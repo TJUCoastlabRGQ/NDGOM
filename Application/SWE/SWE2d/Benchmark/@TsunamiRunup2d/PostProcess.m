@@ -1,0 +1,14 @@
+open('hydrostatic-rk45.fig');
+h = findall(gca,'Type','line');
+xdata1 = get(h(1,:),'xData');
+ydata1 = get(h(1,:),'yData');
+xdata2 = get(h(2,:),'xData');
+ydata2 = get(h(2,:),'yData');
+xdata3 = get(h(3,:),'xData');
+ydata3 = get(h(3,:),'yData');
+XDATA = xdata{1,1};
+YDATA = ydata{1,1};
+close;
+open('Non-hydrostatic-rk45.fig');
+hold on;
+plot(XDATA,YDATA,'');
