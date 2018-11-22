@@ -49,7 +49,7 @@ classdef StdPrismQuad < handle
     end
     properties ( SetAccess = protected)
         %> Vandermonde matrix
-        V, Vh
+        V, Vh,Vint
         %> project matrx from interpolation points to quadrature points
         Vq
         %> mass matrix
