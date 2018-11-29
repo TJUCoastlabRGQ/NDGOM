@@ -8,11 +8,15 @@ lambda = sqrt( I * obj.omega / obj.miu0 );
 tau = tau0 / 3 * ( lambda ^ 2 * tanh( lambda ) / ...
     ( lambda + ( lambda^2 / obj.cD - 1 ) * tanh(lambda) ) );
 beta2 = ( obj.omega ^ 2 - I * obj.omega * tau ) / obj.gra / obj.H0;
-s1 = -0.5 + sqrt( 0.25 - beta2 );
-s2 = -0.5 - sqrt( 0.25 - beta2 );
+% s1 = -0.5 + sqrt( 0.25 - beta2 );
+% s2 = -0.5 - sqrt( 0.25 - beta2 );
+s1 = -1 + sqrt( 2 - beta2 );
+s2 = -1 - sqrt( 2 - beta2 );
 
-A = + obj.a*s2* obj.x1^s2 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
-B = - obj.a*s1* obj.x1^s1 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
+% A = + obj.a*s2* obj.x1^s2 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
+% B = - obj.a*s1* obj.x1^s1 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
+A = + s2* obj.x1^s2 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
+B = - s1* obj.x1^s1 / (s2*obj.x2^s1 * obj.x1^s2 - s1*obj.x1^s1 * obj.x2^s2);
 
 syms x z
 eta = ( A * x .^ s1 + B * x .^ s2 );

@@ -19,7 +19,7 @@ classdef OpenChannelVaryingBottom3d < LSWEAbstract3d
         %> final time
         finalTime = 24 * 3600;
         %> time interval for external information
-        externTimeInterval = 100;
+        externTimeInterval = 5;
         %> output time interval
         outputTimeInterval = 240;
         %> casename
@@ -45,10 +45,10 @@ classdef OpenChannelVaryingBottom3d < LSWEAbstract3d
             [ obj.fphys2d, obj.fphys3d ] = SetInitialField( obj );
             % set parameter
             obj = SetParameter( obj );
-            % setup external field
-            makeBoundaryField( obj );
             %> time interval
             obj.dt = 5;
+            % setup external field
+            makeBoundaryField( obj );            
         end
         
         AnalysisResult2d( obj );

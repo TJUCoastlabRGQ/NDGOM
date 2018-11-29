@@ -8,7 +8,7 @@ Npz = obj.mesh3d.cell.Npz;
 Nph = obj.mesh3d.cell.Nph;
 
 % analysis vertical velocity
-cellId2 = 11;
+cellId2 = 3;
 cellId3 = (cellId2 - 1) * Nz + (Nz:-1:1);
 %cellId3 = (cellId2 - 1) * Nz + 1;
 nodeId3 = ((1:Npz) - 1) * Nph + 1;

@@ -8,7 +8,8 @@ classdef OpenChannel3d < LSWEAbstract3d
         %> channel width
         ChWidth = 20e3;
         %> channel depth
-        H = 12;
+%         H = 12;
+        H = 5;
         % frequency
         omega = 2 * pi / 12.4 / 3600;
         %> start time
@@ -21,7 +22,8 @@ classdef OpenChannel3d < LSWEAbstract3d
         casename = 'TidalForcingWithHorizontalBottomRectangularBasin';
         %> amplitude
         a = 0.25;
-        miu0 = 1e-4;    
+%         miu0 = 1e-4; 
+        miu0 = 0.0015/5/5; 
     end
     
     methods
@@ -33,11 +35,13 @@ classdef OpenChannel3d < LSWEAbstract3d
             [ obj.fphys2d, obj.fphys3d ] = obj.setInitialField( );
             [ obj.fext2d, obj.fext3d ] = obj.initBoundaryField( );
             % set vertical viscosity
-            obj.miu = 0;
+%             obj.miu = 0;
+            obj.miu = 0.0015;
             %> linear slip parameter
-            obj.K = 0;
+%             obj.K = 0;
+            obj.K = 0.01;
             %> time interval
-            obj.dt = 10;
+            obj.dt = 0.000001;
         end
         
         AnalysisResult2d( obj );

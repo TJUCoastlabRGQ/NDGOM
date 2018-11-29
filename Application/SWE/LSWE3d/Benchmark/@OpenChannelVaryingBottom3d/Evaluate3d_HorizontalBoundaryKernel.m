@@ -19,12 +19,19 @@ Hvn = -fm( :, ind, 1 ) .* edge.ny(:, ind) + fm( :, ind, 2).* edge.nx(:, ind);
 fp(:, ind, 1) = - Hun .* edge.nx(:, ind) - Hvn .* edge.ny(:, ind);
 fp(:, ind, 2) = - Hun .* edge.ny(:, ind) + Hvn .* edge.nx(:, ind);
 
-FluxM(:, :, 1) = obj.gra .* fm( :, :, 6 ) .* edge.nx;
-FluxP(:, :, 1) = obj.gra .* fp( :, :, 6 ) .* edge.nx;
-FluxM(:, :, 2) = obj.gra .* fm( :, :, 6 ) .* edge.ny;
-FluxP(:, :, 2) = obj.gra .* fp( :, :, 6 ) .* edge.ny;
+% FluxM(:, :, 1) = obj.gra .* fm( :, :, 6 ) .* edge.nx;
+% FluxP(:, :, 1) = obj.gra .* fp( :, :, 6 ) .* edge.nx;
+% FluxM(:, :, 2) = obj.gra .* fm( :, :, 6 ) .* edge.ny;
+% FluxP(:, :, 2) = obj.gra .* fp( :, :, 6 ) .* edge.ny;
+% 
+% lambda = sqrt( max( obj.gra .* fm(:, :, 5), obj.gra .* fp(:, :, 5) ) );
 
-lambda = sqrt( max( obj.gra .* fm(:, :, 5), obj.gra .* fp(:, :, 5) ) );
+FluxM(:, :, 1) = obj.gra .* fm( :, :, 7 ) .* edge.nx;
+FluxP(:, :, 1) = obj.gra .* fp( :, :, 7 ) .* edge.nx;
+FluxM(:, :, 2) = obj.gra .* fm( :, :, 7 ) .* edge.ny;
+FluxP(:, :, 2) = obj.gra .* fp( :, :, 7 ) .* edge.ny;
+
+lambda = sqrt( max( obj.gra .* fm(:, :, 6), obj.gra .* fp(:, :, 6) ) );
 
 FluxS(:, :, 1) = 0.5 .* ( FluxM(:, :, 1) + FluxP(:, :, 1) - ...
     lambda .* ( fp( :, :, 1 ) - fm( :, :, 1 ) ) );

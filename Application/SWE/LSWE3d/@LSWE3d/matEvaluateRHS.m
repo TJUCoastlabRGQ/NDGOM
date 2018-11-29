@@ -7,76 +7,47 @@ for m = 1:obj.Nmesh
     mesh3d = obj.mesh3d(m);
     
     % evaluate 2d PCE volume integral term
-    fphys2d{m} = EvaluateHorizon2d_Kernel( mesh3d, ...
-        fphys2d{m}, fphys3d{m} );
+    fphys2d{m} = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
+        fphys2d{m}, fphys3d{m} );                 %HU AND HV
     
-    obj.frhs2d{m} = EvaluatePCE2d_VolumeKernel( mesh2d, fphys2d{m} );
+    obj.frhs2d{m} = obj.matEvaluate2dHorizonPCEVolumeTerm( mesh2d, fphys2d{m} ); %Calculate Volume Integration
 
     % evaluate 2d PCE surface integral term
-    obj.frhs2d{m} = obj.frhs2d{m} + EvaluatePCE2d_SurfaceKernel( ...
-        obj.gra, mesh2d.InnerEdge, fphys2d );
+    obj.frhs2d{m} = obj.frhs2d{m} + obj.matEvaluate2dHorizonPCEInnerSurfaceTerm( ...
+        obj.gra, mesh2d.InnerEdge, fphys2d );                                    %Calculate Inner face Contribution
     
-    obj.frhs2d{m} = obj.frhs2d{m} + EvaluatePCE2d_BoundaryKernel( ...
-        obj, mesh2d.BoundaryEdge, fphys2d, obj.fext2d{m});
+    obj.frhs2d{m} = obj.frhs2d{m} + obj.matEvaluate2dHorizonPCEBoundaryTerm( ...
+        mesh2d.BoundaryEdge, fphys2d, obj.fext2d{m});                           %Calculate Boundary face Contribution
     
     % extend 3d field
-    fphys3d = Evaluate3d_Auxiliary( obj, mesh3d, fphys2d, fphys3d );   %1
+    fphys3d = Evaluate3d_Auxiliary( obj, mesh3d, fphys2d, fphys3d );           %1
     
     % evaluate 3d velocity volume integral
-    obj.frhs3d{m} = Evaluate3d_VolumeKernel( obj, obj.gra, mesh3d, fphys3d{m} );   %2
+    obj.frhs3d{m} = Evaluate3d_VolumeKernel( obj, obj.gra, mesh3d, fphys3d{m} );    %2
     
     % evaluate 3d velocity horizontal surface integral
-    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_SideSurfaceKernel( ...           %3
+    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_SideSurfaceKernel( ...         %3
         obj.gra, mesh3d.InnerEdge, fphys3d );
-    
-    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_HorizontalBoundaryKernel( ...     %4
+    %> evaluate the auxialary variable surface contribution
+    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_HorizontalBoundaryKernel( ...    %4
         obj, mesh3d.BoundaryEdge, fphys3d, obj.fext3d{m} );
     
     % evaluate 3d velocity field surface integral
-    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_SurfaceBoundaryKernel( ...        %5
+    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_SurfaceBoundaryKernel( ...       %5
         obj, mesh3d.SurfaceBoundaryEdge, fphys3d );
     
     % evaluate 3d velocity field bottom integral
-    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_BottomSurfaceKernel( ...         %6
+    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_BottomSurfaceKernel( ...        %6
         obj, mesh3d.BottomEdge, fphys3d);
     
-    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_BottomBoundaryKernel( ...       %7
+  % evaluate contribution of the auxialary variable in the bottom boundary
+  % layer
+    obj.frhs3d{m} = obj.frhs3d{m} + Evaluate3d_BottomBoundaryKernel( ...      %7
         obj, mesh3d.BottomBoundaryEdge, fphys3d );
 end
 
 end
 
-function fphys2d = EvaluateHorizon2d_Kernel( mesh3d, fphys2d, fphys3d )
-% evaluate 2d averaged velocity
-U = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
-V = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
-
-%fphys2d(:, :, 4) = fphys2d(:, :, 1) - fphys2d(:, :, 5);
-fphys2d(:, :, 2) = fphys2d(:, :, 4) .* U;
-fphys2d(:, :, 3) = fphys2d(:, :, 4) .* V;
-end
-
-function frhs2d = EvaluatePCE2d_VolumeKernel( mesh2d, fphys2d )
-
-% evaluated 2d depth rhs
-frhs2d(:, :, 1) = -( ...
-    mesh2d.rx .* ( mesh2d.cell.Dr * fphys2d(:, :, 2) ) + ...
-    mesh2d.sx .* ( mesh2d.cell.Ds * fphys2d(:, :, 2) ) + ...
-    mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d(:, :, 3) ) + ...
-    mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d(:, :, 3) ) );
-end
-
-function frhs2d = EvaluatePCE2d_SurfaceKernel( gra, edge, fphys2d )
-
-[ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-lambda = max( sqrt( gra .* fm(:, :, 4) ), sqrt( gra .* fp(:, :, 4) ) );
-
-FluxM = fm(:, :, 2) .* edge.nx + fm(:, :, 3) .* edge.ny;
-FluxP = fp(:, :, 2) .* edge.nx + fp(:, :, 3) .* edge.ny;
-FluxS = 0.5 * ( FluxM + FluxP - lambda .* ( fp(:, :, 1) - fm(:, :, 1)  ) );
-
-frhs2d = edge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
-end
 
 function fphys3d = Evaluate3d_Auxiliary( obj, mesh3d, fphys2d, fphys3d )
 
@@ -158,17 +129,15 @@ end
 function frhs3d = Evaluate3d_SurfaceBoundaryKernel( obj, edge, fphys3d )
 
 Hmiu = sqrt( obj.miu0 );
-
+%为什么符号相反的问题，因为在计算右端项的时候已经使用了FM-FS了
 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys3d );
 FluxM(:, :, 1) = Hmiu .* fm( :, :, 4 ) .* edge.nz;
 FluxM(:, :, 2) = Hmiu .* fm( :, :, 5 ) .* edge.nz;
-% FluxS(:, :, 1) = - Hmiu .* fm( :, :, 4 ) .* edge.nz;
-% FluxS(:, :, 2) = - Hmiu .* fm( :, :, 5 ) .* edge.nz;
+% FluxS(:, :, 1) =  -Hmiu .* fm( :, :, 4 ) .* edge.nz;
+% FluxS(:, :, 2) =  -Hmiu .* fm( :, :, 5 ) .* edge.nz;
 
-FluxS(:, :, 1) = zeros(size( fm( :, :, 4 )));
-FluxS(:, :, 2) = zeros(size( fm( :, :, 5 )));
-
-
+FluxS(:, :, 1) =  zeros(size(fm( :, :, 4 )));
+FluxS(:, :, 2) =  zeros(size(fm( :, :, 5 )));
 frhs3d = edge.matEvaluateStrongFormEdgeRHS( FluxM, FluxS );
 end
 
@@ -177,7 +146,7 @@ function frhs3d = Evaluate3d_BottomSurfaceKernel( ...
 
 Hmiu = sqrt( obj.miu0 );
 tau = 1e-3;
-
+%为什么数值通量加了一个惩罚项，特别是计算内部值的时候完全没必要加惩罚项的
 [ fm, fp ] = edge.matEvaluateSurfValue( fphys3d );
 FluxM(:, :, 1) = Hmiu .* ( fm( :, :, 4 ) .* edge.nz + tau * fm(:, :, 1) );
 FluxM(:, :, 2) = Hmiu .* ( fm( :, :, 5 ) .* edge.nz + tau * fm(:, :, 2) );
@@ -199,18 +168,9 @@ Hmiu = sqrt( obj.miu0 );
 [ fm, fp ] = edge.matEvaluateSurfValue( fphys3d );
 FluxM(:, :, 1) = Hmiu .* fm( :, :, 4 ) .* edge.nz;
 FluxM(:, :, 2) = Hmiu .* fm( :, :, 5 ) .* edge.nz;
-
+%同样还是数值通量为什么取相反值的问题。
 FluxS(:, :, 1) =  - obj.K .* fp( :, :, 1 ) ./ fp( :, :, 6 ) .* edge.nz;
 FluxS(:, :, 2) =  - obj.K .* fp( :, :, 2 ) ./ fp( :, :, 6 ) .* edge.nz;
-
-% FluxS(:, :, 1) =   obj.K .* fp( :, :, 1 ) ./ fp( :, :, 6 ) .* edge.nz;
-% FluxS(:, :, 2) =   obj.K .* fp( :, :, 2 ) ./ fp( :, :, 6 ) .* edge.nz;
-
-% FluxS(:, :, 1) =   obj.K .* fp( :, :, 6 ).* fp( :, :, 1 ) ./ obj.miu .* edge.nz;
-% FluxS(:, :, 2) =   obj.K .* fp( :, :, 6 ).* fp( :, :, 2 ) ./ obj.miu .* edge.nz;
-
-% FluxS(:, :, 1) =   obj.cD .* fp( :, :, 1 ) .* edge.nz;
-% FluxS(:, :, 2) =   obj.cD .* fp( :, :, 2 ) .* edge.nz;
 
 frhs3d = edge.matEvaluateStrongFormEdgeRHS( FluxM, FluxS );
 end
