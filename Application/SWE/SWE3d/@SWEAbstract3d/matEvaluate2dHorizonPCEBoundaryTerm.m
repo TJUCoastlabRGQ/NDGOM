@@ -1,5 +1,13 @@
 function frhs2d_BoundarySurfaceTerm = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext)
-
+%> @brief Function used to calculate the two dimentional PCE boundary surface integration term
+%> 
+%> More detailed description.
+%>
+%> @param BoundaryEdge The boundary edge object
+%> @param fphys2d The two dimensional physical field
+%> @param fext The exterior physical field
+%>
+%> @fphys2d frhs2d_BoundarySurfaceTerm Contribution to the RHS of the two dimensional PCE from the boundary face integration term
 
 
 [ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( fphys2d );
