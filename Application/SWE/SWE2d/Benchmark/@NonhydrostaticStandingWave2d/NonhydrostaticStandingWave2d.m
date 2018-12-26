@@ -10,6 +10,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
+        d = 10
     end
     
     methods
@@ -19,7 +20,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             obj.initPhysFromOptions( mesh );
         end
         
-        function Postprocess(obj)  
+        function NonhydroPostprocess(obj)  
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
@@ -27,22 +28,61 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             exactEta = zeros( Ntime,1 );
             Lambda = 20;
             x0 = 17.5;
-            h = 7.5;
-            a = 0.1;
+            h = obj.d;
+            a = 0.01;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
             for t = 1:Ntime
-                exactEta(t) = a * cos(2*pi/Lambda*x0)*cos(2*pi/T*outputTime(t)) + h;
-                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t );
+                exactEta(t) = a * cos(2*pi/Lambda*x0)*cos(2*pi/T*outputTime(t));
+                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
                 Eta(t) = tempdata(1);
             end
             figure;
+            set(gcf,'position',[50,50,1050,400]);
             plot(outputTime,Eta,'k','LineWidth',1.5);
             hold on;
-            plot(outputTime,exactEta,'k--','LineWidth',1.5);
-            legend('Simulated','Exact');
-            xlabel('time(s)');
-            ylabel('Water level(m)');
+            set(gca,'YLIM',[-1*a, 1*a],'Fontsize',12);
+            xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
+            ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
+            
+            str = strcat('Hydro',num2str(obj.d),'.fig');
+            h = openfig(str,'reuse'); % open figure
+            D1=get(gca,'Children'); %get the handle of the line object
+            XData1=get(D1,'XData'); %get the x data
+            YData1=get(D1,'YData'); %get the y data
+            close(h);
+            plot(XData1, YData1,'k--','LineWidth',1.5);
+            plot(outputTime,exactEta,'ro','markersize',1.5);
+%             legend('Nonhydro','Hydro','Exact');
+            legend('boxoff');
+        end
+        
+        function HydroPostprocess(obj)  
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
+            Ntime = PostProcess.Nt;
+            outputTime = ncread( PostProcess.outputFile{1}, 'time' );
+            Eta = zeros( Ntime,1 );
+            Lambda = 20;
+            x0 = 17.5;
+            h = obj.d;
+            a = 0.01;
+            c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
+            T = Lambda/c;
+            for t = 1:Ntime
+                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
+                Eta(t) = tempdata(1);
+            end
+            figure;
+            set(gcf,'position',[50,50,1050,400]);
+            plot(outputTime,Eta,'k','LineWidth',1.5);
+            legend('Hydro');
+            legend('boxoff');
+            set(gca,'YLIM',[-1*a, 1.5*a],'Fontsize',12);
+            xlabel({'$\it t(s)$'},'Interpreter','latex');
+            ylabel({'$\eta(m)$'},'Interpreter','latex');
+            str = strcat('Hydro',num2str(obj.d),'.fig');
+            saveas(gca,str);
+            close(gcf);
         end
     end
     
@@ -52,15 +92,15 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
                 Lambda = 20;
-                bot = -7.5;
+                bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  0.1 * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);
+                fphys{m}(:,:,1) =  0.01 * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 30;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -72,7 +112,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-%             option('nonhydrostaticType') = NdgNonhydrostaticType.Hydrostatic;
+%             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
     

@@ -7,6 +7,7 @@ function outputResult( obj, time, field )
     % output physical field
     startInd = [ 0, 0, 0, obj.outputStep ];
     countInd = [ obj.mesh.cell.Np, obj.mesh.K, obj.Nfield, 1 ];
+%     countInd = [ obj.mesh.cell.Np, obj.mesh.K, 6, 1 ];
     netcdf.putVar(obj.ncfile.ncid, obj.fieldVarableId, startInd, countInd, field);
 
     % increase output step num

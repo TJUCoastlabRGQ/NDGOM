@@ -16,7 +16,7 @@ dimTime = NdgNcDim('Nt', 0);
 dimK = NdgNcDim('K', mesh.K);
 dimNp = NdgNcDim('Np', mesh.cell.Np);
 dimNfield = NdgNcDim('Nvar', obj.Nfield);
-
+% dimNfield = NdgNcDim('Nvar', 6);
 % define variable
 varTime = NdgNcVar('time', dimTime, enumNcData.NC_DOUBLE );
 varField = NdgNcVar('fphys', [dimNp, dimK, dimNfield, dimTime], enumNcData.NC_DOUBLE);
