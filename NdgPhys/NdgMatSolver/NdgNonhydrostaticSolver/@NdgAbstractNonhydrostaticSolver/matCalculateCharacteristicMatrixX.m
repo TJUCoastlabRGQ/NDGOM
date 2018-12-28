@@ -17,6 +17,11 @@ termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);
 
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( Variable );        
 fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, ftype, obj.EidBoundaryType);
+%% test first
+
+
+
+
 %< Boundary edge contribution
 fluxMX = BoundaryEdge.nx.*fm;
 fluxSX = BoundaryEdge.nx.*(fp + fm)./2; 

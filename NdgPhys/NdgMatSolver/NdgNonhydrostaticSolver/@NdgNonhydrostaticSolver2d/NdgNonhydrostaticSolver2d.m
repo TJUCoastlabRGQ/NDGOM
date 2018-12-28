@@ -64,9 +64,10 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
             obj = obj@NdgVisAuxiStrongFormSolver(PhysClass);
             mesh = PhysClass.meshUnion(1);
             obj.matSetBoundaryType(mesh);
-            obj.matAverageBoundaryTopoGrad(PhysClass,mesh);
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
+            obj.bx = PhysClass.zGrad{1}(:,:,1);
+            obj.by = PhysClass.zGrad{1}(:,:,2);
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
                 obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
