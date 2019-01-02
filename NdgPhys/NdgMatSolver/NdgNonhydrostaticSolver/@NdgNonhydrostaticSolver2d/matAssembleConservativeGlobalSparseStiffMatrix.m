@@ -13,11 +13,11 @@ function StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, Updat
 %> @param[in] PhysClass The hydrostatic Solver
 rho = PhysClass.rho;
 h = fphys{1}(:,:,1);
-BoundaryEdge = PhysClass.meshUnion(1).BoundaryEdge;
-InnerEdge = PhysClass.meshUnion(1).InnerEdge;
-fhx = obj.matCalculateConservativeVariableRelatedMatrixX( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-fhy = obj.matCalculateConservativeVariableRelatedMatrixY( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-
+% BoundaryEdge = PhysClass.meshUnion(1).BoundaryEdge;
+% InnerEdge = PhysClass.meshUnion(1).InnerEdge;
+% fhx = obj.matCalculateConservativeVariableRelatedMatrixX( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
+% fhy = obj.matCalculateConservativeVariableRelatedMatrixY( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
+[fhx, fhy] = obj.matEvaluateLocalDerivativeTerm( PhysClass.meshUnion(1), h );
 StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, rho, obj.NP, h, UpdatedPNPX, obj.bx,...
     UpdatedPNPY, obj.by, UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, ...
     fhx, fhy, obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);

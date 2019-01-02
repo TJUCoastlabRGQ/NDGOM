@@ -35,12 +35,12 @@ while( time < ftime )
                 = fphys{n}(:,:, obj.varFieldIndex) + rk4b(intRK) * resQ{n};
         end 
         
-        fphys = obj.matEvaluateLimiter( fphys );
+%         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys );        
         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt/5);
     end
 %     visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
-%     visual.drawResult( fphys{1}(:, :, 1) );
+    visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys );
     timeRatio = time / ftime;

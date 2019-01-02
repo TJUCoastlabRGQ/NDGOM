@@ -132,11 +132,11 @@ classdef NdgPhysMat < NdgPhys
         %> @brief Update the final result of the physical field
         function matUpdateFinalResult( obj, time, fphys )
             for m = 1:obj.Nmesh
-                varFieldIndex = [1 2 3 4 5 6];
-%                 obj.outputFile(m).outputFinalResult( ...
-%                     time, fphys{m}(:,:,obj.varFieldIndex) );
+%                 varFieldIndex = [1 2 3 4 5 6];
                 obj.outputFile(m).outputFinalResult( ...
-                    time, fphys{m}(:,:,varFieldIndex) );
+                    time, fphys{m}(:,:,obj.varFieldIndex) );
+%                 obj.outputFile(m).outputFinalResult( ...
+%                     time, fphys{m}(:,:,varFieldIndex) );
                 obj.outputFile(m).closeOutputFile();
             end
         end% function
