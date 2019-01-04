@@ -78,8 +78,8 @@ classdef WaveTest < SWEConventional2d
 %                       aveW(i,j) = int(2*pi/3.59*PEta(i,j)*sinh(k*(z - bot))/sinh(-k*bot),bot,Eta(i,j))/(-bot + Eta(i,j));
                     end 
                 end
-                fphys{m}(:,:,2) = aveU .* fphys{m}(:,:,1);
-%                 fphys{m}(:,:,6) = aveW .* fphys{m}(:,:,1);
+                fphys{m}(:,:,2) = aveU .* fphys{m}(:,:,1) + 1 * fphys{m}(:,:,1);
+                fphys{m}(:,:,6) = aveW .* fphys{m}(:,:,1);
 %                 fphys{m}(:,colIndex,2) =  fphys{m}(:,colIndex,1) * 20/3.59;
             end
         end
@@ -107,8 +107,8 @@ function [ mesh ] = makeUniformMesh(N, deltax, type)
 bctype = [...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall];
+    enumBoundaryCondition.ZeroGrad, ...
+    enumBoundaryCondition.ZeroGrad];
 
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 20], [0, deltax], 20/deltax, deltax/deltax, bctype);

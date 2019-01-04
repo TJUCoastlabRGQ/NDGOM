@@ -11,10 +11,10 @@ end
 
 NonhydroVolumeflux = 1/2 * NonhydrostaticPressure .* fphys{1}(:,:,1);
 
-% NqHx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
-% NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+NqHx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
 
-[NqHx, NqHy] = obj.matEvaluateLocalDerivativeTerm(mesh, NonhydroVolumeflux);
+% [NqHx, NqHy] = obj.matEvaluateLocalDerivativeTerm(mesh, NonhydroVolumeflux);
 
 fphys{1}(:,:,6) = fphys{1}(:,:,6) + obj.dt/physClass.rho  .* NonhydrostaticPressure;
 fphys{1}(:,:,2) = fphys{1}(:,:,2) + (- obj.dt/physClass.rho) *(NqHx +NonhydrostaticPressure.*obj.bx);

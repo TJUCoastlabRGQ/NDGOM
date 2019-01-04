@@ -70,8 +70,8 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         end
         
         function matUpdateExternalField( obj, time, ~ )
-%             Eta =  obj.amplitude * cos(2*pi*time+pi/2);
-            Eta =  obj.amplitude * cos(-2*pi*time+pi/2);
+            Eta =  obj.amplitude * cos(2*pi*time+pi/2);
+%             Eta =  obj.amplitude * cos(-2*pi*time);
             %NHWAVE  surface elevation and velocity
             
 %             syms z;
@@ -82,7 +82,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
 
             % SWASH velocity
             obj.fext{1}( :, :, 1 ) = obj.d + Eta;
-            obj.fext{1}( :, :, 3 ) =  obj.fext{1}( :, :, 1 ) .* sqrt(obj.gra ./ obj.fext{1}( :, :, 1 )) * Eta;
+            obj.fext{1}( :, :, 3 ) =  (obj.d + Eta) .* sqrt(obj.gra ./ (obj.d + Eta)) * Eta;
             % Geoclaw water depth and velocity 
 %             obj.fext{1}( :, :, 1 ) = d + obj.amplitude * cos(2*pi*time+pi/2);
 %             obj.fext{1}( :, :, 3 ) =  2 * obj.fext{1}( :, :, 1 ) .*  (sqrt(obj.gra * obj.fext{1}( :, :, 1 )) - sqrt(obj.gra * d));

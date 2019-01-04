@@ -10,7 +10,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
-        d = 10
+        d = 7.5
     end
     
     methods
@@ -45,13 +45,13 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
             ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
             
-            str = strcat('Hydro',num2str(obj.d),'.fig');
-            h = openfig(str,'reuse'); % open figure
-            D1=get(gca,'Children'); %get the handle of the line object
-            XData1=get(D1,'XData'); %get the x data
-            YData1=get(D1,'YData'); %get the y data
-            close(h);
-            plot(XData1, YData1,'k--','LineWidth',1.5);
+%             str = strcat('Hydro',num2str(obj.d),'.fig');
+%             h = openfig(str,'reuse'); % open figure
+%             D1=get(gca,'Children'); %get the handle of the line object
+%             XData1=get(D1,'XData'); %get the x data
+%             YData1=get(D1,'YData'); %get the y data
+%             close(h);
+%             plot(XData1, YData1,'k--','LineWidth',1.5);
             plot(outputTime,exactEta,'ro','markersize',1.5);
 %             legend('Nonhydro','Hydro','Exact');
             legend('boxoff');
