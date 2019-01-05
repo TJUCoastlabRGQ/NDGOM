@@ -11,8 +11,11 @@ end
 
 NonhydroVolumeflux = 1/2 * NonhydrostaticPressure .* fphys{1}(:,:,1);
 
-NqHx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
-NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% NqHx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+
+NqHx = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge,  num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
+NqHy = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge,  num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
 
 % [NqHx, NqHy] = obj.matEvaluateLocalDerivativeTerm(mesh, NonhydroVolumeflux);
 
@@ -23,6 +26,96 @@ fphys{1}(:,:,3) = fphys{1}(:,:,3) + (- obj.dt/physClass.rho) *(NqHy +Nonhydrosta
 % UpdataWaterDepth(physClass, mesh, fphys, tempFluxhu, tempFluxhv);
 
 end
+
+function termX = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge, Variable, ftype)
+%> @brief Function to calculate the characteristic matrix
+%> @details Function to calculate the characteristic matrix in the x direction
+%> @param[in] BoundaryEdge the boundary edge object
+%> @param[in] InnerEdge the inner edge object
+%> @param[in] Variable variable used to calculate the characteristic matrix
+%> @param[in] ftype enumeration type used to impose the non-hydro static relalated boundary condition at the wet dry interface
+%> @param[out] termX the calculated characteristic matrix in x direction
+%> @param[out] termY the calculated characteristic matrix in y direction
+%< Inner value and outer value of the Inner edges
+mesh = physClass.meshUnion(1);
+[fm, fp] = InnerEdge.matEvaluateSurfValue( Variable );       
+[fm, fp] = obj.matGetFaceValue(fm, fp, ftype);
+%< Inner edge contribution
+fluxMX = InnerEdge.nx.*fm;
+fluxPX = InnerEdge.nx.*fp; 
+% fluxSx = InnerEdge.nx .* (1 + sign(InnerEdge.nx .* fm))./2 .* fm + InnerEdge.nx .*  (1 + sign( -InnerEdge.nx .* fp))./2 .* fp; % upwind
+fluxSx = InnerEdge.nx .* (1 + sign(InnerEdge.nx .* fm))./2 .* fp + InnerEdge.nx .*  (1 + sign( -InnerEdge.nx .* fp))./2 .* fm; % downwind
+termX = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSx );
+
+[fm, fp] = BoundaryEdge.matEvaluateSurfValue( Variable );        
+fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, ftype, obj.EidBoundaryType);
+%% test first
+%< Boundary edge contribution
+fluxMX = BoundaryEdge.nx.*fm;
+% fluxSX = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fm+ BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fp;
+fluxSX = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fp+ BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fm;
+termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
+
+termX = termX + mesh.rx .* (mesh.cell.Dr * cell2mat(Variable))...
+    + mesh.sx .* (mesh.cell.Ds * cell2mat(Variable));
+
+end
+
+function termY = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge, Variable, ftype)
+%> @brief Function to calculate the characteristic matrix
+%> @details Function to calculate the characteristic matrix in the x direction
+%> @param[in] BoundaryEdge the boundary edge object
+%> @param[in] InnerEdge the inner edge object
+%> @param[in] Variable variable used to calculate the characteristic matrix
+%> @param[in] ftype enumeration type used to impose the non-hydro static relalated boundary condition at the wet dry interface
+%> @param[out] termX the calculated characteristic matrix in x direction
+%> @param[out] termY the calculated characteristic matrix in y direction
+%< Inner value and outer value of the Inner edges
+mesh = physClass.meshUnion(1);
+[fm, fp] = InnerEdge.matEvaluateSurfValue( Variable );       
+[fm, fp] = obj.matGetFaceValue(fm, fp, ftype);
+%< Inner edge contribution
+fluxMY = InnerEdge.ny.*fm;
+fluxPY = InnerEdge.ny.*fp; 
+% fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.ny .* fm))./2 .* fm + InnerEdge.ny .*  (1 + sign( -InnerEdge.ny .* fp))./2 .* fp;
+fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.ny .* fm))./2 .* fp + InnerEdge.ny .*  (1 + sign( -InnerEdge.ny .* fp))./2 .* fm;
+termY = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSy );
+
+[fm, fp] = BoundaryEdge.matEvaluateSurfValue( Variable );        
+fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, ftype, obj.EidBoundaryType);
+%% test first
+%< Boundary edge contribution
+fluxMY = BoundaryEdge.ny.*fm;
+% fluxSy = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fm +  BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fp;  % upwind
+fluxSy = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fp + BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fm;  % downwind
+termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSy);
+
+termY = termY + mesh.ry .* (mesh.cell.Dr * cell2mat(Variable))...
+    + mesh.sy .* (mesh.cell.Ds * cell2mat(Variable));
+
+end
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 function  UpdataWaterDepth(physClass, mesh, fphys, tempFluxhu, tempFluxhv)
 

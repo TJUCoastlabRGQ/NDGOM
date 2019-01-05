@@ -70,7 +70,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         end
         
         function matUpdateExternalField( obj, time, ~ )
-            Eta =  obj.amplitude * cos(2*pi*time+pi/2);
+            Eta =  obj.amplitude * cos(2*pi*time - pi/2);
 %             Eta =  obj.amplitude * cos(-2*pi*time);
             %NHWAVE  surface elevation and velocity
             

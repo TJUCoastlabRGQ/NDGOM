@@ -27,7 +27,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
             Lambda = 20;
-            x0 = 17.5;
+            x0 = 10;
             h = obj.d;
             a = 0.01;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
