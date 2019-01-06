@@ -23,25 +23,46 @@ qbx = zeros(K*Np,1);qby = zeros(K*Np,1);
 
 InnerEdge = mesh.InnerEdge;
 BoundaryEdge = mesh.BoundaryEdge;
-tempqx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-tempqy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+
+ele = ceil(index/Np);
+[UpWindedFlag, DownWindedFlag] = AssembleWindedFlagInformation(InnerEdge, ele);
+
+[tempqx, tempqy] = obj.matCalculateFluxUpwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
+% tempqx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% tempqy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
 qx = tempqx(:);
 qy = tempqy(:);
 % [nqx, nqy] = obj.matEvaluateLocalDerivativeTerm( mesh, gmat );
 % qx = nqx(:);
 % qy = nqy(:);
 
+[tempq2x, ~] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
+[~, tempq2y] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
 % tempq2x = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 % tempq2y = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-tempq2x = matCalculatePenaltyCharacteristicMatrixX(obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), obj.EidBoundaryType);
-tempq2y = matCalculatePenaltyCharacteristicMatrixY(obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqy,[1 2]), obj.EidBoundaryType);
+% tempq2x = matCalculatePenaltyCharacteristicMatrixX(obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), obj.EidBoundaryType);
+% tempq2y = matCalculatePenaltyCharacteristicMatrixY(obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqy,[1 2]), obj.EidBoundaryType);
 q2x = tempq2x(:); q2y = tempq2y(:);
 
-tempfqbx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.bx,[1 2]), enumNonhydroBoundaryCondition.Zero);
-tempfqby = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.by,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% tempfqbx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.bx,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% tempfqby = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.by,[1 2]), enumNonhydroBoundaryCondition.Zero);
+tempfqbx = zeros(size(mesh.x));
+tempfqby = zeros(size(mesh.x));
 fqbx = tempfqbx(:);
 fqby = tempfqby(:);
 qbx(index) = obj.bx(index);qby(index) = obj.by(index);
+end
+
+function [UpWindedFlag, DownWindedFlag] = AssembleWindedFlagInformation(InnerEdge, ele)
+DownWindedFlag = zeros(size(InnerEdge.nx));
+UpWindedFlag = ones(size(InnerEdge.nx));
+[Row, Col] = find(InnerEdge.FToE == ele);
+for i = 1:numel(Row)
+    if Row(i) == 2
+        UpWindedFlag(:,Col(i)) = 0;
+        DownWindedFlag(:, Col(i)) = 1;
+    end
+end
 end
 
 function tempq2x = matCalculatePenaltyCharacteristicMatrixX(obj, mesh, BoundaryEdge, InnerEdge, gmat, tempqx, EidBoundaryType)
