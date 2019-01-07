@@ -8,7 +8,7 @@ classdef NdgFlatBottomWetDryTestWithWallBoundary < NdgNonhydrostaticAbstractTest
         end
         
         function ExactWetCellIndex=getExactWetCellIndex(obj)
-            ExactWetCellIndex = [1 2 3 4 6 7 8 9]';
+            ExactWetCellIndex = [1 2 3 4 6 7 8 9];
         end
         
         function [ExactZeroFluxBoundary, ExactZeroFluxBoundaryIndex] = getExactZeroFluxBoundary(obj)
@@ -21,7 +21,7 @@ classdef NdgFlatBottomWetDryTestWithWallBoundary < NdgNonhydrostaticAbstractTest
         end
         
         function ExactEidBoundaryType = getExactEidBoundaryType(obj)
-            ExactEidBoundaryType = ones(size(obj.meshUnion(1).eidM));
+            ExactEidBoundaryType =  ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
         end
         
         function ExactReverseEidBoundaryType = getExactReverseEidBoundaryType(obj)
@@ -71,14 +71,14 @@ classdef NdgFlatBottomWetDryTestWithWallBoundary < NdgNonhydrostaticAbstractTest
         
         function [ mesh ] = makeUniformMesh(obj, N, type)
             bctype = [...
-                NdgEdgeType.SlipWall, ...
-                NdgEdgeType.SlipWall, ...
-                NdgEdgeType.SlipWall, ...
-                NdgEdgeType.SlipWall];
+                enumBoundaryCondition.SlipWall, ...
+                enumBoundaryCondition.SlipWall, ...
+                enumBoundaryCondition.SlipWall, ...
+                enumBoundaryCondition.SlipWall];
             
-            if (type == NdgCellType.Tri)
+            if (type == enumStdCell.Tri)
                 mesh = makeUniformTriMesh(N, [0, 3], [0, 3], 3, 3, bctype);
-            elseif(type == NdgCellType.Quad)
+            elseif(type == enumStdCell.Quad)
                 mesh = makeUniformQuadMesh(N, [0, 3], [0, 3], 3, 3, bctype);
             else
                 msgID = [mfile, ':inputCellTypeError'];

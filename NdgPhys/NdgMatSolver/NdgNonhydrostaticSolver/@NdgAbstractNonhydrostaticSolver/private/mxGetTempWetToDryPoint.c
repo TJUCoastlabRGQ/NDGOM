@@ -33,6 +33,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
+  // get the global point index of the the point that located on the face of wet cell and adjacent to a dry cell 
 for(mwIndex i = 0; i<M; i++){
 	int cell = (int)NewWetDyrFace[i];
 	int face = (int)NewWetDyrFace[M+i];

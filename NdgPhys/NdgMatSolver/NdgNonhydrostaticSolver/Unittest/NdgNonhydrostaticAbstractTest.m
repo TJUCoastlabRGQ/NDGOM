@@ -101,41 +101,50 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.Assert(ExactZeroFluxBoundary, obj.NonhydrostaticSolver.ZeroFluxBoundary);
             obj.Assert(ExactZeroFluxBoundaryIndex, obj.NonhydrostaticSolver.ZeroFluxBoundaryIndex);
             ExactAdjacentDryCellAndFace = obj.getExactAdjacentDryCellAndFace;
-            obj.Assert(ExactAdjacentDryCellAndFace, obj.NonhydrostaticSolver.AdjacentDryCellAndFace);           
+            obj.Assert(ExactAdjacentDryCellAndFace, obj.NonhydrostaticSolver.AdjacentDryCellAndFace);
         end
         
         function testEidBoundaryType(obj)
+            %> @brief function for testing the boundary type related non-hydrostatic information matrix
+            %> EidBoundaryType is the flag matrix used to impose the boundary related Non-hydrostatic condition, at both the slip wall and non-slip wall boundaries, this value is set to 1 to indicate
+            %> the zero gradient non-hydrostatic pressure condition($q^+ = q^-$) and the zero non-hydrostatic gradient condition($\frac{\partial q^+}{\partial x} =-\frac{\partial q^-}{\partial x} $), while at
+            %> the clamped type boundaries, this value is set to -1 to indicate the zero non-hydrostatic pressure condition($q^+ = -q^-$) and the zero gradient non-hydrostatic gradient condition
+            %> ($\frac{\partial q^+}{\partial x} =\frac{\partial q^-}{\partial x} $)
             ExactEidBoundaryType = obj.getExactEidBoundaryType;
-            obj.Assert(ExactEidBoundaryType, obj.NonhydrostaticSolver.EidBoundaryType);           
+            obj.Assert(ExactEidBoundaryType, obj.NonhydrostaticSolver.EidBoundaryType);
         end
         
-        function testReverseEidBoundaryType(obj)
-            ExactReverseEidBoundaryType = obj.getExactReverseEidBoundaryType;
-            obj.Assert(ExactReverseEidBoundaryType, obj.NonhydrostaticSolver.ReverseEidBoundaryType);
-        end
-        
-        function testGetFaceOuterValue(obj)
+        %         function testReverseEidBoundaryType(obj)
+        %             ExactReverseEidBoundaryType = obj.getExactReverseEidBoundaryType;
+        %             obj.Assert(ExactReverseEidBoundaryType, obj.NonhydrostaticSolver.ReverseEidBoundaryType);
+        %         end
+                
+        function testmatGetFaceValue(obj)
             %> @brief function for testing the Nonhydrostatic pressure at face point
-            ExactGetFaceOuterValue = obj.getExactGetFaceOuterValue; 
+            %             ExactGetFaceOuterValue = obj.getExactGetFaceOuterValue;
             mesh = obj.meshUnion(1);
-            obj.NonhydrostaticSolver.getWetDryInterface( mesh );
-            Nonhydro = obj.fphys{1}(:,:,1);
-            Inner = Nonhydro(obj.meshUnion(1).eidM);
-            Outer = obj.NonhydrostaticSolver.EidBoundaryType .* Nonhydro(obj.meshUnion(1).eidP);
-            Outer = obj.NonhydrostaticSolver.getFaceOuterValue(mesh, Outer, -Inner);
-            obj.Assert(ExactGetFaceOuterValue, Outer);
+            obj.NonhydrostaticSolver.getWetDryInterface(mesh);
+            
+            [~, ~, ~, ~, ~, ~]= obj.NonhydrostaticSolver.matReconstructStiffmatrixRelatedMatrix( obj); %to get the obj.NonhydroFmPoint and obj.NonhydroFpPoint
+            [fm, fp] = mesh.InnerEdge.matEvaluateSurfValue( obj.fphys );       
+            [fm, fp] = obj.NonhydrostaticSolver.GetFaceValue(fm(:,:,1), fp(:,:,1), enumNonhydroBoundaryCondition.Zero); % for this case, the water depth is treated as the non-hydrostatic pressure to test the inner and outer value
+            
+            [ExactFm, ExactFp] = obj.getExactInnerOuterValue;
+            
+            obj.Assert(ExactFm, fm);
+            obj.Assert(ExactFp, fp);
         end
         
-        function testTopographyNonhydrostaticFaceOuterValue(obj)
-            %> @brief function for testing the Topography Nonhydrostatic at face point
-            ExactGetFaceOuterValue = obj.getExactGetFaceOuterValue; 
-            mesh = obj.meshUnion(1);
-            obj.NonhydrostaticSolver.getWetDryInterface( mesh );
-            Inner = obj.zGrad{1}(:,:,1);
-            Outer = Inner(mesh.eidM);
-            Outer = obj.NonhydrostaticSolver.getFaceOuterValue(mesh, Outer, -Inner);
-            obj.Assert(ExactGetFaceOuterValue, Outer);
-        end 
+%         function testTopographyNonhydrostaticFaceOuterValue(obj)
+%             %> @brief function for testing the Topography Nonhydrostatic at face point
+%             ExactGetFaceOuterValue = obj.getExactGetFaceOuterValue;
+%             mesh = obj.meshUnion(1);
+%             obj.NonhydrostaticSolver.getWetDryInterface( mesh );
+%             Inner = obj.zGrad{1}(:,:,1);
+%             Outer = Inner(mesh.eidM);
+%             Outer = obj.NonhydrostaticSolver.getFaceOuterValue(mesh, Outer, -Inner);
+%             obj.Assert(ExactGetFaceOuterValue, Outer);
+%         end
         
         function testUpdatedExactEidBoundaryType(obj)
             mesh = obj.meshUnion(1);
@@ -147,9 +156,9 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
         
         function testFluxTerm(obj)
             mesh = obj.meshUnion(1);
-            obj.NonhydrostaticSolver.getWetDryInterface( mesh );            
+            obj.NonhydrostaticSolver.getWetDryInterface( mesh );
             ExactFluxterm = obj.GetExactFluxterm(mesh);
-            Fluxterm = ones(size(mesh.eidM));
+%             Fluxterm = ones(size(mesh.eidM));
             Fluxterm =  obj.NonhydrostaticSolver.GetFluxTerm(mesh, Fluxterm);
             obj.Assert(ExactFluxterm, Fluxterm);
         end
@@ -162,19 +171,20 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             outputIntervalNum = 1000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
-            option('temporalDiscreteType') = NdgTemporalIntervalType.DeltaTime;
-            option('obcType') = NdgBCType.None;
-            option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
+            %             option('temporalDiscreteType') = enumOutputInterval.DeltaTime;
+            %             option('obcType') = NdgBCType.None;
+            option('outputCaseName') = mfilename;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputNetcdfCaseName') = mfilename;
-            option('temporalDiscreteType') = NdgTemporalDiscreteType.RK45;
-            option('limiterType') = NdgLimiterType.Vert;
-            option('equationType') = NdgDiscreteEquationType.Strong;
-            option('integralType') = NdgDiscreteIntegralType.QuadratureFree;
-            option('CoriolisType') = SWECoriolisType.None;
-            option('WindType') = SWEWindType.None;
-            option('FrictionType') = SWEFrictionType.None;
-            option('nonhydrostaticType') = NdgNonhydrostaticType.Nonhydrostatic;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('limiterType') = enumLimiter.Vert;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            %             option('CoriolisType') = SWECoriolisType.None;
+            %             option('WindType') = SWEWindType.None;
+            %             option('FrictionType') = SWEFrictionType.None;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
         end
         
         function Assert(obj, Exact, Numerical )

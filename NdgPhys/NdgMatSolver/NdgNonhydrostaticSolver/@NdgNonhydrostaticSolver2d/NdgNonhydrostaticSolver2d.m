@@ -85,16 +85,18 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
             fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );
         end
         
+        %> Functions following are used for testing purpose
         function getWetDryInterface(obj, mesh)
             obj.matAssembleWetDryInterface(mesh);
         end
-        
         function Outer = getFaceOuterValue(obj,mesh, Inner, Outer)
             Outer = obj.matGetFaceOuterValue( mesh, Inner, Outer);
         end
-        
         function fluxterm = GetFluxTerm(obj, mesh, fluxterm)
             fluxterm = obj.matGetFluxTerm(mesh, fluxterm);
+        end
+        function [fm, fp] = GetFaceValue( obj, fm, fp, ftype)
+            [fm, fp] = obj.matGetFaceValue(fm, fp, ftype);
         end
     end
     

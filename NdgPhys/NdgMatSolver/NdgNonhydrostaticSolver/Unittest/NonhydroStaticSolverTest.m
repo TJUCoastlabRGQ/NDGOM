@@ -14,27 +14,28 @@ Norder = [1 2 3];
 % end
 
 for i = 1:numel(Norder)
-    Solver = NdgFlatBottomWetDryTestWithClampedBoundary(Norder(i), NdgCellType.Quad);
+    Solver = NdgFlatBottomWetDryTestWithClampedBoundary(Norder(i), enumStdCell.Quad);
     Solver.testAssembleWetDryInterface;
     Solver.testEidBoundaryType;
-    Solver.testReverseEidBoundaryType;
-    Solver.testGetFaceOuterValue;
-    Solver.testFluxTerm;
+%     Solver.testReverseEidBoundaryType;
+%     Solver.testAdjacentcellAndFace;
+    Solver.testmatGetFaceValue;
+%     Solver.testFluxTerm;   % not needed anymore
     clear Solver;
 end
 
-for i = 1:numel(Norder)
-    Solver = NdgSlopeBottomWetDryTestWithWallBoundary(Norder(i), NdgCellType.Quad);
-    Solver.testAssembleWetDryInterface;
-    Solver.testTopographyNonhydrostaticFaceOuterValue;
-    clear Solver;
-end
+% for i = 1:numel(Norder)
+%     Solver = NdgSlopeBottomWetDryTestWithWallBoundary(Norder(i), enumStdCell.Quad);
+%     Solver.testAssembleWetDryInterface;
+%     Solver.testTopographyNonhydrostaticFaceOuterValue;
+%     clear Solver;
+% end
 
 for i = 1:numel(Norder)
-    Solver = NdgFlatBottomWetDryTestWithWallBoundary(Norder(i), NdgCellType.Quad);
+    Solver = NdgFlatBottomWetDryTestWithWallBoundary(Norder(i), enumStdCell.Quad);
     Solver.testAssembleWetDryInterface;
     Solver.testEidBoundaryType;
-    Solver.testReverseEidBoundaryType;
+%     Solver.testReverseEidBoundaryType;
     Solver.testUpdatedExactEidBoundaryType;
     Solver.testGetFaceOuterValue;
     clear Solver;  
