@@ -16,7 +16,7 @@ classdef NdgFlatBottomWetDryTestWithClampedBoundary < NdgFlatBottomWetDryTestWit
         
         function ExactEidBoundaryType = getExactEidBoundaryType(obj)
 %             Nfp = obj.meshUnion(1).cell.Nfp;
-            ExactEidBoundaryType = ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
+            ExactEidBoundaryType = -1 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
 %             ExactEidBoundaryType = ones(size(obj.meshUnion(1).eidM));
 %             ExactEidBoundaryType(1:Nfp,1) = -1;
 %             ExactEidBoundaryType(3*Nfp + 1 :4*Nfp,1) = -1;

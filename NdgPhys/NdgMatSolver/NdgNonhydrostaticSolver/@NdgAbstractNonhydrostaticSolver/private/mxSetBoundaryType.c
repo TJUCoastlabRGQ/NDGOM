@@ -34,6 +34,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     mexPrintf("Matlab:%s:InvalidNumberOutput,\n", __FILE__);
     mexPrintf("%d inputs required.\n", NLHS);
   }
+  
   signed char *ftype = (signed char *)mxGetData(prhs[0]);
   double *FToN1 = mxGetPr(prhs[1]);
   mwSize M = mxGetM(prhs[1]);
@@ -47,16 +48,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
  
  for(mwIndex e = 0; e< N; e++){
 	 NdgEdgeType type = (NdgEdgeType)ftype[e];
-	 for(mwIndex n = 0; n < M; n++){
-		 if (type == NdgEdgeSlipWall || NdgEdgeNonSlipWall){
-			 EidBoundaryType[e*M+n] = 1;		 
+	 if (type == NdgEdgeSlipWall || type == NdgEdgeNonSlipWall){
+		 for (mwIndex n = 0; n < M; n++){
+			 EidBoundaryType[e*M + n] = 1;
 		 }
-		 else if(type == NdgEdgeZeroGrad || NdgEdgeClamped || NdgEdgeClampedDepth || NdgEdgeClampedVel){
-			 EidBoundaryType[e*M+n] = -1;		 
+	 }
+	 else if (type == NdgEdgeZeroGrad || type == NdgEdgeClamped || type == NdgEdgeClampedDepth || type == NdgEdgeClampedVel){
+		 for (mwIndex n = 0; n < M; n++){
+			 EidBoundaryType[e*M + n] = -1;
 		 }
+	 }
 		 else{
              mexPrintf("Unknown or Unrealized boundary type\n");			 
 		 }
 	 }
  }
-}

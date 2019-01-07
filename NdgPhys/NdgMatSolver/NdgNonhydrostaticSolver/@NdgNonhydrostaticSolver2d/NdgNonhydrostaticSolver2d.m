@@ -98,6 +98,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
         function [fm, fp] = GetFaceValue( obj, fm, fp, ftype)
             [fm, fp] = obj.matGetFaceValue(fm, fp, ftype);
         end
+        
+        function [qx, qy] = GetCharacteristicMatrix( obj, mesh, gmatx, gmaty, ftype)
+           BoundaryEdge = mesh.BoundaryEdge; InnerEdge = mesh.InnerEdge;
+           qx =  obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, gmatx, ftype);
+           qy =  obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, gmaty, ftype);
+        end
     end
     
     methods(Access=protected)
