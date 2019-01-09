@@ -25,7 +25,7 @@ fluxMY = BoundaryEdge.ny.*fm(:,:,index);
 fluxSX = BoundaryEdge.ny.*(fp(:,:,index) + fm(:,:,index))./2; 
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSX);
 
-termY = termY + mesh.rx .* (mesh.cell.Dr * fphys{1}(:,:,index))...
-    + mesh.sx .* (mesh.cell.Ds * fphys{1}(:,:,index));
+termY = termY + mesh.ry .* (mesh.cell.Dr * fphys{1}(:,:,index))...
+    + mesh.sy .* (mesh.cell.Ds * fphys{1}(:,:,index));
 
 end

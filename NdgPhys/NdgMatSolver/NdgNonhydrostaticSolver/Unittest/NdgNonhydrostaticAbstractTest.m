@@ -128,6 +128,16 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.Assert(ExactFp, fp);
         end
         
+        function testmatImposeNonhydroRelatedBoundaryCondition(obj)
+            [ ExactZeroFp, ExactZeroGradFp ] = obj.getExactBoundaryFp;
+             % for this case, the water depth is treated as the non-hydrostatic pressure to test the boundary value
+            [Fm, Fp] = obj.meshUnion(1).BoundaryEdge.matEvaluateSurfValue(num2cell(obj.fphys{1}(:,:,1),[1 2]));  %
+            ZeroFp = obj.NonhydrostaticSolver.GetBoundaryValue(Fm, Fp, enumNonhydroBoundaryCondition.Zero);
+            ZeroGradFp = obj.NonhydrostaticSolver.GetBoundaryValue(Fm, Fp, enumNonhydroBoundaryCondition.ZeroGrad);
+            obj.Assert(ExactZeroFp, ZeroFp);
+            obj.Assert(ExactZeroGradFp, ZeroGradFp);
+        end
+        
 
         
         

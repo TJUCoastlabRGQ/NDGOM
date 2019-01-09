@@ -104,6 +104,11 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
            qx =  obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, gmatx, ftype);
            qy =  obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, gmaty, ftype);
         end
+        
+        function fp = GetBoundaryValue(obj, fm, fp, ftype)
+            fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, ftype, obj.EidBoundaryType);
+        end
+        
     end
     
     methods(Access=protected)
