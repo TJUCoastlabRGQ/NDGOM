@@ -16,11 +16,14 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
         Ng
         xg
         yg
-%         A = 0.054
-        A = 0.0085
+        A = 0.054
+%         A = 0.0085
 %         x0 = 5.95
 %         x0 = 2.7096
-        x0 = 2.705
+%         x0 = 2.705
+        
+        
+        x0 = -5
         Eta0
         U0
         W0

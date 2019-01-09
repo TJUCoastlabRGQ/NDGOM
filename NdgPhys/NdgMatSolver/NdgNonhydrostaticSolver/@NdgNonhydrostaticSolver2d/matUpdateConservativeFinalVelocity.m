@@ -19,9 +19,9 @@ NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num
 
 % [NqHx, NqHy] = obj.matEvaluateLocalDerivativeTerm(mesh, NonhydroVolumeflux);
 
-fphys{1}(:,:,6) = fphys{1}(:,:,6) + obj.dt/physClass.rho  .* NonhydrostaticPressure;
-fphys{1}(:,:,2) = fphys{1}(:,:,2) + (- obj.dt/physClass.rho) *(NqHx +NonhydrostaticPressure.*obj.bx);
-fphys{1}(:,:,3) = fphys{1}(:,:,3) + (- obj.dt/physClass.rho) *(NqHy +NonhydrostaticPressure.*obj.by);
+fphys{1}(:,:,6) = fphys{1}(:,:,6) + obj.dt/physClass.rho .* NonhydrostaticPressure;
+fphys{1}(:,:,2) = fphys{1}(:,:,2) - obj.dt/physClass.rho .* (NqHx +NonhydrostaticPressure.*obj.bx);
+fphys{1}(:,:,3) = fphys{1}(:,:,3) - obj.dt/physClass.rho .* (NqHy +NonhydrostaticPressure.*obj.by);
 
 % UpdataWaterDepth(physClass, mesh, fphys, tempFluxhu, tempFluxhv);
 

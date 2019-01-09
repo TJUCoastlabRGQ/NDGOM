@@ -157,10 +157,14 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             for index = 1:K*Np
                 gmat = zeros( Np, K );
                 gmat(index) = 1.0/2.0;
-                [tempqx, tempqy] = obj.NonhydrostaticSolver.matCalculateLDGAuxialaryTerm( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-                [Exactqx, Exactqy] = obj.NonhydrostaticSolver.matCalculateLDGAuxialaryTerm( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-                [tempq2x, tempq2y] = obj.NonhydrostaticSolver.matCalculateLDGTerm( mesh, BoundaryEdge, InnerEdge, num2cell( gmat,[1 2]), num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-                [Exactq2x, Exactq2y] = obj.NonhydrostaticSolver.matCalculateLDGTerm( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqx,[1 2]), num2cell(Exactqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+                [tempqx, tempqy] = obj.NonhydrostaticSolver.matCalculateLDGAuxialaryTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [Exactqx, Exactqy] = obj.NonhydrostaticSolver.matCalculateLDGAuxialaryTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [tempq2x, tempq2y] = obj.NonhydrostaticSolver.matCalculateLDGTerm( mesh, ...
+                    BoundaryEdge, InnerEdge, num2cell( gmat,[1 2]), num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+                [Exactq2x, Exactq2y] = obj.NonhydrostaticSolver.matCalculateLDGTerm( mesh,...
+                    BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqx,[1 2]), num2cell(Exactqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
                 obj.Assert( height(index) .* tempqx, Exactqx );
                 obj.Assert( height(index) .* tempqy, Exactqy );
                 obj.Assert( height(index) .* tempq2x, Exactq2x );
@@ -173,11 +177,15 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             for index = 1:K*Np
                 gmat = zeros( Np, K );
                 gmat(index) = 1.0/2.0;
-                [ tempqx, tempqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(height(index) .* gmat,[1 2]), num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [ tempqx, tempqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(height(index) .* gmat,[1 2]), num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
                 
-                [ tempq2x, tempq2y ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-                [ Exactq2x, Exactq2y ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(Exactqx,[1 2]), num2cell(Exactqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+                [ tempq2x, tempq2y ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+                [ Exactq2x, Exactq2y ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(Exactqx,[1 2]), num2cell(Exactqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
                           
                 obj.Assert( height(index) .* tempqx, Exactqx );
                 obj.Assert( height(index) .* tempqy, Exactqy );
@@ -194,14 +202,20 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
                 gmat(index) = 1.0/2.0;
                 [UpWindedFlag, DownWindedFlag] = AssembleWindedFlagInformation(InnerEdge, ele);
                 
-                [tempqx, tempqy] = obj.NonhydrostaticSolver.matCalculateFluxUpwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell( gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
-                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.matCalculateFluxUpwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
+                [tempqx, tempqy] = obj.NonhydrostaticSolver.matCalculateFluxUpwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell( gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
+                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.matCalculateFluxUpwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
                 
-                [tempq2x, ~] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
-                [~, tempq2y] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
+                [tempq2x, ~] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
+                [~, tempq2y] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
                 
-                [Exactq2x, ~] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(Exactqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
-                [~, Exactq2y] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(Exactqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
+                [Exactq2x, ~] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(Exactqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
+                [~, Exactq2y] = obj.NonhydrostaticSolver.matCalculateFluxDownwindedTerm...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(Exactqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
                           
                 obj.Assert( height(index) .* tempqx, Exactqx );
                 obj.Assert( height(index) .* tempqy, Exactqy );
@@ -215,14 +229,20 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             for index = 1:K*Np
                 gmat = zeros( Np, K );
                 gmat(index) = 1.0/2.0;
-                [ tempqx, tempqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix( mesh, num2cell(height(index) .* gmat,[1 2]), num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [ tempqx, tempqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+                [ Exactqx, Exactqy ] = obj.NonhydrostaticSolver.GetCharacteristicMatrix...
+                    ( mesh, num2cell(height(index) .* gmat,[1 2]), num2cell(height(index) .* gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
                 
-                tempq2x = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
-                tempq2y = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqy,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
+                tempq2x = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixX...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
+                tempq2y = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixY...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqy,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
                 
-                Exactq2x = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqx,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
-                Exactq2y = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqy,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);                
+                Exactq2x = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixX...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqx,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);
+                Exactq2y = obj.NonhydrostaticSolver.matCalculatePenaltyCharacteristicMatrixY...
+                    ( mesh, BoundaryEdge, InnerEdge, num2cell(height(index) .* gmat,[1 2]), num2cell(Exactqy,[1 2]), obj.NonhydrostaticSolver.EidBoundaryType);                
                           
                 obj.Assert( height(index) .* tempqx, Exactqx );
                 obj.Assert( height(index) .* tempqy, Exactqy );
@@ -233,6 +253,74 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             display('Stable Central Assemble verified');
             display('===========================================');        
             
+        end
+        
+        function testmatCalculateCharacteristicMatrixX(obj)
+            %> @brief function for testing the way to assemble the global stiff matrix
+            %> In this study, the global matrix is assembled at the initial
+            %> stage of the computation so as to reduce the computational cost.
+            %> To do that, a matrix was constructed at first. matCalculateCharacteristicMatrixX
+            %> is the function used to calculate the global derivative with the central flux considered in the x
+            %> direction
+            mesh = obj.meshUnion(1);
+            BoundaryEdge = mesh.BoundaryEdge;
+            InnerEdge = mesh.BoundaryEdge;
+            ExactMatrixX = obj.getExactMatrixX;
+            MatrixX = obj.NonhydrostaticSolver.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(obj.fphys{1}(:,:,1),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            obj.Assert( MatrixX, ExactMatrixX );
+        end
+        
+        function testmatCalculateCharacteristicMatrixY(obj)
+            %> @brief function for testing the way to assemble the global stiff matrix
+            %> In this study, the global matrix is assembled at the initial
+            %> stage of the computation so as to reduce the computational cost.
+            %> To do that, a matrix was constructed at first. matCalculateCharacteristicMatrixY
+            %> is the function used to calculate the global derivative with the central flux considered in the y
+            %> direction            
+            mesh = obj.meshUnion(1);
+            BoundaryEdge = mesh.BoundaryEdge;
+            InnerEdge = mesh.BoundaryEdge;
+            ExactMatrixY = obj.getExactMatrixY;
+            MatrixY = obj.NonhydrostaticSolver.GetCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(obj.fphys{1}(:,:,1),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            obj.Assert( MatrixY, ExactMatrixY );
+        end
+        
+        function testmatCalculateConservativeVariableRelatedMatrixX(obj)
+            %> @brief function for testing the calculation of the
+            %> conservative variable, [h hu hv], related global partial
+            %> derivative with the central flux considered in the x direction
+            %>  matCalculateConservativeVariableRelatedMatrixX is the function 
+            %> used to calculate the global derivative of the conservative variable
+            %> with the central flux considered in the x direction            
+           mesh = obj.meshUnion(1);
+           BoundaryEdge = mesh.BoundaryEdge;
+           InnerEdge = mesh.BoundaryEdge;   
+           ExactMatrixX = obj.getExactConservativeVariableRelatedMatrixX;
+           MatrixX =  obj.NonhydrostaticSolver.GetConservativeVariableRelatedMatrixX( BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero, 1);
+           obj.Assert( MatrixX, ExactMatrixX );
+        end
+        
+        function testmatCalculateConservativeVariableRelatedMatrixY(obj)
+            %> @brief function for testing the calculation of the
+            %> conservative variable, [h hu hv], related global partial
+            %> derivative with the central flux considered in the y direction
+            %>  matCalculateConservativeVariableRelatedMatrixY is the function 
+            %> used to calculate the global derivative of the conservative variable
+            %> with the central flux considered in the y direction                 
+           mesh = obj.meshUnion(1);
+           BoundaryEdge = mesh.BoundaryEdge;
+           InnerEdge = mesh.BoundaryEdge;   
+           ExactMatrixY = obj.getExactConservativeVariableRelatedMatrixY;
+           MatrixY =  obj.NonhydrostaticSolver.GetConservativeVariableRelatedMatrixY( BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero, 1);
+           obj.Assert( MatrixY, ExactMatrixY );
+        end 
+        
+        function testGlobalMatrix(obj)
+            obj.NonhydrostaticSolver.dt = 1;
+            StiffMatrix = obj.NonhydrostaticSolver.GetGlobalStiffMatrix(obj.NonhydrostaticSolver.PNPX, obj.NonhydrostaticSolver.PNPY, obj.NonhydrostaticSolver.SPNPX,...
+    obj.NonhydrostaticSolver.SPNPY, obj.NonhydrostaticSolver.FNPBX, obj.NonhydrostaticSolver.FNPBY, obj.fphys, obj);
+            ExactStiffMatrix = obj.getGlobalStiffMatrix;
+            obj.Assert( full(StiffMatrix), ExactStiffMatrix );
         end
         
     end

@@ -1,4 +1,4 @@
-function drawAnimation( obj, fildId, frameRate, videoName )
+function drawAnimation( obj, Visual, fildId, frameRate, videoName )
 
 video = VideoWriter( [videoName, '.avi'] );
 video.FrameRate = frameRate;
@@ -7,9 +7,9 @@ varId = fildId;
 for t = 1:5:obj.Nt
     field = obj.accessOutputResultAtStepNum( t );
     for m = 1:obj.Nmesh
-        obj.meshUnion(m).draw( field{m}(:,:,varId) );
+        Visual.drawResult( field{m}(:,:,varId) );
     end
-    zlim([-0.2, 1]);
+    zlim([0.51, 0.63]);
     frame = getframe( gcf );
     writeVideo( video, frame );
     drawnow;

@@ -36,7 +36,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 10, 'SwashHydrostaticWave');
+            PostProcess.drawAnimation(Visual, 1, 10, 'RK33NHydrostaticWave');
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
             Lambda = 20;
@@ -143,6 +143,8 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('NumFluxType') = enumSWENumFlux.LF;
+%             enumSWENumFlux.LF
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
@@ -151,7 +153,7 @@ end
 
 function [ mesh ] = makeUniformMesh(N, ~, type)
 bctype = [...
-    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.ClampedDepth, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall];

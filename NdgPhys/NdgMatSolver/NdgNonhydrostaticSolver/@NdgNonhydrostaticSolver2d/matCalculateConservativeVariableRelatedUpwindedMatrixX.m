@@ -17,16 +17,22 @@ mesh = physClass.meshUnion(1);
 fluxHmX = InnerEdge.nx.*hm;fluxHumX = InnerEdge.nx.*hum;fluxHvmX = InnerEdge.nx.*hvm;
 fluxHpX = InnerEdge.nx.*hp;fluxHupX = InnerEdge.nx.*hup;fluxHvpX = InnerEdge.nx.*hvp; 
 
-% fluxNHx = zeros(size(hm)); fluxNHux = zeros(size(hum)); fluxNHvx = zeros(size(hvm));
-fluxNHx = InnerEdge.nx .* (hm + hp)./2; fluxNHux = InnerEdge.nx .* (hum + hup)./2; fluxNHvx = InnerEdge.nx .* (hvm + hvp)./2;
+hu_norm = InnerEdge.ny .* hum;
+sign_hu_norm = sign(hu_norm);
+fluxNHx = InnerEdge.nx .* (hm.*(sign_hu_norm+1)*0.5 + hp.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
+fluxNHux = InnerEdge.nx .* (hum.*(sign_hu_norm+1)*0.5 + hup.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
+fluxNHvx = InnerEdge.nx .* (hvm.*(sign_hu_norm+1)*0.5 + hvp.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
 
-Index = ((InnerEdge.nx .* hum + InnerEdge.ny .* hvm) > 0 & (-InnerEdge.nx .* hup - InnerEdge.ny .* hvp) < 0 );    % flow out
-% fluxNHx(Index) = InnerEdge.nx(Index).* hm(Index);
-fluxNHux(Index) = InnerEdge.nx(Index).* hum(Index); fluxNHvx(Index) = InnerEdge.nx(Index).* hvm(Index);
-
-Index = ((InnerEdge.nx .* hum + InnerEdge.ny .* hvm) < 0 & (-InnerEdge.nx .* hup - InnerEdge.ny .* hvp) > 0 );   % flow in
-% fluxNHx(Index) = InnerEdge.nx(Index).* hp(Index);
-fluxNHux(Index) = InnerEdge.nx(Index).* hup(Index); fluxNHvx(Index) = InnerEdge.nx(Index).* hvp(Index);
+% % fluxNHx = zeros(size(hm)); fluxNHux = zeros(size(hum)); fluxNHvx = zeros(size(hvm));
+% fluxNHx = InnerEdge.nx .* (hm + hp)./2; fluxNHux = InnerEdge.nx .* (hum + hup)./2; fluxNHvx = InnerEdge.nx .* (hvm + hvp)./2;
+% 
+% Index = ((InnerEdge.nx .* hum + InnerEdge.ny .* hvm) > 0 & (-InnerEdge.nx .* hup - InnerEdge.ny .* hvp) < 0 );    % flow out
+% % fluxNHx(Index) = InnerEdge.nx(Index).* hm(Index);
+% fluxNHux(Index) = InnerEdge.nx(Index).* hum(Index); fluxNHvx(Index) = InnerEdge.nx(Index).* hvm(Index);
+% 
+% Index = ((InnerEdge.nx .* hum + InnerEdge.ny .* hvm) < 0 & (-InnerEdge.nx .* hup - InnerEdge.ny .* hvp) > 0 );   % flow in
+% % fluxNHx(Index) = InnerEdge.nx(Index).* hp(Index);
+% fluxNHux(Index) = InnerEdge.nx(Index).* hup(Index); fluxNHvx(Index) = InnerEdge.nx(Index).* hvp(Index);
 
 
 termHx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxHmX, fluxHpX, fluxNHx );
@@ -42,16 +48,22 @@ hp = fp(:,:,1); hup = fp(:,:,2); hvp = fp(:,:,3);
 
 fluxHmX = BoundaryEdge.nx .* hm;fluxHumX = BoundaryEdge.nx .* hum;fluxHvmX = BoundaryEdge.nx .* hvm;
 
-% fluxNHx = zeros(size(hm)); fluxNHux = zeros(size(hum)); fluxNHvx = zeros(size(hvm));
-fluxNHx = BoundaryEdge.nx .* (hm + hp)./2; fluxNHux = BoundaryEdge.nx .* (hum + hup)./2; fluxNHvx = BoundaryEdge.nx .* (hvm + hvp)./2;
+% % fluxNHx = zeros(size(hm)); fluxNHux = zeros(size(hum)); fluxNHvx = zeros(size(hvm));
+% fluxNHx = BoundaryEdge.nx .* (hm + hp)./2; fluxNHux = BoundaryEdge.nx .* (hum + hup)./2; fluxNHvx = BoundaryEdge.nx .* (hvm + hvp)./2;
+% 
+% Index = ((BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm) > 0 & (-BoundaryEdge.nx .* hup - BoundaryEdge.ny .* hvp) < 0 );    % flow out
+% % fluxNHx(Index) = BoundaryEdge.nx(Index).* hm(Index);
+% fluxNHux(Index) = BoundaryEdge.nx(Index).* hum(Index); fluxNHvx(Index) = BoundaryEdge.nx(Index).* hvm(Index);
+% 
+% Index = ((BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm) < 0 & (-BoundaryEdge.nx .* hup - BoundaryEdge.ny .* hvp) > 0 );   % flow in
+% % fluxNHx(Index) = BoundaryEdge.nx(Index).* hp(Index); 
+% fluxNHux(Index) = BoundaryEdge.nx(Index).* hup(Index); fluxNHvx(Index) = BoundaryEdge.nx(Index).* hvp(Index);
 
-Index = ((BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm) > 0 & (-BoundaryEdge.nx .* hup - BoundaryEdge.ny .* hvp) < 0 );    % flow out
-% fluxNHx(Index) = BoundaryEdge.nx(Index).* hm(Index);
-fluxNHux(Index) = BoundaryEdge.nx(Index).* hum(Index); fluxNHvx(Index) = BoundaryEdge.nx(Index).* hvm(Index);
-
-Index = ((BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm) < 0 & (-BoundaryEdge.nx .* hup - BoundaryEdge.ny .* hvp) > 0 );   % flow in
-% fluxNHx(Index) = BoundaryEdge.nx(Index).* hp(Index); 
-fluxNHux(Index) = BoundaryEdge.nx(Index).* hup(Index); fluxNHvx(Index) = BoundaryEdge.nx(Index).* hvp(Index);
+hu_norm = BoundaryEdge.ny .* hum;
+sign_hu_norm = sign(hu_norm);
+fluxNHx = BoundaryEdge.nx .* (hm.*(sign_hu_norm+1)*0.5 + hp.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
+fluxNHux = BoundaryEdge.nx .* (hum.*(sign_hu_norm+1)*0.5 + hup.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
+fluxNHvx = BoundaryEdge.nx .* (hvm.*(sign_hu_norm+1)*0.5 + hvp.*(1 - sign_hu_norm)*0.5) .* sign_hu_norm;
 
 termHx = - termHx - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxHmX, fluxNHx);
 termHux = - termHux - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxHumX, fluxNHux);

@@ -10,10 +10,12 @@ for n = 1:obj.Nmesh
     fphys0{n} = zeros( obj.meshUnion(n).cell.Np, obj.meshUnion(n).K, obj.Nvar );
 end
 fphys = obj.fphys;
+
+visual = makeVisualizationFromNdgPhys( obj );
 % init limiter and output file
 %hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = obj.matUpdateTimeInterval( fphys );
+    dt = 0.5 * obj.matUpdateTimeInterval( fphys );
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -34,14 +36,14 @@ while( time < ftime )
                 + rk2(intRK)*dt*obj.frhs{n};
         end
         
-        fphys = obj.matEvaluateLimiter( fphys );
+%         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys );
-        
+        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt/3);
     end
 %     fprintf('processing %f...\n', time/ftime);
 %     obj.draw( fphys );
-    obj.meshUnion(1).draw( fphys{1}(:,:,1) );
-    drawnow;
+    
+    visual.drawResult( fphys{1}(:, :, 1) );
     fprintf('processing %f ...\n', time/ftime);
     
     time = time + dt;
