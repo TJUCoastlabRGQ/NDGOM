@@ -40,6 +40,7 @@ classdef DiffusionAbstract2d < NdgPhysMat
             % end
             
             obj.viscositySolver = NdgQuadFreeStrongCentralVisSolver2d( obj, 1, 1 );
+%             obj.viscositySolver = NdgQuadFreeStrongLDGVisSolver2d( obj, 1, 1 );
             for m = 1:obj.Nmesh % constant viscosity
                 obj.viscositySolver.mx{1} = obj.miu;
                 obj.viscositySolver.my{1} = obj.miu;

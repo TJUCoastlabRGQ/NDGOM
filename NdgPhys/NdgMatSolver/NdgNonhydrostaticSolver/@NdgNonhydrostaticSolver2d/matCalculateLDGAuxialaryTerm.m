@@ -1,4 +1,4 @@
-function [termx, termy] = matCalculateLDGAuxialaryTerm( obj, mesh, BoundaryEdge, InnerEdge, variable, eidtype )
+function [termx, termy] = matCalculateLDGAuxialaryTerm( obj, mesh, BoundaryEdge, InnerEdge, variable )
 %> @brief Function to calculate variable with the upwinded flux to weakly impose the continuity condition
 %> @details
 %> Function to calculate variable with the upwinded flux to weakly impose the continuity condition
@@ -6,31 +6,30 @@ function [termx, termy] = matCalculateLDGAuxialaryTerm( obj, mesh, BoundaryEdge,
 %> @param[in] BoundaryEdge The boundaryEdge object
 %> @param[in] InnerEdge The innerEdge object
 %> @param[in] Variable The variable used to calculate the returned value
-%> @param[in] eidtype The boundary condition to be imposed at the wet-dry interface and all the clamped-type boundary 
 %> @param[out] termx the calculated characteristic matrix in x direction
 %> @param[out] termy the calculated characteristic matrix in y direction
 [fm, fp] = InnerEdge.matEvaluateSurfValue( variable );       
-[fm, fp] = obj.matGetFaceValue(fm, fp, eidtype);
+[fm, fp] = obj.matGetFaceValue(fm, fp, enumNonhydroBoundaryCondition.Zero);
 %< Inner edge contribution
 fluxMX = InnerEdge.nx.*fm; fluxMY = InnerEdge.ny.*fm;
 fluxPX = InnerEdge.nx.*fp; fluxPY = InnerEdge.ny.*fp; 
 
 Beta = [1, 1];
-[penaltyX, penaltyY] = obj.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, variable, eidtype);
+[penaltyX, penaltyY] = obj.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, variable, enumNonhydroBoundaryCondition.Zero);
 
-fluxSx = InnerEdge.nx .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
-fluxSy = InnerEdge.ny .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
+fluxSX = InnerEdge.nx .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
+fluxSY = InnerEdge.ny .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
 
-termx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSx );
-termy = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSy );
+termx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSX );
+termy = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSY );
 
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( variable );        
-fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, eidtype, obj.EidBoundaryType);
+fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, enumNonhydroBoundaryCondition.Zero, obj.EidBoundaryType);
 %< Boundary edge contribution
 fluxMX = BoundaryEdge.nx.*fm; fluxMY = BoundaryEdge.ny.*fm;
 
 
-[penaltyX, penaltyY] = obj.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, variable, eidtype);
+[penaltyX, penaltyY] = obj.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, variable, enumNonhydroBoundaryCondition.Zero);
 fluxSX = BoundaryEdge.nx .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
 fluxSY = BoundaryEdge.ny .* ((fm + fp)./2 - Beta(1) * penaltyX - Beta(2) * penaltyY);
 

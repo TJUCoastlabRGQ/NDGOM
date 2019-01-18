@@ -1,14 +1,14 @@
 
-function run_conv2d
+function run_diffusion2d
 
 % casename{1} = 'Conv2D/@conv2d_diffusion/mesh/quad_500/quad_500';
 % K = 505;
 % nk = [0, 1, 2];
 % ne = K*4.^nk;
 % len = 0.5.^nk;
-order = [1, 2, 3];
-ne = [20, 40, 60];
-len = 1./ne;
+order = [1 2 3];
+ne = [40, 60, 80];
+len = 10./ne;
 type = enumStdCell.Quad;
 
 Nmesh = numel(ne);
@@ -41,13 +41,13 @@ marker = {'o', 's', '^', '*'};
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        adv = AdvRotationUniformMesh2d( order(n), ne(m), type );
-        tic; adv.matSolve(); time(m, n) = toc;
-        PostProcess = NdgPostProcess(adv.meshUnion(1),strcat('AdvRotationUniformMesh2d','.',num2str(adv.Nmesh),'-','1','/','AdvRotationUniformMesh2d'));
+        DIFF = Diffusion2d( order(n), ne(m), type );
+        tic; DIFF.matSolve(); time(m, n) = toc;
+        PostProcess = NdgPostProcess(DIFF.meshUnion(1),strcat('Diffusion2d','.',num2str(DIFF.Nmesh),'-','1','/','Diffusion2d'));
 %         adv_pos = makeNdgPostProcessFromNdgPhys( adv );
-        err2(m, n) = PostProcess.evaluateNormErr2(adv.fphys,adv.fext);
-        err1(m, n) = PostProcess.evaluateNormErr1(adv.fphys,adv.fext);
-        errInf(m, n) = PostProcess.evaluateNormErrInf(adv.fphys,adv.fext);
+        err2(m, n) = PostProcess.evaluateNormErr2(DIFF.fphys,DIFF.ext);
+        err1(m, n) = PostProcess.evaluateNormErr1(DIFF.fphys,DIFF.ext);
+        errInf(m, n) = PostProcess.evaluateNormErrInf(DIFF.fphys,DIFF.ext);
 
     end
     % print table

@@ -11,7 +11,7 @@ visual = makeVisualizationFromNdgPhys( obj );
 % init limiter and output file
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = obj.matUpdateTimeInterval( fphys );
+    dt = 0.25 * obj.matUpdateTimeInterval( fphys );
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -35,7 +35,7 @@ while( time < ftime )
     
     time = time + dt;
 %     obj.dt = dt;
-%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);
+    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);
     obj.matUpdateOutputResult( time, fphys );
     visual.drawResult( fphys{1}(:, :, 1) );
     waitbar( time/ftime, hwait, 'Runing MatSolver....');

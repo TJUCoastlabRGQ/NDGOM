@@ -9,7 +9,8 @@ for t = 1:5:obj.Nt
     for m = 1:obj.Nmesh
         Visual.drawResult( field{m}(:,:,varId) );
     end
-    zlim([0.51, 0.63]);
+    zlim([0.4, 0.5]);
+%     zlim([0.217, 0.228]);
     frame = getframe( gcf );
     writeVideo( video, frame );
     drawnow;

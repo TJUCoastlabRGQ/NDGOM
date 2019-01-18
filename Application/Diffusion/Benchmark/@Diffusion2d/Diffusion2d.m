@@ -3,10 +3,14 @@ classdef Diffusion2d < DiffusionAbstract2d
     %   Detailed explanation goes here
     
     properties ( Constant )
-        len = 4
+        len = 10
         x0 = 0
         y0 = 0
         miu = 0.05;
+    end
+    
+    properties
+        ext
     end
     
     methods
@@ -18,6 +22,11 @@ classdef Diffusion2d < DiffusionAbstract2d
             obj.initPhysFromOptions( mesh );
             
             Introduction(obj);
+            
+            obj.ext = cell(obj.Nmesh,1);
+            for m = 1:obj.Nmesh
+            obj.ext{m} = obj.getExtFunc( obj.meshUnion(m).x, obj.meshUnion(m).y, obj.ftime);
+            end
         end
     end
     

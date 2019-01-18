@@ -16,12 +16,12 @@ fluxMX = InnerEdge.nx.*fm; fluxMY = InnerEdge.ny.*fm;
 fluxPX = InnerEdge.nx.*fp; fluxPY = InnerEdge.ny.*fp; 
 % fluxSx = InnerEdge.nx .* (1 + sign(InnerEdge.nx .* fm + InnerEdge.ny .* fm))./2 .* fm + InnerEdge.nx .*  (1 + sign( -InnerEdge.nx .* fm - InnerEdge.ny .* fm))./2 .* fp;
 % fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.nx .* fm + InnerEdge.ny .* fm))./2 .* fm + InnerEdge.ny .*  (1 + sign( -InnerEdge.nx .* fm - InnerEdge.ny .* fm))./2 .* fp;
-% fluxSx = InnerEdge.nx .* fm;
-% fluxSy = InnerEdge.ny .* fm;
+fluxSx = InnerEdge.nx .* fm;
+fluxSy = InnerEdge.ny .* fm;
 % fluxSx = InnerEdge.nx .* (1 + sign(InnerEdge.nx  + InnerEdge.ny ))./2 .* fm + InnerEdge.nx .*  (1 + sign( -InnerEdge.nx  - InnerEdge.ny ))./2 .* fp;
 % fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.nx  + InnerEdge.ny ))./2 .* fm + InnerEdge.ny .*  (1 + sign( -InnerEdge.nx  - InnerEdge.ny ))./2 .* fp;
-fluxSx = UpWindedFlag .* InnerEdge.nx .* fm - DownWindedFlag .* InnerEdge.nx .* fp;
-fluxSy = UpWindedFlag .* InnerEdge.ny .* fm - DownWindedFlag .* InnerEdge.ny .* fp;
+% fluxSx = UpWindedFlag .* InnerEdge.nx .* fm - DownWindedFlag .* InnerEdge.nx .* fp;
+% fluxSy = UpWindedFlag .* InnerEdge.ny .* fm - DownWindedFlag .* InnerEdge.ny .* fp;
 
 termx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSx );
 termy = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSy );
@@ -32,15 +32,15 @@ fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, eidtype, obj.EidBound
 fluxMX = BoundaryEdge.nx.*fm; fluxMY = BoundaryEdge.ny.*fm;
 % fluxSX = BoundaryEdge.nx .* (1 + sign(BoundaryEdge.nx .* fm + BoundaryEdge.ny .* fm))./2 .* fm + BoundaryEdge.nx .*  (1 + sign( -BoundaryEdge.nx .* fm - BoundaryEdge.ny .* fm))./2 .* fp;
 % fluxSY = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.nx .* fm + BoundaryEdge.ny .* fm))./2 .* fm + BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.nx .* fm - BoundaryEdge.ny .* fm))./2 .* fp;
-% fluxSX = BoundaryEdge.nx .* fm;
-% fluxSY = BoundaryEdge.ny .* fm;
+fluxSx = BoundaryEdge.nx .* fm;
+fluxSy = BoundaryEdge.ny .* fm;
 % fluxSX = BoundaryEdge.nx .* (1 + sign(BoundaryEdge.nx + BoundaryEdge.ny))./2 .* fm + BoundaryEdge.nx .*  (1 + sign( -BoundaryEdge.nx - BoundaryEdge.ny))./2 .* fp;
 % fluxSY = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.nx + BoundaryEdge.ny))./2 .* fm + BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.nx - BoundaryEdge.ny))./2 .* fp;
-fluxSX = BoundaryEdge.nx .* fm;
-fluxSY = BoundaryEdge.ny .* fm;
+% fluxSX = BoundaryEdge.nx .* (fm + fp)./2;
+% fluxSY = BoundaryEdge.ny .* (fm + fp)./2;
 
-termx = - termx - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
-termy = - termy - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
+termx = - termx - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSx);
+termy = - termy - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSy);
 
 termx = termx + mesh.rx .* (mesh.cell.Dr * cell2mat(Variable))...
     + mesh.sx .* (mesh.cell.Ds * cell2mat(Variable));

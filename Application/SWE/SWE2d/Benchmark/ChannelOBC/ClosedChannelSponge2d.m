@@ -9,7 +9,7 @@ classdef ClosedChannelSponge2d < ClosedChannel2d
     
     methods( Access = protected, Static )
         function obtype = setOpenBoundaryCondition(  )
-            obtype = [ NdgEdgeType.ZeroGrad, NdgEdgeType.SlipWall ];
+            obtype = [ enumBoundaryCondition.ZeroGrad, enumBoundaryCondition.ClampedVel ];
         end
     end
     
@@ -18,8 +18,9 @@ classdef ClosedChannelSponge2d < ClosedChannel2d
             obj = obj@ClosedChannel2d( N, M );
             
             bp = - obj.ChLength + obj.spgLength;
-            ind = obj.meshUnion.xc < bp; % left part is sponge region
-            obj.meshUnion.EToR(ind) = NdgRegionType.Sponge;
+            ind = obj.meshUnion.xc < bp; % left part is sponge region 
+%             obj.meshUnion.EToR(ind) = NdgRegionType.Sponge;
+            obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
             
             Nb = 10;
             xb = bp * ones( Nb, 1 ); 
@@ -38,30 +39,37 @@ classdef ClosedChannelSponge2d < ClosedChannel2d
             outputIntervalNum = 2000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
-            option('obcType') = NdgBCType.None;
-            option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
+%             option('obcType') = NdgBCType.None;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputCaseName') = mfilename;            
             option('outputNetcdfCaseName') = ...
                 [mfilename, '.', num2str(obj.meshUnion.cell.N)];
-            option('temporalDiscreteType') = NdgTemporalDiscreteType.RK22;
-            option('limiterType') = NdgLimiterType.None;
-            option('equationType') = NdgDiscreteEquationType.Strong;
-            option('integralType') = NdgDiscreteIntegralType.GaussQuadrature;
-            option('CoriolisType') = SWECoriolisType.None;
-            option('WindType') = SWEWindType.None;
-            option('FrictionType') = SWEFrictionType.None;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('limiterType') = enumLimiter.None;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+%             option('CoriolisType') = SWECoriolisType.None;
+%             option('WindType') = SWEWindType.None;
+%             option('FrictionType') = SWEFrictionType.None;
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
             matEvaluateTopographySourceTerm@ClosedChannel2d( obj, fphys );
             
             for m = 1:obj.Nmesh
+%                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1)...
+%                     - obj.sigma.*( fphys{m}(:,:,1) - obj.fext{m}(:,:,1) );
+%                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...
+%                     - obj.sigma.*( fphys{m}(:,:,2) - obj.fext{m}(:,:,2) );
+%                 obj.frhs{m}(:,:,3) = obj.frhs{m}(:,:,3)...
+%                     - obj.sigma.*( fphys{m}(:,:,3) - obj.fext{m}(:,:,3) );
                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1)...
-                    - obj.sigma.*( fphys{m}(:,:,1) - obj.fext{m}(:,:,1) );
+                    - obj.sigma.*( fphys{m}(:,:,1) - 320 );
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...
-                    - obj.sigma.*( fphys{m}(:,:,2) - obj.fext{m}(:,:,2) );
+                    - obj.sigma.*( fphys{m}(:,:,2) - 0 );
                 obj.frhs{m}(:,:,3) = obj.frhs{m}(:,:,3)...
-                    - obj.sigma.*( fphys{m}(:,:,3) - obj.fext{m}(:,:,3) );
+                    - obj.sigma.*( fphys{m}(:,:,3) - 0 );
             end
         end
         
@@ -71,7 +79,7 @@ classdef ClosedChannelSponge2d < ClosedChannel2d
             mesh = obj.meshUnion;
             obj.distance = zeros( mesh.cell.Np, mesh.K);
             for k = 1:mesh.K
-                if (mesh.EToR(k) ~= NdgRegionType.Sponge)
+                if (mesh.EToR(k) ~= enumSWERegion.Sponge)
                     continue;
                 end
                 
@@ -91,7 +99,7 @@ classdef ClosedChannelSponge2d < ClosedChannel2d
             obj.sigma = zeros(mesh.cell.Np, mesh.K);
             p = 3;
             for k = 1:mesh.K
-                if mesh.EToR(k) ~= NdgRegionType.Sponge
+                if mesh.EToR(k) ~= enumSWERegion.Sponge
                     continue;
                 end
                 obj.sigma(:, k) = maxSigma*abs( obj.distance(:, k)/spongeLength ).^p;

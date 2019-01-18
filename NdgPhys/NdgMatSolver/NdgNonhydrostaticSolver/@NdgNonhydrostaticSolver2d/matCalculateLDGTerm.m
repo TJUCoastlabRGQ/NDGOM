@@ -1,34 +1,35 @@
-function [termx, termy] = matCalculateLDGTerm( obj, mesh, BoundaryEdge, InnerEdge, Variable, qx, qy, eidtype)
+function [termx, termy] = matCalculateLDGTerm( obj, mesh, BoundaryEdge, InnerEdge, Variable, qx, qy)
 
-tau = 1.0;
+tau = 1;
 Beta = [1, 1];
 
 %< Inner edge contribution
-[penaltyX, penaltyY] = obj.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, Variable, eidtype);  %Penalty term for u
-[ penaltyTerm ] =  obj.matEvaluateInnerEdgeVectorJumpTerm( InnerEdge, qx, qy, eidtype);
+[penaltyX, penaltyY] = obj.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, Variable, enumNonhydroBoundaryCondition.Zero);  %Penalty term for u
+[ penaltyTerm ] =  obj.matEvaluateInnerEdgeVectorJumpTerm( InnerEdge, qx, qy, enumNonhydroBoundaryCondition.ZeroGrad);
 
 
 [fmx, fpx] = InnerEdge.matEvaluateSurfValue( qx );  [fmy, fpy] = InnerEdge.matEvaluateSurfValue( qy );        
-[fmx, fpx] = obj.matGetFaceValue(fmx, fpx, eidtype); [fmy, fpy] = obj.matGetFaceValue(fmy, fpy, eidtype);
+[fmx, fpx] = obj.matGetFaceValue(fmx, fpx, enumNonhydroBoundaryCondition.ZeroGrad); 
+[fmy, fpy] = obj.matGetFaceValue(fmy, fpy, enumNonhydroBoundaryCondition.ZeroGrad);
 
 
 fluxMX = InnerEdge.nx.*fmx; fluxMY = InnerEdge.ny.*fmy;
 fluxPX = InnerEdge.nx.*fpx; fluxPY = InnerEdge.ny.*fpy; 
 
-fluxSx = InnerEdge.nx .* ( (fmx + fpx)./2 + Beta(1) .* penaltyTerm  - tau .* penaltyX);
-fluxSy = InnerEdge.ny .* ( (fmy + fpy)./2 + Beta(2) .* penaltyTerm  - tau .* penaltyY);
+fluxSX = InnerEdge.nx .* ( (fmx + fpx)./2 + Beta(1) .* penaltyTerm  - tau .* penaltyX);
+fluxSY = InnerEdge.ny .* ( (fmy + fpy)./2 + Beta(2) .* penaltyTerm  - tau .* penaltyY);
 
-termx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSx );
-termy = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSy );
+termx = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSX );
+termy = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMY, fluxPY, fluxSY );
 
 %< boundary edge contribution
-[penaltyX, penaltyY] = obj.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, Variable, eidtype);  %Penalty term for u
-[ penaltyTerm ] =  obj.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, qx, qy, eidtype);
+[penaltyX, penaltyY] = obj.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, Variable, enumNonhydroBoundaryCondition.Zero);  %Penalty term for u
+[ penaltyTerm ] =  obj.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, qx, qy, enumNonhydroBoundaryCondition.ZeroGrad);
 
 
 [fmx, fpx] = BoundaryEdge.matEvaluateSurfValue( qx ); [fmy, fpy] = BoundaryEdge.matEvaluateSurfValue( qy );         
-fpx = obj.matImposeNonhydroRelatedBoundaryCondition(fmx, fpx, eidtype, obj.EidBoundaryType);
-fpy = obj.matImposeNonhydroRelatedBoundaryCondition(fmy, fpy, eidtype, obj.EidBoundaryType);
+fpx = obj.matImposeNonhydroRelatedBoundaryCondition(fmx, fpx, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
+fpy = obj.matImposeNonhydroRelatedBoundaryCondition(fmy, fpy, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
 %< Boundary edge contribution
 fluxMX = BoundaryEdge.nx.*fmx; fluxMY = BoundaryEdge.ny.*fmy;
 

@@ -25,7 +25,6 @@ fluxMX = BoundaryEdge.nx.*fm(:,:,index);
 fluxSX = BoundaryEdge.nx.*(fp(:,:,index) + fm(:,:,index))./2; 
 termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
 
-termX = termX + mesh.rx .* (mesh.cell.Dr * fphys{1}(:,:,index))...
-    + mesh.sx .* (mesh.cell.Ds * fphys{1}(:,:,index));
+termX = termX + obj.matGetVolumeIntegralX(mesh, fphys{1}(:,:,index));
 
 end

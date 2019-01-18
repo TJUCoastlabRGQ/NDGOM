@@ -27,6 +27,5 @@ fluxSY = BoundaryEdge.ny.*(fp + fm)./2;
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 
 
-termY = termY + mesh.ry .* (mesh.cell.Dr * cell2mat(Variable))...
-    + mesh.sy .* (mesh.cell.Ds * cell2mat(Variable));
+termY = termY + obj.matGetVolumeIntegralY(mesh, cell2mat(Variable));
 end

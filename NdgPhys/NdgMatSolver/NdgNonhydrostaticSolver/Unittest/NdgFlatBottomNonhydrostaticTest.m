@@ -11,7 +11,7 @@ classdef NdgFlatBottomNonhydrostaticTest < NdgNonhydrostaticAbstractTest
         end  
         
         function ExactEidBoundaryType = getExactEidBoundaryType(obj)
-            ExactEidBoundaryType = -1 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
+            ExactEidBoundaryType = 1 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
         end
     end
     

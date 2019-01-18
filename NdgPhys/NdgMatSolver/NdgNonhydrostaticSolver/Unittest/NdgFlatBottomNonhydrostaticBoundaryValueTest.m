@@ -13,13 +13,13 @@ classdef NdgFlatBottomNonhydrostaticBoundaryValueTest < NdgFlatBottomWetDryTestW
         
         function ExactEidBoundaryType = getExactEidBoundaryType(obj)
             ExactEidBoundaryType = 1 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
-            ExactEidBoundaryType(:, [2, 6, 8]) = -1;
+%             ExactEidBoundaryType(:, [2, 6, 8]) = -1;
         end
         
         function [ ExactZeroFp, ExactZeroGradFp ] = getExactBoundaryFp(obj)
             ExactZeroFp = 4 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
             ExactZeroGradFp = -4 * ones(size(obj.meshUnion(1).BoundaryEdge.FToN1));
-            ExactZeroFp(:, [2, 6, 8]) =  -4; ExactZeroGradFp(:, [2, 6, 8]) = 4;
+%             ExactZeroFp(:, [2, 6, 8]) =  -4; ExactZeroGradFp(:, [2, 6, 8]) = 4;
         end
         
     end

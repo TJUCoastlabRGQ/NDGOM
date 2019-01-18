@@ -6,4 +6,6 @@ function matSetBoundaryType(obj,mesh)
 obj.EidBoundaryType = mxSetBoundaryType(int8(mesh.BoundaryEdge.ftype),...
    mesh.BoundaryEdge.FToN1);
 
+% obj.EidBoundaryType = ones(size(obj.EidBoundaryType));
+
 end

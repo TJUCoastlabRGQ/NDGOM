@@ -22,10 +22,9 @@ termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
 
 %< Boundary edge contribution
 fluxMY = BoundaryEdge.ny.*fm(:,:,index);
-fluxSX = BoundaryEdge.ny.*(fp(:,:,index) + fm(:,:,index))./2; 
-termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSX);
+fluxSY = BoundaryEdge.ny.*(fp(:,:,index) + fm(:,:,index))./2; 
+termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 
-termY = termY + mesh.ry .* (mesh.cell.Dr * fphys{1}(:,:,index))...
-    + mesh.sy .* (mesh.cell.Ds * fphys{1}(:,:,index));
+termY = termY + obj.matGetVolumeIntegralY(mesh, fphys{1}(:,:,index));
 
 end

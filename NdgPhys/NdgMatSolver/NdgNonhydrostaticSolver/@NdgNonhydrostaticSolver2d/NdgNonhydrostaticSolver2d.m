@@ -125,6 +125,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
                  StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( PNPX, PNPY,...
             SPNPX, SPNPY, FNPBX, FNPBY, fphys, PhysClass);
         end
+        
     end
     
     methods(Access=protected)

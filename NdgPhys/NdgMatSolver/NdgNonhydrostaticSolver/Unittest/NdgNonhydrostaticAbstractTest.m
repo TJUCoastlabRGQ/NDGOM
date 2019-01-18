@@ -323,6 +323,81 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.Assert( full(StiffMatrix), ExactStiffMatrix );
         end
         
+        function testmatCalculateConservativeVariableRelatedUpwindedMatrixXAndY(obj)
+            InnerEdge = obj.meshUnion(1).InnerEdge;
+            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
+           [fm, fp] = InnerEdge.matEvaluateSurfValue( obj.fphys );       
+           [hm, hp] = obj.NonhydrostaticSolver.GetFaceValue(fm(:,:,1), fp(:,:,1), enumNonhydroBoundaryCondition.Zero);
+           [hum, hup] = obj.NonhydrostaticSolver.GetFaceValue(fm(:,:,2), fp(:,:,2), enumNonhydroBoundaryCondition.Zero);
+           [fhx, hux] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermX(InnerEdge, hm, hp, hum, hup);
+           [Exactfhx, Exacthux] = obj.GetExactInnerEdgeFluxTermX;
+           obj.Assert( fhx, Exactfhx );
+           obj.Assert( hux, Exacthux ); 
+           
+          [fm, fp] = BoundaryEdge.matEvaluateSurfValue( obj.fphys ); 
+          [fm, fp] = obj.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx, BoundaryEdge.ny, fm, fp, obj.fext{1} );  
+          hm = fm(:,:,1); hum = fm(:,:,2); 
+          hp = fp(:,:,1); hup = fp(:,:,2); 
+          [fhx, hux] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermX(BoundaryEdge, hm, hp, hum, hup);
+          [Exactfhx, Exacthux] = obj.GetExactBoundaryEdgeFluxTermX;
+          obj.Assert( fhx, Exactfhx );
+          obj.Assert( hux, Exacthux );           
+%             [fhy, huy, hvy] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermY( obj, BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero);
+%             
+%             [Exactfhy, Exacthuy, Exacthvy] = obj.GetDerivativeInDirectionX;
+        end
+        
+        function testInnerEdgeScalerJumpTerm(obj)
+            InnerEdge = obj.meshUnion(1).InnerEdge;
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            [ExactScalerJumpX, ExactScalerJumpY] = obj.getExactHuFieldInnerEdgeScalerJump;
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );              
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            [ExactScalerJumpX, ExactScalerJumpY] = obj.getExactHvFieldInnerEdgeScalerJump;
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );    
+        end
+        
+        function testInnerEdgeVecrtorJumpTerm(obj)
+            InnerEdge = obj.meshUnion(1).InnerEdge;
+            VectorJump = obj.NonhydrostaticSolver.matEvaluateInnerEdgeVectorJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            ExactVectorJump = obj.getExactInnerEdgeVectorJump;
+            obj.Assert( VectorJump, ExactVectorJump );
+        end
+        
+        function testBoundaryEdgeScalerJumpTerm(obj)
+            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHuFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.Zero);
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHuFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.ZeroGrad);  
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );       
+            
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHvFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.Zero);
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );    
+            
+            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHvFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.ZeroGrad);
+            obj.Assert( ScalerJumpX, ExactScalerJumpX );
+            obj.Assert( ScalerJumpY, ExactScalerJumpY );                
+        end
+        
+        function testBoundaryEdgeVecrtorJumpTerm(obj)
+            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
+            VectorJump = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            ExactVectorJump = obj.getExactBoundaryEdgeVectorJump(enumNonhydroBoundaryCondition.Zero);
+            obj.Assert( VectorJump, ExactVectorJump );
+
+            VectorJump = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+            ExactVectorJump = obj.getExactBoundaryEdgeVectorJump(enumNonhydroBoundaryCondition.ZeroGrad);
+            obj.Assert( VectorJump, ExactVectorJump );
+        end
     end
     methods(Access = protected)
         
