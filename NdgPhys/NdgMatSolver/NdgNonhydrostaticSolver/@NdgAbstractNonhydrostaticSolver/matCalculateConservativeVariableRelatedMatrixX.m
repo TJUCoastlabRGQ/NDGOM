@@ -20,6 +20,12 @@ termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys ); 
 [fm, fp] = physClass.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx, BoundaryEdge.ny, fm, fp, physClass.fext{1} );
 
+% for i = 1:numel(BoundaryEdge.ftype)
+%     if BoundaryEdge.ftype(i) == enumBoundaryCondition.ClampedVel
+%         fp(:,i,:) = fm(:,i,:);
+%     end
+% end
+
 %< Boundary edge contribution
 fluxMX = BoundaryEdge.nx.*fm(:,:,index);
 fluxSX = BoundaryEdge.nx.*(fp(:,:,index) + fm(:,:,index))./2; 

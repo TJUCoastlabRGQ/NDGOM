@@ -19,10 +19,12 @@ fluxNHx = Edge.nx .* ( hm + hp )./2;  fluxNHux = Edge.nx .* ( hum + hup )./2;  %
 index = (sign(Lnorm) == 1 & sign(Anorm) ~= 1);
 % fluxNHx(index) = Edge.nx(index) .* hm(index);
 fluxNHux(index) = Edge.nx(index) .* hum(index);
+% fluxNHx(index) = Edge.nx(index) .* hm(index);
 
 index = (sign(Lnorm) ~= 1 & sign(Anorm) == 1);
 % fluxNHx(index) = -Edge.nx(index) .* hp(index);
 fluxNHux(index) = -Edge.nx(index) .* hup(index);
+% fluxNHx(index) = -Edge.nx(index) .* hp(index);
 
 % index = (sign(Lnorm) .* sign(Anorm) == 1);
 % fluxNHx(index) = Edge.nx(index) .* (hm(index) + hp(index))*0.5;

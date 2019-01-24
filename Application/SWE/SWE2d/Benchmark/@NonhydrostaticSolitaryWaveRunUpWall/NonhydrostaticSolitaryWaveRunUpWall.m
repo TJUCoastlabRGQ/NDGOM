@@ -56,7 +56,7 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
                 end
             end
 %             fpath = 'D:\PhdResearch\Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data';
-           fpath ='D:\PhdResearch\Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data\SmallWaveHeight';
+           fpath ='D:\PhdResearch\Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data';
             for i = 1:numel(Coor)
                 str = strcat('\Gauge',num2str(index(i)),'.csv');
                 pathstr = strcat(fpath,str);

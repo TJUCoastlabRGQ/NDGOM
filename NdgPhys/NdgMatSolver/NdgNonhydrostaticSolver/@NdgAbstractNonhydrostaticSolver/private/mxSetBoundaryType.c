@@ -48,7 +48,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
  
  for(mwIndex e = 0; e< N; e++){
 	 NdgEdgeType type = (NdgEdgeType)ftype[e];
-	 if (type == NdgEdgeSlipWall || type == NdgEdgeClamped || type == NdgEdgeNonSlipWall || type == NdgEdgeClampedVel || type == NdgEdgeClampedDepth){
+	 if (type == NdgEdgeSlipWall || type == NdgEdgeClamped || type == NdgEdgeClampedVel || type == NdgEdgeNonSlipWall || type == NdgEdgeClampedDepth){
 		 for (mwIndex n = 0; n < M; n++){
 			 EidBoundaryType[e*M + n] = 1;
 		 }

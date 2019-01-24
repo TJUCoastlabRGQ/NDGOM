@@ -41,7 +41,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             set(gcf,'position',[50,50,1050,400]);
             plot(outputTime,Eta,'k','LineWidth',1.5);
             hold on;
-            set(gca,'YLIM',[-1*a, 1*a],'Fontsize',12);
+            set(gca,'YLIM',[-1.3*a, 1.3*a],'Fontsize',12);
             xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
             ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
             
@@ -107,7 +107,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.Euler;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

@@ -9,25 +9,32 @@ for i = 1:numel(obj.WetCellIndex)
     NonhydrostaticPressure(:,obj.WetCellIndex(i)) = NonhydroPre(:,i);
 end
 
+% NonhydrostaticPressure(:,1:17) = - NonhydrostaticPressure(:,1:17);
+% index = ( abs(NonhydrostaticPressure) < 1 );
+% NonhydrostaticPressure(index) = 0;
+
 NonhydroVolumeflux = 1/2 * NonhydrostaticPressure .* fphys{1}(:,:,1);
 
 NqHx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
 NqHy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
 
-% NqHx = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge,  NonhydroVolumeflux, enumNonhydroBoundaryCondition.Zero);
-% NqHy = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge,  NonhydroVolumeflux, enumNonhydroBoundaryCondition.Zero);
+% NqHx = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge,  NonhydroVolumeflux, fphys, enumNonhydroBoundaryCondition.Zero);
+% NqHy = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge,  NonhydroVolumeflux, fphys, enumNonhydroBoundaryCondition.Zero);
 
+% data = fphys{1}(:,1,:);
 
 fphys{1}(:,:,6) = fphys{1}(:,:,6) + obj.dt/physClass.rho .* NonhydrostaticPressure;
 fphys{1}(:,:,2) = fphys{1}(:,:,2) - obj.dt/physClass.rho .* (NqHx +NonhydrostaticPressure.*obj.bx);
 fphys{1}(:,:,3) = fphys{1}(:,:,3) - obj.dt/physClass.rho .* (NqHy +NonhydrostaticPressure.*obj.by);
+
+% fphys{1}(:,1,:) = data( :,1,:);
 
 % UpdataWaterDepth(physClass, mesh, fphys, tempFluxhu, tempFluxhv);
 
 end
 
 
-function termX = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge, Variable, ftype)
+function termX = matCalculateUpwindedNonhydroRelatedMatrixX(obj, physClass, BoundaryEdge, InnerEdge, Variable, fphys, ftype)
 %> @brief Function to calculate the characteristic matrix
 %> @details Function to calculate the characteristic matrix in the x direction
 %> @param[in] BoundaryEdge the boundary edge object
@@ -49,15 +56,21 @@ fluxPX = InnerEdge.nx.*fp;
 fluxSx = InnerEdge.nx.*(fp + fm)./2;   %Central
 % fluxSx = InnerEdge.nx.*((fp + fm)./2 + InnerEdge.nx .* (fm - fp) + InnerEdge.ny .* (fm - fp));   %Penalty failed
 
-% Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
-% fluxSx(Index) = InnerEdge.nx(Index) .* fm(Index);  %upwinded
-% Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-% fluxSx(Index) = -InnerEdge.nx(Index) .* fp(Index);  %upwinded
+[Hydrofm, Hydrofp] = InnerEdge.matEvaluateSurfValue( fphys );       
+[hum, hup] = obj.matGetFaceValue(Hydrofm(:,:,2), Hydrofp(:,:,2), ftype);
+[hvm, hvp] = obj.matGetFaceValue(Hydrofm(:,:,3), Hydrofp(:,:,3), ftype);
 
-Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
-fluxSx(Index) = InnerEdge.nx(Index) .* fp(Index);  %downwinded
-Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-fluxSx(Index) = - InnerEdge.nx(Index) .* fm(Index);  %donwinded
+Lnorm = InnerEdge.nx .* hum + InnerEdge.ny .* hvm;     Anorm = -InnerEdge.nx .* hup -InnerEdge.ny .* hvp;
+
+% Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
+% fluxSx(Index) = InnerEdge.nx(Index) .* fm(Index);  %upwinded
+% Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+% fluxSx(Index) = - InnerEdge.nx(Index) .* fp(Index);  %upwinded
+
+Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
+fluxSx(Index) = - InnerEdge.nx(Index) .* fp(Index);  %downwinded
+Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+fluxSx(Index) =  InnerEdge.nx(Index) .* fm(Index);  %downwinded
 
 % fluxSx = InnerEdge.nx .* (1 + sign(InnerEdge.nx .* fm))./2 .* fp + InnerEdge.nx .*  (1 + sign( -InnerEdge.nx .* fp))./2 .* fm; % downwind
 termX = InnerEdge.matEvaluateStrongFromEdgeRHS( fluxMX, fluxPX, fluxSx );
@@ -72,15 +85,26 @@ fluxMX = BoundaryEdge.nx.*fm;
 fluxSx = BoundaryEdge.nx.*(fp + fm)./2;   %Central
 % fluxSx = BoundaryEdge.nx.*((fp + fm)./2 + BoundaryEdge.nx .* (fm - fp) + BoundaryEdge.ny .* (fm - fp));   %Penalty failed
 
-% Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
+[Hydrofm, Hydrofp] = BoundaryEdge.matEvaluateSurfValue( fphys );       
+[hum, hup] = obj.matGetFaceValue(Hydrofm(:,:,2), Hydrofp(:,:,2), ftype);
+[hvm, hvp] = obj.matGetFaceValue(Hydrofm(:,:,3), Hydrofp(:,:,3), ftype);
+
+Lnorm = BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm;     Anorm = -BoundaryEdge.nx .* hup -BoundaryEdge.ny .* hvp;
+
+% Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
 % fluxSx(Index) = BoundaryEdge.nx(Index) .* fm(Index);  %upwinded
-% Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
+% Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
 % fluxSx(Index) = -BoundaryEdge.nx(Index) .* fp(Index);  %upwinded
 
-Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
-fluxSx(Index) = BoundaryEdge.nx(Index) .* fp(Index);  %downwinded
-Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-fluxSx(Index) = - BoundaryEdge.nx(Index) .* fm(Index);  %donwinded
+Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
+fluxSx(Index) = - BoundaryEdge.nx(Index) .* fp(Index);  %downwinded
+Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+fluxSx(Index) =  BoundaryEdge.nx(Index) .* fm(Index);  %downwinded
+
+% Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
+% fluxSx(Index) = BoundaryEdge.nx(Index) .* fp(Index);  %downwinded
+% Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
+% fluxSx(Index) = - BoundaryEdge.nx(Index) .* fm(Index);  %donwinded
 
 % fluxSX = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fm+ BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fp;
 % fluxSX = BoundaryEdge.ny .* (1 + sign(BoundaryEdge.ny .* fm))./2 .* fp - BoundaryEdge.ny .*  (1 + sign( -BoundaryEdge.ny .* fp))./2 .* fm;
@@ -92,7 +116,7 @@ termX = termX + obj.matGetVolumeIntegralX(mesh, Variable);
 
 end
 
-function termY = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge, Variable, ftype)
+function termY = matCalculateUpwindedNonhydroRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge, Variable, fphys, ftype)
 %> @brief Function to calculate the characteristic matrix
 %> @details Function to calculate the characteristic matrix in the x direction
 %> @param[in] BoundaryEdge the boundary edge object
@@ -113,16 +137,21 @@ fluxPY = InnerEdge.ny.*fp;
 fluxSy = InnerEdge.ny.*(fp + fm)./2;   %Central
 % fluxSy = InnerEdge.ny.*((fp + fm)./2 + InnerEdge.nx .* (fm - fp) + InnerEdge.ny .* (fm - fp));   %Penalty failed
 
+[Hydrofm, Hydrofp] = InnerEdge.matEvaluateSurfValue( fphys );       
+[hum, hup] = obj.matGetFaceValue(Hydrofm(:,:,2), Hydrofp(:,:,2), ftype);
+[hvm, hvp] = obj.matGetFaceValue(Hydrofm(:,:,3), Hydrofp(:,:,3), ftype);
 
-% Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
+Lnorm = InnerEdge.nx .* hum + InnerEdge.ny .* hvm;     Anorm = -InnerEdge.nx .* hup -InnerEdge.ny .* hvp;
+
+% Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
 % fluxSy(Index) = InnerEdge.ny(Index) .* fm(Index);  %upwinded
-% Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-% fluxSy(Index) = -InnerEdge.ny(Index) .* fp(Index);  %upwinded
+% Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+% fluxSy(Index) = - InnerEdge.ny(Index) .* fp(Index);  %upwinded
 
-Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
-fluxSy(Index) = InnerEdge.ny(Index) .* fp(Index);  %downwinded
-Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-fluxSy(Index) = - InnerEdge.ny(Index) .* fm(Index);  %downwinded
+Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
+fluxSy(Index) = - InnerEdge.ny(Index) .* fp(Index);  %downwinded
+Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+fluxSy(Index) = InnerEdge.ny(Index) .* fm(Index);  %downwinded
 
 % fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.ny .* fm))./2 .* fm - InnerEdge.ny .*  (1 + sign( -InnerEdge.ny .* fp))./2 .* fp;
 % fluxSy = InnerEdge.ny .* (1 + sign(InnerEdge.ny .* fm))./2 .* fp + InnerEdge.ny .*  (1 + sign( -InnerEdge.ny .* fp))./2 .* fm;
@@ -140,16 +169,21 @@ fluxSy = BoundaryEdge.ny.*(fp + fm)./2;   %Central
 % fluxSy = BoundaryEdge.ny.*((fp + fm)./2 + BoundaryEdge.nx .* (fm - fp) + BoundaryEdge.ny .* (fm - fp));   %Penalty failed
 
 
-% Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
+[Hydrofm, Hydrofp] = BoundaryEdge.matEvaluateSurfValue( fphys );       
+[hum, hup] = obj.matGetFaceValue(Hydrofm(:,:,2), Hydrofp(:,:,2), ftype);
+[hvm, hvp] = obj.matGetFaceValue(Hydrofm(:,:,3), Hydrofp(:,:,3), ftype);
+
+Lnorm = BoundaryEdge.nx .* hum + BoundaryEdge.ny .* hvm;     Anorm = -BoundaryEdge.nx .* hup -BoundaryEdge.ny .* hvp;
+
+% Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
 % fluxSy(Index) = BoundaryEdge.ny(Index) .* fm(Index);  %upwinded
-% Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-% fluxSy(Index) =  -BoundaryEdge.ny(Index) .* fp(Index);  %upwinded
+% Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+% fluxSy(Index) = - BoundaryEdge.ny(Index) .* fp(Index);  %upwinded
 
-Index = ( sign(fm) == 1 & sign(fp) ~= 1 );
-fluxSy(Index) = BoundaryEdge.ny(Index) .* fp(Index);  %downwinded
-Index = ( sign(fm) ~= 1 & sign(fp) == 1 );
-fluxSy(Index) = - BoundaryEdge.ny(Index) .* fm(Index);  %downwinded
-
+Index = ( sign(Lnorm) == 1 & sign(Anorm) ~= 1 );
+fluxSy(Index) = - BoundaryEdge.ny(Index) .* fp(Index);  %downwinded
+Index = ( sign(Lnorm) ~= 1 & sign(Anorm) == 1 );
+fluxSy(Index) = BoundaryEdge.ny(Index) .* fm(Index);  %downwinded
 
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSy);
 

@@ -18,10 +18,12 @@ fluxNHy = Edge.ny .* ( hm + hp )./2;fluxNHvy = Edge.ny .* ( hvm + hvp )./2; %Cen
 index = (sign(Lnorm) == 1 & sign(Anorm) ~= 1);
 % fluxNHy(index) = Edge.ny(index) .* hm(index);
 fluxNHvy(index) = Edge.ny(index) .* hvm(index);
+% fluxNHy(index) = Edge.ny(index) .* hm(index);
 
 index = (sign(Lnorm) ~= 1 & sign(Anorm) == 1);
 % fluxNHy(index) = -Edge.ny(index) .* hp(index);
 fluxNHvy(index) = -Edge.ny(index) .* hvp(index);
+% fluxNHy(index) = -Edge.ny(index) .* hp(index);
 
 % index = (sign(Lnorm) .* sign(Anorm) == -1);
 % fluxNHy(index) = Edge.ny(index) .* (hm(index).*(sign(Lnorm(index)) + 1)*0.5 + hp(index).*(1 - sign(Lnorm(index)) )*0.5);

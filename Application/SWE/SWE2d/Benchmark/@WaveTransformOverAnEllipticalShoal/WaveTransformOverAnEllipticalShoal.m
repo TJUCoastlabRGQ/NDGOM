@@ -9,7 +9,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         amplitude = 0.0232
         d = 0.45
         T = 1
-        ChLength = 10
+        ChLength = 26
         ChWidth = 0.05
     end
     
@@ -17,10 +17,13 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         initial_fphys
         length
         k
-        spgLength = 3; %> sponge region size
+        spgLength = 4; %> sponge region size
         distance %> distance to boundary nodes
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
+        SpongeCoefficient
+        Ylim = [-10 16]
+        Xlim = [-0.3 0.3]
     end
     
     methods (Access = public)
@@ -30,18 +33,19 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
             obj.WaveCharacterEstimate;
+                   
+            bp = obj.Ylim(2) - obj.spgLength;
+            ind = obj.meshUnion.yc > bp; % right part is sponge region
+            obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
             
-%             bp = obj.ChLength - obj.spgLength;
-%             ind = obj.meshUnion.yc > bp; % right part is sponge region
-%             obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
-%             
+            %methods from LongXiang Li              
 %             Nb = 10;
 %             xb = bp * ones( Nb, 1 );
 %             yb = linspace( 0, obj.ChWidth, Nb )';
 %             obj.evaluateSpongeDistance( xb, yb );
-%             
 %             dt = matUpdateTimeInterval( obj, obj.fphys );
-%             obj.evaluateSpongeStrength( obj.spgLength, 0.1/dt );
+%             obj.evaluateSpongeStrength( obj.spgLength, 0.05 /dt );
+           obj.evaluateSpongeCoefficient(bp);
             
         end
         %> Compared numerical water elevation with measured data
@@ -56,7 +60,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 10, 'RK33NHydrostaticWave');
+            PostProcess.drawAnimation(Visual, 1, 6, 'RK33NHydrostaticWave');
         end
         
     end
@@ -70,8 +74,8 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         end
         
         function matUpdateExternalField( obj, time, ~ )
-            Eta =  obj.amplitude * cos(2*pi/obj.T*time - pi/2);
-            %             Eta =  obj.amplitude * cos(-2*pi*time);
+%             Eta =  obj.amplitude * cos(2*pi/obj.T*time - pi/2);
+            Eta =  obj.amplitude * sin(2*pi/obj.T*time);
             %NHWAVE  surface elevation and velocity
             
             %             syms z;
@@ -79,14 +83,19 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             %             aveV = int(2*Eta*pi/1*cosh(obj.k*(z+obj.d))/sinh(obj.k*obj.d),-obj.d,Eta)/(obj.d + obj.amplitude * cos(-2*pi*time));
             %             obj.fext{1}( :, :, 3 ) = aveV * obj.fext{1}( :, :, 1 );
             % SWASH velocity
-            obj.fext{1}( :, :, 1 ) = obj.d + Eta;
-            obj.fext{1}( :, :, 3 ) =  (obj.d + Eta) .* sqrt(obj.gra ./ (obj.d + Eta)) * Eta;
+%             obj.fext{1}( :, :, 1 ) = obj.d + Eta;
+%             obj.fext{1}( :, :, 3 ) =  (obj.d + Eta) .* sqrt(obj.gra ./ (obj.d + Eta)) * Eta;
             %             obj.fext{1}( :, :, 3 ) =  (obj.d + Eta) .* sqrt(obj.gra ./ (obj.d)) * Eta;
             % Geoclaw water depth and velocity
             %             obj.fext{1}( :, :, 1 ) = obj.d + Eta;
-            %             obj.fext{1}( :, :, 3 ) =  2 * obj.fext{1}( :, :, 1 ) .*  (sqrt(obj.gra * obj.fext{1}( :, :, 1 )) - sqrt(obj.gra * obj.d));
-            % pressure setting Cui Haiyang
+            %             obj.fext{1}( :, :, 3 ) =  2 * obj.fext{1}( :, :,
+            %             1 ) .*  (sqrt(obj.gra * obj.fext{1}( :, :, 1 )) - sqrt(obj.gra * obj.d));
             
+            % Stelling and Zijlema, 2003
+            omega = 2*pi/obj.T;
+            obj.fext{1}( :, :, 3 ) =  omega*obj.amplitude/obj.k/obj.d*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta+obj.d);
+            
+%              pressure setting Cui Haiyang
 %             obj.fext{1}( :, :, 6 ) = -2 * obj.rho * obj.gra * Eta*...
 %                 (1-sinh(obj.k*obj.fext{1}( :, :, 1 ))./obj.k./obj.fext{1}( :, :, 1 )./cosh(obj.k*obj.d)).*obj.fext{1}( :, :, 1 )./2;     %(hq0)/2
 %             index = 1;
@@ -101,9 +110,9 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
 %             end
         end
         
-%         function matEvaluateTopographySourceTerm( obj, fphys )
-%             matEvaluateTopographySourceTerm@SWEPreBlanaced2d( obj, fphys );
-%             
+        function matEvaluateTopographySourceTerm( obj, fphys )
+            matEvaluateTopographySourceTerm@SWEPreBlanaced2d( obj, fphys );
+            
 %             for m = 1:obj.Nmesh
 %                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1)...
 %                     - obj.sigma.*( fphys{m}(:,:,1) - obj.d );
@@ -112,7 +121,14 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
 %                 obj.frhs{m}(:,:,3) = obj.frhs{m}(:,:,3)...
 %                     - obj.sigma.*( fphys{m}(:,:,3) - 0 );
 %             end
-%         end
+
+            for m = 1:obj.Nmesh
+                obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...
+                    - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,2);
+                obj.frhs{m}(:,:,3) = obj.frhs{m}(:,:,3)...
+                    - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,3);
+            end
+        end
         
         %> \brief calculate distance from the boundary
         function evaluateSpongeDistance(obj, xb, yb)
@@ -132,34 +148,47 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             end
         end% func        
         
+        function evaluateSpongeCoefficient(obj, yb)
+            obj.SpongeCoefficient = zeros(size(obj.meshUnion(1).x));
+            ratio = ( obj.meshUnion(1).y - yb )/obj.spgLength;
+            Index = (ratio>0 & ratio <= 1/2);
+            obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(4*ratio(Index)-1)/2)./( 1-(4*ratio(Index)-1).^2) ) +1 );
+            Index = (ratio>1/2 & ratio <= 1);
+            obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(3-4*ratio(Index))/2)./( 1-(3-4*ratio(Index)).^2) )+1 );
+        end
+        
         function fphys = setInitialField( obj )
-            %             alpha = 0/360*2*pi;
-            %             fphys = cell( 1, 1 );
-            %             mesh = obj.meshUnion(1);
-            %             fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
-            %             tempx = mesh.x*cos(alpha)+mesh.y*sin(alpha);
-            %             tempy = mesh.y*cos(alpha) - mesh.x*sin(alpha);
-            %             index =  (tempy >= -5.84);
-            %             fphys{1}(index) =  obj.d-0.02*(5.84+tempy(index));
-            %             fphys{1}(~index) =  obj.d;
-            %
-            %             index = (((tempx/4).^2+(tempy/3).^2)<1);
-            %             fphys{1}(index) = fphys{1}(index)+0.3-...
-            %                 0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
-            %             fphys{1}(:,:,4) = -fphys{1}(:,:,1);
+                        alpha = 20/360*2*pi;
+                        fphys = cell( 1, 1 );
+                        mesh = obj.meshUnion(1);
+                        fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
+                        tempx = mesh.x*cos(alpha)+mesh.y*sin(alpha);
+                        tempy = mesh.y*cos(alpha) - mesh.x*sin(alpha);
+                        
+                        index =  (tempy >= -5.84);
+                        fphys{1}(index) =  obj.d-0.02*(5.84+tempy(index));
+                        fphys{1}(~index) =  obj.d;
+                        
+                        index = (mesh.y > 12);
+                        fphys{1}(index) = 0.1077;
+                        
+                        index = (((tempx/4).^2+(tempy/3).^2)<1);
+                        fphys{1}(index) = fphys{1}(index)+0.3-...
+                            0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
+                        fphys{1}(:,:,4) = -fphys{1}(:,:,1);
             
-            %             obj.initial_fphys = fphys{1};
+                        obj.initial_fphys = fphys{1};
             
-            fphys = cell( 1, 1 );
-            mesh = obj.meshUnion(1);
-            fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
-            fphys{1}(:,:,1) = obj.d;
-            fphys{1}(:,:,4) = -fphys{1}(:,:,1);
+%             fphys = cell( 1, 1 );
+%             mesh = obj.meshUnion(1);
+%             fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
+%             fphys{1}(:,:,1) = obj.d;
+%             fphys{1}(:,:,4) = -fphys{1}(:,:,1);
             
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 80;
+            ftime = 35;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -188,14 +217,14 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         function [ mesh ] = makeUniformMesh(obj, N, ~, type)
             bctype = [...
                 enumBoundaryCondition.ClampedVel, ...
-                enumBoundaryCondition.SlipWall, ...
+                enumBoundaryCondition.ZeroGrad, ...
                 enumBoundaryCondition.SlipWall, ...
                 enumBoundaryCondition.SlipWall];
             
             if (type == enumStdCell.Tri)
                 mesh = makeUniformTriMesh(N, [-10, 10], [-10, 12], 20/0.1, 22/0.05, bctype);
             elseif(type == enumStdCell.Quad)
-                mesh = makeUniformQuadMesh(N, [0, obj.ChWidth], [0, obj.ChLength], obj.ChWidth/obj.ChWidth, obj.ChLength/obj.ChWidth, bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
+                mesh = makeUniformQuadMesh(N, obj.Xlim, obj.Ylim, ceil((obj.Xlim(2) - obj.Xlim(1))/2/obj.ChWidth), ceil((obj.Ylim(2) - obj.Ylim(1))/obj.ChWidth), bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
             else
                 msgID = [mfile, ':inputCellTypeError'];
                 msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
