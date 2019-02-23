@@ -21,9 +21,9 @@ for i = 1:numel(y)
 %     xpf = x(i).*ones(size(ypf));
     analys = Analysis2d( obj, xpf,  ypf);
     
-    tempgaugeResult = zeros(numel(xpf),ceil(Nout/2)-ceil(Nout/4)+1);
+    tempgaugeResult = zeros(numel(xpf),ceil(Nout)-ceil(7 * Nout/8)+1);
     k = 1;
-    for t = ceil(Nout/4):ceil(1*Nout/2)
+    for t = ceil(7 * Nout/8):ceil(Nout)
        tempdata = analys.InterpOutputResult2GaugePoint( t ); 
        tempgaugeResult( :,k ) = tempdata( :,1 );
        k = k+1;
@@ -36,7 +36,7 @@ for i = 1:numel(y)
     plot(xpf,gaugeResult./obj.amplitude/2,'LineWidth',3);
 %     plot(ypf,gaugeResult./obj.amplitude/2,'LineWidth',3);
     hold on;
-    plot(data(:,1),data(:,2),'LineWidth',3);
+    plot(data(:,1),data(:,2),'o','LineWidth',3);
     legend(str);
 end
 end

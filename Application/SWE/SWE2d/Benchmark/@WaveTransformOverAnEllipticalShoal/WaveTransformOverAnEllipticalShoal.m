@@ -23,7 +23,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         maxSigma %> maximum sponge strength
         SpongeCoefficient
         Ylim = [-10 16]
-        Xlim = [-0.3 0.3]
+        Xlim = [-10 10]
     end
     
     methods (Access = public)
@@ -46,6 +46,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
 %             dt = matUpdateTimeInterval( obj, obj.fphys );
 %             obj.evaluateSpongeStrength( obj.spgLength, 0.05 /dt );
            obj.evaluateSpongeCoefficient(bp);
+%            obj.matSolve;
             
         end
         %> Compared numerical water elevation with measured data
@@ -60,7 +61,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 6, 'RK33NHydrostaticWave');
+            PostProcess.drawAnimation(Visual, 1, 6, 'RK33NHydrostaticWave', obj.fphys{1}(:,:,4) );
         end
         
     end
@@ -166,15 +167,24 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
                         tempy = mesh.y*cos(alpha) - mesh.x*sin(alpha);
                         
                         index =  (tempy >= -5.84);
-                        fphys{1}(index) =  obj.d-0.02*(5.84+tempy(index));
+                        fphys{1}(index) =  max(0.1077, obj.d-0.02*(5.84+tempy(index)));
                         fphys{1}(~index) =  obj.d;
+
+%                         index =  (tempy >= -5.484);
+%                         fphys{1}(index) =  max(0.1,obj.d-0.02*(5.84+tempy(index)));
+%                         fphys{1}(~index) =  obj.d;
                         
-                        index = (mesh.y > 12);
-                        fphys{1}(index) = 0.1077;
+%                         index = (mesh.y > 12);
+%                         fphys{1}(index) = max(0.1077,obj.d-0.02*(5.84+tempy(index)));
                         
-                        index = (((tempx/4).^2+(tempy/3).^2)<1);
+                        index = (((tempx/4).^2+(tempy/3).^2)<=1);
                         fphys{1}(index) = fphys{1}(index)+0.3-...
                             0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
+
+%                         index = (((tempx/4).^2+(tempy/3).^2)<=1);
+%                         fphys{1}(index) = -0.3+...
+%                             0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
+                        
                         fphys{1}(:,:,4) = -fphys{1}(:,:,1);
             
                         obj.initial_fphys = fphys{1};
@@ -189,7 +199,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         
         function [ option ] = setOption( obj, option )
             ftime = 35;
-            outputIntervalNum = 1500;
+            outputIntervalNum = 2400;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -224,7 +234,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             if (type == enumStdCell.Tri)
                 mesh = makeUniformTriMesh(N, [-10, 10], [-10, 12], 20/0.1, 22/0.05, bctype);
             elseif(type == enumStdCell.Quad)
-                mesh = makeUniformQuadMesh(N, obj.Xlim, obj.Ylim, ceil((obj.Xlim(2) - obj.Xlim(1))/2/obj.ChWidth), ceil((obj.Ylim(2) - obj.Ylim(1))/obj.ChWidth), bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
+                mesh = makeUniformQuadMesh(N, obj.Xlim, obj.Ylim, ceil((obj.Xlim(2) - obj.Xlim(1))/obj.ChWidth/2), ceil((obj.Ylim(2) - obj.Ylim(1))/obj.ChWidth), bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
             else
                 msgID = [mfile, ':inputCellTypeError'];
                 msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

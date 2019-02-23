@@ -41,7 +41,7 @@ while( time < ftime )
         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt/5);
 %         end
     end
-    visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
+%     visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
 %     visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys );
