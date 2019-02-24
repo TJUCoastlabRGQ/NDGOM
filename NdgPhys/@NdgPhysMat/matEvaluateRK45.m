@@ -35,9 +35,9 @@ while( time < ftime )
                 = fphys{n}(:,:, obj.varFieldIndex) + rk4b(intRK) * resQ{n};
         end 
         
-        fphys = obj.matEvaluateLimiter( fphys );
+%         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys );        
-%         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);
+        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, rk4b(intRK) * dt);
     end
 %     visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
     visual.drawResult( fphys{1}(:, :, 1) );
@@ -51,9 +51,6 @@ hwait.delete();
 obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
 toc;
-% catch
-%     hwait.delete();
-% end
 
 end
 
