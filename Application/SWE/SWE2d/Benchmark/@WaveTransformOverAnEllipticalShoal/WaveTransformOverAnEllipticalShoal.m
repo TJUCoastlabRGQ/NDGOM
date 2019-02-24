@@ -199,13 +199,15 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         
         function [ option ] = setOption( obj, option )
             ftime = 35;
-            outputIntervalNum = 2400;
+            outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('outputFieldOrder') = [1 2 3 6];
+            option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

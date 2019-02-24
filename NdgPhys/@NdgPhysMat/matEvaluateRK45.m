@@ -36,10 +36,8 @@ while( time < ftime )
         end 
         
 %         fphys = obj.matEvaluateLimiter( fphys );
-        fphys = obj.matEvaluatePostFunc( fphys ); 
-%         if time >= 1
-        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt/5);
-%         end
+        fphys = obj.matEvaluatePostFunc( fphys );        
+        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, rk4b(intRK) * dt);
     end
 %     visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
 %     visual.drawResult( fphys{1}(:, :, 1) );
@@ -53,9 +51,6 @@ hwait.delete();
 obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
 toc;
-% catch
-%     hwait.delete();
-% end
 
 end
 

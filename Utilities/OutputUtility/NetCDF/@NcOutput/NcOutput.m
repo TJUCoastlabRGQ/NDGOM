@@ -15,7 +15,7 @@ classdef NcOutput < AbstractOutputFile
         end
 
         %> create NetCDF output file
-        initFromMesh( obj, mesh );
+        initFromMesh( obj, mesh, filename, outputIntervalNum, varIndex );
         %> output result
         outputResult( obj, time, field );
 

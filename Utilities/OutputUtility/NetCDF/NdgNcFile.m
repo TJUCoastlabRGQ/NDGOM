@@ -13,6 +13,17 @@ classdef NdgNcFile < handle
         fileName
     end
     
+    properties
+        %> order of the nc file to be written
+        fileOrder
+        %> total number of the nc file
+        Numfile
+        %> Step contained in each nc file
+        StepPerFile
+        %> Index of variable to be output
+        varIndex
+    end
+    
     methods
         %======================================================================
         %> @brief Brief description of the function
@@ -32,27 +43,36 @@ classdef NdgNcFile < handle
             obj.fileName = filename;
             obj.ncDim = ncdim;
             obj.ncVar = ncvar;
-            obj.isOpen = false;
+            obj.ncid = zeros(size(filename));
+            obj.isOpen = false * ones(size(filename));
+            obj.fileOrder = 1;
+            obj.Numfile = numel(filename);
         end% func
         
         function delete( obj )
-            if(obj.isOpen) % if netcdf file is still open
-                obj.isOpen = false;
-                netcdf.close( obj.ncid );
+            for n = 1:numel(obj.ncid)
+                obj.closeNetcdfFile(n);
             end
         end% func
         
-        function defineIntoNetcdfFile( obj )
-            obj.ncid = netcdf.create( obj.fileName, 'CLOBBER');
-            obj.isOpen = true;
+        function closeNetcdfFile( obj, index )
+            if(obj.isOpen(index)) % if netcdf file is still open
+                obj.isOpen(index) = false;
+                netcdf.close( obj.ncid(index) );
+            end
+        end
+        
+        function defineIntoNetcdfFile( obj, index )
+            obj.ncid(index) = netcdf.create( obj.fileName{index}, 'CLOBBER');
+            obj.isOpen(index) = true;
             for n = 1:numel(obj.ncDim)
-                obj.ncDim(n).defineIntoNetcdfFile( obj.ncid );
+                obj.ncDim(n).defineIntoNetcdfFile( obj.ncid(index) );
             end
             
             for n = 1:numel(obj.ncVar)
-                obj.ncVar(n).defineIntoNetcdfFile( obj.ncid );
+                obj.ncVar(n).defineIntoNetcdfFile( obj.ncid(index) );
             end
-            netcdf.endDef(obj.ncid);
+            netcdf.endDef(obj.ncid(index));
         end
     end
     
