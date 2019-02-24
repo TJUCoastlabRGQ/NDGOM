@@ -1,4 +1,4 @@
-function initFromMesh( obj, mesh )
+function initFromMesh( obj, mesh, filename, outputIntervalNum, varIndex )
 
 % set vtk output
 if (mesh.type == enumMeshDim.One)
@@ -22,12 +22,21 @@ varTime = NdgNcVar('time', dimTime, enumNcData.NC_DOUBLE );
 varField = NdgNcVar('fphys', [dimNp, dimK, dimNfield, dimTime], enumNcData.NC_DOUBLE);
 
 % define file
-obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
-obj.ncfile = NdgNcFile( obj.filename, ...
+% obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
+obj.ncfile = NdgNcFile( filename, ...
     [dimTime, dimK, dimNp, dimNfield], [varTime, varField]);
 
+if floor(outputIntervalNum/numel(obj.ncfile.fileName))<1
+    error( 'Too many output nc file!' );
+else
+    obj.ncfile.StepPerFile = floor(outputIntervalNum/numel(obj.ncfile.fileName));
+end
+
+obj.ncfile.varIndex = varIndex;
 % init file
-obj.ncfile.defineIntoNetcdfFile();
+for n = 1:numel(obj.ncfile.fileName)
+obj.ncfile.defineIntoNetcdfFile(n);
+end
 
 % set properties
 obj.timeVarableId = varTime.id;
