@@ -38,7 +38,7 @@ while( time < ftime )
 %         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys ); 
 %         if time >= 1
-        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt/5);
+        fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys,  rk4b(intRK) * dt);
 %         end
     end
 %     visual.drawResult( fphys{1}(:, :, 1)+fphys{1}(:, :, 4) )        
