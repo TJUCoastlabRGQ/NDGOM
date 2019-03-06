@@ -31,7 +31,7 @@ classdef AbstractOutputFile < handle
                 obj.timePrevious = time;
             end
         end
-
+        
         function outputFinalResult( obj, time, field )
             obj.outputResult( time, field );
         end

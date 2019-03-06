@@ -9,16 +9,34 @@ k = sqrt(3*A/4/h^3);
 % eta =@(x,t) A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t));
 eta = A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t));
 % obj.Eta0 = eta(mesh.x,0);
-obj.Eta0 = double(subs(eta,{x,t},{mesh.x,0}));
-obj.Eta25 = double(subs(eta,{x,t},{mesh.x,25}));
-obj.Eta50 = double(subs(eta,{x,t},{mesh.x,50}));
+% obj.Eta0 = double(subs(eta,{x,t},{mesh.x,0}));
+% obj.Eta25 = double(subs(eta,{x,t},{mesh.x,25}));
+% obj.Eta50 = double(subs(eta,{x,t},{mesh.x,50}));
+
+for i = 1:size(mesh.x,1)
+    for j = 1:size(mesh.x,2)
+        obj.Eta0(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),0}));
+        obj.Eta25(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),25}));
+        obj.Eta50(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),50}));
+    end
+end
+
 % U = @(x,t) c*A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t))./(A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t))+h);
 U = c*A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t))./(A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t))+h);
 difU = diff(U,x);
 % W0 = difU(mesh.x,0);
-obj.U0 = double(subs(U,{x,t},{mesh.x,0}));
-obj.U25 = double(subs(U,{x,t},{mesh.x,25}));
-obj.U50 = double(subs(U,{x,t},{mesh.x,50}));
+% obj.U0 = double(subs(U,{x,t},{mesh.x,0}));
+% obj.U25 = double(subs(U,{x,t},{mesh.x,25}));
+% obj.U50 = double(subs(U,{x,t},{mesh.x,50}));
+for i = 1:size(mesh.x,1)
+    for j = 1:size(mesh.x,2)
+        obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
+        obj.U25(i,j) = double(subs(U,{x,t},{mesh.x(i,j),25}));
+        obj.U50(i,j) = double(subs(U,{x,t},{mesh.x(i,j),50}));
+    end
+end
+
+
 % obj.W0 = -(obj.Eta0+h).*difU(mesh.x,zeros(size(mesh.x)));
 % obj.W25 = -(obj.Eta0+h).*difU(mesh.x,25.*ones(size(mesh.x)));
 % obj.W50 = -(obj.Eta0+h).*difU(mesh.x,50.*ones(size(mesh.x)));

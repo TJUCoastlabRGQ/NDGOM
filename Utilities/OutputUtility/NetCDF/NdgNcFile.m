@@ -62,6 +62,14 @@ classdef NdgNcFile < handle
             end
         end
         
+        
+        function openNetcdfFile(obj)
+            for i = 1:numel(obj.fileName)
+                obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
+                obj.isOpen(i) = true;
+            end
+        end
+        
         function defineIntoNetcdfFile( obj, index )
             obj.ncid(index) = netcdf.create( obj.fileName{index}, 'CLOBBER');
             obj.isOpen(index) = true;

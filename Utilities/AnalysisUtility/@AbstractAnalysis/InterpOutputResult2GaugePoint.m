@@ -7,7 +7,6 @@ for n = 1 : obj.Ng
     meshId = obj.gaugeMesh(n);
     cellId = obj.gaugeCell(n);
     Vg = obj.Vg{n};
-    
     Nstep = obj.phys.outputFile(meshId).outputStep;
     if( step > Nstep )
         error( 'Output step num is out of range.' );

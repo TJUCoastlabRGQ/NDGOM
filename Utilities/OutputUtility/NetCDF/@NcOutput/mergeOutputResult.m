@@ -1,4 +1,4 @@
-function outputResult( obj, time, field )
+function mergeOutputResult(obj)
     % output time
     startInd = obj.outputStep;
     countInd = 1;

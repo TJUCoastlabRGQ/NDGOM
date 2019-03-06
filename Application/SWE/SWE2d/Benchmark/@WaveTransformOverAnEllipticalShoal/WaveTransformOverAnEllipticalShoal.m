@@ -57,11 +57,11 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         end
         
         function Postprocess(obj)
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 6, 'RK33NHydrostaticWave', obj.fphys{1}(:,:,4) );
+            PostProcess.drawAnimation(Visual, 1, 6, 'WaveTransformOverAnEllipticalShoal', obj.fphys{1}(:,:,4) );
         end
         
     end
