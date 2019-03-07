@@ -56,12 +56,34 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             obj.fphys = obj.setInitialField;
         end
         
-        function Postprocess(obj)
+        function VideoPostprocess(obj)
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
             PostProcess.drawAnimation(Visual, 1, 6, 'WaveTransformOverAnEllipticalShoal', obj.fphys{1}(:,:,4) );
+        end
+        
+        function VisualPostprocess(obj)
+           time = 30;
+           PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+           outputTime = ncread( PostProcess.outputFile{1}, 'time' );
+           [~,Index] = sort(abs(outputTime-time));
+           [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
+           Visual = makeVisualizationFromNdgPhys( obj );
+           Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
+           xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+           ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex');
+           zlabel({'$z\;\rm{(m)}$'},'Interpreter','latex');
+           box off;
+           grid off;
+%            Visual.drawResult( obj.fphys{1}(:, :, 4)+fphys{1}(:,:,1) );
+%            Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
+%            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4));
+%            Visual.drawResult( obj.fphys{1}(:, :, 4));
+%            Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
+%            Visual.drawHandle.FaceAlpha = 1;
+%            light('Position',[-1 0 0],'Style','local');
         end
         
     end

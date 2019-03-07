@@ -31,6 +31,15 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             obj.matSolve;
         end
         
+       function VisualPostprocess(obj)
+           Visual = makeVisualizationFromNdgPhys( obj );
+           Visual.drawResult( obj.fphys{1}(:, :, 4) );
+           Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
+           Visual.drawResult( obj.fphys{1}(:, :, 1) );
+           Visual.drawHandle.FaceAlpha = 0.95;
+           light('Position',[-1 0 0],'Style','local');
+        end
+        
         function Postprocess(obj)
             deltapoint = 24;
             mesh = obj.meshUnion(1);      
