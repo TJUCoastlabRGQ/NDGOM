@@ -72,11 +72,23 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
            [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
            Visual = makeVisualizationFromNdgPhys( obj );
            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
-           xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
-           ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex');
-           zlabel({'$z\;\rm{(m)}$'},'Interpreter','latex');
-           box off;
-           grid off;
+           shading interp; 
+%            axis off;
+%            hold on;
+           xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           zlabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           set(gca,'Ylim',[-10,12]);
+           set(gca,'FontSize',12);
+           set(gcf,'Position',[309 198 1252 614]);
+           view(122, 66);
+           h = colorbar;
+           h.Location = 'south';
+           h.Position = [0.1 0.04 0.8 0.025];
+           h.FontSize = 12;
+%            box off;
+%            grid off;
+           
 %            Visual.drawResult( obj.fphys{1}(:, :, 4)+fphys{1}(:,:,1) );
 %            Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
 %            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4));

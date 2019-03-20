@@ -12,12 +12,18 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     properties
         A = 2
         Eta0
+        Eta10
+        Eta20
         Eta25
         Eta50
         U0
+        U10
+        U20
         U25
         U50
         W0
+        W10
+        W20
         W25
         W50
     end
@@ -123,7 +129,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 52;
+            ftime = 10;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -150,9 +156,9 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 900], [0, deltax], 900/deltax, 1, bctype);
+    mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 900], [0, deltax], 900/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

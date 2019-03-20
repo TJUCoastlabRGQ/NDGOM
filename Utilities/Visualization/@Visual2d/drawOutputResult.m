@@ -15,12 +15,14 @@ function drawOutputResult( obj, outputObj, step, fieldId )
 end
 
 function updateFigure( obj, field )
-    set(obj.drawHandle, 'Vertices', [obj.mesh.x(:), obj.mesh.y(:), field(:)],...
-        'FaceVertexCData', field(:));
+%     set(obj.drawHandle, 'Vertices', [obj.mesh.x(:), obj.mesh.y(:), field(:)],...
+%         'FaceVertexCData', field(:));
+    trisurf( obj.tri, obj.mesh.x(:), obj.mesh.y(:), field(:) )
 end
 
 function drawNewFigure(obj, field)
     obj.drawHandle = trisurf( obj.tri, obj.mesh.x(:), obj.mesh.y(:), field(:) );
+    hold on;
     box on;
     grid on;
 end
