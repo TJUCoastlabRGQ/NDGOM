@@ -15,7 +15,7 @@ classdef NcOutput < AbstractOutputFile
         end
         
         %> create NetCDF output file
-        initFromMesh( obj, mesh, filename, outputIntervalNum, varIndex );
+        initFromMesh( obj, mesh, fileName, outputIntervalNum, varIndex );
         %> output result
         outputResult( obj, time, field );
         
@@ -43,8 +43,7 @@ classdef NcOutput < AbstractOutputFile
                     obj.outputStep = obj.outputStep + 1;
                 end
                 obj.ncfile.closeNetcdfFile(i);
-%                 str = obj.ncfile.fileName{i};
-%                 delete(str);
+                obj.ncfile.deleteNetcdfFile(i);
             end
             obj.ncfile.closeNetcdfFile(1);
         end

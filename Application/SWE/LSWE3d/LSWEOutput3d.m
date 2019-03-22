@@ -39,8 +39,8 @@ classdef LSWEOutput3d < NcOutput
             varField3 = NdgNcVar('fphys3d', ...
                 [ dimNp3, dimK3, dimNfield3, dimTime], ...
                 enumNcData.NC_DOUBLE);
-            
-            obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
+            % at present only one file considered
+            obj.filename{1} = [ obj.casename, '/', obj.casename, '.nc' ];
             obj.ncfile = NdgNcFile( obj.filename, ...
                 [dimTime, dimK2, dimNp2, dimNfield2, dimK3, dimNp3, dimNfield3], ...
                 [varTime, varField2, varField3]);
@@ -49,7 +49,7 @@ classdef LSWEOutput3d < NcOutput
                 mkdir(obj.casename);
             end
             % init file
-            obj.ncfile.defineIntoNetcdfFile();
+            obj.ncfile.defineIntoNetcdfFile(1);
 
             % set properties
             obj.timeVarableId = varTime.id;
