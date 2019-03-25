@@ -13,8 +13,22 @@ classdef SWEAbstract3d < handle
     end    
     
     properties ( SetAccess = protected )
-        %> gradient of bottom elevation
-        zGrad
+        %> num of mesh
+        Nmesh
+        %> physical field
+        fphys2d, frhs2d, fext2d
+        %> physical field
+        fphys3d, frhs3d, fext3d
+        %> horizontal mesh
+        mesh2d
+        %> vertical extended mesh
+        mesh3d
+        %> viscosity
+        miu
+        %> linear slip parameter
+        K
+        %> output file object
+        outputFile
     end
     
     properties ( SetAccess = private )
@@ -35,10 +49,8 @@ classdef SWEAbstract3d < handle
             % Doing nothing
         end
         
-        function matSolve( obj )
-            matEvaluateRK45( obj );
-        end
-        
+        matSolve( obj );
+ 
         initPhysFromOptions( obj, mesh2d, mesh3d );        
         
     end
@@ -52,17 +64,27 @@ classdef SWEAbstract3d < handle
         
         matUpdateOutputResult( obj, time, fphys2d, fphys3d );
         
+        [ fphys2d ]  = matEvaluate2dHorizonMomentum(obj, mesh3d, fphys2d, fphys3d);
+        
+        [ VolumeTerm_rhs2d ] = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d, fphys2d );
+        
+        [ InnerSurface_rhs2d ] = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge, fphys2d);
+        
+        [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext);
+        
+        [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys2d, fphys3d);
+
+        [ SideSurface_rhs3d ]  = matEvaluate3dSideSurfaceTerm( obj, InnerEdge, fphys3d );
+        
+        [ HorizontalBoundarySurface_rhs3d ] = matEvaluate3dHorizontalBoundaryTerm( obj, BoundaryEdge, fphys3d, fext );
+        
+        [ SurfaceBoundary_rhs3d ] = matEvaluate3dSurfaceBoundaryTerm( obj, Edge, fphys3d );
+        
+        [ BottomBoundary_rhs3d ] = matEvaluate3dBottomBoundaryTerm( obj, BottomEdge, fphys3d);
+        
+        [ AuxialaryVariableFace_rhs3d ] = matEvaluate3dVerticalAuxialaryVariableFaceTerm( obj, mesh3d, fphys3d );
+        
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d );
-        
-        fphys2d = matEvaluate2dHorizonMomentum(obj, mesh3d, fphys2d, fphys3d);
-        
-        frhs2d_VolumeTerm = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d, fphys2d );
-        
-        frhs2d_InnerSurfaceTerm = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge, fphys2d);
-        
-        frhs2d_BoundarySurfaceTerm = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext);
-        
-        fphys3d = matEvaluate3dAuxiliaryVariable( obj, mesh3d, fphys3d );
         
     end
     

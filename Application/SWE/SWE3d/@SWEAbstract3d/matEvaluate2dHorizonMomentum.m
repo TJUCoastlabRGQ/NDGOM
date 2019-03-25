@@ -10,6 +10,7 @@ function fphys2d = matEvaluate2dHorizonMomentum( obj, mesh3d, fphys2d, fphys3d )
 %> @fphys2d fphys2d The two dimensional physical field with the vertically averaged horizontal momentum term updated
 
 
+% Evaluate depth-integrated velocity
 fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
 fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
 

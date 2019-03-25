@@ -20,6 +20,8 @@ classdef NdgNcFile < handle
         StepPerFile
         %> Index of variable to be output
         varIndex
+        %> Number of the nc files
+        Numfile
     end
     
     methods
@@ -44,6 +46,7 @@ classdef NdgNcFile < handle
             obj.ncid = zeros(size(filename));
             obj.isOpen = false * ones(size(filename));
             obj.fileOrder = 1;
+            obj.Numfile = numel(filename);
         end% func
         
         function delete( obj )

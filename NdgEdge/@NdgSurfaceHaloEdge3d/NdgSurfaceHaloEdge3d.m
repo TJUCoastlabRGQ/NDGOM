@@ -6,6 +6,8 @@ classdef NdgSurfaceHaloEdge3d < NdgBottomHaloEdge3d
         function obj = NdgSurfaceHaloEdge3d( meshUnion3d, meshId )
             obj = obj@NdgBottomHaloEdge3d( meshUnion3d, meshId );
         end
+        
+        [ frhs ] = matEvaluateStrongFormEdgeRHS( obj, fluxM, fluxS );
     end
     
     methods ( Access = protected )

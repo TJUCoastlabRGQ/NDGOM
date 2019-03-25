@@ -35,7 +35,6 @@ end
 obj.ncfile.varIndex = varIndex;
 % init file
 for n = 1:numel(obj.ncfile.fileName)
-display(n);
 obj.ncfile.defineIntoNetcdfFile(n);
 end
 
