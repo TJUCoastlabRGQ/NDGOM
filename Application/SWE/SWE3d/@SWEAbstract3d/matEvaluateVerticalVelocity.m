@@ -11,7 +11,7 @@ function [ W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d )
 % dHVdy = mesh3d.ry .* ( mesh3d.cell.Dr * fphys3d(:, :, 2) ) + mesh3d.sy .* ( mesh3d.cell.Ds * fphys3d(:, :, 2) ) + mesh3d.ty .* ( mesh3d.cell.Dt * fphys3d(:, :, 2) );
 data = cell(1);
 data{1} = fphys3d;
-[ dHUdx, dHVdy ] = obj.matEvaluatePartialDerivativeTermX( mesh3d,data );
+[ dHUdx, dHVdy ] = obj.matEvaluateHorizontalPartialDerivativeTerm( mesh3d,data );
 % dHVdy = obj.matEvaluatePartialDerivativeTermX( mesh, fphys3d);
 % fphys2d = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
 %         fphys2d, fphys3d );
