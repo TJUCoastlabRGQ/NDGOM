@@ -34,14 +34,14 @@ while( time < ftime )
     
     for intRK = 1:5
         tloc = time + rk4c( intRK ) * dt;
-        obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
+%         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
         obj.matEvaluateRHS( fphys2d, fphys3d );
         
         for n = 1:Nmesh
             resQ2d{n} = rk4a( intRK ) * resQ2d{n} + dt * obj.frhs2d{n};
             resQ3d{n} = rk4a( intRK ) * resQ3d{n} + dt * obj.frhs3d{n};
             
-            fphys2d{n}(:,:,1) = fphys2d{n}(:,:,1) + rk4b(intRK) * resQ2d{n};
+            fphys2d{n}(:,:,4) = fphys2d{n}(:,:,4) + rk4b(intRK) * resQ2d{n};
             fphys3d{n}(:,:,1:2) = fphys3d{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
             fphys3d{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
                 obj.mesh3d(n), fphys2d{n}, fphys3d{n} );
@@ -52,10 +52,10 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
     
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,4) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
-    obj.matUpdateOutputResult( time, fphys2d, fphys3d );
+%     obj.matUpdateOutputResult( time, fphys2d, fphys3d );
     
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);

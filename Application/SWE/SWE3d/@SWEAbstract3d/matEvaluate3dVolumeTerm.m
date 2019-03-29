@@ -1,5 +1,5 @@
 function Volume_frhs3d = matEvaluate3dVolumeTerm( obj, mesh3d, fphys3d )
-%> @brief Function used to calculate the volume integration part of the three dimensional barotropic model
+%> @brief Function used to calculate the volume integration part of the model
 %> 
 %> More detailed description.
 %>
@@ -8,15 +8,19 @@ function Volume_frhs3d = matEvaluate3dVolumeTerm( obj, mesh3d, fphys3d )
 %>
 %> @retval Volume_frhs3d The three dimensional volume integration part
 
-Hmiu = sqrt(obj.miu);
-
-HUX = fphys3d(:, :, 1).^2./fphys3d(:, :, 6) + 1/2 * obj.gra *( fphys3d(:, :, 6).^2 - fphys3d(:, :, 8).^2 );
+%> $Hu^2 + \frac{1}{2}g(H^2-h^2)$
+HUX = fphys3d(:, :, 1).^2./fphys3d(:, :, 6) + 1/2 * obj.gra * ( fphys3d(:, :, 6).^2 - obj.H0^2 ); 
+%> $Huv$
 HUY = fphys3d(:, :, 1) .* fphys3d(:, :, 2)./fphys3d(:, :, 6);
-HUZ = fphys3d(:, :, 1) .* fphys3d(:, :, 3)./fphys3d(:, :, 6) + Hmiu .* fphys3d(:, :, 4);
+%> $\omega u-\tau_x$
+HUZ = fphys3d(:, :, 1) .* fphys3d(:, :, 3)./fphys3d(:, :, 6) - fphys3d(:, :, 4); 
 
-HVX = fphys3d(:, :, 1) .* fphys3d(:, :, 2)./fphys3d(:, :, 6);
-HVY = fphys3d(:, :, 2).^2./fphys3d(:, :, 6) + 1/2 * obj.gra *( fphys3d(:, :, 6).^2 - fphys3d(:, :, 8).^2 );
-HVZ = fphys3d(:, :, 2) .* fphys3d(:, :, 3)./fphys3d(:, :, 6) + Hmiu .* fphys3d(:, :, 5);
+%> $Huv$
+HVX = fphys3d(:, :, 1) .* fphys3d(:, :, 2)./fphys3d(:, :, 6); 
+%> $Hv^2 + \frac{1}{2}g(H^2-h^2)$
+HVY = fphys3d(:, :, 2).^2./fphys3d(:, :, 6) + 1/2 * obj.gra * ( fphys3d(:, :, 6).^2 - obj.H0^2 );
+%> $\omega v-\tau_y$
+HVZ = fphys3d(:, :, 2) .* fphys3d(:, :, 3)./fphys3d(:, :, 6) - fphys3d(:, :, 5);  
 
 
 Volume_frhs3d(:, :, 1) =...

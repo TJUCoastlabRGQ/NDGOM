@@ -23,7 +23,7 @@ classdef NdgPostProcess < handle
             
             for n = 1:obj.Nmesh
                 [ obj.outputFile{n} ] = [ casename, '.', num2str(n), '-', ...
-                    num2str(obj.Nmesh), '.nc'];
+                    num2str(obj.Nmesh), '.1.nc'];
             end
             
             [ obj.Nt ] = accessOutputStepNumber( obj );

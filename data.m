@@ -1,64 +1,73 @@
-% format long;
-% a = 2.5 - sqrt(9.8);
-% b = 3.86398-sqrt(9.8*0.611753);
-% 
-% % h = 1 - 0.4*abs(a)/(abs(a)+abs(b));
-% 
-% u = 2.5 + (3.86398 - 2.5 )*abs(a)/(abs(a)+abs(b));
-% 
-% u1 = 1/3*(2.5 + 2*sqrt(9.8));
-% 
-% format short;
+function data
+close all;
+ydata = [1 3 5 7 9];
+xdata = [-2 0 2];
+for i = 1:5
 
-rx = [3 5 7]';
-h = [1 2.4 5.1]';
-Dr = [0.2 0.4 0.5; 0.37 0.45 0.63; 0.89 0.91 0.75];
-q = [3 6 9]';
-deltat = 0.93;
-rhoreverse = 0.002;
-deltat*rhoreverse*rx.*(Dr*((1./h).*(rx.*(Dr*(0.5*h.*q)))));
-deltat*rhoreverse*diag(rx)*(Dr*(diag((1./h))*(diag(rx)*(Dr*(0.5*diag(h)*q)))));
-deltat*rhoreverse*diag(rx)*Dr*diag(1./h)*diag(rx)*Dr*0.5*diag(h)*q;
-(deltat*rhoreverse*diag(rx)*Dr*diag(1./h)*diag(rx)*Dr*0.5*diag(h))*q;
+Title = strcat('WaveTransformOverAnEllipticalShoal\','section',num2str(i),'.fig');
+h = open(Title); % open figure
+[ measuredX, simulatedX, measuredY, simulatedY ]=getdata(gca);
+close(h);
+newh = plotdata(measuredX, simulatedX, measuredY, simulatedY);
+str = strcat('$$','\rm{Section }',num2str(i), ' (','y=',num2str(ydata(i)),'\rm{m}',')','$$');
 
-
-
-% need to be verified
-0.5*deltat*rhoreverse*rx.^2.*((1./h).*(Dr*(h.*q)));
-0.5*deltat*rhoreverse*rx.^2.*(1./h).*(Dr*(h.*q))
-% wrong
-% deltat*rhoreverse*rx.*((1./h).*(rx.*(Dr*(0.5*h)))).*q;
-% deltat*rhoreverse*rx.^2.*(Dr*((1./h).*(Dr*(0.5*h.*q))));
-% (deltat*rhoreverse*diag(rx)*diag(rx)*Dr*diag(1./h)*Dr*0.5*diag(h))*q;
-1/2*h;
-1./h;
-
-
-
-Lambda = 20;
-x0 = 10;
-a = 0.01;
-h = 15;
-c = sqrt(9.8*Lambda/2/pi*tanh(2*pi*h/Lambda));
-T = Lambda/c;
-tempx = zeros(10/0.01+1,1);
-x = 0: 0.01 : 10;
-tempdata = zeros(size(x));
-k = 2*pi/Lambda;
-figure;
-for t = 0: 0.01 : 10
- tempdata = 2*a*cos(k.* x)* cos(2*pi/T*t);
- plot(x,tempdata);
- hold on;
- pause(0.05);
- cla;
+% legend({str,'$i$','(','$y=\;ydata(i)\rm{(m)}$'}, 'FontSize',15,'Interpreter','latex');
+% legend('$str,i,(,y=\;ydata(i)\rm{(m)}$', 'FontSize',15,'Interpreter','latex');
+% legend(str,'Interpreter','latex');
+t = text ( 3, 2.2, str,'Interpreter','latex','FontSize',15);
+t.FontSize = 15;
 end
 
-k = 1;
-for i = 0 : 0.5 :600
-    x(k) = i;
-    eta(k) = 2*(sech(sqrt(3*2/4/1000) * (i - 80) ))^2;
-    k = k+1;
-end
-plot(x , eta);
+for i = 1:3
 
+Title = strcat('WaveTransformOverAnEllipticalShoal\','section',num2str(i+5),'.fig');
+h = open(Title); % open figure
+[ measuredX, simulatedX, measuredY, simulatedY ]=getdata(gca);
+close(h);
+newh = plotdata(measuredX, simulatedX, measuredY, simulatedY);
+str = strcat('$$','\rm{Section }',num2str(i+5), ' (','x=',num2str(xdata(i)),'\rm{m}',')','$$');
+
+% legend({str,'$i$','(','$y=\;ydata(i)\rm{(m)}$'}, 'FontSize',15,'Interpreter','latex');
+% legend('$str,i,(,y=\;ydata(i)\rm{(m)}$', 'FontSize',15,'Interpreter','latex');
+% legend(str,'Interpreter','latex');
+if i~=1
+t = text ( 9.6, 2.2, str,'Interpreter','latex','FontSize',15);
+else
+t = text ( 9.4, 2.2, str,'Interpreter','latex','FontSize',15);
+end
+t.FontSize = 15;
+end
+end
+
+function [ measuredX, simulatedX, measuredY, simulatedY ]=getdata(Currentaxis)
+D1=get(Currentaxis,'Children'); %get the handle of the line object
+XData=get(D1,'XData'); %get the x data
+YData=get(D1,'YData'); %get the y data
+sizedata = zeros(1,2);
+sizedata(1) = numel(XData{1});
+sizedata(2) = numel(XData{2});
+if sizedata(1)>sizedata(2)
+    measuredX = XData{2};
+    measuredY = YData{2};
+    simulatedX = XData{1};
+    simulatedY = YData{1};
+else
+    measuredX = XData{1};
+    measuredY = YData{1};
+    simulatedX = XData{2};
+    simulatedY = YData{2};    
+end
+end
+
+function h = plotdata(measuredX, simulatedX, measuredY, simulatedY)
+h = figure;
+set(gcf,'position',[50,50,1050,400]);
+plot(simulatedX, simulatedY,'k','LineWidth',1.5);
+hold on;
+plot(measuredX, measuredY,'ro','markersize',5);
+set(gca,'YLIM',[0, 2.5],'Fontsize',15);
+set(gca,'Fontsize',15);
+xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+ylabel({'$h/h0$'},'Interpreter','latex');
+
+end

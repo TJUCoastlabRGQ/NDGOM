@@ -20,7 +20,7 @@ function [ nx, ny, nz, Js ] = PrismQuadJacobian3d( obj, mesh, f1, e1, fid )
         nz = - rz;
     end
     
-    Js = sqrt( nx .* nx + ny .* ny );
-    nx = nx ./ Js; ny = ny ./ Js;
+    Js = sqrt( nx .* nx + ny .* ny + nz .* nz );
+    nx = nx ./ Js; ny = ny ./ Js; nz = nz ./ Js;
     Js = Js .* mesh.J( fid, e1 );
 end

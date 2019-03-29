@@ -2,7 +2,7 @@ classdef NdgNcFile < handle
     
     properties(SetAccess = protected)
         %> true for file is open
-        isOpen = false
+        isOpen
         %> ID of ncfile
         ncid
         %> array of dimensions in NetCDF file
@@ -16,12 +16,12 @@ classdef NdgNcFile < handle
     properties
         %> order of the nc file to be written
         fileOrder
-        %> total number of the nc file
-        Numfile
         %> Step contained in each nc file
         StepPerFile
         %> Index of variable to be output
         varIndex
+        %> Number of the nc files
+        Numfile
     end
     
     methods
@@ -62,6 +62,16 @@ classdef NdgNcFile < handle
             end
         end
         
+        
+        function openNetcdfFile(obj)
+            for i = 1:numel(obj.fileName)
+                if obj.isOpen(i) == false 
+                obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
+                obj.isOpen(i) = true;   
+                end
+            end
+        end
+        
         function defineIntoNetcdfFile( obj, index )
             obj.ncid(index) = netcdf.create( obj.fileName{index}, 'CLOBBER');
             obj.isOpen(index) = true;
@@ -73,6 +83,11 @@ classdef NdgNcFile < handle
                 obj.ncVar(n).defineIntoNetcdfFile( obj.ncid(index) );
             end
             netcdf.endDef(obj.ncid(index));
+        end
+        
+        function deleteNetcdfFile(obj, index)
+            str = obj.fileName(index);
+            delete(str{1});
         end
     end
     

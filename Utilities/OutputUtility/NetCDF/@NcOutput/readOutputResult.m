@@ -7,6 +7,6 @@ end
 
 Np = obj.mesh.cell.Np;
 K = obj.mesh.K;
-field = ncread( obj.filename, 'fphys', [1, 1, 1, step], [Np, K, obj.Nfield, 1]);
+field = ncread( obj.ncfile.fileName{1}, 'fphys', [1, 1, 1, step], [Np, K, obj.Nfield, 1]);
 
 end% func

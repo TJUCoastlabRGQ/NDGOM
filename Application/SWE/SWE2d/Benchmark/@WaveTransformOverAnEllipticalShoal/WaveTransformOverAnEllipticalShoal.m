@@ -56,12 +56,46 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             obj.fphys = obj.setInitialField;
         end
         
-        function Postprocess(obj)
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
+        function VideoPostprocess(obj)
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 6, 'RK33NHydrostaticWave', obj.fphys{1}(:,:,4) );
+            PostProcess.drawAnimation(Visual, 1, 6, 'WaveTransformOverAnEllipticalShoal', obj.fphys{1}(:,:,4) );
+        end
+        
+        function VisualPostprocess(obj)
+           time = 30;
+           PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+           outputTime = ncread( PostProcess.outputFile{1}, 'time' );
+           [~,Index] = sort(abs(outputTime-time));
+           [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
+           Visual = makeVisualizationFromNdgPhys( obj );
+           Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
+           shading interp; 
+%            axis off;
+%            hold on;
+           xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           zlabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
+           set(gca,'Ylim',[-10,12]);
+           set(gca,'FontSize',12);
+           set(gcf,'Position',[309 198 1252 614]);
+           view(122, 66);
+           h = colorbar;
+           h.Location = 'south';
+           h.Position = [0.1 0.04 0.8 0.025];
+           h.FontSize = 12;
+%            box off;
+%            grid off;
+           
+%            Visual.drawResult( obj.fphys{1}(:, :, 4)+fphys{1}(:,:,1) );
+%            Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
+%            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4));
+%            Visual.drawResult( obj.fphys{1}(:, :, 4));
+%            Visual.drawHandle.FaceColor = [0.5 0.5 0.5];
+%            Visual.drawHandle.FaceAlpha = 1;
+%            light('Position',[-1 0 0],'Style','local');
         end
         
     end

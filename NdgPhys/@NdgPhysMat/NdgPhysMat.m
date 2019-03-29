@@ -132,12 +132,9 @@ classdef NdgPhysMat < NdgPhys
         %> @brief Update the final result of the physical field
         function matUpdateFinalResult( obj, time, fphys )
             for m = 1:obj.Nmesh
-%                 varFieldIndex = [1 2 3 4 5 6];
                 obj.outputFile(m).outputFinalResult( ...
                     time, fphys{m}(:,:,obj.outputFile(m).ncfile.varIndex) );
-%                 obj.ncfile.closeNetcdfFile(obj.ncfile.fileOrder);
                 obj.outputFile(m).ncfile.closeNetcdfFile(obj.outputFile(m).ncfile.fileOrder);
-                obj.outputFile(m).ncfile.delete;
             end
         end% function
     end
