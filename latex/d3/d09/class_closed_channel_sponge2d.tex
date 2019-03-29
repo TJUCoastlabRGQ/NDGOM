@@ -1,0 +1,153 @@
+\hypertarget{class_closed_channel_sponge2d}{}\section{Closed\+Channel\+Sponge2d Class Reference}
+\label{class_closed_channel_sponge2d}\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+
+
+Inheritance diagram for Closed\+Channel\+Sponge2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{d8/d1c/class_closed_channel_sponge2d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Closed\+Channel\+Sponge2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=204pt]{d0/d81/class_closed_channel_sponge2d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_closed_channel_sponge2d_a3d2f7e3dfbff4f33f22e670e1941b4f5}{Closed\+Channel\+Sponge2d} (in N, in M)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_closed_channel_sponge2d_a235a10d14b6beb2058693d1856f39833}{spg\+Length}
+\item 
+Property \hyperlink{class_closed_channel_sponge2d_a4c6447f66431d35d079639f70c18d3b3}{distance}
+\item 
+Property \hyperlink{class_closed_channel_sponge2d_a2864ea2868a5cc35d634928ab0b90931}{sigma}
+\item 
+Property \hyperlink{class_closed_channel_sponge2d_acb222bffecc37c4266ae6cc6eb5441b0}{max\+Sigma}
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_closed_channel_sponge2d_af8573996bd1cb011975c3d06a7c196ea}{set\+Option} (in obj, in \hyperlink{class_ndg_phys_af91f4c54b93504e76b38a5693774dff1}{option})
+\begin{DoxyCompactList}\small\item\em Set the solver options. \end{DoxyCompactList}\item 
+function \hyperlink{class_closed_channel_sponge2d_a6c4946628fd7d9a94e5b91cfa882ffee}{mat\+Evaluate\+Topography\+Source\+Term} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em evaluate topography source term \end{DoxyCompactList}\item 
+function \hyperlink{class_closed_channel_sponge2d_a5e1e503844a7115b8a579d0028571934}{evaluate\+Sponge\+Distance} (in obj, in xb, in yb)
+\begin{DoxyCompactList}\small\item\em calculate distance from the boundary \end{DoxyCompactList}\item 
+function \hyperlink{class_closed_channel_sponge2d_a1d7ef85d2fee18f96cffeb661cc3ff5c}{evaluate\+Sponge\+Strength} (in obj, in sponge\+Length, in \hyperlink{class_closed_channel_sponge2d_acb222bffecc37c4266ae6cc6eb5441b0}{max\+Sigma})
+\begin{DoxyCompactList}\small\item\em evaluate sponge strength, care may be needed numerically to guarantee that max\+Sigma $\ast$ dt $<$= 0.\+9; \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Static Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+static function \hyperlink{class_closed_channel_sponge2d_a612a42bab1b9b8ca7730f4139243909d}{set\+Open\+Boundary\+Condition} (in)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a3d2f7e3dfbff4f33f22e670e1941b4f5}\label{class_closed_channel_sponge2d_a3d2f7e3dfbff4f33f22e670e1941b4f5}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{Closed\+Channel\+Sponge2d()}{ClosedChannelSponge2d()}}
+{\footnotesize\ttfamily function Closed\+Channel\+Sponge2d\+::\+Closed\+Channel\+Sponge2d (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{M }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a5e1e503844a7115b8a579d0028571934}\label{class_closed_channel_sponge2d_a5e1e503844a7115b8a579d0028571934}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!evaluate\+Sponge\+Distance@{evaluate\+Sponge\+Distance}}
+\index{evaluate\+Sponge\+Distance@{evaluate\+Sponge\+Distance}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{evaluate\+Sponge\+Distance()}{evaluateSpongeDistance()}}
+{\footnotesize\ttfamily function Closed\+Channel\+Sponge2d\+::evaluate\+Sponge\+Distance (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xb,  }\item[{in}]{yb }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+calculate distance from the boundary 
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a1d7ef85d2fee18f96cffeb661cc3ff5c}\label{class_closed_channel_sponge2d_a1d7ef85d2fee18f96cffeb661cc3ff5c}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!evaluate\+Sponge\+Strength@{evaluate\+Sponge\+Strength}}
+\index{evaluate\+Sponge\+Strength@{evaluate\+Sponge\+Strength}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{evaluate\+Sponge\+Strength()}{evaluateSpongeStrength()}}
+{\footnotesize\ttfamily function Closed\+Channel\+Sponge2d\+::evaluate\+Sponge\+Strength (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{sponge\+Length,  }\item[{in}]{max\+Sigma }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+evaluate sponge strength, care may be needed numerically to guarantee that max\+Sigma $\ast$ dt $<$= 0.\+9; 
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a6c4946628fd7d9a94e5b91cfa882ffee}\label{class_closed_channel_sponge2d_a6c4946628fd7d9a94e5b91cfa882ffee}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}}
+\index{mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Topography\+Source\+Term()}{matEvaluateTopographySourceTerm()}}
+{\footnotesize\ttfamily function Closed\+Channel\+Sponge2d\+::mat\+Evaluate\+Topography\+Source\+Term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate topography source term 
+
+
+
+Reimplemented from \hyperlink{class_s_w_e_conventional2d_a4d47d0d516ce7dba71beff5016df9085}{S\+W\+E\+Conventional2d}.
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a612a42bab1b9b8ca7730f4139243909d}\label{class_closed_channel_sponge2d_a612a42bab1b9b8ca7730f4139243909d}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!set\+Open\+Boundary\+Condition@{set\+Open\+Boundary\+Condition}}
+\index{set\+Open\+Boundary\+Condition@{set\+Open\+Boundary\+Condition}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{set\+Open\+Boundary\+Condition()}{setOpenBoundaryCondition()}}
+{\footnotesize\ttfamily static function Closed\+Channel\+Sponge2d\+::set\+Open\+Boundary\+Condition (\begin{DoxyParamCaption}\item[{in}]{ }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [static]}, {\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_af8573996bd1cb011975c3d06a7c196ea}\label{class_closed_channel_sponge2d_af8573996bd1cb011975c3d06a7c196ea}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!set\+Option@{set\+Option}}
+\index{set\+Option@{set\+Option}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{set\+Option()}{setOption()}}
+{\footnotesize\ttfamily function Closed\+Channel\+Sponge2d\+::set\+Option (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{option }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the solver options. 
+
+
+
+Reimplemented from \hyperlink{class_closed_channel2d_aae73281d675dd1095fccdf784d62e4ad}{Closed\+Channel2d}.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a4c6447f66431d35d079639f70c18d3b3}\label{class_closed_channel_sponge2d_a4c6447f66431d35d079639f70c18d3b3}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!distance@{distance}}
+\index{distance@{distance}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{distance}{distance}}
+{\footnotesize\ttfamily Property Closed\+Channel\+Sponge2d\+::distance}
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_acb222bffecc37c4266ae6cc6eb5441b0}\label{class_closed_channel_sponge2d_acb222bffecc37c4266ae6cc6eb5441b0}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!max\+Sigma@{max\+Sigma}}
+\index{max\+Sigma@{max\+Sigma}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{max\+Sigma}{maxSigma}}
+{\footnotesize\ttfamily Property Closed\+Channel\+Sponge2d\+::max\+Sigma}
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a2864ea2868a5cc35d634928ab0b90931}\label{class_closed_channel_sponge2d_a2864ea2868a5cc35d634928ab0b90931}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!sigma@{sigma}}
+\index{sigma@{sigma}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{sigma}{sigma}}
+{\footnotesize\ttfamily Property Closed\+Channel\+Sponge2d\+::sigma}
+
+\mbox{\Hypertarget{class_closed_channel_sponge2d_a235a10d14b6beb2058693d1856f39833}\label{class_closed_channel_sponge2d_a235a10d14b6beb2058693d1856f39833}} 
+\index{Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}!spg\+Length@{spg\+Length}}
+\index{spg\+Length@{spg\+Length}!Closed\+Channel\+Sponge2d@{Closed\+Channel\+Sponge2d}}
+\subsubsection{\texorpdfstring{spg\+Length}{spgLength}}
+{\footnotesize\ttfamily Property Closed\+Channel\+Sponge2d\+::spg\+Length}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_closed_channel_sponge2d_8m}{Closed\+Channel\+Sponge2d.\+m}\end{DoxyCompactItemize}

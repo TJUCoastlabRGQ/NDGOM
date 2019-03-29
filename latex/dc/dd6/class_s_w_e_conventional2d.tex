@@ -1,0 +1,125 @@
+\hypertarget{class_s_w_e_conventional2d}{}\section{S\+W\+E\+Conventional2d Class Reference}
+\label{class_s_w_e_conventional2d}\index{S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}}
+
+
+S\+WE conventional solver.  
+
+
+
+
+Inheritance diagram for S\+W\+E\+Conventional2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{d2/d86/class_s_w_e_conventional2d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for S\+W\+E\+Conventional2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{d3/dad/class_s_w_e_conventional2d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_s_w_e_conventional2d_a45bdb5dd88ae1ea73f2d7a7dd40cdbb9}{mat\+Evaluate\+Flux} (in obj, in mesh, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em abstract function to evaluate volume flux term \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_s_w_e_conventional2d_af4391251efde6dd1a4304681916f1a85}{mat\+Update\+Wet\+Dry\+State} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em determine wetting and drying status \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_conventional2d_afb47a46de6ed3ef5d094750c0a1ea6ca}{mat\+Evaluate\+Post\+Func} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em evaluate post function \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_conventional2d_a4d47d0d516ce7dba71beff5016df9085}{mat\+Evaluate\+Topography\+Source\+Term} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em evaluate topography source term \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+S\+WE conventional solver. 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_s_w_e_conventional2d_a45bdb5dd88ae1ea73f2d7a7dd40cdbb9}\label{class_s_w_e_conventional2d_a45bdb5dd88ae1ea73f2d7a7dd40cdbb9}} 
+\index{S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}!mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}}
+\index{mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}!S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Flux()}{matEvaluateFlux()}}
+{\footnotesize\ttfamily function S\+W\+E\+Conventional2d\+::mat\+Evaluate\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+abstract function to evaluate volume flux term 
+
+
+
+Reimplemented from \hyperlink{class_s_w_e_abstract2d_afa8846dd96e3975dc0069ab87831e0c9}{S\+W\+E\+Abstract2d}.
+
+
+
+Reimplemented in \hyperlink{class_s_w_e_pre_blanaced2d_a59b0ef470db28d009b0c8aa863f29f8f}{S\+W\+E\+Pre\+Blanaced2d}, and \hyperlink{class_s_w_e_w_d_pre_blanaced2d_a3aa951b2ef88db981c7e371cc3929fb6}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}.
+
+\mbox{\Hypertarget{class_s_w_e_conventional2d_afb47a46de6ed3ef5d094750c0a1ea6ca}\label{class_s_w_e_conventional2d_afb47a46de6ed3ef5d094750c0a1ea6ca}} 
+\index{S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}!mat\+Evaluate\+Post\+Func@{mat\+Evaluate\+Post\+Func}}
+\index{mat\+Evaluate\+Post\+Func@{mat\+Evaluate\+Post\+Func}!S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Post\+Func()}{matEvaluatePostFunc()}}
+{\footnotesize\ttfamily function S\+W\+E\+Conventional2d\+::mat\+Evaluate\+Post\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate post function 
+
+
+
+Reimplemented from \hyperlink{class_s_w_e_abstract2d_a4f8ff718398e2caed60574f1602dd311}{S\+W\+E\+Abstract2d}.
+
+
+
+Reimplemented in \hyperlink{class_malpasset2d_a69869bfecba889300e815dd8c59586e6}{Malpasset2d}, and \hyperlink{class_steady_mount2d_a31a4c892298d775d35587b5ea7441189}{Steady\+Mount2d}.
+
+\mbox{\Hypertarget{class_s_w_e_conventional2d_a4d47d0d516ce7dba71beff5016df9085}\label{class_s_w_e_conventional2d_a4d47d0d516ce7dba71beff5016df9085}} 
+\index{S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}!mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}}
+\index{mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}!S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Topography\+Source\+Term()}{matEvaluateTopographySourceTerm()}}
+{\footnotesize\ttfamily function S\+W\+E\+Conventional2d\+::mat\+Evaluate\+Topography\+Source\+Term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate topography source term 
+
+
+
+Reimplemented from \hyperlink{class_s_w_e_abstract2d_aec026e019146aa65c0c9f1476bd8dfc1}{S\+W\+E\+Abstract2d}.
+
+
+
+Reimplemented in \hyperlink{class_wave_transform_over_an_elliptical_shoal_a30af660bfeddbc9bf75f786d7ae7370a}{Wave\+Transform\+Over\+An\+Elliptical\+Shoal}, \hyperlink{class_closed_channel_sponge2d_a6c4946628fd7d9a94e5b91cfa882ffee}{Closed\+Channel\+Sponge2d}, \hyperlink{class_s_w_e_w_d_pre_blanaced2d_a8b1954554505417779437dcf59972b41}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}, and \hyperlink{class_s_w_e_pre_blanaced2d_af89d6da5053d87a1f587d4d5f958ec1b}{S\+W\+E\+Pre\+Blanaced2d}.
+
+\mbox{\Hypertarget{class_s_w_e_conventional2d_af4391251efde6dd1a4304681916f1a85}\label{class_s_w_e_conventional2d_af4391251efde6dd1a4304681916f1a85}} 
+\index{S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}!mat\+Update\+Wet\+Dry\+State@{mat\+Update\+Wet\+Dry\+State}}
+\index{mat\+Update\+Wet\+Dry\+State@{mat\+Update\+Wet\+Dry\+State}!S\+W\+E\+Conventional2d@{S\+W\+E\+Conventional2d}}
+\subsubsection{\texorpdfstring{mat\+Update\+Wet\+Dry\+State()}{matUpdateWetDryState()}}
+{\footnotesize\ttfamily function S\+W\+E\+Conventional2d\+::mat\+Update\+Wet\+Dry\+State (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+determine wetting and drying status 
+
+
+
+Reimplemented from \hyperlink{class_s_w_e_abstract2d_ab92b4b39e65c83f6eaced650e8e5d61c}{S\+W\+E\+Abstract2d}.
+
+
+
+Reimplemented in \hyperlink{class_s_w_e_w_d_pre_blanaced2d_aee8de435e5f6f4b0a4ac48e42982facd}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}, and \hyperlink{class_s_w_e_pre_blanaced2d_a77864de8837b7a3f0b3c9ef6a7d8371d}{S\+W\+E\+Pre\+Blanaced2d}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_s_w_e_conventional2d_8m}{S\+W\+E\+Conventional2d.\+m}\end{DoxyCompactItemize}

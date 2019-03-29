@@ -1,0 +1,274 @@
+\hypertarget{class_open_channel2d}{}\section{Open\+Channel2d Class Reference}
+\label{class_open_channel2d}\index{Open\+Channel2d@{Open\+Channel2d}}
+
+
+Inheritance diagram for Open\+Channel2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{d4/dc0/class_open_channel2d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Open\+Channel2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{dc/db9/class_open_channel2d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_open_channel2d_ac068d0d6e1b6a0fe28b87e7bb04f0467}{Open\+Channel2d} (in N, in M)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_open_channel2d_ad2dcc13d8c7e091d93205ec67c676064}{hmin} = 1e
+\begin{DoxyCompactList}\small\item\em water depth threshold \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_a700031d06a370545b38c31810c09590c}{gra} = 9.\+8
+\begin{DoxyCompactList}\small\item\em gravity acceleration \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_a1c41bef8b83de402f4a8c03504777f73}{H} = 320
+\begin{DoxyCompactList}\small\item\em channel depth \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_acfffb41190a2dae0106aee6c3d52dee1}{delta} = 0.\+04
+\begin{DoxyCompactList}\small\item\em delta = amplitude / depth \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_af18cc997c4945ad69bcf5136385ddff2}{T} = 500
+\begin{DoxyCompactList}\small\item\em wave period \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_aa91ccfffe90c54158eeb815d41d2bb79}{Ch\+Length} = 28e3
+\begin{DoxyCompactList}\small\item\em domain length = wave length $\ast$ lambda \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_ac64b88f082e0f96c627c3313b05e9fa9}{Ch\+Width} = 500
+\begin{DoxyCompactList}\small\item\em domain width \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_af2ecc0919a232f386bd0df37575853b1}{theta} = 0
+\begin{DoxyCompactList}\small\item\em mesh rotation angle \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_ad74bd6b2b729222587e977b1587bb51b}{xc} = 0
+\begin{DoxyCompactList}\small\item\em mesh center \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel2d_a6ce72cb1b50c3b3747ea4b86af2119bd}{yc} = 0
+\begin{DoxyCompactList}\small\item\em mesh center \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual function \hyperlink{class_open_channel2d_a79563bcdcfbb801f066fa06f94a44594}{set\+Exact\+Solution} (in obj, in x, in time)
+\begin{DoxyCompactList}\small\item\em draw the numerical results at gauge points \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel2d_aae4720b1bde2cf5f3729db24fe8e5216}{set\+Initial\+Field} (in obj)
+\begin{DoxyCompactList}\small\item\em Set the initial field. \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel2d_a1fb78e2b0cc0ce348774f0c5249710af}{mat\+Update\+External\+Field} (in obj, in time, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\item 
+function \hyperlink{class_open_channel2d_ace770faaaf09f0bd86ea6e01f7f95def}{set\+O\+BC} (in obj, in x, in time)
+\begin{DoxyCompactList}\small\item\em Set open boundary condition. \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel2d_ae97b262d9cb93c70dcadda529394482d}{check\+Result} (in obj)
+\begin{DoxyCompactList}\small\item\em check scalar fields to evaluate the O\+B\+Cs performance \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel2d_aa92c8f61700a74a5732a08d6e60f7234}{draw\+Gauge\+Points} (in obj, in xg)
+\item 
+function \hyperlink{class_open_channel2d_a94313ac0e4efe573134b1e9eb5518c6d}{show\+Parameter} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Private Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_open_channel2d_ae40e5a9ca854f9146bd58e52d3824aed}{make\+Uniform\+Mesh} (in obj, in N, in M)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_open_channel2d_ac068d0d6e1b6a0fe28b87e7bb04f0467}\label{class_open_channel2d_ac068d0d6e1b6a0fe28b87e7bb04f0467}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!Open\+Channel2d@{Open\+Channel2d}}
+\index{Open\+Channel2d@{Open\+Channel2d}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{Open\+Channel2d()}{OpenChannel2d()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::\+Open\+Channel2d (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{M }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_open_channel2d_ae97b262d9cb93c70dcadda529394482d}\label{class_open_channel2d_ae97b262d9cb93c70dcadda529394482d}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!check\+Result@{check\+Result}}
+\index{check\+Result@{check\+Result}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{check\+Result()}{checkResult()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::check\+Result (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+check scalar fields to evaluate the O\+B\+Cs performance 
+
+The scalar fields include
+\begin{DoxyItemize}
+\item mechanical energy
+\item excess mass
+\item energy flux 
+\end{DoxyItemize}\mbox{\Hypertarget{class_open_channel2d_aa92c8f61700a74a5732a08d6e60f7234}\label{class_open_channel2d_aa92c8f61700a74a5732a08d6e60f7234}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!draw\+Gauge\+Points@{draw\+Gauge\+Points}}
+\index{draw\+Gauge\+Points@{draw\+Gauge\+Points}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{draw\+Gauge\+Points()}{drawGaugePoints()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::draw\+Gauge\+Points (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xg }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel2d_ae40e5a9ca854f9146bd58e52d3824aed}\label{class_open_channel2d_ae40e5a9ca854f9146bd58e52d3824aed}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!make\+Uniform\+Mesh@{make\+Uniform\+Mesh}}
+\index{make\+Uniform\+Mesh@{make\+Uniform\+Mesh}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{make\+Uniform\+Mesh()}{makeUniformMesh()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::make\+Uniform\+Mesh (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N,  }\item[{in}]{M }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [private]}}
+
+\mbox{\Hypertarget{class_open_channel2d_a1fb78e2b0cc0ce348774f0c5249710af}\label{class_open_channel2d_a1fb78e2b0cc0ce348774f0c5249710af}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!mat\+Update\+External\+Field@{mat\+Update\+External\+Field}}
+\index{mat\+Update\+External\+Field@{mat\+Update\+External\+Field}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{mat\+Update\+External\+Field()}{matUpdateExternalField()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::mat\+Update\+External\+Field (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{time,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel2d_a79563bcdcfbb801f066fa06f94a44594}\label{class_open_channel2d_a79563bcdcfbb801f066fa06f94a44594}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!set\+Exact\+Solution@{set\+Exact\+Solution}}
+\index{set\+Exact\+Solution@{set\+Exact\+Solution}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{set\+Exact\+Solution()}{setExactSolution()}}
+{\footnotesize\ttfamily virtual function Open\+Channel2d\+::set\+Exact\+Solution (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+draw the numerical results at gauge points 
+
+show the paramters for determing the test problem check mechanical energy, excess mass, energy flux set open boundary condition 
+
+Reimplemented in \hyperlink{class_closed_channel2d_a67b1a67df5ce6d94beed608b673794b4}{Closed\+Channel2d}, and \hyperlink{class_open_channel2d___transpose_b_c_a3cc1b2758992fb7de13911c04412b4bc}{Open\+Channel2d\+\_\+\+Transpose\+BC}.
+
+\mbox{\Hypertarget{class_open_channel2d_aae4720b1bde2cf5f3729db24fe8e5216}\label{class_open_channel2d_aae4720b1bde2cf5f3729db24fe8e5216}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!set\+Initial\+Field@{set\+Initial\+Field}}
+\index{set\+Initial\+Field@{set\+Initial\+Field}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{set\+Initial\+Field()}{setInitialField()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::set\+Initial\+Field (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the initial field. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a300c8d73472e9397d961b5d1aa5470e1}{Ndg\+Phys}.
+
+
+
+Reimplemented in \hyperlink{class_closed_channel2d_a54f595d858c67d5b5ef90fa5481d9a37}{Closed\+Channel2d}.
+
+\mbox{\Hypertarget{class_open_channel2d_ace770faaaf09f0bd86ea6e01f7f95def}\label{class_open_channel2d_ace770faaaf09f0bd86ea6e01f7f95def}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!set\+O\+BC@{set\+O\+BC}}
+\index{set\+O\+BC@{set\+O\+BC}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{set\+O\+B\+C()}{setOBC()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::set\+O\+BC (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Set open boundary condition. 
+
+\mbox{\Hypertarget{class_open_channel2d_a94313ac0e4efe573134b1e9eb5518c6d}\label{class_open_channel2d_a94313ac0e4efe573134b1e9eb5518c6d}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!show\+Parameter@{show\+Parameter}}
+\index{show\+Parameter@{show\+Parameter}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{show\+Parameter()}{showParameter()}}
+{\footnotesize\ttfamily function Open\+Channel2d\+::show\+Parameter (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_open_channel2d_aa91ccfffe90c54158eeb815d41d2bb79}\label{class_open_channel2d_aa91ccfffe90c54158eeb815d41d2bb79}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!Ch\+Length@{Ch\+Length}}
+\index{Ch\+Length@{Ch\+Length}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{Ch\+Length}{ChLength}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::\+Ch\+Length = 28e3}
+
+
+
+domain length = wave length $\ast$ lambda 
+
+\mbox{\Hypertarget{class_open_channel2d_ac64b88f082e0f96c627c3313b05e9fa9}\label{class_open_channel2d_ac64b88f082e0f96c627c3313b05e9fa9}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!Ch\+Width@{Ch\+Width}}
+\index{Ch\+Width@{Ch\+Width}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{Ch\+Width}{ChWidth}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::\+Ch\+Width = 500}
+
+
+
+domain width 
+
+\mbox{\Hypertarget{class_open_channel2d_acfffb41190a2dae0106aee6c3d52dee1}\label{class_open_channel2d_acfffb41190a2dae0106aee6c3d52dee1}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!delta@{delta}}
+\index{delta@{delta}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{delta}{delta}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::delta = 0.\+04}
+
+
+
+delta = amplitude / depth 
+
+\mbox{\Hypertarget{class_open_channel2d_a700031d06a370545b38c31810c09590c}\label{class_open_channel2d_a700031d06a370545b38c31810c09590c}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!gra@{gra}}
+\index{gra@{gra}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::gra = 9.\+8}
+
+
+
+gravity acceleration 
+
+\mbox{\Hypertarget{class_open_channel2d_a1c41bef8b83de402f4a8c03504777f73}\label{class_open_channel2d_a1c41bef8b83de402f4a8c03504777f73}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!H@{H}}
+\index{H@{H}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{H}{H}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::H = 320}
+
+
+
+channel depth 
+
+\mbox{\Hypertarget{class_open_channel2d_ad2dcc13d8c7e091d93205ec67c676064}\label{class_open_channel2d_ad2dcc13d8c7e091d93205ec67c676064}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!hmin@{hmin}}
+\index{hmin@{hmin}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::hmin = 1e}
+
+
+
+water depth threshold 
+
+\mbox{\Hypertarget{class_open_channel2d_af18cc997c4945ad69bcf5136385ddff2}\label{class_open_channel2d_af18cc997c4945ad69bcf5136385ddff2}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!T@{T}}
+\index{T@{T}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{T}{T}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::T = 500}
+
+
+
+wave period 
+
+\mbox{\Hypertarget{class_open_channel2d_af2ecc0919a232f386bd0df37575853b1}\label{class_open_channel2d_af2ecc0919a232f386bd0df37575853b1}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!theta@{theta}}
+\index{theta@{theta}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{theta}{theta}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::theta = 0}
+
+
+
+mesh rotation angle 
+
+\mbox{\Hypertarget{class_open_channel2d_ad74bd6b2b729222587e977b1587bb51b}\label{class_open_channel2d_ad74bd6b2b729222587e977b1587bb51b}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!xc@{xc}}
+\index{xc@{xc}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{xc}{xc}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::xc = 0}
+
+
+
+mesh center 
+
+\mbox{\Hypertarget{class_open_channel2d_a6ce72cb1b50c3b3747ea4b86af2119bd}\label{class_open_channel2d_a6ce72cb1b50c3b3747ea4b86af2119bd}} 
+\index{Open\+Channel2d@{Open\+Channel2d}!yc@{yc}}
+\index{yc@{yc}!Open\+Channel2d@{Open\+Channel2d}}
+\subsubsection{\texorpdfstring{yc}{yc}}
+{\footnotesize\ttfamily Constant Property Open\+Channel2d\+::yc = 0}
+
+
+
+mesh center 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_open_channel2d_8m}{Open\+Channel2d.\+m}\end{DoxyCompactItemize}

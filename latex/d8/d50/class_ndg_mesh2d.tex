@@ -1,0 +1,113 @@
+\hypertarget{class_ndg_mesh2d}{}\section{Ndg\+Mesh2d Class Reference}
+\label{class_ndg_mesh2d}\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+
+
+Inheritance diagram for Ndg\+Mesh2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{dd/d1e/class_ndg_mesh2d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Mesh2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{d0/d51/class_ndg_mesh2d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_mesh2d_a32859ff1a6c18eaebf90615e81ded188}{Ndg\+Mesh2d} (in \hyperlink{class_ndg_mesh_a6f128cd638adcec9a184937ad483232a}{cell}, in \hyperlink{class_ndg_mesh_a1d100eb162c56c890e007b8d2ff267a3}{Nv}, in \hyperlink{class_ndg_mesh_a2b7b3abe64802afdb217cce9a2cb3f04}{vx}, in vy, in \hyperlink{class_ndg_mesh_a81fc6a6affd3609e69eb1b8fc72b7f2f}{K}, in \hyperlink{class_ndg_mesh_a3ab88286c8e628f39ad7654d8e43fd96}{E\+ToV}, in \hyperlink{class_ndg_mesh_a58a82bb05a658319454739725b098e2a}{E\+ToR})
+\item 
+function \hyperlink{class_ndg_mesh2d_a98874b740e8402a14cf1aec7cf242f98}{access\+Gauge\+Point\+Location} (in obj, in xg, in yg, in zg)
+\item 
+function \hyperlink{class_ndg_mesh2d_ad8053d6bc3b8731fc8a991771089a2ad}{access\+Quad\+Local\+Coor} (in obj, in xd, in yd, in kd)
+\item 
+function \hyperlink{class_ndg_mesh2d_aefa60678f8dd4953037b5f603ef1dca3}{access\+Tri\+Local\+Coor} (in obj, in xd, in yd, in kd)
+\item 
+function \hyperlink{class_ndg_mesh2d_a700b8daf4a622a56ec32bb647b9dcde0}{refine} (in input\+\_\+args)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_ndg_mesh2d_a48b5c79f0e0f040c8c425bfa26fe515c}{type} = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672af027c134a34d29d25d620ecb88abf423}{enum\+Mesh\+Dim.\+Two}
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_mesh2d_ae18efcc0cff8127857a737c1f57e07a1}{assemble\+Jacobi\+Factor} (in obj)
+\begin{DoxyCompactList}\small\item\em normal vector of each facial point \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Create the 2d mesh object. The object is inherited from the mesh object and has special treatment for the 2d elements (triangle and quadrilateral). The mesh object contains only one type of elements, and allocate multiple choices to create the object. The input methods include 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_mesh2d_a32859ff1a6c18eaebf90615e81ded188}\label{class_ndg_mesh2d_a32859ff1a6c18eaebf90615e81ded188}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{Ndg\+Mesh2d()}{NdgMesh2d()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::\+Ndg\+Mesh2d (\begin{DoxyParamCaption}\item[{in}]{cell,  }\item[{in}]{Nv,  }\item[{in}]{vx,  }\item[{in}]{vy,  }\item[{in}]{K,  }\item[{in}]{E\+ToV,  }\item[{in}]{E\+ToR }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_mesh2d_a98874b740e8402a14cf1aec7cf242f98}\label{class_ndg_mesh2d_a98874b740e8402a14cf1aec7cf242f98}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}}
+\index{access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{access\+Gauge\+Point\+Location()}{accessGaugePointLocation()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::access\+Gauge\+Point\+Location (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xg,  }\item[{in}]{yg,  }\item[{in}]{zg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_mesh2d_ad8053d6bc3b8731fc8a991771089a2ad}\label{class_ndg_mesh2d_ad8053d6bc3b8731fc8a991771089a2ad}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!access\+Quad\+Local\+Coor@{access\+Quad\+Local\+Coor}}
+\index{access\+Quad\+Local\+Coor@{access\+Quad\+Local\+Coor}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{access\+Quad\+Local\+Coor()}{accessQuadLocalCoor()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::access\+Quad\+Local\+Coor (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xd,  }\item[{in}]{yd,  }\item[{in}]{kd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_mesh2d_aefa60678f8dd4953037b5f603ef1dca3}\label{class_ndg_mesh2d_aefa60678f8dd4953037b5f603ef1dca3}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!access\+Tri\+Local\+Coor@{access\+Tri\+Local\+Coor}}
+\index{access\+Tri\+Local\+Coor@{access\+Tri\+Local\+Coor}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{access\+Tri\+Local\+Coor()}{accessTriLocalCoor()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::access\+Tri\+Local\+Coor (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xd,  }\item[{in}]{yd,  }\item[{in}]{kd }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_mesh2d_ae18efcc0cff8127857a737c1f57e07a1}\label{class_ndg_mesh2d_ae18efcc0cff8127857a737c1f57e07a1}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!assemble\+Jacobi\+Factor@{assemble\+Jacobi\+Factor}}
+\index{assemble\+Jacobi\+Factor@{assemble\+Jacobi\+Factor}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{assemble\+Jacobi\+Factor()}{assembleJacobiFactor()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::assemble\+Jacobi\+Factor (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+normal vector of each facial point 
+
+determination of facial integral at each face points Get volume infomation of each element 
+
+Reimplemented from \hyperlink{class_ndg_mesh_a4a0b19580b622c53f9e336e7dbd533bd}{Ndg\+Mesh}.
+
+\mbox{\Hypertarget{class_ndg_mesh2d_a700b8daf4a622a56ec32bb647b9dcde0}\label{class_ndg_mesh2d_a700b8daf4a622a56ec32bb647b9dcde0}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!refine@{refine}}
+\index{refine@{refine}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{refine()}{refine()}}
+{\footnotesize\ttfamily function Ndg\+Mesh2d\+::refine (\begin{DoxyParamCaption}\item[{in}]{input\+\_\+args }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_ndg_mesh2d_a48b5c79f0e0f040c8c425bfa26fe515c}\label{class_ndg_mesh2d_a48b5c79f0e0f040c8c425bfa26fe515c}} 
+\index{Ndg\+Mesh2d@{Ndg\+Mesh2d}!type@{type}}
+\index{type@{type}!Ndg\+Mesh2d@{Ndg\+Mesh2d}}
+\subsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily Constant Property Ndg\+Mesh2d\+::type = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672af027c134a34d29d25d620ecb88abf423}{enum\+Mesh\+Dim.\+Two}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_mesh2d_8m}{Ndg\+Mesh2d.\+m}\end{DoxyCompactItemize}

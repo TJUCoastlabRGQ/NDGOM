@@ -1,0 +1,122 @@
+\hypertarget{class_ndg_mesh1d}{}\section{Ndg\+Mesh1d Class Reference}
+\label{class_ndg_mesh1d}\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+
+
+Inheritance diagram for Ndg\+Mesh1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{df/d33/class_ndg_mesh1d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Mesh1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{d0/dd9/class_ndg_mesh1d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_mesh1d_a8ac44af9495afb74ad070bf877e5af6e}{Ndg\+Mesh1d} (in \hyperlink{class_ndg_mesh_a6f128cd638adcec9a184937ad483232a}{cell}, in \hyperlink{class_ndg_mesh_a1d100eb162c56c890e007b8d2ff267a3}{Nv}, in \hyperlink{class_ndg_mesh_a2b7b3abe64802afdb217cce9a2cb3f04}{vx}, in \hyperlink{class_ndg_mesh_a81fc6a6affd3609e69eb1b8fc72b7f2f}{K}, in \hyperlink{class_ndg_mesh_a3ab88286c8e628f39ad7654d8e43fd96}{E\+ToV}, in \hyperlink{class_ndg_mesh_a58a82bb05a658319454739725b098e2a}{E\+ToR}, in B\+C\+ToV)
+\begin{DoxyCompactList}\small\item\em refine elements \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_mesh1d_a56999c262d799a7d34a577e0306c2e90}{access\+Gauge\+Point\+Location} (in obj, in xg, in yg, in zg)
+\item 
+function \hyperlink{class_ndg_mesh1d_ad486c6667cc1097f66a98a3955a51424}{draw} (in obj, in zvar)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_ndg_mesh1d_addd292d33f15965cef132a48fb4c74bd}{dim} = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672a459e0997a41df310edd45a87176a6f41}{enum\+Mesh\+Dim.\+One}
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_mesh1d_aa8a38dbce91682ea4af9139c6a016636}{make\+Connect\+Ndg\+Edge} (in obj, in mesh1, in mid0, in mid1)
+\item 
+function \hyperlink{class_ndg_mesh1d_a6f2703f3c11af53bf962455ff12bf55d}{assemble\+Jacobi\+Factor} (in obj)
+\begin{DoxyCompactList}\small\item\em normal vector of each facial point \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_mesh1d_af70d4e6def54e8490e55736f677abd81}{assemble\+Facial\+Jaobi\+Factor} (in obj)
+\item 
+function \hyperlink{class_ndg_mesh1d_ac37111f79441b5ff8a5fcec8c4cb5045}{assemble\+Global\+Face\+Index} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_mesh1d_a8ac44af9495afb74ad070bf877e5af6e}\label{class_ndg_mesh1d_a8ac44af9495afb74ad070bf877e5af6e}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{Ndg\+Mesh1d()}{NdgMesh1d()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::\+Ndg\+Mesh1d (\begin{DoxyParamCaption}\item[{in}]{cell,  }\item[{in}]{Nv,  }\item[{in}]{vx,  }\item[{in}]{K,  }\item[{in}]{E\+ToV,  }\item[{in}]{E\+ToR,  }\item[{in}]{B\+C\+ToV }\end{DoxyParamCaption})}
+
+
+
+refine elements 
+
+draw mesh construction function 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_mesh1d_a56999c262d799a7d34a577e0306c2e90}\label{class_ndg_mesh1d_a56999c262d799a7d34a577e0306c2e90}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}}
+\index{access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{access\+Gauge\+Point\+Location()}{accessGaugePointLocation()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::access\+Gauge\+Point\+Location (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xg,  }\item[{in}]{yg,  }\item[{in}]{zg }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_mesh1d_af70d4e6def54e8490e55736f677abd81}\label{class_ndg_mesh1d_af70d4e6def54e8490e55736f677abd81}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!assemble\+Facial\+Jaobi\+Factor@{assemble\+Facial\+Jaobi\+Factor}}
+\index{assemble\+Facial\+Jaobi\+Factor@{assemble\+Facial\+Jaobi\+Factor}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{assemble\+Facial\+Jaobi\+Factor()}{assembleFacialJaobiFactor()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::assemble\+Facial\+Jaobi\+Factor (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_mesh1d_ac37111f79441b5ff8a5fcec8c4cb5045}\label{class_ndg_mesh1d_ac37111f79441b5ff8a5fcec8c4cb5045}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!assemble\+Global\+Face\+Index@{assemble\+Global\+Face\+Index}}
+\index{assemble\+Global\+Face\+Index@{assemble\+Global\+Face\+Index}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{assemble\+Global\+Face\+Index()}{assembleGlobalFaceIndex()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::assemble\+Global\+Face\+Index (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_mesh1d_a6f2703f3c11af53bf962455ff12bf55d}\label{class_ndg_mesh1d_a6f2703f3c11af53bf962455ff12bf55d}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!assemble\+Jacobi\+Factor@{assemble\+Jacobi\+Factor}}
+\index{assemble\+Jacobi\+Factor@{assemble\+Jacobi\+Factor}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{assemble\+Jacobi\+Factor()}{assembleJacobiFactor()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::assemble\+Jacobi\+Factor (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+normal vector of each facial point 
+
+determination of facial integral at each face points Get volume infomation of each element 
+
+Reimplemented from \hyperlink{class_ndg_mesh_a4a0b19580b622c53f9e336e7dbd533bd}{Ndg\+Mesh}.
+
+\mbox{\Hypertarget{class_ndg_mesh1d_ad486c6667cc1097f66a98a3955a51424}\label{class_ndg_mesh1d_ad486c6667cc1097f66a98a3955a51424}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!draw@{draw}}
+\index{draw@{draw}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{draw()}{draw()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::draw (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{zvar }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_mesh1d_aa8a38dbce91682ea4af9139c6a016636}\label{class_ndg_mesh1d_aa8a38dbce91682ea4af9139c6a016636}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!make\+Connect\+Ndg\+Edge@{make\+Connect\+Ndg\+Edge}}
+\index{make\+Connect\+Ndg\+Edge@{make\+Connect\+Ndg\+Edge}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{make\+Connect\+Ndg\+Edge()}{makeConnectNdgEdge()}}
+{\footnotesize\ttfamily function Ndg\+Mesh1d\+::make\+Connect\+Ndg\+Edge (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh1,  }\item[{in}]{mid0,  }\item[{in}]{mid1 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_ndg_mesh1d_addd292d33f15965cef132a48fb4c74bd}\label{class_ndg_mesh1d_addd292d33f15965cef132a48fb4c74bd}} 
+\index{Ndg\+Mesh1d@{Ndg\+Mesh1d}!dim@{dim}}
+\index{dim@{dim}!Ndg\+Mesh1d@{Ndg\+Mesh1d}}
+\subsubsection{\texorpdfstring{dim}{dim}}
+{\footnotesize\ttfamily Constant Property Ndg\+Mesh1d\+::dim = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672a459e0997a41df310edd45a87176a6f41}{enum\+Mesh\+Dim.\+One}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_mesh1d_8m}{Ndg\+Mesh1d.\+m}\end{DoxyCompactItemize}

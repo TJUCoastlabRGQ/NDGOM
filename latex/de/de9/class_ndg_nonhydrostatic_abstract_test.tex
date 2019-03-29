@@ -1,0 +1,282 @@
+\hypertarget{class_ndg_nonhydrostatic_abstract_test}{}\section{Ndg\+Nonhydrostatic\+Abstract\+Test Class Reference}
+\label{class_ndg_nonhydrostatic_abstract_test}\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+
+
+Inheritance diagram for Ndg\+Nonhydrostatic\+Abstract\+Test\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{d9/df9/class_ndg_nonhydrostatic_abstract_test__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Nonhydrostatic\+Abstract\+Test\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{dc/d21/class_ndg_nonhydrostatic_abstract_test__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_afdfe8a40820ecd745d5ea16249dfa08b}{Ndg\+Nonhydrostatic\+Abstract\+Test} (in N, in cell\+Type)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_adb76f62e03e412b79391b47662fbba67}{testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a5a27c1b76b339260188cc8cc3a47bcb8}{test\+Assemble\+Wet\+Dry\+Interface} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a85510ff3dbf5de105826408947136cb9}{test\+Eid\+Boundary\+Type} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a140557f2bf245f10dd6c548abf4fd4f2}{testmat\+Get\+Face\+Value} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the boundary type related non-\/hydrostatic information matrix Eid\+Boundary\+Type is the flag matrix used to impose the boundary related Non-\/hydrostatic condition, at both the slip wall and non-\/slip wall boundaries, this value is set to 1 to indicate the zero gradient non-\/hydrostatic pressure condition(\$q$^\wedge$+ = q$^\wedge$-\/\$) and the zero non-\/hydrostatic gradient condition(\$\{ q$^\wedge$+\}\{ x\} =-\/\{ q$^\wedge$-\/\}\{ x\} \$), while at the clamped type boundaries, this value is set to -\/1 to indicate the zero non-\/hydrostatic pressure condition(\$q$^\wedge$+ = -\/q$^\wedge$-\/\$) and the zero gradient non-\/hydrostatic gradient condition (\$\{ q$^\wedge$+\}\{ x\} =\{ q$^\wedge$-\/\}\{ x\} \$) \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_aa97093daf733e4cc4dc3ff15db9cec3c}{testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the Nonhydrostatic pressure at face point \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a7cadf01d4f6f9498a107b545c2baca9f}{test\+Global\+Matrix\+Assemble} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_ae4f798477c8a77c893a907d20fb6817d}{testmat\+Calculate\+Characteristic\+MatrixX} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the global matrix assemble methods In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. Then, at each step, the matrix was constructed by multiplying each column of the matrix by the water depth at the studied point or the whole depth field \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a1af91113ed159212582b07992ffc3b0a}{testmat\+Calculate\+Characteristic\+MatrixY} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the way to assemble the global stiff matrix In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. mat\+Calculate\+Characteristic\+MatrixX is the function used to calculate the global derivative with the central flux considered in the x direction \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_ae641189c4f37199dd5b50a72a116f20a}{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the way to assemble the global stiff matrix In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. mat\+Calculate\+Characteristic\+MatrixY is the function used to calculate the global derivative with the central flux considered in the y direction \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a12407c5a97033d5ddf54fccabf4a9b09}{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the calculation of the conservative variable, \mbox{[}h hu hv\mbox{]}, related global partial derivative with the central flux considered in the x direction mat\+Calculate\+Conservative\+Variable\+Related\+MatrixX is the function used to calculate the global derivative of the conservative variable with the central flux considered in the x direction \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a9b81c2b1cd173ba4765c0cac5061eed7}{test\+Global\+Matrix} (in obj)
+\begin{DoxyCompactList}\small\item\em function for testing the calculation of the conservative variable, \mbox{[}h hu hv\mbox{]}, related global partial derivative with the central flux considered in the y direction mat\+Calculate\+Conservative\+Variable\+Related\+MatrixY is the function used to calculate the global derivative of the conservative variable with the central flux considered in the y direction \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_af2121228e1bbe04aff2baa0f212ce9be}{testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_ae2876d5306cb72a76c2c68aafdfa33f0}{test\+Inner\+Edge\+Scaler\+Jump\+Term} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_aea8e1b571cf026ff45fa77de52efe15c}{test\+Inner\+Edge\+Vecrtor\+Jump\+Term} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a67af2a99186b16ca53a36609b682aa85}{test\+Boundary\+Edge\+Scaler\+Jump\+Term} (in obj)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a24fce962e2b161b7fae0c93148ea765a}{test\+Boundary\+Edge\+Vecrtor\+Jump\+Term} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_ndg_nonhydrostatic_abstract_test_a93c380296a5041ae0c40aaab83f9a412}{gra} = 9.\+81
+\item 
+Constant Property \hyperlink{class_ndg_nonhydrostatic_abstract_test_a1fe286c21310d6e066fb3ebd6030a212}{hmin} = 1e
+\item 
+Constant Property \hyperlink{class_ndg_nonhydrostatic_abstract_test_a56cc33e2601e720147400387ba4df15b}{rho} = 1000
+\item 
+Constant Property \hyperlink{class_ndg_nonhydrostatic_abstract_test_a3859c87e1ad5683b16464201f2c5c129}{tol} = 10
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_ab5c8fa5bc6f48f8b274244446fc17fcc}{set\+Option} (in obj, in \hyperlink{class_ndg_phys_af91f4c54b93504e76b38a5693774dff1}{option})
+\begin{DoxyCompactList}\small\item\em Set the solver options. \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a1a4026ced308f916a182cd63b3231d54}{Assert} (in obj, in Exact, in Numerical)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_a03b100d72c44f360b047a09fd26dd08b}{make\+Uniform\+Mesh} (in obj, in N, in type)
+\item 
+function \hyperlink{class_ndg_nonhydrostatic_abstract_test_acccf8e23bb2f2b208a3870525be57de5}{Assemble\+Winded\+Flag\+Information} (in Inner\+Edge, in ele)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_afdfe8a40820ecd745d5ea16249dfa08b}\label{class_ndg_nonhydrostatic_abstract_test_afdfe8a40820ecd745d5ea16249dfa08b}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{Ndg\+Nonhydrostatic\+Abstract\+Test()}{NdgNonhydrostaticAbstractTest()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::\+Ndg\+Nonhydrostatic\+Abstract\+Test (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{cell\+Type }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_acccf8e23bb2f2b208a3870525be57de5}\label{class_ndg_nonhydrostatic_abstract_test_acccf8e23bb2f2b208a3870525be57de5}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!Assemble\+Winded\+Flag\+Information@{Assemble\+Winded\+Flag\+Information}}
+\index{Assemble\+Winded\+Flag\+Information@{Assemble\+Winded\+Flag\+Information}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{Assemble\+Winded\+Flag\+Information()}{AssembleWindedFlagInformation()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::\+Assemble\+Winded\+Flag\+Information (\begin{DoxyParamCaption}\item[{in}]{Inner\+Edge,  }\item[{in}]{ele }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a1a4026ced308f916a182cd63b3231d54}\label{class_ndg_nonhydrostatic_abstract_test_a1a4026ced308f916a182cd63b3231d54}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!Assert@{Assert}}
+\index{Assert@{Assert}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{Assert()}{Assert()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::\+Assert (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{Exact,  }\item[{in}]{Numerical }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a03b100d72c44f360b047a09fd26dd08b}\label{class_ndg_nonhydrostatic_abstract_test_a03b100d72c44f360b047a09fd26dd08b}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!make\+Uniform\+Mesh@{make\+Uniform\+Mesh}}
+\index{make\+Uniform\+Mesh@{make\+Uniform\+Mesh}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{make\+Uniform\+Mesh()}{makeUniformMesh()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::make\+Uniform\+Mesh (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N,  }\item[{in}]{type }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_ab5c8fa5bc6f48f8b274244446fc17fcc}\label{class_ndg_nonhydrostatic_abstract_test_ab5c8fa5bc6f48f8b274244446fc17fcc}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!set\+Option@{set\+Option}}
+\index{set\+Option@{set\+Option}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{set\+Option()}{setOption()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::set\+Option (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{option }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the solver options. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a5cd323275f4098db166471c4b078ed17}{Ndg\+Phys}.
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a5a27c1b76b339260188cc8cc3a47bcb8}\label{class_ndg_nonhydrostatic_abstract_test_a5a27c1b76b339260188cc8cc3a47bcb8}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Assemble\+Wet\+Dry\+Interface@{test\+Assemble\+Wet\+Dry\+Interface}}
+\index{test\+Assemble\+Wet\+Dry\+Interface@{test\+Assemble\+Wet\+Dry\+Interface}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Assemble\+Wet\+Dry\+Interface()}{testAssembleWetDryInterface()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Assemble\+Wet\+Dry\+Interface (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a67af2a99186b16ca53a36609b682aa85}\label{class_ndg_nonhydrostatic_abstract_test_a67af2a99186b16ca53a36609b682aa85}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Boundary\+Edge\+Scaler\+Jump\+Term@{test\+Boundary\+Edge\+Scaler\+Jump\+Term}}
+\index{test\+Boundary\+Edge\+Scaler\+Jump\+Term@{test\+Boundary\+Edge\+Scaler\+Jump\+Term}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Boundary\+Edge\+Scaler\+Jump\+Term()}{testBoundaryEdgeScalerJumpTerm()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Boundary\+Edge\+Scaler\+Jump\+Term (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a24fce962e2b161b7fae0c93148ea765a}\label{class_ndg_nonhydrostatic_abstract_test_a24fce962e2b161b7fae0c93148ea765a}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Boundary\+Edge\+Vecrtor\+Jump\+Term@{test\+Boundary\+Edge\+Vecrtor\+Jump\+Term}}
+\index{test\+Boundary\+Edge\+Vecrtor\+Jump\+Term@{test\+Boundary\+Edge\+Vecrtor\+Jump\+Term}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Boundary\+Edge\+Vecrtor\+Jump\+Term()}{testBoundaryEdgeVecrtorJumpTerm()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Boundary\+Edge\+Vecrtor\+Jump\+Term (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a85510ff3dbf5de105826408947136cb9}\label{class_ndg_nonhydrostatic_abstract_test_a85510ff3dbf5de105826408947136cb9}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Eid\+Boundary\+Type@{test\+Eid\+Boundary\+Type}}
+\index{test\+Eid\+Boundary\+Type@{test\+Eid\+Boundary\+Type}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Eid\+Boundary\+Type()}{testEidBoundaryType()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Eid\+Boundary\+Type (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a9b81c2b1cd173ba4765c0cac5061eed7}\label{class_ndg_nonhydrostatic_abstract_test_a9b81c2b1cd173ba4765c0cac5061eed7}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Global\+Matrix@{test\+Global\+Matrix}}
+\index{test\+Global\+Matrix@{test\+Global\+Matrix}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Global\+Matrix()}{testGlobalMatrix()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Global\+Matrix (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the calculation of the conservative variable, \mbox{[}h hu hv\mbox{]}, related global partial derivative with the central flux considered in the y direction mat\+Calculate\+Conservative\+Variable\+Related\+MatrixY is the function used to calculate the global derivative of the conservative variable with the central flux considered in the y direction 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a7cadf01d4f6f9498a107b545c2baca9f}\label{class_ndg_nonhydrostatic_abstract_test_a7cadf01d4f6f9498a107b545c2baca9f}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Global\+Matrix\+Assemble@{test\+Global\+Matrix\+Assemble}}
+\index{test\+Global\+Matrix\+Assemble@{test\+Global\+Matrix\+Assemble}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Global\+Matrix\+Assemble()}{testGlobalMatrixAssemble()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Global\+Matrix\+Assemble (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_ae2876d5306cb72a76c2c68aafdfa33f0}\label{class_ndg_nonhydrostatic_abstract_test_ae2876d5306cb72a76c2c68aafdfa33f0}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Inner\+Edge\+Scaler\+Jump\+Term@{test\+Inner\+Edge\+Scaler\+Jump\+Term}}
+\index{test\+Inner\+Edge\+Scaler\+Jump\+Term@{test\+Inner\+Edge\+Scaler\+Jump\+Term}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Inner\+Edge\+Scaler\+Jump\+Term()}{testInnerEdgeScalerJumpTerm()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Inner\+Edge\+Scaler\+Jump\+Term (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_aea8e1b571cf026ff45fa77de52efe15c}\label{class_ndg_nonhydrostatic_abstract_test_aea8e1b571cf026ff45fa77de52efe15c}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!test\+Inner\+Edge\+Vecrtor\+Jump\+Term@{test\+Inner\+Edge\+Vecrtor\+Jump\+Term}}
+\index{test\+Inner\+Edge\+Vecrtor\+Jump\+Term@{test\+Inner\+Edge\+Vecrtor\+Jump\+Term}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{test\+Inner\+Edge\+Vecrtor\+Jump\+Term()}{testInnerEdgeVecrtorJumpTerm()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::test\+Inner\+Edge\+Vecrtor\+Jump\+Term (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_ae4f798477c8a77c893a907d20fb6817d}\label{class_ndg_nonhydrostatic_abstract_test_ae4f798477c8a77c893a907d20fb6817d}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Calculate\+Characteristic\+MatrixX@{testmat\+Calculate\+Characteristic\+MatrixX}}
+\index{testmat\+Calculate\+Characteristic\+MatrixX@{testmat\+Calculate\+Characteristic\+MatrixX}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Calculate\+Characteristic\+Matrix\+X()}{testmatCalculateCharacteristicMatrixX()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Calculate\+Characteristic\+MatrixX (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the global matrix assemble methods In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. Then, at each step, the matrix was constructed by multiplying each column of the matrix by the water depth at the studied point or the whole depth field 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a1af91113ed159212582b07992ffc3b0a}\label{class_ndg_nonhydrostatic_abstract_test_a1af91113ed159212582b07992ffc3b0a}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Calculate\+Characteristic\+MatrixY@{testmat\+Calculate\+Characteristic\+MatrixY}}
+\index{testmat\+Calculate\+Characteristic\+MatrixY@{testmat\+Calculate\+Characteristic\+MatrixY}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Calculate\+Characteristic\+Matrix\+Y()}{testmatCalculateCharacteristicMatrixY()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Calculate\+Characteristic\+MatrixY (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the way to assemble the global stiff matrix In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. mat\+Calculate\+Characteristic\+MatrixX is the function used to calculate the global derivative with the central flux considered in the x direction 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_ae641189c4f37199dd5b50a72a116f20a}\label{class_ndg_nonhydrostatic_abstract_test_ae641189c4f37199dd5b50a72a116f20a}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX@{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX}}
+\index{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX@{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Calculate\+Conservative\+Variable\+Related\+Matrix\+X()}{testmatCalculateConservativeVariableRelatedMatrixX()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixX (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the way to assemble the global stiff matrix In this study, the global matrix is assembled at the initial stage of the computation so as to reduce the computational cost. To do that, a matrix was constructed at first. mat\+Calculate\+Characteristic\+MatrixY is the function used to calculate the global derivative with the central flux considered in the y direction 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a12407c5a97033d5ddf54fccabf4a9b09}\label{class_ndg_nonhydrostatic_abstract_test_a12407c5a97033d5ddf54fccabf4a9b09}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY@{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY}}
+\index{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY@{testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Calculate\+Conservative\+Variable\+Related\+Matrix\+Y()}{testmatCalculateConservativeVariableRelatedMatrixY()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Calculate\+Conservative\+Variable\+Related\+MatrixY (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the calculation of the conservative variable, \mbox{[}h hu hv\mbox{]}, related global partial derivative with the central flux considered in the x direction mat\+Calculate\+Conservative\+Variable\+Related\+MatrixX is the function used to calculate the global derivative of the conservative variable with the central flux considered in the x direction 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_af2121228e1bbe04aff2baa0f212ce9be}\label{class_ndg_nonhydrostatic_abstract_test_af2121228e1bbe04aff2baa0f212ce9be}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY@{testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY}}
+\index{testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY@{testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+And\+Y()}{testmatCalculateConservativeVariableRelatedUpwindedMatrixXAndY()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Calculate\+Conservative\+Variable\+Related\+Upwinded\+Matrix\+X\+AndY (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_adb76f62e03e412b79391b47662fbba67}\label{class_ndg_nonhydrostatic_abstract_test_adb76f62e03e412b79391b47662fbba67}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value@{testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value}}
+\index{testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value@{testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value()}{testmatEvaluateNonhydrostaticSurfaceValue()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Evaluate\+Nonhydrostatic\+Surface\+Value (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a140557f2bf245f10dd6c548abf4fd4f2}\label{class_ndg_nonhydrostatic_abstract_test_a140557f2bf245f10dd6c548abf4fd4f2}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Get\+Face\+Value@{testmat\+Get\+Face\+Value}}
+\index{testmat\+Get\+Face\+Value@{testmat\+Get\+Face\+Value}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Get\+Face\+Value()}{testmatGetFaceValue()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Get\+Face\+Value (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the boundary type related non-\/hydrostatic information matrix Eid\+Boundary\+Type is the flag matrix used to impose the boundary related Non-\/hydrostatic condition, at both the slip wall and non-\/slip wall boundaries, this value is set to 1 to indicate the zero gradient non-\/hydrostatic pressure condition(\$q$^\wedge$+ = q$^\wedge$-\/\$) and the zero non-\/hydrostatic gradient condition(\$\{ q$^\wedge$+\}\{ x\} =-\/\{ q$^\wedge$-\/\}\{ x\} \$), while at the clamped type boundaries, this value is set to -\/1 to indicate the zero non-\/hydrostatic pressure condition(\$q$^\wedge$+ = -\/q$^\wedge$-\/\$) and the zero gradient non-\/hydrostatic gradient condition (\$\{ q$^\wedge$+\}\{ x\} =\{ q$^\wedge$-\/\}\{ x\} \$) 
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_aa97093daf733e4cc4dc3ff15db9cec3c}\label{class_ndg_nonhydrostatic_abstract_test_aa97093daf733e4cc4dc3ff15db9cec3c}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition@{testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition}}
+\index{testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition@{testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition()}{testmatImposeNonhydroRelatedBoundaryCondition()}}
+{\footnotesize\ttfamily function Ndg\+Nonhydrostatic\+Abstract\+Test\+::testmat\+Impose\+Nonhydro\+Related\+Boundary\+Condition (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+function for testing the Nonhydrostatic pressure at face point 
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a93c380296a5041ae0c40aaab83f9a412}\label{class_ndg_nonhydrostatic_abstract_test_a93c380296a5041ae0c40aaab83f9a412}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!gra@{gra}}
+\index{gra@{gra}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property Ndg\+Nonhydrostatic\+Abstract\+Test\+::gra = 9.\+81}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a1fe286c21310d6e066fb3ebd6030a212}\label{class_ndg_nonhydrostatic_abstract_test_a1fe286c21310d6e066fb3ebd6030a212}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!hmin@{hmin}}
+\index{hmin@{hmin}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property Ndg\+Nonhydrostatic\+Abstract\+Test\+::hmin = 1e}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a56cc33e2601e720147400387ba4df15b}\label{class_ndg_nonhydrostatic_abstract_test_a56cc33e2601e720147400387ba4df15b}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!rho@{rho}}
+\index{rho@{rho}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{rho}{rho}}
+{\footnotesize\ttfamily Constant Property Ndg\+Nonhydrostatic\+Abstract\+Test\+::rho = 1000}
+
+\mbox{\Hypertarget{class_ndg_nonhydrostatic_abstract_test_a3859c87e1ad5683b16464201f2c5c129}\label{class_ndg_nonhydrostatic_abstract_test_a3859c87e1ad5683b16464201f2c5c129}} 
+\index{Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}!tol@{tol}}
+\index{tol@{tol}!Ndg\+Nonhydrostatic\+Abstract\+Test@{Ndg\+Nonhydrostatic\+Abstract\+Test}}
+\subsubsection{\texorpdfstring{tol}{tol}}
+{\footnotesize\ttfamily Constant Property Ndg\+Nonhydrostatic\+Abstract\+Test\+::tol = 10}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_nonhydrostatic_abstract_test_8m}{Ndg\+Nonhydrostatic\+Abstract\+Test.\+m}\end{DoxyCompactItemize}

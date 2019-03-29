@@ -1,0 +1,441 @@
+\hypertarget{class_ndg_extend_mesh3d}{}\section{Ndg\+Extend\+Mesh3d Class Reference}
+\label{class_ndg_extend_mesh3d}\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+
+
+three-\/dimensional vertical extended mesh  
+
+
+
+
+Inheritance diagram for Ndg\+Extend\+Mesh3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{d0/d21/class_ndg_extend_mesh3d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Extend\+Mesh3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=178pt]{d8/d5b/class_ndg_extend_mesh3d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a2c36b3f74eb8dfb965561150d89d1e8a}{Ndg\+Extend\+Mesh3d} (in \hyperlink{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}{cell}, in \hyperlink{class_ndg_extend_mesh3d_a93abeffb02cc5fb2c6b4f8786d31e282}{mesh2d}, in vzs, in vzb, in \hyperlink{class_ndg_extend_mesh3d_a68d35b55601da05f983c888ce3309849}{Nz})
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a7839527d840c61037d5332b650fc01d7}{proj\+\_\+vert2node} (in obj, in vertQ)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_ndg_extend_mesh3d_a75a9e610f14c80a86cc82aed5953ddaa}{type} = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672a4e749d96848830bd18200e5055f83634}{enum\+Mesh\+Dim.\+Three}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}{cell}
+\begin{DoxyCompactList}\small\item\em std cell object \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a93abeffb02cc5fb2c6b4f8786d31e282}{mesh2d}
+\begin{DoxyCompactList}\small\item\em 2D mesh object \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a93ca38b920f55095f981855e6401a3fb}{K}
+\begin{DoxyCompactList}\small\item\em number of element \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a68d35b55601da05f983c888ce3309849}{Nz}
+\begin{DoxyCompactList}\small\item\em vertical layer \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_ab987a5dc128812bd25ac028a70212adf}{Nv}
+\begin{DoxyCompactList}\small\item\em number of vertices \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a8d857a0cfba06d4d7d16857e0e98e4e0}{E\+ToV}
+\begin{DoxyCompactList}\small\item\em vertex index in each element \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a707fc48fcf344105ef2a187af5fff963}{E\+ToR}
+\begin{DoxyCompactList}\small\item\em region types for each element \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_afb4b1254bc0cc86fc2e58b5595d37b54}{vx}
+\begin{DoxyCompactList}\small\item\em coordinate of vertex \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_afde3cac5e29d5055cf1a9559abf0336c}{Bottom\+Edge}
+\begin{DoxyCompactList}\small\item\em edge objects \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_ad639925e01064ee306272b970c75a460}{Inner\+Edge}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_aebeb43d01e2f24ecf3eadaa874b9c611}{Bottom\+Boundary\+Edge}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_acd9261022269d73bd681fdacbd4e0540}{Boundary\+Edge}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a7d004f753e448f5464d30fde21ed3698}{Surface\+Boundary\+Edge}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a23eb9078aa41067a20143d23dbb8b1c2}{ind}
+\begin{DoxyCompactList}\small\item\em mesh index \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a24f9819859796e6360dec222c6b23425}{Get\+Node\+Coor} (in obj)
+\begin{DoxyCompactList}\small\item\em draw horizontal result \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_extend_mesh3d_a9e26fc541395a6e4e2cc7361c6963bd4}{draw\+Horizon\+Slice} (in obj, in node\+Field3d)
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a7b27d1422cdb3d67c69d3b1ba56ce829}{draw\+New3d\+Figure} (in obj, in \hyperlink{class_ndg_extend_mesh3d_adf3495103decb1d0f3b93fd0335f4d24}{x}, in y, in z, in cvar)
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a7550c35bc76273fb8292114e68b16a23}{Update\+\_\+\+Figure} (in handle, in xvar, in yvar, in zvar, in cvar)
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a59dcfe75f7f6c3facd589749512788d3}{Extend2d\+Field} (in obj, in field2d)
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a536d7bc178fd14d4e98e389aa7209dd8}{Extend\+Mesh3d} (in obj, in \hyperlink{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}{cell}, in \hyperlink{class_ndg_extend_mesh3d_a93abeffb02cc5fb2c6b4f8786d31e282}{mesh2d}, in \hyperlink{class_ndg_extend_mesh3d_a68d35b55601da05f983c888ce3309849}{Nz})
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a05a1fe6d1353846fbfc886c42228191d}{Jacobian3d} (in obj, in \hyperlink{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}{cell})
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a6d7981dc92a9f06ac9e242128cf44af3}{Vertical\+Column\+Integral\+Field} (in obj, in field3d)
+\item 
+function \hyperlink{class_ndg_extend_mesh3d_a54bbce0b1db842e3f12aa3f12434c869}{Vertical\+Integral\+Field} (in obj, in field3d)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_accb32b151195a5247f58836cbaf6dc30}{E\+ToL}
+\begin{DoxyCompactList}\small\item\em element index in each layer \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a1a2e5c2de80b2827daac20f40ab178b0}{E\+ToM}
+\begin{DoxyCompactList}\small\item\em index of adjecent mesh \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_af30d668453d4c28ff1dbd43cd9ef25b9}{E\+ToE}
+\begin{DoxyCompactList}\small\item\em index of adjacent elements and faces \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_adf3495103decb1d0f3b93fd0335f4d24}{x}
+\begin{DoxyCompactList}\small\item\em coordinate of interp points \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_aab4b23b87da0a6cc916b4967850ecd4e}{J}
+\begin{DoxyCompactList}\small\item\em determination of Jacobian matrix at each interp points \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a8c1a5dd8c8a0ec0152d40f3ba7a03cfd}{rx}
+\begin{DoxyCompactList}\small\item\em Jacobian matrix entries. \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_aeac715fab7dd42bc3cd5d176daae2a65}{sx}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_ae4f57beec9e4432ddfd79244d6874dcf}{tx}
+\item 
+Property \hyperlink{class_ndg_extend_mesh3d_abe68d6b73dc3d03e408b96e383d004b1}{L\+AV}
+\begin{DoxyCompactList}\small\item\em length/area/volume of each element \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_a4c84a58796461c7ac15c96f7f547dcc5}{char\+Length}
+\begin{DoxyCompactList}\small\item\em character length of each element \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_extend_mesh3d_aaba4d6b432ea9204e59672e0fc6013fa}{figure\+\_\+handle}
+\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+three-\/dimensional vertical extended mesh 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a2c36b3f74eb8dfb965561150d89d1e8a}\label{class_ndg_extend_mesh3d_a2c36b3f74eb8dfb965561150d89d1e8a}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Ndg\+Extend\+Mesh3d()}{NdgExtendMesh3d()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Ndg\+Extend\+Mesh3d (\begin{DoxyParamCaption}\item[{in}]{cell,  }\item[{in}]{mesh2d,  }\item[{in}]{vzs,  }\item[{in}]{vzb,  }\item[{in}]{Nz }\end{DoxyParamCaption})}
+
+construction function 
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em cell} & reference element \\
+\hline
+\mbox{\tt in}  & {\em mesh2d} & two-\/dimensional mesh object \\
+\hline
+\mbox{\tt in}  & {\em vzs} & vertex surface elevation \\
+\hline
+\mbox{\tt in}  & {\em vzb} & vertex bottom elevation \\
+\hline
+\mbox{\tt in}  & {\em Nz} & num of vertical layer \\
+\hline
+\end{DoxyParams}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a9e26fc541395a6e4e2cc7361c6963bd4}\label{class_ndg_extend_mesh3d_a9e26fc541395a6e4e2cc7361c6963bd4}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!draw\+Horizon\+Slice@{draw\+Horizon\+Slice}}
+\index{draw\+Horizon\+Slice@{draw\+Horizon\+Slice}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{draw\+Horizon\+Slice()}{drawHorizonSlice()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::draw\+Horizon\+Slice (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{node\+Field3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a7b27d1422cdb3d67c69d3b1ba56ce829}\label{class_ndg_extend_mesh3d_a7b27d1422cdb3d67c69d3b1ba56ce829}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!draw\+New3d\+Figure@{draw\+New3d\+Figure}}
+\index{draw\+New3d\+Figure@{draw\+New3d\+Figure}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{draw\+New3d\+Figure()}{drawNew3dFigure()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::draw\+New3d\+Figure (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{y,  }\item[{in}]{z,  }\item[{in}]{cvar }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a59dcfe75f7f6c3facd589749512788d3}\label{class_ndg_extend_mesh3d_a59dcfe75f7f6c3facd589749512788d3}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Extend2d\+Field@{Extend2d\+Field}}
+\index{Extend2d\+Field@{Extend2d\+Field}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Extend2d\+Field()}{Extend2dField()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Extend2d\+Field (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{field2d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a536d7bc178fd14d4e98e389aa7209dd8}\label{class_ndg_extend_mesh3d_a536d7bc178fd14d4e98e389aa7209dd8}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Extend\+Mesh3d@{Extend\+Mesh3d}}
+\index{Extend\+Mesh3d@{Extend\+Mesh3d}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Extend\+Mesh3d()}{ExtendMesh3d()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Extend\+Mesh3d (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{cell,  }\item[{in}]{mesh2d,  }\item[{in}]{Nz }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a24f9819859796e6360dec222c6b23425}\label{class_ndg_extend_mesh3d_a24f9819859796e6360dec222c6b23425}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Get\+Node\+Coor@{Get\+Node\+Coor}}
+\index{Get\+Node\+Coor@{Get\+Node\+Coor}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Get\+Node\+Coor()}{GetNodeCoor()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Get\+Node\+Coor (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+draw horizontal result 
+
+draw vertical section evaluate vertical integral result extend 2d field to 3d evaluate vertical integral from bottom to each node \mbox{\Hypertarget{class_ndg_extend_mesh3d_a05a1fe6d1353846fbfc886c42228191d}\label{class_ndg_extend_mesh3d_a05a1fe6d1353846fbfc886c42228191d}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Jacobian3d@{Jacobian3d}}
+\index{Jacobian3d@{Jacobian3d}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Jacobian3d()}{Jacobian3d()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Jacobian3d (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{cell }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a7839527d840c61037d5332b650fc01d7}\label{class_ndg_extend_mesh3d_a7839527d840c61037d5332b650fc01d7}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!proj\+\_\+vert2node@{proj\+\_\+vert2node}}
+\index{proj\+\_\+vert2node@{proj\+\_\+vert2node}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{proj\+\_\+vert2node()}{proj\_vert2node()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::proj\+\_\+vert2node (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{vertQ }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a7550c35bc76273fb8292114e68b16a23}\label{class_ndg_extend_mesh3d_a7550c35bc76273fb8292114e68b16a23}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Update\+\_\+\+Figure@{Update\+\_\+\+Figure}}
+\index{Update\+\_\+\+Figure@{Update\+\_\+\+Figure}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Update\+\_\+\+Figure()}{Update\_Figure()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Update\+\_\+\+Figure (\begin{DoxyParamCaption}\item[{in}]{handle,  }\item[{in}]{xvar,  }\item[{in}]{yvar,  }\item[{in}]{zvar,  }\item[{in}]{cvar }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a6d7981dc92a9f06ac9e242128cf44af3}\label{class_ndg_extend_mesh3d_a6d7981dc92a9f06ac9e242128cf44af3}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Vertical\+Column\+Integral\+Field@{Vertical\+Column\+Integral\+Field}}
+\index{Vertical\+Column\+Integral\+Field@{Vertical\+Column\+Integral\+Field}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Vertical\+Column\+Integral\+Field()}{VerticalColumnIntegralField()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Vertical\+Column\+Integral\+Field (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{field3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a54bbce0b1db842e3f12aa3f12434c869}\label{class_ndg_extend_mesh3d_a54bbce0b1db842e3f12aa3f12434c869}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Vertical\+Integral\+Field@{Vertical\+Integral\+Field}}
+\index{Vertical\+Integral\+Field@{Vertical\+Integral\+Field}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Vertical\+Integral\+Field()}{VerticalIntegralField()}}
+{\footnotesize\ttfamily function Ndg\+Extend\+Mesh3d\+::\+Vertical\+Integral\+Field (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{field3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_aebeb43d01e2f24ecf3eadaa874b9c611}\label{class_ndg_extend_mesh3d_aebeb43d01e2f24ecf3eadaa874b9c611}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Bottom\+Boundary\+Edge@{Bottom\+Boundary\+Edge}}
+\index{Bottom\+Boundary\+Edge@{Bottom\+Boundary\+Edge}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Bottom\+Boundary\+Edge}{BottomBoundaryEdge}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Bottom\+Boundary\+Edge}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_afde3cac5e29d5055cf1a9559abf0336c}\label{class_ndg_extend_mesh3d_afde3cac5e29d5055cf1a9559abf0336c}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Bottom\+Edge@{Bottom\+Edge}}
+\index{Bottom\+Edge@{Bottom\+Edge}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Bottom\+Edge}{BottomEdge}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Bottom\+Edge}
+
+
+
+edge objects 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_acd9261022269d73bd681fdacbd4e0540}\label{class_ndg_extend_mesh3d_acd9261022269d73bd681fdacbd4e0540}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Boundary\+Edge@{Boundary\+Edge}}
+\index{Boundary\+Edge@{Boundary\+Edge}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Boundary\+Edge}{BoundaryEdge}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Boundary\+Edge}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}\label{class_ndg_extend_mesh3d_a56772bd06c09acb1334f90e959f3f767}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!cell@{cell}}
+\index{cell@{cell}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{cell}{cell}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::cell}
+
+
+
+std cell object 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a4c84a58796461c7ac15c96f7f547dcc5}\label{class_ndg_extend_mesh3d_a4c84a58796461c7ac15c96f7f547dcc5}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!char\+Length@{char\+Length}}
+\index{char\+Length@{char\+Length}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{char\+Length}{charLength}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::char\+Length\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+character length of each element 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_af30d668453d4c28ff1dbd43cd9ef25b9}\label{class_ndg_extend_mesh3d_af30d668453d4c28ff1dbd43cd9ef25b9}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!E\+ToE@{E\+ToE}}
+\index{E\+ToE@{E\+ToE}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{E\+ToE}{EToE}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+E\+ToE\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+index of adjacent elements and faces 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_accb32b151195a5247f58836cbaf6dc30}\label{class_ndg_extend_mesh3d_accb32b151195a5247f58836cbaf6dc30}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!E\+ToL@{E\+ToL}}
+\index{E\+ToL@{E\+ToL}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{E\+ToL}{EToL}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+E\+ToL\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+element index in each layer 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a1a2e5c2de80b2827daac20f40ab178b0}\label{class_ndg_extend_mesh3d_a1a2e5c2de80b2827daac20f40ab178b0}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!E\+ToM@{E\+ToM}}
+\index{E\+ToM@{E\+ToM}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{E\+ToM}{EToM}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+E\+ToM\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+index of adjecent mesh 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a707fc48fcf344105ef2a187af5fff963}\label{class_ndg_extend_mesh3d_a707fc48fcf344105ef2a187af5fff963}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!E\+ToR@{E\+ToR}}
+\index{E\+ToR@{E\+ToR}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{E\+ToR}{EToR}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+E\+ToR}
+
+
+
+region types for each element 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a8d857a0cfba06d4d7d16857e0e98e4e0}\label{class_ndg_extend_mesh3d_a8d857a0cfba06d4d7d16857e0e98e4e0}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!E\+ToV@{E\+ToV}}
+\index{E\+ToV@{E\+ToV}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{E\+ToV}{EToV}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+E\+ToV}
+
+
+
+vertex index in each element 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_aaba4d6b432ea9204e59672e0fc6013fa}\label{class_ndg_extend_mesh3d_aaba4d6b432ea9204e59672e0fc6013fa}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!figure\+\_\+handle@{figure\+\_\+handle}}
+\index{figure\+\_\+handle@{figure\+\_\+handle}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{figure\+\_\+handle}{figure\_handle}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::figure\+\_\+handle\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a23eb9078aa41067a20143d23dbb8b1c2}\label{class_ndg_extend_mesh3d_a23eb9078aa41067a20143d23dbb8b1c2}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!ind@{ind}}
+\index{ind@{ind}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{ind}{ind}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::ind}
+
+
+
+mesh index 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_ad639925e01064ee306272b970c75a460}\label{class_ndg_extend_mesh3d_ad639925e01064ee306272b970c75a460}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Inner\+Edge@{Inner\+Edge}}
+\index{Inner\+Edge@{Inner\+Edge}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Inner\+Edge}{InnerEdge}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Inner\+Edge}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_aab4b23b87da0a6cc916b4967850ecd4e}\label{class_ndg_extend_mesh3d_aab4b23b87da0a6cc916b4967850ecd4e}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!J@{J}}
+\index{J@{J}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{J}{J}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::J\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+determination of Jacobian matrix at each interp points 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a93ca38b920f55095f981855e6401a3fb}\label{class_ndg_extend_mesh3d_a93ca38b920f55095f981855e6401a3fb}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!K@{K}}
+\index{K@{K}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{K}{K}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::K}
+
+
+
+number of element 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_abe68d6b73dc3d03e408b96e383d004b1}\label{class_ndg_extend_mesh3d_abe68d6b73dc3d03e408b96e383d004b1}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!L\+AV@{L\+AV}}
+\index{L\+AV@{L\+AV}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{L\+AV}{LAV}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+L\+AV\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+length/area/volume of each element 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a93abeffb02cc5fb2c6b4f8786d31e282}\label{class_ndg_extend_mesh3d_a93abeffb02cc5fb2c6b4f8786d31e282}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!mesh2d@{mesh2d}}
+\index{mesh2d@{mesh2d}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{mesh2d}{mesh2d}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::mesh2d}
+
+
+
+2D mesh object 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_ab987a5dc128812bd25ac028a70212adf}\label{class_ndg_extend_mesh3d_ab987a5dc128812bd25ac028a70212adf}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Nv@{Nv}}
+\index{Nv@{Nv}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Nv}{Nv}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Nv}
+
+
+
+number of vertices 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a68d35b55601da05f983c888ce3309849}\label{class_ndg_extend_mesh3d_a68d35b55601da05f983c888ce3309849}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Nz@{Nz}}
+\index{Nz@{Nz}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Nz}{Nz}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Nz}
+
+
+
+vertical layer 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a8c1a5dd8c8a0ec0152d40f3ba7a03cfd}\label{class_ndg_extend_mesh3d_a8c1a5dd8c8a0ec0152d40f3ba7a03cfd}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!rx@{rx}}
+\index{rx@{rx}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{rx}{rx}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::rx\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Jacobian matrix entries. 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a7d004f753e448f5464d30fde21ed3698}\label{class_ndg_extend_mesh3d_a7d004f753e448f5464d30fde21ed3698}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!Surface\+Boundary\+Edge@{Surface\+Boundary\+Edge}}
+\index{Surface\+Boundary\+Edge@{Surface\+Boundary\+Edge}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{Surface\+Boundary\+Edge}{SurfaceBoundaryEdge}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::\+Surface\+Boundary\+Edge}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_aeac715fab7dd42bc3cd5d176daae2a65}\label{class_ndg_extend_mesh3d_aeac715fab7dd42bc3cd5d176daae2a65}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!sx@{sx}}
+\index{sx@{sx}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{sx}{sx}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::sx\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_ae4f57beec9e4432ddfd79244d6874dcf}\label{class_ndg_extend_mesh3d_ae4f57beec9e4432ddfd79244d6874dcf}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!tx@{tx}}
+\index{tx@{tx}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{tx}{tx}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::tx\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_a75a9e610f14c80a86cc82aed5953ddaa}\label{class_ndg_extend_mesh3d_a75a9e610f14c80a86cc82aed5953ddaa}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!type@{type}}
+\index{type@{type}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily Constant Property Ndg\+Extend\+Mesh3d\+::type = \hyperlink{classenum_mesh_dim_a5a67c42a0c79eab8e32b9c613507a672a4e749d96848830bd18200e5055f83634}{enum\+Mesh\+Dim.\+Three}}
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_afb4b1254bc0cc86fc2e58b5595d37b54}\label{class_ndg_extend_mesh3d_afb4b1254bc0cc86fc2e58b5595d37b54}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!vx@{vx}}
+\index{vx@{vx}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{vx}{vx}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::vx}
+
+
+
+coordinate of vertex 
+
+\mbox{\Hypertarget{class_ndg_extend_mesh3d_adf3495103decb1d0f3b93fd0335f4d24}\label{class_ndg_extend_mesh3d_adf3495103decb1d0f3b93fd0335f4d24}} 
+\index{Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}!x@{x}}
+\index{x@{x}!Ndg\+Extend\+Mesh3d@{Ndg\+Extend\+Mesh3d}}
+\subsubsection{\texorpdfstring{x}{x}}
+{\footnotesize\ttfamily Property Ndg\+Extend\+Mesh3d\+::x\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+coordinate of interp points 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_extend_mesh3d_8m}{Ndg\+Extend\+Mesh3d.\+m}\end{DoxyCompactItemize}

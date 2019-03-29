@@ -1,0 +1,176 @@
+\hypertarget{class_abstract_analysis}{}\section{Abstract\+Analysis Class Reference}
+\label{class_abstract_analysis}\index{Abstract\+Analysis@{Abstract\+Analysis}}
+
+
+Inheritance diagram for Abstract\+Analysis\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=170pt]{d3/de7/class_abstract_analysis__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Abstract\+Analysis\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=170pt]{dd/df2/class_abstract_analysis__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_abstract_analysis_a05370192749aeff8a83230e3edb767af}{Abstract\+Analysis} (in \hyperlink{class_abstract_analysis_aa0d0d19a77f93d3ad8d25f4812d0b42f}{phys})
+\item 
+function \hyperlink{class_abstract_analysis_a2e6a5cd20bf646aa0a4636d021b4d4e6}{Interp\+Gauge\+Result} (in obj, in fphys)
+\item 
+function \hyperlink{class_abstract_analysis_a7f07dfe4405450e9a9969b7a59e12664}{Interp\+Output\+Result2\+Gauge\+Point} (in obj, in step)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_abstract_analysis_aa0d0d19a77f93d3ad8d25f4812d0b42f}{phys}
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{class_abstract_analysis_a7e27be73311a387a786791b96c1f8459}{access\+Gauge\+Point\+Location} (in obj)
+\item 
+virtual \hyperlink{class_abstract_analysis_afab5faf2b297303497bfd7a181ad4e8c}{assess\+Gauge\+Interp\+Matrix} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_abstract_analysis_af715cdbe228c7cd479c9d4fc362d956d}{Ng}
+\begin{DoxyCompactList}\small\item\em num of gauge points \end{DoxyCompactList}\item 
+Property \hyperlink{class_abstract_analysis_a0f64f43406510dbaa9689003375c0cf9}{Nfield}
+\begin{DoxyCompactList}\small\item\em num of physical field \end{DoxyCompactList}\item 
+Property \hyperlink{class_abstract_analysis_abaf0926252e93facb0590298a27f0ae6}{xg}
+\begin{DoxyCompactList}\small\item\em gauge point position \end{DoxyCompactList}\item 
+Property \hyperlink{class_abstract_analysis_ac7e8144eb8a0dd2a234bf60469c899df}{gauge\+Mesh}
+\begin{DoxyCompactList}\small\item\em mesh id of gauge point location \end{DoxyCompactList}\item 
+Property \hyperlink{class_abstract_analysis_a261e50d6b812a8fc4c6eb08578c46a92}{gauge\+Cell}
+\begin{DoxyCompactList}\small\item\em cell id of gauge point location \end{DoxyCompactList}\item 
+Property \hyperlink{class_abstract_analysis_a4e9418dfd5f4564c5b78179a0fb6e1bb}{Vg}
+\begin{DoxyCompactList}\small\item\em interp matrix \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_abstract_analysis_a05370192749aeff8a83230e3edb767af}\label{class_abstract_analysis_a05370192749aeff8a83230e3edb767af}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Abstract\+Analysis@{Abstract\+Analysis}}
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Abstract\+Analysis()}{AbstractAnalysis()}}
+{\footnotesize\ttfamily function Abstract\+Analysis\+::\+Abstract\+Analysis (\begin{DoxyParamCaption}\item[{in}]{phys }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_abstract_analysis_a7e27be73311a387a786791b96c1f8459}\label{class_abstract_analysis_a7e27be73311a387a786791b96c1f8459}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}}
+\index{access\+Gauge\+Point\+Location@{access\+Gauge\+Point\+Location}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{access\+Gauge\+Point\+Location()}{accessGaugePointLocation()}}
+{\footnotesize\ttfamily virtual Abstract\+Analysis\+::access\+Gauge\+Point\+Location (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \hyperlink{class_analysis2d_ad58c2097db31a0eb0ae6b4f4624383ef}{Analysis2d}.
+
+\mbox{\Hypertarget{class_abstract_analysis_afab5faf2b297303497bfd7a181ad4e8c}\label{class_abstract_analysis_afab5faf2b297303497bfd7a181ad4e8c}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!assess\+Gauge\+Interp\+Matrix@{assess\+Gauge\+Interp\+Matrix}}
+\index{assess\+Gauge\+Interp\+Matrix@{assess\+Gauge\+Interp\+Matrix}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{assess\+Gauge\+Interp\+Matrix()}{assessGaugeInterpMatrix()}}
+{\footnotesize\ttfamily virtual Abstract\+Analysis\+::assess\+Gauge\+Interp\+Matrix (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \hyperlink{class_analysis2d_a6c0bcc80a3922d5e9209b2bcd15734f9}{Analysis2d}.
+
+\mbox{\Hypertarget{class_abstract_analysis_a2e6a5cd20bf646aa0a4636d021b4d4e6}\label{class_abstract_analysis_a2e6a5cd20bf646aa0a4636d021b4d4e6}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Interp\+Gauge\+Result@{Interp\+Gauge\+Result}}
+\index{Interp\+Gauge\+Result@{Interp\+Gauge\+Result}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Interp\+Gauge\+Result()}{InterpGaugeResult()}}
+{\footnotesize\ttfamily function Abstract\+Analysis\+::\+Interp\+Gauge\+Result (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_abstract_analysis_a7f07dfe4405450e9a9969b7a59e12664}\label{class_abstract_analysis_a7f07dfe4405450e9a9969b7a59e12664}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Interp\+Output\+Result2\+Gauge\+Point@{Interp\+Output\+Result2\+Gauge\+Point}}
+\index{Interp\+Output\+Result2\+Gauge\+Point@{Interp\+Output\+Result2\+Gauge\+Point}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Interp\+Output\+Result2\+Gauge\+Point()}{InterpOutputResult2GaugePoint()}}
+{\footnotesize\ttfamily function Abstract\+Analysis\+::\+Interp\+Output\+Result2\+Gauge\+Point (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{step }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_abstract_analysis_a261e50d6b812a8fc4c6eb08578c46a92}\label{class_abstract_analysis_a261e50d6b812a8fc4c6eb08578c46a92}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!gauge\+Cell@{gauge\+Cell}}
+\index{gauge\+Cell@{gauge\+Cell}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{gauge\+Cell}{gaugeCell}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::gauge\+Cell\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+cell id of gauge point location 
+
+\mbox{\Hypertarget{class_abstract_analysis_ac7e8144eb8a0dd2a234bf60469c899df}\label{class_abstract_analysis_ac7e8144eb8a0dd2a234bf60469c899df}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!gauge\+Mesh@{gauge\+Mesh}}
+\index{gauge\+Mesh@{gauge\+Mesh}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{gauge\+Mesh}{gaugeMesh}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::gauge\+Mesh\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+mesh id of gauge point location 
+
+\mbox{\Hypertarget{class_abstract_analysis_a0f64f43406510dbaa9689003375c0cf9}\label{class_abstract_analysis_a0f64f43406510dbaa9689003375c0cf9}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Nfield@{Nfield}}
+\index{Nfield@{Nfield}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Nfield}{Nfield}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::\+Nfield\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+num of physical field 
+
+\mbox{\Hypertarget{class_abstract_analysis_af715cdbe228c7cd479c9d4fc362d956d}\label{class_abstract_analysis_af715cdbe228c7cd479c9d4fc362d956d}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Ng@{Ng}}
+\index{Ng@{Ng}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Ng}{Ng}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::\+Ng\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+num of gauge points 
+
+\mbox{\Hypertarget{class_abstract_analysis_aa0d0d19a77f93d3ad8d25f4812d0b42f}\label{class_abstract_analysis_aa0d0d19a77f93d3ad8d25f4812d0b42f}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!phys@{phys}}
+\index{phys@{phys}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{phys}{phys}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::phys}
+
+\mbox{\Hypertarget{class_abstract_analysis_a4e9418dfd5f4564c5b78179a0fb6e1bb}\label{class_abstract_analysis_a4e9418dfd5f4564c5b78179a0fb6e1bb}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!Vg@{Vg}}
+\index{Vg@{Vg}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{Vg}{Vg}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::\+Vg\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+interp matrix 
+
+\mbox{\Hypertarget{class_abstract_analysis_abaf0926252e93facb0590298a27f0ae6}\label{class_abstract_analysis_abaf0926252e93facb0590298a27f0ae6}} 
+\index{Abstract\+Analysis@{Abstract\+Analysis}!xg@{xg}}
+\index{xg@{xg}!Abstract\+Analysis@{Abstract\+Analysis}}
+\subsubsection{\texorpdfstring{xg}{xg}}
+{\footnotesize\ttfamily Property Abstract\+Analysis\+::xg\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+gauge point position 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_abstract_analysis_8m}{Abstract\+Analysis.\+m}\end{DoxyCompactItemize}

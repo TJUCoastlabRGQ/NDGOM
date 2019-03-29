@@ -1,0 +1,77 @@
+\hypertarget{class_ndg_vis_auxi_strong_form_solver}{}\section{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver Class Reference}
+\label{class_ndg_vis_auxi_strong_form_solver}\index{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}}
+
+
+Inheritance diagram for Ndg\+Vis\+Auxi\+Strong\+Form\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{d6/df7/class_ndg_vis_auxi_strong_form_solver__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Vis\+Auxi\+Strong\+Form\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=234pt]{d3/d61/class_ndg_vis_auxi_strong_form_solver__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_vis_auxi_strong_form_solver_ac14c302947fc4a8c79aeff4129f4b7b5}{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver} (in phys)
+\item 
+function \hyperlink{class_ndg_vis_auxi_strong_form_solver_a4a70d7dccaf49b7ccd8e0579ff011b0b}{evaluate\+Viscosity\+R\+HS} (in obj, in fphys)
+\item 
+function \hyperlink{class_ndg_vis_auxi_strong_form_solver_a640351d1165f9546bf99158a41ee97dd}{evaluate\+Auxialary\+Variable} (in obj, in m, in fphys, in delta\+Varflux)
+\begin{DoxyCompactList}\small\item\em function used to calculate the auxialary variable, size(\+Np, K) \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_vis_auxi_strong_form_solver_ac14c302947fc4a8c79aeff4129f4b7b5}\label{class_ndg_vis_auxi_strong_form_solver_ac14c302947fc4a8c79aeff4129f4b7b5}} 
+\index{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}!Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}}
+\index{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}!Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}}
+\subsubsection{\texorpdfstring{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver()}{NdgVisAuxiStrongFormSolver()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Strong\+Form\+Solver\+::\+Ndg\+Vis\+Auxi\+Strong\+Form\+Solver (\begin{DoxyParamCaption}\item[{in}]{phys }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_vis_auxi_strong_form_solver_a640351d1165f9546bf99158a41ee97dd}\label{class_ndg_vis_auxi_strong_form_solver_a640351d1165f9546bf99158a41ee97dd}} 
+\index{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}!evaluate\+Auxialary\+Variable@{evaluate\+Auxialary\+Variable}}
+\index{evaluate\+Auxialary\+Variable@{evaluate\+Auxialary\+Variable}!Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Auxialary\+Variable()}{evaluateAuxialaryVariable()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Strong\+Form\+Solver\+::evaluate\+Auxialary\+Variable (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{m,  }\item[{in}]{fphys,  }\item[{in}]{delta\+Varflux }\end{DoxyParamCaption})}
+
+
+
+function used to calculate the auxialary variable, size(\+Np, K) 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em m} & Index of the studied mesh, size (T\+Nfp,K,Nvar) \\
+\hline
+\mbox{\tt in}  & {\em fphys} & The fphys value of the studied mesh of index varfield\+Index(i), size (Np,K) \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em } & \\
+\hline
+\end{DoxyRetVals}
+\mbox{\Hypertarget{class_ndg_vis_auxi_strong_form_solver_a4a70d7dccaf49b7ccd8e0579ff011b0b}\label{class_ndg_vis_auxi_strong_form_solver_a4a70d7dccaf49b7ccd8e0579ff011b0b}} 
+\index{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}!evaluate\+Viscosity\+R\+HS@{evaluate\+Viscosity\+R\+HS}}
+\index{evaluate\+Viscosity\+R\+HS@{evaluate\+Viscosity\+R\+HS}!Ndg\+Vis\+Auxi\+Strong\+Form\+Solver@{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Viscosity\+R\+H\+S()}{evaluateViscosityRHS()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Strong\+Form\+Solver\+::evaluate\+Viscosity\+R\+HS (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_vis_auxi_strong_form_solver_8m}{Ndg\+Vis\+Auxi\+Strong\+Form\+Solver.\+m}\end{DoxyCompactItemize}

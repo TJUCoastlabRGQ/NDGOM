@@ -1,0 +1,150 @@
+\hypertarget{class_adv_abstract_var_flow3d}{}\section{Adv\+Abstract\+Var\+Flow3d Class Reference}
+\label{class_adv_abstract_var_flow3d}\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+
+
+Inheritance diagram for Adv\+Abstract\+Var\+Flow3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=216pt]{d1/dbc/class_adv_abstract_var_flow3d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Adv\+Abstract\+Var\+Flow3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=194pt]{d6/d35/class_adv_abstract_var_flow3d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_aa5e5f21952f1cd7a2006cd55a5c87f6a}{Adv\+Abstract\+Var\+Flow3d} ()
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_ab30211bfc272c7a3f25f0a3fe755edfd}{init\+Phys\+From\+Options} (in obj, in mesh)
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_ac20011b55e276c0b317d0ae22a097131}{mat\+Evaluate\+Flux} (in obj, in mesh, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_a08e3d72100586b764ab437d8333be2ba}{mat\+Evaluate\+Surf\+Num\+Flux} (in obj, in mesh, in nx, in ny, in nz, in fm, in fp)
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_a360b4ee85fd66bb70959b5e939842d6c}{mat\+Evaluate\+Surf\+Flux} (in obj, in mesh, in nx, in ny, in nz, in fm)
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_a4e7799c86586415162c2fa86039bf506}{mat\+Impose\+Boundary\+Condition} (in obj, in edge, in nx, in ny, in fm, in fp, in \hyperlink{class_ndg_phys_mat_a2b0e8a77bf5f6fe870b12e400d6d83f3}{fext})
+\item 
+function \hyperlink{class_adv_abstract_var_flow3d_ada60228e747318b6e71b4cfd3221d7a9}{draw\+Vertical\+Section} (in x, in y)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_adv_abstract_var_flow3d_ab5fcb7fe49c1215c05b30044e5c8e21c}{Nfield} = 4
+\begin{DoxyCompactList}\small\item\em Number of physical field. \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_adv_abstract_var_flow3d_a54a5d63c06d105c2e727381b2ff10de1}{Nvar} = 1
+\begin{DoxyCompactList}\small\item\em Number of variable field. \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_adv_abstract_var_flow3d_a385e2d69864aaff7936b3971724a858f}{var\+Field\+Index} = 1
+\begin{DoxyCompactList}\small\item\em field index of variable field \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual function \hyperlink{class_adv_abstract_var_flow3d_a7e025df8fe5bdf6f48f5a2ef72fe2c1b}{get\+Ext\+Func} (in obj, in mesh, in time)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_aa5e5f21952f1cd7a2006cd55a5c87f6a}\label{class_adv_abstract_var_flow3d_aa5e5f21952f1cd7a2006cd55a5c87f6a}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{Adv\+Abstract\+Var\+Flow3d()}{AdvAbstractVarFlow3d()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::\+Adv\+Abstract\+Var\+Flow3d (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_ada60228e747318b6e71b4cfd3221d7a9}\label{class_adv_abstract_var_flow3d_ada60228e747318b6e71b4cfd3221d7a9}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!draw\+Vertical\+Section@{draw\+Vertical\+Section}}
+\index{draw\+Vertical\+Section@{draw\+Vertical\+Section}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{draw\+Vertical\+Section()}{drawVerticalSection()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::draw\+Vertical\+Section (\begin{DoxyParamCaption}\item[{in}]{x,  }\item[{in}]{y }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a7e025df8fe5bdf6f48f5a2ef72fe2c1b}\label{class_adv_abstract_var_flow3d_a7e025df8fe5bdf6f48f5a2ef72fe2c1b}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!get\+Ext\+Func@{get\+Ext\+Func}}
+\index{get\+Ext\+Func@{get\+Ext\+Func}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{get\+Ext\+Func()}{getExtFunc()}}
+{\footnotesize\ttfamily virtual function Adv\+Abstract\+Var\+Flow3d\+::get\+Ext\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Reimplemented in \hyperlink{class_adv_rotation_uniform_mesh3d_aab4b339aef948b6953eb96eb13594026}{Adv\+Rotation\+Uniform\+Mesh3d}.
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_ab30211bfc272c7a3f25f0a3fe755edfd}\label{class_adv_abstract_var_flow3d_ab30211bfc272c7a3f25f0a3fe755edfd}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!init\+Phys\+From\+Options@{init\+Phys\+From\+Options}}
+\index{init\+Phys\+From\+Options@{init\+Phys\+From\+Options}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{init\+Phys\+From\+Options()}{initPhysFromOptions()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::init\+Phys\+From\+Options (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_ac20011b55e276c0b317d0ae22a097131}\label{class_adv_abstract_var_flow3d_ac20011b55e276c0b317d0ae22a097131}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}}
+\index{mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Flux()}{matEvaluateFlux()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::mat\+Evaluate\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{fphys }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a360b4ee85fd66bb70959b5e939842d6c}\label{class_adv_abstract_var_flow3d_a360b4ee85fd66bb70959b5e939842d6c}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!mat\+Evaluate\+Surf\+Flux@{mat\+Evaluate\+Surf\+Flux}}
+\index{mat\+Evaluate\+Surf\+Flux@{mat\+Evaluate\+Surf\+Flux}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Surf\+Flux()}{matEvaluateSurfFlux()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::mat\+Evaluate\+Surf\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{nx,  }\item[{in}]{ny,  }\item[{in}]{nz,  }\item[{in}]{fm }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a08e3d72100586b764ab437d8333be2ba}\label{class_adv_abstract_var_flow3d_a08e3d72100586b764ab437d8333be2ba}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!mat\+Evaluate\+Surf\+Num\+Flux@{mat\+Evaluate\+Surf\+Num\+Flux}}
+\index{mat\+Evaluate\+Surf\+Num\+Flux@{mat\+Evaluate\+Surf\+Num\+Flux}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Surf\+Num\+Flux()}{matEvaluateSurfNumFlux()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::mat\+Evaluate\+Surf\+Num\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{nx,  }\item[{in}]{ny,  }\item[{in}]{nz,  }\item[{in}]{fm,  }\item[{in}]{fp }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a4e7799c86586415162c2fa86039bf506}\label{class_adv_abstract_var_flow3d_a4e7799c86586415162c2fa86039bf506}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!mat\+Impose\+Boundary\+Condition@{mat\+Impose\+Boundary\+Condition}}
+\index{mat\+Impose\+Boundary\+Condition@{mat\+Impose\+Boundary\+Condition}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{mat\+Impose\+Boundary\+Condition()}{matImposeBoundaryCondition()}}
+{\footnotesize\ttfamily function Adv\+Abstract\+Var\+Flow3d\+::mat\+Impose\+Boundary\+Condition (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{edge,  }\item[{in}]{nx,  }\item[{in}]{ny,  }\item[{in}]{fm,  }\item[{in}]{fp,  }\item[{in}]{fext }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_ab5fcb7fe49c1215c05b30044e5c8e21c}\label{class_adv_abstract_var_flow3d_ab5fcb7fe49c1215c05b30044e5c8e21c}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!Nfield@{Nfield}}
+\index{Nfield@{Nfield}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{Nfield}{Nfield}}
+{\footnotesize\ttfamily Constant Property Adv\+Abstract\+Var\+Flow3d\+::\+Nfield = 4}
+
+
+
+Number of physical field. 
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a54a5d63c06d105c2e727381b2ff10de1}\label{class_adv_abstract_var_flow3d_a54a5d63c06d105c2e727381b2ff10de1}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!Nvar@{Nvar}}
+\index{Nvar@{Nvar}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{Nvar}{Nvar}}
+{\footnotesize\ttfamily Constant Property Adv\+Abstract\+Var\+Flow3d\+::\+Nvar = 1}
+
+
+
+Number of variable field. 
+
+\mbox{\Hypertarget{class_adv_abstract_var_flow3d_a385e2d69864aaff7936b3971724a858f}\label{class_adv_abstract_var_flow3d_a385e2d69864aaff7936b3971724a858f}} 
+\index{Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}!var\+Field\+Index@{var\+Field\+Index}}
+\index{var\+Field\+Index@{var\+Field\+Index}!Adv\+Abstract\+Var\+Flow3d@{Adv\+Abstract\+Var\+Flow3d}}
+\subsubsection{\texorpdfstring{var\+Field\+Index}{varFieldIndex}}
+{\footnotesize\ttfamily Constant Property Adv\+Abstract\+Var\+Flow3d\+::var\+Field\+Index = 1}
+
+
+
+field index of variable field 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_adv_abstract_var_flow3d_8m}{Adv\+Abstract\+Var\+Flow3d.\+m}\end{DoxyCompactItemize}

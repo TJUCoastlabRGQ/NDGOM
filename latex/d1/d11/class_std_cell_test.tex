@@ -1,0 +1,189 @@
+\hypertarget{class_std_cell_test}{}\section{Std\+Cell\+Test Class Reference}
+\label{class_std_cell_test}\index{Std\+Cell\+Test@{Std\+Cell\+Test}}
+
+
+Unit test for the \hyperlink{class_std_cell}{Std\+Cell} classes.  
+
+
+
+
+Inheritance diagram for Std\+Cell\+Test\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=210pt]{d2/d86/class_std_cell_test__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Std\+Cell\+Test\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=210pt]{d4/d18/class_std_cell_test__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_std_cell_test_a07438c5c440eda75610e1b36490926d3}{set\+\_\+std\+\_\+cell} (in test, in \hyperlink{class_std_cell_test_a682c89deef81edd34d9e5fe7c84a022c}{type}, in \hyperlink{class_std_cell_test_a4f213b4195801baf37b26318f3aa3da1}{order})
+\begin{DoxyCompactList}\small\item\em get the \hyperlink{class_std_cell}{Std\+Cell} object \end{DoxyCompactList}\item 
+function \hyperlink{class_std_cell_test_af0d37fce9f3b45f745f9450861813c3e}{test\+\_\+point\+\_\+coor} (in test)
+\item 
+function \hyperlink{class_std_cell_test_ac3fd2a9d0f6340ec57fbcf0cc895e61c}{test\+\_\+edge\+\_\+basis\+\_\+val} (in test)
+\begin{DoxyCompactList}\small\item\em test the basis function values on edge quadrature points. Test whether the values of the basis function on I\+P\+PS at edges are equal to the basis function values from the facial cell Vq. $ l_i^{\Omega}(r_q, s_q) = l_{fi}^{\partial \Omega}(r_q), $ while $ l_i^{\Omega} $ is the nodal basis function of interpolation nodes $(r_i, s_i)$, and $ \l_{fi}^{\partial \Omega} $ are the nodal basis function of the boundary cell, and on the interpolation nodel $(r_{fi})$. \end{DoxyCompactList}\item 
+function \hyperlink{class_std_cell_test_ad668015703d9cd0712f7da6b068eadec}{test\+\_\+vand\+\_\+matrix} (in test)
+\item 
+function \hyperlink{class_std_cell_test_a0c6e2a271116021fc3b8812ecb58a6b4}{test\+\_\+quadrature\+\_\+weight} (in test)
+\item 
+function \hyperlink{class_std_cell_test_a0ec69ee05cbd6605acf74b04191ff19d}{test\+\_\+orthgonal\+\_\+func} (in test)
+\begin{DoxyCompactList}\small\item\em test the orthgonality of the basis function \end{DoxyCompactList}\item 
+function \hyperlink{class_std_cell_test_a4140689ee6d75083b6546a334c1d032b}{get\+\_\+ext\+\_\+coor} (in \hyperlink{class_std_cell_test_a24b5d8a0c7f63a12a95c8896b5d1b6ed}{cell})
+\item 
+function \hyperlink{class_std_cell_test_a34e456bd3242bf8b0c6796a94a6a3dae}{get\+\_\+ext\+\_\+vandmatrix} (in \hyperlink{class_std_cell_test_a24b5d8a0c7f63a12a95c8896b5d1b6ed}{cell})
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_std_cell_test_a682c89deef81edd34d9e5fe7c84a022c}{type}
+\begin{DoxyCompactList}\small\item\em test cell types \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_cell_test_a7fe3b32aabce6b77b16c3f505b98540a}{enum\+Std\+Cell}
+\item 
+Property \hyperlink{class_std_cell_test_a4f213b4195801baf37b26318f3aa3da1}{order}
+\begin{DoxyCompactList}\small\item\em test cell orders \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_cell_test_a18a2b19579642ba281c876be496bb1c3}{tol} = 1e
+\begin{DoxyCompactList}\small\item\em tolerance \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_cell_test_a24b5d8a0c7f63a12a95c8896b5d1b6ed}{cell}
+\begin{DoxyCompactList}\small\item\em cell object \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+Unit test for the \hyperlink{class_std_cell}{Std\+Cell} classes. 
+
+
+\begin{DoxyCode}
+addpath(pwd);
+results = runtests(\textcolor{stringliteral}{'NdgCell/test/StdCellTest.m'});
+\end{DoxyCode}
+ This class is part of the N\+D\+G-\/\+F\+EM software. \begin{DoxyAuthor}{Author}
+li12242, Tianjin University, \href{mailto:li12242@tju.edu.cn}{\tt li12242@tju.\+edu.\+cn} 
+\end{DoxyAuthor}
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_std_cell_test_a4140689ee6d75083b6546a334c1d032b}\label{class_std_cell_test_a4140689ee6d75083b6546a334c1d032b}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!get\+\_\+ext\+\_\+coor@{get\+\_\+ext\+\_\+coor}}
+\index{get\+\_\+ext\+\_\+coor@{get\+\_\+ext\+\_\+coor}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{get\+\_\+ext\+\_\+coor()}{get\_ext\_coor()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::get\+\_\+ext\+\_\+coor (\begin{DoxyParamCaption}\item[{in}]{cell }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_std_cell_test_a34e456bd3242bf8b0c6796a94a6a3dae}\label{class_std_cell_test_a34e456bd3242bf8b0c6796a94a6a3dae}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!get\+\_\+ext\+\_\+vandmatrix@{get\+\_\+ext\+\_\+vandmatrix}}
+\index{get\+\_\+ext\+\_\+vandmatrix@{get\+\_\+ext\+\_\+vandmatrix}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{get\+\_\+ext\+\_\+vandmatrix()}{get\_ext\_vandmatrix()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::get\+\_\+ext\+\_\+vandmatrix (\begin{DoxyParamCaption}\item[{in}]{cell }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_std_cell_test_a07438c5c440eda75610e1b36490926d3}\label{class_std_cell_test_a07438c5c440eda75610e1b36490926d3}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!set\+\_\+std\+\_\+cell@{set\+\_\+std\+\_\+cell}}
+\index{set\+\_\+std\+\_\+cell@{set\+\_\+std\+\_\+cell}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{set\+\_\+std\+\_\+cell()}{set\_std\_cell()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::set\+\_\+std\+\_\+cell (\begin{DoxyParamCaption}\item[{in}]{test,  }\item[{in}]{type,  }\item[{in}]{order }\end{DoxyParamCaption})}
+
+
+
+get the \hyperlink{class_std_cell}{Std\+Cell} object 
+
+\mbox{\Hypertarget{class_std_cell_test_ac3fd2a9d0f6340ec57fbcf0cc895e61c}\label{class_std_cell_test_ac3fd2a9d0f6340ec57fbcf0cc895e61c}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!test\+\_\+edge\+\_\+basis\+\_\+val@{test\+\_\+edge\+\_\+basis\+\_\+val}}
+\index{test\+\_\+edge\+\_\+basis\+\_\+val@{test\+\_\+edge\+\_\+basis\+\_\+val}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{test\+\_\+edge\+\_\+basis\+\_\+val()}{test\_edge\_basis\_val()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::test\+\_\+edge\+\_\+basis\+\_\+val (\begin{DoxyParamCaption}\item[{in}]{test }\end{DoxyParamCaption})}
+
+
+
+test the basis function values on edge quadrature points. Test whether the values of the basis function on I\+P\+PS at edges are equal to the basis function values from the facial cell Vq. $ l_i^{\Omega}(r_q, s_q) = l_{fi}^{\partial \Omega}(r_q), $ while $ l_i^{\Omega} $ is the nodal basis function of interpolation nodes $(r_i, s_i)$, and $ \l_{fi}^{\partial \Omega} $ are the nodal basis function of the boundary cell, and on the interpolation nodel $(r_{fi})$. 
+
+\mbox{\Hypertarget{class_std_cell_test_a0ec69ee05cbd6605acf74b04191ff19d}\label{class_std_cell_test_a0ec69ee05cbd6605acf74b04191ff19d}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!test\+\_\+orthgonal\+\_\+func@{test\+\_\+orthgonal\+\_\+func}}
+\index{test\+\_\+orthgonal\+\_\+func@{test\+\_\+orthgonal\+\_\+func}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{test\+\_\+orthgonal\+\_\+func()}{test\_orthgonal\_func()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::test\+\_\+orthgonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{test }\end{DoxyParamCaption})}
+
+
+
+test the orthgonality of the basis function 
+
+\mbox{\Hypertarget{class_std_cell_test_af0d37fce9f3b45f745f9450861813c3e}\label{class_std_cell_test_af0d37fce9f3b45f745f9450861813c3e}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!test\+\_\+point\+\_\+coor@{test\+\_\+point\+\_\+coor}}
+\index{test\+\_\+point\+\_\+coor@{test\+\_\+point\+\_\+coor}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{test\+\_\+point\+\_\+coor()}{test\_point\_coor()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::test\+\_\+point\+\_\+coor (\begin{DoxyParamCaption}\item[{in}]{test }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_std_cell_test_a0c6e2a271116021fc3b8812ecb58a6b4}\label{class_std_cell_test_a0c6e2a271116021fc3b8812ecb58a6b4}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!test\+\_\+quadrature\+\_\+weight@{test\+\_\+quadrature\+\_\+weight}}
+\index{test\+\_\+quadrature\+\_\+weight@{test\+\_\+quadrature\+\_\+weight}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{test\+\_\+quadrature\+\_\+weight()}{test\_quadrature\_weight()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::test\+\_\+quadrature\+\_\+weight (\begin{DoxyParamCaption}\item[{in}]{test }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_std_cell_test_ad668015703d9cd0712f7da6b068eadec}\label{class_std_cell_test_ad668015703d9cd0712f7da6b068eadec}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!test\+\_\+vand\+\_\+matrix@{test\+\_\+vand\+\_\+matrix}}
+\index{test\+\_\+vand\+\_\+matrix@{test\+\_\+vand\+\_\+matrix}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{test\+\_\+vand\+\_\+matrix()}{test\_vand\_matrix()}}
+{\footnotesize\ttfamily function Std\+Cell\+Test\+::test\+\_\+vand\+\_\+matrix (\begin{DoxyParamCaption}\item[{in}]{test }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_std_cell_test_a24b5d8a0c7f63a12a95c8896b5d1b6ed}\label{class_std_cell_test_a24b5d8a0c7f63a12a95c8896b5d1b6ed}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!cell@{cell}}
+\index{cell@{cell}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{cell}{cell}}
+{\footnotesize\ttfamily Property Std\+Cell\+Test\+::cell}
+
+
+
+cell object 
+
+\mbox{\Hypertarget{class_std_cell_test_a7fe3b32aabce6b77b16c3f505b98540a}\label{class_std_cell_test_a7fe3b32aabce6b77b16c3f505b98540a}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!enum\+Std\+Cell@{enum\+Std\+Cell}}
+\index{enum\+Std\+Cell@{enum\+Std\+Cell}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{enum\+Std\+Cell}{enumStdCell}}
+{\footnotesize\ttfamily Property Std\+Cell\+Test\+::enum\+Std\+Cell}
+
+\mbox{\Hypertarget{class_std_cell_test_a4f213b4195801baf37b26318f3aa3da1}\label{class_std_cell_test_a4f213b4195801baf37b26318f3aa3da1}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!order@{order}}
+\index{order@{order}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{order}{order}}
+{\footnotesize\ttfamily Property Std\+Cell\+Test\+::order}
+
+
+
+test cell orders 
+
+\mbox{\Hypertarget{class_std_cell_test_a18a2b19579642ba281c876be496bb1c3}\label{class_std_cell_test_a18a2b19579642ba281c876be496bb1c3}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!tol@{tol}}
+\index{tol@{tol}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{tol}{tol}}
+{\footnotesize\ttfamily Constant Property Std\+Cell\+Test\+::tol = 1e}
+
+
+
+tolerance 
+
+\mbox{\Hypertarget{class_std_cell_test_a682c89deef81edd34d9e5fe7c84a022c}\label{class_std_cell_test_a682c89deef81edd34d9e5fe7c84a022c}} 
+\index{Std\+Cell\+Test@{Std\+Cell\+Test}!type@{type}}
+\index{type@{type}!Std\+Cell\+Test@{Std\+Cell\+Test}}
+\subsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily Property Std\+Cell\+Test\+::type}
+
+
+
+test cell types 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_std_cell_test_8m}{Std\+Cell\+Test.\+m}\end{DoxyCompactItemize}

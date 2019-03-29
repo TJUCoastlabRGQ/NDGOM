@@ -1,0 +1,641 @@
+\hypertarget{class_std_prism_tri}{}\section{Std\+Prism\+Tri Class Reference}
+\label{class_std_prism_tri}\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+
+
+Inheritance diagram for Std\+Prism\+Tri\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{d5/d7a/class_std_prism_tri__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Std\+Prism\+Tri\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=148pt]{d6/d40/class_std_prism_tri__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_std_prism_tri_abef1448e566aa46a77db6122ba6673ea}{Std\+Prism\+Tri} (in Nh, in \hyperlink{class_std_prism_tri_a6d9a746cf2d10610a759d8a3dce6f8e7}{Nz})
+\item 
+function \hyperlink{class_std_prism_tri_ace75f32449fc2e45d3b0d737e8a7a477}{nodal\+\_\+func} (in obj, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s, in t)
+\begin{DoxyCompactList}\small\item\em Evaluate all the nodal basis function values at points. \end{DoxyCompactList}\item 
+function \hyperlink{class_std_prism_tri_a1fcf29bd47a8e4d8e4ecbee0d4e5c8d7}{nodal\+\_\+derivative\+\_\+func} (in obj, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s, in t)
+\begin{DoxyCompactList}\small\item\em Evaluate the derivative nodal function values at points. \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_std_prism_tri_a51803876c1f6f01469a4b5820fac5553}{type} = \hyperlink{classenum_std_cell_ac4c2fa4e189e76e103f3ff9b1d19b9e7a50e59d01719761402ae7fe95c54b1360}{enum\+Std\+Cell.\+Prism\+Tri}
+\begin{DoxyCompactList}\small\item\em reference element type \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_ae8726861a4238aa232cf25ddb40e318c}{Nv} = 6
+\begin{DoxyCompactList}\small\item\em num of vertices \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_a589701d6be2784f667b7608d32205a6e}{L\+AV} = 4
+\begin{DoxyCompactList}\small\item\em volume of reference elements \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_a87d7bf3e382d8683bb7a75b79acc9d4b}{vr} = \mbox{[}
+\begin{DoxyCompactList}\small\item\em vertices coordinates \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_aa4659d9663148da529fc50b5058c03f1}{vs} = \mbox{[}
+\item 
+Constant Property \hyperlink{class_std_prism_tri_a505548c307095d9254e96b82400346b8}{vt} = \mbox{[}
+\item 
+Constant Property \hyperlink{class_std_prism_tri_a3cfc1041c891dcfd731940749d25f055}{Nfv} = \mbox{[}4, 4, 4, 3, 3\mbox{]}
+\begin{DoxyCompactList}\small\item\em num of vertices on each face \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_ae5f4fe1b8473e8313acad8f0bf9adcd5}{F\+ToV} = \mbox{[}1,2,5,4
+\begin{DoxyCompactList}\small\item\em index of interpolation points on each face \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_ad1dae3ee364c0f6f639560c7089ed73a}{Nface} = 5
+\begin{DoxyCompactList}\small\item\em num of faces \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_a51231d155c3ba8a0c673165b3246927b}{face\+Type} = \mbox{[}\hyperlink{classenum_std_cell_ac4c2fa4e189e76e103f3ff9b1d19b9e7a79d1c44e78bdfebfd755a724f5e04029}{enum\+Std\+Cell.\+Quad}, ...
+\begin{DoxyCompactList}\small\item\em element types of each face \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_std_prism_tri_a22f8f05a0e485040d28adc1385258039}{enum\+Std\+Cell}
+\item 
+Property \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}
+\begin{DoxyCompactList}\small\item\em maximum order of basis function \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a6d9a746cf2d10610a759d8a3dce6f8e7}{Nz}
+\begin{DoxyCompactList}\small\item\em maximum polynomial order in vertical direction \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_std_prism_tri_a5a4e1d1a3bbe1b8aea7ae9d0529c78a3}{assemble\+Quadrature\+Matrix} (in obj)
+\begin{DoxyCompactList}\small\item\em Assemble the interpolation matrix of Gauss quadrature nodes The elements of the quadratuer interpolation matrix is $ [V_q]_{i,j} = l_j(\xi_i) $ where $ \xi_i $ is the ith Gauss quadrature nodes. \end{DoxyCompactList}\item 
+function \hyperlink{class_std_prism_tri_a788c97ee74f5c3068038cf4d4008fa64}{assemble\+Mass\+Matrix} (in obj)
+\begin{DoxyCompactList}\small\item\em Assemble the Vandermonde matrix. \end{DoxyCompactList}\item 
+function \hyperlink{class_std_prism_tri_a879d55afa4176ca6174b069b03dd6fce}{Assemble\+Facial\+Node\+Index} (in obj)
+\item 
+function \hyperlink{class_std_prism_tri_a30ab6b775934cbc81fff59c607e9096a}{Assemble\+Vand\+Matrix} (in obj)
+\item 
+function \hyperlink{class_std_prism_tri_af0a8de9e52cec135e335848e68c54de2}{Evaluate\+Vertical\+Integral\+Orthogonal\+Func} (in obj)
+\item 
+function \hyperlink{class_std_prism_tri_a369076123765c2b71c10a098a3ac5e2b}{Legendre\+Norm1d} (in ind, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r})
+\item 
+function \hyperlink{class_std_prism_tri_a2a918b6587e6d53a6d5a2aff056a118c}{derivative\+\_\+orthogonal\+\_\+func} (in obj, in N1, in N2, in td, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s, in t)
+\item 
+function \hyperlink{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}{line\+\_\+orthogonal\+\_\+func} (in ind, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r})
+\item 
+function \hyperlink{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}{tri\+\_\+orthogonal\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in td, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s)
+\item 
+function \hyperlink{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}{simplex2\+DP} (in a, in b, in i, in j)
+\item 
+function \hyperlink{class_std_prism_tri_a4450a453e41593eb2b169ccc719788d8}{line\+\_\+derivative\+\_\+orthogonal\+\_\+func} (in ind, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r})
+\item 
+function \hyperlink{class_std_prism_tri_a9115576d23e9cecc5fdb210a9b4fbcf7}{tri\+\_\+derivative\+\_\+orthogonal\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in ind, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s)
+\item 
+function \hyperlink{class_std_prism_tri_ace65d47787f36f2171b91f280d44df11}{deri\+\_\+simplex2\+DP} (in a, in b, in id, in jd)
+\item 
+function \hyperlink{class_std_prism_tri_ab11ba4f464b2ed8d3c5815b085c04bdb}{Evaluaet\+Node\+Coor} (in obj, in Nh, in \hyperlink{class_std_prism_tri_a6d9a746cf2d10610a759d8a3dce6f8e7}{Nz})
+\item 
+function \hyperlink{class_std_prism_tri_a6126b62691432a677c060ad8e067dded}{line\+\_\+node\+\_\+coor\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N})
+\item 
+function \hyperlink{class_std_prism_tri_a8aa0f7ddb7ed4dc838b627da8e86e7d2}{tri\+\_\+node\+\_\+coor\+\_\+func} (in n\+Order)
+\item 
+function \hyperlink{class_std_prism_tri_a34d51ef1bf6eb3380aef11d5161ccdda}{warpfactor} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in rout)
+\item 
+function \hyperlink{class_std_prism_tri_a0704a6b1543f7bc2f1f1f1393cc30394}{Vand\+Matrix} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r})
+\item 
+function \hyperlink{class_std_prism_tri_a032e476677854b16948a82236a2ba0a9}{xytors} (in x, in y)
+\item 
+function \hyperlink{class_std_prism_tri_aa1b9412cb2f569be10f8a7c2e2272dd5}{Evaluate\+Horizontal\+Orthogonal\+Func} (in obj, in N1, in td, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s)
+\item 
+function \hyperlink{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}{tri\+\_\+orthogonal\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in td, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}, in s)
+\item 
+function \hyperlink{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}{simplex2\+DP} (in a, in b, in i, in j)
+\item 
+function \hyperlink{class_std_prism_tri_ac6980309a531948268b05082a922c305}{Evaluate\+Vertical\+Orthogonal\+Func} (in obj, in td, in t)
+\item 
+function \hyperlink{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}{line\+\_\+orthogonal\+\_\+func} (in ind, in \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r})
+\item 
+function \hyperlink{class_std_prism_tri_a47f65016f3ccc4ece839fb1f29706886}{project\+\_\+vert2node} (in obj, in vert\+\_\+val)
+\item 
+function \hyperlink{class_std_prism_tri_a43661fbac19c1f477268314516b76daa}{quad\+\_\+coor\+\_\+func} (in obj, in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in N2)
+\item 
+function \hyperlink{class_std_prism_tri_ac1e62bffad83080c8c4bec7b37d69c5e}{line\+\_\+quadrature\+\_\+coor\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N})
+\item 
+function \hyperlink{class_std_prism_tri_a4ae21011fdd7ecd3f6e70e54676f7187}{tri\+\_\+quadrature\+\_\+coor\+\_\+func} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N})
+\item 
+function \hyperlink{class_std_prism_tri_a2275ada5f9cc8a150063d38ce5666c7f}{triquad} (in \hyperlink{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}{N}, in v)
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_std_prism_tri_ac04897b2b8836ed32b4929f5928b9440}{Np}
+\begin{DoxyCompactList}\small\item\em num of interpolation points (IP) \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}{r}
+\begin{DoxyCompactList}\small\item\em coordinates of interpolation points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_ac299edebe60f4004b8de0c402c40889e}{r1}
+\begin{DoxyCompactList}\small\item\em horizontal and vertical node coordinate \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a46904390f458a61845e1727b6458288f}{Fmask}
+\begin{DoxyCompactList}\small\item\em node index of facial points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_acaceb0774faf5c002381475a45575675}{Nfp}
+\begin{DoxyCompactList}\small\item\em number of facial interpolation points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_abd9ddf06a9024c8894dd9f4fbbafc169}{T\+Nfp}
+\begin{DoxyCompactList}\small\item\em total number of face points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a2de460aab5349ff8fa131ce687f07f81}{V}
+\begin{DoxyCompactList}\small\item\em Vandermonde matrix. \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_af8d7e4c3ab71b4ecec29dfc0d03801a3}{Vq}
+\begin{DoxyCompactList}\small\item\em project matrx from interpolation points to quadrature points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a348c05c4207234381617a452cb14a0f3}{M}
+\begin{DoxyCompactList}\small\item\em mass matrix \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a4542d6911c6759f3ba78afe6161d01cd}{invM}
+\begin{DoxyCompactList}\small\item\em inverse of mass matrix \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a4f01172eb04ca20e829fef6d9b17a9a8}{Dr}
+\item 
+Property \hyperlink{class_std_prism_tri_a1ddd2676a7743d36002bc0f0b85f2ca0}{Nq}
+\begin{DoxyCompactList}\small\item\em number of gauss quadrature points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_a278061b68cc1edd442b98241cc68de7d}{rq}
+\begin{DoxyCompactList}\small\item\em coordinate of quadrature points \end{DoxyCompactList}\item 
+Property \hyperlink{class_std_prism_tri_ae765bd6d352ea95b5102310916a8978a}{wq}
+\begin{DoxyCompactList}\small\item\em integral weights for each quadrature points \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_std_prism_tri_abef1448e566aa46a77db6122ba6673ea}\label{class_std_prism_tri_abef1448e566aa46a77db6122ba6673ea}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Std\+Prism\+Tri()}{StdPrismTri()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Std\+Prism\+Tri (\begin{DoxyParamCaption}\item[{in}]{Nh,  }\item[{in}]{Nz }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_std_prism_tri_a879d55afa4176ca6174b069b03dd6fce}\label{class_std_prism_tri_a879d55afa4176ca6174b069b03dd6fce}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Assemble\+Facial\+Node\+Index@{Assemble\+Facial\+Node\+Index}}
+\index{Assemble\+Facial\+Node\+Index@{Assemble\+Facial\+Node\+Index}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Assemble\+Facial\+Node\+Index()}{AssembleFacialNodeIndex()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Assemble\+Facial\+Node\+Index (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a788c97ee74f5c3068038cf4d4008fa64}\label{class_std_prism_tri_a788c97ee74f5c3068038cf4d4008fa64}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!assemble\+Mass\+Matrix@{assemble\+Mass\+Matrix}}
+\index{assemble\+Mass\+Matrix@{assemble\+Mass\+Matrix}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{assemble\+Mass\+Matrix()}{assembleMassMatrix()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::assemble\+Mass\+Matrix (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Assemble the Vandermonde matrix. 
+
+The Vandermonde matrix interpolate the orthgonal basis functions to the nodal basis functions, with $ [V]_{i,j} = P_j(r_i) $ where $ r_i $ is the ith interpolation nodes and $ P_j $ is the jth orthgonal function. Assemble the mass matrix \mbox{\Hypertarget{class_std_prism_tri_a5a4e1d1a3bbe1b8aea7ae9d0529c78a3}\label{class_std_prism_tri_a5a4e1d1a3bbe1b8aea7ae9d0529c78a3}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!assemble\+Quadrature\+Matrix@{assemble\+Quadrature\+Matrix}}
+\index{assemble\+Quadrature\+Matrix@{assemble\+Quadrature\+Matrix}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{assemble\+Quadrature\+Matrix()}{assembleQuadratureMatrix()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::assemble\+Quadrature\+Matrix (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Assemble the interpolation matrix of Gauss quadrature nodes The elements of the quadratuer interpolation matrix is $ [V_q]_{i,j} = l_j(\xi_i) $ where $ \xi_i $ is the ith Gauss quadrature nodes. 
+
+\mbox{\Hypertarget{class_std_prism_tri_a30ab6b775934cbc81fff59c607e9096a}\label{class_std_prism_tri_a30ab6b775934cbc81fff59c607e9096a}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Assemble\+Vand\+Matrix@{Assemble\+Vand\+Matrix}}
+\index{Assemble\+Vand\+Matrix@{Assemble\+Vand\+Matrix}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Assemble\+Vand\+Matrix()}{AssembleVandMatrix()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Assemble\+Vand\+Matrix (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_ace65d47787f36f2171b91f280d44df11}\label{class_std_prism_tri_ace65d47787f36f2171b91f280d44df11}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!deri\+\_\+simplex2\+DP@{deri\+\_\+simplex2\+DP}}
+\index{deri\+\_\+simplex2\+DP@{deri\+\_\+simplex2\+DP}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{deri\+\_\+simplex2\+D\+P()}{deri\_simplex2DP()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::deri\+\_\+simplex2\+DP (\begin{DoxyParamCaption}\item[{in}]{a,  }\item[{in}]{b,  }\item[{in}]{id,  }\item[{in}]{jd }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a2a918b6587e6d53a6d5a2aff056a118c}\label{class_std_prism_tri_a2a918b6587e6d53a6d5a2aff056a118c}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!derivative\+\_\+orthogonal\+\_\+func@{derivative\+\_\+orthogonal\+\_\+func}}
+\index{derivative\+\_\+orthogonal\+\_\+func@{derivative\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{derivative\+\_\+orthogonal\+\_\+func()}{derivative\_orthogonal\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::derivative\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N1,  }\item[{in}]{N2,  }\item[{in}]{td,  }\item[{in}]{r,  }\item[{in}]{s,  }\item[{in}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_ab11ba4f464b2ed8d3c5815b085c04bdb}\label{class_std_prism_tri_ab11ba4f464b2ed8d3c5815b085c04bdb}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Evaluaet\+Node\+Coor@{Evaluaet\+Node\+Coor}}
+\index{Evaluaet\+Node\+Coor@{Evaluaet\+Node\+Coor}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Evaluaet\+Node\+Coor()}{EvaluaetNodeCoor()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Evaluaet\+Node\+Coor (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{Nh,  }\item[{in}]{Nz }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_aa1b9412cb2f569be10f8a7c2e2272dd5}\label{class_std_prism_tri_aa1b9412cb2f569be10f8a7c2e2272dd5}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Evaluate\+Horizontal\+Orthogonal\+Func@{Evaluate\+Horizontal\+Orthogonal\+Func}}
+\index{Evaluate\+Horizontal\+Orthogonal\+Func@{Evaluate\+Horizontal\+Orthogonal\+Func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Evaluate\+Horizontal\+Orthogonal\+Func()}{EvaluateHorizontalOrthogonalFunc()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Evaluate\+Horizontal\+Orthogonal\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N1,  }\item[{in}]{td,  }\item[{in}]{r,  }\item[{in}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_af0a8de9e52cec135e335848e68c54de2}\label{class_std_prism_tri_af0a8de9e52cec135e335848e68c54de2}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Evaluate\+Vertical\+Integral\+Orthogonal\+Func@{Evaluate\+Vertical\+Integral\+Orthogonal\+Func}}
+\index{Evaluate\+Vertical\+Integral\+Orthogonal\+Func@{Evaluate\+Vertical\+Integral\+Orthogonal\+Func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Evaluate\+Vertical\+Integral\+Orthogonal\+Func()}{EvaluateVerticalIntegralOrthogonalFunc()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Evaluate\+Vertical\+Integral\+Orthogonal\+Func (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_ac6980309a531948268b05082a922c305}\label{class_std_prism_tri_ac6980309a531948268b05082a922c305}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Evaluate\+Vertical\+Orthogonal\+Func@{Evaluate\+Vertical\+Orthogonal\+Func}}
+\index{Evaluate\+Vertical\+Orthogonal\+Func@{Evaluate\+Vertical\+Orthogonal\+Func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Evaluate\+Vertical\+Orthogonal\+Func()}{EvaluateVerticalOrthogonalFunc()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Evaluate\+Vertical\+Orthogonal\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{td,  }\item[{in}]{t }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a369076123765c2b71c10a098a3ac5e2b}\label{class_std_prism_tri_a369076123765c2b71c10a098a3ac5e2b}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Legendre\+Norm1d@{Legendre\+Norm1d}}
+\index{Legendre\+Norm1d@{Legendre\+Norm1d}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Legendre\+Norm1d()}{LegendreNorm1d()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Legendre\+Norm1d (\begin{DoxyParamCaption}\item[{in}]{ind,  }\item[{in}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a4450a453e41593eb2b169ccc719788d8}\label{class_std_prism_tri_a4450a453e41593eb2b169ccc719788d8}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!line\+\_\+derivative\+\_\+orthogonal\+\_\+func@{line\+\_\+derivative\+\_\+orthogonal\+\_\+func}}
+\index{line\+\_\+derivative\+\_\+orthogonal\+\_\+func@{line\+\_\+derivative\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{line\+\_\+derivative\+\_\+orthogonal\+\_\+func()}{line\_derivative\_orthogonal\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::line\+\_\+derivative\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{ind,  }\item[{in}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a6126b62691432a677c060ad8e067dded}\label{class_std_prism_tri_a6126b62691432a677c060ad8e067dded}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!line\+\_\+node\+\_\+coor\+\_\+func@{line\+\_\+node\+\_\+coor\+\_\+func}}
+\index{line\+\_\+node\+\_\+coor\+\_\+func@{line\+\_\+node\+\_\+coor\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{line\+\_\+node\+\_\+coor\+\_\+func()}{line\_node\_coor\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::line\+\_\+node\+\_\+coor\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}\label{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!line\+\_\+orthogonal\+\_\+func@{line\+\_\+orthogonal\+\_\+func}}
+\index{line\+\_\+orthogonal\+\_\+func@{line\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{line\+\_\+orthogonal\+\_\+func()}{line\_orthogonal\_func()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::line\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{ind,  }\item[{in}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}\label{class_std_prism_tri_a95c573c90aec2945b9c1c3362c405f6d}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!line\+\_\+orthogonal\+\_\+func@{line\+\_\+orthogonal\+\_\+func}}
+\index{line\+\_\+orthogonal\+\_\+func@{line\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{line\+\_\+orthogonal\+\_\+func()}{line\_orthogonal\_func()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::line\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{ind,  }\item[{in}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_ac1e62bffad83080c8c4bec7b37d69c5e}\label{class_std_prism_tri_ac1e62bffad83080c8c4bec7b37d69c5e}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!line\+\_\+quadrature\+\_\+coor\+\_\+func@{line\+\_\+quadrature\+\_\+coor\+\_\+func}}
+\index{line\+\_\+quadrature\+\_\+coor\+\_\+func@{line\+\_\+quadrature\+\_\+coor\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{line\+\_\+quadrature\+\_\+coor\+\_\+func()}{line\_quadrature\_coor\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::line\+\_\+quadrature\+\_\+coor\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a1fcf29bd47a8e4d8e4ecbee0d4e5c8d7}\label{class_std_prism_tri_a1fcf29bd47a8e4d8e4ecbee0d4e5c8d7}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!nodal\+\_\+derivative\+\_\+func@{nodal\+\_\+derivative\+\_\+func}}
+\index{nodal\+\_\+derivative\+\_\+func@{nodal\+\_\+derivative\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{nodal\+\_\+derivative\+\_\+func()}{nodal\_derivative\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::nodal\+\_\+derivative\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{r,  }\item[{in}]{s,  }\item[{in}]{t }\end{DoxyParamCaption})}
+
+
+
+Evaluate the derivative nodal function values at points. 
+
+\mbox{\Hypertarget{class_std_prism_tri_ace75f32449fc2e45d3b0d737e8a7a477}\label{class_std_prism_tri_ace75f32449fc2e45d3b0d737e8a7a477}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!nodal\+\_\+func@{nodal\+\_\+func}}
+\index{nodal\+\_\+func@{nodal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{nodal\+\_\+func()}{nodal\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::nodal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{r,  }\item[{in}]{s,  }\item[{in}]{t }\end{DoxyParamCaption})}
+
+
+
+Evaluate all the nodal basis function values at points. 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em obj} & The \hyperlink{class_std_cell}{Std\+Cell} class \\
+\hline
+\mbox{\tt in}  & {\em r} & The node coordinate \\
+\hline
+\mbox{\tt in}  & {\em s} & The node coordinate \\
+\hline
+\mbox{\tt in}  & {\em t} & The node coordinate \\
+\hline
+\mbox{\tt out}  & {\em func} & The basis function values at points \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_std_prism_tri_a47f65016f3ccc4ece839fb1f29706886}\label{class_std_prism_tri_a47f65016f3ccc4ece839fb1f29706886}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!project\+\_\+vert2node@{project\+\_\+vert2node}}
+\index{project\+\_\+vert2node@{project\+\_\+vert2node}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{project\+\_\+vert2node()}{project\_vert2node()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::project\+\_\+vert2node (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{vert\+\_\+val }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a43661fbac19c1f477268314516b76daa}\label{class_std_prism_tri_a43661fbac19c1f477268314516b76daa}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!quad\+\_\+coor\+\_\+func@{quad\+\_\+coor\+\_\+func}}
+\index{quad\+\_\+coor\+\_\+func@{quad\+\_\+coor\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{quad\+\_\+coor\+\_\+func()}{quad\_coor\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::quad\+\_\+coor\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N,  }\item[{in}]{N2 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}\label{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!simplex2\+DP@{simplex2\+DP}}
+\index{simplex2\+DP@{simplex2\+DP}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{simplex2\+D\+P()}{simplex2DP()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::simplex2\+DP (\begin{DoxyParamCaption}\item[{in}]{a,  }\item[{in}]{b,  }\item[{in}]{i,  }\item[{in}]{j }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}\label{class_std_prism_tri_a40a7e2ceeb9306b1916ba59fb857b14a}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!simplex2\+DP@{simplex2\+DP}}
+\index{simplex2\+DP@{simplex2\+DP}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{simplex2\+D\+P()}{simplex2DP()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::simplex2\+DP (\begin{DoxyParamCaption}\item[{in}]{a,  }\item[{in}]{b,  }\item[{in}]{i,  }\item[{in}]{j }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a9115576d23e9cecc5fdb210a9b4fbcf7}\label{class_std_prism_tri_a9115576d23e9cecc5fdb210a9b4fbcf7}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!tri\+\_\+derivative\+\_\+orthogonal\+\_\+func@{tri\+\_\+derivative\+\_\+orthogonal\+\_\+func}}
+\index{tri\+\_\+derivative\+\_\+orthogonal\+\_\+func@{tri\+\_\+derivative\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{tri\+\_\+derivative\+\_\+orthogonal\+\_\+func()}{tri\_derivative\_orthogonal\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::tri\+\_\+derivative\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{ind,  }\item[{in}]{r,  }\item[{in}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a8aa0f7ddb7ed4dc838b627da8e86e7d2}\label{class_std_prism_tri_a8aa0f7ddb7ed4dc838b627da8e86e7d2}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!tri\+\_\+node\+\_\+coor\+\_\+func@{tri\+\_\+node\+\_\+coor\+\_\+func}}
+\index{tri\+\_\+node\+\_\+coor\+\_\+func@{tri\+\_\+node\+\_\+coor\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{tri\+\_\+node\+\_\+coor\+\_\+func()}{tri\_node\_coor\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::tri\+\_\+node\+\_\+coor\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{n\+Order }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}\label{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!tri\+\_\+orthogonal\+\_\+func@{tri\+\_\+orthogonal\+\_\+func}}
+\index{tri\+\_\+orthogonal\+\_\+func@{tri\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{tri\+\_\+orthogonal\+\_\+func()}{tri\_orthogonal\_func()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::tri\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{td,  }\item[{in}]{r,  }\item[{in}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}\label{class_std_prism_tri_a94fd2a92e233dce1c2d3e3a95ab35a7e}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!tri\+\_\+orthogonal\+\_\+func@{tri\+\_\+orthogonal\+\_\+func}}
+\index{tri\+\_\+orthogonal\+\_\+func@{tri\+\_\+orthogonal\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{tri\+\_\+orthogonal\+\_\+func()}{tri\_orthogonal\_func()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::tri\+\_\+orthogonal\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{td,  }\item[{in}]{r,  }\item[{in}]{s }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a4ae21011fdd7ecd3f6e70e54676f7187}\label{class_std_prism_tri_a4ae21011fdd7ecd3f6e70e54676f7187}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!tri\+\_\+quadrature\+\_\+coor\+\_\+func@{tri\+\_\+quadrature\+\_\+coor\+\_\+func}}
+\index{tri\+\_\+quadrature\+\_\+coor\+\_\+func@{tri\+\_\+quadrature\+\_\+coor\+\_\+func}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{tri\+\_\+quadrature\+\_\+coor\+\_\+func()}{tri\_quadrature\_coor\_func()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::tri\+\_\+quadrature\+\_\+coor\+\_\+func (\begin{DoxyParamCaption}\item[{in}]{N }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a2275ada5f9cc8a150063d38ce5666c7f}\label{class_std_prism_tri_a2275ada5f9cc8a150063d38ce5666c7f}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!triquad@{triquad}}
+\index{triquad@{triquad}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{triquad()}{triquad()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::triquad (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{v }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a0704a6b1543f7bc2f1f1f1393cc30394}\label{class_std_prism_tri_a0704a6b1543f7bc2f1f1f1393cc30394}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Vand\+Matrix@{Vand\+Matrix}}
+\index{Vand\+Matrix@{Vand\+Matrix}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Vand\+Matrix()}{VandMatrix()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::\+Vand\+Matrix (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{r }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a34d51ef1bf6eb3380aef11d5161ccdda}\label{class_std_prism_tri_a34d51ef1bf6eb3380aef11d5161ccdda}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!warpfactor@{warpfactor}}
+\index{warpfactor@{warpfactor}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{warpfactor()}{warpfactor()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::warpfactor (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{rout }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a032e476677854b16948a82236a2ba0a9}\label{class_std_prism_tri_a032e476677854b16948a82236a2ba0a9}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!xytors@{xytors}}
+\index{xytors@{xytors}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{xytors()}{xytors()}}
+{\footnotesize\ttfamily function Std\+Prism\+Tri\+::xytors (\begin{DoxyParamCaption}\item[{in}]{x,  }\item[{in}]{y }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_std_prism_tri_a4f01172eb04ca20e829fef6d9b17a9a8}\label{class_std_prism_tri_a4f01172eb04ca20e829fef6d9b17a9a8}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Dr@{Dr}}
+\index{Dr@{Dr}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Dr}{Dr}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Dr\hspace{0.3cm}{\ttfamily [protected]}}
+
+derivative matrix with $ [Dr]_{ij} = \left.\frac{\partial l_j}{\partial r}\right|_{r_i} $ \mbox{\Hypertarget{class_std_prism_tri_a22f8f05a0e485040d28adc1385258039}\label{class_std_prism_tri_a22f8f05a0e485040d28adc1385258039}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!enum\+Std\+Cell@{enum\+Std\+Cell}}
+\index{enum\+Std\+Cell@{enum\+Std\+Cell}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{enum\+Std\+Cell}{enumStdCell}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::enum\+Std\+Cell}
+
+\mbox{\Hypertarget{class_std_prism_tri_a51231d155c3ba8a0c673165b3246927b}\label{class_std_prism_tri_a51231d155c3ba8a0c673165b3246927b}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!face\+Type@{face\+Type}}
+\index{face\+Type@{face\+Type}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{face\+Type}{faceType}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::face\+Type = \mbox{[}\hyperlink{classenum_std_cell_ac4c2fa4e189e76e103f3ff9b1d19b9e7a79d1c44e78bdfebfd755a724f5e04029}{enum\+Std\+Cell.\+Quad}, ...}
+
+
+
+element types of each face 
+
+\mbox{\Hypertarget{class_std_prism_tri_a46904390f458a61845e1727b6458288f}\label{class_std_prism_tri_a46904390f458a61845e1727b6458288f}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Fmask@{Fmask}}
+\index{Fmask@{Fmask}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Fmask}{Fmask}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Fmask\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+node index of facial points 
+
+\mbox{\Hypertarget{class_std_prism_tri_ae5f4fe1b8473e8313acad8f0bf9adcd5}\label{class_std_prism_tri_ae5f4fe1b8473e8313acad8f0bf9adcd5}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!F\+ToV@{F\+ToV}}
+\index{F\+ToV@{F\+ToV}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{F\+ToV}{FToV}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::\+F\+ToV = \mbox{[}1,2,5,4}
+
+
+
+index of interpolation points on each face 
+
+\mbox{\Hypertarget{class_std_prism_tri_a4542d6911c6759f3ba78afe6161d01cd}\label{class_std_prism_tri_a4542d6911c6759f3ba78afe6161d01cd}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!invM@{invM}}
+\index{invM@{invM}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{invM}{invM}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::invM\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+inverse of mass matrix 
+
+\mbox{\Hypertarget{class_std_prism_tri_a589701d6be2784f667b7608d32205a6e}\label{class_std_prism_tri_a589701d6be2784f667b7608d32205a6e}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!L\+AV@{L\+AV}}
+\index{L\+AV@{L\+AV}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{L\+AV}{LAV}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::\+L\+AV = 4}
+
+
+
+volume of reference elements 
+
+\mbox{\Hypertarget{class_std_prism_tri_a348c05c4207234381617a452cb14a0f3}\label{class_std_prism_tri_a348c05c4207234381617a452cb14a0f3}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!M@{M}}
+\index{M@{M}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{M}{M}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::M\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+mass matrix 
+
+\mbox{\Hypertarget{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}\label{class_std_prism_tri_ae66dea60d79b3eea15b9be2c1892d784}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!N@{N}}
+\index{N@{N}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{N}{N}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::N}
+
+
+
+maximum order of basis function 
+
+\mbox{\Hypertarget{class_std_prism_tri_ad1dae3ee364c0f6f639560c7089ed73a}\label{class_std_prism_tri_ad1dae3ee364c0f6f639560c7089ed73a}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nface@{Nface}}
+\index{Nface@{Nface}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nface}{Nface}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::\+Nface = 5}
+
+
+
+num of faces 
+
+\mbox{\Hypertarget{class_std_prism_tri_acaceb0774faf5c002381475a45575675}\label{class_std_prism_tri_acaceb0774faf5c002381475a45575675}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nfp@{Nfp}}
+\index{Nfp@{Nfp}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nfp}{Nfp}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Nfp\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+number of facial interpolation points 
+
+\mbox{\Hypertarget{class_std_prism_tri_a3cfc1041c891dcfd731940749d25f055}\label{class_std_prism_tri_a3cfc1041c891dcfd731940749d25f055}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nfv@{Nfv}}
+\index{Nfv@{Nfv}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nfv}{Nfv}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::\+Nfv = \mbox{[}4, 4, 4, 3, 3\mbox{]}}
+
+
+
+num of vertices on each face 
+
+\mbox{\Hypertarget{class_std_prism_tri_ac04897b2b8836ed32b4929f5928b9440}\label{class_std_prism_tri_ac04897b2b8836ed32b4929f5928b9440}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Np@{Np}}
+\index{Np@{Np}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Np}{Np}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Np\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+num of interpolation points (IP) 
+
+\mbox{\Hypertarget{class_std_prism_tri_a1ddd2676a7743d36002bc0f0b85f2ca0}\label{class_std_prism_tri_a1ddd2676a7743d36002bc0f0b85f2ca0}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nq@{Nq}}
+\index{Nq@{Nq}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nq}{Nq}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Nq\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+number of gauss quadrature points 
+
+\mbox{\Hypertarget{class_std_prism_tri_ae8726861a4238aa232cf25ddb40e318c}\label{class_std_prism_tri_ae8726861a4238aa232cf25ddb40e318c}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nv@{Nv}}
+\index{Nv@{Nv}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nv}{Nv}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::\+Nv = 6}
+
+
+
+num of vertices 
+
+\mbox{\Hypertarget{class_std_prism_tri_a6d9a746cf2d10610a759d8a3dce6f8e7}\label{class_std_prism_tri_a6d9a746cf2d10610a759d8a3dce6f8e7}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Nz@{Nz}}
+\index{Nz@{Nz}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Nz}{Nz}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Nz}
+
+
+
+maximum polynomial order in vertical direction 
+
+\mbox{\Hypertarget{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}\label{class_std_prism_tri_aad8e1b11ac7552139fe6aacc8728b249}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!r@{r}}
+\index{r@{r}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{r}{r}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::r\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+coordinates of interpolation points 
+
+\mbox{\Hypertarget{class_std_prism_tri_ac299edebe60f4004b8de0c402c40889e}\label{class_std_prism_tri_ac299edebe60f4004b8de0c402c40889e}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!r1@{r1}}
+\index{r1@{r1}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{r1}{r1}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::r1\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+horizontal and vertical node coordinate 
+
+\mbox{\Hypertarget{class_std_prism_tri_a278061b68cc1edd442b98241cc68de7d}\label{class_std_prism_tri_a278061b68cc1edd442b98241cc68de7d}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!rq@{rq}}
+\index{rq@{rq}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{rq}{rq}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::rq\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+coordinate of quadrature points 
+
+\mbox{\Hypertarget{class_std_prism_tri_abd9ddf06a9024c8894dd9f4fbbafc169}\label{class_std_prism_tri_abd9ddf06a9024c8894dd9f4fbbafc169}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!T\+Nfp@{T\+Nfp}}
+\index{T\+Nfp@{T\+Nfp}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{T\+Nfp}{TNfp}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+T\+Nfp\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+total number of face points 
+
+\mbox{\Hypertarget{class_std_prism_tri_a51803876c1f6f01469a4b5820fac5553}\label{class_std_prism_tri_a51803876c1f6f01469a4b5820fac5553}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!type@{type}}
+\index{type@{type}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{type}{type}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::type = \hyperlink{classenum_std_cell_ac4c2fa4e189e76e103f3ff9b1d19b9e7a50e59d01719761402ae7fe95c54b1360}{enum\+Std\+Cell.\+Prism\+Tri}}
+
+
+
+reference element type 
+
+\mbox{\Hypertarget{class_std_prism_tri_a2de460aab5349ff8fa131ce687f07f81}\label{class_std_prism_tri_a2de460aab5349ff8fa131ce687f07f81}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!V@{V}}
+\index{V@{V}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{V}{V}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::V\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+Vandermonde matrix. 
+
+\mbox{\Hypertarget{class_std_prism_tri_af8d7e4c3ab71b4ecec29dfc0d03801a3}\label{class_std_prism_tri_af8d7e4c3ab71b4ecec29dfc0d03801a3}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!Vq@{Vq}}
+\index{Vq@{Vq}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{Vq}{Vq}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::\+Vq\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+project matrx from interpolation points to quadrature points 
+
+\mbox{\Hypertarget{class_std_prism_tri_a87d7bf3e382d8683bb7a75b79acc9d4b}\label{class_std_prism_tri_a87d7bf3e382d8683bb7a75b79acc9d4b}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!vr@{vr}}
+\index{vr@{vr}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{vr}{vr}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::vr = \mbox{[}}
+
+
+
+vertices coordinates 
+
+\mbox{\Hypertarget{class_std_prism_tri_aa4659d9663148da529fc50b5058c03f1}\label{class_std_prism_tri_aa4659d9663148da529fc50b5058c03f1}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!vs@{vs}}
+\index{vs@{vs}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{vs}{vs}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::vs = \mbox{[}}
+
+\mbox{\Hypertarget{class_std_prism_tri_a505548c307095d9254e96b82400346b8}\label{class_std_prism_tri_a505548c307095d9254e96b82400346b8}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!vt@{vt}}
+\index{vt@{vt}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{vt}{vt}}
+{\footnotesize\ttfamily Constant Property Std\+Prism\+Tri\+::vt = \mbox{[}}
+
+\mbox{\Hypertarget{class_std_prism_tri_ae765bd6d352ea95b5102310916a8978a}\label{class_std_prism_tri_ae765bd6d352ea95b5102310916a8978a}} 
+\index{Std\+Prism\+Tri@{Std\+Prism\+Tri}!wq@{wq}}
+\index{wq@{wq}!Std\+Prism\+Tri@{Std\+Prism\+Tri}}
+\subsubsection{\texorpdfstring{wq}{wq}}
+{\footnotesize\ttfamily Property Std\+Prism\+Tri\+::wq\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+integral weights for each quadrature points 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_std_prism_tri_8m}{Std\+Prism\+Tri.\+m}\end{DoxyCompactItemize}

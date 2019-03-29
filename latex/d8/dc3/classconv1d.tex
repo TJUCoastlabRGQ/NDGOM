@@ -1,0 +1,161 @@
+\hypertarget{classconv1d}{}\section{conv1d Class Reference}
+\label{classconv1d}\index{conv1d@{conv1d}}
+
+
+Inheritance diagram for conv1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=277pt]{da/d44/classconv1d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for conv1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=192pt]{de/d20/classconv1d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{classconv1d_a8a2a102c6d68a467cefe7db537a971bc}{character\+\_\+len} (in obj, in f\+\_\+Q)
+\item 
+function \hyperlink{classconv1d_aaaf10511813f52fdd403c6b1fcd583bd}{conv1d} (in mesh)
+\item 
+function \hyperlink{classconv1d_aae2f3637e8e9da279b837720c97bf50c}{create\+\_\+obc\+\_\+file} (in obj, in filename, in \hyperlink{classconv1d_adf437888f16fbfd326f087077cf022d5}{dt}, in \hyperlink{classconv1d_a14e36ea9e24c4edb42b697488f646045}{ftime})
+\item 
+function \hyperlink{classconv1d_a4834e397bd99e34e3971950506360996}{flux\+\_\+term} (in obj, in f\+\_\+Q)
+\item 
+function \hyperlink{classconv1d_a7e9949e1bd85c6a659bae307338132e3}{rhs\+\_\+term} (in obj, in f\+\_\+Q)
+\item 
+function \hyperlink{classconv1d_aee855d61a5e3cc2b902d88ab6a9763eb}{R\+K45\+\_\+solve} (in obj)
+\item 
+function \hyperlink{classconv1d_a04d183892adfd894a63d6d47f9cf7ba5}{time\+\_\+interval} (in obj, in f\+\_\+Q)
+\item 
+function \hyperlink{classconv1d_a2c40a1bfb84a9966aa630ac62aea345e}{surf\+\_\+term} (in obj, in f\+\_\+Q)
+\item 
+function \hyperlink{classconv1d_a15e0c0d4ed64875917f0c84559f8c510}{nei\+\_\+node\+\_\+val} (in cM, in cP, in c\+\_\+extM, in ftype)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{classconv1d_a7f1670988008db1e4e5265f067f4479b}{Nfield} = 1
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{classconv1d_a825a4733cc687e6bb21761db4fc18464}{cfl}
+\item 
+Property \hyperlink{classconv1d_a14e36ea9e24c4edb42b697488f646045}{ftime}
+\item 
+Property \hyperlink{classconv1d_adf437888f16fbfd326f087077cf022d5}{dt}
+\item 
+Property \hyperlink{classconv1d_ac5c4990e0891351a2831da5e8845d0d2}{u}
+\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{classconv1d_aaaf10511813f52fdd403c6b1fcd583bd}\label{classconv1d_aaaf10511813f52fdd403c6b1fcd583bd}} 
+\index{conv1d@{conv1d}!conv1d@{conv1d}}
+\index{conv1d@{conv1d}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{conv1d()}{conv1d()}}
+{\footnotesize\ttfamily function conv1d\+::conv1d (\begin{DoxyParamCaption}\item[{in}]{mesh }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{classconv1d_a8a2a102c6d68a467cefe7db537a971bc}\label{classconv1d_a8a2a102c6d68a467cefe7db537a971bc}} 
+\index{conv1d@{conv1d}!character\+\_\+len@{character\+\_\+len}}
+\index{character\+\_\+len@{character\+\_\+len}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{character\+\_\+len()}{character\_len()}}
+{\footnotesize\ttfamily virtual conv1d\+::character\+\_\+len (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{f\+\_\+Q }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+Reimplemented in \hyperlink{classconv1d__advection_a9d3767628bcfe2980fc623cf1e07f046}{conv1d\+\_\+advection}.
+
+\mbox{\Hypertarget{classconv1d_aae2f3637e8e9da279b837720c97bf50c}\label{classconv1d_aae2f3637e8e9da279b837720c97bf50c}} 
+\index{conv1d@{conv1d}!create\+\_\+obc\+\_\+file@{create\+\_\+obc\+\_\+file}}
+\index{create\+\_\+obc\+\_\+file@{create\+\_\+obc\+\_\+file}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{create\+\_\+obc\+\_\+file()}{create\_obc\_file()}}
+{\footnotesize\ttfamily function conv1d\+::create\+\_\+obc\+\_\+file (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{filename,  }\item[{in}]{dt,  }\item[{in}]{ftime }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_a4834e397bd99e34e3971950506360996}\label{classconv1d_a4834e397bd99e34e3971950506360996}} 
+\index{conv1d@{conv1d}!flux\+\_\+term@{flux\+\_\+term}}
+\index{flux\+\_\+term@{flux\+\_\+term}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{flux\+\_\+term()}{flux\_term()}}
+{\footnotesize\ttfamily function conv1d\+::flux\+\_\+term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{f\+\_\+Q }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_a15e0c0d4ed64875917f0c84559f8c510}\label{classconv1d_a15e0c0d4ed64875917f0c84559f8c510}} 
+\index{conv1d@{conv1d}!nei\+\_\+node\+\_\+val@{nei\+\_\+node\+\_\+val}}
+\index{nei\+\_\+node\+\_\+val@{nei\+\_\+node\+\_\+val}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{nei\+\_\+node\+\_\+val()}{nei\_node\_val()}}
+{\footnotesize\ttfamily function conv1d\+::nei\+\_\+node\+\_\+val (\begin{DoxyParamCaption}\item[{in}]{cM,  }\item[{in}]{cP,  }\item[{in}]{c\+\_\+extM,  }\item[{in}]{ftype }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_a7e9949e1bd85c6a659bae307338132e3}\label{classconv1d_a7e9949e1bd85c6a659bae307338132e3}} 
+\index{conv1d@{conv1d}!rhs\+\_\+term@{rhs\+\_\+term}}
+\index{rhs\+\_\+term@{rhs\+\_\+term}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{rhs\+\_\+term()}{rhs\_term()}}
+{\footnotesize\ttfamily function conv1d\+::rhs\+\_\+term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{f\+\_\+Q }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_aee855d61a5e3cc2b902d88ab6a9763eb}\label{classconv1d_aee855d61a5e3cc2b902d88ab6a9763eb}} 
+\index{conv1d@{conv1d}!R\+K45\+\_\+solve@{R\+K45\+\_\+solve}}
+\index{R\+K45\+\_\+solve@{R\+K45\+\_\+solve}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{R\+K45\+\_\+solve()}{RK45\_solve()}}
+{\footnotesize\ttfamily function conv1d\+::\+R\+K45\+\_\+solve (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_a2c40a1bfb84a9966aa630ac62aea345e}\label{classconv1d_a2c40a1bfb84a9966aa630ac62aea345e}} 
+\index{conv1d@{conv1d}!surf\+\_\+term@{surf\+\_\+term}}
+\index{surf\+\_\+term@{surf\+\_\+term}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{surf\+\_\+term()}{surf\_term()}}
+{\footnotesize\ttfamily function conv1d\+::surf\+\_\+term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{f\+\_\+Q }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{classconv1d_a04d183892adfd894a63d6d47f9cf7ba5}\label{classconv1d_a04d183892adfd894a63d6d47f9cf7ba5}} 
+\index{conv1d@{conv1d}!time\+\_\+interval@{time\+\_\+interval}}
+\index{time\+\_\+interval@{time\+\_\+interval}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{time\+\_\+interval()}{time\_interval()}}
+{\footnotesize\ttfamily function conv1d\+::time\+\_\+interval (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{f\+\_\+Q }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{classconv1d_a825a4733cc687e6bb21761db4fc18464}\label{classconv1d_a825a4733cc687e6bb21761db4fc18464}} 
+\index{conv1d@{conv1d}!cfl@{cfl}}
+\index{cfl@{cfl}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{cfl}{cfl}}
+{\footnotesize\ttfamily Property conv1d\+::cfl\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classconv1d_adf437888f16fbfd326f087077cf022d5}\label{classconv1d_adf437888f16fbfd326f087077cf022d5}} 
+\index{conv1d@{conv1d}!dt@{dt}}
+\index{dt@{dt}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{dt}{dt}}
+{\footnotesize\ttfamily Property conv1d\+::dt\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classconv1d_a14e36ea9e24c4edb42b697488f646045}\label{classconv1d_a14e36ea9e24c4edb42b697488f646045}} 
+\index{conv1d@{conv1d}!ftime@{ftime}}
+\index{ftime@{ftime}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{ftime}{ftime}}
+{\footnotesize\ttfamily Property conv1d\+::ftime\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{classconv1d_a7f1670988008db1e4e5265f067f4479b}\label{classconv1d_a7f1670988008db1e4e5265f067f4479b}} 
+\index{conv1d@{conv1d}!Nfield@{Nfield}}
+\index{Nfield@{Nfield}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{Nfield}{Nfield}}
+{\footnotesize\ttfamily Constant Property conv1d\+::\+Nfield = 1}
+
+\mbox{\Hypertarget{classconv1d_ac5c4990e0891351a2831da5e8845d0d2}\label{classconv1d_ac5c4990e0891351a2831da5e8845d0d2}} 
+\index{conv1d@{conv1d}!u@{u}}
+\index{u@{u}!conv1d@{conv1d}}
+\subsubsection{\texorpdfstring{u}{u}}
+{\footnotesize\ttfamily Property conv1d\+::u\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{conv1d_8m}{conv1d.\+m}\end{DoxyCompactItemize}

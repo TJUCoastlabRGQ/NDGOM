@@ -1,0 +1,168 @@
+\hypertarget{class_s_w_e_abstract3d}{}\section{S\+W\+E\+Abstract3d Class Reference}
+\label{class_s_w_e_abstract3d}\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+
+
+Inheritance diagram for S\+W\+E\+Abstract3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=249pt]{d7/d65/class_s_w_e_abstract3d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for S\+W\+E\+Abstract3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=166pt]{d6/dab/class_s_w_e_abstract3d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_s_w_e_abstract3d_a2408809742248ed269bf386808cfb311}{S\+W\+E\+Abstract3d} (in N, in Nz, in M, in Mz)
+\item 
+function \hyperlink{class_s_w_e_abstract3d_a81b944e443365fa0359de35c6d77285c}{mat\+Solve} (in obj)
+\item 
+function \hyperlink{class_s_w_e_abstract3d_ad43f9f266ab27aa467cbfd4c10c1e71d}{init\+Phys\+From\+Options} (in obj, in mesh2d, in mesh3d)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_s_w_e_abstract3d_a21e5bead486eb8c8534f77f1da3d567c}{hmin}
+\begin{DoxyCompactList}\small\item\em wet/dry depth threshold \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_s_w_e_abstract3d_a95ccfe8526956a8cd05bcd49cd9c4be3}{gra} = 9.\+81
+\begin{DoxyCompactList}\small\item\em gravity acceleration \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_s_w_e_abstract3d_aab40d4b93b0543f975a46276ef3ea756}{z\+Grad}
+\begin{DoxyCompactList}\small\item\em gradient of bottom elevation \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_s_w_e_abstract3d_a5d8d169211a5ee0e646192e05edfde5d}{coriolis\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for coriolis source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract3d_affc1a8ce49b4cdc93cb956d6341d7f16}{friction\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for friction source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract3d_a53c1f46f7b01c1dbad920b83dd9ed36d}{wind\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for wind source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract3d_a4e6aa02d6857950bcc2e05b77b69e7db}{numflux\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for unmerical flux \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract3d_a01c616bca35e8321faccb766b515908f}{limiter\+Solver}
+\begin{DoxyCompactList}\small\item\em limiter type \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a2408809742248ed269bf386808cfb311}\label{class_s_w_e_abstract3d_a2408809742248ed269bf386808cfb311}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{S\+W\+E\+Abstract3d()}{SWEAbstract3d()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract3d\+::\+S\+W\+E\+Abstract3d (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{Nz,  }\item[{in}]{M,  }\item[{in}]{Mz }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_s_w_e_abstract3d_ad43f9f266ab27aa467cbfd4c10c1e71d}\label{class_s_w_e_abstract3d_ad43f9f266ab27aa467cbfd4c10c1e71d}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!init\+Phys\+From\+Options@{init\+Phys\+From\+Options}}
+\index{init\+Phys\+From\+Options@{init\+Phys\+From\+Options}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{init\+Phys\+From\+Options()}{initPhysFromOptions()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract3d\+::init\+Phys\+From\+Options (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh2d,  }\item[{in}]{mesh3d }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a81b944e443365fa0359de35c6d77285c}\label{class_s_w_e_abstract3d_a81b944e443365fa0359de35c6d77285c}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!mat\+Solve@{mat\+Solve}}
+\index{mat\+Solve@{mat\+Solve}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{mat\+Solve()}{matSolve()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract3d\+::mat\+Solve (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a5d8d169211a5ee0e646192e05edfde5d}\label{class_s_w_e_abstract3d_a5d8d169211a5ee0e646192e05edfde5d}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!coriolis\+Solver@{coriolis\+Solver}}
+\index{coriolis\+Solver@{coriolis\+Solver}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{coriolis\+Solver}{coriolisSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::coriolis\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for coriolis source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_affc1a8ce49b4cdc93cb956d6341d7f16}\label{class_s_w_e_abstract3d_affc1a8ce49b4cdc93cb956d6341d7f16}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!friction\+Solver@{friction\+Solver}}
+\index{friction\+Solver@{friction\+Solver}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{friction\+Solver}{frictionSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::friction\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for friction source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a95ccfe8526956a8cd05bcd49cd9c4be3}\label{class_s_w_e_abstract3d_a95ccfe8526956a8cd05bcd49cd9c4be3}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!gra@{gra}}
+\index{gra@{gra}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract3d\+::gra = 9.\+81}
+
+
+
+gravity acceleration 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a21e5bead486eb8c8534f77f1da3d567c}\label{class_s_w_e_abstract3d_a21e5bead486eb8c8534f77f1da3d567c}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!hmin@{hmin}}
+\index{hmin@{hmin}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract3d\+::hmin}
+
+
+
+wet/dry depth threshold 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a01c616bca35e8321faccb766b515908f}\label{class_s_w_e_abstract3d_a01c616bca35e8321faccb766b515908f}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!limiter\+Solver@{limiter\+Solver}}
+\index{limiter\+Solver@{limiter\+Solver}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{limiter\+Solver}{limiterSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::limiter\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+limiter type 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a4e6aa02d6857950bcc2e05b77b69e7db}\label{class_s_w_e_abstract3d_a4e6aa02d6857950bcc2e05b77b69e7db}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!numflux\+Solver@{numflux\+Solver}}
+\index{numflux\+Solver@{numflux\+Solver}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{numflux\+Solver}{numfluxSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::numflux\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for unmerical flux 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_a53c1f46f7b01c1dbad920b83dd9ed36d}\label{class_s_w_e_abstract3d_a53c1f46f7b01c1dbad920b83dd9ed36d}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!wind\+Solver@{wind\+Solver}}
+\index{wind\+Solver@{wind\+Solver}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{wind\+Solver}{windSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::wind\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for wind source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract3d_aab40d4b93b0543f975a46276ef3ea756}\label{class_s_w_e_abstract3d_aab40d4b93b0543f975a46276ef3ea756}} 
+\index{S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}!z\+Grad@{z\+Grad}}
+\index{z\+Grad@{z\+Grad}!S\+W\+E\+Abstract3d@{S\+W\+E\+Abstract3d}}
+\subsubsection{\texorpdfstring{z\+Grad}{zGrad}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract3d\+::z\+Grad\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+gradient of bottom elevation 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_s_w_e_abstract3d_8m}{S\+W\+E\+Abstract3d.\+m}\end{DoxyCompactItemize}

@@ -1,0 +1,286 @@
+\hypertarget{class_ndg_post_process}{}\section{Ndg\+Post\+Process Class Reference}
+\label{class_ndg_post_process}\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+
+
+Inheritance diagram for Ndg\+Post\+Process\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=170pt]{df/d89/class_ndg_post_process__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Post\+Process\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=170pt]{d1/df7/class_ndg_post_process__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_post_process_aabd86000ddefc5267769626f1ba7ca9f}{Ndg\+Post\+Process} (in \hyperlink{class_ndg_post_process_ac866eb3ed1f565c92018469cb55ba403}{mesh\+Union}, in casename)
+\item 
+function \hyperlink{class_ndg_post_process_a5319dfee06cf255bd5a66ab2b0bbc518}{draw\+Result} (in obj, in delta, in field\+Id, in phys\+Field)
+\begin{DoxyCompactList}\small\item\em draw output physical field \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_post_process_abbf06625ea4083021193610c65fcc94e}{assess\+Output\+Var} (in obj, in mesh\+Id, in var\+Name)
+\item 
+function \hyperlink{class_ndg_post_process_a0f803340a064b35bdba5f010664f4af6}{access\+Output\+Result\+At\+Step\+Num} (in obj, in step\+Id)
+\item 
+function \hyperlink{class_ndg_post_process_aa532ce4d2f6b23f6f0b8ae48f8d3991d}{access\+Output\+Step\+Number} (in obj)
+\begin{DoxyCompactList}\small\item\em Get the total number of output step in the output Net\+C\+DF file. \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_post_process_a46e463715da828937b2a432284895687}{access\+Output\+Var\+Number} (in obj)
+\item 
+function \hyperlink{class_ndg_post_process_a01d8400022c4028aecf357e3a04aefde}{check\+Mass\+Volume} (in obj, in var\+Id)
+\item 
+function \hyperlink{class_ndg_post_process_ad6ef4dc10609dd863c4caa81c4384dd9}{draw\+Animation} (in obj, in Visual, in fild\+Id, in frame\+Rate, in video\+Name, in topography)
+\item 
+function \hyperlink{class_ndg_post_process_a4cbaa72f465088097cfd828562f298e9}{evaluate\+Norm\+Err1} (in obj, in fphys, in fext)
+\begin{DoxyCompactList}\small\item\em Calculate the L2-\/norm error. \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_post_process_af9e2ccaedeb209aa53697adadc08451b}{evaluate\+Norm\+Err2} (in obj, in fphys, in fext)
+\begin{DoxyCompactList}\small\item\em Calculate the L2-\/norm error. \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_post_process_ae1a351e3d66f138149ca586160fa77df}{evaluate\+Norm\+Err\+Inf} (in obj, in fphys, in fext)
+\item 
+function \hyperlink{class_ndg_post_process_ac368557b19daf792366b0328d801a974}{interpolate\+Output\+Result\+To\+Gauge\+Point} (in obj, in xg, in yg, in zg)
+\begin{DoxyCompactList}\small\item\em Return interpolation of numerical result at input gauge points. \end{DoxyCompactList}\item 
+function \hyperlink{class_ndg_post_process_a4591e1692fed63238d7d4ac291e1018c}{interpolate\+Output\+Step\+Result\+To\+Gauge\+Point} (in obj, in xg, in yg, in zg, in output\+Step)
+\item 
+function \hyperlink{class_ndg_post_process_a9e40a19774380b19b62903285bb40544}{interpolate\+Phys\+Field\+To\+Gauge\+Point} (in obj, in fphys, in xg, in yg, in zg)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_ndg_post_process_a121c506c8594edeb77255f80029070d1}{Nmesh}
+\begin{DoxyCompactList}\small\item\em number of mesh \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_post_process_ac866eb3ed1f565c92018469cb55ba403}{mesh\+Union}
+\begin{DoxyCompactList}\small\item\em mesh objects \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_post_process_a08853dfa054b39523a379ab3817e648d}{output\+File}
+\begin{DoxyCompactList}\small\item\em output Net\+C\+DF file name \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_post_process_af2926f8de2e1452109e8e56f15349e75}{Nvar}
+\begin{DoxyCompactList}\small\item\em number of variable field \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_post_process_a25cf8ac0ec945656b03c3d74389ba6c4}{Nt}
+\begin{DoxyCompactList}\small\item\em number of output step \end{DoxyCompactList}\item 
+Property \hyperlink{class_ndg_post_process_a11744c856df74639604e7c8e0761fdd7}{time}
+\begin{DoxyCompactList}\small\item\em output time \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_post_process_aabd86000ddefc5267769626f1ba7ca9f}\label{class_ndg_post_process_aabd86000ddefc5267769626f1ba7ca9f}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{Ndg\+Post\+Process()}{NdgPostProcess()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::\+Ndg\+Post\+Process (\begin{DoxyParamCaption}\item[{in}]{mesh\+Union,  }\item[{in}]{casename }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_post_process_a0f803340a064b35bdba5f010664f4af6}\label{class_ndg_post_process_a0f803340a064b35bdba5f010664f4af6}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!access\+Output\+Result\+At\+Step\+Num@{access\+Output\+Result\+At\+Step\+Num}}
+\index{access\+Output\+Result\+At\+Step\+Num@{access\+Output\+Result\+At\+Step\+Num}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{access\+Output\+Result\+At\+Step\+Num()}{accessOutputResultAtStepNum()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::access\+Output\+Result\+At\+Step\+Num (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{step\+Id }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_aa532ce4d2f6b23f6f0b8ae48f8d3991d}\label{class_ndg_post_process_aa532ce4d2f6b23f6f0b8ae48f8d3991d}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!access\+Output\+Step\+Number@{access\+Output\+Step\+Number}}
+\index{access\+Output\+Step\+Number@{access\+Output\+Step\+Number}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{access\+Output\+Step\+Number()}{accessOutputStepNumber()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::access\+Output\+Step\+Number (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+Get the total number of output step in the output Net\+C\+DF file. 
+
+\mbox{\Hypertarget{class_ndg_post_process_a46e463715da828937b2a432284895687}\label{class_ndg_post_process_a46e463715da828937b2a432284895687}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!access\+Output\+Var\+Number@{access\+Output\+Var\+Number}}
+\index{access\+Output\+Var\+Number@{access\+Output\+Var\+Number}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{access\+Output\+Var\+Number()}{accessOutputVarNumber()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::access\+Output\+Var\+Number (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_abbf06625ea4083021193610c65fcc94e}\label{class_ndg_post_process_abbf06625ea4083021193610c65fcc94e}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!assess\+Output\+Var@{assess\+Output\+Var}}
+\index{assess\+Output\+Var@{assess\+Output\+Var}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{assess\+Output\+Var()}{assessOutputVar()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::assess\+Output\+Var (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh\+Id,  }\item[{in}]{var\+Name }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_a01d8400022c4028aecf357e3a04aefde}\label{class_ndg_post_process_a01d8400022c4028aecf357e3a04aefde}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!check\+Mass\+Volume@{check\+Mass\+Volume}}
+\index{check\+Mass\+Volume@{check\+Mass\+Volume}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{check\+Mass\+Volume()}{checkMassVolume()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::check\+Mass\+Volume (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{var\+Id }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_ad6ef4dc10609dd863c4caa81c4384dd9}\label{class_ndg_post_process_ad6ef4dc10609dd863c4caa81c4384dd9}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!draw\+Animation@{draw\+Animation}}
+\index{draw\+Animation@{draw\+Animation}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{draw\+Animation()}{drawAnimation()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::draw\+Animation (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{Visual,  }\item[{in}]{fild\+Id,  }\item[{in}]{frame\+Rate,  }\item[{in}]{video\+Name,  }\item[{in}]{topography }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_a5319dfee06cf255bd5a66ab2b0bbc518}\label{class_ndg_post_process_a5319dfee06cf255bd5a66ab2b0bbc518}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!draw\+Result@{draw\+Result}}
+\index{draw\+Result@{draw\+Result}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{draw\+Result()}{drawResult()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::draw\+Result (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{delta,  }\item[{in}]{field\+Id,  }\item[{in}]{phys\+Field }\end{DoxyParamCaption})}
+
+
+
+draw output physical field 
+
+More detailed description.
+
+
+\begin{DoxyParams}{Parameters}
+{\em phys\+Field} & external field \\
+\hline
+\end{DoxyParams}
+\mbox{\Hypertarget{class_ndg_post_process_a4cbaa72f465088097cfd828562f298e9}\label{class_ndg_post_process_a4cbaa72f465088097cfd828562f298e9}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!evaluate\+Norm\+Err1@{evaluate\+Norm\+Err1}}
+\index{evaluate\+Norm\+Err1@{evaluate\+Norm\+Err1}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{evaluate\+Norm\+Err1()}{evaluateNormErr1()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::evaluate\+Norm\+Err1 (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys,  }\item[{in}]{fext }\end{DoxyParamCaption})}
+
+
+
+Calculate the L2-\/norm error. 
+
+The L1-\/norm error is calculated from the integral formula
+
+$ L^2(c) = \frac{1}{A}\sqrt{ \sum_{k=1}^K \int_{\Omega_k} { \left( u_h - u_{ext} \right) } } $ (Bunya, Kubatko and Westerink, et al., C\+O\+M\+P\+UT M\+E\+T\+H\+OD A\+P\+PL M, 2009)
+
+where exact solution should be stored in the properties {\ttfamily fext}, and the error are calculated from the formula for each variable field.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em err} & Vector of the L2 norm error for each variable field. This function is part of the N\+D\+G\+OM software. \\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyAuthor}{Author}
+li12242, Tianjin University, \href{mailto:li12242@tju.edu.cn}{\tt li12242@tju.\+edu.\+cn} 
+\end{DoxyAuthor}
+\mbox{\Hypertarget{class_ndg_post_process_af9e2ccaedeb209aa53697adadc08451b}\label{class_ndg_post_process_af9e2ccaedeb209aa53697adadc08451b}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!evaluate\+Norm\+Err2@{evaluate\+Norm\+Err2}}
+\index{evaluate\+Norm\+Err2@{evaluate\+Norm\+Err2}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{evaluate\+Norm\+Err2()}{evaluateNormErr2()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::evaluate\+Norm\+Err2 (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys,  }\item[{in}]{fext }\end{DoxyParamCaption})}
+
+
+
+Calculate the L2-\/norm error. 
+
+The L2-\/norm error is calculated from the integral formula
+
+$ L^2(c) = \frac{1}{A}\sqrt{ \sum_{k=1}^K \int_{\Omega_k} { \left( u_h - u_{ext} \right) } } $ (Bunya, Kubatko and Westerink, et al., C\+O\+M\+P\+UT M\+E\+T\+H\+OD A\+P\+PL M, 2009)
+
+where exact solution should be stored in the properties {\ttfamily fext}, and the error are calculated from the formula for each variable field.
+
+
+\begin{DoxyRetVals}{Return values}
+{\em err} & Vector of the L2 norm error for each variable field. This function is part of the N\+D\+G\+OM software. \\
+\hline
+\end{DoxyRetVals}
+\begin{DoxyAuthor}{Author}
+li12242, Tianjin University, \href{mailto:li12242@tju.edu.cn}{\tt li12242@tju.\+edu.\+cn} 
+\end{DoxyAuthor}
+\mbox{\Hypertarget{class_ndg_post_process_ae1a351e3d66f138149ca586160fa77df}\label{class_ndg_post_process_ae1a351e3d66f138149ca586160fa77df}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!evaluate\+Norm\+Err\+Inf@{evaluate\+Norm\+Err\+Inf}}
+\index{evaluate\+Norm\+Err\+Inf@{evaluate\+Norm\+Err\+Inf}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{evaluate\+Norm\+Err\+Inf()}{evaluateNormErrInf()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::evaluate\+Norm\+Err\+Inf (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys,  }\item[{in}]{fext }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_ac368557b19daf792366b0328d801a974}\label{class_ndg_post_process_ac368557b19daf792366b0328d801a974}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!interpolate\+Output\+Result\+To\+Gauge\+Point@{interpolate\+Output\+Result\+To\+Gauge\+Point}}
+\index{interpolate\+Output\+Result\+To\+Gauge\+Point@{interpolate\+Output\+Result\+To\+Gauge\+Point}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{interpolate\+Output\+Result\+To\+Gauge\+Point()}{interpolateOutputResultToGaugePoint()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::interpolate\+Output\+Result\+To\+Gauge\+Point (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xg,  }\item[{in}]{yg,  }\item[{in}]{zg }\end{DoxyParamCaption})}
+
+
+
+Return interpolation of numerical result at input gauge points. 
+
+Function {\ttfamily interpolate\+Output\+Result\+To\+Gauge\+Point} interpolate the numerical results at gauge points with three steps\+:
+\begin{DoxyEnumerate}
+\item The localtion of cell index and local coordinate \mbox{[}r, s\mbox{]} are deternmined;
+\item The interpolation matrix Vg is calculated with its entries given by $ [V_{g}]_{i,j} = \varphi_j(r_i, s_i), \; i = 1, \cdots, N_g $, where $ N_g $ is the total number of gauge points.
+\item The interpolated results at gauge point $(x_i, y_i)$ are obtained with $ \sum_{j = 1}^{N_p} [V_{g}]_{i,j} \mathbf{U}(j, k_i) $, where $ k_i $ is the cell index. 
+\end{DoxyEnumerate}\mbox{\Hypertarget{class_ndg_post_process_a4591e1692fed63238d7d4ac291e1018c}\label{class_ndg_post_process_a4591e1692fed63238d7d4ac291e1018c}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!interpolate\+Output\+Step\+Result\+To\+Gauge\+Point@{interpolate\+Output\+Step\+Result\+To\+Gauge\+Point}}
+\index{interpolate\+Output\+Step\+Result\+To\+Gauge\+Point@{interpolate\+Output\+Step\+Result\+To\+Gauge\+Point}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{interpolate\+Output\+Step\+Result\+To\+Gauge\+Point()}{interpolateOutputStepResultToGaugePoint()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::interpolate\+Output\+Step\+Result\+To\+Gauge\+Point (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{xg,  }\item[{in}]{yg,  }\item[{in}]{zg,  }\item[{in}]{output\+Step }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_ndg_post_process_a9e40a19774380b19b62903285bb40544}\label{class_ndg_post_process_a9e40a19774380b19b62903285bb40544}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!interpolate\+Phys\+Field\+To\+Gauge\+Point@{interpolate\+Phys\+Field\+To\+Gauge\+Point}}
+\index{interpolate\+Phys\+Field\+To\+Gauge\+Point@{interpolate\+Phys\+Field\+To\+Gauge\+Point}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{interpolate\+Phys\+Field\+To\+Gauge\+Point()}{interpolatePhysFieldToGaugePoint()}}
+{\footnotesize\ttfamily function Ndg\+Post\+Process\+::interpolate\+Phys\+Field\+To\+Gauge\+Point (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys,  }\item[{in}]{xg,  }\item[{in}]{yg,  }\item[{in}]{zg }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_ndg_post_process_ac866eb3ed1f565c92018469cb55ba403}\label{class_ndg_post_process_ac866eb3ed1f565c92018469cb55ba403}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!mesh\+Union@{mesh\+Union}}
+\index{mesh\+Union@{mesh\+Union}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{mesh\+Union}{meshUnion}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::mesh\+Union}
+
+
+
+mesh objects 
+
+\mbox{\Hypertarget{class_ndg_post_process_a121c506c8594edeb77255f80029070d1}\label{class_ndg_post_process_a121c506c8594edeb77255f80029070d1}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!Nmesh@{Nmesh}}
+\index{Nmesh@{Nmesh}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{Nmesh}{Nmesh}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::\+Nmesh}
+
+
+
+number of mesh 
+
+\mbox{\Hypertarget{class_ndg_post_process_a25cf8ac0ec945656b03c3d74389ba6c4}\label{class_ndg_post_process_a25cf8ac0ec945656b03c3d74389ba6c4}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!Nt@{Nt}}
+\index{Nt@{Nt}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{Nt}{Nt}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::\+Nt}
+
+
+
+number of output step 
+
+\mbox{\Hypertarget{class_ndg_post_process_af2926f8de2e1452109e8e56f15349e75}\label{class_ndg_post_process_af2926f8de2e1452109e8e56f15349e75}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!Nvar@{Nvar}}
+\index{Nvar@{Nvar}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{Nvar}{Nvar}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::\+Nvar}
+
+
+
+number of variable field 
+
+\mbox{\Hypertarget{class_ndg_post_process_a08853dfa054b39523a379ab3817e648d}\label{class_ndg_post_process_a08853dfa054b39523a379ab3817e648d}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!output\+File@{output\+File}}
+\index{output\+File@{output\+File}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{output\+File}{outputFile}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::output\+File}
+
+
+
+output Net\+C\+DF file name 
+
+\mbox{\Hypertarget{class_ndg_post_process_a11744c856df74639604e7c8e0761fdd7}\label{class_ndg_post_process_a11744c856df74639604e7c8e0761fdd7}} 
+\index{Ndg\+Post\+Process@{Ndg\+Post\+Process}!time@{time}}
+\index{time@{time}!Ndg\+Post\+Process@{Ndg\+Post\+Process}}
+\subsubsection{\texorpdfstring{time}{time}}
+{\footnotesize\ttfamily Property Ndg\+Post\+Process\+::time}
+
+
+
+output time 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_post_process_8m}{Ndg\+Post\+Process.\+m}\end{DoxyCompactItemize}

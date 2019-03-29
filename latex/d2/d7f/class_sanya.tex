@@ -1,0 +1,238 @@
+\hypertarget{class_sanya}{}\section{Sanya Class Reference}
+\label{class_sanya}\index{Sanya@{Sanya}}
+
+
+Inheritance diagram for Sanya\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{d8/d2a/class_sanya__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Sanya\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=202pt]{d8/d3d/class_sanya__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_sanya_ae4dc5b888a77771a55a60a71ef175c2f}{Sanya} (in \hyperlink{class_sanya_a933e9e02d7cd73f9722669a5b9d5b1c5}{N})
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_sanya_a20e4c22347d98ed14123bf7963178cf2}{hmin} = 0.\+5
+\begin{DoxyCompactList}\small\item\em wet/dry depth threshold \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_sanya_aabe93aa8cfbddb9ee73ff30a537853bf}{gra} = 9.\+8
+\begin{DoxyCompactList}\small\item\em gravity acceleration \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_sanya_a55795de68414b87102507f87e6ad6af0}{tideinterval} = 600
+\begin{DoxyCompactList}\small\item\em interval of tide elevation (s) \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_sanya_ae6488393d6dd7f772f0050df1da2cb47}{tidal\+File} = ...
+\begin{DoxyCompactList}\small\item\em tidal elevation of open boundary vertices \end{DoxyCompactList}\item 
+Property \hyperlink{class_sanya_a933e9e02d7cd73f9722669a5b9d5b1c5}{N}
+\item 
+Property \hyperlink{class_sanya_a7905e627e38963365c48713b82083fd8}{O\+B\+Edge\+Index}
+\begin{DoxyCompactList}\small\item\em open boundary edge index \end{DoxyCompactList}\item 
+Property \hyperlink{class_sanya_a90a8db1cd3e1c55054e6c739361a8511}{Tide}
+\begin{DoxyCompactList}\small\item\em open boundary tidal elevation \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_sanya_a624f9917b7802d63efdf71eb9c134643}{set\+Initial\+Field} (in obj)
+\begin{DoxyCompactList}\small\item\em Set the initial field. \end{DoxyCompactList}\item 
+function \hyperlink{class_sanya_ab70365b8ce5e40a6c0081d20524d01d2}{set\+Option} (in obj, in \hyperlink{class_ndg_phys_af91f4c54b93504e76b38a5693774dff1}{option})
+\begin{DoxyCompactList}\small\item\em Set the solver options. \end{DoxyCompactList}\item 
+function \hyperlink{class_sanya_a28fafaae47f19a25e9e2a8bafb009baa}{get\+Initial\+Function} (in obj)
+\item 
+function \hyperlink{class_sanya_a28c7cc126cf26b74aefa75b4c8d5e0cb}{Output\+Open\+Boundary\+Vert\+Coor} (in obj)
+\item 
+function \hyperlink{class_sanya_af9a6d489299805e94938acdc2d84b448}{Post\+Process\+\_\+direction} (in obj)
+\item 
+function \hyperlink{class_sanya_a8a5100e9c105dc2496c7589c0a93ce24}{Post\+Process\+\_\+level} (in obj)
+\item 
+function \hyperlink{class_sanya_a196bc12a9c63098bdb2b0b2cc25269e0}{Post\+Process\+\_\+speed} (in obj)
+\item 
+function \hyperlink{class_sanya_a3fb01627e16128d771f249dd95d8c189}{Read\+Tide\+Elevation} (in obj)
+\item 
+function \hyperlink{class_sanya_ade239b8bd0dca435cdf63545a02f7e86}{Validation\+\_\+direction} (in obj, in id)
+\item 
+function \hyperlink{class_sanya_aa2a87328de59bfe468561bac287dd373}{Validation\+\_\+level} (in obj, in id1, in id2)
+\item 
+function \hyperlink{class_sanya_a876b9f8292887c87692a1b5b392e4e71}{Validation\+\_\+speed} (in obj, in id)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_sanya_ae4dc5b888a77771a55a60a71ef175c2f}\label{class_sanya_ae4dc5b888a77771a55a60a71ef175c2f}} 
+\index{Sanya@{Sanya}!Sanya@{Sanya}}
+\index{Sanya@{Sanya}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Sanya()}{Sanya()}}
+{\footnotesize\ttfamily function Sanya\+::\+Sanya (\begin{DoxyParamCaption}\item[{in}]{N }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_sanya_a28fafaae47f19a25e9e2a8bafb009baa}\label{class_sanya_a28fafaae47f19a25e9e2a8bafb009baa}} 
+\index{Sanya@{Sanya}!get\+Initial\+Function@{get\+Initial\+Function}}
+\index{get\+Initial\+Function@{get\+Initial\+Function}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{get\+Initial\+Function()}{getInitialFunction()}}
+{\footnotesize\ttfamily function Sanya\+::get\+Initial\+Function (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a28c7cc126cf26b74aefa75b4c8d5e0cb}\label{class_sanya_a28c7cc126cf26b74aefa75b4c8d5e0cb}} 
+\index{Sanya@{Sanya}!Output\+Open\+Boundary\+Vert\+Coor@{Output\+Open\+Boundary\+Vert\+Coor}}
+\index{Output\+Open\+Boundary\+Vert\+Coor@{Output\+Open\+Boundary\+Vert\+Coor}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Output\+Open\+Boundary\+Vert\+Coor()}{OutputOpenBoundaryVertCoor()}}
+{\footnotesize\ttfamily function Sanya\+::\+Output\+Open\+Boundary\+Vert\+Coor (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_af9a6d489299805e94938acdc2d84b448}\label{class_sanya_af9a6d489299805e94938acdc2d84b448}} 
+\index{Sanya@{Sanya}!Post\+Process\+\_\+direction@{Post\+Process\+\_\+direction}}
+\index{Post\+Process\+\_\+direction@{Post\+Process\+\_\+direction}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Post\+Process\+\_\+direction()}{PostProcess\_direction()}}
+{\footnotesize\ttfamily function Sanya\+::\+Post\+Process\+\_\+direction (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a8a5100e9c105dc2496c7589c0a93ce24}\label{class_sanya_a8a5100e9c105dc2496c7589c0a93ce24}} 
+\index{Sanya@{Sanya}!Post\+Process\+\_\+level@{Post\+Process\+\_\+level}}
+\index{Post\+Process\+\_\+level@{Post\+Process\+\_\+level}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Post\+Process\+\_\+level()}{PostProcess\_level()}}
+{\footnotesize\ttfamily function Sanya\+::\+Post\+Process\+\_\+level (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a196bc12a9c63098bdb2b0b2cc25269e0}\label{class_sanya_a196bc12a9c63098bdb2b0b2cc25269e0}} 
+\index{Sanya@{Sanya}!Post\+Process\+\_\+speed@{Post\+Process\+\_\+speed}}
+\index{Post\+Process\+\_\+speed@{Post\+Process\+\_\+speed}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Post\+Process\+\_\+speed()}{PostProcess\_speed()}}
+{\footnotesize\ttfamily function Sanya\+::\+Post\+Process\+\_\+speed (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a3fb01627e16128d771f249dd95d8c189}\label{class_sanya_a3fb01627e16128d771f249dd95d8c189}} 
+\index{Sanya@{Sanya}!Read\+Tide\+Elevation@{Read\+Tide\+Elevation}}
+\index{Read\+Tide\+Elevation@{Read\+Tide\+Elevation}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Read\+Tide\+Elevation()}{ReadTideElevation()}}
+{\footnotesize\ttfamily function Sanya\+::\+Read\+Tide\+Elevation (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a624f9917b7802d63efdf71eb9c134643}\label{class_sanya_a624f9917b7802d63efdf71eb9c134643}} 
+\index{Sanya@{Sanya}!set\+Initial\+Field@{set\+Initial\+Field}}
+\index{set\+Initial\+Field@{set\+Initial\+Field}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{set\+Initial\+Field()}{setInitialField()}}
+{\footnotesize\ttfamily function Sanya\+::set\+Initial\+Field (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the initial field. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a300c8d73472e9397d961b5d1aa5470e1}{Ndg\+Phys}.
+
+\mbox{\Hypertarget{class_sanya_ab70365b8ce5e40a6c0081d20524d01d2}\label{class_sanya_ab70365b8ce5e40a6c0081d20524d01d2}} 
+\index{Sanya@{Sanya}!set\+Option@{set\+Option}}
+\index{set\+Option@{set\+Option}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{set\+Option()}{setOption()}}
+{\footnotesize\ttfamily function Sanya\+::set\+Option (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{option }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the solver options. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a5cd323275f4098db166471c4b078ed17}{Ndg\+Phys}.
+
+\mbox{\Hypertarget{class_sanya_ade239b8bd0dca435cdf63545a02f7e86}\label{class_sanya_ade239b8bd0dca435cdf63545a02f7e86}} 
+\index{Sanya@{Sanya}!Validation\+\_\+direction@{Validation\+\_\+direction}}
+\index{Validation\+\_\+direction@{Validation\+\_\+direction}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Validation\+\_\+direction()}{Validation\_direction()}}
+{\footnotesize\ttfamily function Sanya\+::\+Validation\+\_\+direction (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_aa2a87328de59bfe468561bac287dd373}\label{class_sanya_aa2a87328de59bfe468561bac287dd373}} 
+\index{Sanya@{Sanya}!Validation\+\_\+level@{Validation\+\_\+level}}
+\index{Validation\+\_\+level@{Validation\+\_\+level}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Validation\+\_\+level()}{Validation\_level()}}
+{\footnotesize\ttfamily function Sanya\+::\+Validation\+\_\+level (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{id1,  }\item[{in}]{id2 }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_sanya_a876b9f8292887c87692a1b5b392e4e71}\label{class_sanya_a876b9f8292887c87692a1b5b392e4e71}} 
+\index{Sanya@{Sanya}!Validation\+\_\+speed@{Validation\+\_\+speed}}
+\index{Validation\+\_\+speed@{Validation\+\_\+speed}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Validation\+\_\+speed()}{Validation\_speed()}}
+{\footnotesize\ttfamily function Sanya\+::\+Validation\+\_\+speed (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{id }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_sanya_aabe93aa8cfbddb9ee73ff30a537853bf}\label{class_sanya_aabe93aa8cfbddb9ee73ff30a537853bf}} 
+\index{Sanya@{Sanya}!gra@{gra}}
+\index{gra@{gra}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property Sanya\+::gra = 9.\+8}
+
+
+
+gravity acceleration 
+
+\mbox{\Hypertarget{class_sanya_a20e4c22347d98ed14123bf7963178cf2}\label{class_sanya_a20e4c22347d98ed14123bf7963178cf2}} 
+\index{Sanya@{Sanya}!hmin@{hmin}}
+\index{hmin@{hmin}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property Sanya\+::hmin = 0.\+5}
+
+
+
+wet/dry depth threshold 
+
+\mbox{\Hypertarget{class_sanya_a933e9e02d7cd73f9722669a5b9d5b1c5}\label{class_sanya_a933e9e02d7cd73f9722669a5b9d5b1c5}} 
+\index{Sanya@{Sanya}!N@{N}}
+\index{N@{N}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{N}{N}}
+{\footnotesize\ttfamily Property Sanya\+::N}
+
+\mbox{\Hypertarget{class_sanya_a7905e627e38963365c48713b82083fd8}\label{class_sanya_a7905e627e38963365c48713b82083fd8}} 
+\index{Sanya@{Sanya}!O\+B\+Edge\+Index@{O\+B\+Edge\+Index}}
+\index{O\+B\+Edge\+Index@{O\+B\+Edge\+Index}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{O\+B\+Edge\+Index}{OBEdgeIndex}}
+{\footnotesize\ttfamily Property Sanya\+::\+O\+B\+Edge\+Index}
+
+
+
+open boundary edge index 
+
+\mbox{\Hypertarget{class_sanya_ae6488393d6dd7f772f0050df1da2cb47}\label{class_sanya_ae6488393d6dd7f772f0050df1da2cb47}} 
+\index{Sanya@{Sanya}!tidal\+File@{tidal\+File}}
+\index{tidal\+File@{tidal\+File}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{tidal\+File}{tidalFile}}
+{\footnotesize\ttfamily Constant Property Sanya\+::tidal\+File = ...}
+
+
+
+tidal elevation of open boundary vertices 
+
+\mbox{\Hypertarget{class_sanya_a90a8db1cd3e1c55054e6c739361a8511}\label{class_sanya_a90a8db1cd3e1c55054e6c739361a8511}} 
+\index{Sanya@{Sanya}!Tide@{Tide}}
+\index{Tide@{Tide}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{Tide}{Tide}}
+{\footnotesize\ttfamily Property Sanya\+::\+Tide}
+
+
+
+open boundary tidal elevation 
+
+\mbox{\Hypertarget{class_sanya_a55795de68414b87102507f87e6ad6af0}\label{class_sanya_a55795de68414b87102507f87e6ad6af0}} 
+\index{Sanya@{Sanya}!tideinterval@{tideinterval}}
+\index{tideinterval@{tideinterval}!Sanya@{Sanya}}
+\subsubsection{\texorpdfstring{tideinterval}{tideinterval}}
+{\footnotesize\ttfamily Constant Property Sanya\+::tideinterval = 600}
+
+
+
+interval of tide elevation (s) 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_sanya_8m}{Sanya.\+m}\end{DoxyCompactItemize}

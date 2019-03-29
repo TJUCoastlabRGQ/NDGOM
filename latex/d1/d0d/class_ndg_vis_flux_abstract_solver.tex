@@ -1,0 +1,132 @@
+\hypertarget{class_ndg_vis_flux_abstract_solver}{}\section{Ndg\+Vis\+Flux\+Abstract\+Solver Class Reference}
+\label{class_ndg_vis_flux_abstract_solver}\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+
+
+Inheritance diagram for Ndg\+Vis\+Flux\+Abstract\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{d8/d04/class_ndg_vis_flux_abstract_solver__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Vis\+Flux\+Abstract\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=210pt]{d6/d44/class_ndg_vis_flux_abstract_solver__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_vis_flux_abstract_solver_a2a333a4d758e61119403fafe481b723f}{Ndg\+Vis\+Flux\+Abstract\+Solver} ()
+\item 
+virtual function \hyperlink{class_ndg_vis_flux_abstract_solver_a4f51a74540ffba28a09dba43f750a78e}{evaluate\+Var\+Surf\+Num\+Flux} (in obj, in fm, in fp)
+\begin{DoxyCompactList}\small\item\em function used to caculate the variable flux to compute the auxiallary flux \end{DoxyCompactList}\item 
+virtual function \hyperlink{class_ndg_vis_flux_abstract_solver_af24af3c5c34dcd33ec53b3dcdea092ed}{evaluate\+Volume\+Flux\+Term} (in obj, in qx, in qy, in Epsilon)
+\begin{DoxyCompactList}\small\item\em function used to caculate the variable flux to compute the auxiallary volume flux \end{DoxyCompactList}\item 
+virtual function \hyperlink{class_ndg_vis_flux_abstract_solver_a2c9b1f860b7e46dc3246bd84ac528201}{evaluate\+Auxialary\+Surfaceflux} (in obj, in mesh, in Qx, in Qy)
+\begin{DoxyCompactList}\small\item\em function used to caculate the auxiallary variable flux \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_vis_flux_abstract_solver_a2a333a4d758e61119403fafe481b723f}\label{class_ndg_vis_flux_abstract_solver_a2a333a4d758e61119403fafe481b723f}} 
+\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}!Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}!Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+\subsubsection{\texorpdfstring{Ndg\+Vis\+Flux\+Abstract\+Solver()}{NdgVisFluxAbstractSolver()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Flux\+Abstract\+Solver\+::\+Ndg\+Vis\+Flux\+Abstract\+Solver (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_vis_flux_abstract_solver_a2c9b1f860b7e46dc3246bd84ac528201}\label{class_ndg_vis_flux_abstract_solver_a2c9b1f860b7e46dc3246bd84ac528201}} 
+\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}!evaluate\+Auxialary\+Surfaceflux@{evaluate\+Auxialary\+Surfaceflux}}
+\index{evaluate\+Auxialary\+Surfaceflux@{evaluate\+Auxialary\+Surfaceflux}!Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Auxialary\+Surfaceflux()}{evaluateAuxialarySurfaceflux()}}
+{\footnotesize\ttfamily virtual function Ndg\+Vis\+Flux\+Abstract\+Solver\+::evaluate\+Auxialary\+Surfaceflux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{Qx,  }\item[{in}]{Qy }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+function used to caculate the auxiallary variable flux 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em mesh} & The mesh object \\
+\hline
+\mbox{\tt in}  & {\em Qx} & The volume flux term in x direction, size (T\+Nfp,K) \\
+\hline
+\mbox{\tt in}  & {\em Qy} & The volume flux term in y direction, size (T\+Nfp,K) \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em } & \\
+\hline
+\end{DoxyRetVals}
+
+
+Reimplemented in \hyperlink{class_ndg_vis_central_flux_solver_ac570459fbbea19359360e4be013c3827}{Ndg\+Vis\+Central\+Flux\+Solver}.
+
+\mbox{\Hypertarget{class_ndg_vis_flux_abstract_solver_a4f51a74540ffba28a09dba43f750a78e}\label{class_ndg_vis_flux_abstract_solver_a4f51a74540ffba28a09dba43f750a78e}} 
+\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}!evaluate\+Var\+Surf\+Num\+Flux@{evaluate\+Var\+Surf\+Num\+Flux}}
+\index{evaluate\+Var\+Surf\+Num\+Flux@{evaluate\+Var\+Surf\+Num\+Flux}!Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Var\+Surf\+Num\+Flux()}{evaluateVarSurfNumFlux()}}
+{\footnotesize\ttfamily virtual function Ndg\+Vis\+Flux\+Abstract\+Solver\+::evaluate\+Var\+Surf\+Num\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fm,  }\item[{in}]{fp }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+function used to caculate the variable flux to compute the auxiallary flux 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em fm} & The surface value of the studied cell, size (T\+Nfp,K,Nvar) \\
+\hline
+\mbox{\tt in}  & {\em fp} & The surface value of the adjacent cell, size (T\+Nfp,K,Nvar) \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em } & \\
+\hline
+\end{DoxyRetVals}
+
+
+Reimplemented in \hyperlink{class_ndg_vis_central_flux_solver_a1fa51d9658f91514731fd5ef52344f78}{Ndg\+Vis\+Central\+Flux\+Solver}.
+
+\mbox{\Hypertarget{class_ndg_vis_flux_abstract_solver_af24af3c5c34dcd33ec53b3dcdea092ed}\label{class_ndg_vis_flux_abstract_solver_af24af3c5c34dcd33ec53b3dcdea092ed}} 
+\index{Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}!evaluate\+Volume\+Flux\+Term@{evaluate\+Volume\+Flux\+Term}}
+\index{evaluate\+Volume\+Flux\+Term@{evaluate\+Volume\+Flux\+Term}!Ndg\+Vis\+Flux\+Abstract\+Solver@{Ndg\+Vis\+Flux\+Abstract\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Volume\+Flux\+Term()}{evaluateVolumeFluxTerm()}}
+{\footnotesize\ttfamily virtual function Ndg\+Vis\+Flux\+Abstract\+Solver\+::evaluate\+Volume\+Flux\+Term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{qx,  }\item[{in}]{qy,  }\item[{in}]{Epsilon }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+function used to caculate the variable flux to compute the auxiallary volume flux 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em qx} & The auxiallary variable in the x direction \\
+\hline
+\mbox{\tt in}  & {\em qy} & The auxiallary variable in the y direction \\
+\hline
+\mbox{\tt in}  & {\em Epsilon} & The viscosity parameter of mesh m for varflux numbered var\+Field\+Index \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em } & \\
+\hline
+\end{DoxyRetVals}
+
+
+Reimplemented in \hyperlink{class_ndg_vis_central_flux_solver_a41a3aeb7b361a0c993cc1ea654144910}{Ndg\+Vis\+Central\+Flux\+Solver}.
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_vis_flux_abstract_solver_8m}{Ndg\+Vis\+Flux\+Abstract\+Solver.\+m}\end{DoxyCompactItemize}

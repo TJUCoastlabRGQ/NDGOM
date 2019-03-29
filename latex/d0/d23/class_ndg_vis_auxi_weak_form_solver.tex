@@ -1,0 +1,76 @@
+\hypertarget{class_ndg_vis_auxi_weak_form_solver}{}\section{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver Class Reference}
+\label{class_ndg_vis_auxi_weak_form_solver}\index{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}}
+
+
+Inheritance diagram for Ndg\+Vis\+Auxi\+Weak\+Form\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=230pt]{d1/d22/class_ndg_vis_auxi_weak_form_solver__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Ndg\+Vis\+Auxi\+Weak\+Form\+Solver\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=230pt]{d6/d5e/class_ndg_vis_auxi_weak_form_solver__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_ndg_vis_auxi_weak_form_solver_a4f0ebb085f3c61feab591480ce4a6a57}{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver} (in phys)
+\item 
+function \hyperlink{class_ndg_vis_auxi_weak_form_solver_ac8e64dc2624b939ace221899debaa9db}{evaluate\+Viscosity\+R\+HS} (in obj, in fphys)
+\item 
+function \hyperlink{class_ndg_vis_auxi_weak_form_solver_a4bcceaa358596c10a30cb6c3dcab5b2a}{evaluate\+Auxialary\+Variable} (in obj, in m, in fphys, in Varflux)
+\begin{DoxyCompactList}\small\item\em function used to calculate the auxialary variables, size(\+Np, K) \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_ndg_vis_auxi_weak_form_solver_a4f0ebb085f3c61feab591480ce4a6a57}\label{class_ndg_vis_auxi_weak_form_solver_a4f0ebb085f3c61feab591480ce4a6a57}} 
+\index{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}!Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}}
+\index{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}!Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}}
+\subsubsection{\texorpdfstring{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver()}{NdgVisAuxiWeakFormSolver()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Weak\+Form\+Solver\+::\+Ndg\+Vis\+Auxi\+Weak\+Form\+Solver (\begin{DoxyParamCaption}\item[{in}]{phys }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_ndg_vis_auxi_weak_form_solver_a4bcceaa358596c10a30cb6c3dcab5b2a}\label{class_ndg_vis_auxi_weak_form_solver_a4bcceaa358596c10a30cb6c3dcab5b2a}} 
+\index{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}!evaluate\+Auxialary\+Variable@{evaluate\+Auxialary\+Variable}}
+\index{evaluate\+Auxialary\+Variable@{evaluate\+Auxialary\+Variable}!Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Auxialary\+Variable()}{evaluateAuxialaryVariable()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Weak\+Form\+Solver\+::evaluate\+Auxialary\+Variable (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{m,  }\item[{in}]{fphys,  }\item[{in}]{Varflux }\end{DoxyParamCaption})}
+
+
+
+function used to calculate the auxialary variables, size(\+Np, K) 
+
+
+\begin{DoxyParams}[1]{Parameters}
+\mbox{\tt in}  & {\em m} & Index of the studied mesh \\
+\hline
+\mbox{\tt in}  & {\em fphys} & The fphys value of the studied mesh of index varfield\+Index(i), size (Np,K) \\
+\hline
+\end{DoxyParams}
+
+\begin{DoxyRetVals}{Return values}
+{\em } & \\
+\hline
+\end{DoxyRetVals}
+\mbox{\Hypertarget{class_ndg_vis_auxi_weak_form_solver_ac8e64dc2624b939ace221899debaa9db}\label{class_ndg_vis_auxi_weak_form_solver_ac8e64dc2624b939ace221899debaa9db}} 
+\index{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}!evaluate\+Viscosity\+R\+HS@{evaluate\+Viscosity\+R\+HS}}
+\index{evaluate\+Viscosity\+R\+HS@{evaluate\+Viscosity\+R\+HS}!Ndg\+Vis\+Auxi\+Weak\+Form\+Solver@{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver}}
+\subsubsection{\texorpdfstring{evaluate\+Viscosity\+R\+H\+S()}{evaluateViscosityRHS()}}
+{\footnotesize\ttfamily function Ndg\+Vis\+Auxi\+Weak\+Form\+Solver\+::evaluate\+Viscosity\+R\+HS (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_ndg_vis_auxi_weak_form_solver_8m}{Ndg\+Vis\+Auxi\+Weak\+Form\+Solver.\+m}\end{DoxyCompactItemize}

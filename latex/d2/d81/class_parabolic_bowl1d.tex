@@ -1,0 +1,209 @@
+\hypertarget{class_parabolic_bowl1d}{}\section{Parabolic\+Bowl1d Class Reference}
+\label{class_parabolic_bowl1d}\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+
+
+Inheritance diagram for Parabolic\+Bowl1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=198pt]{dd/d3f/class_parabolic_bowl1d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Parabolic\+Bowl1d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=184pt]{de/dc3/class_parabolic_bowl1d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_parabolic_bowl1d_a557bdce485a3f85972c4d699f4a49f3c}{Parabolic\+Bowl1d} (in N, in M)
+\item 
+function \hyperlink{class_parabolic_bowl1d_aab469ead195463f6316305f790f66beb}{draw\+Depth\+Error} (in obj)
+\item 
+function \hyperlink{class_parabolic_bowl1d_ae4c4d2461801c3441aa1f66dc5ca2443}{draw\+Flow\+Error} (in obj)
+\item 
+function \hyperlink{class_parabolic_bowl1d_af5c3937be0135c29386d685a3c8e62be}{draw\+Section} (in obj, in period\+Frac)
+\item 
+function \hyperlink{class_parabolic_bowl1d_ab90e776735e3f8656ce25162c91c10be}{draw\+Mass\+Error} (in obj)
+\item 
+function \hyperlink{class_parabolic_bowl1d_a9886a572e746d2f359bd1ea3f70af062}{draw\+Section\+Error} (in obj, in timefrac)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_parabolic_bowl1d_a9d2851339a4d54f816c9e3f93b5c2f70}{hmin} = 1e
+\item 
+Constant Property \hyperlink{class_parabolic_bowl1d_a152bf3a1a100e0a075fecdf43ce533e5}{gra} = 9.\+81
+\item 
+Constant Property \hyperlink{class_parabolic_bowl1d_a8ce37a49f081841e51ec00c1942fc15a}{a} = 3000
+\item 
+Constant Property \hyperlink{class_parabolic_bowl1d_a74bb8fa6705ab95ac310c343635bb023}{h0} = 10
+\item 
+Constant Property \hyperlink{class_parabolic_bowl1d_a46c8ee4b372cc4f93820303a7a6346c0}{B} = 5
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_parabolic_bowl1d_a9398fc3477e482640b615d32304b5607}{set\+Initial\+Field} (in obj)
+\begin{DoxyCompactList}\small\item\em Set the initial field. \end{DoxyCompactList}\item 
+function \hyperlink{class_parabolic_bowl1d_aa7b7e16cac1c6bf8ac2ba9e03080c9f0}{set\+Option} (in obj, in \hyperlink{class_ndg_phys_af91f4c54b93504e76b38a5693774dff1}{option})
+\begin{DoxyCompactList}\small\item\em Set the solver options. \end{DoxyCompactList}\item 
+function \hyperlink{class_parabolic_bowl1d_aff0287ba51019e7d837007bf0fa377ec}{evaluate\+Exact\+Func} (in obj, in time)
+\item 
+function \hyperlink{class_parabolic_bowl1d_a68dd2303dd89df5b163a381d768ff4a8}{draw\+Flux\+Section} (in x, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys}, in \hyperlink{class_ndg_phys_mat_a2b0e8a77bf5f6fe870b12e400d6d83f3}{fext})
+\item 
+function \hyperlink{class_parabolic_bowl1d_ac8a5f7473584b80cf52a93d03b29784f}{draw\+Elavation\+Section} (in x, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys}, in \hyperlink{class_ndg_phys_mat_a2b0e8a77bf5f6fe870b12e400d6d83f3}{fext}, in bot)
+\item 
+function \hyperlink{class_parabolic_bowl1d_aa13e4936d6edee12f66e8171031c630b}{make\+Uniform\+Mesh} (in N, in M)
+\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Detailed Description}
+Khan AA, Lai W. Modeling shallow water flows using the discontinuous Galerkin method. C\+RC Press; 2014. 
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_parabolic_bowl1d_a557bdce485a3f85972c4d699f4a49f3c}\label{class_parabolic_bowl1d_a557bdce485a3f85972c4d699f4a49f3c}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{Parabolic\+Bowl1d()}{ParabolicBowl1d()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::\+Parabolic\+Bowl1d (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{M }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_parabolic_bowl1d_aab469ead195463f6316305f790f66beb}\label{class_parabolic_bowl1d_aab469ead195463f6316305f790f66beb}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Depth\+Error@{draw\+Depth\+Error}}
+\index{draw\+Depth\+Error@{draw\+Depth\+Error}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Depth\+Error()}{drawDepthError()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Depth\+Error (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_ac8a5f7473584b80cf52a93d03b29784f}\label{class_parabolic_bowl1d_ac8a5f7473584b80cf52a93d03b29784f}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Elavation\+Section@{draw\+Elavation\+Section}}
+\index{draw\+Elavation\+Section@{draw\+Elavation\+Section}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Elavation\+Section()}{drawElavationSection()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Elavation\+Section (\begin{DoxyParamCaption}\item[{in}]{x,  }\item[{in}]{fphys,  }\item[{in}]{fext,  }\item[{in}]{bot }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_ae4c4d2461801c3441aa1f66dc5ca2443}\label{class_parabolic_bowl1d_ae4c4d2461801c3441aa1f66dc5ca2443}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Flow\+Error@{draw\+Flow\+Error}}
+\index{draw\+Flow\+Error@{draw\+Flow\+Error}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Flow\+Error()}{drawFlowError()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Flow\+Error (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a68dd2303dd89df5b163a381d768ff4a8}\label{class_parabolic_bowl1d_a68dd2303dd89df5b163a381d768ff4a8}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Flux\+Section@{draw\+Flux\+Section}}
+\index{draw\+Flux\+Section@{draw\+Flux\+Section}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Flux\+Section()}{drawFluxSection()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Flux\+Section (\begin{DoxyParamCaption}\item[{in}]{x,  }\item[{in}]{fphys,  }\item[{in}]{fext }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_ab90e776735e3f8656ce25162c91c10be}\label{class_parabolic_bowl1d_ab90e776735e3f8656ce25162c91c10be}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Mass\+Error@{draw\+Mass\+Error}}
+\index{draw\+Mass\+Error@{draw\+Mass\+Error}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Mass\+Error()}{drawMassError()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Mass\+Error (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_af5c3937be0135c29386d685a3c8e62be}\label{class_parabolic_bowl1d_af5c3937be0135c29386d685a3c8e62be}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Section@{draw\+Section}}
+\index{draw\+Section@{draw\+Section}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Section()}{drawSection()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Section (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{period\+Frac }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a9886a572e746d2f359bd1ea3f70af062}\label{class_parabolic_bowl1d_a9886a572e746d2f359bd1ea3f70af062}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!draw\+Section\+Error@{draw\+Section\+Error}}
+\index{draw\+Section\+Error@{draw\+Section\+Error}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{draw\+Section\+Error()}{drawSectionError()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::draw\+Section\+Error (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{timefrac }\end{DoxyParamCaption})}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_aff0287ba51019e7d837007bf0fa377ec}\label{class_parabolic_bowl1d_aff0287ba51019e7d837007bf0fa377ec}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!evaluate\+Exact\+Func@{evaluate\+Exact\+Func}}
+\index{evaluate\+Exact\+Func@{evaluate\+Exact\+Func}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{evaluate\+Exact\+Func()}{evaluateExactFunc()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::evaluate\+Exact\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_aa13e4936d6edee12f66e8171031c630b}\label{class_parabolic_bowl1d_aa13e4936d6edee12f66e8171031c630b}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!make\+Uniform\+Mesh@{make\+Uniform\+Mesh}}
+\index{make\+Uniform\+Mesh@{make\+Uniform\+Mesh}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{make\+Uniform\+Mesh()}{makeUniformMesh()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::make\+Uniform\+Mesh (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{M }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a9398fc3477e482640b615d32304b5607}\label{class_parabolic_bowl1d_a9398fc3477e482640b615d32304b5607}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!set\+Initial\+Field@{set\+Initial\+Field}}
+\index{set\+Initial\+Field@{set\+Initial\+Field}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{set\+Initial\+Field()}{setInitialField()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::set\+Initial\+Field (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the initial field. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a300c8d73472e9397d961b5d1aa5470e1}{Ndg\+Phys}.
+
+
+
+Reimplemented in \hyperlink{class_parabolic_bowl_steady1d_af7b7ff69b6309210100cac06240a3d02}{Parabolic\+Bowl\+Steady1d}.
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_aa7b7e16cac1c6bf8ac2ba9e03080c9f0}\label{class_parabolic_bowl1d_aa7b7e16cac1c6bf8ac2ba9e03080c9f0}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!set\+Option@{set\+Option}}
+\index{set\+Option@{set\+Option}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{set\+Option()}{setOption()}}
+{\footnotesize\ttfamily function Parabolic\+Bowl1d\+::set\+Option (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{option }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+Set the solver options. 
+
+
+
+Reimplemented from \hyperlink{class_ndg_phys_a5cd323275f4098db166471c4b078ed17}{Ndg\+Phys}.
+
+
+
+Reimplemented in \hyperlink{class_parabolic_bowl_steady1d_aff5f5d26655d66ff196787e071f0465a}{Parabolic\+Bowl\+Steady1d}.
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_parabolic_bowl1d_a8ce37a49f081841e51ec00c1942fc15a}\label{class_parabolic_bowl1d_a8ce37a49f081841e51ec00c1942fc15a}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!a@{a}}
+\index{a@{a}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{a}{a}}
+{\footnotesize\ttfamily Constant Property Parabolic\+Bowl1d\+::a = 3000}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a46c8ee4b372cc4f93820303a7a6346c0}\label{class_parabolic_bowl1d_a46c8ee4b372cc4f93820303a7a6346c0}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!B@{B}}
+\index{B@{B}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{B}{B}}
+{\footnotesize\ttfamily Constant Property Parabolic\+Bowl1d\+::B = 5}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a152bf3a1a100e0a075fecdf43ce533e5}\label{class_parabolic_bowl1d_a152bf3a1a100e0a075fecdf43ce533e5}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!gra@{gra}}
+\index{gra@{gra}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property Parabolic\+Bowl1d\+::gra = 9.\+81}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a74bb8fa6705ab95ac310c343635bb023}\label{class_parabolic_bowl1d_a74bb8fa6705ab95ac310c343635bb023}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!h0@{h0}}
+\index{h0@{h0}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{h0}{h0}}
+{\footnotesize\ttfamily Constant Property Parabolic\+Bowl1d\+::h0 = 10}
+
+\mbox{\Hypertarget{class_parabolic_bowl1d_a9d2851339a4d54f816c9e3f93b5c2f70}\label{class_parabolic_bowl1d_a9d2851339a4d54f816c9e3f93b5c2f70}} 
+\index{Parabolic\+Bowl1d@{Parabolic\+Bowl1d}!hmin@{hmin}}
+\index{hmin@{hmin}!Parabolic\+Bowl1d@{Parabolic\+Bowl1d}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property Parabolic\+Bowl1d\+::hmin = 1e}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_parabolic_bowl1d_8m}{Parabolic\+Bowl1d.\+m}\end{DoxyCompactItemize}

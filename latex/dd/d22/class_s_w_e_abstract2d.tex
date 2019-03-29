@@ -1,0 +1,298 @@
+\hypertarget{class_s_w_e_abstract2d}{}\section{S\+W\+E\+Abstract2d Class Reference}
+\label{class_s_w_e_abstract2d}\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+
+
+2-\/dimensional non-\/linear shallow water equations  
+
+
+
+
+Inheritance diagram for S\+W\+E\+Abstract2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=350pt]{d8/d8b/class_s_w_e_abstract2d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for S\+W\+E\+Abstract2d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=166pt]{d6/d86/class_s_w_e_abstract2d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{class_s_w_e_abstract2d_afa8846dd96e3975dc0069ab87831e0c9}{mat\+Evaluate\+Flux} (in obj, in mesh, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em abstract function to evaluate volume flux term \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_abstract2d_ae5b55baded753812f4432d1a7b6225c4}{mat\+Evaluate\+Surf\+Flux} (in obj, in mesh, in nx, in ny, in fm)
+\begin{DoxyCompactList}\small\item\em impose boundary condition and evaluate cell boundary values \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_abstract2d_aa4ae645f3869a9f9e5255fd737368e23}{mat\+Evaluate\+Surf\+Num\+Flux} (in obj, in mesh, in nx, in ny, in fm, in fp)
+\begin{DoxyCompactList}\small\item\em evaluate boundary numerical flux \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_abstract2d_a269a11d526096bf8b3f461d6246fe21a}{init\+Phys\+From\+Options} (in obj, in mesh)
+\begin{DoxyCompactList}\small\item\em determine time interval \end{DoxyCompactList}\item 
+function \hyperlink{class_s_w_e_abstract2d_a7f363cfe463b8fdf4898cc33d78e5123}{set\+Nonhydrostatic\+Solver} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_s_w_e_abstract2d_aa71f664c0b325e62ce72324a66a55664}{hmin}
+\begin{DoxyCompactList}\small\item\em wet/dry depth threshold \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_s_w_e_abstract2d_a2a779d550274f8b90d70da870765feba}{gra}
+\begin{DoxyCompactList}\small\item\em gravity acceleration \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_s_w_e_abstract2d_a25090128dc6b6957dcc45d9aab4fc955}{Nfield} = 6
+\begin{DoxyCompactList}\small\item\em number of physical field \mbox{[}h hu hv z hc w\mbox{]} \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_s_w_e_abstract2d_ab00cd850ebe6ed4bbbafb962486be75a}{Nvar} = 3
+\begin{DoxyCompactList}\small\item\em number of variable field \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_s_w_e_abstract2d_acf32686e87b2e26339f28ec095929713}{var\+Field\+Index} = \mbox{[} 1, 2, 3 \mbox{]}
+\begin{DoxyCompactList}\small\item\em index of variable in physical field \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual \hyperlink{class_s_w_e_abstract2d_ab92b4b39e65c83f6eaced650e8e5d61c}{mat\+Update\+Wet\+Dry\+State} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em determine wetting and drying status \end{DoxyCompactList}\item 
+virtual \hyperlink{class_s_w_e_abstract2d_aec026e019146aa65c0c9f1476bd8dfc1}{mat\+Evaluate\+Topography\+Source\+Term} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em evaluate topography source term \end{DoxyCompactList}\item 
+virtual \hyperlink{class_s_w_e_abstract2d_a4f8ff718398e2caed60574f1602dd311}{mat\+Evaluate\+Post\+Func} (in obj, in \hyperlink{class_ndg_phys_a6b25724fc9474d32018439009072f0a9}{fphys})
+\begin{DoxyCompactList}\small\item\em evaluate post function \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_s_w_e_abstract2d_a9646420b4380fecc669f1a1d2d2904b8}{z\+Grad}
+\begin{DoxyCompactList}\small\item\em gradient of bottom elevation \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Private Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_s_w_e_abstract2d_a56406c864768fe4f0893b3eacb8b8fbd}{coriolis\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for coriolis source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract2d_ae19f76c6a0f424ddd737577908f169a7}{friction\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for friction source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract2d_a0d9905362cee030e437e5795b31ca507}{wind\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for wind source term \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract2d_adc85a44d94c753863eef5ff58209f77f}{numflux\+Solver}
+\begin{DoxyCompactList}\small\item\em solver for unmerical flux \end{DoxyCompactList}\item 
+Property \hyperlink{class_s_w_e_abstract2d_ad4b464b197f1bc399a3724693e34615d}{limiter\+Solver}
+\begin{DoxyCompactList}\small\item\em limiter type \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Detailed Description}
+2-\/dimensional non-\/linear shallow water equations 
+
+This class descripe the conservation equations of the mass and monuments of shallow water equations, written as $ \frac{\partial \mathbf{U}}{\partial t} + \nabla \cdot \mathbf{F}(\mathbf{U}) = \mathbf{S}(\mathbf{U}), $ where $ \mathbf{U} = (h, hu, hv) $ are the conservative variables, $ \mathbf{F}(\mathbf{U}) $ and $ \mathbf{S}(\mathbf{U}) $ are the flux terms and source term, respectively. For the S\+WE model, the wet/dry (WD) probelm is addressed with the methods fron Li (2018), which requires to determine the WD states of each elements. The numerical flux 
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a269a11d526096bf8b3f461d6246fe21a}\label{class_s_w_e_abstract2d_a269a11d526096bf8b3f461d6246fe21a}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!init\+Phys\+From\+Options@{init\+Phys\+From\+Options}}
+\index{init\+Phys\+From\+Options@{init\+Phys\+From\+Options}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{init\+Phys\+From\+Options()}{initPhysFromOptions()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract2d\+::init\+Phys\+From\+Options (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh }\end{DoxyParamCaption})}
+
+
+
+determine time interval 
+
+evaluate source term \mbox{\Hypertarget{class_s_w_e_abstract2d_afa8846dd96e3975dc0069ab87831e0c9}\label{class_s_w_e_abstract2d_afa8846dd96e3975dc0069ab87831e0c9}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}}
+\index{mat\+Evaluate\+Flux@{mat\+Evaluate\+Flux}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Flux()}{matEvaluateFlux()}}
+{\footnotesize\ttfamily virtual S\+W\+E\+Abstract2d\+::mat\+Evaluate\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [virtual]}}
+
+
+
+abstract function to evaluate volume flux term 
+
+
+
+Reimplemented in \hyperlink{class_s_w_e_conventional2d_a45bdb5dd88ae1ea73f2d7a7dd40cdbb9}{S\+W\+E\+Conventional2d}, \hyperlink{class_s_w_e_pre_blanaced2d_a59b0ef470db28d009b0c8aa863f29f8f}{S\+W\+E\+Pre\+Blanaced2d}, and \hyperlink{class_s_w_e_w_d_pre_blanaced2d_a3aa951b2ef88db981c7e371cc3929fb6}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}.
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a4f8ff718398e2caed60574f1602dd311}\label{class_s_w_e_abstract2d_a4f8ff718398e2caed60574f1602dd311}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Evaluate\+Post\+Func@{mat\+Evaluate\+Post\+Func}}
+\index{mat\+Evaluate\+Post\+Func@{mat\+Evaluate\+Post\+Func}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Post\+Func()}{matEvaluatePostFunc()}}
+{\footnotesize\ttfamily virtual S\+W\+E\+Abstract2d\+::mat\+Evaluate\+Post\+Func (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate post function 
+
+
+
+Reimplemented in \hyperlink{class_malpasset2d_a69869bfecba889300e815dd8c59586e6}{Malpasset2d}, \hyperlink{class_steady_mount2d_a31a4c892298d775d35587b5ea7441189}{Steady\+Mount2d}, and \hyperlink{class_s_w_e_conventional2d_afb47a46de6ed3ef5d094750c0a1ea6ca}{S\+W\+E\+Conventional2d}.
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_ae5b55baded753812f4432d1a7b6225c4}\label{class_s_w_e_abstract2d_ae5b55baded753812f4432d1a7b6225c4}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Evaluate\+Surf\+Flux@{mat\+Evaluate\+Surf\+Flux}}
+\index{mat\+Evaluate\+Surf\+Flux@{mat\+Evaluate\+Surf\+Flux}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Surf\+Flux()}{matEvaluateSurfFlux()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract2d\+::mat\+Evaluate\+Surf\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{nx,  }\item[{in}]{ny,  }\item[{in}]{fm }\end{DoxyParamCaption})}
+
+
+
+impose boundary condition and evaluate cell boundary values 
+
+evaluate local boundary flux \mbox{\Hypertarget{class_s_w_e_abstract2d_aa4ae645f3869a9f9e5255fd737368e23}\label{class_s_w_e_abstract2d_aa4ae645f3869a9f9e5255fd737368e23}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Evaluate\+Surf\+Num\+Flux@{mat\+Evaluate\+Surf\+Num\+Flux}}
+\index{mat\+Evaluate\+Surf\+Num\+Flux@{mat\+Evaluate\+Surf\+Num\+Flux}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Surf\+Num\+Flux()}{matEvaluateSurfNumFlux()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract2d\+::mat\+Evaluate\+Surf\+Num\+Flux (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh,  }\item[{in}]{nx,  }\item[{in}]{ny,  }\item[{in}]{fm,  }\item[{in}]{fp }\end{DoxyParamCaption})}
+
+
+
+evaluate boundary numerical flux 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_aec026e019146aa65c0c9f1476bd8dfc1}\label{class_s_w_e_abstract2d_aec026e019146aa65c0c9f1476bd8dfc1}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}}
+\index{mat\+Evaluate\+Topography\+Source\+Term@{mat\+Evaluate\+Topography\+Source\+Term}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Evaluate\+Topography\+Source\+Term()}{matEvaluateTopographySourceTerm()}}
+{\footnotesize\ttfamily virtual S\+W\+E\+Abstract2d\+::mat\+Evaluate\+Topography\+Source\+Term (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate topography source term 
+
+
+
+Reimplemented in \hyperlink{class_wave_transform_over_an_elliptical_shoal_a30af660bfeddbc9bf75f786d7ae7370a}{Wave\+Transform\+Over\+An\+Elliptical\+Shoal}, \hyperlink{class_closed_channel_sponge2d_a6c4946628fd7d9a94e5b91cfa882ffee}{Closed\+Channel\+Sponge2d}, \hyperlink{class_s_w_e_w_d_pre_blanaced2d_a8b1954554505417779437dcf59972b41}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}, \hyperlink{class_s_w_e_conventional2d_a4d47d0d516ce7dba71beff5016df9085}{S\+W\+E\+Conventional2d}, and \hyperlink{class_s_w_e_pre_blanaced2d_af89d6da5053d87a1f587d4d5f958ec1b}{S\+W\+E\+Pre\+Blanaced2d}.
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_ab92b4b39e65c83f6eaced650e8e5d61c}\label{class_s_w_e_abstract2d_ab92b4b39e65c83f6eaced650e8e5d61c}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!mat\+Update\+Wet\+Dry\+State@{mat\+Update\+Wet\+Dry\+State}}
+\index{mat\+Update\+Wet\+Dry\+State@{mat\+Update\+Wet\+Dry\+State}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{mat\+Update\+Wet\+Dry\+State()}{matUpdateWetDryState()}}
+{\footnotesize\ttfamily virtual S\+W\+E\+Abstract2d\+::mat\+Update\+Wet\+Dry\+State (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{fphys }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+determine wetting and drying status 
+
+
+
+Reimplemented in \hyperlink{class_s_w_e_w_d_pre_blanaced2d_aee8de435e5f6f4b0a4ac48e42982facd}{S\+W\+E\+W\+D\+Pre\+Blanaced2d}, \hyperlink{class_s_w_e_conventional2d_af4391251efde6dd1a4304681916f1a85}{S\+W\+E\+Conventional2d}, and \hyperlink{class_s_w_e_pre_blanaced2d_a77864de8837b7a3f0b3c9ef6a7d8371d}{S\+W\+E\+Pre\+Blanaced2d}.
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a7f363cfe463b8fdf4898cc33d78e5123}\label{class_s_w_e_abstract2d_a7f363cfe463b8fdf4898cc33d78e5123}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!set\+Nonhydrostatic\+Solver@{set\+Nonhydrostatic\+Solver}}
+\index{set\+Nonhydrostatic\+Solver@{set\+Nonhydrostatic\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{set\+Nonhydrostatic\+Solver()}{setNonhydrostaticSolver()}}
+{\footnotesize\ttfamily function S\+W\+E\+Abstract2d\+::set\+Nonhydrostatic\+Solver (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a56406c864768fe4f0893b3eacb8b8fbd}\label{class_s_w_e_abstract2d_a56406c864768fe4f0893b3eacb8b8fbd}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!coriolis\+Solver@{coriolis\+Solver}}
+\index{coriolis\+Solver@{coriolis\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{coriolis\+Solver}{coriolisSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::coriolis\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for coriolis source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_ae19f76c6a0f424ddd737577908f169a7}\label{class_s_w_e_abstract2d_ae19f76c6a0f424ddd737577908f169a7}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!friction\+Solver@{friction\+Solver}}
+\index{friction\+Solver@{friction\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{friction\+Solver}{frictionSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::friction\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for friction source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a2a779d550274f8b90d70da870765feba}\label{class_s_w_e_abstract2d_a2a779d550274f8b90d70da870765feba}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!gra@{gra}}
+\index{gra@{gra}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract2d\+::gra}
+
+
+
+gravity acceleration 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_aa71f664c0b325e62ce72324a66a55664}\label{class_s_w_e_abstract2d_aa71f664c0b325e62ce72324a66a55664}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!hmin@{hmin}}
+\index{hmin@{hmin}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract2d\+::hmin}
+
+
+
+wet/dry depth threshold 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_ad4b464b197f1bc399a3724693e34615d}\label{class_s_w_e_abstract2d_ad4b464b197f1bc399a3724693e34615d}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!limiter\+Solver@{limiter\+Solver}}
+\index{limiter\+Solver@{limiter\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{limiter\+Solver}{limiterSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::limiter\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+limiter type 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a25090128dc6b6957dcc45d9aab4fc955}\label{class_s_w_e_abstract2d_a25090128dc6b6957dcc45d9aab4fc955}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!Nfield@{Nfield}}
+\index{Nfield@{Nfield}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{Nfield}{Nfield}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract2d\+::\+Nfield = 6}
+
+
+
+number of physical field \mbox{[}h hu hv z hc w\mbox{]} 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_adc85a44d94c753863eef5ff58209f77f}\label{class_s_w_e_abstract2d_adc85a44d94c753863eef5ff58209f77f}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!numflux\+Solver@{numflux\+Solver}}
+\index{numflux\+Solver@{numflux\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{numflux\+Solver}{numfluxSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::numflux\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for unmerical flux 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_ab00cd850ebe6ed4bbbafb962486be75a}\label{class_s_w_e_abstract2d_ab00cd850ebe6ed4bbbafb962486be75a}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!Nvar@{Nvar}}
+\index{Nvar@{Nvar}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{Nvar}{Nvar}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract2d\+::\+Nvar = 3}
+
+
+
+number of variable field 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_acf32686e87b2e26339f28ec095929713}\label{class_s_w_e_abstract2d_acf32686e87b2e26339f28ec095929713}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!var\+Field\+Index@{var\+Field\+Index}}
+\index{var\+Field\+Index@{var\+Field\+Index}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{var\+Field\+Index}{varFieldIndex}}
+{\footnotesize\ttfamily Constant Property S\+W\+E\+Abstract2d\+::var\+Field\+Index = \mbox{[} 1, 2, 3 \mbox{]}}
+
+
+
+index of variable in physical field 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a0d9905362cee030e437e5795b31ca507}\label{class_s_w_e_abstract2d_a0d9905362cee030e437e5795b31ca507}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!wind\+Solver@{wind\+Solver}}
+\index{wind\+Solver@{wind\+Solver}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{wind\+Solver}{windSolver}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::wind\+Solver\hspace{0.3cm}{\ttfamily [private]}}
+
+
+
+solver for wind source term 
+
+\mbox{\Hypertarget{class_s_w_e_abstract2d_a9646420b4380fecc669f1a1d2d2904b8}\label{class_s_w_e_abstract2d_a9646420b4380fecc669f1a1d2d2904b8}} 
+\index{S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}!z\+Grad@{z\+Grad}}
+\index{z\+Grad@{z\+Grad}!S\+W\+E\+Abstract2d@{S\+W\+E\+Abstract2d}}
+\subsubsection{\texorpdfstring{z\+Grad}{zGrad}}
+{\footnotesize\ttfamily Property S\+W\+E\+Abstract2d\+::z\+Grad\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+gradient of bottom elevation 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_s_w_e_abstract2d_8m}{S\+W\+E\+Abstract2d.\+m}\end{DoxyCompactItemize}

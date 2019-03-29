@@ -1,0 +1,308 @@
+\hypertarget{class_l_s_w_e3d}{}\section{L\+S\+W\+E3d Class Reference}
+\label{class_l_s_w_e3d}\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+
+
+Inheritance diagram for L\+S\+W\+E3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=166pt]{df/d89/class_l_s_w_e3d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for L\+S\+W\+E3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=166pt]{d8/d16/class_l_s_w_e3d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_l_s_w_e3d_a325d8f45714b72559836cdc6f31b38a3}{L\+S\+W\+E3d} ()
+\item 
+function \hyperlink{class_l_s_w_e3d_a01afc84d1c4aa6d921dc3780153a2f79}{mat\+Solve} (in obj)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_l_s_w_e3d_af849f2fe32b1a884b69ba3254085b462}{Nfield2d} = 5
+\begin{DoxyCompactList}\small\item\em num of 2d physical field \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_l_s_w_e3d_a709fc952e6950aafc94868c19a7ae493}{Nfield3d} = 7
+\begin{DoxyCompactList}\small\item\em num of 3d physical field \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_l_s_w_e3d_a9cffdad6df1aca4b8056c75864a11873}{hmin} = 1e
+\begin{DoxyCompactList}\small\item\em min water depth \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_l_s_w_e3d_af1314e9786aeece58828b78d2518495f}{gra} = 9.\+81
+\begin{DoxyCompactList}\small\item\em gravity acceleration \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_l_s_w_e3d_a44fbe9f87718a749072e1b78f1f81415}{start\+Time}
+\item 
+Constant Property \hyperlink{class_l_s_w_e3d_ac7fdd52c7fd26c4c17d559de23773be6}{output\+Time\+Interval}
+\begin{DoxyCompactList}\small\item\em output time interval \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_l_s_w_e3d_acc1fc0fb1e7c1aff37a202183b4081ae}{casename}
+\begin{DoxyCompactList}\small\item\em case name \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_aa3cebe595d88d7e00087765b927335c6}{dt}
+\begin{DoxyCompactList}\small\item\em time interval \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+virtual function \hyperlink{class_l_s_w_e3d_a56d1c65890b1d410e210821d6f76a1e2}{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel} (in obj, in edge, in \hyperlink{class_l_s_w_e3d_a041b98e0bcf7540ae293b75181698e7f}{fphys2d}, in fext2d)
+\begin{DoxyCompactList}\small\item\em evaluate boundary flux for 2d P\+CE \end{DoxyCompactList}\item 
+virtual function \hyperlink{class_l_s_w_e3d_a36b18f24588676b6ce058722c034e320}{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel} (in obj, in edge, in \hyperlink{class_l_s_w_e3d_a0de3e11488a76f7735c2381d48ac66d9}{fphys3d}, in fext3d)
+\begin{DoxyCompactList}\small\item\em evaluate horizontal flux for 3d momentum equations \end{DoxyCompactList}\item 
+function \hyperlink{class_l_s_w_e3d_a1bd0a98aca82cb732473e28192041ee9}{Animation\+Surface\+Level} (in obj)
+\item 
+function \hyperlink{class_l_s_w_e3d_a6bd636ddbb25c548dfc6c3af697bbfda}{draw\+Vertical\+Slice} (in obj, in cell\+Id\+\_\+2, in node\+Id\+\_\+2, in field3d)
+\item 
+function \hyperlink{class_l_s_w_e3d_aa3e46dfa17950ffb83df76a8ce1b5f34}{init\+Output} (in obj, in \hyperlink{class_l_s_w_e3d_abb000bf296c2d3b922ab524c93cc2b3f}{mesh2d}, in \hyperlink{class_l_s_w_e3d_ab2a8fc06f55e023a64c987c456a5127b}{mesh3d})
+\item 
+function \hyperlink{class_l_s_w_e3d_a90182eb8946aa5c60cc31cc142ac3eef}{init\+Phys\+From\+Options} (in obj, in \hyperlink{class_l_s_w_e3d_abb000bf296c2d3b922ab524c93cc2b3f}{mesh2d}, in \hyperlink{class_l_s_w_e3d_ab2a8fc06f55e023a64c987c456a5127b}{mesh3d})
+\end{DoxyCompactItemize}
+\subsection*{Protected Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Property \hyperlink{class_l_s_w_e3d_aa9ca3b8035860972759ada67bd3f44d2}{Nmesh}
+\begin{DoxyCompactList}\small\item\em num of mesh \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_a041b98e0bcf7540ae293b75181698e7f}{fphys2d}
+\begin{DoxyCompactList}\small\item\em physical field \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_a0de3e11488a76f7735c2381d48ac66d9}{fphys3d}
+\begin{DoxyCompactList}\small\item\em physical field \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_abb000bf296c2d3b922ab524c93cc2b3f}{mesh2d}
+\begin{DoxyCompactList}\small\item\em horizontal mesh \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_ab2a8fc06f55e023a64c987c456a5127b}{mesh3d}
+\begin{DoxyCompactList}\small\item\em vertical extended mesh \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_a39ccfa5961ac6b3a899061f11124379b}{miu}
+\begin{DoxyCompactList}\small\item\em viscosity \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_a467e775c28d9ef4e2e978d4599a79bc0}{K}
+\begin{DoxyCompactList}\small\item\em linear slip parameter \end{DoxyCompactList}\item 
+Property \hyperlink{class_l_s_w_e3d_ad7adc998480d20be459d3ae030bd1008}{output\+File}
+\begin{DoxyCompactList}\small\item\em output file object \end{DoxyCompactList}\end{DoxyCompactItemize}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_l_s_w_e3d_a325d8f45714b72559836cdc6f31b38a3}\label{class_l_s_w_e3d_a325d8f45714b72559836cdc6f31b38a3}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{L\+S\+W\+E3d()}{LSWE3d()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::\+L\+S\+W\+E3d (\begin{DoxyParamCaption}{ }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_l_s_w_e3d_a1bd0a98aca82cb732473e28192041ee9}\label{class_l_s_w_e3d_a1bd0a98aca82cb732473e28192041ee9}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Animation\+Surface\+Level@{Animation\+Surface\+Level}}
+\index{Animation\+Surface\+Level@{Animation\+Surface\+Level}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Animation\+Surface\+Level()}{AnimationSurfaceLevel()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::\+Animation\+Surface\+Level (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a6bd636ddbb25c548dfc6c3af697bbfda}\label{class_l_s_w_e3d_a6bd636ddbb25c548dfc6c3af697bbfda}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!draw\+Vertical\+Slice@{draw\+Vertical\+Slice}}
+\index{draw\+Vertical\+Slice@{draw\+Vertical\+Slice}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{draw\+Vertical\+Slice()}{drawVerticalSlice()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::draw\+Vertical\+Slice (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{cell\+Id\+\_\+2,  }\item[{in}]{node\+Id\+\_\+2,  }\item[{in}]{field3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a36b18f24588676b6ce058722c034e320}\label{class_l_s_w_e3d_a36b18f24588676b6ce058722c034e320}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel@{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel}}
+\index{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel@{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel()}{Evaluate3d\_HorizontalBoundaryKernel()}}
+{\footnotesize\ttfamily virtual function L\+S\+W\+E3d\+::\+Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{edge,  }\item[{in}]{fphys3d,  }\item[{in}]{fext3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate horizontal flux for 3d momentum equations 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a56d1c65890b1d410e210821d6f76a1e2}\label{class_l_s_w_e3d_a56d1c65890b1d410e210821d6f76a1e2}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel@{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel}}
+\index{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel@{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel()}{EvaluatePCE2d\_BoundaryKernel()}}
+{\footnotesize\ttfamily virtual function L\+S\+W\+E3d\+::\+Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{edge,  }\item[{in}]{fphys2d,  }\item[{in}]{fext2d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate boundary flux for 2d P\+CE 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_aa3e46dfa17950ffb83df76a8ce1b5f34}\label{class_l_s_w_e3d_aa3e46dfa17950ffb83df76a8ce1b5f34}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!init\+Output@{init\+Output}}
+\index{init\+Output@{init\+Output}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{init\+Output()}{initOutput()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::init\+Output (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh2d,  }\item[{in}]{mesh3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a90182eb8946aa5c60cc31cc142ac3eef}\label{class_l_s_w_e3d_a90182eb8946aa5c60cc31cc142ac3eef}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!init\+Phys\+From\+Options@{init\+Phys\+From\+Options}}
+\index{init\+Phys\+From\+Options@{init\+Phys\+From\+Options}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{init\+Phys\+From\+Options()}{initPhysFromOptions()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::init\+Phys\+From\+Options (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{mesh2d,  }\item[{in}]{mesh3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a01afc84d1c4aa6d921dc3780153a2f79}\label{class_l_s_w_e3d_a01afc84d1c4aa6d921dc3780153a2f79}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!mat\+Solve@{mat\+Solve}}
+\index{mat\+Solve@{mat\+Solve}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{mat\+Solve()}{matSolve()}}
+{\footnotesize\ttfamily function L\+S\+W\+E3d\+::mat\+Solve (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_l_s_w_e3d_acc1fc0fb1e7c1aff37a202183b4081ae}\label{class_l_s_w_e3d_acc1fc0fb1e7c1aff37a202183b4081ae}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!casename@{casename}}
+\index{casename@{casename}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{casename}{casename}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::casename}
+
+
+
+case name 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_aa3cebe595d88d7e00087765b927335c6}\label{class_l_s_w_e3d_aa3cebe595d88d7e00087765b927335c6}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!dt@{dt}}
+\index{dt@{dt}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{dt}{dt}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::dt}
+
+
+
+time interval 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a041b98e0bcf7540ae293b75181698e7f}\label{class_l_s_w_e3d_a041b98e0bcf7540ae293b75181698e7f}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!fphys2d@{fphys2d}}
+\index{fphys2d@{fphys2d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{fphys2d}{fphys2d}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::fphys2d\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+physical field 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a0de3e11488a76f7735c2381d48ac66d9}\label{class_l_s_w_e3d_a0de3e11488a76f7735c2381d48ac66d9}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!fphys3d@{fphys3d}}
+\index{fphys3d@{fphys3d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{fphys3d}{fphys3d}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::fphys3d\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+physical field 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_af1314e9786aeece58828b78d2518495f}\label{class_l_s_w_e3d_af1314e9786aeece58828b78d2518495f}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!gra@{gra}}
+\index{gra@{gra}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{gra}{gra}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::gra = 9.\+81}
+
+
+
+gravity acceleration 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a9cffdad6df1aca4b8056c75864a11873}\label{class_l_s_w_e3d_a9cffdad6df1aca4b8056c75864a11873}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!hmin@{hmin}}
+\index{hmin@{hmin}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{hmin}{hmin}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::hmin = 1e}
+
+
+
+min water depth 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a467e775c28d9ef4e2e978d4599a79bc0}\label{class_l_s_w_e3d_a467e775c28d9ef4e2e978d4599a79bc0}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!K@{K}}
+\index{K@{K}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{K}{K}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::K\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+linear slip parameter 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_abb000bf296c2d3b922ab524c93cc2b3f}\label{class_l_s_w_e3d_abb000bf296c2d3b922ab524c93cc2b3f}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!mesh2d@{mesh2d}}
+\index{mesh2d@{mesh2d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{mesh2d}{mesh2d}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::mesh2d\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+horizontal mesh 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_ab2a8fc06f55e023a64c987c456a5127b}\label{class_l_s_w_e3d_ab2a8fc06f55e023a64c987c456a5127b}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!mesh3d@{mesh3d}}
+\index{mesh3d@{mesh3d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{mesh3d}{mesh3d}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::mesh3d\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+vertical extended mesh 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a39ccfa5961ac6b3a899061f11124379b}\label{class_l_s_w_e3d_a39ccfa5961ac6b3a899061f11124379b}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!miu@{miu}}
+\index{miu@{miu}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{miu}{miu}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::miu\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+viscosity 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_af849f2fe32b1a884b69ba3254085b462}\label{class_l_s_w_e3d_af849f2fe32b1a884b69ba3254085b462}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Nfield2d@{Nfield2d}}
+\index{Nfield2d@{Nfield2d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Nfield2d}{Nfield2d}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::\+Nfield2d = 5}
+
+
+
+num of 2d physical field 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a709fc952e6950aafc94868c19a7ae493}\label{class_l_s_w_e3d_a709fc952e6950aafc94868c19a7ae493}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Nfield3d@{Nfield3d}}
+\index{Nfield3d@{Nfield3d}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Nfield3d}{Nfield3d}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::\+Nfield3d = 7}
+
+
+
+num of 3d physical field 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_aa9ca3b8035860972759ada67bd3f44d2}\label{class_l_s_w_e3d_aa9ca3b8035860972759ada67bd3f44d2}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!Nmesh@{Nmesh}}
+\index{Nmesh@{Nmesh}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{Nmesh}{Nmesh}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::\+Nmesh\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+num of mesh 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_ad7adc998480d20be459d3ae030bd1008}\label{class_l_s_w_e3d_ad7adc998480d20be459d3ae030bd1008}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!output\+File@{output\+File}}
+\index{output\+File@{output\+File}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{output\+File}{outputFile}}
+{\footnotesize\ttfamily Property L\+S\+W\+E3d\+::output\+File\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+output file object 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_ac7fdd52c7fd26c4c17d559de23773be6}\label{class_l_s_w_e3d_ac7fdd52c7fd26c4c17d559de23773be6}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!output\+Time\+Interval@{output\+Time\+Interval}}
+\index{output\+Time\+Interval@{output\+Time\+Interval}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{output\+Time\+Interval}{outputTimeInterval}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::output\+Time\+Interval}
+
+
+
+output time interval 
+
+\mbox{\Hypertarget{class_l_s_w_e3d_a44fbe9f87718a749072e1b78f1f81415}\label{class_l_s_w_e3d_a44fbe9f87718a749072e1b78f1f81415}} 
+\index{L\+S\+W\+E3d@{L\+S\+W\+E3d}!start\+Time@{start\+Time}}
+\index{start\+Time@{start\+Time}!L\+S\+W\+E3d@{L\+S\+W\+E3d}}
+\subsubsection{\texorpdfstring{start\+Time}{startTime}}
+{\footnotesize\ttfamily Constant Property L\+S\+W\+E3d\+::start\+Time}
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_l_s_w_e3d_8m}{L\+S\+W\+E3d.\+m}\end{DoxyCompactItemize}

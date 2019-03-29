@@ -1,0 +1,298 @@
+\hypertarget{class_open_channel3d}{}\section{Open\+Channel3d Class Reference}
+\label{class_open_channel3d}\index{Open\+Channel3d@{Open\+Channel3d}}
+
+
+Inheritance diagram for Open\+Channel3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=172pt]{d6/d06/class_open_channel3d__inherit__graph}
+\end{center}
+\end{figure}
+
+
+Collaboration diagram for Open\+Channel3d\+:
+\nopagebreak
+\begin{figure}[H]
+\begin{center}
+\leavevmode
+\includegraphics[width=172pt]{d3/da6/class_open_channel3d__coll__graph}
+\end{center}
+\end{figure}
+\subsection*{Public Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_open_channel3d_a3f2efb9bdd9eb8c5db131b809b6ee69f}{Open\+Channel3d} (in N, in Nz, in M, in Mz)
+\end{DoxyCompactItemize}
+\subsection*{Public Attributes}
+\begin{DoxyCompactItemize}
+\item 
+Constant Property \hyperlink{class_open_channel3d_a6d829ad6501499ee3cc2122164ed3ff2}{Ch\+Length} = 100e3
+\begin{DoxyCompactList}\small\item\em channel length \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a7e606ae3ce4132c49184d2252ec5642d}{Ch\+Width} = 20e3
+\begin{DoxyCompactList}\small\item\em channel width \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a326dedeb4a7503cc6b028460e33680a3}{H} = 5
+\begin{DoxyCompactList}\small\item\em channel depth \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_ae068e1b972f9f51e49767bb23d166804}{omega} = 2
+\item 
+Constant Property \hyperlink{class_open_channel3d_a6fed2187810c042b20d1830cced71668}{start\+Time} = 0
+\begin{DoxyCompactList}\small\item\em start time \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a7d9472d8232552edc47bb487df119dc6}{final\+Time} = 24
+\begin{DoxyCompactList}\small\item\em final time \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_ac61988aca3f0fd6165fa22be5ca52ab9}{output\+Time\+Interval} = 240
+\begin{DoxyCompactList}\small\item\em output time interval \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a11ad49cbe382d4c92db26b035a2e6293}{casename} = \textquotesingle{}Tidal\+Forcing\+With\+Horizontal\+Bottom\+Rectangular\+Basin\textquotesingle{}
+\begin{DoxyCompactList}\small\item\em casename \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a2102b0fd16e119165e1699810912bc3e}{a} = 0.\+25
+\begin{DoxyCompactList}\small\item\em amplitude \end{DoxyCompactList}\item 
+Constant Property \hyperlink{class_open_channel3d_a29718d5d95f0ead35d689690a361c1e2}{miu0} = 0.\+0015
+\end{DoxyCompactItemize}
+\subsection*{Protected Member Functions}
+\begin{DoxyCompactItemize}
+\item 
+function \hyperlink{class_open_channel3d_a50f37a66a05832ba2fbdc559d1bfb0e4}{init\+Boundary\+Field} (in obj)
+\begin{DoxyCompactList}\small\item\em linear slip parameter \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel3d_ac0165752f3793364fda301ed42be4159}{set\+Initial\+Field} (in obj)
+\item 
+function \hyperlink{class_open_channel3d_a3c385082525c91de9459bbaecb764499}{make\+Channel\+Mesh} (in obj, in N, in Nz, in M, in Mz)
+\item 
+function \hyperlink{class_open_channel3d_a87aeafd3cfc6ee4685d375e7d58d40d4}{Analysis\+Result2d} (in obj)
+\item 
+function \hyperlink{class_open_channel3d_ac3ce644bd3c983951205d4b125ac9003}{Draw\+Subplot2d} (in Nx2, in time, in eta\+Num, in eta\+Ext, in label)
+\item 
+function \hyperlink{class_open_channel3d_a7473e07f895d8d5d28f2295d3c66ed33}{Exact\+Horizon\+Velcity} (in obj, in x, in time)
+\item 
+function \hyperlink{class_open_channel3d_a163fec5baf004f98317ead032bdc448b}{Exact\+Water\+Level} (in obj, in x, in time)
+\item 
+function \hyperlink{class_open_channel3d_ab53a8afd34822d6d50baad537d91b8e3}{Analysis\+Result3d} (in obj)
+\item 
+function \hyperlink{class_open_channel3d_afc1316e9b11d92deefd22c89700ebd4c}{Draw\+Vertical\+Animation} (in Nt, in w\+Num, in w\+Ext)
+\item 
+function \hyperlink{class_open_channel3d_a106e5f7ded060f32d7b285fc5a462363}{Draw\+Subplot2d} (in Nx2, in time, in w\+Num, in w\+Ext, in label)
+\item 
+function \hyperlink{class_open_channel3d_a078069fa7a403d2732669514608f0706}{Draw\+Subplot3d} (in Nt, in time\+Step, in z, in w\+Num, in w\+Ext)
+\item 
+function \hyperlink{class_open_channel3d_a739451cc4812b0283c34c710279b86e9}{Exact\+Vertical\+Velcity} (in obj, in x, in z, in time)
+\item 
+function \hyperlink{class_open_channel3d_ae08be3624dde2b52536eb6b5328429d5}{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel} (in obj, in edge, in \hyperlink{class_l_s_w_e_abstract3d_a85a25b72732b21d0d624e9f88ed52dc4}{fphys3d}, in fext3d)
+\begin{DoxyCompactList}\small\item\em evaluate horizontal flux for 3d momentum equations \end{DoxyCompactList}\item 
+function \hyperlink{class_open_channel3d_a57aed6b24d1c41d1d3b5d6408575cd06}{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel} (in obj, in edge, in \hyperlink{class_l_s_w_e_abstract3d_ac109e689a672a973a96c1068a45cf15c}{fphys2d}, in fext2d)
+\begin{DoxyCompactList}\small\item\em evaluate boundary flux for 2d P\+CE \end{DoxyCompactList}\end{DoxyCompactItemize}
+\subsection*{Additional Inherited Members}
+
+
+\subsection{Constructor \& Destructor Documentation}
+\mbox{\Hypertarget{class_open_channel3d_a3f2efb9bdd9eb8c5db131b809b6ee69f}\label{class_open_channel3d_a3f2efb9bdd9eb8c5db131b809b6ee69f}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Open\+Channel3d@{Open\+Channel3d}}
+\index{Open\+Channel3d@{Open\+Channel3d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Open\+Channel3d()}{OpenChannel3d()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Open\+Channel3d (\begin{DoxyParamCaption}\item[{in}]{N,  }\item[{in}]{Nz,  }\item[{in}]{M,  }\item[{in}]{Mz }\end{DoxyParamCaption})}
+
+
+
+\subsection{Member Function Documentation}
+\mbox{\Hypertarget{class_open_channel3d_a87aeafd3cfc6ee4685d375e7d58d40d4}\label{class_open_channel3d_a87aeafd3cfc6ee4685d375e7d58d40d4}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Analysis\+Result2d@{Analysis\+Result2d}}
+\index{Analysis\+Result2d@{Analysis\+Result2d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Analysis\+Result2d()}{AnalysisResult2d()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Analysis\+Result2d (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_ab53a8afd34822d6d50baad537d91b8e3}\label{class_open_channel3d_ab53a8afd34822d6d50baad537d91b8e3}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Analysis\+Result3d@{Analysis\+Result3d}}
+\index{Analysis\+Result3d@{Analysis\+Result3d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Analysis\+Result3d()}{AnalysisResult3d()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Analysis\+Result3d (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_ac3ce644bd3c983951205d4b125ac9003}\label{class_open_channel3d_ac3ce644bd3c983951205d4b125ac9003}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Draw\+Subplot2d@{Draw\+Subplot2d}}
+\index{Draw\+Subplot2d@{Draw\+Subplot2d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Draw\+Subplot2d()}{DrawSubplot2d()}\hspace{0.1cm}{\footnotesize\ttfamily [1/2]}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Draw\+Subplot2d (\begin{DoxyParamCaption}\item[{in}]{Nx2,  }\item[{in}]{time,  }\item[{in}]{eta\+Num,  }\item[{in}]{eta\+Ext,  }\item[{in}]{label }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_a106e5f7ded060f32d7b285fc5a462363}\label{class_open_channel3d_a106e5f7ded060f32d7b285fc5a462363}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Draw\+Subplot2d@{Draw\+Subplot2d}}
+\index{Draw\+Subplot2d@{Draw\+Subplot2d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Draw\+Subplot2d()}{DrawSubplot2d()}\hspace{0.1cm}{\footnotesize\ttfamily [2/2]}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Draw\+Subplot2d (\begin{DoxyParamCaption}\item[{in}]{Nx2,  }\item[{in}]{time,  }\item[{in}]{w\+Num,  }\item[{in}]{w\+Ext,  }\item[{in}]{label }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_a078069fa7a403d2732669514608f0706}\label{class_open_channel3d_a078069fa7a403d2732669514608f0706}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Draw\+Subplot3d@{Draw\+Subplot3d}}
+\index{Draw\+Subplot3d@{Draw\+Subplot3d}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Draw\+Subplot3d()}{DrawSubplot3d()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Draw\+Subplot3d (\begin{DoxyParamCaption}\item[{in}]{Nt,  }\item[{in}]{time\+Step,  }\item[{in}]{z,  }\item[{in}]{w\+Num,  }\item[{in}]{w\+Ext }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_afc1316e9b11d92deefd22c89700ebd4c}\label{class_open_channel3d_afc1316e9b11d92deefd22c89700ebd4c}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Draw\+Vertical\+Animation@{Draw\+Vertical\+Animation}}
+\index{Draw\+Vertical\+Animation@{Draw\+Vertical\+Animation}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Draw\+Vertical\+Animation()}{DrawVerticalAnimation()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Draw\+Vertical\+Animation (\begin{DoxyParamCaption}\item[{in}]{Nt,  }\item[{in}]{w\+Num,  }\item[{in}]{w\+Ext }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_ae08be3624dde2b52536eb6b5328429d5}\label{class_open_channel3d_ae08be3624dde2b52536eb6b5328429d5}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel@{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel}}
+\index{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel@{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel()}{Evaluate3d\_HorizontalBoundaryKernel()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Evaluate3d\+\_\+\+Horizontal\+Boundary\+Kernel (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{edge,  }\item[{in}]{fphys3d,  }\item[{in}]{fext3d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate horizontal flux for 3d momentum equations 
+
+
+
+Reimplemented from \hyperlink{class_l_s_w_e_abstract3d_a4f81fc97c2f810f94e82e00a37a686c7}{L\+S\+W\+E\+Abstract3d}.
+
+\mbox{\Hypertarget{class_open_channel3d_a57aed6b24d1c41d1d3b5d6408575cd06}\label{class_open_channel3d_a57aed6b24d1c41d1d3b5d6408575cd06}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel@{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel}}
+\index{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel@{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel()}{EvaluatePCE2d\_BoundaryKernel()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Evaluate\+P\+C\+E2d\+\_\+\+Boundary\+Kernel (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{edge,  }\item[{in}]{fphys2d,  }\item[{in}]{fext2d }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}, {\ttfamily [virtual]}}
+
+
+
+evaluate boundary flux for 2d P\+CE 
+
+
+
+Reimplemented from \hyperlink{class_l_s_w_e_abstract3d_a95b19f1020c0469e267edc93b5d07a13}{L\+S\+W\+E\+Abstract3d}.
+
+\mbox{\Hypertarget{class_open_channel3d_a7473e07f895d8d5d28f2295d3c66ed33}\label{class_open_channel3d_a7473e07f895d8d5d28f2295d3c66ed33}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Exact\+Horizon\+Velcity@{Exact\+Horizon\+Velcity}}
+\index{Exact\+Horizon\+Velcity@{Exact\+Horizon\+Velcity}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Exact\+Horizon\+Velcity()}{ExactHorizonVelcity()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Exact\+Horizon\+Velcity (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_a739451cc4812b0283c34c710279b86e9}\label{class_open_channel3d_a739451cc4812b0283c34c710279b86e9}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Exact\+Vertical\+Velcity@{Exact\+Vertical\+Velcity}}
+\index{Exact\+Vertical\+Velcity@{Exact\+Vertical\+Velcity}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Exact\+Vertical\+Velcity()}{ExactVerticalVelcity()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Exact\+Vertical\+Velcity (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{z,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_a163fec5baf004f98317ead032bdc448b}\label{class_open_channel3d_a163fec5baf004f98317ead032bdc448b}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Exact\+Water\+Level@{Exact\+Water\+Level}}
+\index{Exact\+Water\+Level@{Exact\+Water\+Level}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Exact\+Water\+Level()}{ExactWaterLevel()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::\+Exact\+Water\+Level (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{x,  }\item[{in}]{time }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_a50f37a66a05832ba2fbdc559d1bfb0e4}\label{class_open_channel3d_a50f37a66a05832ba2fbdc559d1bfb0e4}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!init\+Boundary\+Field@{init\+Boundary\+Field}}
+\index{init\+Boundary\+Field@{init\+Boundary\+Field}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{init\+Boundary\+Field()}{initBoundaryField()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::init\+Boundary\+Field (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+linear slip parameter 
+
+time interval evaluate boundary flux for 2d P\+CE evaluate horizontal flux for 3d momentum equations update external fields \mbox{\Hypertarget{class_open_channel3d_a3c385082525c91de9459bbaecb764499}\label{class_open_channel3d_a3c385082525c91de9459bbaecb764499}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!make\+Channel\+Mesh@{make\+Channel\+Mesh}}
+\index{make\+Channel\+Mesh@{make\+Channel\+Mesh}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{make\+Channel\+Mesh()}{makeChannelMesh()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::make\+Channel\+Mesh (\begin{DoxyParamCaption}\item[{in}]{obj,  }\item[{in}]{N,  }\item[{in}]{Nz,  }\item[{in}]{M,  }\item[{in}]{Mz }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+\mbox{\Hypertarget{class_open_channel3d_ac0165752f3793364fda301ed42be4159}\label{class_open_channel3d_ac0165752f3793364fda301ed42be4159}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!set\+Initial\+Field@{set\+Initial\+Field}}
+\index{set\+Initial\+Field@{set\+Initial\+Field}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{set\+Initial\+Field()}{setInitialField()}}
+{\footnotesize\ttfamily function Open\+Channel3d\+::set\+Initial\+Field (\begin{DoxyParamCaption}\item[{in}]{obj }\end{DoxyParamCaption})\hspace{0.3cm}{\ttfamily [protected]}}
+
+
+
+\subsection{Member Data Documentation}
+\mbox{\Hypertarget{class_open_channel3d_a2102b0fd16e119165e1699810912bc3e}\label{class_open_channel3d_a2102b0fd16e119165e1699810912bc3e}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!a@{a}}
+\index{a@{a}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{a}{a}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::a = 0.\+25}
+
+
+
+amplitude 
+
+\mbox{\Hypertarget{class_open_channel3d_a11ad49cbe382d4c92db26b035a2e6293}\label{class_open_channel3d_a11ad49cbe382d4c92db26b035a2e6293}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!casename@{casename}}
+\index{casename@{casename}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{casename}{casename}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::casename = \textquotesingle{}Tidal\+Forcing\+With\+Horizontal\+Bottom\+Rectangular\+Basin\textquotesingle{}}
+
+
+
+casename 
+
+\mbox{\Hypertarget{class_open_channel3d_a6d829ad6501499ee3cc2122164ed3ff2}\label{class_open_channel3d_a6d829ad6501499ee3cc2122164ed3ff2}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Ch\+Length@{Ch\+Length}}
+\index{Ch\+Length@{Ch\+Length}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Ch\+Length}{ChLength}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::\+Ch\+Length = 100e3}
+
+
+
+channel length 
+
+\mbox{\Hypertarget{class_open_channel3d_a7e606ae3ce4132c49184d2252ec5642d}\label{class_open_channel3d_a7e606ae3ce4132c49184d2252ec5642d}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!Ch\+Width@{Ch\+Width}}
+\index{Ch\+Width@{Ch\+Width}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{Ch\+Width}{ChWidth}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::\+Ch\+Width = 20e3}
+
+
+
+channel width 
+
+\mbox{\Hypertarget{class_open_channel3d_a7d9472d8232552edc47bb487df119dc6}\label{class_open_channel3d_a7d9472d8232552edc47bb487df119dc6}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!final\+Time@{final\+Time}}
+\index{final\+Time@{final\+Time}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{final\+Time}{finalTime}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::final\+Time = 24}
+
+
+
+final time 
+
+\mbox{\Hypertarget{class_open_channel3d_a326dedeb4a7503cc6b028460e33680a3}\label{class_open_channel3d_a326dedeb4a7503cc6b028460e33680a3}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!H@{H}}
+\index{H@{H}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{H}{H}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::H = 5}
+
+
+
+channel depth 
+
+\mbox{\Hypertarget{class_open_channel3d_a29718d5d95f0ead35d689690a361c1e2}\label{class_open_channel3d_a29718d5d95f0ead35d689690a361c1e2}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!miu0@{miu0}}
+\index{miu0@{miu0}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{miu0}{miu0}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::miu0 = 0.\+0015}
+
+\mbox{\Hypertarget{class_open_channel3d_ae068e1b972f9f51e49767bb23d166804}\label{class_open_channel3d_ae068e1b972f9f51e49767bb23d166804}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!omega@{omega}}
+\index{omega@{omega}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{omega}{omega}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::omega = 2}
+
+\mbox{\Hypertarget{class_open_channel3d_ac61988aca3f0fd6165fa22be5ca52ab9}\label{class_open_channel3d_ac61988aca3f0fd6165fa22be5ca52ab9}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!output\+Time\+Interval@{output\+Time\+Interval}}
+\index{output\+Time\+Interval@{output\+Time\+Interval}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{output\+Time\+Interval}{outputTimeInterval}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::output\+Time\+Interval = 240}
+
+
+
+output time interval 
+
+\mbox{\Hypertarget{class_open_channel3d_a6fed2187810c042b20d1830cced71668}\label{class_open_channel3d_a6fed2187810c042b20d1830cced71668}} 
+\index{Open\+Channel3d@{Open\+Channel3d}!start\+Time@{start\+Time}}
+\index{start\+Time@{start\+Time}!Open\+Channel3d@{Open\+Channel3d}}
+\subsubsection{\texorpdfstring{start\+Time}{startTime}}
+{\footnotesize\ttfamily Constant Property Open\+Channel3d\+::start\+Time = 0}
+
+
+
+start time 
+
+
+
+The documentation for this class was generated from the following file\+:\begin{DoxyCompactItemize}
+\item 
+\hyperlink{_open_channel3d_8m}{Open\+Channel3d.\+m}\end{DoxyCompactItemize}
