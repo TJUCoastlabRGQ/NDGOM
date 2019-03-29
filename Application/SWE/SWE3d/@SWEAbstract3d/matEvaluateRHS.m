@@ -43,7 +43,7 @@ for m = 1:obj.Nmesh
     obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dBottomBoundaryTerm( ...       %7
          mesh3d.BottomBoundaryEdge, fphys3d );
     
-    obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dVerticalAuxialaryVariableFaceTerm( ...       %7
+    obj.frhs3d{m} = obj.frhs3d{m} - obj.matEvaluate3dVerticalAuxialaryVariableFaceTerm( ...       %7
          mesh3d, fphys3d );    
 end
 

@@ -14,13 +14,16 @@ function SurfaceBoundary_rhs = matEvaluate3dSurfaceBoundaryTerm( obj, edge, fphy
 %> @param Edge The surface boundary edge object
 %> @param fphys3d The three dimensional physical field
 %>
-%> @retval SurfaceBoundary_rhs The three dimensional physical field with the auxiliary variable updated
+%> @retval SurfaceBoundary_rhs The Surface Boundary contribution to the right hand side
 
 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys3d );
 
+%> $(hu^2+\frac{1}{2}g(H^2 - h^2) )* nx + huv * ny + u\omega * nz$
 FluxM(:, :, 1) = fm(:,:,1) .* fm(:,:,3) ./ fm(:,:,6) .* edge.nz;
+%> $huv * nx + ( hv^2+\frac{1}{2}g(H^2 - h^2) ) * ny + v\omega * nz$
 FluxM(:, :, 2) = fm(:,:,2) .* fm(:,:,3) ./ fm(:,:,6) .* edge.nz;
 
+%> $\mathbf n\cdot\mathbf {F^*} = \mathbf n\cdot\frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(\bold U^+ - \bold U^-)$
 FluxS(:, :, 1) = zeros(size( fm( :, :, 1 )));
 FluxS(:, :, 2) = zeros(size( fm( :, :, 1 )));
 

@@ -17,7 +17,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         finalTime = 30;
         %> casename
         casename = 'StandingWaveInAClosedChannel';
-        Cf = 1e2;
+        Cf = 0.0025;
+%        Cf = 0;
     end
     
     properties
@@ -35,9 +36,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys3d ] = SetInitialField( obj );
             %> time interval
-            obj.dt = 0.001;
+            obj.dt = 0.015;
             
-            obj.miu = 10^(-2);
+            obj.miu = 0.01;
             
             obj.Taux = zeros(size(obj.fphys2d{1}(:,:,1)));
             obj.Tauy = zeros(size(obj.fphys2d{1}(:,:,1)));
@@ -62,7 +63,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 
                 Lambda = 20;
                 % surface elevation
-                fphys2d{m}(:,:,1) =  0.1 * cos(2*pi*mesh2d.x/Lambda);
+                fphys2d{m}(:,:,1) =  0.01 * cos(2*pi*mesh2d.x/Lambda);
                 % bottom elevation
                 fphys2d{m}(:, :, 5) = -obj.H0;
                 % water depth
@@ -82,10 +83,10 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformQuadMesh( N, ...
+mesh2d = makeUniformTriMesh( N, ...
     [ 0, obj.ChLength ], [0, obj.ChWidth], M, obj.ChWidth/(obj.ChLength/M), bctype);
 
-cell = StdPrismQuad( N, Nz );
+cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );

@@ -25,13 +25,13 @@ FluxP(:, :, 2) = fp( :, :, 2 ) .* fp( :, :, 3 ) ./ fp( :, :, 6 )  .* edge.nz;
 
 
 %> $\lambda_{max}  = max(\lambda_1,\lambda_2,\lambda_3)$, for the situation
-%> here $\lambda_1 = \lambda_2 = lambda_3$, because $n_x = n_y = 0$
-lambda = max(max( abs (fm(:, :, 3) ./ fm(:, :, 6) .* edge.nz ) , abs ( - fp(:, :, 3) ./ fp(:, :, 6) .* edge.nz )));
+%> here $\lambda_1 = \lambda_2 = \lambda_3$, because $n_x = n_y = 0$
+lambda = abs( max( max( fm(:, :, 3) ./ fm(:, :, 6) .* edge.nz ,  - fp(:, :, 3) ./ fp(:, :, 6) .* edge.nz ) ) );
 
 FluxS(:, :, 1) = 0.5 .* ( FluxM(:, :, 1) + FluxP(:, :, 1) - ...
-    bsxfun( @times, lambda , ( fp( :, :, 1 ) - fm( :, :, 1 ) ) ) );
+    bsxfun( @times,   lambda  , ( fp( :, :, 1 ) - fm( :, :, 1 ) ) ) );
 FluxS(:, :, 2) = 0.5 .* ( FluxM(:, :, 2) + FluxP(:, :, 2) - ...
-    bsxfun( @times, lambda , ( fp( :, :, 2 ) - fm( :, :, 2 ) ) ) );
+    bsxfun( @times,  lambda  , ( fp( :, :, 2 ) - fm( :, :, 2 ) ) ) );
 
 BottomEdge_rhs = edge.matEvaluateStrongFormEdgeRHS( FluxM, FluxP, FluxS );
 

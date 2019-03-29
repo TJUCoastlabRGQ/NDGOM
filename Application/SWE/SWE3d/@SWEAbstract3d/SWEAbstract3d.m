@@ -86,6 +86,8 @@ classdef SWEAbstract3d < handle
         
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d );
         
+        [ TermX, TermY ] = matEvaluatePartialDerivativeTermX(obj, mesh3d, fphys3d)
+        
     end
     
 end

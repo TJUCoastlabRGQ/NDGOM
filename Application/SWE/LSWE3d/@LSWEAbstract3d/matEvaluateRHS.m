@@ -69,11 +69,17 @@ end
 function frhs2d = EvaluatePCE2d_SurfaceKernel( gra, edge, fphys2d )
 
 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-lambda = max( sqrt( gra .* fm(:, :, 4) ), sqrt( gra .* fp(:, :, 4) ) );
+% lambda = max( sqrt( gra .* fm(:, :, 4) ), sqrt( gra .* fp(:, :, 4) ) );
+% 
+% FluxM = fm(:, :, 2) .* edge.nx + fm(:, :, 3) .* edge.ny;
+% FluxP = fp(:, :, 2) .* edge.nx + fp(:, :, 3) .* edge.ny;
+% FluxS = 0.5 * ( FluxM + FluxP - lambda .* ( fp(:, :, 1) - fm(:, :, 1)  ) );
 
+lambda = max( max( sqrt( gra .* fm(:, :, 4) ), sqrt( gra .* fp(:, :, 4) ) ));
 FluxM = fm(:, :, 2) .* edge.nx + fm(:, :, 3) .* edge.ny;
 FluxP = fp(:, :, 2) .* edge.nx + fp(:, :, 3) .* edge.ny;
-FluxS = 0.5 * ( FluxM + FluxP - lambda .* ( fp(:, :, 1) - fm(:, :, 1)  ) );
+FluxS(:, :, 1) = 0.5 .* ( FluxM + FluxP - ...
+    bsxfun( @times ,lambda, ( fp( :, :, 1 ) - fm( :, :, 1 ) ) ));
 
 frhs2d = edge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
 end
@@ -130,11 +136,18 @@ dFds = mesh3d.cell.Ds * phi;
 % dFdt = mesh3d.cell.Dt * phi;
 Hmiu = sqrt( obj.miu0 );
 
-frhs3d(:, :, 1) = - ( mesh3d.rx .* dFdr + mesh3d.sx .* dFds + ...
+% frhs3d(:, :, 1) = - ( mesh3d.rx .* dFdr + mesh3d.sx .* dFds + ...
+%     Hmiu .* (mesh3d.tz .* ( mesh3d.cell.Dt * fphys3d(:, :, 4) ) ) );
+% 
+% frhs3d(:, :, 2) = - ( mesh3d.ry .* dFdr + mesh3d.sy .* dFds + ...
+%     Hmiu .* (mesh3d.tz .* ( mesh3d.cell.Dt * fphys3d(:, :, 5) ) ) );
+
+frhs3d(:, :, 1) = - ( mesh3d.rx .* dFdr + mesh3d.sx .* dFds - ...
     Hmiu .* (mesh3d.tz .* ( mesh3d.cell.Dt * fphys3d(:, :, 4) ) ) );
 
-frhs3d(:, :, 2) = - ( mesh3d.ry .* dFdr + mesh3d.sy .* dFds + ...
+frhs3d(:, :, 2) = - ( mesh3d.ry .* dFdr + mesh3d.sy .* dFds - ...
     Hmiu .* (mesh3d.tz .* ( mesh3d.cell.Dt * fphys3d(:, :, 5) ) ) );
+
 end
 
 function frhs3d = Evaluate3d_SideSurfaceKernel( gra, edge, fphys3d )
@@ -145,12 +158,19 @@ FluxP(:, :, 1) = gra .* fp( :, :, 7 ) .* edge.nx;
 FluxM(:, :, 2) = gra .* fm( :, :, 7 ) .* edge.ny;
 FluxP(:, :, 2) = gra .* fp( :, :, 7 ) .* edge.ny;
 
-lambda = max( sqrt( gra .* fm(:, :, 6) ), sqrt( gra .* fp(:, :, 6) ) );
+% lambda = max( sqrt( gra .* fm(:, :, 6) ), sqrt( gra .* fp(:, :, 6) ) );
+% 
+% FluxS(:, :, 1) = 0.5 .* ( FluxM(:, :, 1) + FluxP(:, :, 1) - ...
+%     lambda .* ( fp( :, :, 1 ) - fm( :, :, 1 ) ) );
+% FluxS(:, :, 2) = 0.5 .* ( FluxM(:, :, 2) + FluxP(:, :, 2) - ...
+%     lambda .* ( fp( :, :, 2 ) - fm( :, :, 2 ) ) );
+
+lambda = max( max( sqrt( gra .* fm(:, :, 6) ), sqrt( gra .* fp(:, :, 6) ) ));
 
 FluxS(:, :, 1) = 0.5 .* ( FluxM(:, :, 1) + FluxP(:, :, 1) - ...
-    lambda .* ( fp( :, :, 1 ) - fm( :, :, 1 ) ) );
+    bsxfun( @times ,lambda, ( fp( :, :, 1 ) - fm( :, :, 1 ) ) ));
 FluxS(:, :, 2) = 0.5 .* ( FluxM(:, :, 2) + FluxP(:, :, 2) - ...
-    lambda .* ( fp( :, :, 2 ) - fm( :, :, 2 ) ) );
+    bsxfun( @times ,lambda, ( fp( :, :, 2 ) - fm( :, :, 2 ) ) ));
 
 frhs3d = edge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
 end
@@ -176,7 +196,8 @@ function frhs3d = Evaluate3d_BottomSurfaceKernel( ...
     obj, edge, fphys3d )
 
 Hmiu = sqrt( obj.miu0 );
-tau = 1e-3;
+% tau = 1e-3;
+tau = 0;
 
 [ fm, fp ] = edge.matEvaluateSurfValue( fphys3d );
 FluxM(:, :, 1) = Hmiu .* ( fm( :, :, 4 ) .* edge.nz + tau * fm(:, :, 1) );
