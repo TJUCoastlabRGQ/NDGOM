@@ -14,11 +14,8 @@ else
     error( 'Please set the output case name option "outputCaseName".' );
 end
 
-if physMat.option.isKey('outputFieldOrder') 
-    OutputFieldNum = numel(physMat.getOption( 'outputFieldOrder' ));
-else
-    OutputFieldNum = physMat.Nvar;
-end
+  OutputFieldNum = numel( physMat.outputFieldOrder );
+  varIndex = physMat.outputFieldOrder; 
 
 if physMat.option.isKey('outputNcfileNum') 
     OutputFileNum = physMat.getOption( 'outputNcfileNum' );
@@ -30,12 +27,6 @@ if physMat.option.isKey('outputTimeInterval')
     finalTime = physMat.getOption( 'finalTime' );
     deltaTimeStep = physMat.getOption( 'outputTimeInterval' );
     outputIntervalNum = finalTime/deltaTimeStep;
-end
-
-if physMat.option.isKey('outputFieldOrder')
-    varIndex = physMat.getOption('outputFieldOrder');
-else
-    varIndex = physMat.varFieldIndex;
 end
 
 if physMat.option.isKey('outputType')

@@ -1,16 +1,16 @@
 %> @brief Abstract class of the solver.
 %
 %> NdgPhys is the abstract superclass of all the solvers. The class stores
-%> the options for solving problem with specific spacial scheme, such as 
-%> using the quadrature-free scheme for strong form discrete equations, 
+%> the options for solving problem with specific spacial scheme, such as
+%> using the quadrature-free scheme for strong form discrete equations,
 %> and the temporal discrete methods used.
 %>
-%> The public functions includes: 
+%> The public functions includes:
 %> @code
 %>  [ ] = initPhysFromOptions( obj, mesh ); // Public function to call initial function;
 %>  [ ] = listOption( obj ); // List all the options in the solver;
 %>  [ field ] = getOption( obj, fieldName ); // get the option values;
-%>  [ ] = addOption( obj, optionName, optionValue ); // add new options into the solver; 
+%>  [ ] = addOption( obj, optionName, optionValue ); // add new options into the solver;
 %>  [ ] = draw(obj, fieldId); // draw the field;
 %> @endcode
 % ======================================================================
@@ -29,6 +29,9 @@ classdef NdgPhys < handle
         Nfield
         %> number of variable field
         Nvar
+    end
+    
+    properties( Abstract )
         %> index of variable in physical field
         varFieldIndex
     end
@@ -53,7 +56,7 @@ classdef NdgPhys < handle
         %> This function will set the solver's mesh objects and initialize
         %> the physical field
         initPhysFromOptions( obj, mesh )
-
+        
         %> @brief Add new setting option into the solver
         function addOption( obj, optionName, optionValue )
             obj.option( optionName ) = optionValue;

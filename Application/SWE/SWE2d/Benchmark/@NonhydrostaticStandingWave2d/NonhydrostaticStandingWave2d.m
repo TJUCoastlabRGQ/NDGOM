@@ -18,8 +18,9 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEConventional2d();
+            obj.outputFieldOrder = [1 2 3 6];
             obj.initPhysFromOptions( mesh );
-
+                        
             Lambda = 20;
             h = obj.d;
             a = 0.01;
@@ -115,14 +116,13 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputFieldOrder') = [1 2 3];
             option('outputNcfileNum') = 500;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+%             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
     

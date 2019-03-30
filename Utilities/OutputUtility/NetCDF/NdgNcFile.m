@@ -65,9 +65,9 @@ classdef NdgNcFile < handle
         
         function openNetcdfFile(obj)
             for i = 1:numel(obj.fileName)
-                if obj.isOpen(i) == false 
-                obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
-                obj.isOpen(i) = true;   
+                if obj.isOpen(i) == false
+                    obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
+                    obj.isOpen(i) = true;
                 end
             end
         end
@@ -90,7 +90,6 @@ classdef NdgNcFile < handle
             delete(str{1});
         end
     end
-    
 end
 
 function [ncid, ncDim, ncVar] = readFromNetcdfFile( fileName )

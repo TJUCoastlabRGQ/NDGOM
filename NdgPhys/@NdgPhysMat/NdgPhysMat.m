@@ -13,6 +13,11 @@ classdef NdgPhysMat < NdgPhys
         frhs
     end
     
+    properties (Abstract)
+        %> order of the field to be written in the output file     
+        outputFieldOrder
+    end
+    
     properties( SetAccess = protected )
         %> cell array for external value fields
         fext

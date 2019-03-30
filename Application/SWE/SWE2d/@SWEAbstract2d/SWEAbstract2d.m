@@ -24,8 +24,13 @@ classdef SWEAbstract2d < NdgPhysMat
         Nfield = 6
         %> number of variable field
         Nvar = 3
+    end
+    
+    properties
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2, 3 ]
+        varFieldIndex = [ 1, 2, 3 ] 
+        
+        outputFieldOrder = [1, 2, 3]
     end
     
     properties ( SetAccess = protected )
