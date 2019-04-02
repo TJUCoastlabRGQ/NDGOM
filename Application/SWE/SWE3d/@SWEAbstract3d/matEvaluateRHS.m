@@ -23,27 +23,27 @@ for m = 1:obj.Nmesh
     fphys3d = obj.matEvaluate3dAuxiliaryVariable(  mesh3d, fphys2d, fphys3d );   %1
     
     % evaluate 3d velocity volume integral
-    obj.frhs3d{m} = obj.matEvaluate3dVolumeTerm( mesh3d, fphys3d{m} );   %2
+    obj.frhs{m} = obj.matEvaluate3dVolumeTerm( mesh3d, fphys3d{m} );   %2
     
     % evaluate 3d velocity horizontal surface integral
-    obj.frhs3d{m} = obj.frhs3d{m} +obj.matEvaluate3dSideSurfaceTerm( ...           %3
+    obj.frhs{m} = obj.frhs{m} +obj.matEvaluate3dSideSurfaceTerm( ...           %3
          mesh3d.InnerEdge, fphys3d );
     
-    obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dHorizontalBoundaryTerm( ...     %4
-         mesh3d.BoundaryEdge, fphys3d, obj.fext3d{m} );
+    obj.frhs{m} = obj.frhs{m} + obj.matEvaluate3dHorizontalBoundaryTerm( ...     %4
+         mesh3d.BoundaryEdge, fphys3d, obj.fext{m} );
     
     % evaluate 3d velocity field surface integral
-    obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dSurfaceBoundaryTerm( ...        %5
+    obj.frhs{m} = obj.frhs{m} + obj.matEvaluate3dSurfaceBoundaryTerm( ...        %5
          mesh3d.SurfaceBoundaryEdge, fphys3d );
     
     % evaluate 3d velocity field bottom integral
-    obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dBottomEdgeTerm( ...         %6
+    obj.frhs{m} = obj.frhs{m} + obj.matEvaluate3dBottomEdgeTerm( ...         %6
          mesh3d.BottomEdge, fphys3d);
     
-    obj.frhs3d{m} = obj.frhs3d{m} + obj.matEvaluate3dBottomBoundaryTerm( ...       %7
+    obj.frhs{m} = obj.frhs{m} + obj.matEvaluate3dBottomBoundaryTerm( ...       %7
          mesh3d.BottomBoundaryEdge, fphys3d );
     
-    obj.frhs3d{m} = obj.frhs3d{m} - obj.matEvaluate3dVerticalAuxialaryVariableFaceTerm( ...       %7
+    obj.frhs{m} = obj.frhs{m} - obj.matEvaluate3dVerticalAuxialaryVariableFaceTerm( ...       %7
          mesh3d, fphys3d );    
 end
 

@@ -19,17 +19,21 @@ classdef SWEAbstract2d < NdgPhysMat
         gra
     end
     
-    properties( Constant )
+%     properties( Constant )
+%         %> number of physical field [h hu hv z hc w]
+%         Nfield = 6
+%         %> number of variable field
+%         Nvar = 3
+%     end
+    
+    properties 
         %> number of physical field [h hu hv z hc w]
         Nfield = 6
         %> number of variable field
-        Nvar = 3
-    end
-    
-    properties
+        Nvar = 3        
         %> index of variable in physical field
         varFieldIndex = [ 1, 2, 3 ] 
-        
+        %> index of variable to be output
         outputFieldOrder = [1, 2, 3]
     end
     

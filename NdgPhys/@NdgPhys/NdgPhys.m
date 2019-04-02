@@ -24,14 +24,18 @@ classdef NdgPhys < handle
         fphys
     end
     
-    properties( Abstract, Constant )
+%     properties( Abstract, Constant )
+%         %> number of physical field
+%         Nfield
+%         %> number of variable field
+%         Nvar
+%     end
+  
+    properties( Abstract )
         %> number of physical field
         Nfield
         %> number of variable field
-        Nvar
-    end
-    
-    properties( Abstract )
+        Nvar        
         %> index of variable in physical field
         varFieldIndex
     end

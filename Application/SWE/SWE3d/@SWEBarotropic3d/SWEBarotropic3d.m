@@ -1,45 +1,54 @@
 classdef SWEBarotropic3d < SWEAbstract3d
     %SWEBAROTROPIC3D 此处显示有关此类的摘要
     %   此处显示详细说明
-    
+        
+%     properties ( Constant )
+%         %> number of physical field
+%         Nfield2d = 7 %[eta HU HV H Z Zx Zy]
+%         %> num of 3d physical field
+%         Nfield3d = 11 % [ Hu, Hv, w, tau_x, tau_y, H, eta, Z, Zx, Zy, MUy ]
+%         %> number of variable field
+%         Nvar3d = 2
+%         %> index of variable in physical field
+%         varFieldIndex3d = [ 1, 2 ]
+%         %> number of variable field
+%         Nvar2d = 1
+%         %> index of variable in physical field
+%         varFieldIndex2d = 1        
+%     end
     properties
-    end
-    
-    properties ( Constant )
         %> number of physical field
         Nfield2d = 7 %[eta HU HV H Z Zx Zy]
         %> num of 3d physical field
-        Nfield3d = 11 % [ Hu, Hv, w, tau_x, tau_y, H, eta, Z, Zx, Zy, MUy ]
+        Nfield = 11 % [ Hu, Hv, w, tau_x, tau_y, H, eta, Z, Zx, Zy, MUy ]
         %> number of variable field
-        Nvar = 3
+        Nvar = 2
         %> index of variable in physical field
         varFieldIndex = [ 1, 2 ]
+        %> number of variable field
+        Nvar2d = 1
+        %> index of variable in physical field
+        varFieldIndex2d = 1        
     end
     
+    properties
+        %> the 2d field to be put in the output file
+        outputFieldOrder2d =  1 
+        %> the 3d field to be put in the output file 
+        outputFieldOrder = [1 2 3]
+    end
     
     methods
         
-        function matSolve( obj )
-            matEvaluateRK45( obj );
-        end
-        
-        matEvaluateRK45( obj );
+%         function matSolve( obj )
+%             matEvaluateRK45( obj );
+%         end
+%         
+%         matEvaluateRK45( obj );
     end
     
     methods ( Access = protected )
-        
-        %         Volume_frhs3d = matEvaluate3dVolumeTerm( obj, mesh3d, fphys3d );
-        %
-        %         InnerSurface_frhs3d = matEvaluate3dInnerSurfaceTerm( obj, InnerEdge, fphys3d );
-        %
-        %         VerticalBoundarySurface_frhs3d = matEvaluate3dVerticalBoundarySurfaceTerm( obj, BoundaryEdge, fphys3d );
-        %
-        %         Bottom_frhs3d = matEvaluate3dBottomTerm(obj, BottomEdge, fphys3d);
-        %
-        %         SurfaceBoundary_frhs3d =  matEvaluate3dSurfaceBoundaryTerm( obj, SurfaceBoundaryEdge, fphys3d );
-        %
-        %         BottomBoundary_frhs3d =  matEvaluate3dBottomBoundaryTerm( obj, BottomBoundaryEdge, fphys3d );
-        
+          matEvaluateRK45( obj );
     end
     
 end

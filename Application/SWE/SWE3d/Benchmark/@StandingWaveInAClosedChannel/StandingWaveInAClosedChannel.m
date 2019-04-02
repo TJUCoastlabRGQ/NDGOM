@@ -9,16 +9,17 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel width
         ChWidth = 20;
         %> channel depth
-        H0 = 2;
+        H0 = 10;
         %> x range
         %> start time
         startTime = 0;
         %> final time
         finalTime = 30;
         %> casename
-        casename = 'StandingWaveInAClosedChannel';
-        Cf = 0.0025;
-%        Cf = 0;
+%         casename = 'StandingWaveInAClosedChannel';
+ % cf = cd/rho
+%         Cf = 0.0025/1000;
+       Cf = 0;
     end
     
     properties
@@ -34,12 +35,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             % set initilize physical field
-            [ obj.fphys2d, obj.fphys3d ] = SetInitialField( obj );
+            [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.08;
-            
-            obj.miu = 0.001;
-%             obj.miu = 0;
+            obj.dt = 0.03;
+            obj.outputFieldOrder2d = 4;
+%             obj.miu = 0.001;
+            obj.miu = 0;
             obj.Taux = zeros(size(obj.fphys2d{1}(:,:,1)));
             obj.Tauy = zeros(size(obj.fphys2d{1}(:,:,1)));
         end
@@ -52,14 +53,14 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     methods ( Access = protected )
         
         %> set initial function
-        function [fphys2d, fphys3d] = SetInitialField( obj )
+        function [fphys2d, fphys] = setInitialField( obj )
             fphys2d = cell( obj.Nmesh, 1 );
-            fphys3d = cell( obj.Nmesh, 1 );
+            fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
                 mesh2d = obj.mesh2d(m);
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
-                fphys3d{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield3d );
+                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 
                 Lambda = 20;
                 % surface elevation
@@ -69,9 +70,26 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 % water depth
                 fphys2d{m}(:, :, 4) = fphys2d{m}(:,:,1) - fphys2d{m}(:, :, 5);
                 % water depth
-                fphys3d{m}(:, :, 6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
+                fphys{m}(:, :, 6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
             end
         end
+        
+        function [ option ] = setOption( obj, option )
+            ftime = 20;
+            outputIntervalNum = 1500;
+            option('startTime') = 0.0;
+            option('finalTime') = ftime;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
+            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputCaseName') = mfilename;
+            option('outputNcfileNum') = 500;                  
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('limiterType') = enumLimiter.Vert;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;            
+        end
+        
     end
 end
 

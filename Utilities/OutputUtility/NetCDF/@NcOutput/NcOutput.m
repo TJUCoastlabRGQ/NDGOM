@@ -29,18 +29,22 @@ classdef NcOutput < AbstractOutputFile
             obj.outputStep = numel(netcdf.getVar(obj.ncfile.ncid(1),0)); % Get number of time points
             for i = 2:numel(obj.ncfile.fileName)
                 Time = netcdf.getVar(obj.ncfile.ncid(i),0);
-                field = netcdf.getVar(obj.ncfile.ncid(i),1);
+%                 field = netcdf.getVar(obj.ncfile.ncid(i),1);
+                Info = ncinfo(obj.ncfile.fileName{i});
                 for n = 1:numel(Time)
                     startInd = obj.outputStep;
                     countInd = 1;
                     netcdf.putVar(obj.ncfile.ncid(1), obj.timeVarableId, startInd, countInd, Time(n));
-                    
+                  for m = 1:numel(Info.Variables) - 1 
+                    field = netcdf.getVar(obj.ncfile.ncid(i),m);
                     % output physical field
                     startInd = [ 0, 0, 0, obj.outputStep ];
-                    countInd = [ size(field,1), size(field,2), size(field,3), 1 ];
-                    netcdf.putVar(obj.ncfile.ncid(1), obj.fieldVarableId, startInd, countInd, field(:,:,:,n));
+                    countInd = [ Info.Variables( m+1 ).Size(1),  Info.Variables( m+1 ).Size(2),  Info.Variables( m+1 ).Size(3), 1 ];
+                    netcdf.putVar(obj.ncfile.ncid(1), obj.fieldVarableId(m), startInd, countInd, field(:,:,:,n));
                     % increase output step num
-                    obj.outputStep = obj.outputStep + 1;
+                    
+                  end
+                  obj.outputStep = obj.outputStep + 1;
                 end
                 obj.ncfile.closeNetcdfFile(i);
                 obj.ncfile.deleteNetcdfFile(i);
@@ -50,7 +54,7 @@ classdef NcOutput < AbstractOutputFile
         
         function closeOutputFile( obj )
             obj.ncfile.delete();
-            obj.outputTime = ncread( obj.filename, 'time' );
+%             obj.outputTime = ncread( obj.filename, 'time' );
         end
     end
     
