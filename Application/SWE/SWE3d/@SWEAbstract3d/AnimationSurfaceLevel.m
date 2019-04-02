@@ -7,14 +7,14 @@ OutstepNum = obj.outputFile.outputStep;
 
 video = VideoWriter( [obj.outputFile.casename, '/', ...
     obj.outputFile.casename, '.avi'] );
-video.FrameRate = 30;
+video.FrameRate = 20;
 open( video );
 
 % initialize axis with the first step output
 figure('Color', 'w');
 [ fphys2d, ~ ] = obj.outputFile.readOutputResult( obj, 1);
 visual.drawResult( fphys2d(:, :, 1) );
-zlim([9.989, 10.011]);
+zlim([9.88, 10.12]);
 zlabel('$\xi$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 xlabel('$x$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 % ylabel('$y$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);

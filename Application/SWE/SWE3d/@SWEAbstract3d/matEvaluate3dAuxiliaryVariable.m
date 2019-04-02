@@ -39,7 +39,7 @@ FluxS(:, :, 2) = edge3d.nz .* fp(:, :, 2);
 fphys3d{1}(:, :, 4:5) = fphys3d{1}(:, :, 4:5) ...
     + edge3d.matEvaluateStrongFormEdgeRHS( FluxM, FluxS );
 
-fphys3d{1}(:, :, 6) = mesh3d.Extend2dField( fphys2d{1}(:, :, 4) );
+fphys3d{1}(:, :, 6) = mesh3d.Extend2dField( fphys2d{1}(:, :, 1) );
 
 %> $\tau_x - \frac{\mu}{H^2}frac{\partial {Hu}}{\partial \sigma} = 0$ 
 fphys3d{1}(:, :, 4) =  obj.miu./((fphys3d{1}(:, :, 6)).^2) .* (mesh3d.tz .* ( mesh3d.cell.Dt * fphys3d{1}(:,:,1) ) - fphys3d{1}(:, :, 4) );

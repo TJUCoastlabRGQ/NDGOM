@@ -69,7 +69,7 @@ classdef SWEAbstract3d < NdgPhysMat
     end
     
     methods
-        function obj = SWEAbstract3d( N, Nz, M, Mz )
+        function obj = SWEAbstract3d(  )
             % Doing nothing
         end
  

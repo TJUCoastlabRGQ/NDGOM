@@ -1,4 +1,4 @@
-classdef StandingWaveInAClosedChannel < SWEBarotropic3d
+classdef ModeSplitStandingWaveInAClosedChannel < SWEMSBarotropic3d
     %STANDINGWAVEINACLOSECHANNEL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -7,19 +7,19 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         %> channel width
-        ChWidth = 10;
+        ChWidth = 20;
         %> channel depth
-        H0 = 10;
+        H0 = 7.5;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 23;
+        finalTime = 30;
         %> casename
 %         casename = 'StandingWaveInAClosedChannel';
  % cf = cd/rho
-        Cf = 0.0025/1000;
-%        Cf = 0;
+%         Cf = 0.0025/1000;
+       Cf = 0;
     end
     
     properties
@@ -29,7 +29,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     end
     
     methods
-        function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+        function obj = ModeSplitStandingWaveInAClosedChannel( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             % allocate boundary field with mesh obj
@@ -37,12 +37,16 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.025;
+            obj.dt = 0.3;
             obj.outputFieldOrder2d = 4;
-            obj.miu = 0.001;
-%             obj.miu = 0;
+%             obj.miu = 0.001;
+            obj.miu = 0;
             obj.Taux = zeros(size(obj.fphys2d{1}(:,:,1)));
             obj.Tauy = zeros(size(obj.fphys2d{1}(:,:,1)));
+            
+            obj.Solver2d = ModeSplitStandingWaveInAClosedChannel2d( obj.mesh2d );
+%             obj.Solver2d.initPhysFromOptions( obj.mesh2d );
+
         end
         
         AnalysisResult2d( obj );
@@ -63,19 +67,19 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 
                 Lambda = 20;
-                % surface elevation
-                fphys2d{m}(:,:,1) =  0.01 * cos(2*pi*mesh2d.x/Lambda);
                 % bottom elevation
-                fphys2d{m}(:, :, 5) = -obj.H0;
+                fphys2d{m}(:, :, 5) = -obj.H0;                
                 % water depth
-                fphys2d{m}(:, :, 4) = fphys2d{m}(:,:,1) - fphys2d{m}(:, :, 5);
+                fphys2d{m}(:,:,1) =  0.01 * cos(2*pi*mesh2d.x/Lambda) - fphys2d{m}(:, :, 5);
+                % surface elevation
+                fphys2d{m}(:, :, 4) = 0.01 * cos(2*pi*mesh2d.x/Lambda);
                 % water depth
-                fphys{m}(:, :, 6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
+                fphys{m}(:, :, 6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 1) );
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 30;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

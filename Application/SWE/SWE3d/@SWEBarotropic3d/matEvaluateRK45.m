@@ -52,7 +52,7 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
     
-%     visual.drawResult( fphys2d{1}(:,:,4) );
+    visual.drawResult( fphys2d{1}(:,:,4) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys2d, fphys );
