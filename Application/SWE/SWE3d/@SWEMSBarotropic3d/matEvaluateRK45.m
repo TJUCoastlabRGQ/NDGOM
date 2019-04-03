@@ -43,7 +43,7 @@ while( time < ftime )
             dt2d =  time + dt - time2d;
         end
         for intRK = 1:5
-            tloc = time + rk4c( intRK ) * dt2d;
+            tloc = time2d + rk4c( intRK ) * dt2d;
             obj.Solver2d.matUpdateExternalField( tloc, fphys2d );
             obj.Solver2d.matEvaluateRHS( fphys2d );
             
@@ -58,20 +58,20 @@ while( time < ftime )
         time2d = time2d + dt2d;
         visual.drawResult( fphys2d{1}(:, :, 1) );        
     end
-%     for intRK = 1:5
-% %         tloc = time + rk4c( intRK ) * dt;
-%         %         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
-%         obj.matEvaluateRHS( fphys2d, fphys );
-%         
-%         for n = 1:Nmesh
-%             resQ3d{n} = rk4a( intRK ) * resQ3d{n} + dt * obj.frhs{n};
-%             fphys{n}(:,:,1:2) = fphys{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
-%             fphys{n} = obj.matEvaluateCorrectedMomentum( ...
-%                 obj.mesh3d(n), fphys{n}, fphys2d{n} );
-%             fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
-%                 obj.mesh3d(n), fphys2d{n}, fphys{n} );
-%         end
-%     end
+    for intRK = 1:5
+%         tloc = time + rk4c( intRK ) * dt;
+        %         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
+        obj.matEvaluateRHS( fphys2d, fphys );
+        
+        for n = 1:Nmesh
+            resQ3d{n} = rk4a( intRK ) * resQ3d{n} + dt * obj.frhs{n};
+            fphys{n}(:,:,1:2) = fphys{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
+            fphys{n} = obj.matEvaluateCorrectedMomentum( ...
+                obj.mesh3d(n), fphys{n}, fphys2d{n} );
+            fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
+                obj.mesh3d(n), fphys2d{n}, fphys{n} );
+        end
+    end
     time = time + dt;
 %     obj.matUpdateOutputResult( time, fphys2d, fphys );
     
