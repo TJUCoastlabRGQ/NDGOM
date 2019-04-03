@@ -10,7 +10,8 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
-        d = 7.6145
+%         d = 7.6145
+        d = 7.5
         fexact
     end
     
@@ -23,7 +24,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
                         
             Lambda = 20;
             h = obj.d;
-            a = 0.1;
+            a = 0.01;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
             obj.fexact = a * cos(2*pi/Lambda*mesh.x)*cos(2*pi/T*20);
@@ -104,7 +105,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
                 bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  0.1 * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);                
+                fphys{m}(:,:,1) =  0.01 * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);                
             end
         end
         
@@ -117,7 +118,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.Euler;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

@@ -68,6 +68,12 @@ classdef SWEAbstract3d < NdgPhysMat
         limiterSolver
     end
     
+    properties
+        Taux
+        Tauy
+        Cf
+    end    
+     
     methods
         function obj = SWEAbstract3d(  )
             % Doing nothing

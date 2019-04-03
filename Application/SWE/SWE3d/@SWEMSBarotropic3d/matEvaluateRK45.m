@@ -46,7 +46,7 @@ while( time < ftime )
             tloc = time2d + rk4c( intRK ) * dt2d;
             obj.Solver2d.matUpdateExternalField( tloc, fphys2d );
             obj.Solver2d.matEvaluateRHS( fphys2d );
-            
+            obj.matEvaluate2dBoundaryStressRHS( obj.mesh3d, fphys, obj.Solver2d.frhs);
             for n = 1:Nmesh
                 resQ2d{n} = rk4a( intRK ) * resQ2d{n} + dt2d * obj.Solver2d.frhs{n};
                 fphys2d{n}(:,:, obj.varFieldIndex2d) ...

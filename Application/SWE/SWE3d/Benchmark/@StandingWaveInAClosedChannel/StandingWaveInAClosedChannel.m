@@ -18,14 +18,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> casename
 %         casename = 'StandingWaveInAClosedChannel';
  % cf = cd/rho
-        Cf = 0.0025/1000;
+%         Cf = 0.0025/1000;
 %        Cf = 0;
     end
     
     properties
         dt
-        Taux
-        Tauy
     end
     
     methods
@@ -41,8 +39,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             obj.outputFieldOrder2d = 4;
             obj.miu = 0.001;
 %             obj.miu = 0;
-            obj.Taux = zeros(size(obj.fphys2d{1}(:,:,1)));
-            obj.Tauy = zeros(size(obj.fphys2d{1}(:,:,1)));
+            obj.Cf{1} = 0.0025/1000;
         end
         
         AnalysisResult2d( obj );

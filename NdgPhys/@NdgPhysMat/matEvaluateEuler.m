@@ -7,11 +7,11 @@ ftime = obj.getOption('finalTime');
 
 fphys = obj.fphys;
 
-visual = makeVisualizationFromNdgPhys( obj );
+visual = Visual2d( obj.meshUnion );
 % init limiter and output file
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = obj.matUpdateTimeInterval( fphys );
+    dt = 0.2 * obj.matUpdateTimeInterval( fphys );
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -32,7 +32,7 @@ while( time < ftime )
 %         obj.meshUnion(m).draw( fphys{m}(:,:,1) );
 %     end
 %     drawnow;
-    
+    visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
 %     obj.dt = dt;
     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);

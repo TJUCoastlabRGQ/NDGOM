@@ -14,24 +14,21 @@ classdef ModeSplitStandingWaveInAClosedChannel < SWEMSBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 30;
-        %> casename
-%         casename = 'StandingWaveInAClosedChannel';
- % cf = cd/rho
-%         Cf = 0.0025/1000;
-       Cf = 0;
+        finalTime = 20;
     end
     
     properties
         dt
-        Taux
-        Tauy
+%         Taux
+%         Tauy
     end
     
     methods
         function obj = ModeSplitStandingWaveInAClosedChannel( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+
+            obj.Solver2d = ModeSplitStandingWaveInAClosedChannel2d( obj.mesh2d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             % set initilize physical field
@@ -40,13 +37,10 @@ classdef ModeSplitStandingWaveInAClosedChannel < SWEMSBarotropic3d
             obj.dt = 0.3;
             obj.outputFieldOrder2d = 4;
 %             obj.miu = 0.001;
-            obj.miu = 0;
-            obj.Taux = zeros(size(obj.fphys2d{1}(:,:,1)));
-            obj.Tauy = zeros(size(obj.fphys2d{1}(:,:,1)));
+            obj.miu = 0.01;
+            obj.Cf{1} = 1000;
             
-            obj.Solver2d = ModeSplitStandingWaveInAClosedChannel2d( obj.mesh2d );
-%             obj.Solver2d.initPhysFromOptions( obj.mesh2d );
-
+            
         end
         
         AnalysisResult2d( obj );
@@ -87,7 +81,7 @@ classdef ModeSplitStandingWaveInAClosedChannel < SWEMSBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.Euler;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

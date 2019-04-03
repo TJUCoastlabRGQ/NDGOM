@@ -26,7 +26,7 @@ edge = mesh3d.SurfaceBoundaryEdge;
 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys3d );
 fluxM(:,:,1) = edge.nz .* fm(:,:,4); 
 fluxM(:,:,2) = edge.nz .* fm(:,:,5);
-fluxS(:,:,1) = edge.nz .*obj.Taux; fluxS(:,:,2) = edge.nz .*obj.Tauy;
+fluxS(:,:,1) = edge.nz .*obj.Taux{1}; fluxS(:,:,2) = edge.nz .*obj.Tauy{1};
 
 
 AuxialaryVariableFace_rhs3d = AuxialaryVariableFace_rhs3d + ...
@@ -38,8 +38,8 @@ edge = mesh3d.BottomBoundaryEdge;
 fluxM(:,:,1) = edge.nz .* fm(:,:,4); fluxM(:,:,2) = edge.nz .* fm(:,:,5);
 u = fm(:,:,1)./fm(:,:,6); v = fm(:,:,2)./fm(:,:,6); 
 Velocity = sqrt( u.^2 + v.^2 );
-fluxS(:,:,1) = edge.nz .*obj.Cf .* u .* Velocity;
-fluxS(:,:,2) = edge.nz .*obj.Cf .* v .* Velocity;
+fluxS(:,:,1) = edge.nz .*obj.Cf{1} .* u .* Velocity;
+fluxS(:,:,2) = edge.nz .*obj.Cf{1} .* v .* Velocity;
 
 AuxialaryVariableFace_rhs3d = AuxialaryVariableFace_rhs3d + ...
     edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );

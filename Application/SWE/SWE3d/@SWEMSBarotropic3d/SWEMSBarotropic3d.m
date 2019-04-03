@@ -13,14 +13,16 @@ classdef SWEMSBarotropic3d < SWEBarotropic3d
             obj.Nfield2d = 5; %[H HU HV eta b]
             obj.Nvar2d = 3;
             obj.varFieldIndex2d = [1 2 3];
-           
+            
         end
     end
     
     methods  ( Access = protected )
         fphys = matEvaluateCorrectedMomentum( obj, mesh3d, fphys, fphys2d );
         matEvaluateRK45( obj );
+        matEvaluateEuler( obj );
         matEvaluateRHS( obj, fphys2d, fphys );
+        matEvaluate2dBoundaryStressRHS(obj, mesh, fphys, rhs2d);
     end
 end
 
