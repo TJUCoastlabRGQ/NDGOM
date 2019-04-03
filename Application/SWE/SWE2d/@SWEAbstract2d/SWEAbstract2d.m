@@ -12,12 +12,15 @@
 %> each elements. The numerical flux
 classdef SWEAbstract2d < NdgPhysMat
     
-    properties (Abstract, Constant)
+    properties ( Constant)
+        %> gravity acceleration
+        gra = 9.81
+    end
+    
+    properties
         %> wet/dry depth threshold
         hmin
-        %> gravity acceleration
-        gra
-    end
+    end    
     
 %     properties( Constant )
 %         %> number of physical field [h hu hv z hc w]
@@ -37,7 +40,7 @@ classdef SWEAbstract2d < NdgPhysMat
         outputFieldOrder = [1, 2, 3]
     end
     
-    properties ( SetAccess = protected )
+    properties
         %> gradient of bottom elevation
         zGrad
     end
@@ -55,6 +58,10 @@ classdef SWEAbstract2d < NdgPhysMat
         limiterSolver
     end
     
+    methods
+        matUpdateWetDryState(obj, fphys);
+    end
+    
     % ======================================================================
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
@@ -66,7 +73,6 @@ classdef SWEAbstract2d < NdgPhysMat
     % ======================================================================
     methods ( Abstract, Access = protected )
         %> determine wetting and drying status
-        matUpdateWetDryState(obj, fphys)
         
         %> evaluate topography source term
         matEvaluateTopographySourceTerm( obj, fphys )

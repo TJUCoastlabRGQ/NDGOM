@@ -27,12 +27,12 @@ classdef ModeSplitStandingWaveInAClosedChannel < SWEMSBarotropic3d
         function obj = ModeSplitStandingWaveInAClosedChannel( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-
-            obj.Solver2d = ModeSplitStandingWaveInAClosedChannel2d( obj.mesh2d );
+            
+%             obj.Solver2d = ModeSplitStandingWaveInAClosedChannel2d( obj.mesh2d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             % set initilize physical field
-            [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
+            
             %> time interval
             obj.dt = 0.3;
             obj.outputFieldOrder2d = 4;

@@ -6,7 +6,7 @@ classdef SWEPreBlanaced2d < SWEConventional2d
         end
     end
     
-    methods( Access = protected )
+    methods
         function matUpdateWetDryState(obj, fphys)
             for m = 1:obj.Nmesh
                 wetflag = all( fphys{m}(:,:,1) > obj.hmin );
@@ -14,6 +14,9 @@ classdef SWEPreBlanaced2d < SWEConventional2d
                 obj.meshUnion(m).status(  wetflag ) = int8( enumSWERegion.Wet );
             end
         end
+    end
+    
+    methods( Access = protected )
         
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh

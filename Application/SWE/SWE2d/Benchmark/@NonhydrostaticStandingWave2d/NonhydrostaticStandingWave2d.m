@@ -3,8 +3,6 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     %   此处显示详细说明
     
     properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
         rho = 1000
     end
     
@@ -20,8 +18,9 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEConventional2d();
             obj.outputFieldOrder = [1 2 3 6];
+            obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
-                        
+                  
             Lambda = 20;
             h = obj.d;
             a = 0.01;

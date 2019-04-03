@@ -100,7 +100,7 @@ classdef NdgPhys < handle
         end% func
     end
     
-    methods( Abstract, Access = protected )
+    methods( Access = protected )
         %> Set the solver options
         [ option ] = setOption( obj, option );
         

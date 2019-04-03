@@ -5,16 +5,24 @@ classdef SWEConventional2d < SWEAbstract2d
         function [ E, G ] = matEvaluateFlux( obj, mesh, fphys )
             [ E, G ] = mxEvaluateFlux2d( obj.hmin, obj.gra, mesh.status, fphys );
         end
-    end
-    
-    methods( Access = protected )
+        
         function matUpdateWetDryState(obj, fphys)
             for m = 1:obj.Nmesh
                 wetflag = all( fphys{m}(:,:,1) > obj.hmin );
                 obj.meshUnion(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
                 obj.meshUnion(m).status(  wetflag ) = int8( enumSWERegion.Wet );
             end
-        end
+        end        
+    end
+    
+    methods( Access = protected )
+%         function matUpdateWetDryState(obj, fphys)
+%             for m = 1:obj.Nmesh
+%                 wetflag = all( fphys{m}(:,:,1) > obj.hmin );
+%                 obj.meshUnion(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
+%                 obj.meshUnion(m).status(  wetflag ) = int8( enumSWERegion.Wet );
+%             end
+%         end
         
         function [ fphys ] = matEvaluatePostFunc(obj, fphys)
             for m = 1:obj.Nmesh

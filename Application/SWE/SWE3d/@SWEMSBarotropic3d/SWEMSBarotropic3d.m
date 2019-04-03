@@ -8,13 +8,15 @@ classdef SWEMSBarotropic3d < SWEBarotropic3d
     
     methods
         function  obj = SWEMSBarotropic3d(  )
-            %             obj.Solver2d = SWEPreBlanaced2d();
             %             obj.Solver2d.initPhysFromOptions( obj.mesh2d );
             obj.Nfield2d = 5; %[H HU HV eta b]
             obj.Nvar2d = 3;
             obj.varFieldIndex2d = [1 2 3];
+            obj.Solver2d = SWEPreBlanaced2d();
             
         end
+        
+        initPhysFromOptions(obj, mesh2d, mesh3d);
     end
     
     methods  ( Access = protected )
