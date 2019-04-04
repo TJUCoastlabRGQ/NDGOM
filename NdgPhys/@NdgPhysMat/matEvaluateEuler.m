@@ -25,7 +25,7 @@ while( time < ftime )
             = fphys{n}(:,:, obj.varFieldIndex) + dt*obj.frhs{n};
     end
     
-%     fphys = obj.matEvaluateLimiter( fphys );
+    fphys = obj.matEvaluateLimiter( fphys );
     fphys = obj.matEvaluatePostFunc( fphys );
     
 %     for m = 1:obj.Nmesh

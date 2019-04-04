@@ -44,4 +44,15 @@ for m = 1:obj.Nmesh
     obj.Solver2d.zGrad{m}(:,:,1) = mesh.rx .* zr + mesh.sx .* zs;
     obj.Solver2d.zGrad{m}(:,:,2) = mesh.ry .* zr + mesh.sy .* zs;
 end
+
+%Set NonhydrostaticSolver
+% [obj.NonhydrostaticSolver] = setNonhydrostaticSolver(obj);
+%Coriolis Term
+[ obj.Solver2d.coriolisSolver ] = initCoriolisSolver2d( obj );
+%Friction Term
+[ obj.Solver2d.frictionSolver ] = initFrictionSolver2d( obj );
+%Wind Term
+[ obj.Solver2d.windSolver ] = initWindSolver2d( obj );
+[ obj.Solver2d.numfluxSolver ] = initNumFluxSolver2d( obj );
+[ obj.Solver2d.limiterSolver ] = initLimiter2d( obj );
 end

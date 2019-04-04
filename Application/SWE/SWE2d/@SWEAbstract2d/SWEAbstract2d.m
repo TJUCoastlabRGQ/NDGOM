@@ -45,7 +45,7 @@ classdef SWEAbstract2d < NdgPhysMat
         zGrad
     end
     
-    properties ( SetAccess = private )
+    properties
         %> solver for coriolis source term
         coriolisSolver
         %> solver for friction source term
