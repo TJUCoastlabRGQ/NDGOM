@@ -3,14 +3,15 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
     %   此处显示详细说明
     
     properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
+%         gra = 9.81
+        
         rho = 1000
         amplitude = 0.0232
         d = 0.45
         T = 1
         ChLength = 26
-        ChWidth = 0.05
+%         ChWidth = 0.05
+        ChWidth = 0.1
     end
     
     properties
@@ -30,9 +31,11 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         function obj = WaveTransformOverAnEllipticalShoal(N, deltax, cellType)
             
             obj = obj@SWEPreBlanaced2d();
+            obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
             obj.WaveCharacterEstimate;
+            obj.outputFieldOrder = [1, 2, 3, 6];
                    
             bp = obj.Ylim(2) - obj.spgLength;
             ind = obj.meshUnion.yc > bp; % right part is sponge region
@@ -240,7 +243,6 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
-            option('outputFieldOrder') = [1 2 3 6];
             option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
