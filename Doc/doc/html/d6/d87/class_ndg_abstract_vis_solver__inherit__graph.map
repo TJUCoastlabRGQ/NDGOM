@@ -1,0 +1,5 @@
+<map id="NdgAbstractVisSolver" name="NdgAbstractVisSolver">
+<area shape="rect" id="node3" href="$d9/de2/class_ndg_non_vis_solver.html" title="NdgNonVisSolver" alt="" coords="368,5,491,32"/>
+<area shape="rect" id="node4" href="$dd/df3/class_ndg_quad_free_strong_central_vis_solver2d.html" title="NdgQuadFreeStrongCentral\lVisSolver2d" alt="" coords="339,57,520,98"/>
+<area shape="rect" id="node5" href="$d2/dd3/class_ndg_quad_free_strong_l_d_g_vis_solver2d.html" title="NdgQuadFreeStrongLDGVisSolver2d" alt="" coords="312,123,547,149"/>
+</map>

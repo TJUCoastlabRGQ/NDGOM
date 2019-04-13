@@ -1,0 +1,5 @@
+<map id="DiffusionAbstract2d" name="DiffusionAbstract2d">
+<area shape="rect" id="node5" href="$d5/dd9/class_diffusion2d.html" title="Diffusion2d" alt="" coords="29,304,115,331"/>
+<area shape="rect" id="node2" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="23,155,120,181"/>
+<area shape="rect" id="node3" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="35,80,109,107"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="ModeSplitStandingWaveInAClosedChannel" name="ModeSplitStandingWaveInAClosedChannel">
+<area shape="rect" id="node2" href="$d6/da4/class_s_w_e_m_s_barotropic3d.html" title="SWEMSBarotropic3d" alt="" coords="43,379,189,405"/>
+<area shape="rect" id="node3" href="$df/ddb/class_s_w_e_barotropic3d.html" title="SWEBarotropic3d" alt="" coords="53,304,179,331"/>
+<area shape="rect" id="node4" href="$d4/d04/class_s_w_e_abstract3d.html" title="SWEAbstract3d" alt="" coords="58,229,173,256"/>
+<area shape="rect" id="node5" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="67,155,164,181"/>
+<area shape="rect" id="node6" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="79,80,153,107"/>
+</map>

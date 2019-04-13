@@ -1,0 +1,6 @@
+<map id="DamBreakDryUniformMesh1d" name="DamBreakDryUniformMesh1d">
+<area shape="rect" id="node2" href="$d8/db9/class_s_w_e_conventional1d.html" title="SWEConventional1d" alt="" coords="31,304,171,331"/>
+<area shape="rect" id="node3" href="$d8/d4d/class_s_w_e_abstract1d.html" title="SWEAbstract1d" alt="" coords="43,229,159,256"/>
+<area shape="rect" id="node4" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="53,155,149,181"/>
+<area shape="rect" id="node5" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="64,80,139,107"/>
+</map>

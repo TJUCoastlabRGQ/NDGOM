@@ -1,0 +1,9 @@
+<map id="SWEWD1d" name="SWEWD1d">
+<area shape="rect" id="node8" href="$de/d36/class_tri_hump1d.html" title="TriHump1d" alt="" coords="5,528,88,555"/>
+<area shape="rect" id="node9" href="$d1/dea/class_tsunami_runup1d.html" title="TsunamiRunup1d" alt="" coords="113,528,236,555"/>
+<area shape="rect" id="node2" href="$db/d53/class_s_w_e_pre_blanaced1d.html" title="SWEPreBlanaced1d" alt="" coords="40,379,181,405"/>
+<area shape="rect" id="node3" href="$d8/db9/class_s_w_e_conventional1d.html" title="SWEConventional1d" alt="" coords="41,304,180,331"/>
+<area shape="rect" id="node4" href="$d8/d4d/class_s_w_e_abstract1d.html" title="SWEAbstract1d" alt="" coords="53,229,168,256"/>
+<area shape="rect" id="node5" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="62,155,159,181"/>
+<area shape="rect" id="node6" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="73,80,148,107"/>
+</map>

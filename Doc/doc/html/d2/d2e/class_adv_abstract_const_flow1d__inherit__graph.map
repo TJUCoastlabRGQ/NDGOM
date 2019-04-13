@@ -1,0 +1,6 @@
+<map id="AdvAbstractConstFlow1d" name="AdvAbstractConstFlow1d">
+<area shape="rect" id="node5" href="$d4/d4c/class_shock_uniform_flow1d.html" title="ShockUniformFlow1d" alt="" coords="5,304,149,331"/>
+<area shape="rect" id="node6" href="$d8/dee/class_sin_uniform_flow1d.html" title="SinUniformFlow1d" alt="" coords="174,304,300,331"/>
+<area shape="rect" id="node2" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="109,155,205,181"/>
+<area shape="rect" id="node3" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="120,80,195,107"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="AbstractFrictionTermSolver" name="AbstractFrictionTermSolver">
+<area shape="rect" id="node3" href="$d6/dec/class_linear_friction_term_solver2d.html" title="LinearFrictionTermSolver2d" alt="" coords="347,5,525,32"/>
+<area shape="rect" id="node4" href="$d2/d12/class_manning_friction_solver1d.html" title="ManningFrictionSolver1d" alt="" coords="355,56,517,83"/>
+<area shape="rect" id="node5" href="$d7/d31/class_manning_friction_solver2d.html" title="ManningFrictionSolver2d" alt="" coords="355,107,517,133"/>
+<area shape="rect" id="node6" href="$d7/d0d/class_non_friction_term_solver.html" title="NonFrictionTermSolver" alt="" coords="360,157,512,184"/>
+<area shape="rect" id="node7" href="$d8/d4c/class_quadric_friction_term_solver2d.html" title="QuadricFrictionTermSolver2d" alt="" coords="342,208,530,235"/>
+</map>

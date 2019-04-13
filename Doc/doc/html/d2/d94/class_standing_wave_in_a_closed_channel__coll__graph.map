@@ -1,0 +1,6 @@
+<map id="StandingWaveInAClosedChannel" name="StandingWaveInAClosedChannel">
+<area shape="rect" id="node2" href="$df/ddb/class_s_w_e_barotropic3d.html" title="SWEBarotropic3d" alt="" coords="47,304,173,331"/>
+<area shape="rect" id="node3" href="$d4/d04/class_s_w_e_abstract3d.html" title="SWEAbstract3d" alt="" coords="53,229,168,256"/>
+<area shape="rect" id="node4" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="62,155,159,181"/>
+<area shape="rect" id="node5" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="73,80,148,107"/>
+</map>

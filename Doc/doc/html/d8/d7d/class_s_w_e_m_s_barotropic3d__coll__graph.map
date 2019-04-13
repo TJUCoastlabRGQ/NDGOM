@@ -1,0 +1,6 @@
+<map id="SWEMSBarotropic3d" name="SWEMSBarotropic3d">
+<area shape="rect" id="node2" href="$df/ddb/class_s_w_e_barotropic3d.html" title="SWEBarotropic3d" alt="" coords="15,304,141,331"/>
+<area shape="rect" id="node3" href="$d4/d04/class_s_w_e_abstract3d.html" title="SWEAbstract3d" alt="" coords="21,229,136,256"/>
+<area shape="rect" id="node4" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="30,155,127,181"/>
+<area shape="rect" id="node5" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="41,80,116,107"/>
+</map>

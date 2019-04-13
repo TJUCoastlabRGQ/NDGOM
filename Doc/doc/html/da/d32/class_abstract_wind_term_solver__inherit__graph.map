@@ -1,0 +1,5 @@
+<map id="AbstractWindTermSolver" name="AbstractWindTermSolver">
+<area shape="rect" id="node3" href="$d0/d1b/class_non_wind_term_solver.html" title="NonWindTermSolver" alt="" coords="5,155,144,181"/>
+<area shape="rect" id="node4" href="$d4/df8/class_stress_wind_term_solver.html" title="StressWindTermSolver" alt="" coords="168,155,323,181"/>
+<area shape="rect" id="node5" href="$d7/d33/class_u_v_wind_term_solver.html" title="UVWindTermSolver" alt="" coords="347,155,481,181"/>
+</map>

@@ -1,0 +1,7 @@
+<map id="ParabolicBowl1d" name="ParabolicBowl1d">
+<area shape="rect" id="node7" href="$df/d8e/class_parabolic_bowl_steady1d.html" title="ParabolicBowlSteady1d" alt="" coords="5,453,163,480"/>
+<area shape="rect" id="node2" href="$d8/db9/class_s_w_e_conventional1d.html" title="SWEConventional1d" alt="" coords="14,304,153,331"/>
+<area shape="rect" id="node3" href="$d8/d4d/class_s_w_e_abstract1d.html" title="SWEAbstract1d" alt="" coords="26,229,141,256"/>
+<area shape="rect" id="node4" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="35,155,132,181"/>
+<area shape="rect" id="node5" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="47,80,121,107"/>
+</map>
