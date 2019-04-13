@@ -1,7 +1,0 @@
-<map id="AdvAbstractVarFlow2d" name="AdvAbstractVarFlow2d">
-<area shape="rect" id="node5" href="$da/dbc/class_adv_rotation_hybrid_mesh2d.html" title="AdvRotationHybridMesh2d" alt="" coords="5,304,179,331"/>
-<area shape="rect" id="node6" href="$d5/db3/class_adv_rotation_uniform_mesh2d.html" title="AdvRotationUniformMesh2d" alt="" coords="204,304,385,331"/>
-<area shape="rect" id="node2" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="145,155,241,181"/>
-<area shape="rect" id="node3" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="156,80,231,107"/>
-<area shape="rect" id="node7" href="$d3/db3/class_adv_rotation_shock_uniform_mesh2d.html" title="AdvRotationShockUniformMesh2d" alt="" coords="185,379,404,405"/>
-</map>

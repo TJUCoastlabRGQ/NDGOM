@@ -1,8 +1,0 @@
-<map id="TriHump1d" name="TriHump1d">
-<area shape="rect" id="node2" href="$da/d70/class_s_w_e_w_d1d.html" title="SWEWD1d" alt="" coords="31,453,120,480"/>
-<area shape="rect" id="node3" href="$db/d53/class_s_w_e_pre_blanaced1d.html" title="SWEPreBlanaced1d" alt="" coords="5,379,147,405"/>
-<area shape="rect" id="node4" href="$d8/db9/class_s_w_e_conventional1d.html" title="SWEConventional1d" alt="" coords="6,304,145,331"/>
-<area shape="rect" id="node5" href="$d8/d4d/class_s_w_e_abstract1d.html" title="SWEAbstract1d" alt="" coords="18,229,133,256"/>
-<area shape="rect" id="node6" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="27,155,124,181"/>
-<area shape="rect" id="node7" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="39,80,113,107"/>
-</map>

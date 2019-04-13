@@ -1,5 +1,0 @@
-<map id="SWEConventional1d" name="SWEConventional1d">
-<area shape="rect" id="node2" href="$d8/d4d/class_s_w_e_abstract1d.html" title="SWEAbstract1d" alt="" coords="17,229,132,256"/>
-<area shape="rect" id="node3" href="$d8/d16/class_ndg_phys_mat.html" title="Abstract class for physical solver calculated by Matlab functions. " alt="" coords="26,155,123,181"/>
-<area shape="rect" id="node4" href="$d5/da9/class_ndg_phys.html" title="Abstract class of the solver. " alt="" coords="37,80,112,107"/>
-</map>

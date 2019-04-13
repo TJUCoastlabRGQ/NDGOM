@@ -1,8 +1,0 @@
-<map id="AbstractOutputFile" name="AbstractOutputFile">
-<area shape="rect" id="node3" href="$da/d65/class_abstract_vtk_output.html" title="AbstractVtkOutput" alt="" coords="5,155,136,181"/>
-<area shape="rect" id="node6" href="$dd/de7/class_nc_output.html" title="NcOutput" alt="" coords="160,155,237,181"/>
-<area shape="rect" id="node4" href="$de/d0d/class_vtk_output2d.html" title="VtkOutput2d" alt="" coords="23,229,117,256"/>
-<area shape="rect" id="node5" href="$dc/d4c/class_vtk_output3d.html" title="VtkOutput3d" alt="" coords="23,304,117,331"/>
-<area shape="rect" id="node7" href="$d8/d00/class_l_s_w_e_output3d.html" title="LSWEOutput3d" alt="" coords="142,229,255,256"/>
-<area shape="rect" id="node8" href="$d8/d1d/class_s_w_e_output3d.html" title="SWEOutput3d" alt="" coords="280,229,387,256"/>
-</map>

@@ -1,5 +1,0 @@
-<map id="NdgVisCentralFluxSolver" name="NdgVisCentralFluxSolver">
-<area shape="rect" id="node4" href="$d9/dd1/class_ndg_quad_free_strong_form_central_vis_solver2d.html" title="NdgQuadFreeStrongFormCentral\lVisSolver2d" alt="" coords="5,230,216,271"/>
-<area shape="rect" id="node5" href="$db/d59/class_ndg_quad_free_weak_form_central_vis_solver2d.html" title="NdgQuadFreeWeakFormCentral\lVisSolver2d" alt="" coords="241,230,447,271"/>
-<area shape="rect" id="node2" href="$d1/d0d/class_ndg_vis_flux_abstract_solver.html" title="NdgVisFluxAbstractSolver" alt="" coords="140,80,313,107"/>
-</map>

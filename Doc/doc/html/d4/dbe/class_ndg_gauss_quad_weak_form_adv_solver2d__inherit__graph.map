@@ -1,5 +1,0 @@
-<map id="NdgGaussQuadWeakFormAdvSolver2d" name="NdgGaussQuadWeakFormAdvSolver2d">
-<area shape="rect" id="node2" href="$d2/dac/class_ndg_gauss_quad_weak_form_solver.html" title="NdgGaussQuadWeakFormSolver" alt="" coords="5,155,219,181"/>
-<area shape="rect" id="node3" href="$d4/d6f/class_ndg_gauss_quad_strong_form_solver.html" title="class of solving strong form equations with the Gauss quadrature formula " alt="" coords="33,80,249,107"/>
-<area shape="rect" id="node5" href="$d6/d4e/class_ndg_abstract_adv_solver.html" title="NdgAbstractAdvSolver" alt="" coords="243,155,393,181"/>
-</map>

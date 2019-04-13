@@ -1,8 +1,0 @@
-<map id="conv2d" name="conv2d">
-<area shape="rect" id="node3" href="$d8/d63/classconv2d__adv__gq.html" title="conv2d_adv_gq" alt="" coords="5,155,115,181"/>
-<area shape="rect" id="node4" href="$d9/d6c/classconv2d__advection.html" title="conv2d_advection" alt="" coords="139,155,261,181"/>
-<area shape="rect" id="node7" href="$d2/d8e/classconv2d__gaussrotate.html" title="conv2d_gaussrotate" alt="" coords="286,155,423,181"/>
-<area shape="rect" id="node8" href="$d3/d0a/classconv2d__solidrotate.html" title="conv2d_solidrotate" alt="" coords="447,155,576,181"/>
-<area shape="rect" id="node5" href="$d2/da0/classconv2d__diffusion.html" title="conv2d_diffusion" alt="" coords="73,229,188,256"/>
-<area shape="rect" id="node6" href="$de/d46/classconv2d__refine__fv.html" title="conv2d_refine_fv" alt="" coords="213,229,328,256"/>
-</map>
