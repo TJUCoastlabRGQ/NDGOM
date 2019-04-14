@@ -50,6 +50,8 @@ classdef NdgQuadFreeStrongCentralVisSolver2d < NdgAbstractVisSolver
                 % fluxS = ( fluxM + fluxP ) * 0.5;
                 obj.py{m} = obj.py{m} + obj.my{m} .* ...
                     edge.matEvaluateStrongFormEdgeCentralRHS( fluxM, fluxP );
+                
+                 % Boundary Edge Contribution Not Considered
             end
         end
         
@@ -88,6 +90,8 @@ classdef NdgQuadFreeStrongCentralVisSolver2d < NdgAbstractVisSolver
                 obj.phys.frhs{m}(:, :, obj.rhsId) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId) + ...
                     edge.matEvaluateStrongFormEdgeCentralRHS( fluxM, fluxP );
+                
+                 % Boundary Edge Contribution Not Considered
             end
         end
     end

@@ -3,14 +3,14 @@ y = [1, 3, 5, 7, 9]; x = [-2 0 2];
 % fontsize = 15;
 % markersize = 6;
 
-YprofileProcess(obj, y);
+% YprofileProcess(obj, y);
 XprofileProcess(obj, x);
 
 end
 
 function  YprofileProcess(obj, y)
 % Nout = obj.outputFile.outputStep;
-Nout = 1652;
+Nout = 1616;
 for i = 1:numel(y)
     str = strcat('Section',num2str(i));
     csv = strcat('profile',num2str(i),'.csv');
@@ -22,9 +22,10 @@ for i = 1:numel(y)
     ypf = y(i).*ones(size(xpf));
     analys = Analysis2d( obj, xpf,  ypf);
     
-    tempgaugeResult = zeros(numel(xpf),ceil(29* Nout/35)-ceil(33* Nout/35)+1);
+%     tempgaugeResult = zeros(numel(xpf),ceil(29* Nout/35)-ceil(33* Nout/35)+1);
+    tempgaugeResult = zeros(numel(xpf),ceil(35* Nout/35)-ceil(30* Nout/35)+1);
     k = 1;
-    for t = ceil(29* Nout/35):ceil(33* Nout/35)
+    for t = ceil(30* Nout/35):ceil(35* Nout/35)
        tempdata = analys.InterpOutputResult2GaugePoint( t ); 
        tempgaugeResult( :,k ) = tempdata( :,1 );
        k = k+1;
@@ -49,7 +50,8 @@ end
 
 function  XprofileProcess(obj, x)
 % Nout = obj.outputFile.outputStep;
-Nout = 1652;
+% Nout = 1652;
+Nout = 1616;
 for i = 1:numel(x)
     str = strcat('Section',num2str(i+5));
     csv = strcat('profile',num2str(i+5),'.csv');
@@ -57,13 +59,13 @@ for i = 1:numel(x)
     '/data/',csv];
     data = xlsread(filename);
   
-    ypf = 0:0.05:12;
+    ypf = 0:0.15:12;
     xpf = x(i).*ones(size(ypf));
     analys = Analysis2d( obj, xpf,  ypf);
     
-    tempgaugeResult = zeros(numel(xpf),ceil(29* Nout/35)-ceil(33* Nout/35)+1);
+    tempgaugeResult = zeros(numel(xpf),ceil(35* Nout/35)-ceil(30* Nout/35)+1);
     k = 1;
-    for t = ceil(29* Nout/35):ceil(33* Nout/35)
+    for t = ceil(30* Nout/35):ceil(35* Nout/35)
        tempdata = analys.InterpOutputResult2GaugePoint( t ); 
        tempgaugeResult( :,k ) = tempdata( :,1 );
        k = k+1;

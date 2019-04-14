@@ -81,6 +81,9 @@ classdef NdgQuadFreeStrongLDGVisSolver2d < NdgAbstractVisSolver
                 
                 obj.py{m} = obj.py{m} + obj.my{m} .* ...
                     edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                
+                % Boundary Edge Contribution Not Considered
+                
             end
         end
         
@@ -124,6 +127,8 @@ classdef NdgQuadFreeStrongLDGVisSolver2d < NdgAbstractVisSolver
                 obj.phys.frhs{m}(:, :, obj.rhsId) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId) + ...
                     edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                
+                 % Boundary Edge Contribution Not Considered
             end
         end
     end

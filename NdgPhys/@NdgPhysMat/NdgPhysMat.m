@@ -83,6 +83,8 @@ classdef NdgPhysMat < NdgPhys
         %> @param [in] fphys The physical field on the mesh grid
         %>
         [ flux ] = matEvaluateSurfFlux( obj, mesh, nx, ny, nz, fm )
+        
+        [ fM, fP ] = matImposeBoundaryCondition( obj, edge, nx, ny, fM, fP, fext )
     end
     
     methods( Access = protected )

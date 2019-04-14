@@ -68,7 +68,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         end
         
         function VisualPostprocess(obj)
-           time = 30;
+           time = 35;
            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
            outputTime = ncread( PostProcess.outputFile{1}, 'time' );
            [~,Index] = sort(abs(outputTime-time));
