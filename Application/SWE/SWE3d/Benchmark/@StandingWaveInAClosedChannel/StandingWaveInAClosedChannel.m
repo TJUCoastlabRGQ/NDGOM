@@ -35,7 +35,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.025;
+            obj.dt = 0.015;
             obj.outputFieldOrder2d = 4;
             obj.miu = 0.001;
 %             obj.miu = 0;

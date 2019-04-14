@@ -32,8 +32,8 @@ edge3d = mesh3d.SurfaceBoundaryEdge;
 [ fm, fp ] = edge3d.matEvaluateSurfValue( fphys3d );
 FluxM(:, :, 1) = edge3d.nz .* fm(:, :, 1);
 FluxM(:, :, 2) = edge3d.nz .* fm(:, :, 2);
-%> $|(Hu)^+ = (Hu)^-|_{\Omega = 1}$
-%> $|(Hv)^+ = (Hv)^-|_{\Omega = 1}$
+%> $|(Hu)^+ = (Hu)^-|_{\Omega = 0}$
+%> $|(Hv)^+ = (Hv)^-|_{\Omega = 0}$
 FluxS(:, :, 1) = edge3d.nz .* fp(:, :, 1);  
 FluxS(:, :, 2) = edge3d.nz .* fp(:, :, 2);
 fphys3d{1}(:, :, 4:5) = fphys3d{1}(:, :, 4:5) ...
