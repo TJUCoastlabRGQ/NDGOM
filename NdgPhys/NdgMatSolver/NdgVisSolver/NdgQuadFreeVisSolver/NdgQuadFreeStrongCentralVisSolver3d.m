@@ -78,35 +78,59 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         function matEvaluateOriVarVolumeKernel( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.phys.mesh3d(m);
-                for fld = 1:obj.Nfield
-                    id = obj.rhsId(fld);
-                    
-                    obj.phys.frhs{m}(:, :, id) = obj.phys.frhs{m}(:, :, id) + ...
-                        mesh.rz .* (mesh.cell.Dr * fphys{m}(:,:,3+id)) + mesh.sz .* (mesh.cell.Ds * fphys{m}(:,:,3+id))...
-                        + mesh.tz .* (mesh.cell.Dt * fphys{m}(:,:,3+id));
-                end
+                
+                obj.phys.frhs{m}(:, :, 1) = obj.phys.frhs{m}(:, :, 1) + ...
+                    mesh.rz .* (mesh.cell.Dr * obj.pzx{m}) + mesh.sz .* (mesh.cell.Ds * obj.pzx{m})...
+                    + mesh.tz .* (mesh.cell.Dt * obj.pzx{m});
+                obj.phys.frhs{m}(:, :, 2) = obj.phys.frhs{m}(:, :, 2) + ...
+                    mesh.rz .* (mesh.cell.Dr * obj.pzy{m}) + mesh.sz .* (mesh.cell.Ds * obj.pzy{m})...
+                    + mesh.tz .* (mesh.cell.Dt * obj.pzy{m});
             end
         end% func
         
         function matEvaluateOriVarSurfaceKernel( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.phys.mesh3d(m);
-                fphys{m}(:,:,4) = obj.phys.miu{m} .*  obj.pzx{m};
-                fphys{m}(:,:,5) = obj.phys.miu{m} .*  obj.pzy{m};
+                obj.pzx{m} = obj.phys.miu{m} .*  obj.pzx{m};
+                obj.pzy{m} = obj.phys.miu{m} .*  obj.pzy{m};
                 
                 edge = mesh.BottomEdge;
-                [ fmx, fpx ] = edge.matEvaluateSurfValue( fphys{m}(:,:,4) );
-                [ fmy, fpy ] = edge.matEvaluateSurfValue( fphys{m}(:,:,5) );
+                [ fmx, fpx ] = edge.matEvaluateSurfValue( obj.pzx{m} );
+                [ fmy, fpy ] = edge.matEvaluateSurfValue( obj.pzy{m} );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
                 fluxPx = edge.nz .* fpx; fluxPy = edge.nz .* fpy;
                 obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId{1}) + ...
                     edge.matEvaluateStrongFormEdgeCentralRHS( fluxMx, fluxPx );
-                
                 obj.phys.frhs{m}(:, :, obj.rhsId{2}) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId{2}) + ...
                     edge.matEvaluateStrongFormEdgeCentralRHS( fluxMy, fluxPy );
+                
                 % The wind term and the bottom friction term is considered is the source term fraction
+                edge = mesh3d.SurfaceBoundaryEdge;
+                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx{m} );
+                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy{m} );
+                fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
+                fluxSx = zeros(size(fmx)); fluxSy = zeros(size(fmy));
+                obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId{1}) + ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxSx );
+                obj.phys.frhs{m}(:, :, obj.rhsId{2}) = ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId{2}) + ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
+                
+                edge = mesh3d.BottomBoundaryEdge;
+                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx{m} );
+                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy{m} );
+                fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
+                fluxSx = zeros(size(fmx)); fluxSy = zeros(size(fmy));
+                obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId{1}) + ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxSx );
+                obj.phys.frhs{m}(:, :, obj.rhsId{2}) = ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId{2}) + ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
+                
             end
         end
     end
