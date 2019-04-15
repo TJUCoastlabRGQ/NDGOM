@@ -94,9 +94,10 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 obj.pzx{m} = obj.phys.miu{m} .*  obj.pzx{m};
                 obj.pzy{m} = obj.phys.miu{m} .*  obj.pzy{m};
                 
+                %only one mesh considered
                 edge = mesh.BottomEdge;
-                [ fmx, fpx ] = edge.matEvaluateSurfValue( obj.pzx{m} );
-                [ fmy, fpy ] = edge.matEvaluateSurfValue( obj.pzy{m} );
+                [ fmx, fpx ] = edge.matEvaluateSurfValue( obj.pzx );
+                [ fmy, fpy ] = edge.matEvaluateSurfValue( obj.pzy );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
                 fluxPx = edge.nz .* fpx; fluxPy = edge.nz .* fpy;
                 obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...
@@ -108,8 +109,8 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 
                 % The wind term and the bottom friction term is considered is the source term fraction
                 edge = mesh3d.SurfaceBoundaryEdge;
-                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx{m} );
-                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy{m} );
+                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
+                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
                 fluxSx = zeros(size(fmx)); fluxSy = zeros(size(fmy));
                 obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...
@@ -119,9 +120,10 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                     obj.phys.frhs{m}(:, :, obj.rhsId{2}) + ...
                     edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
                 
+                %only one mesh considered
                 edge = mesh3d.BottomBoundaryEdge;
-                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx{m} );
-                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy{m} );
+                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
+                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
                 fluxSx = zeros(size(fmx)); fluxSy = zeros(size(fmy));
                 obj.phys.frhs{m}(:, :, obj.rhsId{1}) = ...

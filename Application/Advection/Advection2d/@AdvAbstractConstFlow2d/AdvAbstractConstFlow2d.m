@@ -1,9 +1,16 @@
 classdef AdvAbstractConstFlow2d < NdgPhysMat
     
     properties( Constant )
+%         Nfield = 1
+%         Nvar = 1
+%         varFieldIndex = 1
+    end
+    
+    properties
         Nfield = 1
         Nvar = 1
-        varFieldIndex = 1
+        varFieldIndex = 1        
+        outputFieldOrder = 1
     end
         
     properties( Abstract, Constant )

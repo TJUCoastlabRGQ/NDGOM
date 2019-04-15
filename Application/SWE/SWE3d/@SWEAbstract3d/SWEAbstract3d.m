@@ -83,6 +83,13 @@ classdef SWEAbstract3d < NdgPhysMat
         AnimationSurfaceLevel( obj );
     end
     
+    % ======================================================================
+    methods ( Hidden, Abstract ) % Abstract function, hidden
+        %> abstract function to evaluate volume flux term
+        [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );        
+    end
+    % ======================================================================
+    
     
     methods ( Access = protected )
         
