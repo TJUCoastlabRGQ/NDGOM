@@ -9,7 +9,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     properties
         dt
 %         d = 7.6145
-        d = 7.5
+        d = 10
         fexact
     end
     
@@ -38,7 +38,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             Lambda = 20;
             x0 = 17.5;
             h = obj.d;
-            a = 0.01;
+            a = 0.1;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
             for t = 1:Ntime
@@ -109,7 +109,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 20;
+            ftime = 300;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -117,7 +117,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.Euler;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -138,7 +138,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 100], [0, 10], 100/deltax, 10/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

@@ -30,10 +30,13 @@ obj.Taux =  cell(obj.Nmesh);
 obj.Tauy =  cell(obj.Nmesh);
 %> bottom friction coefficient
 obj.Cf =  cell(obj.Nmesh);
+%> vertical viscosity coefficient
+obj.miu =  cell(obj.Nmesh); 
 for n = 1:obj.Nmesh
     obj.Taux{n} = zeros(size(mesh2d(n).x));
     obj.Tauy{n} = zeros(size(mesh2d(n).y));
     obj.Cf{n} =  zeros(size(mesh2d(n).y));
+    obj.miu{m} = zeros(size(mesh3d(n).x));
 end
 % Setup the output NetCDF file object
 initOutput( obj, mesh2d, mesh3d );

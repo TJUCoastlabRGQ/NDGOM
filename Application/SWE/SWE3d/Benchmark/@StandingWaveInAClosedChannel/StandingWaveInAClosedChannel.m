@@ -7,7 +7,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         %> channel width
-        ChWidth = 10;
+        ChWidth = 0.5;
         %> channel depth
         H0 = 10;
         %> x range
@@ -24,6 +24,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     
     properties
         dt
+        miu0
     end
     
     methods
@@ -35,9 +36,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.015;
+            obj.dt = 0.005;
             obj.outputFieldOrder2d = 4;
-            obj.miu{1} = 0.001;
+            obj.miu0{1} = 0.001;
 %             obj.miu = 0;
             obj.Cf{1} = 0.0025/1000;
         end
@@ -61,11 +62,11 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 
                 Lambda = 20;
                 % surface elevation
-                fphys2d{m}(:,:,1) =  0.01 * cos(2*pi*mesh2d.x/Lambda) + obj.H0;
+                fphys2d{m}(:,:,1) =  0.1 * cos(2*pi*mesh2d.x/Lambda) + obj.H0;
                 % bottom elevation
                 fphys2d{m}(:, :, 5) = -obj.H0;
                 % water depth
-                fphys2d{m}(:, :, 4) = 0.01 * cos(2*pi*mesh2d.x/Lambda);
+                fphys2d{m}(:, :, 4) = 0.1 * cos(2*pi*mesh2d.x/Lambda);
                 % water depth
                 fphys{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
             end
