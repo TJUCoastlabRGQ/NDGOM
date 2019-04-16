@@ -2,7 +2,7 @@ function initPhysFromOptions( obj, mesh2d, mesh3d )
 
 % set mesh object
 obj.mesh2d = mesh2d;
-obj.mesh3d = mesh3d;
+obj.meshUnion = mesh3d;
 obj.Nmesh = numel( mesh3d );
 
 % set the physical field for the NdgPhysMat solver
@@ -13,7 +13,7 @@ for m = 1:obj.Nmesh
     if ~isempty( mesh3d(m).BoundaryEdge )
         Nfp = mesh3d(m).BoundaryEdge.Nfp;
         Ne = mesh3d(m).BoundaryEdge.Ne;
-        obj.fext{m} = zeros( Nfp, Ne, obj.Nfield );
+        obj.fext3d{m} = zeros( Nfp, Ne, obj.Nfield );
     end
     
     Np = obj.mesh2d(m).cell.Np;

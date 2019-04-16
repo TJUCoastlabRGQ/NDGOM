@@ -30,7 +30,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 InnerEdge = mesh2d.InnerEdge;
                 [ fm, fp ] = InnerEdge.matEvaluateSurfValue( fphys );
                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( obj.gra .* fm(:, :, 1) ), sqrt( obj.gra .* fp(:, :, 1) ) )) );
+                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
                 FluxM = fm(:, :, 2) .* InnerEdge.nx + fm(:, :, 3) .* InnerEdge.ny;
                 FluxP = fp(:, :, 2) .* InnerEdge.nx + fp(:, :, 3) .* InnerEdge.ny;
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
@@ -43,7 +43,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 
                 % apply clamped boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );
-                fp(:, ind, 1) = fext(:, ind, 1);
+                fp(:, ind, 1) = fext{m}(:, ind, 1);
                 
                 % apply slip wall boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.SlipWall );
@@ -54,7 +54,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 fp(:, ind, 3) = - Hun .* BoundaryEdge.ny(:, ind) + Hvn .* BoundaryEdge.nx(:, ind);
                 
                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( obj.gra .* fm(:, :, 1) ), sqrt( obj.gra .* fp(:, :, 1) ) ) ) );
+                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
                 % lambda = zeros(size(lambda));
                 
                 FluxM = fm(:, :, 2) .* BoundaryEdge.nx + fm(:, :, 3) .* BoundaryEdge.ny;

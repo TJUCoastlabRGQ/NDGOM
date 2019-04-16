@@ -5,7 +5,7 @@ function [ adv, vis, wind, flux, Friction, PCESolver2d ] = initSolver( physMat )
 integralType = physMat.getOption('integralType');
 if (integralType == enumDiscreteIntegral.QuadratureFree)
     adv = NdgQuadFreeStrongFormAdvSolver3d( physMat );
-    vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.Nvar, 1:numel(physMat.Nvar));
+    vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:numel(physMat.varFieldIndex));
     wind = NdgQuadFreeWindSolver3d();
     flux = SWELFNumFluxSolver3d;
     Friction = NdgQuadFreeFrictionSolver3d;

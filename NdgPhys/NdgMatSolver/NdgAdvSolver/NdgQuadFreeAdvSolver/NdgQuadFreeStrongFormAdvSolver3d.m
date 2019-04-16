@@ -22,7 +22,7 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
 
                 edge = mesh3d.BoundaryEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-                [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, fm, fp, phys.fext3d );
+                [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, fm, fp, phys.fext3d{m} );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
@@ -38,11 +38,11 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
                 edge = mesh3d.BottomEdge;
-                [ fm, fp ] = edge.matEvaluateSurfValue( fphys3d );
+                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
-                [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
                 
                 edge = mesh3d.BottomBoundaryEdge;
                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );

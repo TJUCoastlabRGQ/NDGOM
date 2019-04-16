@@ -57,7 +57,7 @@ classdef SWEAbstract3d < NdgPhysMat
         %> output file object
     end
     
-    properties ( SetAccess = private )
+    properties
         %> solver for coriolis source term
         coriolisSolver
         %> solver for friction source term
@@ -135,6 +135,8 @@ classdef SWEAbstract3d < NdgPhysMat
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
+        
+        matEvaluateSourceTerm( obj, fphys );
         
     end
     

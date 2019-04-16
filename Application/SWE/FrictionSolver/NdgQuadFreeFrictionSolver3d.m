@@ -12,17 +12,19 @@ classdef NdgQuadFreeFrictionSolver3d < AbstractFrictionTermSolver
                 mesh3d = physObj.meshUnion(m);
                 edge = mesh3d.BottomBoundaryEdge;
                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-                u = fm(:,:,1)./fm(:,:,3); v = fm(:,:,2)./fm(:,:,3); 
+                fluxM = zeros(size(fm(:,:,1:2)));
+               
+                u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
                 Velocity = sqrt( u.^2 + v.^2 );
-%                 fluxS(:,:,1) = edge.nz .*obj.Cf{m} .* u .* Velocity;
-%                 fluxS(:,:,2) = edge.nz .*obj.Cf{m} .* v .* Velocity;                
+                fluxS(:,:,1) = edge.nz .*physObj.Cf{m} .* u .* Velocity;
+                fluxS(:,:,2) = edge.nz .*physObj.Cf{m} .* v .* Velocity; 
                 
-              physObj.frhs{m}(:,:,1) = physObj.frhs{m}(:,:,1)...
-                    + edge.nz .*obj.Cf{m} .* u .* Velocity;
+              physObj.frhs{m} = physObj.frhs{m}...
+                    + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
                 % frhs = frhs + cd*rouair*w10*windx/rouwater
-                physObj.frhs{m}(:,:,2) = physObj.frhs{m}(:,:,2)...
-                    + edge.nz .*obj.Cf{m} .* v .* Velocity; 
+%                 physObj.frhs{m}(:,:,2) = physObj.frhs{m}(:,:,2)...
+%                     + edge.nz .*obj.Cf{m} .* v .* Velocity; 
                 
             end
         end% func        

@@ -12,17 +12,17 @@ classdef NdgQuadFreeWindSolver3d < AbstractWindTermSolver
         
         function evaluateWindTermRHS( obj, physClass, fphys )
             
-%             fluxS(:,:,1) = edge.nz .*obj.Taux{1}; fluxS(:,:,2) = edge.nz .*obj.Tauy{1};
             for m = 1:physClass.Nmesh
                 mesh3d = physClass.meshUnion(m);
                 edge = mesh3d.SurfaceBoundaryEdge;
-              physClass.frhs{m}(:,:,1) = physClass.frhs{m}(:,:,1)...
-                    + edge.nz .*obj.Taux{m};
+               [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+                fluxM = zeros(size(fm(:,:,1:2)));
+               
+               fluxS(:,:,1) = edge.nz .*physClass.Taux{m}; 
+               fluxS(:,:,2) = edge.nz .*physClass.Tauy{m};
                 
-                % frhs = frhs + cd*rouair*w10*windx/rouwater
-                physClass.frhs{m}(:,:,2) = physClass.frhs{m}(:,:,2)...
-                    + edge.nz .*obj.Tauy{m};
-                
+              physClass.frhs{m} = physClass.frhs{m}...
+                    + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );   
             end
         end
     end
