@@ -20,13 +20,39 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
                 [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
 
-                edge = phys.meshUnion(m).BottomEdge;
+                edge = mesh3d.BoundaryEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-                %[ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, phys.fext );
+                [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, fm, fp, phys.fext3d );
+                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+                
+                edge = mesh3d.SurfaceBoundaryEdge;
+                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                % At present, this solver is designed for three dimensional
+                % barotropic shallow water equation, and the top boundary
+                % condition is not considered here, and I simply set this
+                % numerical flux to be zero, this would be corrected later
+                [ fluxS ] =  zeros(size(fluxM));
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+                
+                edge = mesh3d.BottomEdge;
+                [ fm, fp ] = edge.matEvaluateSurfValue( fphys3d );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
-                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
+                [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                
+                edge = mesh3d.BottomBoundaryEdge;
+                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                % At present, this solver is designed for three dimensional
+                % barotropic shallow water equation, and the top boundary
+                % condition is not considered here, and I simply set this
+                % numerical flux to be zero, this would be corrected later                
+                [ fluxS ] =  zeros(size(fluxM));
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );    
             end
             
             for m = 1:phys.Nmesh % calculate RHS term on each mesh

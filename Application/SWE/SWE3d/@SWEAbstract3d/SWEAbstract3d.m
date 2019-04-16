@@ -1,7 +1,7 @@
 classdef SWEAbstract3d < NdgPhysMat
     %SWEABSTRACT3D Summary of this class goes here
     %   Detailed explanation goes here
-
+    
     properties
         %> cell array field for RHS
         frhs2d
@@ -13,9 +13,11 @@ classdef SWEAbstract3d < NdgPhysMat
     end
     
     properties( SetAccess = protected )
-        %> cell array for external value fields
+        %> cell array for two dimensional external value fields
         fext2d
-    end 
+        %> cell array for three dimensional external value fields
+        fext3d
+    end
     
     properties ( Abstract, Constant )
         %> wet/dry depth threshold
@@ -25,16 +27,16 @@ classdef SWEAbstract3d < NdgPhysMat
     properties( SetAccess = protected )
         %> cell array for physical field variable
         fphys2d
-    end    
+    end
     
     properties( Abstract )
         %> number of physical field
         Nfield2d
         %> number of variable field
-        Nvar2d        
+        Nvar2d
         %> index of variable in physical field
         varFieldIndex2d
-    end    
+    end
     
     properties ( Constant )
         %> gravity acceleration
@@ -43,7 +45,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( SetAccess = protected )
         %> num of mesh
-%         Nmesh
+        %         Nmesh
         %> horizontal mesh
         mesh2d
         %> vertical extended mesh
@@ -66,30 +68,39 @@ classdef SWEAbstract3d < NdgPhysMat
         numfluxSolver
         %> limiter type
         limiterSolver
+        %> Solver for the primal continuity equation
+        PCESolver2d
     end
     
     properties
         Taux
         Tauy
         Cf
-    end    
-     
+    end
+    
     methods
         function obj = SWEAbstract3d(  )
             % Doing nothing
         end
- 
-        initPhysFromOptions( obj, mesh2d, mesh3d );        
+        
+        initPhysFromOptions( obj, mesh2d, mesh3d );
         AnimationSurfaceLevel( obj );
     end
     
     % ======================================================================
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
-        [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );        
+        [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );
     end
     % ======================================================================
     
+    
+    methods( Access = protected )
+        
+        function matEvaluateTopographySourceTerm( obj, fphys )
+            %doing nothing
+        end
+    end
     
     methods ( Access = protected )
         
@@ -110,7 +121,7 @@ classdef SWEAbstract3d < NdgPhysMat
         [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext);
         
         [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys2d, fphys);
-
+        
         [ SideSurface_rhs3d ]  = matEvaluate3dSideSurfaceTerm( obj, InnerEdge, fphys );
         
         [ HorizontalBoundarySurface_rhs3d ] = matEvaluate3dHorizontalBoundaryTerm( obj, BoundaryEdge, fphys, fext );
@@ -123,7 +134,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
-        [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);      
+        [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
         
     end
     

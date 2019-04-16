@@ -17,11 +17,11 @@ classdef NdgQuadFreeWindSolver3d < AbstractWindTermSolver
                 mesh3d = physClass.meshUnion(m);
                 edge = mesh3d.SurfaceBoundaryEdge;
               physClass.frhs{m}(:,:,1) = physClass.frhs{m}(:,:,1)...
-                    + edge.nz .*obj.Taux{1};
+                    + edge.nz .*obj.Taux{m};
                 
                 % frhs = frhs + cd*rouair*w10*windx/rouwater
                 physClass.frhs{m}(:,:,2) = physClass.frhs{m}(:,:,2)...
-                    + edge.nz .*obj.Tauy{1};
+                    + edge.nz .*obj.Tauy{m};
                 
             end
         end

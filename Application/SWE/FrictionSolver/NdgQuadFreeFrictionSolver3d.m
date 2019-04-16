@@ -14,8 +14,8 @@ classdef NdgQuadFreeFrictionSolver3d < AbstractFrictionTermSolver
                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
                 u = fm(:,:,1)./fm(:,:,3); v = fm(:,:,2)./fm(:,:,3); 
                 Velocity = sqrt( u.^2 + v.^2 );
-%                 fluxS(:,:,1) = edge.nz .*obj.Cf{1} .* u .* Velocity;
-%                 fluxS(:,:,2) = edge.nz .*obj.Cf{1} .* v .* Velocity;                
+%                 fluxS(:,:,1) = edge.nz .*obj.Cf{m} .* u .* Velocity;
+%                 fluxS(:,:,2) = edge.nz .*obj.Cf{m} .* v .* Velocity;                
                 
               physObj.frhs{m}(:,:,1) = physObj.frhs{m}(:,:,1)...
                     + edge.nz .*obj.Cf{m} .* u .* Velocity;
