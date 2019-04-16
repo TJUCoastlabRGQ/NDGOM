@@ -6,7 +6,7 @@ my_version
 *.nc
 *.avi
 *.m~
-html
+*.html
 *.mexmaci64
 *.mexw64
 *.mexw32
