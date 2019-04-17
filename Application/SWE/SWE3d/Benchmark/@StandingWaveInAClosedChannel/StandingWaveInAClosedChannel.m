@@ -7,7 +7,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         %> channel width
-        ChWidth = 0.5;
+        ChWidth = 2;
         %> channel depth
         H0 = 10;
         %> x range
@@ -36,7 +36,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.005;
+            obj.dt = 0.02;
             obj.outputFieldOrder2d = 4;
             obj.miu0{1} = 0.001;
 %             obj.miu = 0;

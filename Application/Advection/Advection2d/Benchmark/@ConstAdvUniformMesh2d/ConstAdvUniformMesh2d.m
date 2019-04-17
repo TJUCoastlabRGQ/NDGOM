@@ -47,8 +47,8 @@ classdef ConstAdvUniformMesh2d < AdvAbstractConstFlow2d
             option('outputTimeInterval') = finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
-            option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('equationType') = enumDiscreteEquation.Weak;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
         end
                
         %> the exact function

@@ -151,6 +151,9 @@ classdef StdCell < handle
             [ dfr, dfs, dft ] = obj.derivative_orthogonal_func( obj.N, ind, r, s, t );
         end
         
+        %> @brief Function to get the standard cell
+%         [ stdCell ] = getStdCell( obj, N, type )
+        
         %> @brief Evaluate the derivative nodal function values at points
         [ fDr, fDs, fDt ] = nodal_derivative_func( obj, r, s, t )
         

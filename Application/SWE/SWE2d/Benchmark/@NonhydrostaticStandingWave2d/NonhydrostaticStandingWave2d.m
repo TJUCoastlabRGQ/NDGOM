@@ -1,4 +1,4 @@
-classdef NonhydrostaticStandingWave2d < SWEConventional2d
+classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     %NONHYDROSTATICSTANDINGWAVE2D 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -16,7 +16,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     methods
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
-            obj = obj@SWEConventional2d();
+            obj = obj@SWEPreBlanaced2d();
             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
