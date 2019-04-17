@@ -4,10 +4,11 @@ classdef AdvAbstractConstFlow1d < NdgPhysMat
         u0
     end
     
-    properties( Constant )
+    properties
         Nfield = 1
         Nvar = 1
         varFieldIndex = 1
+        outputFieldOrder = 1
     end
     
     methods( Hidden )

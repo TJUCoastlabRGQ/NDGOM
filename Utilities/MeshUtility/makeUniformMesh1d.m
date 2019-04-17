@@ -31,7 +31,7 @@ for m = 1:Nmesh
     startVertId = finalVertId - K;
     EToV{m} = [ startVertId:(finalVertId-1); 
         (startVertId+1):finalVertId ];
-    EToR{m} = NdgRegionType.Normal * ones( K, 1, 'int8' );
+    EToR{m} = enumRegion.Normal * ones( K, 1, 'int8' );
 end
 
 end

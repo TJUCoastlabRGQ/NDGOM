@@ -58,7 +58,7 @@ end
 
 function [ mesh ] = makeUniformMesh( N, M )
 xlim = [0, 1];
-bcType = [NdgEdgeType.Clamped, NdgEdgeType.Clamped];
+bcType = [enumBoundaryCondition.Clamped, enumBoundaryCondition.Clamped];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
 end
 

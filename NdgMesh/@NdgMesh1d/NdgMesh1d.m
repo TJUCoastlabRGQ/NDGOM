@@ -11,18 +11,19 @@ classdef NdgMesh1d < NdgMesh
             edge = NdgEdge1d( obj, mesh1, mid0, mid1 );
         end
         
-        function [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J ] = assembleJacobiFactor( obj )
+        function obj = assembleJacobiFactor( obj )
             xr = obj.cell.Dr*obj.x;
-            J = xr; rx = 1./J;
+            obj.J = xr; 
+            obj.rx = 1./obj.J;
             
-            ry = zeros(size(rx));
-            rz = zeros(size(rx));
-            sx = zeros(size(rx));
-            sy = zeros(size(rx));
-            sz = zeros(size(rx));
-            tx = zeros(size(rx));
-            ty = zeros(size(rx));
-            tz = zeros(size(rx));
+            obj.ry = zeros(size(obj.rx));
+            obj.rz = zeros(size(obj.rx));
+            obj.sx = zeros(size(obj.rx));
+            obj.sy = zeros(size(obj.rx));
+            obj.sz = zeros(size(obj.rx));
+            obj.tx = zeros(size(obj.rx));
+            obj.ty = zeros(size(obj.rx));
+            obj.tz = zeros(size(obj.rx));
         end
         
         function [nx, ny, nz, Js] = assembleFacialJaobiFactor( obj )
@@ -55,7 +56,8 @@ classdef NdgMesh1d < NdgMesh
         function obj = NdgMesh1d( cell, Nv, vx, K, EToV, EToR, BCToV )
             vy = zeros(size(vx)); % vy is all zeros
             vz = zeros(size(vx)); % vz is all zeros
-            obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR, BCToV);
+%             obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR, BCToV);
+            obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR);
         end% func
     end
     

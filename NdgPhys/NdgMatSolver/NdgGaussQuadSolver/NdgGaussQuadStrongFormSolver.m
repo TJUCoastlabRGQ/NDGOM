@@ -27,8 +27,7 @@ classdef NdgGaussQuadStrongFormSolver < handle
         %> at each quadrature points
         txwJ, tywJ, tzwJ
         
-        %> values of basis functions at each quadrature points, where
-        %> \f$ [ \mathcal{V}_q ]_{i,j} = \varphi_{ \mathbf{r}_j } \f$
+        %> Interpolation matrix to get the value at the Volume Guass quadrature point
         Vq
     end
     properties
@@ -36,47 +35,54 @@ classdef NdgGaussQuadStrongFormSolver < handle
         %> \f$$ [\mathcal{LIFT}_t]_{i,ej} = \varphi_i(\mathbf{r}_{ej}), \f$$
         %> where \f$ \mathbf{r}_{ej} \f$ is the location of quadrature points on edges.
         LIFT
-        %> outward normal vector at the surface integral quadrature points
-        nx, ny, nz
-        
+        %> outward normal vector at the local inner edge
+        IEnx, IEny, IEnz
+        %> outward normal vector at the local boundary edge 
+        BEnx, BEny, BEnz  
         %> the element in the vector equals to
         %> \f$ w_{ei} \cdot Js_{ei} \f$
         %> where \f$ w_{ei} \f$ and \f$ Js_{ei} \f$ are the surface integral weights and Jacobian 
-        %> at each quadrature points on edges
-        wJs
+        %> at each quadrature points on local inner edges.
+        IEwJs
+        %> Likewise, BEwJs are the surface integral weights and Jacobian at each quadrature points on local boundary edges
+        BEwJs        
         %> project nodal values to face quadrature points
-        Vfq
-        %> project face values to face quadrature points
-        FVfq
+%         Vfq
+        %> project face values to face quadrature points at the inner edges
+        IEFVfq
+        %> project face values to face quadrature points at the boundary edges
+        BEFVfq
         %> total number of quadrature points for surface integration
-        TNfq
+%         TNfq
     end
     
     methods
         function obj = NdgGaussQuadStrongFormSolver( phys )
             
-            obj.TNfq = cell( phys.Nmesh, 1 );
+%             obj.TNfq = cell( phys.Nmesh, 1 );
             for m = 1:phys.Nmesh
                 mesh = phys.meshUnion( m );
                 stdcell = mesh.cell;
                 % count the total quadrature points on each edge
-                TNfq = 0;
-                for f = 1:stdcell.Nface
-                    fcell = getStdCell( stdcell.N, stdcell.faceType(f) );
-                    TNfq = TNfq + fcell.Nq;
-                end
-                [ obj.TNfq{m} ] = TNfq;
-                [ obj.Vq{m} ] = stdcell.Vq';
+%                 TNfq = 0;
+%                 for f = 1:stdcell.Nface
+%                     fcell = getStdCell( stdcell.N, stdcell.faceType(f) );
+%                     TNfq = TNfq + fcell.Nq;
+%                 end
+%                 [ obj.TNfq{m} ] = TNfq;
+                [ obj.Vq{m} ] = stdcell.Vq;
                 [ obj.invM{m} ] = obj.assembleInverseMassMatrix( mesh );
-                [ obj.Vfq{m} ] = obj.assembleVandMatrixFaceQuadrature( mesh.cell, TNfq );
-                [ obj.FVfq{m} ] = obj.assembleFacialVandMatrixFaceQuadrature( mesh.cell, TNfq );
+%                 [ obj.Vfq{m} ] = obj.assembleVandMatrixFaceQuadrature( mesh.cell, TNfq );
+                [ obj.IEFVfq{m}, obj.BEFVfq{m},...
+                    obj.IEwJs{m}, obj.BEwJs{m}] = obj.assembleFacialVandMatrixFaceQuadrature( mesh );
                 [ obj.Dr{m}, obj.Ds{m}, obj.Dt{m} ] = obj.assembleDerivativeMatrix( mesh );                
-                [ nx, ny, nz, Js ] = obj.assembleNormalVector( mesh );
+                [ obj.IEnx{m}, obj.IEny{m}, obj.IEnz{m},...
+                    obj.BEnx{m}, obj.BEny{m}, obj.BEnz{m} ] = obj.assembleNormalVector( mesh, obj.IEFVfq{m}, obj.BEFVfq{m} );
                 % project the outward normal vector from edge nodes to quadrature nodes.
-                obj.nx{m} = obj.FVfq{m} * nx;
-                obj.ny{m} = obj.FVfq{m} * ny;
-                obj.nz{m} = obj.FVfq{m} * nz;
-                [ obj.wJs{m} ] = obj.assembleFaceQuadratureWeight( mesh, TNfq, obj.FVfq{m}*Js );
+%                 obj.nx{m} = obj.FVfq{m} * nx;
+%                 obj.ny{m} = obj.FVfq{m} * ny;
+%                 obj.nz{m} = obj.FVfq{m} * nz;
+%                 [ obj.IEwJs{m}, obj.BEwJs{m} ] = obj.assembleFaceQuadratureWeight( mesh, obj.FVfq{m}*Js );
                 [ obj.rxwJ{m}, obj.rywJ{m}, obj.rzwJ{m}, ...
                     obj.sxwJ{m}, obj.sywJ{m}, obj.szwJ{m}, ...
                     obj.txwJ{m}, obj.tywJ{m}, obj.tzwJ{m} ] = obj.assembleJacobianFactor( mesh );
@@ -87,17 +93,17 @@ classdef NdgGaussQuadStrongFormSolver < handle
     end
 
     methods( Static )
-        function [ wJs ] = assembleFaceQuadratureWeight( mesh, TNfq, Js )
-            cell = mesh.cell;
-            sk = 1;
-            ws = zeros( TNfq, 1 );
-            for f = 1:cell.Nface
-                fcell = getStdCell( cell.N, cell.faceType(f) );
-                ws(sk:(sk+fcell.Nq-1) ) = fcell.wq;
-                sk = sk + fcell.Nq;
-            end
-            wJs = bsxfun(@times, ws, Js);
-        end
+%         function [ wJs ] = assembleFaceQuadratureWeight( mesh, TNfq, Js )
+%             cell = mesh.cell;
+%             sk = 1;
+%             ws = zeros( TNfq, 1 );
+%             for f = 1:cell.Nface
+%                 fcell = getStdCell( cell.N, cell.faceType(f) );
+%                 ws(sk:(sk+fcell.Nq-1) ) = fcell.wq;
+%                 sk = sk + fcell.Nq;
+%             end
+%             wJs = bsxfun(@times, ws, Js);
+%         end
         
         function [ rxwJ, rywJ, rzwJ, sxwJ, sywJ, szwJ, txwJ, tywJ, tzwJ ] ...
                 = assembleJacobianFactor( mesh )
@@ -118,8 +124,10 @@ classdef NdgGaussQuadStrongFormSolver < handle
             szwJ = wJ.*( mesh.cell.project_node2quad( sz ) );
         end
         
-        function [ nx, ny, nz, Js ] = assembleNormalVector( mesh )
-            [ nx, ny, nz, Js ] = mesh.cell.assembleNormalVector( mesh.x, mesh.y, mesh.z );
+        function [ IEnx, IEny, IEnz, BEnx, BEny, BEnz ] = assembleNormalVector( mesh, IEFVfq, BEFVfq )
+            IEnx = IEFVfq * mesh.InnerEdge.nx; BEnx = BEFVfq * mesh.BoundaryEdge.nx;
+            IEny = IEFVfq * mesh.InnerEdge.ny; BEny = BEFVfq * mesh.BoundaryEdge.ny;
+            IEnz = IEFVfq * mesh.InnerEdge.nz; BEnz = BEFVfq * mesh.BoundaryEdge.nz;
         end
         
         function [ Vfq ] = assembleVandMatrixFaceQuadrature( cell, TNfq )
@@ -144,15 +152,20 @@ classdef NdgGaussQuadStrongFormSolver < handle
             Vfq = cell.nodal_func( rfq, sfq, tfq );
         end
         
-        function [ FVfq ] = assembleFacialVandMatrixFaceQuadrature( cell, TNfq )
-            sk = 1;
-            sp = 1;
-            FVfq = zeros( TNfq, cell.TNfp );
-            for f = 1:cell.Nface
-                fcell = getStdCell( cell.N, cell.faceType(f) );
-                FVfq( sk:(sk+fcell.Nq-1), sp:(sp+fcell.Np-1) ) = fcell.Vq;
-                sk = sk+fcell.Nq;
-                sp = sp+fcell.Np;
+        function [ IEFVfq, BEFVfq, IEwJs, BEwJs] = assembleFacialVandMatrixFaceQuadrature( mesh )
+            switch mesh.type
+                case enumMeshDim.Three
+                    fcell = getStdCell( max(mesh.cell.N, mesh.cell.Nz), enumStdCell.Quad );
+                    IEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
+                    BEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
+                    IEwJs = bsxfun(@times, fcell.wq, IEFVfq * mesh.InnerEdge.Js);
+                    BEwJs = bsxfun(@times, fcell.wq, BEFVfq * mesh.BoundaryEdge.Js);
+                otherwise
+                    fcell = getStdCell( mesh.cell.N, mesh.cell.faceType(1) );
+                    IEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
+                    BEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);    
+                    IEwJs = bsxfun(@times, fcell.wq, IEFVfq * mesh.InnerEdge.Js);
+                    BEwJs = bsxfun(@times, fcell.wq, BEFVfq * mesh.BoundaryEdge.Js);                    
             end
         end
         
