@@ -3,6 +3,8 @@ classdef NdgBottomInnerEdge3d < handle
     %   Detailed explanation goes here
     
     properties ( SetAccess = protected )
+        %> type of the side edge
+        type        
         %> mesh obj
         mesh
         %> num of face nodes
@@ -36,6 +38,7 @@ classdef NdgBottomInnerEdge3d < handle
             mesh = meshUnion3d( meshId );
 
             obj.mesh = mesh;
+            obj.type = mesh.mesh2d.type;
             obj = assembleMassMatrix( obj, mesh.cell.N, mesh.cell.Nz );
             obj = assembleEdgeConnect( obj, mesh, mesh.mesh2d );
             obj = assembleNodeProject( obj, mesh );

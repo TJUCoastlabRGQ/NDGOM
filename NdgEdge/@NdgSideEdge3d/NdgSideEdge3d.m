@@ -1,5 +1,7 @@
 classdef NdgSideEdge3d < handle
     properties ( SetAccess = protected )
+        %> type of the side edge
+        type
         %> mesh obj
         mesh
         %> num of face nodes
@@ -31,6 +33,7 @@ classdef NdgSideEdge3d < handle
             mesh = meshUnion3d( meshId );
             
             obj.mesh = mesh;
+            obj.type = enumStdCell.Quad;
             obj = assembleMassMatrix( obj, mesh.cell.N, mesh.cell.Nz );
             obj = assembleEdgeConnect( obj, mesh );
             obj = assembleNodeProject( obj, mesh );
