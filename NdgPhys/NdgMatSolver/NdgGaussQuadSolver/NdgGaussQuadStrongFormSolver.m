@@ -60,11 +60,11 @@ classdef NdgGaussQuadStrongFormSolver < handle
     end
     
     methods
-        function obj = NdgGaussQuadStrongFormSolver( phys )
+        function obj = NdgGaussQuadStrongFormSolver( phys, meshUnion )
             
             %             obj.TNfq = cell( phys.Nmesh, 1 );
             for m = 1:phys.Nmesh
-                mesh = phys.meshUnion( m );
+                mesh = meshUnion( m );
                 stdcell = mesh.cell;
                 % count the total quadrature points on each edge
                 %                 TNfq = 0;

@@ -1,11 +1,11 @@
 classdef NdgGaussQuadWeakFormSolver < NdgGaussQuadStrongFormSolver
     
     methods
-        function obj = NdgGaussQuadWeakFormSolver( phys )
-            obj = obj@NdgGaussQuadStrongFormSolver( phys );
+        function obj = NdgGaussQuadWeakFormSolver( phys, meshUnion )
+            obj = obj@NdgGaussQuadStrongFormSolver( phys, meshUnion );
 
             for m = 1:phys.Nmesh
-                mesh = phys.meshUnion( m );
+                mesh = meshUnion( m );
                 [ obj.Vq{m} ] = mesh.cell.Vq;
                 obj.Dr{m} = obj.Dr{m}';
                 obj.Ds{m} = obj.Ds{m}';

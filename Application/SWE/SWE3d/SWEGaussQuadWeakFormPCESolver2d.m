@@ -25,9 +25,9 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 fq = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq, fphys2d{m} );
                 
                 % Volume Integral
-                 [ physClass.frhs2d{m} ] = ...
-                        + obj.Dr{m} * ( obj.rxwJ{m}.* (fq(:,:,2)) + obj.rywJ{m}.* ( fq(:,:,3) ) ) ...
-                        + obj.Ds{m} * ( obj.sxwJ{m}.* (fq(:,:,2)) + obj.sywJ{m}.* ( fq(:,:,3) ) );
+                [ physClass.frhs2d{m} ] = ...
+                    + obj.Dr{m} * ( obj.rxwJ{m}.* (fq(:,:,2)) + obj.rywJ{m}.* ( fq(:,:,3) ) ) ...
+                    + obj.Ds{m} * ( obj.sxwJ{m}.* (fq(:,:,2)) + obj.sywJ{m}.* ( fq(:,:,3) ) );
                 
                 % Function used to calculate the two dimentional PCE inner surface term
                 InnerEdge = mesh2d.InnerEdge;
@@ -43,7 +43,7 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1)  ) ) );
                 EdgeRHS = - ( obj.IELIFT{m} * ( obj.IEwJs{m} .* ( FluxS ) ));
                 physClass.frhs2d{m} = obj.matAssembleIntoRHS( InnerEdge, EdgeRHS, physClass.frhs2d{m});
-%                 physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
+                %                 physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
                 
                 % Function used to calculate the two dimentional PCE boundary surface integration term
                 BoundaryEdge = mesh2d.BoundaryEdge;
@@ -75,6 +75,11 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 EdgeRHS = - ( obj.BELIFT{m} * ( obj.BEwJs{m} .* ( FluxS ) ));
                 
                 physClass.frhs2d{m} = obj.matAssembleIntoRHS( BoundaryEdge, EdgeRHS, physClass.frhs2d{m});
+                
+                physClass.frhs2d{m} = permute( sum( ...
+                    bsxfun(@times, obj.invM{m}, ...
+                    permute( permute( physClass.frhs2d{m}, [1,3,2] ), ...
+                    [2,1,3] ) ), 2 ), [1,3,2]);
                 
             end
         end

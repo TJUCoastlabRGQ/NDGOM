@@ -37,10 +37,10 @@ classdef NdgGaussQuadWeakFormSolver3d < NdgGaussQuadWeakFormSolver
     end
     
     methods
-        function obj = NdgGaussQuadWeakFormSolver3d( phys )
-            obj = obj@NdgGaussQuadWeakFormSolver(phys);
+        function obj = NdgGaussQuadWeakFormSolver3d( phys, meshUnion )
+            obj = obj@NdgGaussQuadWeakFormSolver(phys, meshUnion );
             for m = 1:phys.Nmesh
-                mesh = phys.meshUnion( m );
+                mesh = meshUnion( m );
                 %                 stdcell = mesh.cell;
                 [ obj.SBFVfq{m}, obj.BOTFVfq{m}, obj.BBFVfq{m}, ...
                     obj.SBwJs{m}, obj.BOTwJs{m}, obj.BBwJs{m}] = obj.assembleFacialVandMatrixFaceQuadrature( mesh );
