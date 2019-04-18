@@ -20,10 +20,17 @@ classdef NdgGaussQuadWeakFormSolver < NdgGaussQuadStrongFormSolver
             InterVolumefphys = bsxfun(@times, Vq, fphys);
         end
         
-        function [ InterFaceLocalfphys, InterFaceAdjacentfphys ] = matInterpolateToFaceGaussQuadraturePoint(obj, edge, Vfq, fphys)
-            for i = 1:size(fphys, 3)
-                InterFaceLocalfphys = bsxfun(@times, Vfq, fphys( edge.GFToN1 + (i-1) * numel(fphys(:,:,i))) );
-                InterFaceAdjacentfphys = bsxfun(@times, Vfq, fphys( edge.GFToN2 + (i-1) * numel(fphys(:,:,i))) );
+        function [ InterFaceLocalfphys, InterFaceAdjacentfphys ] = matInterpolateToFaceGaussQuadraturePoint(obj, edge, Vfq, InterFaceLocalfphys, InterFaceAdjacentfphys )
+            for i = 1:size(InterFaceLocalfphys, 3)
+                InterFaceLocalfphys = bsxfun(@times, Vfq, InterFaceLocalfphys(:,:,i) );
+                InterFaceAdjacentfphys = bsxfun(@times, Vfq, InterFaceAdjacentfphys(:,:,i) );
+            end
+        end
+        
+        function RHS = matAssembleIntoRHS( obj, edge, FRHS, RHS)
+            for i = 1:numel(FRHS)
+                RHS(edge.GFToN1(i)) = RHS(edge.GFToN1(i)) + FRHS(i);
+                RHS(edge.GFToN2(i)) = RHS(edge.GFToN2(i)) - FRHS(i);
             end
         end
     end
