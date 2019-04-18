@@ -14,5 +14,14 @@ classdef NdgGaussQuadWeakFormSolver < NdgGaussQuadStrongFormSolver
         end% func
     end
     
+    methods ( Access = protected )
+        %> Function used to interpolate the value from the interpolation point to the Volume Gauss quadrature point
+        function Interfphys = matInterpolateToGaussQuadraturePoint(obj, Vq, fphys)
+            Interfphys = bsxfun(@times, Vq, fphys);
+        end
+        
+        
+    end
+    
 end
 
