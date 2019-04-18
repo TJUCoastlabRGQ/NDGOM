@@ -28,8 +28,12 @@ classdef NdgInnerEdge < handle
         FToM
         %> interp node index of 1st ele on each edge
         FToN1
+        %> Global interp node index of 1st ele on each edge
+        GFToN1
         %> interp node index of 2nd ele on each edge
         FToN2
+        %> Global interp node index of 2nd ele on each edge
+        GFToN2        
         %> outward normal vector
         nx, ny, nz
         %> determination of edge Jacabian
@@ -46,6 +50,8 @@ classdef NdgInnerEdge < handle
             obj = obj.assembleEdgeConnect( meshUnion );
             % connect node
             obj = obj.assembleNodeProject( meshUnion );
+            
+            obj.assembleGlobalFacialPointIndex;
         end
         
         %> evaluate R.H.S. for surface integral term
@@ -64,6 +70,19 @@ classdef NdgInnerEdge < handle
         obj = assembleMassMatrix( obj );
         obj = assembleEdgeConnect( obj, mesh )
         obj = assembleNodeProject( obj, mesh )
+    end
+    
+    methods( Access = protected )
+        function assembleGlobalFacialPointIndex(obj)
+            obj.GFToN1 = zeros(size(obj.FToN1));
+            obj.GFToN2 = zeros(size(obj.FToN2));
+            for i = 1:obj.Ne
+               obj.GFToN1(:,i) = ( obj.FToE(1,i) - 1 ) * obj.mesh.cell.Np + ...
+                   obj.FToN1(:,i);
+               obj.GFToN2(:,i) = ( obj.FToE(2,i) - 1 ) * obj.mesh.cell.Np + ...
+                   obj.FToN2(:,i);               
+            end
+        end
     end
     
 end

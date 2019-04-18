@@ -4,7 +4,7 @@ classdef NdgBottomInnerEdge3d < handle
     
     properties ( SetAccess = protected )
         %> type of the side edge
-        type        
+        type
         %> mesh obj
         mesh
         %> num of face nodes
@@ -23,27 +23,32 @@ classdef NdgBottomInnerEdge3d < handle
         FToM
         %> interp node index of 1st ele on each edge
         FToN1
+        %> Global interp node index of 1st ele on each edge
+        GFToN1
         %> interp node index of 2nd ele on each edge
         FToN2
+        %> Global interp node index of 2nd ele on each edge
+        GFToN2
         %> outward normal vector
         nx, ny, nz
         %> determination of edge Jacabian
         Js
-%         %> edge type
-%         ftypes
+        %         %> edge type
+        %         ftypes
     end
     
     methods (Access = public)
         function obj = NdgBottomInnerEdge3d( meshUnion3d, meshId )
             mesh = meshUnion3d( meshId );
-
+            
             obj.mesh = mesh;
             obj.type = mesh.mesh2d.type;
             obj = assembleMassMatrix( obj, mesh.cell.N, mesh.cell.Nz );
             obj = assembleEdgeConnect( obj, mesh, mesh.mesh2d );
             obj = assembleNodeProject( obj, mesh );
+            obj.assembleGlobalFacialPointIndex;
         end
-
+        
         %> access boundary values at edges
         [ fM, fP ] = matEvaluateSurfValue( obj, fphys );
         %> evaluate strong-form surface term rhs
@@ -56,6 +61,19 @@ classdef NdgBottomInnerEdge3d < handle
         obj = assembleEdgeConnect( obj, mesh, mesh2d );
         obj = assembleNodeProject( obj, mesh );
         obj = assembleMassMatrix( obj, N, Nz );
+    end
+    
+    methods( Access = protected )
+        function assembleGlobalFacialPointIndex(obj)
+            obj.GFToN1 = zeros(size(obj.FToN1));
+            obj.GFToN2 = zeros(size(obj.FToN2));
+            for i = 1:obj.Ne
+                obj.GFToN1(:,i) = ( obj.FToE(1,i) - 1 ) * obj.mesh.cell.Np + ...
+                    obj.FToN1(:,i);
+                obj.GFToN2(:,i) = ( obj.FToE(2,i) - 1 ) * obj.mesh.cell.Np + ...
+                    obj.FToN2(:,i);
+            end
+        end
     end
 end
 
