@@ -7,8 +7,8 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
     
     methods
         
-        function  obj = SWEGaussQuadWeakFormPCESolver2d( phys )
-            obj = obj@NdgGaussQuadWeakFormSolver( phys );
+        function  obj = SWEGaussQuadWeakFormPCESolver2d( phys, meshUnion )
+            obj = obj@NdgGaussQuadWeakFormSolver( phys, meshUnion );
         end
         function evaluateAdvectionRHS( obj, physClass, fphys2d, fphys3d, fext )
             
