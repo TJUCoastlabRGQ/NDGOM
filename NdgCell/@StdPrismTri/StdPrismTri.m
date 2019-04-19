@@ -121,7 +121,7 @@ classdef StdPrismTri < handle
             quad_val = obj.Vq * node_val;
         end% func        
         
-        [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J ] = assembleJacobianMatrix(obj, x, y, z);
+        [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J, Jz ] = assembleJacobianMatrix(obj, x, y, z);
         
         %> @brief Evaluate the derivative nodal function values at points
         function [ fDr, fDs, fDt ] = nodal_derivative_func( obj, r, s, t )

@@ -1,4 +1,4 @@
-function [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J ] = assembleJacobianMatrix( obj, x, y, z )
+function [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J, Jz ] = assembleJacobianMatrix( obj, x, y, z )
 
 xr = obj.Dr * x; xs = obj.Ds * x; xt = obj.Dt * x;
 yr = obj.Dr * y; ys = obj.Ds * y; yt = obj.Dt * y;
@@ -16,6 +16,5 @@ rz = ( xs .* yt - ys .* xt ) ./ J;
 sz = - ( xr .* yt - yr .* xt ) ./ J;
 tz = ( xr .* ys - yr .* xs ) ./ J;
 
-J = J;
 Jz = zt;
 end

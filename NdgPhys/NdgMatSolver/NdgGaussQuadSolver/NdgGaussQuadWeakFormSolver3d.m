@@ -58,7 +58,8 @@ classdef NdgGaussQuadWeakFormSolver3d < NdgGaussQuadWeakFormSolver
             SBFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
             BOTFVfq = SBFVfq; BBFVfq = SBFVfq;
             SBwJs = bsxfun(@times, fcell.wq, SBFVfq * mesh.SurfaceBoundaryEdge.Js);
-            BOTwJs = SBwJs; BBwJs = SBwJs;
+            BOTwJs = bsxfun(@times, fcell.wq, SBFVfq * mesh.BottomEdge.Js);
+            BBwJs = bsxfun(@times, fcell.wq, SBFVfq * mesh.BottomBoundaryEdge.Js);
         end
         
         function  [ SBnx, SBny, SBnz, BOTnx, BOTny, BOTnz, BBnx, BBny, BBnz ] = assemble3dNormalVector( mesh, SBFVfq, BOTFVfq, BBFVfq )
