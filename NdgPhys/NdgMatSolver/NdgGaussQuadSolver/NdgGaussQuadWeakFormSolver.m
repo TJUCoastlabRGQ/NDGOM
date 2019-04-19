@@ -33,6 +33,12 @@ classdef NdgGaussQuadWeakFormSolver < NdgGaussQuadStrongFormSolver
                 RHS(edge.GFToN2(i)) = RHS(edge.GFToN2(i)) - FRHS(i);
             end
         end
+        
+        function RHS = matAssembleSourceTermIntoRHS( obj, edge, FRHS, RHS)
+            for i = 1:numel(FRHS)
+                RHS(edge.GFToN1(i)) = RHS(edge.GFToN1(i)) + FRHS(i);
+            end
+        end        
     end
     
 end

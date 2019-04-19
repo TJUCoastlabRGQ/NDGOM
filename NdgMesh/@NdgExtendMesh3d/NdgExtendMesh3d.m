@@ -87,7 +87,8 @@ classdef NdgExtendMesh3d < handle
             obj = GetNodeCoor( obj );
             
             % Jacobian coefficients at IP nodes
-            obj = Jacobian3d(obj, cell);
+            [ obj.rx, obj.ry, obj.rz, obj.sx, obj.sy, obj.sz, obj.tx, obj.ty,...
+                obj.tz, obj.J ] = cell.assembleJacobianMatrix( obj.x, obj.y, obj.z);
             
         end% func
         

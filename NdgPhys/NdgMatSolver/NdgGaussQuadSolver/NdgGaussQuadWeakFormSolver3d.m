@@ -43,31 +43,31 @@ classdef NdgGaussQuadWeakFormSolver3d < NdgGaussQuadWeakFormSolver
                 mesh = meshUnion( m );
                 %                 stdcell = mesh.cell;
                 [ obj.SBFVfq{m}, obj.BOTFVfq{m}, obj.BBFVfq{m}, ...
-                    obj.SBwJs{m}, obj.BOTwJs{m}, obj.BBwJs{m}] = obj.assembleFacialVandMatrixFaceQuadrature( mesh );
+                    obj.SBwJs{m}, obj.BOTwJs{m}, obj.BBwJs{m}] = obj.assemble3dFacialVandMatrixFaceQuadrature( mesh );
                 [ obj.SBnx{m}, obj.SBny{m}, obj.SBnz{m},...
                     obj.BOTnx{m}, obj.BOTny{m}, obj.BOTnz{m},...
-                    obj.BBnx{m}, obj.BBny{m}, obj.BBnz{m} ] = obj.assembleNormalVector( mesh, obj.SBFVfq{m}, obj.BOTFVfq{m}, obj.BBFVfq{m} );
-                [ obj.SBLIFT{m}, obj.BOTLIFT{m}, obj.BBLIFT{m} ] = obj.assembleBoundaryLiftMatrix( mesh );
+                    obj.BBnx{m}, obj.BBny{m}, obj.BBnz{m} ] = obj.assemble3dNormalVector( mesh, obj.SBFVfq{m}, obj.BOTFVfq{m}, obj.BBFVfq{m} );
+                [ obj.SBLIFT{m}, obj.BOTLIFT{m}, obj.BBLIFT{m} ] = obj.assemble3dBoundaryLiftMatrix( mesh );
             end
         end
     end
     
     methods( Static )
-        function [ SBFVfq, BOTFVfq, BBFVfq, SBwJs, BOTwJs, BBwJs] = assembleFacialVandMatrixFaceQuadrature( mesh )
+        function [ SBFVfq, BOTFVfq, BBFVfq, SBwJs, BOTwJs, BBwJs] = assemble3dFacialVandMatrixFaceQuadrature( mesh )
             fcell = getStdCell( mesh.cell.N, mesh.SurfaceBoundaryEdge.type );
             SBFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
             BOTFVfq = SBFVfq; BBFVfq = SBFVfq;
-            SBwJs = bsxfun(@times, fcell.wq, IEFVfq * mesh.SurfaceBoundaryEdge.Js);
+            SBwJs = bsxfun(@times, fcell.wq, SBFVfq * mesh.SurfaceBoundaryEdge.Js);
             BOTwJs = SBwJs; BBwJs = SBwJs;
         end
         
-        function  [ SBnx, SBny, SBnz, BOTnx, BOTny, BOTnz, BBnx, BBny, BBnz ] = assembleNormalVector( mesh, SBFVfq, BOTFVfq, BBFVfq )
+        function  [ SBnx, SBny, SBnz, BOTnx, BOTny, BOTnz, BBnx, BBny, BBnz ] = assemble3dNormalVector( mesh, SBFVfq, BOTFVfq, BBFVfq )
             SBnx = SBFVfq * mesh.SurfaceBoundaryEdge.nx; BOTnx = BOTFVfq * mesh.BottomEdge.nx; BBnx = BBFVfq * mesh.BottomBoundaryEdge.nx;
             SBny = SBFVfq * mesh.SurfaceBoundaryEdge.ny; BOTny = BOTFVfq * mesh.BottomEdge.ny; BBny = BBFVfq * mesh.BottomBoundaryEdge.ny;
             SBnz = SBFVfq * mesh.SurfaceBoundaryEdge.nz; BOTnz = BOTFVfq * mesh.BottomEdge.nz; BBnz = BBFVfq * mesh.BottomBoundaryEdge.nz;
         end
         
-        function [ SBLIFT, BOTLIFT, BBLIFT ] = assembleBoundaryLiftMatrix( mesh )
+        function [ SBLIFT, BOTLIFT, BBLIFT ] = assemble3dBoundaryLiftMatrix( mesh )
             fcell = getStdCell( mesh.cell.N, mesh.SurfaceBoundaryEdge.type );
             SBLIFT = ( fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq) )';
             BOTLIFT = SBLIFT; BBLIFT = SBLIFT;
