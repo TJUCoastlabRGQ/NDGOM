@@ -5,14 +5,14 @@ function [ adv, vis, wind, flux, Friction, PCESolver2d ] = initSolver( physMat )
 integralType = physMat.getOption('integralType');
 if (integralType == enumDiscreteIntegral.QuadratureFree)
     adv = NdgQuadFreeStrongFormAdvSolver3d( physMat );
-    vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:numel(physMat.varFieldIndex));
+    vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
     wind = NdgQuadFreeWindSolver3d();
     flux = SWELFNumFluxSolver3d;
     Friction = NdgQuadFreeFrictionSolver3d;
     PCESolver2d = SWEQuadFreeStrongFormPCESolver2d;
 elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     adv = NdgGaussQuadWeakFormAdvSolver3d( physMat, physMat.meshUnion );
-    vis = NdgGaussQuadWeakFormCentralVisSolver3d( physMat, physMat.Nvar, 1:numel(physMat.Nvar));
+    vis = NdgGaussQuadWeakFormCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
     wind = NdgGaussQuadWindSolver3d( physMat, physMat.meshUnion );
     flux = SWELFNumFluxSolver3d;
     Friction = NdgGaussQuadFrictionSolver3d( physMat, physMat.meshUnion );    

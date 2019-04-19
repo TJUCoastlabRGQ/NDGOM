@@ -18,19 +18,32 @@ classdef NdgGaussQuadWindSolver3d < AbstractWindTermSolver & ...
                 edge = mesh3d.SurfaceBoundaryEdge;
                 %                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
                 %                 fluxM = zeros(size(fm(:,:,1:2)));
-                [ Taux, ~ ] = obj.matInterpolateToFaceGaussQuadraturePoint( obj.SBVfq, physClass.Taux{m}, physClass.Taux{m} );
-                [ Tauy, ~ ] = obj.matInterpolateToFaceGaussQuadraturePoint( obj.SBVfq, physClass.Tauy{m}, physClass.Tauy{m} );
+                [ Taux, ~ ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.SBFVfq{m}, physClass.Taux{m}, physClass.Taux{m} );
+                [ Tauy, ~ ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.SBFVfq{m}, physClass.Tauy{m}, physClass.Tauy{m} );
                 
-                Taux = obj.SBnz .* Taux;
-                Tauy = obj.SBnz .* Tauy;
+                Taux = obj.SBnz{m} .* Taux;
+                Tauy = obj.SBnz{m} .* Tauy;
                 
-                tempRHS{m} = zeros(size(physObj.frhs{m}));
+                TEMPTaux = ( obj.BBLIFT{m} * ( obj.BBwJs{m} .* ( Taux ) ));
+                TEMPTauy = ( obj.BBLIFT{m} * ( obj.BBwJs{m} .* ( Tauy ) ));
                 
-                tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, Taux, tempRHS{m}(:,:,1));
-                tempRHS{m}(:,:,2) = obj.matAssembleSourceTermIntoRHS( edge, Tauy, tempRHS{m}(:,:,2));
+                tempRHS{m} = zeros(size(physClass.frhs{m}));
+                %                 %                 ( obj, edge, FRHS, RHS)
+                tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, TEMPTaux, tempRHS{m}(:,:,1));
+                tempRHS{m}(:,:,2) = obj.matAssembleSourceTermIntoRHS( edge, TEMPTauy, tempRHS{m}(:,:,2));
                 
-                tempRHS{m} = permute( sum( bsxfun(@times, obj.invM{m}, ...
-                    permute( permute( phys.frhs{m}, [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);
+                tempRHS{m}(:,:,1) = permute( sum( bsxfun(@times, obj.invM{m}, ...
+                    permute( permute( tempRHS{m}(:,:,1), [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);
+                tempRHS{m}(:,:,2) = permute( sum( bsxfun(@times, obj.invM{m}, ...
+                    permute( permute( tempRHS{m}(:,:,2), [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);                
+        
+%                 tempRHS{m} = zeros(size(physObj.frhs{m}));
+%                 
+%                 tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, Taux, tempRHS{m}(:,:,1));
+%                 tempRHS{m}(:,:,2) = obj.matAssembleSourceTermIntoRHS( edge, Tauy, tempRHS{m}(:,:,2));
+%                 
+%                 tempRHS{m} = permute( sum( bsxfun(@times, obj.invM{m}, ...
+%                     permute( permute( phys.frhs{m}, [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);
                 
                 physClass.frhs{m} = physClass.frhs{m} + tempRHS{m};
             end
