@@ -18,15 +18,19 @@ classdef NdgGaussQuadFrictionSolver3d < AbstractFrictionTermSolver & ...
             for m = 1:physObj.Nmesh
                 mesh3d = physObj.meshUnion(m);
                 edge = mesh3d.BottomBoundaryEdge;
-               [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-                fluxM = zeros(size(fm(:,:,1:2)));
-               
+               [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );               
                 u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
                 Velocity = sqrt( u.^2 + v.^2 );
                 friction(:,:,1) = physObj.Cf{m} .* u .* Velocity;
                 friction(:,:,2) = physObj.Cf{m} .* v .* Velocity; 
                 
                 [ friction, ~ ] = obj.matInterpolateToFaceGaussQuadraturePoint( obj.BBFVfq, friction, friction );
+                
+                % we note that this part is added as a supplement of the
+                % diffusion operator, so the direction vector should be included
+                friction(:,:,1) = obj.BBnz .* friction(:,:,1);
+                friction(:,:,2) = obj.BBnz .* friction(:,:,2);
+
                 tempRHS{m} = zeros(size(physObj.frhs{m}));
                 
                 tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, friction(:,:,1), tempRHS{m}(:,:,1));
