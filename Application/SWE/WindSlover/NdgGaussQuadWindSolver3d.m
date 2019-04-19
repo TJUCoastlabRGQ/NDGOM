@@ -1,12 +1,14 @@
-classdef NdgQuadFreeWindSolver3d < AbstractWindTermSolver
-    %NDGQUADFREEWINDSOLVER3D 此处显示有关此类的摘要
+classdef NdgGaussQuadWindSolver3d < AbstractWindTermSolver & ...
+        NdgGaussQuadWeakFormSolver3d
+    %NDGGAUSSQUADWINDSOLVER3D 此处显示有关此类的摘要
     %   此处显示详细说明
+    
     properties
     end
     
     methods
-        function obj = NdgQuadFreeWindSolver3d()
-            %doing nothing
+        function obj = NdgGaussQuadWindSolver3d( physObj, meshUnion )
+            obj = obj@NdgGaussQuadWeakFormSolver3d(physObj, meshUnion);
         end
         
         function evaluateWindTermRHS( obj, physClass, fphys )
@@ -23,7 +25,7 @@ classdef NdgQuadFreeWindSolver3d < AbstractWindTermSolver
               physClass.frhs{m} = physClass.frhs{m}...
                     + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );   
             end
-        end
+        end        
     end
     
 end
