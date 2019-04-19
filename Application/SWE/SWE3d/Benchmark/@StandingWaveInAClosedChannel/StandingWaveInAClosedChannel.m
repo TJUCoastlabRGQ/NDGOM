@@ -83,8 +83,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputNcfileNum') = 500;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('equationType') = enumDiscreteEquation.Weak;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;            
         end
         

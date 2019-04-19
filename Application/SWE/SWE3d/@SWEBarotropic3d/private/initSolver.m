@@ -13,9 +13,9 @@ if (integralType == enumDiscreteIntegral.QuadratureFree)
 elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     adv = NdgGaussQuadWeakFormAdvSolver3d( physMat, physMat.meshUnion );
     vis = NdgGaussQuadWeakFormVisSolver3d( physMat, physMat.Nvar, 1:numel(physMat.Nvar));
-    wind = NdgGaussQuadWindSolver3d();
+    wind = NdgGaussQuadWindSolver3d( physMat, physMat.meshUnion );
     flux = SWELFNumFluxSolver3d;
-    Friction = NdgGaussQuadFrictionSolver3d;    
+    Friction = NdgGaussQuadFrictionSolver3d( physMat, physMat.meshUnion );    
     PCESolver2d = SWEGaussQuadWeakFormPCESolver2d( physMat, physMat.mesh2d );
 end
 % vis = NdgNonVisSolver( physMat );
