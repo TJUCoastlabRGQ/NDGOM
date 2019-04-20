@@ -51,7 +51,7 @@ classdef NdgGaussQuadWeakFormAdvSolver3d < NdgGaussQuadWeakFormSolver3d & ...
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, obj.BEnx{m}, obj.BEny{m}, obj.BEnz{m}, fm, fp );
                 for i = 1:phys.Nvar
                     EdgeRHS = - ( obj.IELIFT{m} * ( obj.BEwJs{m} .* ( fluxS(:,:,i) ) ));
-                    phys.frhs{m}(:,:,i) = obj.matAssembleIntoRHS( edge, EdgeRHS, phys.frhs{m}(:,:,i));
+                    phys.frhs{m}(:,:,i) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, EdgeRHS, phys.frhs{m}(:,:,i));
                 end
                 
                 for i = 1:phys.Nvar

@@ -24,13 +24,13 @@ classdef NdgGaussQuadWindSolver3d < AbstractWindTermSolver & ...
                 Taux = obj.SBnz{m} .* Taux;
                 Tauy = obj.SBnz{m} .* Tauy;
                 
-                TEMPTaux = ( obj.BBLIFT{m} * ( obj.BBwJs{m} .* ( Taux ) ));
-                TEMPTauy = ( obj.BBLIFT{m} * ( obj.BBwJs{m} .* ( Tauy ) ));
+                TEMPTaux = ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( Taux ) ));
+                TEMPTauy = ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( Tauy ) ));
                 
                 tempRHS{m} = zeros(size(physClass.frhs{m}));
                 %                 %                 ( obj, edge, FRHS, RHS)
-                tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, TEMPTaux, tempRHS{m}(:,:,1));
-                tempRHS{m}(:,:,2) = obj.matAssembleSourceTermIntoRHS( edge, TEMPTauy, tempRHS{m}(:,:,2));
+                tempRHS{m}(:,:,1) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, TEMPTaux, tempRHS{m}(:,:,1));
+                tempRHS{m}(:,:,2) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, TEMPTauy, tempRHS{m}(:,:,2));
                 
                 tempRHS{m}(:,:,1) = permute( sum( bsxfun(@times, obj.invM{m}, ...
                     permute( permute( tempRHS{m}(:,:,1), [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);

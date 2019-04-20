@@ -20,11 +20,11 @@ for n = 1 : Ne
     f2 = obj.FToF(2, n);
 
     % set local node index
-    FToN1(:, n) = Fmask(:, f1);
-
-    x2 = mesh.x(Fmask(:, f2), e2);
-    y2 = mesh.y(Fmask(:, f2), e2);
-    z2 = mesh.z(Fmask(:, f2), e2);
+    FToN1(:, n) = Fmask(1:Nfp, f1);
+    
+    x2 = mesh.x(Fmask(1:Nfp, f2), e2);
+    y2 = mesh.y(Fmask(1:Nfp, f2), e2);
+    z2 = mesh.z(Fmask(1:Nfp, f2), e2);
     for m = 1 : Nfp
         ind = FToN1(m, n);
         x1 = mesh.x(ind, e1);

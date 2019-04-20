@@ -36,9 +36,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.02;
+            obj.dt = 0.01;
             obj.outputFieldOrder2d = 4;
-            obj.miu0{1} = 0.001;
+            obj.miu0{1} = 0.03;
 %             obj.miu = 0;
             obj.Cf{1} = 0.0025/1000;
         end
@@ -62,11 +62,11 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 
                 Lambda = 20;
                 % surface elevation
-                fphys2d{m}(:,:,1) =  0.1 * cos(2*pi*mesh2d.x/Lambda) + obj.H0;
+                fphys2d{m}(:,:,1) =  0.01 * cos(2*pi*mesh2d.x/Lambda) + obj.H0;
                 % bottom elevation
                 fphys2d{m}(:, :, 5) = -obj.H0;
                 % water depth
-                fphys2d{m}(:, :, 4) = 0.1 * cos(2*pi*mesh2d.x/Lambda);
+                fphys2d{m}(:, :, 4) = 0.01 * cos(2*pi*mesh2d.x/Lambda);
                 % water depth
                 fphys{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
             end
@@ -80,11 +80,11 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 500;                  
+            option('outputNcfileNum') = 1500;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Weak;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;            
         end
         
@@ -100,7 +100,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformTriMesh( N, ...
-    [ 0, obj.ChLength ], [0, obj.ChWidth], M, obj.ChWidth/(obj.ChLength/M), bctype);
+    [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
 
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

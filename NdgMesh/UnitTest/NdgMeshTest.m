@@ -12,8 +12,8 @@ classdef NdgMeshTest < matlab.unittest.TestCase
     properties(MethodSetupParameter)
         type = {...
             %NdgCellType.Line, ...
-            NdgCellType.Tri, ...
-            NdgCellType.Quad, ...
+            enumStdCell.Tri, ...
+            enumStdCell.Quad, ...
             }
         order = {1, 2, 3}
     end
@@ -32,7 +32,7 @@ classdef NdgMeshTest < matlab.unittest.TestCase
         function set_test_cell(test)
             stdCell = test.cell;
             switch test.cell.type
-                case NdgCellType.Line
+                case enumStdCell.Line
                     Nv = stdCell.Nv;
                     vx = stdCell.vr./2+1;
                     K = 1;
@@ -40,7 +40,7 @@ classdef NdgMeshTest < matlab.unittest.TestCase
                     EToR = 1;
                     BCToV = [1, 0; 2, 0]';
                     testMesh = NdgMesh1d(stdCell,Nv,vx,K,EToV,EToR,BCToV);
-                case NdgCellType.Tri
+                case enumStdCell.Tri
                     Nv = stdCell.Nv;
                     vx = stdCell.vr/2+3;
                     vy = stdCell.vs/2+4;
@@ -49,7 +49,7 @@ classdef NdgMeshTest < matlab.unittest.TestCase
                     EToR = 1;
                     BCToV = [1,2,0; 2,3,0; 3,1,0]';
                     testMesh = NdgMesh2d(stdCell,Nv,vx,vy,K,EToV,EToR,BCToV);
-                case NdgCellType.Quad 
+                case enumStdCell.Quad 
                     Nv = stdCell.Nv;
                     vx = stdCell.vr*3 + 2*stdCell.vs + 2;
                     vy = stdCell.vs/2+1;
@@ -73,12 +73,12 @@ classdef NdgMeshTest < matlab.unittest.TestCase
             y = test.mesh.y;
             z = test.mesh.z;
             switch test.cell.type
-                case NdgCellType.Line
+                case enumStdCell.Line
                     test.verifyEqual( r/2 + 1, x, 'AbsTol', test.tol);
-                case NdgCellType.Tri
+                case enumStdCell.Tri
                     test.verifyEqual( r/2 + 3, x, 'AbsTol', test.tol);    
                     test.verifyEqual( s/2 + 4, y, 'AbsTol', test.tol); 
-                case NdgCellType.Quad 
+                case enumStdCell.Quad 
                     test.verifyEqual( r*3 + 2*s + 2, x, 'AbsTol', test.tol);    
                     test.verifyEqual( s/2 + 1, y, 'AbsTol', test.tol); 
             end
