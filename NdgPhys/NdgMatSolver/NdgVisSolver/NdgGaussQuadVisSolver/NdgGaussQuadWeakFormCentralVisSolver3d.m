@@ -32,8 +32,8 @@ classdef NdgGaussQuadWeakFormCentralVisSolver3d < NdgGaussQuadWeakFormSolver3d &
                 fq = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq{m}, fphys{m} );
                 
                 % Volume Integral
-                obj.pzx{m} = obj.Dt{m} * ( obj.tzwJ{m}.* (fq(:,:,obj.varId(1))));
-                obj.pzy{m} = obj.Dt{m} * ( obj.tzwJ{m}.* (fq(:,:,obj.varId(2))));
+                obj.pzx{m} = - obj.Dt{m} * ( obj.tzwJ{m}.* (fq(:,:,obj.varId(1))));
+                obj.pzy{m} = - obj.Dt{m} * ( obj.tzwJ{m}.* (fq(:,:,obj.varId(2))));
             end
         end
         
@@ -68,8 +68,8 @@ classdef NdgGaussQuadWeakFormCentralVisSolver3d < NdgGaussQuadWeakFormSolver3d &
                 EdgeRHSPzy = ( obj.BBLIFT{m} * ( obj.BBwJs{m} .* ( FluxS(:,:,2) ) ));
                 clear FluxS;
                 
-                obj.pzx{m} = obj.matAssembleIntoRHS( edge3d, EdgeRHSPzx, obj.pzx{m});
-                obj.pzy{m} = obj.matAssembleIntoRHS( edge3d, EdgeRHSPzy, obj.pzy{m});
+                obj.pzx{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge3d, EdgeRHSPzx, obj.pzx{m});
+                obj.pzy{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge3d, EdgeRHSPzy, obj.pzy{m});
                 
                 edge3d = mesh.SurfaceBoundaryEdge;
                 [ fm, fp ] = edge3d.matEvaluateSurfValue( fphys3d );
@@ -83,8 +83,8 @@ classdef NdgGaussQuadWeakFormCentralVisSolver3d < NdgGaussQuadWeakFormSolver3d &
                 EdgeRHSPzx = ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( FluxS(:,:,1) ) ));
                 EdgeRHSPzy = ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( FluxS(:,:,2) ) ));
                 
-                obj.pzx{m} = obj.matAssembleIntoRHS( edge3d, EdgeRHSPzx, obj.pzx{m});
-                obj.pzy{m} = obj.matAssembleIntoRHS( edge3d, EdgeRHSPzy, obj.pzy{m});
+                obj.pzx{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge3d, EdgeRHSPzx, obj.pzx{m});
+                obj.pzy{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge3d, EdgeRHSPzy, obj.pzy{m});
                 
                 obj.pzx{m} = permute( sum( bsxfun(@times, obj.invM{m}, ...
                     permute( permute( obj.pzx{m}, [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);
@@ -107,8 +107,8 @@ classdef NdgGaussQuadWeakFormCentralVisSolver3d < NdgGaussQuadWeakFormSolver3d &
                 pzx = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq{m}, obj.pzx{m} );
                 pzy = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq{m}, obj.pzy{m} );
                 
-                obj.tempRHS{m}(:,:,1) = obj.Dt{m} * ( obj.tzwJ{m}.* pzx);
-                obj.tempRHS{m}(:,:,2) = obj.Dt{m} * ( obj.tzwJ{m}.* pzy);
+                obj.tempRHS{m}(:,:,1) = - obj.Dt{m} * ( obj.tzwJ{m}.* pzx);
+                obj.tempRHS{m}(:,:,2) = - obj.Dt{m} * ( obj.tzwJ{m}.* pzy);
             end
         end% func          
         

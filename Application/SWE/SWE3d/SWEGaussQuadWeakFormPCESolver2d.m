@@ -74,7 +74,7 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 
                 EdgeRHS = - ( obj.BELIFT{m} * ( obj.BEwJs{m} .* ( FluxS ) ));
                 
-                physClass.frhs2d{m} = obj.matAssembleIntoRHS( BoundaryEdge, EdgeRHS, physClass.frhs2d{m});
+                physClass.frhs2d{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( BoundaryEdge, EdgeRHS, physClass.frhs2d{m});
                 
                 physClass.frhs2d{m} = permute( sum( ...
                     bsxfun(@times, obj.invM{m}, ...

@@ -156,8 +156,20 @@ classdef NdgGaussQuadStrongFormSolver < handle
             switch mesh.type
                 case enumMeshDim.Three
                     fcell = getStdCell( max(mesh.cell.N, mesh.cell.Nz), enumStdCell.Quad );
-                    IEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
-                    BEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
+                    IEFVfq = zeros( numel(fcell.rq) ,( mesh.cell.N + 1 ) * ( mesh.cell.Nz + 1 ));
+                   
+                    Hcell = getStdCell( mesh.cell.N, enumStdCell.Line );
+                    Vcell = getStdCell( mesh.cell.Nz, enumStdCell.Line );
+                    HInterp = ( Hcell.nodal_func(fcell.rq, zeros(size(fcell.rq)), zeros(size(fcell.rq))) );
+                    VInterp = ( Vcell.nodal_func(fcell.sq, zeros(size(fcell.sq)), zeros(size(fcell.sq))) );
+                    for j = 1 : mesh.cell.Nz + 1
+                        for i = 1 : mesh.cell.N + 1
+                            IEFVfq( :, (j - 1)*(mesh.cell.N + 1) + i ) = HInterp( :,i ) .* VInterp( :,j );
+                        end
+                    end
+                    BEFVfq = IEFVfq;
+%                     IEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
+%                     BEFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
                     IEwJs = bsxfun(@times, fcell.wq, IEFVfq * mesh.InnerEdge.Js);
                     BEwJs = bsxfun(@times, fcell.wq, BEFVfq * mesh.BoundaryEdge.Js);
                 otherwise
@@ -200,6 +212,30 @@ classdef NdgGaussQuadStrongFormSolver < handle
                 tq = fcell.project_vert2quad( vt );
                 LIFT(:, sk:(sk+fcell.Nq-1) ) = ( cell.nodal_func( rq, sq, tq ) )';
                 sk = sk + fcell.Nq;
+            end
+        end
+        
+        function [ IELIFT, BELIFT ] = assembleBoundaryLiftMatrix( mesh )
+            switch mesh.type
+                case enumMeshDim.Three
+                    fcell = getStdCell( max(mesh.cell.N, mesh.cell.Nz), enumStdCell.Quad );
+                    IELIFT = zeros( ( mesh.cell.N + 1 ) * ( mesh.cell.Nz + 1 ), numel(fcell.rq));
+                   
+                    Hcell = getStdCell( mesh.cell.N, enumStdCell.Line );
+                    Vcell = getStdCell( mesh.cell.Nz, enumStdCell.Line );
+                    HInterp = ( Hcell.nodal_func(fcell.rq, zeros(size(fcell.rq)), zeros(size(fcell.rq))) )';
+                    VInterp = ( Vcell.nodal_func(fcell.sq, zeros(size(fcell.sq)), zeros(size(fcell.sq))) )';
+                    for j = 1 : mesh.cell.Nz + 1
+                        for i = 1 : mesh.cell.N + 1
+                            IELIFT( (j - 1)*(mesh.cell.N + 1) + i, : ) = HInterp( i,: ) .* VInterp( j,: );
+                        end
+                    end                    
+                    
+                   BELIFT = IELIFT; 
+                otherwise
+                    fcell = getStdCell( mesh.cell.N, mesh.cell.faceType(1) );
+                    IELIFT = ( fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq) )';
+                    BELIFT = ( fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq) )';
             end
         end
     end

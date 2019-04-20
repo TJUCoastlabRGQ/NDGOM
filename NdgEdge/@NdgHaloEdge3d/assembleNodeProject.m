@@ -22,11 +22,11 @@ for n = 1:obj.Ne
     Fmask2 = mesh(m2).cell.Fmask;
 
     % set local node index
-    FToN1(:, n) = Fmask1(:, f1);
+    FToN1(:, n) = Fmask1(1:Nfp, f1);
 
-    x2 = mesh(m2).x(Fmask2(:, f2), e2);
-    y2 = mesh(m2).y(Fmask2(:, f2), e2);
-    z2 = mesh(m2).z(Fmask2(:, f2), e2);
+    x2 = mesh(m2).x(Fmask2(1:Nfp, f2), e2);
+    y2 = mesh(m2).y(Fmask2(1:Nfp, f2), e2);
+    z2 = mesh(m2).z(Fmask2(1:Nfp, f2), e2);
     for m = 1 : Nfp
         ind = FToN1(m, n);
         x1 = mesh1.x(ind, e1);

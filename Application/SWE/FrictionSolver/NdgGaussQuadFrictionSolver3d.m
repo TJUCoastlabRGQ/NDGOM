@@ -36,8 +36,8 @@ classdef NdgGaussQuadFrictionSolver3d < AbstractFrictionTermSolver & ...
                 
                 tempRHS{m} = zeros(size(physObj.frhs{m}));
                 %                 %                 ( obj, edge, FRHS, RHS)
-                tempRHS{m}(:,:,1) = obj.matAssembleSourceTermIntoRHS( edge, TEMPFriction(:,:,1), tempRHS{m}(:,:,1));
-                tempRHS{m}(:,:,2) = obj.matAssembleSourceTermIntoRHS( edge, TEMPFriction(:,:,2), tempRHS{m}(:,:,2));
+                tempRHS{m}(:,:,1) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, TEMPFriction(:,:,1), tempRHS{m}(:,:,1));
+                tempRHS{m}(:,:,2) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, TEMPFriction(:,:,2), tempRHS{m}(:,:,2));
                 
                 tempRHS{m}(:,:,1) = permute( sum( bsxfun(@times, obj.invM{m}, ...
                     permute( permute( tempRHS{m}(:,:,1), [1,3,2] ),[2,1,3] ) ), 2 ), [1,3,2]);
