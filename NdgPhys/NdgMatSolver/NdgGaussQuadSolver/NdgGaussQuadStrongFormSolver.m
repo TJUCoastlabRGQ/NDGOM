@@ -93,17 +93,6 @@ classdef NdgGaussQuadStrongFormSolver < handle
     end
 
     methods( Static )
-%         function [ wJs ] = assembleFaceQuadratureWeight( mesh, TNfq, Js )
-%             cell = mesh.cell;
-%             sk = 1;
-%             ws = zeros( TNfq, 1 );
-%             for f = 1:cell.Nface
-%                 fcell = getStdCell( cell.N, cell.faceType(f) );
-%                 ws(sk:(sk+fcell.Nq-1) ) = fcell.wq;
-%                 sk = sk + fcell.Nq;
-%             end
-%             wJs = bsxfun(@times, ws, Js);
-%         end
         
         function [ rxwJ, rywJ, rzwJ, sxwJ, sywJ, szwJ, txwJ, tywJ, tzwJ ] ...
                 = assembleJacobianFactor( mesh )
@@ -196,24 +185,7 @@ classdef NdgGaussQuadStrongFormSolver < handle
         function [ Dr, Ds, Dt ] = assembleDerivativeMatrix( mesh )
             cell = mesh.cell;
             [ Dr, Ds, Dt ] = cell.nodal_derivative_func( cell.rq, cell.sq, cell.tq );
-        end
-        
-        function [ LIFT ] = assembleLiftMatrix( mesh, TNfq )
-            cell = mesh.cell;
-            sk = 1;
-            LIFT = zeros( cell.Np, TNfq );
-            for f = 1:cell.Nface
-                fcell = getStdCell( cell.N, cell.faceType(f) );
-                vr = cell.vr( cell.FToV(:, f) );
-                vs = cell.vs( cell.FToV(:, f) );
-                vt = cell.vt( cell.FToV(:, f) );
-                rq = fcell.project_vert2quad( vr );
-                sq = fcell.project_vert2quad( vs );
-                tq = fcell.project_vert2quad( vt );
-                LIFT(:, sk:(sk+fcell.Nq-1) ) = ( cell.nodal_func( rq, sq, tq ) )';
-                sk = sk + fcell.Nq;
-            end
-        end
+        end  
         
         function [ IELIFT, BELIFT ] = assembleBoundaryLiftMatrix( mesh )
             switch mesh.type
