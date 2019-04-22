@@ -137,9 +137,9 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
+    mesh = makeUniformTriMesh(N, [0, 30], [0, 1], 30/deltax, 1/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 30], [0, 1], 30/deltax, 1/deltax, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
