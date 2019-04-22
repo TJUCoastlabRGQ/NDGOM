@@ -1,5 +1,5 @@
 function runNonhydrostaticSolitaryWave
-deltax = [1.5 1 0.75];
+deltax = [3 2 1.5 1];
 Order = [1 2];
 len = deltax;
 type = enumStdCell.Quad;
@@ -17,7 +17,7 @@ marker = {'o', 's', '^'};%circle for Eta, square for U, triangle for Ws
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = (30 * 6) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
+        dofs(m, n) = (600 * 6) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
     end
 end
 
@@ -32,7 +32,10 @@ for n = 1:Ndeg
     fext = cell(1);
     fext{1}(:,:,1) = Solver.Eta10;fext{1}(:,:,2) = Solver.U10;fext{1}(:,:,3) = Solver.W10;fext{1}(:,:,4) = zeros(size(fext{1}(:,:,1)));
     fphys = cell(1);
+    %> methods from Lu
     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.Depth;fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)*2./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
+    %> methods from Stelling
+%     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)*2./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
     err = PostProcess.evaluateNormErrInf( fphys, fext );
     EtaErrInf( m, n ) = err(1); UErrInf( m, n ) = err(2); WsErrInf( m, n ) = err(3);
 
