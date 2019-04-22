@@ -31,11 +31,11 @@ BoundaryEdge = mesh.BoundaryEdge;
 % [UpWindedFlag, DownWindedFlag] = AssembleWindedFlagInformation(InnerEdge, ele);
 % [tempqx, tempqy] = obj.matCalculateFluxUpwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.Zero);
 
-tempqx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-tempqy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% tempqx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+% tempqy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
 
-qx = tempqx(:);
-qy = tempqy(:);
+% qx = tempqx(:);
+% qy = tempqy(:);
 % [nqx, nqy] = obj.matEvaluateLocalDerivativeTerm( mesh, gmat );
 % qx = nqx(:);
 % qy = nqy(:);
@@ -43,7 +43,13 @@ qy = tempqy(:);
 % [tempq2x, tempq2y] = obj.matCalculateLDGTerm( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]));
 
 [ LDGqx, LDGqy ] = obj.matAlternatingUpwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero); 
+
+qx = LDGqx(:);
+qy = LDGqy(:);
+
 [ LDGq2x, ~] = obj.matAlternatingDownwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(LDGqx,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+
+
 [ ~, LDGq2y] = obj.matAlternatingDownwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(LDGqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 % [tempq2x, ~] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
 % [~, tempq2y] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
