@@ -42,14 +42,18 @@ qy = tempqy(:);
 
 % [tempq2x, tempq2y] = obj.matCalculateLDGTerm( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]));
 
+[ LDGqx, LDGqy ] = obj.matAlternatingUpwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero); 
+[ LDGq2x, ~] = obj.matAlternatingDownwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(LDGqx,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+[ ~, LDGq2y] = obj.matAlternatingDownwindLDGFlux( mesh, BoundaryEdge, InnerEdge, num2cell(LDGqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 % [tempq2x, ~] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
 % [~, tempq2y] = obj.matCalculateFluxDownwindedTerm( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]),UpWindedFlag, DownWindedFlag, enumNonhydroBoundaryCondition.ZeroGrad);
-tempq2x = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-tempq2y = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+% tempq2x = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+% tempq2y = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 
 % tempq2x = obj.matCalculatePenaltyCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqx,[1 2]), obj.EidBoundaryType);
 % tempq2y = obj.matCalculatePenaltyCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(tempqy,[1 2]), obj.EidBoundaryType);% not good
-q2x = tempq2x(:); q2y = tempq2y(:);
+% q2x = tempq2x(:); q2y = tempq2y(:);
+q2x = LDGq2x(:); q2y = LDGq2y(:);
 
 tempfqbx = obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.bx,[1 2]), enumNonhydroBoundaryCondition.Zero);
 tempfqby = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(Nonhydro.*obj.by,[1 2]), enumNonhydroBoundaryCondition.Zero);

@@ -145,6 +145,9 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         
         termY = matCalculateCharacteristicMatrixY(obj, mesh, BoundaryEdge, InnerEdge, Variable, ftype);
         
-        fphys = matUpdateConservativeFinalVelocity(obj, NonhydroPre , physClass, fphys)
+        fphys = matUpdateConservativeFinalVelocity(obj, NonhydroPre , physClass, fphys);
+        
+       [ LDGqx, LDGqy ] = matAlternatingUpwindLDGFlux( obj, mesh, BoundaryEdge, InnerEdge, gmat, ftype); 
+       [ LDGq2x, LDGq2y] = matAlternatingDownwindLDGFlux( obj, mesh, BoundaryEdge, InnerEdge, LDGqx, ftype);
     end
 end

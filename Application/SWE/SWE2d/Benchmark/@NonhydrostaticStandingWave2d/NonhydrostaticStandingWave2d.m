@@ -8,8 +8,8 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     
     properties
         dt
-%         d = 7.6145
-        d = 10
+        d = 7.6145
+%         d = 50
         fexact
         A = 0.1;
     end
@@ -118,7 +118,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.Heun;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -139,7 +139,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 20], [0, 2], 20/deltax, 2/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 10], [0, 1], 10/deltax, 1/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
