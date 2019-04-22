@@ -1,6 +1,5 @@
-classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
-        NdgVisCentralFluxSolver & ...
-        NdgVisAuxiStrongFormSolver
+classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
+
     %NDGNONHYDROSTATICSOLVER 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -60,17 +59,15 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
     methods
         function obj = NdgNonhydrostaticSolver2d(PhysClass)
             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
-            obj = obj@NdgVisCentralFluxSolver;
-            obj = obj@NdgVisAuxiStrongFormSolver(PhysClass);
             mesh = PhysClass.meshUnion(1);
             obj.matSetBoundaryType(mesh);
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
             obj.bx = PhysClass.zGrad{1}(:,:,1);
             obj.by = PhysClass.zGrad{1}(:,:,2);
-%             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-%             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-%                 obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
+            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
+            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
+                obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
             obj.ZeroFluxBoundaryIndex = 0;
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);
@@ -148,6 +145,9 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver & ...
         
         termY = matCalculateCharacteristicMatrixY(obj, mesh, BoundaryEdge, InnerEdge, Variable, ftype);
         
-        fphys = matUpdateConservativeFinalVelocity(obj, NonhydroPre , physClass, fphys)
+        fphys = matUpdateConservativeFinalVelocity(obj, NonhydroPre , physClass, fphys);
+        
+       [ LDGqx, LDGqy ] = matAlternatingUpwindLDGFlux( obj, mesh, BoundaryEdge, InnerEdge, gmat, ftype); 
+       [ LDGq2x, LDGq2y] = matAlternatingDownwindLDGFlux( obj, mesh, BoundaryEdge, InnerEdge, LDGqx, ftype);
     end
 end

@@ -131,5 +131,11 @@ classdef NdgAbstractNonhydrostaticSolver < handle
         %> @param[in] Fmask order of the face interpolation points 
         %> @param[out] TempWetToDryPoint point that change status from wet to dry
         TempWetToDryPoint = matGetTempWetToDryPoint( obj, Np, Nfp, NewWetDryFace, Fmask)
+        %> @brief Function to calculate the volume integral in the x direction
+        %> @details Function to calculate the volume integral in the x direction
+        %> @param[in] mesh the mesh object
+        %> @param[in] Variable variable used to calculate the volume integral
+        %> @param[out] VolumeIntegralX the volume integral in x direction       
+        VolumeIntegralX = matGetVolumeIntegralX(obj, mesh, Variable)
     end
 end

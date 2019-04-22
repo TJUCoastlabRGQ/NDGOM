@@ -112,6 +112,8 @@ classdef NdgPhysMat < NdgPhys
                     obj.matEvaluateRK22();
                 case enumTemporalDiscrete.RK33
                     obj.matEvaluateRK33();
+                case enumTemporalDiscrete.Heun
+                    obj.matEvaluateHeun();
                 otherwise
                     msgID = [ mfilename, ':UnknownTemproalDicsreteType'];
                     msgtext = ['The temporal discrete type ', ...
@@ -126,7 +128,7 @@ classdef NdgPhysMat < NdgPhys
         matEvaluateRK22( obj );
         %> An instantiation of the temporal-discrete with the Euler method
         matEvaluateEuler( obj );
-        
+        matEvaluateHeun( obj );
         matUpdateExternalField( obj, time, fphys )
         dt = matUpdateTimeInterval( obj, fphys )
         matEvaluateSourceTerm( obj, fphys )

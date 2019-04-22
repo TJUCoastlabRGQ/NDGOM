@@ -3,8 +3,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     %   此处显示详细说明
     
   properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
+        
         rho = 1000
         Depth = 10
     end
@@ -32,6 +31,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         function obj = NonhydrostaticSolitaryWave(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEConventional2d();
+            obj.hmin = 1e-3;
             obj.Solitarywave(mesh);  
             obj.initPhysFromOptions( mesh );       
             obj.matSolve;
@@ -122,6 +122,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 mesh = obj.meshUnion(m);
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,1) = obj.Eta0 + obj.Depth;
+%                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
                 fphys{m}(:,:,6) = fphys{m}(:,:,1).*obj.W0./2;
             end       
@@ -158,7 +159,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 600], [0, 6], 600/deltax, 6/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
