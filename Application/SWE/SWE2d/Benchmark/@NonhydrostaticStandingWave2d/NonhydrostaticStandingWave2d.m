@@ -11,6 +11,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 %         d = 7.6145
         d = 10
         fexact
+        A = 0.1;
     end
     
     methods
@@ -23,10 +24,10 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
                   
             Lambda = 20;
             h = obj.d;
-            a = 0.01;
+           
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
-            obj.fexact = a * cos(2*pi/Lambda*mesh.x)*cos(2*pi/T*20);
+            obj.fexact = obj.A * cos(2*pi/Lambda*mesh.x)*cos(2*pi/T*20);
         end
         
         function NonhydroPostprocess(obj)  
@@ -38,11 +39,11 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             Lambda = 20;
             x0 = 17.5;
             h = obj.d;
-            a = 0.1;
+            a = obj.A;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
             for t = 1:Ntime
-                exactEta(t) = a * cos(2*pi/Lambda*x0)*cos(2*pi/T*outputTime(t));
+                exactEta(t) = obj.A * cos(2*pi/Lambda*x0)*cos(2*pi/T*outputTime(t));
                 tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
                 Eta(t) = tempdata(1);
             end
@@ -54,13 +55,13 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
             ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
             
-            str = strcat('Hydro',num2str(obj.d),'.fig');
-            h = openfig(str,'reuse'); % open figure
-            D1=get(gca,'Children'); %get the handle of the line object
-            XData1=get(D1,'XData'); %get the x data
-            YData1=get(D1,'YData'); %get the y data
-            close(h);
-            plot(XData1, YData1,'k--','LineWidth',1.5);
+%             str = strcat('Hydro',num2str(obj.d),'.fig');
+%             h = openfig(str,'reuse'); % open figure
+%             D1=get(gca,'Children'); %get the handle of the line object
+%             XData1=get(D1,'XData'); %get the x data
+%             YData1=get(D1,'YData'); %get the y data
+%             close(h);
+%             plot(XData1, YData1,'k--','LineWidth',1.5);
             plot(outputTime,exactEta,'ro','markersize',1.5);
             legend('Nonhydro','Hydro','Exact');
             legend('boxoff');
@@ -74,7 +75,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             Lambda = 20;
             x0 = 17.5;
             h = obj.d;
-            a = 0.01;
+            a = obj.A;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
             for t = 1:Ntime
@@ -104,12 +105,12 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
                 bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  0.01 * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);                
+                fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/Lambda) - fphys{m}(:,:,4);                
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 300;
+            ftime = 30;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -117,11 +118,11 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.Heun;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
@@ -138,7 +139,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 100], [0, 10], 100/deltax, 10/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 20], [0, 2], 20/deltax, 2/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
