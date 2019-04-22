@@ -65,7 +65,7 @@ elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     if( equType == enumDiscreteEquation.Strong )
         adv = NdgGaussQuadStrongFormAdvSolver2d( physMat );
     elseif( equType == enumDiscreteEquation.Weak )
-        adv = NdgGaussQuadWeakFormAdvSolver2d( physMat );
+        adv = NdgGaussQuadWeakFormAdvSolver2d( physMat, physMat.meshUnion );
     end
 end
 

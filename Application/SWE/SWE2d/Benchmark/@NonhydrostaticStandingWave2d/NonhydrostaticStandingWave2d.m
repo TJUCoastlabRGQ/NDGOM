@@ -1,4 +1,4 @@
-classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
+classdef NonhydrostaticStandingWave2d < SWEConventional2d
     %NONHYDROSTATICSTANDINGWAVE2D 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -17,7 +17,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     methods
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
-            obj = obj@SWEPreBlanaced2d();
+            obj = obj@SWEConventional2d();
             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
@@ -118,10 +118,10 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.Heun;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('equationType') = enumDiscreteEquation.Weak;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
@@ -139,7 +139,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 10], [0, 1], 10/deltax, 1/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 30], [0, 1], 30/deltax, 1/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

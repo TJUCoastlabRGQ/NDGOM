@@ -44,11 +44,11 @@ classdef StdTri < StdCell
             rx = ys./J; sx =-yr./J;
             ry =-xs./J; sy = xr./J; 
             
-            rz = ones( size(x) );
-            sz = ones( size(x) );
-            tx = ones( size(x) );
-            ty = ones( size(x) );
-            tz = ones( size(x) );
+            rz = zeros( size(x) );
+            sz = zeros( size(x) );
+            tx = zeros( size(x) );
+            ty = zeros( size(x) );
+            tz = zeros( size(x) );
         end
         
         f = orthogonal_func(obj, N, ind, r, s, t);
