@@ -11,9 +11,6 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
                         
         [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Np] = ...
             matAssembleCharacteristicMatrix(obj, mesh, i);
-                
-        StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, UpdatedPNPX, UpdatedPNPY,...
-            UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, fphys, PhysClass);
         
         RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
         
@@ -57,18 +54,6 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         function fp = GetBoundaryValue(obj, fm, fp, ftype)
             fp = obj.matImposeNonhydroRelatedBoundaryCondition(fm, fp, ftype, obj.EidBoundaryType);
         end
-        
-        function matrixY = GetCharacteristicMatrixY(obj, mesh, BoundaryEdge, InnerEdge, Variable, ftype)
-            matrixY = obj.matCalculateCharacteristicMatrixY(mesh, BoundaryEdge, InnerEdge, Variable, ftype);
-        end 
-        
-        function matrixX = GetConservativeVariableRelatedMatrixX(obj, BoundaryEdge, InnerEdge, fphys, ftype, index)
-            matrixX = obj.matCalculateConservativeVariableRelatedMatrixX(obj.phys, BoundaryEdge, InnerEdge, fphys, ftype, index);
-        end
-        
-        function matrixY = GetConservativeVariableRelatedMatrixY(obj, BoundaryEdge, InnerEdge, fphys, ftype, index)
-            matrixY = obj.matCalculateConservativeVariableRelatedMatrixY(obj.phys, BoundaryEdge, InnerEdge, fphys, ftype, index);
-        end 
         
         function StiffMatrix = GetGlobalStiffMatrix(obj, PNPX, PNPY, SPNPX, SPNPY, FNPBX, FNPBY, fphys, PhysClass)
                  StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( PNPX, PNPY,...
