@@ -1,4 +1,4 @@
-classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
+classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgQuadratureFreeNonhydrostaticSolver
 
     %NDGNONHYDROSTATICSOLVER 此处显示有关此类的摘要
     %   此处显示详细说明
@@ -57,8 +57,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
     end
     
     methods
-        function obj = NdgNonhydrostaticSolver2d(PhysClass)
-            obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
+        function obj = NdgQuadratureFreeNonhydrostaticSolver2d(PhysClass)
+%             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
             mesh = PhysClass.meshUnion(1);
             obj.matSetBoundaryType(mesh);
             obj.NonhydroFmPoint = [];
@@ -131,7 +131,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         
         matSetInitializeCharacteristicMatrix(obj, PhysClass, mesh);
         
-        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby] = ...
+        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Np] = ...
             matAssembleCharacteristicMatrix(obj, mesh, i);
         
         matAverageBoundaryTopoGrad(obj, PhysClass, mesh);

@@ -7,7 +7,7 @@ classdef NdghydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
     
     methods
         function obj = NdghydrostaticSolver2d(PhysClass)
-            obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
+%             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
         end
         
         function fphys = NdgNonhydrostaticUpdata(obj, PhysClass, fphys)

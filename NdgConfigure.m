@@ -172,7 +172,7 @@ path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
-path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver2d/private/';
+path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver2d/private/';
 srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
     [path, 'mxAssemblePointToCellInformation.c']};
 libfile = {};

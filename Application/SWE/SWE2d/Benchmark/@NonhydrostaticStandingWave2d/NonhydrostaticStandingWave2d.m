@@ -118,10 +118,10 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.Heun;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK22;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Weak;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end

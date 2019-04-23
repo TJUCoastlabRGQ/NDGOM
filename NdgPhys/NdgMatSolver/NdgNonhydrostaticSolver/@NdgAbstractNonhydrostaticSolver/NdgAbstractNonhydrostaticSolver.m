@@ -1,8 +1,8 @@
 classdef NdgAbstractNonhydrostaticSolver < handle
     methods
-        function obj = NdgAbstractNonhydrostaticSolver(PhysClass)
-            % Doing nothing
-        end
+%         function obj = NdgAbstractNonhydrostaticSolver(PhysClass)
+%             % Doing nothing
+%         end
     end
     
     methods( Access = protected )
