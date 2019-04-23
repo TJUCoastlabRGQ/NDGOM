@@ -1,4 +1,4 @@
-classdef NdgGaussQuadNonhydrostaticSolver < NdgAbstractNonhydrostaticSolver & ...
+classdef NdgGaussQuadNonhydrostaticSolver1d < NdgAbstractNonhydrostaticSolver & ...
         NdgGaussQuadWeakFormSolver
         
     %NDGGAUSSQUADNONHYDROSTATICSOLVER 此处显示有关此类的摘要
@@ -8,7 +8,7 @@ classdef NdgGaussQuadNonhydrostaticSolver < NdgAbstractNonhydrostaticSolver & ..
     end
     
     methods
-        function obj = NdgGaussQuadNonhydrostaticSolver( physClass, meshUnion )
+        function obj = NdgGaussQuadNonhydrostaticSolver1d( physClass, meshUnion )
             obj = obj@NdgGaussQuadWeakFormSolver( physClass, meshUnion );
         end
     end

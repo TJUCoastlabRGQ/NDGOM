@@ -15,8 +15,10 @@ rho = PhysClass.rho;
 h = fphys{1}(:,:,1);
 BoundaryEdge = PhysClass.meshUnion(1).BoundaryEdge;
 InnerEdge = PhysClass.meshUnion(1).InnerEdge;
-fhx = obj.matCalculateConservativeVariableRelatedMatrixX( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-fhy = obj.matCalculateConservativeVariableRelatedMatrixY( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
+
+[ fhx, fhy ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
+% fhx = obj.matCalculateConservativeVariableRelatedMatrixX( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
+% fhy = obj.matCalculateConservativeVariableRelatedMatrixY( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
 % [fhx, ~] = obj.matCalculateConservativeVariableRelatedUpwindedMatrixX( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero);
 % [fhy, ~] = obj.matCalculateConservativeVariableRelatedUpwindedMatrixY( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero);
 obj.NP =  obj.NP;
