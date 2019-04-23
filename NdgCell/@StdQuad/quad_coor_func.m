@@ -17,7 +17,8 @@ function [Nq, rq, sq, tq, wq] = quad_coor_func(obj, N)
 %QUADRATURE_NODE_FUNC Summary of this function goes here
 %   Detailed explanation goes here
 
-np = N+1;
+% np = N+1;
+np = 3 * N;
 % [zq, w] = zwgl(np); % the 1D LGL quadrature points and their weights
 [ zq, w ] = zwglj(np);
 % loop along the r-axis first
