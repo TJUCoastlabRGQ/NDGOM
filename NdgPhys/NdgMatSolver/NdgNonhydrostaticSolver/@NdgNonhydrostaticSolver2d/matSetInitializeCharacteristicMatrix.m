@@ -12,13 +12,10 @@ obj.FNPBX = spalloc(Num,Num,2*Num*Np);obj.FNPBY = spalloc(Num,Num,2*Num*Np);
 obj.NP = spalloc(Num,Num,Num);
 for i =  1:K*Np
     [tempPNPX, tempPNPY, tempSPNPX, tempSPNPY,tempNPBX, tempNPBY,...
-        tempFNPBX, tempFNPBY] = obj.matAssembleCharacteristicMatrix( mesh, i);
+        tempFNPBX, tempFNPBY, tempNp] = obj.matAssembleCharacteristicMatrix( mesh, i);
     [obj.PNPX(:,i), obj.PNPY(:,i), obj.SPNPX(:,i), obj.SPNPY(:,i),...
-        obj.NPBX(:,i),obj.NPBY(:,i),obj.FNPBX(:,i), obj.FNPBY(:,i)] = VectorConvert(tempPNPX, tempPNPY, ...
-        tempSPNPX, tempSPNPY,tempNPBX, tempNPBY, tempFNPBX, tempFNPBY);
-    obj.NP(i,i) = 1;
-%     obj.matAssemblePointToCellInformation(Np, obj.PNPX(:,i), obj.PNPY(:,i), obj.SPNPX(:,i), obj.SPNPY(:,i),...
-%         obj.NPBX(:,i),obj.NPBY(:,i),obj.FNPBX(:,i), obj.FNPBY(:,i),obj.NP(:,i), i);
+        obj.NPBX(:,i),obj.NPBY(:,i),obj.FNPBX(:,i), obj.FNPBY(:,i), obj.NP(:,i)] = VectorConvert(tempPNPX, tempPNPY, ...
+        tempSPNPX, tempSPNPY,tempNPBX, tempNPBY, tempFNPBX, tempFNPBY, tempNp);
 end
 
 obj.TempPNPX = obj.PNPX;
@@ -29,8 +26,8 @@ obj.TempFNPBX = obj.FNPBX;
 obj.TempFNPBY = obj.FNPBY;
 end
 
-function [PNPX, PNPY, SPNPX, SPNPY, NPBX, NPBY, FNPBX, FNPBY]=VectorConvert(tempPNPX, tempPNPY,...
-    tempSPNPX, tempSPNPY,tempNPBX, tempNPBY,tempFNPBX, tempFNPBY)
+function [PNPX, PNPY, SPNPX, SPNPY, NPBX, NPBY, FNPBX, FNPBY, Np]=VectorConvert(tempPNPX, tempPNPY,...
+    tempSPNPX, tempSPNPY,tempNPBX, tempNPBY,tempFNPBX, tempFNPBY, tempNp)
 PNPX = sparse(tempPNPX);
 PNPY = sparse(tempPNPY);
 SPNPX = sparse(tempSPNPX);
@@ -39,4 +36,5 @@ NPBX = sparse(tempNPBX);
 NPBY = sparse(tempNPBY);
 FNPBX = sparse(tempFNPBX);
 FNPBY = sparse(tempFNPBY);
+Np = sparse(tempNp);
 end

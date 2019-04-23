@@ -34,7 +34,12 @@ if obj.option.isKey('nonhydrostaticType')
         case enumNonhydrostaticType.Hydrostatic
             NonhydrostaticSolver = NdghydrostaticSolver2d(obj);
         case enumNonhydrostaticType.Nonhydrostatic
-            NonhydrostaticSolver = NdgNonhydrostaticSolver2d(obj);
+            switch obj.getOption('integralType')
+                case enumDiscreteIntegral.GaussQuadrature
+                    NonhydrostaticSolver = NdgGaussQuadNonhydrostaticSolver2d(obj, obj.meshUnion);
+                case enumDiscreteIntegral.QuadratureFree
+                    NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver2d(obj);
+            end
     end% switch
 else
     NonhydrostaticSolver = NdghydrostaticSolver2d( obj );

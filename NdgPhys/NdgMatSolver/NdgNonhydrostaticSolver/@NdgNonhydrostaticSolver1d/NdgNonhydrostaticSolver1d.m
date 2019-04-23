@@ -1,13 +1,13 @@
-classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
-    %NDGNONHYDROSTATICSOLVER2D 此处显示有关此类的摘要
+classdef NdgNonhydrostaticSolver1d < NdgAbstractNonhydrostaticSolver
+    %NDGNONHYDROSTATICSOLVER1D 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties
         %> P stand for partial derivative
         %> NP stands for Non-hydrostatic pressure
-        %> X and Y stands for x direction and y direction, respectively
+        %> X stands for y direction
         %> S stands for second order
-        %> BX and BY stand for topography gradient in x and y direction, respectively
+        %> BX stand for topography gradient in x direction
         %> F stands for flux
         %> EidBoundaryType Index used to impose the zero non-hydrostatic boundary conditions at the open boundary,
         %> and to impose the zero grad non-hydrostatic boundary conditions at the wall
@@ -16,25 +16,17 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> ZeroFluxBoundaryIndex Index used to count the wet-dry interface number
         %> AdjacentDryCellAndFace matrix used to record the adjacent dry cell and the corresponding face index
         %> bx the bottom topography gradient in the x direction, with the boundary gradient term averaged
-        %> by the bottom topography gradient in the y direction, with the boundary gradient term averaged
         %> dt time step
         %> JcsGlobalStiffMatrix the non-zero element contained in precedent column,  for colume j the number of the non-zero element is JcsGlobalStiffMatrix[j+1] - JcsGlobalStiffMatrix[j]
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
         TempPNPX
         PNPX
-        TempPNPY
-        PNPY
         TempSPNPX
         SPNPX
-        TempSPNPY
-        SPNPY
         NPBX
-        NPBY
         NP
         TempFNPBX
         FNPBX
-        TempFNPBY
-        FNPBY
         WetCellIndex
         TempZeroFluxBoundary
         ZeroFluxBoundary
@@ -45,41 +37,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         AdjacentDryCellAndFace
         WetNum
         bx
-        by
         dt
         WetDryPoint
         TempWetDryPoint
         JcsGlobalStiffMatrix
-        JrsGlobalStiffMatrix        
+        JrsGlobalStiffMatrix                
     end
-    
-    methods
-        function obj = NdgNonhydrostaticSolver2d(PhysClass)
-%             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
-            mesh = PhysClass.meshUnion(1);
-            obj.matSetBoundaryType(mesh);
-            obj.NonhydroFmPoint = [];
-            obj.NonhydroFpPoint = [];
-            obj.bx = PhysClass.zGrad{1}(:,:,1);
-            obj.by = PhysClass.zGrad{1}(:,:,2);
-            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-                obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
-            obj.ZeroFluxBoundaryIndex = 0;
-            obj.ZeroFluxBoundary = ones(0,2);
-            obj.TempZeroFluxBoundary = ones(0,2);
-            obj.AdjacentDryCellAndFace = [];
-            obj.WetDryPoint = [];
-            obj.TempWetDryPoint = [];
-            %             obj.NonhydroFlag = 0;
-        end
-        
-        function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)
-            obj.dt = deltatime;
-            fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );
-        end
-        
-    end    
     
     methods( Access = protected )
         %> @brief Function to assemble the global sparse stiff matrix
@@ -90,15 +53,14 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] fphys the physics field
         %> @param[in] PhysClass the hydrostatic solver
         %> @param[out] StiffMatrix the global sparse stiff matrix
-        StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, UpdatedPNPX, UpdatedPNPY,...
-            UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, fphys, PhysClass);
+        StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, UpdatedPNPX, UpdatedSPNPX, UpdatedFNPBX, fphys, PhysClass);
         %> @brief function for calculating the right hand side
         %> @details
         %> Function to calculate the right hand side of the Nonhydrostatic model
         %> @param[in] fphys The fphys field
         %> @param[in] physClass The hydrostatic solver
         %> @retval[out] NonhydrostaticRHS the right hand side of the nonhydrostatic model
-        NonhydrostaticRHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
+        NonhydrostaticRHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass); 
         %> @brief function for updating the final flux term and the vertical velocity
         %> @details
         %> Function to calculate the final physics field of the Nonhydrostatic model
@@ -122,8 +84,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] InnerEdge the inner edge object
         %> @param[in] Variable variable used to calculate the characteristic matrix
         %> @param[in] ftype enumeration type used to impose the non-hydro static relalated boundary condition at the wet dry interface
-        %> @param[out] termX the calculated characteristic matrix in x direction        
-        [ termX, termY ] = matCalculateCharacteristicMatrix( obj, mesh, BoundaryEdge, InnerEdge, qx, qy, ftype);
+        %> @param[out] termX the calculated characteristic matrix in x direction
+        termX = matCalculateCharacteristicMatrix(obj, BoundaryEdge, InnerEdge, Variable, ftype);
         %> @brief Function to calculate the conservative variable related partial derivative operator
         %> @details Function to calculate the conservative variable related partial derivative operator
         %> @param[in] physClass The hydrostatic solver
@@ -133,33 +95,26 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] ftype the boundary condition at the wet-dry interface
         %> @param[in] index index of the calculated variable
         %> @param[out] termX the discrete operator in x direction
-        [ termX, termY ] = matCalculateConservativeVariableRelatedMatrix(obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
-        %<@brief function used to calculate the term used when assemble the global stiff matrix
-        %<@detail In this version, the zero boundary condition for nonhydrostatic pressure is imposed at
-        %< the general clamped boundary, and the zero grad boundary condition at the wall boundary.
-        %< Also the zero gradient boundary condition for the auxialary variable is imposed at the
-        %< general clamped boundary, and the zero boundary condition at the wall boundary
-        %< @param[in] mesh The mesh object
-        %< @param[in] index The number of the studied point
-        %< @param[out] qx first derivative of nonhydrostatic pressure with respect to x
-        %< @param[out] qy first derivative of nonhydrostatic pressure with respect to y
-        %< @param[out] q2x second derivative of nonhydrostatic pressure with respect to x
-        %< @param[out] q2y second derivative of nonhydrostatic pressure with respect to y
-        %< @param[out] qbx product of nonhydrostatic pressure with topography gradient bx in x direction
-        %< @param[out] qby product of nonhydrostatic pressure with topography gradient by in y direction
-        %< @param[out] fqbx product of nonhydrostatic pressure with topography gradient bx in x direction, this term is further included in the flux term
-        %< @param[out] fqby product of nonhydrostatic pressure with topography gradient by in y direction, this term is further included in the flux term
-        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Nonhydrop] = matAssembleCharacteristicMatrix(obj, mesh, index)
+        termX = matCalculateConservativeVariableRelatedMatrix(obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index);
+        %> @brief Function to assemble the characteristic matrix
+        %> @details Function to assemble the characteristic matrix
+        %> @param[in] mesh the mesh object
+        %> @param[in] index index of the studied point
+        %> @param[out] qx the first order derivative of non-hydrostatic prossure with respect to x
+        %> @param[out] q2x the second order derivative of non-hydrostatic prossure with respect to x
+        %> @param[out] qbx product of non-hydrostatic prossure with bottom gradient in x derection
+        %> @param[out] fqbx product of non-hydrostatic prossure with bottom gradient in x derection with flux term function
+        [qx, q2x, qbx, fqbx] = matAssembleCharacteristicMatrix(obj, mesh, i); 
         %> @brief Function to calculate the volume integral in the x direction
         %> @details Function to calculate the volume integral in the x direction
         %> @param[in] mesh the mesh object
         %> @param[in] Variable variable used to calculate the volume integral
         %> @param[out] VolumeIntegralX the volume integral in x direction       
-        [ VolumeIntegralX, VolumeIntegralY ] = matVolumeIntegral(obj, mesh, VariableX, VariableY )
+        VolumeIntegralX = matVolumeIntegral(obj, mesh, Variable)
         
-         matAssemblePointToCellInformation(obj, K, Np, PNPX,PNPY, SPNPX, SPNPY, NPBX, NPBY, FNPBX, FNPBY, NP )
-         
-         [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
+        matAssemblePointToCellInformation(obj, K, Np, PNPX, SPNPX,  NPBX, FNPBX, NP )
+        
+        [ termX ] = matCalculateConservativeVariableRHSMatrix( obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
     end
     
 end
