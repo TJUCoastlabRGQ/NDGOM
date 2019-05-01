@@ -1,21 +1,27 @@
 classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
-
+    
     %NDGNONHYDROSTATICSOLVER 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties
-
+        
+    end
+    
+    methods
+        
+        function obj = NdgQuadratureFreeNonhydrostaticSolver2d(PhysClass)
+            obj = obj@NdgNonhydrostaticSolver2d(PhysClass);
+        end
+        
     end
     
     methods(Access=protected)
-                        
+        
         [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Np] = ...
-            matAssembleCharacteristicMatrix(obj, mesh, i);
+            matAssembleCharacteristicMatrix(obj, mesh, index);
         
         RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
         
-        termY = matCalculateConservativeVariableRelatedMatrixY(obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index);
-                
         fphys = matUpdateConservativeFinalVelocity(obj, NonhydroPre , physClass, fphys);
         
         [ termX, termY] = matCalculateCharacteristicMatrix(obj, mesh,  BoundaryEdge, InnerEdge, VariableX, VariableY, ftype)
@@ -24,13 +30,12 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         
         [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, PhysClass, BoundaryEdge, InnerEdge, fphys, ftype, index);
         
-    end
-    
-    methods
+        [ bx, by ] = matSetBottomGradient(obj, zGrad); 
         
-        function obj = NdgQuadratureFreeNonhydrostaticSolver2d(PhysClass)
-            obj = obj@NdgNonhydrostaticSolver2d(PhysClass);
-        end        
+         matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
+        
+    end
+    methods
         %> Functions following are used for testing purpose
         function getWetDryInterface(obj, mesh)
             obj.matAssembleWetDryInterface(mesh);
@@ -46,9 +51,9 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         end
         
         function [qx, qy] = GetCharacteristicMatrix( obj, mesh, gmatx, gmaty, ftype)
-           BoundaryEdge = mesh.BoundaryEdge; InnerEdge = mesh.InnerEdge;
-           qx =  obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, gmatx, ftype);
-           qy =  obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, gmaty, ftype);
+            BoundaryEdge = mesh.BoundaryEdge; InnerEdge = mesh.InnerEdge;
+            qx =  obj.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, gmatx, ftype);
+            qy =  obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, gmaty, ftype);
         end
         
         function fp = GetBoundaryValue(obj, fm, fp, ftype)
@@ -56,8 +61,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         end
         
         function StiffMatrix = GetGlobalStiffMatrix(obj, PNPX, PNPY, SPNPX, SPNPY, FNPBX, FNPBY, fphys, PhysClass)
-                 StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( PNPX, PNPY,...
-            SPNPX, SPNPY, FNPBX, FNPBY, fphys, PhysClass);
-        end        
+            StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( PNPX, PNPY,...
+                SPNPX, SPNPY, FNPBX, FNPBY, fphys, PhysClass);
+        end
     end
 end

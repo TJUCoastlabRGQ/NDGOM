@@ -8,7 +8,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
-        d = 7.6145
+        d = 7.621
 %         d = 50
         fexact
         A = 0.1;
@@ -27,7 +27,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
            
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
             T = Lambda/c;
-            obj.fexact = obj.A * cos(2*pi/Lambda*mesh.x)*cos(2*pi/T*20);
+            obj.fexact = obj.A * cos(2*pi/Lambda*mesh.x)*cos(2*pi/T*10);
         end
         
         function NonhydroPostprocess(obj)  
@@ -37,7 +37,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
             Lambda = 20;
-            x0 = 17.5;
+            x0 = 7.5;
             h = obj.d;
             a = obj.A;
             c = sqrt(obj.gra*Lambda/2/pi*tanh(2*pi*h/Lambda));
@@ -110,7 +110,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 30;
+            ftime = 10;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -118,10 +118,10 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 500;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK22;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('equationType') = enumDiscreteEquation.Weak;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
@@ -137,7 +137,7 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 30], [0, 1], 30/deltax, 1/deltax, bctype);
+    mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
     mesh = makeUniformQuadMesh(N,[0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 else

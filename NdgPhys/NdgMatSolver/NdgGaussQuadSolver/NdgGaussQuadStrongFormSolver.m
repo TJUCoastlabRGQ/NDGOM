@@ -29,6 +29,8 @@ classdef NdgGaussQuadStrongFormSolver < handle
         
         %> Interpolation matrix to get the value at the Volume Guass quadrature point
         Vq
+        %> Jacobian coefficient at the Gauss quadrature point
+        wJ
     end
     properties
         %> IELIFT, values of the basis functions at each edge quadrature points of the inner edges
@@ -88,7 +90,7 @@ classdef NdgGaussQuadStrongFormSolver < handle
                 %                 [ obj.IEwJs{m}, obj.BEwJs{m} ] = obj.assembleFaceQuadratureWeight( mesh, obj.FVfq{m}*Js );
                 [ obj.rxwJ{m}, obj.rywJ{m}, obj.rzwJ{m}, ...
                     obj.sxwJ{m}, obj.sywJ{m}, obj.szwJ{m}, ...
-                    obj.txwJ{m}, obj.tywJ{m}, obj.tzwJ{m} ] = obj.assembleJacobianFactor( mesh );
+                    obj.txwJ{m}, obj.tywJ{m}, obj.tzwJ{m}, obj.wJ{m} ] = obj.assembleJacobianFactor( mesh );
                 
                 [ obj.IELIFT{m}, obj.BELIFT{m} ] = obj.assembleBoundaryLiftMatrix( mesh );
             end
@@ -97,7 +99,7 @@ classdef NdgGaussQuadStrongFormSolver < handle
     
     methods( Static )
         
-        function [ rxwJ, rywJ, rzwJ, sxwJ, sywJ, szwJ, txwJ, tywJ, tzwJ ] ...
+        function [ rxwJ, rywJ, rzwJ, sxwJ, sywJ, szwJ, txwJ, tywJ, tzwJ, wJ ] ...
                 = assembleJacobianFactor( mesh )
             
             [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J ] ...

@@ -4,7 +4,7 @@ function AnimationSurfaceLevel( obj )
 
 visual = Visual2d( obj.mesh2d );
 OutstepNum = obj.outputFile.outputStep;
-
+% OutstepNum = 2299;
 video = VideoWriter( [obj.outputFile.casename, '/', ...
     obj.outputFile.casename, '.avi'] );
 video.FrameRate = 20;
@@ -14,7 +14,7 @@ open( video );
 figure('Color', 'w');
 [ fphys2d, ~ ] = obj.outputFile.readOutputResult( obj, 1);
 visual.drawResult( fphys2d(:, :, 1) );
-zlim([9.88, 10.12]);
+zlim([9.85, 10.15]);
 zlabel('$\xi$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 xlabel('$x$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 % ylabel('$y$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);

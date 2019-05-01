@@ -5,21 +5,16 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     properties ( Constant )
         hmin = 0.001;
         %> channel length
-        ChLength = 10;
+        ChLength = 100;
         %> channel width
-        ChWidth = 1;
+        ChWidth = 10;
         %> channel depth
         H0 = 10;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 23;
-        %> casename
-%         casename = 'StandingWaveInAClosedChannel';
- % cf = cd/rho
-%         Cf = 0.0025/1000;
-%        Cf = 0;
+        finalTime = 16;
     end
     
     properties
@@ -36,8 +31,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.01;
-            obj.outputFieldOrder2d = 4;
+            obj.dt = 0.02;
+            obj.outputFieldOrder2d = 1;
             obj.miu0{1} = 0.001;
 %             obj.miu = 0;
             obj.Cf{1} = 0.0025/1000;
@@ -83,8 +78,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputNcfileNum') = 1500;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('limiterType') = enumLimiter.Vert;
-            option('equationType') = enumDiscreteEquation.Weak;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;            
         end
         

@@ -11,18 +11,18 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     properties
         A = 2
         Eta0
-        Eta10
-        Eta20
+        Eta1
+        Eta2
         Eta25
         Eta50
         U0
-        U10
-        U20
+        U1
+        U2
         U25
         U50
         W0
-        W10
-        W20
+        W1
+        W2
         W25
         W50
     end
@@ -124,13 +124,13 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 fphys{m}(:,:,1) = obj.Eta0 + obj.Depth;
 %                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
-                fphys{m}(:,:,6) = fphys{m}(:,:,1).*obj.W0./2;
+                fphys{m}(:,:,6) =  obj.W0./2;
             end       
         end
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 1;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
