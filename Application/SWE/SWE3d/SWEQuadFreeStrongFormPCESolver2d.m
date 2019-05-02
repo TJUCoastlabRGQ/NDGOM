@@ -6,7 +6,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
     end
     
     methods
-        function evaluateAdvectionRHS( obj, physClass, fphys2d, fphys3d, fext )
+        function evaluateAdvectionRHS( obj, physClass, fphys3d, fext )
             
             fphys = cell(1);
             % evaluate inner edge
@@ -15,16 +15,16 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 %  Function used to calculate the vertically averaged horizontal momentum term
                 mesh3d = physClass.mesh3d(m);
                 mesh2d = physClass.mesh2d(m);
-                fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
-                fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
-                fphys{1} = fphys2d{m};
+                physClass.fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
+                physClass.fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
+                fphys{1} = physClass.fphys2d{m};
                 
                 %Function used to calculate the two dimentional PCE volume term
                 physClass.frhs2d{m} = -( ...
-                    mesh2d.rx .* ( mesh2d.cell.Dr * fphys2d{m}(:, :, 2) ) + ...
-                    mesh2d.sx .* ( mesh2d.cell.Ds * fphys2d{m}(:, :, 2) ) + ...
-                    mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{m}(:, :, 3) ) + ...
-                    mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:, :, 3) ) );
+                    mesh2d.rx .* ( mesh2d.cell.Dr * physClass.fphys2d{m}(:, :, 2) ) + ...
+                    mesh2d.sx .* ( mesh2d.cell.Ds * physClass.fphys2d{m}(:, :, 2) ) + ...
+                    mesh2d.ry .* ( mesh2d.cell.Dr * physClass.fphys2d{m}(:, :, 3) ) + ...
+                    mesh2d.sy .* ( mesh2d.cell.Ds * physClass.fphys2d{m}(:, :, 3) ) );
                 
                 % Function used to calculate the two dimentional PCE inner surface term
                 InnerEdge = mesh2d.InnerEdge;

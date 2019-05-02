@@ -1,4 +1,4 @@
-function frhs2d_BoundarySurfaceTerm = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext)
+function frhs2d_BoundarySurfaceTerm = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fext)
 %> @brief Function used to calculate the two dimentional PCE boundary surface integration term
 %> 
 %> More detailed description.
@@ -10,7 +10,7 @@ function frhs2d_BoundarySurfaceTerm = matEvaluate2dHorizonPCEBoundaryTerm( obj, 
 %> @fphys2d frhs2d_BoundarySurfaceTerm Contribution to the RHS of the two dimensional PCE from the boundary face integration term
 
 
-[ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( fphys2d );
+[ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( obj.fphys2d );
 
 % apply clamped boundary condition
 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );

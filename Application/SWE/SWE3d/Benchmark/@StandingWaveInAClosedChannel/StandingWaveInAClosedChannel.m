@@ -5,16 +5,16 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     properties ( Constant )
         hmin = 0.001;
         %> channel length
-        ChLength = 100;
+        ChLength = 10;
         %> channel width
-        ChWidth = 10;
+        ChWidth = 6;
         %> channel depth
-        H0 = 10;
+        H0 = 7.621;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 16;
+        finalTime = 30;
     end
     
     properties
@@ -26,17 +26,22 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.outputFieldOrder2d = [ 1 2 3 ];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.02;
-            obj.outputFieldOrder2d = 1;
-            obj.miu0{1} = 0.001;
+            obj.dt = 0.01;
+            
+%             obj.miu0{1} = 0.001;
+            obj.miu0{1} = 0;
 %             obj.miu = 0;
-            obj.Cf{1} = 0.0025/1000;
+%             obj.Cf{1} = 0.0025/1000;
+            obj.Cf{1} = 0;
         end
+        
+        EntropyAndEnergyCalculation(obj);
         
         AnalysisResult2d( obj );
         AnalysisResult3d( obj );
@@ -68,7 +73,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 30;
+            ftime = 10;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
