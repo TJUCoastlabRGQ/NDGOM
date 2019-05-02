@@ -24,11 +24,15 @@ classdef SWEAbstract3d < NdgPhysMat
         hmin
     end
     
-    properties( SetAccess = protected )
+%     properties( SetAccess = protected )
+%         %> cell array for physical field variable
+%         fphys2d
+%     end
+
+    properties
         %> cell array for physical field variable
         fphys2d
     end
-    
     properties( Abstract )
         %> number of physical field
         Nfield2d
@@ -110,17 +114,17 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matUpdateOutputResult( obj, time, fphys2d, fphys );
         
-        matUpdateFinalResult( obj, time, fphys2d, fphys );
+        matUpdateFinalResult( obj, time, fphys );
         
-        [ fphys2d ]  = matEvaluate2dHorizonMomentum(obj, mesh3d, fphys2d, fphys);
+        matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
         
-        [ VolumeTerm_rhs2d ] = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d, fphys2d );
+        [ VolumeTerm_rhs2d ] = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d );
         
-        [ InnerSurface_rhs2d ] = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge, fphys2d);
+        [ InnerSurface_rhs2d ] = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge);
         
-        [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fphys2d, fext);
+        [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fext);
         
-        [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys2d, fphys);
+        [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys);
         
         [ SideSurface_rhs3d ]  = matEvaluate3dSideSurfaceTerm( obj, InnerEdge, fphys );
         

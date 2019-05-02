@@ -55,6 +55,11 @@ while( time < ftime )
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
+    display(time);
+    
+    fphys2d{1}(:, :, 2) = obj.mesh3d(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
+    fphys2d{1}(:, :, 3) = obj.mesh3d(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );    
+    
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     
     timeRatio = time / ftime;
@@ -63,7 +68,7 @@ end
 hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
-obj.matUpdateFinalResult( time, fphys2d, fphys );
+obj.matUpdateFinalResult( time, fphys );
 % obj.outputFile.closeOutputFile();
 end
 

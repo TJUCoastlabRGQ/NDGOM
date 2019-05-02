@@ -2,10 +2,6 @@ function RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, PhysClass)
 
 InnerEdge = PhysClass.meshUnion(1).InnerEdge;
 BoundaryEdge = PhysClass.meshUnion(1).BoundaryEdge;
-% fhx = obj.matCalculateConservativeVariableRelatedMatrixX(physClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-% fhy = obj.matCalculateConservativeVariableRelatedMatrixY(physClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-% fhux = obj.matCalculateConservativeVariableRelatedMatrixX(physClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 2);
-% fhvy = obj.matCalculateConservativeVariableRelatedMatrixY(physClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 3);
 
 [ fhx, fhy ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
 [ fhux, ~ ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 2);

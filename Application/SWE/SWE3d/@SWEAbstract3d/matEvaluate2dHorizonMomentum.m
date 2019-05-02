@@ -1,4 +1,4 @@
-function fphys2d = matEvaluate2dHorizonMomentum( obj, mesh3d, fphys2d, fphys3d )
+function fphys2d = matEvaluate2dHorizonMomentum( obj, mesh3d, fphys3d )
 %> @brief Function used to calculate the vertically averaged horizontal momentum term
 %> 
 %> More detailed description.
@@ -10,7 +10,7 @@ function fphys2d = matEvaluate2dHorizonMomentum( obj, mesh3d, fphys2d, fphys3d )
 %> @fphys2d fphys2d The two dimensional physical field with the vertically averaged horizontal momentum term updated
 
 
-fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
-fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
+obj.fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
+obj.fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
 
 end

@@ -1,4 +1,4 @@
-classdef NdghydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
+classdef NdghydrostaticSolver2d
     %NDGHYDROSTATICSOLVER 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -7,18 +7,19 @@ classdef NdghydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
     
     methods
         function obj = NdghydrostaticSolver2d(PhysClass)
-%             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
+            %             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
         end
         
         function fphys = NdgNonhydrostaticUpdata(obj, PhysClass, fphys)
-           % doing nothing
+            % doing nothing
         end
         
         function fphys = NdgConservativeNonhydrostaticUpdata(obj,PhysClass, fphys, rk, intRK, dt)
-          % doing nothing
-        end        
+            % doing nothing
+        end
         
     end
+    
     
 end
 

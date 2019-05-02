@@ -1,6 +1,7 @@
 function runNonhydrostaticStandingWave
-deltax = [2 1.5 1 0.5];
-Order = [1 2];
+deltax = [ 3 2 1.5 1];
+% deltax = 1.5;
+Order =[ 2 1 ];
 len = deltax;
 type = enumStdCell.Quad;
 Nmesh = numel(deltax);
@@ -37,9 +38,9 @@ for n = 1:Ndeg
     tic; Solver.matSolve(); time(m, n) = toc;
     PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticStandingWave2d','/','NonhydrostaticStandingWave2d'));
     fext = cell(1);
-    fext{1}(:,:,1) = Solver.fexact;fext{1}(:,:,2) = zeros(size(Solver.fext));fext{1}(:,:,3) = zeros(size(Solver.fext));
+    fext{1}(:,:,1) = Solver.fexact;fext{1}(:,:,2) = zeros(size(Solver.fext));fext{1}(:,:,3) = zeros(size(Solver.fext));fext{1}(:,:,4) = zeros(size(Solver.fext));
     fphys = cell(1);
-    fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.d;fphys{1}(:,:,2) = zeros(size(Solver.fext));fphys{1}(:,:,3) = zeros(size(Solver.fext));
+    fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.d;fphys{1}(:,:,2) = zeros(size(Solver.fext));fphys{1}(:,:,3) = zeros(size(Solver.fext));fphys{1}(:,:,4) = zeros(size(Solver.fext));
     error2 = PostProcess.evaluateNormErr2( fphys, fext );
     err2(m, n) = error2(1);
     
@@ -53,9 +54,9 @@ for n = 1:Ndeg
     clear PostProcess;
     end
     % print table
-    fprintf('\n==================deg = %d==================\n', n);
-    convergence_table(len, err1(:, n), err2(:, n), errInf(:, n), ...
-        time(:, n))
+    fprintf('\n==================deg = %d==================\n', Order(n));
+    convergence_table(len, err1(:, n), err2(:, n), errInf(:, 1), ...
+        time(:, 1))
     
     % plot figure
     co = color{n}; ma = marker{n};

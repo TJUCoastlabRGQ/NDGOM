@@ -60,11 +60,11 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.matSetBoundaryType(mesh);
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
-            obj.bx = PhysClass.zGrad{1}(:,:,1);
-            obj.by = PhysClass.zGrad{1}(:,:,2);
+            [ obj.bx, obj.by ] = obj.matSetBottomGradient(PhysClass.zGrad{1});
+            
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-                obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
+%             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
+%                 obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
             obj.ZeroFluxBoundaryIndex = 0;
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);
@@ -79,7 +79,15 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );
         end
         
-    end    
+    end
+    
+    methods(  Access = protected, Abstract )
+        [ bx, by ] = matSetBottomGradient(obj, zGrad);
+        
+        matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
+        
+        [Nq, qx, qy, q2x, q2y] = matAssembleCharacteristicMatrix(obj, mesh, index);
+    end
     
     methods( Access = protected )
         %> @brief Function to assemble the global sparse stiff matrix
@@ -112,10 +120,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] physClass The hydrostatic solver
         %> @param[in] fphys The fphys field
         fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys);
-        %> @brief Function to set the characteristic matrix at the initiaizing stage
-        %> @details Function to set the characteristic matrix used when assemble the global stiff matrix
-        %> @param[in] mesh The mesh object
-        matSetInitializeCharacteristicMatrix(obj, PhysClass, mesh);
         %> @brief Function to calculate the characteristic matrix
         %> @details Function to calculate the characteristic matrix in the x direction
         %> @param[in] BoundaryEdge the boundary edge object
@@ -134,22 +138,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] index index of the calculated variable
         %> @param[out] termX the discrete operator in x direction
         [ termX, termY ] = matCalculateConservativeVariableRelatedMatrix(obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
-        %<@brief function used to calculate the term used when assemble the global stiff matrix
-        %<@detail In this version, the zero boundary condition for nonhydrostatic pressure is imposed at
-        %< the general clamped boundary, and the zero grad boundary condition at the wall boundary.
-        %< Also the zero gradient boundary condition for the auxialary variable is imposed at the
-        %< general clamped boundary, and the zero boundary condition at the wall boundary
-        %< @param[in] mesh The mesh object
-        %< @param[in] index The number of the studied point
-        %< @param[out] qx first derivative of nonhydrostatic pressure with respect to x
-        %< @param[out] qy first derivative of nonhydrostatic pressure with respect to y
-        %< @param[out] q2x second derivative of nonhydrostatic pressure with respect to x
-        %< @param[out] q2y second derivative of nonhydrostatic pressure with respect to y
-        %< @param[out] qbx product of nonhydrostatic pressure with topography gradient bx in x direction
-        %< @param[out] qby product of nonhydrostatic pressure with topography gradient by in y direction
-        %< @param[out] fqbx product of nonhydrostatic pressure with topography gradient bx in x direction, this term is further included in the flux term
-        %< @param[out] fqby product of nonhydrostatic pressure with topography gradient by in y direction, this term is further included in the flux term
-        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Nonhydrop] = matAssembleCharacteristicMatrix(obj, mesh, index)
         %> @brief Function to calculate the volume integral in the x direction
         %> @details Function to calculate the volume integral in the x direction
         %> @param[in] mesh the mesh object
