@@ -1,12 +1,12 @@
-function matEvaluateRHS( obj, fphys3d )
+function matEvaluateRHS( obj, fphys2d, fphys3d )
 %MATEVALUATERHS Summary of this function goes here
 %   Detailed explanation goes here
 
-obj.PCESolver2d.evaluateAdvectionRHS(obj,fphys3d, obj.fext2d);
+obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys3d, obj.fext2d);
 
 for m = 1:obj.Nmesh
     mesh3d = obj.meshUnion(m);
-    fphys3d{m}(:, :, 4) = mesh3d.Extend2dField( obj.fphys2d{m}(:, :, 1) );
+    fphys3d{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 1) );
     obj.miu{m} = obj.miu0{m} ./ ( fphys3d{m}(:, :, 4).^2 );
 end
 

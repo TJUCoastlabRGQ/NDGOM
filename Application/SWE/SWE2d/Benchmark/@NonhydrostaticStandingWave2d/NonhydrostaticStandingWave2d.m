@@ -8,12 +8,12 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
-        d = 7.621
+        d = 12
 %         d = 50
         fexact
-        A = 0.1;
+        A = 0.05;
         T
-        Lambda = 20
+        Lambda = 40000
     end
     
     methods
@@ -24,11 +24,11 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
                   
-            h = obj.d;
-           
-            c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
-            obj.T = obj.Lambda/c;
-            obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
+%             h = obj.d;
+%            
+%             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
+%             obj.T = obj.Lambda/c;
+%             obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -102,12 +102,12 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
                 bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) - fphys{m}(:,:,4);                
+                fphys{m}(:,:,1) =  obj.A * cos(pi*mesh.x/obj.Lambda) * cos( pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 12*3600;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -135,7 +135,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 10], [0, 6], 10/deltax, 6/deltax, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 40000], [0, 8000], 40000/deltax, 8000/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

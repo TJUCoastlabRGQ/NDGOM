@@ -1,4 +1,4 @@
-function [ W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys3d )
+function [ W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -15,9 +15,11 @@ data{1} = fphys3d;
 % dHVdy = obj.matEvaluatePartialDerivativeTermX( mesh, fphys3d);
 % fphys2d = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
 %         fphys2d, fphys3d );
+fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
+fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
 
-HU2D = mesh3d.Extend2dField( obj.fphys2d{1}(:, :, 2) );
-HV2D = mesh3d.Extend2dField( obj.fphys2d{1}(:, :, 3) );
+HU2D = mesh3d.Extend2dField( fphys2d(:, :, 2) );
+HV2D = mesh3d.Extend2dField( fphys2d(:, :, 3) );
 dHU2Ddx = mesh3d.rx .* ( mesh3d.cell.Dr * HU2D ) + mesh3d.sx .* ( mesh3d.cell.Ds * HU2D ) + mesh3d.tx .* ( mesh3d.cell.Dt * HU2D );
 dHV2Ddy = mesh3d.ry .* ( mesh3d.cell.Dr * HV2D ) + mesh3d.sy .* ( mesh3d.cell.Ds * HV2D ) + mesh3d.ty .* ( mesh3d.cell.Dt * HV2D );
 

@@ -31,15 +31,15 @@ for t = 1:Ntime
     Energy(t) = sum( 0.5 * obj.gra * averageH2A + 0.5 * averageHU2V2A );
     
     %     [ ExactEta, ExactU ] = GetExactSolution( obj, outputTime(t) );
-    ExactEta = obj.A * cos( 2*pi/obj.Lambda*obj.meshUnion(1).x ) .* cos( 2*pi/obj.T*outputTime(t) );
-    ExactU = zeros(size(ExactEta));
-    A = obj.A; T = obj.T; Lambda = obj.Lambda; d = obj.d;
-    x = obj.meshUnion(1).x;
-    parfor i =  1:numel(ExactU)
-        display(i);
-        ExactU(i) = int ( A * 2 * pi /T * cosh( 2*pi/Lambda * (z + d) ) ./ sinh (2*pi/Lambda*d) .*...
-            sin( 2*pi/Lambda.*x(i))*sin( 2*pi/T*outputTime(t) ),z, -d , ExactEta(i) )./(ExactEta(i) + d);
-    end
+    ExactEta = obj.A * cos(pi*obj.meshUnion(1).x/obj.Lambda) * cos( pi * sqrt(obj.gra*obj.d)/obj.Lambda*outputTime(t));
+    ExactU = obj.A * sqrt(obj.gra * obj.d)/obj.d*sin(pi*obj.meshUnion(1).x/obj.Lambda) *  sin( pi * sqrt(obj.gra*obj.d)/obj.Lambda*outputTime(t));
+%     A = obj.A; T = obj.T; Lambda = obj.Lambda; d = obj.d;
+%     x = obj.meshUnion(1).x;
+%     parfor i =  1:numel(ExactU)
+%         display(i);
+%         ExactU(i) = int ( A * 2 * pi /T * cosh( 2*pi/Lambda * (z + d) ) ./ sinh (2*pi/Lambda*d) .*...
+%             sin( 2*pi/Lambda.*x(i))*sin( 2*pi/T*outputTime(t) ),z, -d , ExactEta(i) )./(ExactEta(i) + d);
+%     end
     
     averageExactHA = sum( obj.meshUnion(1).J .* ( obj.meshUnion(1).cell.M * ( ExactEta + obj.d )) );
     averageExactU2A = sum( obj.meshUnion(1).J .* ( obj.meshUnion(1).cell.M * ( ExactU.^2) ) );

@@ -108,13 +108,13 @@ classdef SWEAbstract3d < NdgPhysMat
     
     methods ( Access = protected )
         
-        matEvaluateRHS( obj, fphys );
+        matEvaluateRHS( obj, fphys2d, fphys );
         
-        matUpdateExternalField( obj, time, fphys );
+        matUpdateExternalField( obj, time, fphys2d, fphys );
         
-        matUpdateOutputResult( obj, time, fphys );
+        matUpdateOutputResult( obj, time, fphys2d, fphys );
         
-        matUpdateFinalResult( obj, time, fphys );
+        matUpdateFinalResult( obj, time, fphys2d, fphys );
         
         matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
         
@@ -136,7 +136,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         [ AuxialaryVariableFace_rhs3d ] = matEvaluate3dVerticalAuxialaryVariableFaceTerm( obj, mesh3d, fphys );
         
-        [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys );
+        [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
         
