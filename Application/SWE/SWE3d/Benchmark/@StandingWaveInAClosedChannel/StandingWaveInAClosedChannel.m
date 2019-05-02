@@ -5,23 +5,23 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     properties ( Constant )
         hmin = 0.001;
         %> channel length
-        ChLength = 40000;
+        ChLength = 100;
         %> channel width
-        ChWidth = 8000;
+        ChWidth = 2;
         %> channel depth
-        H0 = 12;
+        H0 = 7.612;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 12*3600;
+        finalTime = 200;
     end
     
     properties
         dt
         miu0
-        Lambda = 40000;
-        A = 0.05;
+        Lambda = 100;
+        A = 0.5;
     end
     
     methods
@@ -34,7 +34,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 20;
+            obj.dt = 0.03;
             
 %             obj.miu0{1} = 0.001;
             obj.miu0{1} = 0;
@@ -62,18 +62,18 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                   % surface elevation
-                fphys2d{m}(:,:,1) =  obj.A * cos(pi*mesh2d.x/obj.Lambda) + obj.H0;
+                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*mesh2d.x/obj.Lambda) + obj.H0;
                 % bottom elevation
                 fphys2d{m}(:, :, 5) = -obj.H0;
                 % water depth
-                fphys2d{m}(:, :, 4) = obj.A * cos(pi*mesh2d.x/obj.Lambda);
+                fphys2d{m}(:, :, 4) = obj.A * cos(2*pi*mesh2d.x/obj.Lambda);
                 % water depth
                 fphys{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 12*3600;
+            ftime = 200;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
