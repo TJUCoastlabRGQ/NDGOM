@@ -1,5 +1,5 @@
 function runNonhydrostaticSolitaryWave
-deltax = [3 2 1.5 1];
+deltax = [2 1.5 1 0.75];
 Order = [1 2];
 len = deltax;
 type = enumStdCell.Quad;
@@ -17,7 +17,7 @@ marker = {'o', 's', '^'};%circle for Eta, square for U, triangle for Ws
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = (600 * 6) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
+        dofs(m, n) = (450 * deltax(m)) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
     end
 end
 
@@ -30,7 +30,7 @@ for n = 1:Ndeg
     Solver = NonhydrostaticSolitaryWave(Order(n),deltax(m),type);
     PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticSolitaryWave','/','NonhydrostaticSolitaryWave'));
     fext = cell(1);
-    fext{1}(:,:,1) = Solver.Eta1;fext{1}(:,:,2) = Solver.U1;fext{1}(:,:,3) = Solver.W1;fext{1}(:,:,4) = zeros(size(fext{1}(:,:,1)));
+    fext{1}(:,:,1) = Solver.Eta10;fext{1}(:,:,2) = Solver.U10;fext{1}(:,:,3) = Solver.W10;fext{1}(:,:,4) = zeros(size(fext{1}(:,:,1)));
     fphys = cell(1);
     %> methods from Lu
     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.Depth;fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)*2;fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
@@ -51,13 +51,13 @@ for n = 1:Ndeg
     
     % print table
     fprintf('\n==================deg = %d==================\n', n);
-    convergence_table(len, EtaErr1(:, n), EtaErr2(:, n), EtaErrInf(:, n));
+    convergence_table(len, EtaErr1(:, n), EtaErr2(:, n), EtaErrInf(:, n))
 
     fprintf('\n==================deg = %d==================\n', n);
-    convergence_table(len, UErr1(:, n), UErr2(:, n), UErrInf(:, n));    
+    convergence_table(len, UErr1(:, n), UErr2(:, n), UErrInf(:, n))   
 
     fprintf('\n==================deg = %d==================\n', n);
-    convergence_table(len, WsErr1(:, n), WsErr2(:, n), WsErrInf(:, n));   
+    convergence_table(len, WsErr1(:, n), WsErr2(:, n), WsErrInf(:, n)) 
     
     % plot figure
     co = color{n};

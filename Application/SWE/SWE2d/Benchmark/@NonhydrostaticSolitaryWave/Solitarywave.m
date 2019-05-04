@@ -21,8 +21,8 @@ eta = A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t));
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.Eta0(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),0}));
-        obj.Eta1(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),1}));
-        obj.Eta2(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),2}));
+        obj.Eta10(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),10}));
+        obj.Eta20(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),20}));
 %         obj.Eta25(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),25}));
 %         obj.Eta50(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),50}));
     end
@@ -44,8 +44,8 @@ difU = diff(U,x);
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
-        obj.U1(i,j) = double(subs(U,{x,t},{mesh.x(i,j),1}));
-        obj.U2(i,j) = double(subs(U,{x,t},{mesh.x(i,j),2}));
+        obj.U10(i,j) = double(subs(U,{x,t},{mesh.x(i,j),10}));
+        obj.U20(i,j) = double(subs(U,{x,t},{mesh.x(i,j),20}));
 %         obj.U25(i,j) = double(subs(U,{x,t},{mesh.x(i,j),25}));
 %         obj.U50(i,j) = double(subs(U,{x,t},{mesh.x(i,j),50}));
     end
@@ -56,27 +56,27 @@ end
 % % obj.W25 = -(obj.Eta0+h).*difU(mesh.x,25.*ones(size(mesh.x)));
 % % obj.W50 = -(obj.Eta0+h).*difU(mesh.x,50.*ones(size(mesh.x)));
 W0 = zeros(size(mesh.x));
-W1 = zeros(size(mesh.x));
-W2 = zeros(size(mesh.x));
+W10 = zeros(size(mesh.x));
+W20 = zeros(size(mesh.x));
 W25 = zeros(size(mesh.x));
 W50 = zeros(size(mesh.x));
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         %Methods from Stelling and Zljlema
-         W0(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),0}))*(obj.Eta0(i,j));
-         W1(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),1}))*(obj.Eta1(i,j));
-         W2(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),2}))*(obj.Eta2(i,j));       
+%          W0(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),0}))*(obj.Eta0(i,j));
+%          W10(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),10}))*(obj.Eta10(i,j));
+%          W20(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),20}))*(obj.Eta20(i,j));       
         
-%         W0(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),0}))*(obj.Eta0(i,j)+h);
-%         W10(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),10}))*(obj.Eta0(i,j)+h);
-%         W20(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),20}))*(obj.Eta20(i,j)+h);
+        W0(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),0}))*(obj.Eta0(i,j)+h);
+        W10(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),10}))*(obj.Eta10(i,j)+h);
+        W20(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),20}))*(obj.Eta20(i,j)+h);
 %         W25(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),25}))*(obj.Eta25(i,j)+h);
 %         W50(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),50}))*(obj.Eta50(i,j)+h);
     end
 end
 obj.W0 = -W0;
-obj.W1 = -W1;
-obj.W2 = -W2;
+obj.W10 = -W10;
+obj.W20 = -W20;
 % obj.W25 = -W25;
 % obj.W50 = -W50;
 %% 符号变量反而计算的慢

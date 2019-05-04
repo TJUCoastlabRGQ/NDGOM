@@ -63,8 +63,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             [ obj.bx, obj.by ] = obj.matSetBottomGradient(PhysClass.zGrad{1});
             
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-%             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-%                 obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
+            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
+                obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
             obj.ZeroFluxBoundaryIndex = 0;
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);

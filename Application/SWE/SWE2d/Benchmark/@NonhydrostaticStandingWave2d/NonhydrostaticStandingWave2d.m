@@ -8,12 +8,12 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     
     properties
         dt
-        d = 12
+        d = 7.612
 %         d = 50
         fexact
-        A = 0.05;
+        A = 0.1;
         T
-        Lambda = 40000
+        Lambda = 20
     end
     
     methods
@@ -23,16 +23,12 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
-                  
-%             h = obj.d;
-%            
-%             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
-%             obj.T = obj.Lambda/c;
-%             obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
+                             
+            c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*obj.d/obj.Lambda));
+            obj.T = obj.Lambda/c;
+            obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
         end
-        
-        EntropyAndEnergyCalculation(obj);
-        
+                
         function NonhydroPostprocess(obj)  
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             Ntime = PostProcess.Nt;
@@ -102,12 +98,12 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
                 bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  obj.A * cos(pi*mesh.x/obj.Lambda) * cos( pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
+                fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 12*3600;
+            ftime = 10;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -118,7 +114,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
@@ -135,7 +131,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 40000], [0, 8000], 40000/deltax, 8000/deltax, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
