@@ -91,12 +91,23 @@ classdef SWEAbstract2d < NdgPhysMat
         %> evaluate local boundary flux
         function [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, ny, fm )
             [ fluxM ] = mxEvaluateSurfFlux( obj.hmin, obj.gra, nx, ny, fm);
+            fluxM(:,:,4) = fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) .* nx + ...
+                fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) .* ny;
         end% func
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp )
             [ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp );
+            fluxS(:,:,4) = ( fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
+                ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
+                
         end% func
+    end
+    
+    methods( Access = protected )
+        outputObj = matInitOutput( obj, mesh )
     end
         
     methods ( Sealed, Access = protected )

@@ -1,4 +1,4 @@
-function [ outputObj ] = initOutput( physMat, mesh )
+function [ outputObj ] = matInitOutput( physMat, mesh )
 %INITOUTPUTFILE Summary of this function goes here
 %   Detailed explanation goes here
 

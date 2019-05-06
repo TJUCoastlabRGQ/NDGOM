@@ -1,4 +1,4 @@
-classdef SolitaryWavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
+classdef SolitaryWavetransformOverAnSurbmergedBar < SWEConventional2d
     %NONHYDROSTATICSOLITARYWAVERUNUPWALL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -32,7 +32,7 @@ classdef SolitaryWavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
     methods
         function obj = SolitaryWavetransformOverAnSurbmergedBar(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
-            obj = obj@SWEPreBlanaced2d();
+            obj = obj@SWEConventional2d();
             obj.hmin = 1e-3;
             obj.SolitaryWaveTransform(mesh); 
             obj.initPhysFromOptions( mesh );
@@ -151,7 +151,7 @@ classdef SolitaryWavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

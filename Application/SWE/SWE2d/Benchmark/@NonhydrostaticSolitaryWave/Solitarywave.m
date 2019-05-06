@@ -23,8 +23,8 @@ for i = 1:size(mesh.x,1)
         obj.Eta0(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),0}));
         obj.Eta10(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),10}));
         obj.Eta20(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),20}));
-%         obj.Eta25(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),25}));
-%         obj.Eta50(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),50}));
+        obj.Eta25(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),25}));
+        obj.Eta50(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),50}));
     end
 end
 
@@ -46,8 +46,8 @@ for i = 1:size(mesh.x,1)
         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
         obj.U10(i,j) = double(subs(U,{x,t},{mesh.x(i,j),10}));
         obj.U20(i,j) = double(subs(U,{x,t},{mesh.x(i,j),20}));
-%         obj.U25(i,j) = double(subs(U,{x,t},{mesh.x(i,j),25}));
-%         obj.U50(i,j) = double(subs(U,{x,t},{mesh.x(i,j),50}));
+        obj.U25(i,j) = double(subs(U,{x,t},{mesh.x(i,j),25}));
+        obj.U50(i,j) = double(subs(U,{x,t},{mesh.x(i,j),50}));
     end
 end
 
@@ -70,15 +70,15 @@ for i = 1:size(mesh.x,1)
         W0(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),0}))*(obj.Eta0(i,j)+h);
         W10(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),10}))*(obj.Eta10(i,j)+h);
         W20(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),20}))*(obj.Eta20(i,j)+h);
-%         W25(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),25}))*(obj.Eta25(i,j)+h);
-%         W50(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),50}))*(obj.Eta50(i,j)+h);
+        W25(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),25}))*(obj.Eta25(i,j)+h);
+        W50(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),50}))*(obj.Eta50(i,j)+h);
     end
 end
 obj.W0 = -W0;
 obj.W10 = -W10;
 obj.W20 = -W20;
-% obj.W25 = -W25;
-% obj.W50 = -W50;
+obj.W25 = -W25;
+obj.W50 = -W50;
 %% 符号变量反而计算的慢
 % % obj.W0 = -double(subs(difU,{x,t},{mesh.x,0})).*(obj.Eta0+h);
 % % obj.W25 = -double(subs(difU,{x,t},{mesh.x,25})).*(obj.Eta25+h);

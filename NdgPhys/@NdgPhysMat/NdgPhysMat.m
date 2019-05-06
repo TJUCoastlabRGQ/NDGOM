@@ -135,6 +135,8 @@ classdef NdgPhysMat < NdgPhys
         fphys = matEvaluateLimiter( obj, fphys )
         fphys = matEvaluatePostFunc( obj, fphys )
         
+        outputObj = matInitOutput( obj, mesh )
+        
         %> @brief
         matUpdateOutputResult( obj, time, step, fphys )
         

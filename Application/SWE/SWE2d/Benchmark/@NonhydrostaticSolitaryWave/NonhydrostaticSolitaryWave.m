@@ -35,6 +35,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             obj.Solitarywave(mesh);  
             obj.initPhysFromOptions( mesh );       
             obj.matSolve;
+            obj.Postprocess;
         end
         
        function VisualPostprocess(obj)
@@ -124,13 +125,13 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 fphys{m}(:,:,1) = obj.Eta0 + obj.Depth;
 %                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
-                fphys{m}(:,:,6) =  obj.W0./2;
+                fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0./2;
             end       
         end
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 55;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -159,7 +160,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 450], [0, deltax], 450/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 900], [0, deltax], 900/deltax, 1, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

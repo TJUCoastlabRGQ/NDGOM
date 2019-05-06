@@ -1,7 +1,6 @@
 function matEvaluateSSPRK22( obj )
 
 Nmesh = obj.Nmesh;
-[rk4a, rk4b, rk4c] = GetRKParamter();
 
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
@@ -57,11 +56,5 @@ end
 % hwait.delete();
 obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
-end
-
-function [rk4a, rk4b, rk4c] = GetRKParamter()
-rk4a = [ 0.0, 0.0, -1 ];
-rk4b = [ 0.5, 0.5, 1/3 ];
-rk4c = [ 0.0, 0.5, 1 ];
 end
 

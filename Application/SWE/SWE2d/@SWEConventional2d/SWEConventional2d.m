@@ -4,6 +4,8 @@ classdef SWEConventional2d < SWEAbstract2d
     methods( Hidden )
         function [ E, G ] = matEvaluateFlux( obj, mesh, fphys )
             [ E, G ] = mxEvaluateFlux2d( obj.hmin, obj.gra, mesh.status, fphys );
+            E(:,:,4) = fphys(:,:,2) .* fphys(:,:,6) ./ fphys(:,:,1);
+            G(:,:,4) = fphys(:,:,3) .* fphys(:,:,6) ./ fphys(:,:,1);
         end
         
         function matUpdateWetDryState(obj, fphys)
@@ -37,7 +39,7 @@ classdef SWEConventional2d < SWEAbstract2d
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
-                obj.frhs{m} = obj.frhs{m} + mxEvaluateSourceTopography2d...
+                obj.frhs{m}(:,:,1:3) = obj.frhs{m}(:,:,1:3) + mxEvaluateSourceTopography2d...
                     ( obj.gra, mesh.status, fphys{m}, obj.zGrad{m} );
             end
         end

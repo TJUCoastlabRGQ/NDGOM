@@ -20,7 +20,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEConventional2d();
-            obj.outputFieldOrder = [1 2 3 6];
+%             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
                              
