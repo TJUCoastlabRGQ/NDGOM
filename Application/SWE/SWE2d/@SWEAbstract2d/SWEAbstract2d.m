@@ -14,7 +14,7 @@ classdef SWEAbstract2d < NdgPhysMat
     
     properties ( Constant)
         %> gravity acceleration
-        gra = 9.81
+        gra = 10
     end
     
     properties
@@ -102,7 +102,17 @@ classdef SWEAbstract2d < NdgPhysMat
                 fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
                 ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
                 fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
-                
+%             tempfluxS = ( fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) + ...
+%                 fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
+%                 ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
+%                 fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
+%             temphum = fm(:,:,2); temphvm = fm(:,:,3); temphm = fm(:,:,1);temphwm = fm(:,:,6);
+%             temphup = fm(:,:,2); temphvp = fm(:,:,3); temphp = fm(:,:,1);temphwp = fp(:,:,6);
+%             Index = ( temphum .* nx + temphvm .* ny > 0 );
+%             tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index );
+%             Index = ( - temphup .* nx - temphvp .* ny > 0 );
+%             tempfluxS( Index ) =  ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index );
+%             fluxS(:,:,4) =  tempfluxS;   
         end% func
     end
     

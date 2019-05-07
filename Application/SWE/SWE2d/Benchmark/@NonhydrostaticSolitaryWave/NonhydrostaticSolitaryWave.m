@@ -5,26 +5,20 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
   properties(Constant)
         
         rho = 1000
-        Depth = 10
+        Depth = 2
     end
     
     properties
         A = 2
-        Eta0
-        Eta10
-        Eta20
-        Eta25
-        Eta50
+        H0
+        H4
+        H12
         U0
-        U10
-        U20
-        U25
-        U50
+        U4
+        U12
         W0
-        W10
-        W20
-        W25
-        W50
+        W4
+        W12
     end
     
     methods
@@ -35,7 +29,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             obj.Solitarywave(mesh);  
             obj.initPhysFromOptions( mesh );       
             obj.matSolve;
-            obj.Postprocess;
+%             obj.Postprocess;
         end
         
        function VisualPostprocess(obj)
@@ -51,11 +45,11 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             deltapoint = 24;
             mesh = obj.meshUnion(1);      
             d = obj.Depth;
-            a = obj.A;          
-            time = [25 50];
-            Nintp = 2000;
-            xd = linspace(0, 900, Nintp)';
-            yd = 0.25*ones(size(xd));
+            a = 0.5291;          
+            time = [5 10];
+            Nintp = 400;
+            xd = linspace(0, 400, Nintp)';
+            yd = 0.1*ones(size(xd));
 %             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
@@ -63,15 +57,15 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             figure;
             hold on;            
             set(gcf,'position',[50,50,1050,400]);           
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.Eta0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);            
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.Eta0(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);            
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
             for i = 1:numel(time);
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,1)'- d,'k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.Eta25(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.Eta50(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H5(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H10(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
             set(gca,'Fontsize',12);
             xlabel({'$\it x \;\rm{(m)}$'},'Interpreter','latex');
             ylabel({'$\eta \;\rm {(m)}$'},'Interpreter','latex');    
@@ -122,16 +116,16 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
-                fphys{m}(:,:,1) = obj.Eta0 + obj.Depth;
+                fphys{m}(:,:,1) = obj.H0;
 %                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
-                fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0./2;
+                fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0;
             end       
         end
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 55;
+            ftime = 6;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -160,7 +154,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 900], [0, deltax], 900/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [-10, 40], [0, deltax], 50/deltax, 1, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
