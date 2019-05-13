@@ -81,12 +81,18 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         
     end
     
+    methods( Access = public, Abstract )
+       evaluateNonhydroRHS(obj, PhysClass, fphys);
+        
+    end
+    
     methods(  Access = protected, Abstract )
         [ bx, by ] = matSetBottomGradient(obj, zGrad);
         
         matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
         
         [Nq, qx, qy, q2x, q2y] = matAssembleCharacteristicMatrix(obj, mesh, index);
+        
     end
     
     methods( Access = protected )

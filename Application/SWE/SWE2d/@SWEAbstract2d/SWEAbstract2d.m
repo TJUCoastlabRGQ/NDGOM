@@ -30,8 +30,8 @@ classdef SWEAbstract2d < NdgPhysMat
 %     end
     
     properties 
-        %> number of physical field [h hu hv z hc w]
-        Nfield = 6
+        %> number of physical field [h hu hv z hc w q]
+        Nfield = 7
         %> number of variable field
         Nvar = 3        
         %> index of variable in physical field
@@ -112,7 +112,9 @@ classdef SWEAbstract2d < NdgPhysMat
             tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index );
             Index = ( - temphup .* nx - temphvp .* ny > 0 );
             tempfluxS( Index ) =  ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index );
-            fluxS(:,:,4) =  tempfluxS;   
+            fluxS(:,:,4) =  tempfluxS;  
+            
+%             fluxS(:,:,4) = zeros(size(fluxS(:,:,4)));
         end% func
     end
     

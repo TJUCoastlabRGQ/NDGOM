@@ -26,12 +26,12 @@ qbx = zeros(K*Np,1);qby = zeros(K*Np,1);
 InnerEdge = mesh.InnerEdge;
 BoundaryEdge = mesh.BoundaryEdge;
 
-[ Tempqx, Tempqy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
+[ tempqx, tempqy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
 % tempqy = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]), enumNonhydroBoundaryCondition.Zero);
-[ tempqx, tempqy ]  = getAuxialiaryVariable( obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]));
+% [ tempqx, tempqy ]  = getAuxialiaryVariable( obj, mesh, BoundaryEdge, InnerEdge, num2cell(gmat,[1 2]));
 
-qx = Tempqx(:);
-qy = Tempqy(:);
+qx = tempqx(:);
+qy = tempqy(:);
 
 [ tempq2x, tempq2y ] = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(tempqx,[1 2]), num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 % tempq2y = obj.matCalculateCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(tempqy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
