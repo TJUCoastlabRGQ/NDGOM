@@ -34,7 +34,7 @@ for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.H0(i,j) = double(subs(H,{x,t},{mesh.x(i,j),0}));
         obj.H4(i,j) = double(subs(H,{x,t},{mesh.x(i,j),4}));
-        obj.H12(i,j) = double(subs(H,{x,t},{mesh.x(i,j),12}));
+        obj.H6(i,j) = double(subs(H,{x,t},{mesh.x(i,j),6}));
     end
 end
 
@@ -55,7 +55,7 @@ for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
         obj.U4(i,j) = double(subs(U,{x,t},{mesh.x(i,j),4}));
-        obj.U12(i,j) = double(subs(U,{x,t},{mesh.x(i,j),12}));
+        obj.U6(i,j) = double(subs(U,{x,t},{mesh.x(i,j),6}));
     end
 end
 
@@ -80,6 +80,7 @@ for i = 1:size(mesh.x,1)
 
        obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
        obj.W4(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),4} ));
+       obj.W6(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),6} ));
     end
 end
 % obj.W0 = -W0;

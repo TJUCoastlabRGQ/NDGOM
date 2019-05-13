@@ -12,13 +12,13 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         A = 2
         H0
         H4
-        H12
+        H6
         U0
         U4
-        U12
+        U6
         W0
         W4
-        W12
+        W6
     end
     
     methods
@@ -154,7 +154,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [-10, 40], [0, deltax], 50/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [-30, 40], [0, deltax], 70/deltax, 1, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
