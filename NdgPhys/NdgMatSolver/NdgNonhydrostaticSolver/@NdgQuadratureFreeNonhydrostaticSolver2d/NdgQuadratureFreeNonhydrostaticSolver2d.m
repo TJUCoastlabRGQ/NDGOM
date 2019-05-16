@@ -29,7 +29,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
     
     methods(Access=protected)
         
-        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Np] = ...
+        [qx, qy, q2x, q2y, Np] = ...
             matAssembleCharacteristicMatrix(obj, mesh, index);
         
         RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
@@ -41,10 +41,12 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         [ VolumeIntegralX, VolumeIntegralY ] = matVolumeIntegral(obj, mesh, VariableX, VariableY);
         
         [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, PhysClass, BoundaryEdge, InnerEdge, fphys, ftype, index);
-        
-        [ bx, by ] = matSetBottomGradient(obj, zGrad);
-        
+                
         matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
+        
+        [qx, qy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable);
+        
+        [q2x, q2y] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable, VariableX, VariableY );
         
     end
     methods

@@ -7,16 +7,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> NP stands for Non-hydrostatic pressure
         %> X and Y stands for x direction and y direction, respectively
         %> S stands for second order
-        %> BX and BY stand for topography gradient in x and y direction, respectively
-        %> F stands for flux
         %> EidBoundaryType Index used to impose the zero non-hydrostatic boundary conditions at the open boundary,
         %> and to impose the zero grad non-hydrostatic boundary conditions at the wall
         %> boundary conditions at the open boundary, and zero boundary condition at the wall
         %> ZeroFluxBoundary Index used to assemble the wet-dry interface information
         %> ZeroFluxBoundaryIndex Index used to count the wet-dry interface number
         %> AdjacentDryCellAndFace matrix used to record the adjacent dry cell and the corresponding face index
-        %> bx the bottom topography gradient in the x direction, with the boundary gradient term averaged
-        %> by the bottom topography gradient in the y direction, with the boundary gradient term averaged
         %> dt time step
         %> JcsGlobalStiffMatrix the non-zero element contained in precedent column,  for colume j the number of the non-zero element is JcsGlobalStiffMatrix[j+1] - JcsGlobalStiffMatrix[j]
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
@@ -28,13 +24,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         SPNPX
         TempSPNPY
         SPNPY
-        NPBX
-        NPBY
         NP
-        TempFNPBX
-        FNPBX
-        TempFNPBY
-        FNPBY
         WetCellIndex
         TempZeroFluxBoundary
         ZeroFluxBoundary
@@ -44,13 +34,13 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         EidBoundaryType
         AdjacentDryCellAndFace
         WetNum
-        bx
-        by
         dt
         WetDryPoint
         TempWetDryPoint
         JcsGlobalStiffMatrix
-        JrsGlobalStiffMatrix        
+        JrsGlobalStiffMatrix
+        HBx
+        HBy
     end
     
     methods
@@ -60,7 +50,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.matSetBoundaryType(mesh);
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
-            [ obj.bx, obj.by ] = obj.matSetBottomGradient(PhysClass.zGrad{1});
             
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
@@ -105,7 +94,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] PhysClass the hydrostatic solver
         %> @param[out] StiffMatrix the global sparse stiff matrix
         StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, UpdatedPNPX, UpdatedPNPY,...
-            UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, fphys, PhysClass);
+            UpdatedSPNPX, UpdatedSPNPY, fphys, PhysClass);
         %> @brief function for calculating the right hand side
         %> @details
         %> Function to calculate the right hand side of the Nonhydrostatic model
@@ -151,8 +140,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[out] VolumeIntegralX the volume integral in x direction       
         [ VolumeIntegralX, VolumeIntegralY ] = matVolumeIntegral(obj, mesh, VariableX, VariableY )
         
-         matAssemblePointToCellInformation(obj, K, Np, PNPX,PNPY, SPNPX, SPNPY, NPBX, NPBY, FNPBX, FNPBY, NP )
-         
+         matAssemblePointToCellInformation(obj, K, Np, PNPX,PNPY, SPNPX, SPNPY, NP )
+        %> @brief Function to calculate the volume integral in the x direction
+        %> @details Function to calculate the volume integral in the x direction
+        %> @param[in] mesh the mesh object
+        %> @param[in] Variable variable used to calculate the volume integral
+        %> @param[out] VolumeIntegralX the volume integral in x direction           
          [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
     end
     

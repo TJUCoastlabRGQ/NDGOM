@@ -12,8 +12,9 @@ if obj.option.isKey('nonhydrostaticType')
             obj.varFieldIndex = [1 2 3 6];
             obj.outputFieldOrder = [1 2 3 6];
     end% switch
-    outputObj = matInitOutput@NdgPhysMat(obj, mesh);
 end
+
+outputObj = matInitOutput@NdgPhysMat(obj, mesh);
 
 end
 
