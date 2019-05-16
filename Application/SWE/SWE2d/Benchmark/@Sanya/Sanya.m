@@ -2,9 +2,9 @@ classdef Sanya < SWEWDPreBlanaced2d
     
     properties(Constant)
         %> wet/dry depth threshold
-        hmin = 0.5
+%         hmin = 0.5
         %> gravity acceleration
-        gra = 9.8
+%         gra = 9.8
         %> interval of tide elevation (s)
         tideinterval = 600
         %> tidal elevation of open boundary vertices
@@ -24,6 +24,7 @@ classdef Sanya < SWEWDPreBlanaced2d
         function obj = Sanya( N )
             obj = obj@SWEWDPreBlanaced2d();
             obj.N = N;
+            obj.hmin = 0.5;
             gmshFile = [ fileparts( mfilename('fullpath') ), '/mesh/sanya0111.msh' ];
             mesh = makeGmshFileUMeshUnion2d( N, gmshFile );
             obj.initPhysFromOptions( mesh );
