@@ -53,7 +53,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-                obj.NPBX,obj.NPBY,obj.FNPBX, obj.FNPBY,obj.NP);
+                obj.NP);
             obj.ZeroFluxBoundaryIndex = 0;
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);
@@ -76,7 +76,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
     end
     
     methods(  Access = protected, Abstract )
-        [ bx, by ] = matSetBottomGradient(obj, zGrad);
+%         [ bx, by ] = matSetBottomGradient(obj, zGrad);
         
         matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
         
@@ -147,6 +147,10 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] Variable variable used to calculate the volume integral
         %> @param[out] VolumeIntegralX the volume integral in x direction           
          [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
+         
+         [TempHBx, TempHBy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, variable)
+         
+         [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
     end
     
 end

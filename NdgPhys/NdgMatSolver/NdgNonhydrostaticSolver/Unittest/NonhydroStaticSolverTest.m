@@ -5,7 +5,7 @@
 % same edge point with the non-hydrostatic pressure gradient there set to be zero
 
 
-Norder = [1 2 3];
+Norder = [2 3];
 % for i = 1:numel(Norder)
 %     %> This part is  mainly used to test the non-hydrostatic related boundary value 
 %     Solver = NdgFlatBottomNonhydrostaticBoundaryValueTest(Norder(i), enumStdCell.Quad);
@@ -85,16 +85,24 @@ Norder = [1 2 3];
 
 for i = 1:numel(Norder)
     %> This part is  mainly used to test the calculation of the upwinded advective term in the RHS
-    Solver = NdgFlatBottomNonhydrostaticLDGFluxTermTest(Norder(i), enumStdCell.Quad);
-    display('=========Test for the calculation of the LDG flux term for global matrix assemble begin==========');    
-    Solver.testInnerEdgeScalerJumpTerm;
-    Solver.testInnerEdgeVecrtorJumpTerm;
-    
-    Solver.testBoundaryEdgeScalerJumpTerm;
-    Solver.testBoundaryEdgeVecrtorJumpTerm;
-    display('=========Test for the calculation of the LDG flux term for global matrix assemble finished==========');    
+    Solver = NdgFlatBottomForSecondOrderTerm(Norder(i), enumStdCell.Quad);
+    Solver.testSecondOrderTermCalculation;      
     clear Solver;    
 end
+
+
+% for i = 1:numel(Norder)
+%     %> This part is  mainly used to test the calculation of the upwinded advective term in the RHS
+%     Solver = NdgFlatBottomNonhydrostaticLDGFluxTermTest(Norder(i), enumStdCell.Quad);
+%     display('=========Test for the calculation of the LDG flux term for global matrix assemble begin==========');    
+%     Solver.testInnerEdgeScalerJumpTerm;
+%     Solver.testInnerEdgeVecrtorJumpTerm;
+%     
+%     Solver.testBoundaryEdgeScalerJumpTerm;
+%     Solver.testBoundaryEdgeVecrtorJumpTerm;
+%     display('=========Test for the calculation of the LDG flux term for global matrix assemble finished==========');    
+%     clear Solver;    
+% end
 
 % for i = 1:numel(Norder)
 %     Solver = NdgFlatBottomWetDryTestWithClampedBoundary(Norder(i), enumStdCell.Quad);

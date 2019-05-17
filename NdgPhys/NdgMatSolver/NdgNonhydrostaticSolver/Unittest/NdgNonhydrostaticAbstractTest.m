@@ -3,8 +3,6 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
     %   此处显示详细说明
     
     properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
         rho = 1000
         tol = 10^(-9)
     end
@@ -13,7 +11,17 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
         function obj = NdgNonhydrostaticAbstractTest(N, cellType)
             obj = obj@SWEConventional2d();
             [ mesh ] = obj.makeUniformMesh(N, cellType);
+            obj.hmin = 1e-3;  
             obj.initPhysFromOptions( mesh );
+        end
+        
+        function testSecondOrderTermCalculation(obj)
+            [Exactqx, Exactqy, Exactq2x, Exactq2y] = obj.getExactSecondOrderTerm;
+            [qx, qy, q2x, q2y] = obj.NonhydrostaticSolver.getLDGFluxTerm( obj.meshUnion(1), num2cell(obj.fphys{1}(:,:,1),[1 2]));
+            obj.Assert(Exactqx, qx);
+            obj.Assert(Exactqy, qy);
+            obj.Assert(Exactq2x, q2x);
+            obj.Assert(Exactq2y, q2y);
         end
         
         function testmatEvaluateNonhydrostaticSurfaceValue(obj)
@@ -22,76 +30,6 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.Assert(ExactFm, fm);
             obj.Assert(ExactFp, fp);
         end
-        
-%         function testmatEvaluatePenaltyTerm(obj)
-%             [ExactPenaltyX, ExactPenaltyY] = obj.getExactPenaltyTerm;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             PenaltyX = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).nx);
-%             PenaltyY = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).ny);
-%             obj.Assert(ExactPenaltyX, PenaltyX);
-%             obj.Assert(ExactPenaltyY, PenaltyY);
-%         end
-        
-%         function testmatEvaluateVelocityLikeTerms(obj)
-%             ExactharmonicTerm = obj.getExactHarmonicTerm;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             harmonicTerm = obj.NonhydrostaticSolver.matEvaluateVelocityLikeTerms( obj.meshUnion(1), fm, fp );
-%             obj.Assert(ExactharmonicTerm, harmonicTerm);
-%         end
-        
-%         function testmatEvaluateNonconservativeFlux(obj)
-%             [ ExactQx, ExactQy ]= obj.getExactNonconservativeFlux;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             harmonicH = obj.NonhydrostaticSolver.matEvaluateVelocityLikeTerms( obj.meshUnion(1), fm, fp );
-%             PenaltyX = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).nx);
-%             PenaltyY = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).ny);
-%             qx = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( harmonicH, fm, fp, PenaltyX);
-%             qy = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( harmonicH, fm, fp, PenaltyY);
-%             obj.Assert(ExactQx, qx);
-%             obj.Assert(ExactQy, qy);
-%         end
-        
-%         function testmatEvaluateDeltaSurfaceFlux(obj)
-%             ExactDeltaFlux = obj.getExactDeltaFlux;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             harmonicH = obj.NonhydrostaticSolver.matEvaluateVelocityLikeTerms( obj.meshUnion(1), fm, fp );
-%             PenaltyX = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).nx);
-%             PenaltyY = obj.NonhydrostaticSolver.matEvaluatePenaltyTerm(obj.meshUnion(1), fm, fp, obj.meshUnion(1).ny);
-%             qx = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( harmonicH, fm, fp, PenaltyX);
-%             qy = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( harmonicH, fm, fp, PenaltyY);
-%             DeltaFlux = obj.NonhydrostaticSolver.matEvaluateDeltaSurfaceFlux( obj.meshUnion(1), ones(size(obj.meshUnion(1).x)), ones(size(obj.meshUnion(1).x)), qx, qy );
-%             obj.Assert(ExactDeltaFlux, DeltaFlux);
-%         end
-        
-%         function testmatEvaluateDeltaSurfaceFluxY(obj)
-%             ExactDeltaFlux = obj.getExactDeltaFluxY;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             PenaltyY = zeros(size(obj.meshUnion(1).eidM));
-%             qY = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( fm, fp, PenaltyY);
-%             DeltaFlux = obj.NonhydrostaticSolver.matEvaluateDeltaSurfaceFluxY(obj.meshUnion(1), ones(size(obj.meshUnion(1).eidM)), qY);
-%             obj.Assert(ExactDeltaFlux, DeltaFlux);
-%         end
-        
-%         function testmatEvaluateDeltaSurfaceFluxX(obj)
-%             ExactDeltaFlux = obj.getExactDeltaFluxX;
-%             [fm, fp] = obj.NonhydrostaticSolver.matEvaluateNonhydrostaticSurfaceValue(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             PenaltyX = zeros(size(obj.meshUnion(1).eidM));
-%             qX = obj.NonhydrostaticSolver.matEvaluateNonconservativeFlux( fm, fp, PenaltyX);
-%             DeltaFlux = obj.NonhydrostaticSolver.matEvaluateDeltaSurfaceFluxX(obj.meshUnion(1), ones(size(obj.meshUnion(1).eidM)), qX);
-%             obj.Assert(ExactDeltaFlux, DeltaFlux);
-%         end
-        
-%         function testmatEvaluateDivergenceDirectionX(obj)
-%             ExactDivergenceX = obj.getExactDivergenceX;
-%             DivergenceX = obj.NonhydrostaticSolver.matEvaluateDivergenceDirectionX(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             obj.Assert(ExactDivergenceX, DivergenceX);
-%         end
-        
-%         function testmatEvaluateDivergenceDirectionY(obj)
-%             ExactDivergenceY = obj.getExactDivergenceY;
-%             DivergenceY = obj.NonhydrostaticSolver.matEvaluateDivergenceDirectionY(obj.meshUnion(1), ones(size(obj.meshUnion(1).x)));
-%             obj.Assert(ExactDivergenceY, DivergenceY);
-%         end
         
         function testAssembleWetDryInterface(obj)
             ExactWetCellIndex = obj.getExactWetCellIndex;
@@ -254,66 +192,7 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             display('===========================================');        
             
         end
-        
-        function testmatCalculateCharacteristicMatrixX(obj)
-            %> @brief function for testing the way to assemble the global stiff matrix
-            %> In this study, the global matrix is assembled at the initial
-            %> stage of the computation so as to reduce the computational cost.
-            %> To do that, a matrix was constructed at first. matCalculateCharacteristicMatrixX
-            %> is the function used to calculate the global derivative with the central flux considered in the x
-            %> direction
-            mesh = obj.meshUnion(1);
-            BoundaryEdge = mesh.BoundaryEdge;
-            InnerEdge = mesh.BoundaryEdge;
-            ExactMatrixX = obj.getExactMatrixX;
-            MatrixX = obj.NonhydrostaticSolver.matCalculateCharacteristicMatrixX( mesh, BoundaryEdge, InnerEdge, num2cell(obj.fphys{1}(:,:,1),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            obj.Assert( MatrixX, ExactMatrixX );
-        end
-        
-        function testmatCalculateCharacteristicMatrixY(obj)
-            %> @brief function for testing the way to assemble the global stiff matrix
-            %> In this study, the global matrix is assembled at the initial
-            %> stage of the computation so as to reduce the computational cost.
-            %> To do that, a matrix was constructed at first. matCalculateCharacteristicMatrixY
-            %> is the function used to calculate the global derivative with the central flux considered in the y
-            %> direction            
-            mesh = obj.meshUnion(1);
-            BoundaryEdge = mesh.BoundaryEdge;
-            InnerEdge = mesh.BoundaryEdge;
-            ExactMatrixY = obj.getExactMatrixY;
-            MatrixY = obj.NonhydrostaticSolver.GetCharacteristicMatrixY( mesh, BoundaryEdge, InnerEdge, num2cell(obj.fphys{1}(:,:,1),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            obj.Assert( MatrixY, ExactMatrixY );
-        end
-        
-        function testmatCalculateConservativeVariableRelatedMatrixX(obj)
-            %> @brief function for testing the calculation of the
-            %> conservative variable, [h hu hv], related global partial
-            %> derivative with the central flux considered in the x direction
-            %>  matCalculateConservativeVariableRelatedMatrixX is the function 
-            %> used to calculate the global derivative of the conservative variable
-            %> with the central flux considered in the x direction            
-           mesh = obj.meshUnion(1);
-           BoundaryEdge = mesh.BoundaryEdge;
-           InnerEdge = mesh.BoundaryEdge;   
-           ExactMatrixX = obj.getExactConservativeVariableRelatedMatrixX;
-           MatrixX =  obj.NonhydrostaticSolver.GetConservativeVariableRelatedMatrixX( BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero, 1);
-           obj.Assert( MatrixX, ExactMatrixX );
-        end
-        
-        function testmatCalculateConservativeVariableRelatedMatrixY(obj)
-            %> @brief function for testing the calculation of the
-            %> conservative variable, [h hu hv], related global partial
-            %> derivative with the central flux considered in the y direction
-            %>  matCalculateConservativeVariableRelatedMatrixY is the function 
-            %> used to calculate the global derivative of the conservative variable
-            %> with the central flux considered in the y direction                 
-           mesh = obj.meshUnion(1);
-           BoundaryEdge = mesh.BoundaryEdge;
-           InnerEdge = mesh.BoundaryEdge;   
-           ExactMatrixY = obj.getExactConservativeVariableRelatedMatrixY;
-           MatrixY =  obj.NonhydrostaticSolver.GetConservativeVariableRelatedMatrixY( BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero, 1);
-           obj.Assert( MatrixY, ExactMatrixY );
-        end 
+
         
         function testGlobalMatrix(obj)
             obj.NonhydrostaticSolver.dt = 1;
@@ -323,81 +202,6 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.Assert( full(StiffMatrix), ExactStiffMatrix );
         end
         
-        function testmatCalculateConservativeVariableRelatedUpwindedMatrixXAndY(obj)
-            InnerEdge = obj.meshUnion(1).InnerEdge;
-            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
-           [fm, fp] = InnerEdge.matEvaluateSurfValue( obj.fphys );       
-           [hm, hp] = obj.NonhydrostaticSolver.GetFaceValue(fm(:,:,1), fp(:,:,1), enumNonhydroBoundaryCondition.Zero);
-           [hum, hup] = obj.NonhydrostaticSolver.GetFaceValue(fm(:,:,2), fp(:,:,2), enumNonhydroBoundaryCondition.Zero);
-           [fhx, hux] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermX(InnerEdge, hm, hp, hum, hup);
-           [Exactfhx, Exacthux] = obj.GetExactInnerEdgeFluxTermX;
-           obj.Assert( fhx, Exactfhx );
-           obj.Assert( hux, Exacthux ); 
-           
-          [fm, fp] = BoundaryEdge.matEvaluateSurfValue( obj.fphys ); 
-          [fm, fp] = obj.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx, BoundaryEdge.ny, fm, fp, obj.fext{1} );  
-          hm = fm(:,:,1); hum = fm(:,:,2); 
-          hp = fp(:,:,1); hup = fp(:,:,2); 
-          [fhx, hux] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermX(BoundaryEdge, hm, hp, hum, hup);
-          [Exactfhx, Exacthux] = obj.GetExactBoundaryEdgeFluxTermX;
-          obj.Assert( fhx, Exactfhx );
-          obj.Assert( hux, Exacthux );           
-%             [fhy, huy, hvy] = obj.NonhydrostaticSolver.matGetUpwindedNumFluxTermY( obj, BoundaryEdge, InnerEdge, obj.fphys, enumNonhydroBoundaryCondition.Zero);
-%             
-%             [Exactfhy, Exacthuy, Exacthvy] = obj.GetDerivativeInDirectionX;
-        end
-        
-        function testInnerEdgeScalerJumpTerm(obj)
-            InnerEdge = obj.meshUnion(1).InnerEdge;
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            [ExactScalerJumpX, ExactScalerJumpY] = obj.getExactHuFieldInnerEdgeScalerJump;
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );              
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateInnerEdgeScalarJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            [ExactScalerJumpX, ExactScalerJumpY] = obj.getExactHvFieldInnerEdgeScalerJump;
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );    
-        end
-        
-        function testInnerEdgeVecrtorJumpTerm(obj)
-            InnerEdge = obj.meshUnion(1).InnerEdge;
-            VectorJump = obj.NonhydrostaticSolver.matEvaluateInnerEdgeVectorJumpTerm( InnerEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            ExactVectorJump = obj.getExactInnerEdgeVectorJump;
-            obj.Assert( VectorJump, ExactVectorJump );
-        end
-        
-        function testBoundaryEdgeScalerJumpTerm(obj)
-            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHuFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.Zero);
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHuFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.ZeroGrad);  
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );       
-            
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHvFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.Zero);
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );    
-            
-            [ ScalerJumpX, ScalerJumpY ] = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeScalarJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-            [ ExactScalerJumpX, ExactScalerJumpY ] = obj.getExactHvFieldBoundaryEdgeScalerJump(enumNonhydroBoundaryCondition.ZeroGrad);
-            obj.Assert( ScalerJumpX, ExactScalerJumpX );
-            obj.Assert( ScalerJumpY, ExactScalerJumpY );                
-        end
-        
-        function testBoundaryEdgeVecrtorJumpTerm(obj)
-            BoundaryEdge = obj.meshUnion(1).BoundaryEdge;
-            VectorJump = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            ExactVectorJump = obj.getExactBoundaryEdgeVectorJump(enumNonhydroBoundaryCondition.Zero);
-            obj.Assert( VectorJump, ExactVectorJump );
-
-            VectorJump = obj.NonhydrostaticSolver.matEvaluateBoundaryEdgeVectorJumpTerm( BoundaryEdge, num2cell(obj.fphys{1}(:,:,2),[1 2]), num2cell(obj.fphys{1}(:,:,3),[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-            ExactVectorJump = obj.getExactBoundaryEdgeVectorJump(enumNonhydroBoundaryCondition.ZeroGrad);
-            obj.Assert( VectorJump, ExactVectorJump );
-        end
     end
     methods(Access = protected)
         
@@ -453,18 +257,6 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
         end% func
     end
     
-end
-
-function [UpWindedFlag, DownWindedFlag] = AssembleWindedFlagInformation(InnerEdge, ele)
-DownWindedFlag = zeros(size(InnerEdge.nx));
-UpWindedFlag = ones(size(InnerEdge.nx));
-[Row, Col] = find(InnerEdge.FToE == ele);
-for i = 1:numel(Row)
-    if Row(i) == 2
-        UpWindedFlag(:,Col(i)) = 0;
-        DownWindedFlag(:, Col(i)) = 1;
-    end
-end
 end
 
 

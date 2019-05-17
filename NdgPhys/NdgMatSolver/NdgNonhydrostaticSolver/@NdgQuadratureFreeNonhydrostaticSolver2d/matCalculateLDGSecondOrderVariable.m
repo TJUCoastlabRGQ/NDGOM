@@ -12,8 +12,8 @@ fluxPY = InnerEdge.ny.*fpy; fluxPX = InnerEdge.nx.*fpx;
 fluxSx = ( ( fmx + fpx ) ./ 2 - C11 .* JumpUx + 1/2 .* InnerEdge.nx .* Jumpq ) .* InnerEdge.nx;
 fluxSy = ( ( fmy + fpy ) ./ 2 - C11 .* JumpUy + 1/2 .* InnerEdge.ny .* Jumpq ) .* InnerEdge.ny;
 
-q2x = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
-q2y = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
+q2x = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
+q2y = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
 
 [fmy, ~] = BoundaryEdge.matEvaluateSurfValue( VariableY );    [fmx, ~] = BoundaryEdge.matEvaluateSurfValue( VariableX ); 
 fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;

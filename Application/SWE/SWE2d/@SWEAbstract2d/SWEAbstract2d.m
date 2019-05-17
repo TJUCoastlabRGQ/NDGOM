@@ -23,7 +23,7 @@ classdef SWEAbstract2d < NdgPhysMat
     end    
     
 %     properties( Constant )
-%         %> number of physical field [h hu hv z hc w]
+%         %> number of physical field [h hu hv z hc w p]
 %         Nfield = 6
 %         %> number of variable field
 %         Nvar = 3
