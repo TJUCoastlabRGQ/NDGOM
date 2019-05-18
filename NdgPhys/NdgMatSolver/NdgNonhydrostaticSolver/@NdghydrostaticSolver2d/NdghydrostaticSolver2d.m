@@ -10,13 +10,15 @@ classdef NdghydrostaticSolver2d
             %             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
         end
         
-        function fphys = NdgNonhydrostaticUpdata(obj, PhysClass, fphys)
+        function fphys = evaluateNonhydroRHS(obj, PhysClass, fphys)
             % doing nothing
         end
         
         function fphys = NdgConservativeNonhydrostaticUpdata(obj,PhysClass, fphys, rk, intRK, dt)
             % doing nothing
         end
+        
+        
         
     end
     

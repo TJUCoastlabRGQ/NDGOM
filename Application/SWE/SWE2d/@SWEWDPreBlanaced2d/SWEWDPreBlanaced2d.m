@@ -32,12 +32,12 @@ classdef SWEWDPreBlanaced2d < SWEPreBlanaced2d
 %             obj.matUpdateWetDryState( fphys );
 %         end% func
         
-        function matUpdateWetDryState(obj, fphys)
-            for n = 1:obj.Nmesh
-                mesh = obj.meshUnion(n);
-                mesh.status = mxUpdateWDWetDryState( obj.hmin, fphys{n} );
-            end
-        end% func
+%         function matUpdateWetDryState(obj, fphys)
+%             for n = 1:obj.Nmesh
+%                 mesh = obj.meshUnion(n);
+%                 mesh.status = mxUpdateWDWetDryState( obj.hmin, fphys{n} );
+%             end
+%         end% func
         
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh

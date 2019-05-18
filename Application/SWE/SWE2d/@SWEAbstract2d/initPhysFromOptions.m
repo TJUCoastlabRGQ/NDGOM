@@ -16,7 +16,7 @@ for m = 1:obj.Nmesh
 end
 
 %Set NonhydrostaticSolver
-[obj.NonhydrostaticSolver] = setNonhydrostaticSolver(obj);
+[obj.NonhydrostaticSolver] = initNonhydrostaticSolver(obj);
 %Coriolis Term
 [ obj.coriolisSolver ] = initCoriolisSolver( obj );
 %Friction Term
@@ -28,12 +28,13 @@ end
 
 end% func
 
-function [NonhydrostaticSolver] = setNonhydrostaticSolver(obj)
+function [NonhydrostaticSolver] = initNonhydrostaticSolver(obj)
 if obj.option.isKey('nonhydrostaticType')
     switch obj.getOption('nonhydrostaticType')
         case enumNonhydrostaticType.Hydrostatic
             NonhydrostaticSolver = NdghydrostaticSolver2d(obj);
         case enumNonhydrostaticType.Nonhydrostatic
+            % if Nonhydrostatic Solver included , the output variable is [ h, hu, hv, hw ]
             switch obj.getOption('integralType')
                 case enumDiscreteIntegral.GaussQuadrature
                     NonhydrostaticSolver = NdgGaussQuadNonhydrostaticSolver2d(obj, obj.meshUnion);

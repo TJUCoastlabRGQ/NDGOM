@@ -13,11 +13,28 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
             obj = obj@NdgNonhydrostaticSolver2d(PhysClass);
         end
         
+        function evaluateNonhydroRHS(obj, PhysClass, fphys)
+            mesh = PhysClass.meshUnion(1);
+            BoundaryEdge = mesh.BoundaryEdge;
+            InnerEdge = mesh.InnerEdge;
+            [ HBx, HBy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
+                InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]),  num2cell(fphys{1}(:,:,1) +...
+                2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
+            
+            [ px, py ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
+                InnerEdge, num2cell(fphys{1}(:,:,7),[1 2]),  num2cell(fphys{1}(:,:,7),[1 2]),...
+                enumNonhydroBoundaryCondition.Zero);
+            
+            PhysClass.frhs{1}(:,:,2) = PhysClass.frhs{1}(:,:,2) - fphys{1}(:,:,1) .* px - fphys{1}(:,:,7) .* HBx;
+            PhysClass.frhs{1}(:,:,3) = PhysClass.frhs{1}(:,:,3) - fphys{1}(:,:,1) .* py - fphys{1}(:,:,7) .* HBy;
+            PhysClass.frhs{1}(:,:,4) = PhysClass.frhs{1}(:,:,4) + 2 * fphys{1}(:,:,7);
+        end
+        
     end
     
     methods(Access=protected)
         
-        [qx, qy, q2x, q2y, qbx, qby, fqbx, fqby, Np] = ...
+        [qx, qy, q2x, q2y, Np] = ...
             matAssembleCharacteristicMatrix(obj, mesh, index);
         
         RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
@@ -30,13 +47,32 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         
         [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, PhysClass, BoundaryEdge, InnerEdge, fphys, ftype, index);
         
-        [ bx, by ] = matSetBottomGradient(obj, zGrad); 
+        matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
         
-         matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
+        [qx, qy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable);
+        
+        [q2x, q2y] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable, VariableX, VariableY );
+        
+        matCalculateLDGPenaltyParameter(obj, mesh);
         
     end
     methods
         %> Functions following are used for testing purpose
+        
+        function [ qx, qy, q2x, q2y ] = getLDGFluxTerm(obj, mesh, gmat)
+            BoundaryEdge = mesh.BoundaryEdge;
+            InnerEdge = mesh.InnerEdge;
+            %             [ qx, qy ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, gmat);
+            %             [ q2x, q2y ]  = obj.matCalculateLDGSecondOrderVariable( mesh, BoundaryEdge, InnerEdge,...
+            %                 gmat, num2cell( qx, [1 2] ), num2cell( qy, [1 2] ) );
+            
+            [ qx, qy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, ...
+                gmat, gmat, enumNonhydroBoundaryCondition.Zero);
+            
+            [ q2x, q2y ] = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, ...
+                num2cell(qx,[1 2]), num2cell(qy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+        end
+        
         function getWetDryInterface(obj, mesh)
             obj.matAssembleWetDryInterface(mesh);
         end

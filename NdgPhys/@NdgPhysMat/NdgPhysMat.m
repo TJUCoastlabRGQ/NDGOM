@@ -112,8 +112,8 @@ classdef NdgPhysMat < NdgPhys
                     obj.matEvaluateRK22();
                 case enumTemporalDiscrete.RK33
                     obj.matEvaluateRK33();
-                case enumTemporalDiscrete.Heun
-                    obj.matEvaluateHeun();
+                case enumTemporalDiscrete.SSPRK22
+                    obj.matEvaluateSSPRK22();                    
                 otherwise
                     msgID = [ mfilename, ':UnknownTemproalDicsreteType'];
                     msgtext = ['The temporal discrete type ', ...
@@ -134,6 +134,8 @@ classdef NdgPhysMat < NdgPhys
         matEvaluateSourceTerm( obj, fphys )
         fphys = matEvaluateLimiter( obj, fphys )
         fphys = matEvaluatePostFunc( obj, fphys )
+        
+        outputObj = matInitOutput( obj, mesh )
         
         %> @brief
         matUpdateOutputResult( obj, time, step, fphys )

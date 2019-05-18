@@ -8,14 +8,14 @@ mesh = physClass.meshUnion(1);
 
 obj.matAssembleWetDryInterface(mesh);
 
-[UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY]...
+[UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY]...
     = obj.matReconstructStiffmatrixRelatedMatrix( physClass);
 
 obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
-    UpdatedSPNPY, obj.NPBX, obj.NPBY, UpdatedFNPBX, UpdatedFNPBY, obj.NP);
+    UpdatedSPNPY, obj.NP);
 
 StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix(UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
-    UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, fphys, physClass);
+    UpdatedSPNPY, fphys, physClass);
 
 NonhydrostaticRHS  = obj.matEvaluateConservativeNonhydrostaticRHS( fphys, physClass );
 

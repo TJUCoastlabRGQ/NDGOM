@@ -1,7 +1,8 @@
 function runNonhydrostaticStandingWave
-deltax = [ 3 2 1.5 1];
-% deltax = 1.5;
-Order =[ 2 1 ];
+% deltax = [ 0.4 0.25 0.2 0.1];
+deltax = 0.1;
+Order = 1;
+% Order =[ 2 1 ];
 len = deltax;
 type = enumStdCell.Quad;
 Nmesh = numel(deltax);
@@ -11,7 +12,7 @@ time = zeros(Nmesh, Ndeg);
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = (30 * 6) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
+        dofs(m, n) = (20 * 2*deltax(m)) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
     end
 end
 
@@ -56,7 +57,7 @@ for n = 1:Ndeg
     % print table
     fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len, err1(:, n), err2(:, n), errInf(:, 1), ...
-        time(:, 1))
+        time(:, n))
     
     % plot figure
     co = color{n}; ma = marker{n};

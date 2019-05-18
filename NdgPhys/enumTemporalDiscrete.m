@@ -5,7 +5,7 @@ classdef enumTemporalDiscrete < int8
         RK45    (2)
         RK22    (3)
         RK33    (4)
-        Heun    (5)
+        SSPRK22 (5)
     end
     
 end

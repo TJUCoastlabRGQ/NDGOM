@@ -14,28 +14,28 @@ classdef SWEAbstract2d < NdgPhysMat
     
     properties ( Constant)
         %> gravity acceleration
-        gra = 9.81
+        gra = 10
     end
     
     properties
         %> wet/dry depth threshold
         hmin
-    end    
+    end
     
-%     properties( Constant )
-%         %> number of physical field [h hu hv z hc w]
-%         Nfield = 6
-%         %> number of variable field
-%         Nvar = 3
-%     end
+    %     properties( Constant )
+    %         %> number of physical field [h hu hv z hc w p]
+    %         Nfield = 6
+    %         %> number of variable field
+    %         Nvar = 3
+    %     end
     
-    properties 
-        %> number of physical field [h hu hv z hc w]
-        Nfield = 6
+    properties
+        %> number of physical field [h hu hv z hc w q]
+        Nfield = 7
         %> number of variable field
-        Nvar = 3        
+        Nvar = 3
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2, 3 ] 
+        varFieldIndex = [ 1, 2, 3 ]
         %> index of variable to be output
         outputFieldOrder = [1, 2, 3]
     end
@@ -65,10 +65,10 @@ classdef SWEAbstract2d < NdgPhysMat
     % ======================================================================
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
-        [ E, G ] = matEvaluateFlux( obj, mesh, fphys );        
+        [ E, G ] = matEvaluateFlux( obj, mesh, fphys );
     end
     % ======================================================================
-
+    
     
     % ======================================================================
     methods ( Abstract, Access = protected )
@@ -81,7 +81,7 @@ classdef SWEAbstract2d < NdgPhysMat
         [ fphys ] = matEvaluatePostFunc(obj, fphys)
     end
     % ======================================================================
-
+    
     
     methods ( Hidden, Access = public ) % public function, not allow to inherit
         
@@ -91,14 +91,35 @@ classdef SWEAbstract2d < NdgPhysMat
         %> evaluate local boundary flux
         function [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, ny, fm )
             [ fluxM ] = mxEvaluateSurfFlux( obj.hmin, obj.gra, nx, ny, fm);
+            fluxM(:,:,4) = fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) .* nx + ...
+                fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) .* ny;
         end% func
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp )
             [ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp );
+            fluxS(:,:,4) = ( fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
+                ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
+            tempfluxS = ( fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
+                ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
+                fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
+            temphum = fm(:,:,2); temphvm = fm(:,:,3); temphm = fm(:,:,1);temphwm = fm(:,:,6);
+            temphup = fm(:,:,2); temphvp = fm(:,:,3); temphp = fm(:,:,1);temphwp = fp(:,:,6);
+            Index = ( temphum .* nx + temphvm .* ny > 0 );
+            tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index );
+            Index = ( - temphup .* nx - temphvp .* ny > 0 );
+            tempfluxS( Index ) =  ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index );
+            fluxS(:,:,4) =  tempfluxS;
         end% func
     end
-        
+    
+    methods( Access = protected )
+        outputObj = matInitOutput( obj, mesh )
+    end
+    
     methods ( Sealed, Access = protected )
         [ fphys ] = matEvaluateLimiter( obj, fphys )
         

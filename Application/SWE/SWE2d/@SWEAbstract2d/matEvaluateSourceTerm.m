@@ -7,4 +7,6 @@ obj.coriolisSolver.evaluateCoriolisTermRHS(obj, fphys);
 obj.frictionSolver.evaluateFrictionTermRHS(obj, fphys);
 % frhs = frhs + WindTerm
 obj.windSolver.evaluateWindTermRHS(obj, fphys);
+
+obj.NonhydrostaticSolver.evaluateNonhydroRHS(obj, fphys);
 end
