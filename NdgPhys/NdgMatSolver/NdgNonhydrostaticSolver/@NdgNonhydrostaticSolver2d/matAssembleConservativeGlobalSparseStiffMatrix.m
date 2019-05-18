@@ -21,11 +21,11 @@ InnerEdge = PhysClass.meshUnion(1).InnerEdge;
 
 [ obj.HBx, obj.HBy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]),  num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);  
 
-% [TempHBx, TempHBy] = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]));
-% [ H2Bx, H2By ] = obj.matCalculateLDGSecondOrderVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]) );
+[TempHBx, TempHBy] = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]));
+[ H2Bx, H2By ] = obj.matCalculateLDGSecondOrderVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]) );
 
-[ TempHBx, TempHBy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
-[ H2Bx, H2By ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
+% [ TempHBx, TempHBy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
+% [ H2Bx, H2By ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
 
 
 

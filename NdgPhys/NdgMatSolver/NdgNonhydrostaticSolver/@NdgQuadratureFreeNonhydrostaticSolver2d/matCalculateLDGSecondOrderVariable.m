@@ -1,5 +1,5 @@
 function [q2x, q2y] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable, VariableX, VariableY )
-C11 = 1;
+C11 = 100;
 [fmy, fpy] = InnerEdge.matEvaluateSurfValue( VariableY );  
 [fmx, fpx] = InnerEdge.matEvaluateSurfValue( VariableX ); 
 [Um, Up] = InnerEdge.matEvaluateSurfValue( Variable ); 

@@ -98,8 +98,8 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
                 bot = -obj.d;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
-                fphys{m}(:,:,1) =  obj.d;
-%                 fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
+%                 fphys{m}(:,:,1) =  obj.d;
+                fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
             end
         end
         
