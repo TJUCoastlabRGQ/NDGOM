@@ -35,7 +35,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 7.5;
+            x0 = 10;
             h = obj.d;
             a = obj.A;
 %             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));

@@ -20,22 +20,22 @@ classdef SWEAbstract2d < NdgPhysMat
     properties
         %> wet/dry depth threshold
         hmin
-    end    
+    end
     
-%     properties( Constant )
-%         %> number of physical field [h hu hv z hc w p]
-%         Nfield = 6
-%         %> number of variable field
-%         Nvar = 3
-%     end
+    %     properties( Constant )
+    %         %> number of physical field [h hu hv z hc w p]
+    %         Nfield = 6
+    %         %> number of variable field
+    %         Nvar = 3
+    %     end
     
-    properties 
+    properties
         %> number of physical field [h hu hv z hc w q]
         Nfield = 7
         %> number of variable field
-        Nvar = 3        
+        Nvar = 3
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2, 3 ] 
+        varFieldIndex = [ 1, 2, 3 ]
         %> index of variable to be output
         outputFieldOrder = [1, 2, 3]
     end
@@ -65,10 +65,10 @@ classdef SWEAbstract2d < NdgPhysMat
     % ======================================================================
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
-        [ E, G ] = matEvaluateFlux( obj, mesh, fphys );        
+        [ E, G ] = matEvaluateFlux( obj, mesh, fphys );
     end
     % ======================================================================
-
+    
     
     % ======================================================================
     methods ( Abstract, Access = protected )
@@ -81,7 +81,7 @@ classdef SWEAbstract2d < NdgPhysMat
         [ fphys ] = matEvaluatePostFunc(obj, fphys)
     end
     % ======================================================================
-
+    
     
     methods ( Hidden, Access = public ) % public function, not allow to inherit
         
@@ -112,16 +112,14 @@ classdef SWEAbstract2d < NdgPhysMat
             tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index );
             Index = ( - temphup .* nx - temphvp .* ny > 0 );
             tempfluxS( Index ) =  ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index );
-            fluxS(:,:,4) =  tempfluxS;  
-            
-%             fluxS(:,:,4) = zeros(size(fluxS(:,:,4)));
+            fluxS(:,:,4) =  tempfluxS;
         end% func
     end
     
     methods( Access = protected )
         outputObj = matInitOutput( obj, mesh )
     end
-        
+    
     methods ( Sealed, Access = protected )
         [ fphys ] = matEvaluateLimiter( obj, fphys )
         

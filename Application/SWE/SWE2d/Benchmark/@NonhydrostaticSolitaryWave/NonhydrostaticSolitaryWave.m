@@ -4,7 +4,6 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     
   properties(Constant)
         
-        rho = 1000
         Depth = 10
     end
     
@@ -19,6 +18,8 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         W0
         W3
         W6
+        P0
+        P6
 %        Eta0
 %        Eta25
 %        Eta50
@@ -129,6 +130,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
 %                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
                 fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0;
+                fphys{m}(:,:,7) =  obj.P0;
 %                 fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0./2;
             end       
         end

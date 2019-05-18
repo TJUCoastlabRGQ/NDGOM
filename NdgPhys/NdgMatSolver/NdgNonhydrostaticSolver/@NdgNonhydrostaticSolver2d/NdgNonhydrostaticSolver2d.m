@@ -16,6 +16,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> dt time step
         %> JcsGlobalStiffMatrix the non-zero element contained in precedent column,  for colume j the number of the non-zero element is JcsGlobalStiffMatrix[j+1] - JcsGlobalStiffMatrix[j]
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
+        %> HBx the partial derivative of H + 2b with respect to the x direction
+        %> HBy the partial derivative of H + 2b with respect to the y direction
         TempPNPX
         PNPX
         TempPNPY
@@ -41,6 +43,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         JrsGlobalStiffMatrix
         HBx
         HBy
+        IETau
+        BETau
     end
     
     methods
@@ -51,9 +55,11 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
             
+            obj.matCalculateLDGPenaltyParameter( mesh );
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
                 obj.NP);
+            
             obj.ZeroFluxBoundaryIndex = 0;
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);
@@ -151,6 +157,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
          [TempHBx, TempHBy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, variable)
          
          [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
+         
+         matCalculateLDGPenaltyParameter( obj, mesh)
     end
     
 end

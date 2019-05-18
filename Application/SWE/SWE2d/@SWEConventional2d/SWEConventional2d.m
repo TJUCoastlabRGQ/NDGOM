@@ -6,8 +6,6 @@ classdef SWEConventional2d < SWEAbstract2d
             [ E, G ] = mxEvaluateFlux2d( obj.hmin, obj.gra, mesh.status, fphys );
             E(:,:,4) = fphys(:,:,2) .* fphys(:,:,6) ./ fphys(:,:,1);
             G(:,:,4) = fphys(:,:,3) .* fphys(:,:,6) ./ fphys(:,:,1);
-%             E(:,:,4) = zeros(size(E(:,:,4)));
-%             G(:,:,4) = zeros(size(E(:,:,4)));
         end
         
         function matUpdateWetDryState(obj, fphys)

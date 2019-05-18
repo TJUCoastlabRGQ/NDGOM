@@ -30,9 +30,6 @@ InnerEdge = PhysClass.meshUnion(1).InnerEdge;
 
 
 % obj.NP =  obj.NP;
-% StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, rho, obj.NP, h, UpdatedPNPX, obj.bx,...
-%     UpdatedPNPY, obj.by, UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY, ...
-%     fhx, fhy, obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
 
 StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, UpdatedSPNPX, UpdatedSPNPY, UpdatedPNPX, fhx, UpdatedPNPY, fhy,...
     obj.NP, H2Bx, H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);

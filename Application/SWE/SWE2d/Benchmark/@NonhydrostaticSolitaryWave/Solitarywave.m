@@ -1,17 +1,17 @@
 function Solitarywave(obj, mesh)
 syms x t;
 
-Dep = 1;
-d = 1;
-% a = 0.4;
-% l = sqrt(H0^3/a+H0^2);
-l = 3;
-c0 = l/d*sqrt(obj.gra * Dep^3/(l^2-Dep^2));
-a = Dep^3/( l^2 - Dep^2 );
-H = Dep + a * ( sech((x-c0*t)/l) )^2;
-d = 1;
-U = c0 * (1 - d/H);
-W = -( a * c0 * d )/( l * H ) * sech((x - c0 * t)/l)*diff(sech((x - c0 * t)/l),x);
+H0 = 1;
+d = H0; % Constant produce during the derivation, and is taken to be equal to the water depth
+A = 0.2;
+l = H0*sqrt((A+H0)/A);
+Ce = l/d*sqrt(obj.gra * H0^3/(l^2-H0^2));
+
+H = H0 + A * ( sech((x-Ce*t)/l) )^2;
+U = Ce * (1 - d/H);
+W = -( A * Ce * d )/( l * H ) * sech((x - Ce * t)/l)*diff(sech((x - Ce * t)/l),x);
+P = A*Ce^2*d^2/2/l^2/H^2*((2*H0-H)*(diff(sech((x - Ce * t)/l),x))^2+...
+    H * sech((x-Ce*t)/l) * diff(diff(sech((x - Ce * t)/l),x), x ));
 % A = obj.A;
 % h = obj.Depth;
 % g = obj.gra;
@@ -36,6 +36,8 @@ W = -( a * c0 * d )/( l * H ) * sech((x - c0 * t)/l)*diff(sech((x - c0 * t)/l),x
 
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
+        obj.P0(i,j) = double(subs(P,{x,t},{mesh.x(i,j),0}));
+        obj.P6(i,j) = double(subs(P,{x,t},{mesh.x(i,j),6}));
         obj.H0(i,j) = double(subs(H,{x,t},{mesh.x(i,j),0}));
         obj.H3(i,j) = double(subs(H,{x,t},{mesh.x(i,j),3}));
         obj.H6(i,j) = double(subs(H,{x,t},{mesh.x(i,j),6}));
