@@ -35,3 +35,5 @@ NdgMex
 *.sty
 *.md5
 *.png
+*.dvi
+*.map
