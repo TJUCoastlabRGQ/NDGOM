@@ -24,3 +24,16 @@ NdgMex
 *.pdf
 *.tif
 *.tex
+*.tmp
+*.js
+*.eps
+*.ps
+*.log
+*.aux
+*.css
+*.bat
+*.sty
+*.md5
+*.png
+*.dvi
+*.map
