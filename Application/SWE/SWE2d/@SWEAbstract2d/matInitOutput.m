@@ -10,7 +10,7 @@ if obj.option.isKey('nonhydrostaticType')
             % if Nonhydrostatic Solver included , the output variable is [ h, hu, hv, hw ]
             obj.Nvar = 4;
             obj.varFieldIndex = [1 2 3 6];
-            obj.outputFieldOrder = [1 2 3 6];
+            obj.outputFieldOrder = [1 2 3 6 7];
     end% switch
 end
 

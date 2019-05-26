@@ -2,33 +2,15 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     %NONHYDROSTATICSOLITARYWAVE 此处显示有关此类的摘要
     %   此处显示详细说明
     
-  properties(Constant)
-        
-        Depth = 10
-    end
-    
     properties
-        A = 2
         H0
-        H3
-        H6
+        H5
         U0
-        U3
-        U6
+        U5
         W0
-        W3
-        W6
+        W5
         P0
-        P6
-%        Eta0
-%        Eta25
-%        Eta50
-%        U0
-%        U25
-%        U50 
-%        W0
-%        W25
-%        W50
+        P5
     end
     
     methods
@@ -52,14 +34,14 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         end
         
         function Postprocess(obj)
-            deltapoint = 4;
-            mesh = obj.meshUnion(1);      
-            d = obj.Depth;
-            a = 0.5291;          
-            time = [0 3 6];
+            mesh = obj.meshUnion(1);
+            deltapoint = (mesh.cell.N + 1);
+            d = 1;
+            a = 0.2;          
+            time = 5;
             Nintp = 400;
-            xd = linspace(-30, 40, Nintp)';
-            yd = 0.1*ones(size(xd));
+            xd = linspace(-10, 30, Nintp)';
+            yd = 0.025*ones(size(xd));
 %             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
@@ -67,15 +49,14 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             figure;
             hold on;            
             set(gcf,'position',[50,50,1050,400]);           
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);            
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'k','Linewidth',1.5);            
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
             for i = 1:numel(time);
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
-                plot(xd,fg(:,1)','k','Linewidth',1.5);
+                plot(xd,fg(:,1)' - d,'k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U3(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U6(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H5(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$\it x \;\rm{(m)}$'},'Interpreter','latex');
             ylabel({'$\eta \;\rm {(m)}$'},'Interpreter','latex');    
@@ -86,14 +67,13 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             hold on;            
             set(gcf,'position',[50,50,1050,400]);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U0(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             for i = 1:numel(time);           
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,2)'./fg(:,1)','k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U3(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U6(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$\it x(m)$'},'Interpreter','latex');
             ylabel({'$U\;\rm{(m/s)}$'},'Interpreter','latex');    
@@ -103,20 +83,35 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             figure;
             hold on;            
             set(gcf,'position',[50,50,1050,400]);
-            plot(mesh.x(1:8:numel(mesh.x)),obj.W0(1:8:numel(mesh.x)),'k','Linewidth',1.5);
-            plot(mesh.x(1:8:numel(mesh.x)),obj.W0(1:8:numel(mesh.x)),'ro','markersize',3);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             for i = 1:numel(time);                      
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
-                plot(xd,2*fg(:,4)'./fg(:,1)','k','Linewidth',1.5);
+                plot(xd,fg(:,4)'./fg(:,1)','k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W3(1:deltapoint:numel(mesh.x)),'ro','markersize',3);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W6(1:deltapoint:numel(mesh.x)),'ro','markersize',3);            
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
-            ylabel({'$w_s\;\rm {(m/s)}$'},'Interpreter','latex');   
+            ylabel({'$w\;\rm {(m/s)}$'},'Interpreter','latex');   
             box on;
 %             set(gca,'YLim',[-0.3*a 0.3*a+0.01],'Fontsize',15);       
+%% plot P
+            figure;
+            hold on;            
+            set(gcf,'position',[50,50,1050,400]);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            for i = 1:numel(time);                      
+                [~,Index] = sort(abs(outputTime-time(i)));
+                [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
+                plot(xd,fg(:,5)','k','Linewidth',1.5);
+            end
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            set(gca,'Fontsize',12);
+            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+            ylabel({'$P$'},'Interpreter','latex');   
+            box on;
         end
     end
     
@@ -137,7 +132,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 6;
+            ftime = 5;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -145,7 +140,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
-            option('outputFieldOrder') = [1 2 3 6];
+            option('outputFieldOrder') = [1 2 3 6 7];
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -166,7 +161,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [-30, 40], [0, deltax], 70/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [-10, 30], [0, deltax], 40/deltax, 1, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

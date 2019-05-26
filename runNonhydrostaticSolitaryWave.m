@@ -1,7 +1,8 @@
 function runNonhydrostaticSolitaryWave
 % deltax = [0.25 0.2 0.125 0.1 0.05 0.025];
-deltax = [2 1 0.5 0.25 0.2];
-Order = [1 2];
+deltax = [ 1 0.625 0.5 0.4 0.25 0.2 0.125 0.1];
+Order = 2;
+% Order = 2;
 len = deltax;
 type = enumStdCell.Quad;
 Nmesh = numel(deltax);
@@ -18,48 +19,52 @@ marker = {'o', 's', '^'};%circle for Eta, square for U, triangle for Ws
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = (70 * deltax(m)) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
+        dofs(m, n) = (40 * deltax(m)) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
     end
 end
 
-EtaErrInf = zeros(Nmesh, Ndeg); UErrInf = zeros(Nmesh, Ndeg);  WsErrInf = zeros(Nmesh, Ndeg);
-EtaErr2 = zeros(Nmesh, Ndeg);   UErr2 = zeros(Nmesh, Ndeg);    WsErr2 = zeros(Nmesh, Ndeg);
-EtaErr1 = zeros(Nmesh, Ndeg);   UErr1 = zeros(Nmesh, Ndeg);    WsErr1 = zeros(Nmesh, Ndeg);
-
+EtaErrInf = zeros(Nmesh, Ndeg); UErrInf = zeros(Nmesh, Ndeg);  WsErrInf = zeros(Nmesh, Ndeg);PErrInf = zeros(Nmesh, Ndeg);
+EtaErr2 = zeros(Nmesh, Ndeg);   UErr2 = zeros(Nmesh, Ndeg);    WsErr2 = zeros(Nmesh, Ndeg);PErr2 = zeros(Nmesh, Ndeg);
+EtaErr1 = zeros(Nmesh, Ndeg);   UErr1 = zeros(Nmesh, Ndeg);    WsErr1 = zeros(Nmesh, Ndeg);PErr1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
     Solver = NonhydrostaticSolitaryWave(Order(n),deltax(m),type);
+    Solver.matSolve;
     PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticSolitaryWave','/','NonhydrostaticSolitaryWave'));
     fext = cell(1);
-    fext{1}(:,:,1) = Solver.H6;fext{1}(:,:,2) = Solver.U6;fext{1}(:,:,3) = Solver.W6;fext{1}(:,:,4) = zeros(size(fext{1}(:,:,1)));
+    fext{1}(:,:,1) = Solver.H5;fext{1}(:,:,2) = Solver.U5;fext{1}(:,:,3) = Solver.W5;fext{1}(:,:,4) = Solver.P5;fext{1}(:,:,5) = zeros( size( Solver.P5 ) );
     fphys = cell(1);
     %> methods from Lu
 %     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.Depth;fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)*2;fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
     %> methods from Stelling
-    fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
+    fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);
+    fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = Solver.fphys{1}(:,:,7);
+    fphys{1}(:,:,5) = zeros( size( fphys{1}(:,:,3) ) );
     err = PostProcess.evaluateNormErrInf( fphys, fext );
-    EtaErrInf( m, n ) = err(1); UErrInf( m, n ) = err(2); WsErrInf( m, n ) = err(3);
+    EtaErrInf( m, n ) = err(1); UErrInf( m, n ) = err(2); WsErrInf( m, n ) = err(3);PErrInf( m, n ) = err(4);
 
     err = PostProcess.evaluateNormErr2( fphys, fext );
-    EtaErr2( m, n ) = err(1); UErr2( m, n ) = err(2); WsErr2( m, n ) = err(3);    
+    EtaErr2( m, n ) = err(1); UErr2( m, n ) = err(2); WsErr2( m, n ) = err(3);PErr2( m, n ) = err(4);    
     
     err = PostProcess.evaluateNormErr1( fphys, fext );
-    EtaErr1( m, n ) = err(1); UErr1( m, n ) = err(2); WsErr1( m, n ) = err(3);   
+    EtaErr1( m, n ) = err(1); UErr1( m, n ) = err(2); WsErr1( m, n ) = err(3);PErr1( m, n ) = err(4);   
     
     clear Solver;
     clear PostProcess;
     end
     
     % print table
-    fprintf('\n==================deg = %d==================\n', n);
+    fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len, EtaErr1(:, n), EtaErr2(:, n), EtaErrInf(:, n))
 
-    fprintf('\n==================deg = %d==================\n', n);
+    fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len, UErr1(:, n), UErr2(:, n), UErrInf(:, n))   
 
-    fprintf('\n==================deg = %d==================\n', n);
+    fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len, WsErr1(:, n), WsErr2(:, n), WsErrInf(:, n)) 
-    
+
+    fprintf('\n==================deg = %d==================\n', Order(n));
+    convergence_table(len, PErr1(:, n), PErr2(:, n), PErrInf(:, n)) 
     % plot figure
     co = color{n};
     figure(1); plot(dofs(:, n), EtaErr1(:, n), [co, marker{1}, linestyle],...
@@ -111,13 +116,15 @@ end
 save EtaErrInf;
 save UErrInf;
 save WsErrInf;
+save PErrInf;
 save EtaErr1;
 save UErr1;
 save WsErr1;
+save PErr1;
 save EtaErr2;
 save UErr2;
 save WsErr2;
-
+save PErr2;
 ylabel_str = {'$L_1$', '$L_2$', '$L_\infty$'};
 fontsize = 16;
 for n = 1:3

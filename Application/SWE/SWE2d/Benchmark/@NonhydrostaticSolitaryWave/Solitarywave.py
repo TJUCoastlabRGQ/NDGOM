@@ -1,44 +1,45 @@
-function Solitarywave(obj, mesh)
-
-
-% if count(py.sys.path,'') == 0
-%     insert(py.sys.path,int32(0),'');
-% end
-% 
-% Module = py.importlib.import_module('sympy');
-% 
-% x  = Module.Symbol('x');t  = Module.Symbol('t');
-% 
-% % f = Module.Symbol('f', cls=Function );
-% f = 2*x+t;
-
-% f.evalf( Module.subs={x:1, t:2})
-
 syms x t;
 
 H0 = 1;
 d = H0; % Constant produce during the derivation, and is taken to be equal to the water depth
 A = 0.2;
 l = H0*sqrt((A+H0)/A);
-C0 = l/d*sqrt(obj.gra * H0^3/(l^2-H0^2));
-% Ce = sqrt(obj.gra *(A+H0));
-h = H0 + A * ( sech( (x-C0*t)/l ) )^2;
-U = C0 * (1 - d/h);
-% W = -( A * Ce * d )/( l * h ) * sech((x - Ce * t)/l)*( diff(sech((x - Ce * t)/l),x) + diff(sech((x - Ce * t)/l),t) );
-% W = -( A * Ce * d )/( l * h ) * sech((x - Ce * t)/l)*( diff(sech((x - Ce * t)/l),t) );
-W = -( A * C0 * d )/( l * h ) * sech( (x - C0 * t)/l )*( diff( sech( (x - C0 * t)/l ), x ) * l  );
-P = A*C0^2*d^2/2/l^2/h^2*((2*H0-h)*(diff(sech((x - C0 * t)/l),x) * l )^2+...
-    h * sech((x-C0*t)/l) * diff(diff(sech((x - C0 * t)/l),x) * l, x ) * l);
-% f = diff(h*U,x) - U * diff(h,x) + 2*W;
+Ce = l/d*sqrt(obj.gra * H0^3/(l^2-H0^2));
 
+h = H0 + A * sech((x-Ce*t)/l)^2;
+U = Ce * (1 - d/h);
+W = -( A * Ce * d )/( l * h ) * sech((x - Ce * t)/l)*diff(sech((x - Ce * t)/l),x);
+P = A*Ce^2*d^2/2/l^2/h^2*((2*H0-h)*(diff(sech((x - Ce * t)/l),x))^2+...
+    h * sech((x-Ce*t)/l) * diff(diff(sech((x - Ce * t)/l),x), x ));
+% A = obj.A;
+% h = obj.Depth;
+% g = obj.gra;
+% x0 = 200;
+% c = sqrt(g*(A+h));
+% k = sqrt(3*A/4/h^3);
+% Methods from Xinhua Lu
+% eta = A./cosh(k*(x-x0-c*t))./cosh(k*(x-x0-c*t));
 
+%Methods from Stelling and Zljlema
+% eta = h + 4*A*(exp(-sqrt(3*A/h/h/(h+A))*(x-c*t - x0)))/(1 + exp(-sqrt(3*A/h/h/(h+A))*(x-c*t - x0)))^2;
+
+% eta = 4*A*exp(-sqrt(3*A/(h^2*(h+A)))*(x-x0-c*t))./(1+exp(-sqrt(3*A/(h^2*(h+A)))*(x-x0-c*t)))^2;
+% obj.Eta0 = eta(mesh.x,0);
+% obj.Eta0 = double(subs(eta,{x,t},{mesh.x,0}));
+% obj.Eta25 = double(subs(eta,{x,t},{mesh.x,25}));
+% obj.Eta50 = double(subs(eta,{x,t},{mesh.x,50}));
+
+% obj.Eta0 = zeros(size(mesh.x));
+% obj.Eta25 = zeros(size(mesh.x));
+% obj.Eta50 = zeros(size(mesh.x));
 
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.P0(i,j) = double(subs(P,{x,t},{mesh.x(i,j),0}));
-        obj.P5(i,j) = double(subs(P,{x,t},{mesh.x(i,j),5}));
+        obj.P6(i,j) = double(subs(P,{x,t},{mesh.x(i,j),6}));
         obj.H0(i,j) = double(subs(h,{x,t},{mesh.x(i,j),0}));
-        obj.H5(i,j) = double(subs(h,{x,t},{mesh.x(i,j),5}));
+        obj.H3(i,j) = double(subs(h,{x,t},{mesh.x(i,j),3}));
+        obj.H6(i,j) = double(subs(h,{x,t},{mesh.x(i,j),6}));
         %         obj.Eta0(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),0}));
         %         obj.Eta25(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),25}));
         %         obj.Eta50(i,j) = double(subs(eta,{x,t},{mesh.x(i,j),50}));
@@ -64,8 +65,8 @@ end
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
-        obj.U5(i,j) = double(subs(U,{x,t},{mesh.x(i,j),5}));
-%         obj.U6(i,j) = double(subs(U,{x,t},{mesh.x(i,j),6}));
+        obj.U3(i,j) = double(subs(U,{x,t},{mesh.x(i,j),3}));
+        obj.U6(i,j) = double(subs(U,{x,t},{mesh.x(i,j),6}));
         %         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
         %         obj.U25(i,j) = double(subs(U,{x,t},{mesh.x(i,j),25}));
         %         obj.U50(i,j) = double(subs(U,{x,t},{mesh.x(i,j),50}));
@@ -92,8 +93,8 @@ for i = 1:size(mesh.x,1)
         %         W10(i,j) = double(subs(difU,{x,t},{mesh.x(i,j),10}))*(obj.Eta10(i,j)+h);
         
         obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
-        obj.W5(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),5} ));
-%         obj.W6(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),6} ));
+        obj.W3(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),3} ));
+        obj.W6(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),6} ));
     end
 end
 % obj.W0 = -W0;
@@ -103,4 +104,3 @@ end
 % % obj.W0 = -double(subs(difU,{x,t},{mesh.x,0})).*(obj.Eta0+h);
 % % obj.W25 = -double(subs(difU,{x,t},{mesh.x,25})).*(obj.Eta25+h);
 % % obj.W50 = -double(subs(difU,{x,t},{mesh.x,50})).*(obj.Eta50+h);
-end
