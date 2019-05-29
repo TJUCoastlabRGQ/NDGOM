@@ -1,7 +1,7 @@
 function runNonhydrostaticSolitaryWave
 % deltax = [0.25 0.2 0.125 0.1 0.05 0.025];
 deltax = [ 1 0.625 0.5 0.4 0.25 0.2 0.125 0.1];
-Order = 2;
+Order =[ 1 2 ];
 % Order = 2;
 len = deltax;
 type = enumStdCell.Quad;

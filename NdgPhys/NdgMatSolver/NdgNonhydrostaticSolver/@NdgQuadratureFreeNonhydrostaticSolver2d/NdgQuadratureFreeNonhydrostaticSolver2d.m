@@ -14,20 +14,20 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         end
         
         function evaluateNonhydroRHS(obj, PhysClass, fphys)
-            mesh = PhysClass.meshUnion(1);
-            BoundaryEdge = mesh.BoundaryEdge;
-            InnerEdge = mesh.InnerEdge;
-            [ HBx, HBy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
-                InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]),  num2cell(fphys{1}(:,:,1) +...
-                2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
-            
-            [ px, py ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
-                InnerEdge, num2cell(fphys{1}(:,:,7),[1 2]),  num2cell(fphys{1}(:,:,7),[1 2]),...
-                enumNonhydroBoundaryCondition.Zero);
-            
-            PhysClass.frhs{1}(:,:,2) = PhysClass.frhs{1}(:,:,2) - fphys{1}(:,:,1) .* px - fphys{1}(:,:,7) .* HBx;
-            PhysClass.frhs{1}(:,:,3) = PhysClass.frhs{1}(:,:,3) - fphys{1}(:,:,1) .* py - fphys{1}(:,:,7) .* HBy;
-            PhysClass.frhs{1}(:,:,4) = PhysClass.frhs{1}(:,:,4) + 2 * fphys{1}(:,:,7);
+%             mesh = PhysClass.meshUnion(1);
+%             BoundaryEdge = mesh.BoundaryEdge;
+%             InnerEdge = mesh.InnerEdge;
+%             [ HBx, HBy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
+%                 InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]),  num2cell(fphys{1}(:,:,1) +...
+%                 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
+%             
+%             [ px, py ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, ...
+%                 InnerEdge, num2cell(fphys{1}(:,:,7),[1 2]),  num2cell(fphys{1}(:,:,7),[1 2]),...
+%                 enumNonhydroBoundaryCondition.Zero);
+%             
+%             PhysClass.frhs{1}(:,:,2) = PhysClass.frhs{1}(:,:,2) - fphys{1}(:,:,1) .* px - fphys{1}(:,:,7) .* HBx;
+%             PhysClass.frhs{1}(:,:,3) = PhysClass.frhs{1}(:,:,3) - fphys{1}(:,:,1) .* py - fphys{1}(:,:,7) .* HBy;
+%             PhysClass.frhs{1}(:,:,4) = PhysClass.frhs{1}(:,:,4) + 2 * fphys{1}(:,:,7);
         end
         
     end
