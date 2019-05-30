@@ -55,6 +55,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         
         matCalculateLDGPenaltyParameter(obj, mesh);
         
+        matCalculateFphysDerivative(obj, mesh, fphys, physClass);
+        
     end
     methods
         %> Functions following are used for testing purpose

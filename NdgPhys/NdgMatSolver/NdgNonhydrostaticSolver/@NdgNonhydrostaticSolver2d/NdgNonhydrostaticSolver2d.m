@@ -18,6 +18,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
         %> HBx the partial derivative of H + 2b with respect to the x direction
         %> HBy the partial derivative of H + 2b with respect to the y direction
+        %> H2Bx the second order derivative of H + 2b with respect to the x direction
+        %> H2By the second order derivative of H + 2b with respect to the y direction 
+        %> fhx the partial derivative of H with respect to the x direction
+        %> fhy the partial derivative of H with respect to the y direction
+        %> hux the partial derivative of Hu with respect to the x direction
+        %> hvy the partial derivative of Hv with respect to the y direction        
         TempPNPX
         PNPX
         TempPNPY
@@ -41,10 +47,16 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempWetDryPoint
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
-        HBx
-        HBy
         IETau
         BETau
+        HBx
+        HBy
+        H2Bx
+        H2By
+        fhx
+        fhy
+        hux
+        hvy
     end
     
     methods
@@ -159,6 +171,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
          [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
          
          matCalculateLDGPenaltyParameter( obj, mesh)
+         
+         matCalculateFphysDerivative(obj, mesh, fphys, physClass)
     end
     
 end

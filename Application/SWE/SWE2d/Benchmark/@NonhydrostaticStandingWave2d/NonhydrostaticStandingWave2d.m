@@ -35,7 +35,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 10;
+            x0 = 7.5;
             h = obj.d;
             a = obj.A;
 %             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
@@ -132,7 +132,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[10, 20], [0, 2*deltax], 10/deltax, 2, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

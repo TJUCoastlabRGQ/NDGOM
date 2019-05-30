@@ -14,6 +14,8 @@ obj.matAssembleWetDryInterface(mesh);
 obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
     UpdatedSPNPY, obj.NP);
 
+obj.matCalculateFphysDerivative( mesh, fphys, physClass);
+
 StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix(UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
     UpdatedSPNPY, fphys, physClass);
 

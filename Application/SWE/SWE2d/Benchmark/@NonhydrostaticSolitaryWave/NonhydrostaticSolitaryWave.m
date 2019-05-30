@@ -32,8 +32,8 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             obj.hmin = 1e-3;
             obj.Solitarywave(mesh);  
             obj.initPhysFromOptions( mesh );       
-            obj.matSolve;
-            obj.Postprocess;
+%             obj.matSolve;
+%             obj.Postprocess;
         end
         
        function VisualPostprocess(obj)
