@@ -54,6 +54,10 @@ classdef SWEAbstract2d < NdgPhysMat
         windSolver
         %> solver for unmerical flux
         numfluxSolver
+        % solver for local face flux
+        surfluxSolver
+        %> solver for volume flux
+        volumefluxSolver
         %> limiter type
         limiterSolver
     end
@@ -90,28 +94,12 @@ classdef SWEAbstract2d < NdgPhysMat
         [ fM, fP ] = matEvaluateSurfaceValue( obj, mesh, fphys, fext );
         %> evaluate local boundary flux
         function [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, ny, fm )
-            [ fluxM ] = mxEvaluateSurfFlux( obj.hmin, obj.gra, nx, ny, fm);
-            fluxM(:,:,4) = fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) .* nx + ...
-                fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) .* ny;
+            [ fluxM ] = obj.surfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm);
         end% func
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp )
             [ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp );
-            tempfluxS = ( fm(:,:,2) .* fm(:,:,6) ./ fm(:,:,1) + ...
-                fp(:,:,2) .* fp(:,:,6) ./ fp(:,:,1) ) .* nx ./ 2 + ...
-                ( fm(:,:,3) .* fm(:,:,6) ./ fm(:,:,1) + ...
-                fp(:,:,3) .* fp(:,:,6) ./ fp(:,:,1) ) .* ny ./ 2;
-%             tempfluxS = zeros(size(fluxS(:,:,3)));
-            temphum = fm(:,:,2); temphvm = fm(:,:,3); temphm = fm(:,:,1);temphwm = fm(:,:,6);
-            temphup = fp(:,:,2); temphvp = fp(:,:,3); temphp = fp(:,:,1);temphwp = fp(:,:,6);
-            Index = ( temphum .* nx + temphvm .* ny > 0 & - temphup .* nx - temphvp .* ny <= 0 );
-            tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index ) + ...
-            ( temphvm(Index) .* temphwm(Index) ./ temphm(Index) ) .* ny( Index ) ;
-            Index = ( temphum .* nx + temphvm .* ny <= 0 & - temphup .* nx - temphvp .* ny > 0 );
-            tempfluxS( Index ) =   ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index ) +...
-            ( temphvp(Index) .* temphwp(Index) ./ temphp(Index) ) .* ny( Index )  ;
-            fluxS(:,:,4) =  tempfluxS;
         end% func
     end
     
