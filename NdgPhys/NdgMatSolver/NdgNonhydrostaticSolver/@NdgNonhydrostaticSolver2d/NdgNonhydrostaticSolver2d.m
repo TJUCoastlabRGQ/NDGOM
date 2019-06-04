@@ -37,6 +37,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempZeroFluxBoundary
         ZeroFluxBoundary
         ZeroFluxBoundaryIndex
+        WetDryFaceOrder
         NonhydroFmPoint
         NonhydroFpPoint
         EidBoundaryType

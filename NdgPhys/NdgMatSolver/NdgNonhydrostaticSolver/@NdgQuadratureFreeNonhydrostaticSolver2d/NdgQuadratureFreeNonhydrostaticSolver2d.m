@@ -61,6 +61,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
     methods
         %> Functions following are used for testing purpose
         
+        function [NonhydroFmPoint, NonhydroFpPoint, WetDryFaceOrder] = ...
+                getWetDryFaceInformation( obj, physClass )
+            mesh = physClass.meshUnion(1);
+            obj.matAssembleWetDryInterface(mesh);
+            [NonhydroFmPoint, NonhydroFpPoint, WetDryFaceOrder] = ...
+                obj.matAssemblePointRelatedInformation( obj.ZeroFluxBoundary,...
+                obj.AdjacentDryCellAndFace,mesh.InnerEdge.FToE, mesh.InnerEdge.FToN1 );
+        end
+        
         function [ qx, qy, q2x, q2y ] = getLDGFluxTerm(obj, mesh, gmat)
             BoundaryEdge = mesh.BoundaryEdge;
             InnerEdge = mesh.InnerEdge;
