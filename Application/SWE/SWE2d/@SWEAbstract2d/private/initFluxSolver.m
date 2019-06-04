@@ -48,20 +48,15 @@ end
         else
             volumefluxSolver = SWEVolumeFluxSolver2d();
         end
-    else % SWEPreBlanaced2d
+    elseif strcmp(parent.SuperclassList.Name, 'SWEPreBlanaced2d') % SWEPreBlanaced2d
         if obj.option.isKey('nonhydrostaticType')
-            if obj.getOption('nonhydrostaticType') == enumNonhydrostaticType.Hydrostatic
-                volumefluxSolver = SWEVolumeFluxSolver2d();
-            else
-                volumefluxSolver = SWENonhydroVolumeFluxSolver2d();
-            end
-        else
             if obj.getOption('nonhydrostaticType') == enumNonhydrostaticType.Hydrostatic
                 volumefluxSolver = SWEPrebalanceVolumeFlux2d();
             else
                 volumefluxSolver = SWENonhydroPrebalanceVolumeFluxSolver2d();
-            end            
-            
+            end
+        else
+                volumefluxSolver = SWEPrebalanceVolumeFlux2d();      
         end       
     end
 end

@@ -195,7 +195,7 @@ path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver2d/
 srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
     [path, 'mxAssemblePointToCellInformation.c']};
 libfile = {};
-RemoveMexFile(path, srcfile, libfile);
+% RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgAbstractNonhydrostaticSolver/private/';
@@ -212,7 +212,12 @@ srcfile = {[path, 'mxAssembleWetDryInterface.c'],...
     [path, 'mxGetAuxialaryVariableBoundaryEdgeFlux.c'],...
     [path,'mxGetWetDryFaceVariableAndFlux.c']};
 libfile = {};
-RemoveMexFile(path, srcfile, libfile);
+% RemoveMexFile(path, srcfile, libfile);
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
+libfile = {};
+srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);

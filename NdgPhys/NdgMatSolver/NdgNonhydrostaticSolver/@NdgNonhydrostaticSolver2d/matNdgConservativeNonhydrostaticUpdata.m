@@ -8,6 +8,10 @@ mesh = physClass.meshUnion(1);
 
 obj.matAssembleWetDryInterface(mesh);
 
+[obj.NonhydroFmPoint, obj.NonhydroFpPoint, obj.WetDryFaceOrder] = obj.matAssemblePointRelatedInformation...
+    (obj.ZeroFluxBoundary, obj.AdjacentDryCellAndFace, physClass.meshUnion(1).InnerEdge.FToE...
+    ,physClass.meshUnion(1).InnerEdge.FToN1);
+
 [UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY]...
     = obj.matReconstructStiffmatrixRelatedMatrix( physClass);
 

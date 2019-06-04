@@ -1,4 +1,4 @@
-classdef NonhydrostaticStandingWave2d < SWEConventional2d
+classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     %NONHYDROSTATICSTANDINGWAVE2D 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -19,7 +19,7 @@ classdef NonhydrostaticStandingWave2d < SWEConventional2d
     methods
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
-            obj = obj@SWEConventional2d();
+            obj = obj@SWEPreBlanaced2d();
 %             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
@@ -132,7 +132,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 30], [0, 6], 30/deltax, 6/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 3], [0, 3], 3, 3, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

@@ -57,6 +57,10 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
         
         matCalculateFphysDerivative(obj, mesh, fphys, physClass);
         
+        [ UpwindedTermX, UpwindedTermY ] = matCalculateUpwindedFphysDerivative(obj, mesh, fphys, physClass, variableX, variableY);
+        
+        [ DownwindedTermX, DownwindedTermY ] = matCalculateDownwindedFphysDerivative(obj, mesh, fphys, physClass, variableX, variableY);
+        
     end
     methods
         %> Functions following are used for testing purpose

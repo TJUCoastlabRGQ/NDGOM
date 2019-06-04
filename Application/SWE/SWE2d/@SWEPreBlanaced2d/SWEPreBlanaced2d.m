@@ -21,7 +21,7 @@ classdef SWEPreBlanaced2d < SWEConventional2d
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
-                obj.frhs{m} = obj.frhs{m} + mxEvaluateSourceTopography2d...
+                obj.frhs{m}(:,:,1:3) = obj.frhs{m}(:,:,1:3) + mxEvaluateSourceTopography2d...
                     ( obj.gra, mesh.status, fphys{m}, obj.zGrad{m} );
             end
         end
