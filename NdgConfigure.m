@@ -97,18 +97,29 @@ srcfile = {[path, 'mxVertLimit2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE1d
-path = 'Application/SWE/SWE1d/@SWEAbstract1d/private/';
+path = 'D:\PhdResearch\Application\SWE\SWE1d\@SWEAbstract1d\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
 libfile = {};
 srcfile = { ...
     [path, 'mxEvaluateSurfaceValue1d.c'], ...
-    [path, 'mxEvaluateSurfFlux1d.c'], ...
     [path, 'mxUpdateTimeInterval1d.c']};
+FuncHandle(path, srcfile, libfile);
+% Surface flux for SWE1d
+path = 'Application\SWE\FaceFluxSolver\SWEFaceFluxSolver1d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateSurfFlux1d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEVolumeFluxSolver1d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateFlux1d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE1d/@SWEConventional1d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux1d.c'], ...
+srcfile = {...
     [path, 'mxEvaluateSourceTopography1d.c'], ...
     [path, 'mxEvaluatePostFunc1d.c']};
 FuncHandle(path, srcfile, libfile);
