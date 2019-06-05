@@ -7,13 +7,15 @@ classdef SWEAbstract1d < NdgPhysMat
         gra
     end
     
-    properties( Constant )
+    properties
         %> number of physical field: [ h, hu, z, eta ]
-        Nfield = 4
+        Nfield = 6
         %> number of variable field
-        Nvar = 2
+        Nvar = 3
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2 ]
+        varFieldIndex = [ 1, 2, 5 ]
+        %> order of the field to be written in the output file     
+        outputFieldOrder = [1 2 5 6]
     end
     
     properties
@@ -56,7 +58,7 @@ classdef SWEAbstract1d < NdgPhysMat
         [ fphys ] = matEvaluatePostFunc(obj, fphys);
     end
         
-    methods( Access = protected, Sealed )
+    methods( Access = protected )
         
         %> apply slope limiter on conservative variables
         [ fphys ] = matEvaluateLimiter( obj, fphys )

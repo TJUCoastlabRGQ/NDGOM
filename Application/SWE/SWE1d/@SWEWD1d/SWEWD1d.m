@@ -63,10 +63,10 @@ classdef SWEWD1d < SWEPreBlanaced1d
                 mesh = obj.meshUnion(m);
                 % wet part
                 wetflg = all( fphys{m}(:,:,1) > obj.hmin );
-                mesh.EToR( wetflg ) = int8( NdgRegionType.Wet );
+                mesh.EToR( wetflg ) = int8( enumSWERegion.Wet );
                 % dry part
                 dryflag = all( fphys{m}(:,:,1) < obj.hmin );
-                mesh.EToR( dryflag ) = int8( NdgRegionType.Dry );
+                mesh.EToR( dryflag ) = int8( enumSWERegion.Dry );
                 % partial wet part
                 pwlg = ( ~wetflg ) & ( ~dryflag ); %Nwd = sum( flg );
                 % dram-break type or flood type
@@ -74,8 +74,8 @@ classdef SWEWD1d < SWEPreBlanaced1d
                     > max( fphys{m}(:,:,3) );
                 pdblg = dblg & pwlg;
                 pflg = (~dblg) & pwlg;
-                mesh.EToR( pdblg ) = int8( NdgRegionType.PartialWetDamBreak );
-                mesh.EToR( pflg ) = int8( NdgRegionType.PartialWetFlood );
+                mesh.EToR( pdblg ) = int8( enumSWERegion.PartialWetDamBreak );
+                mesh.EToR( pflg ) = int8( enumSWERegion.PartialWetFlood );
                 %mesh.EToR( flg ) = int8( NdgRegionType.PartialWet );
             end
         end% func

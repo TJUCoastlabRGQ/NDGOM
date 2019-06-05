@@ -14,6 +14,10 @@ else
     error( 'Please set the output case name option "outputCaseName".' );
 end
 
+if ~isdir(casename)
+    mkdir(casename);
+end
+
   OutputFieldNum = numel( physMat.outputFieldOrder );
   varIndex = physMat.outputFieldOrder; 
 
