@@ -43,6 +43,9 @@ classdef SWEAbstract1d < NdgPhysMat
         
         %> initilize from options
         initPhysFromOptions( obj, mesh );
+        
+        %> impose boundary condition and evaluate cell boundary values
+        [ fM, fP ] = matImposeBoundaryCondition( obj, edge, nx, fM, fP, fext );
     end
     
     methods( Abstract, Hidden )

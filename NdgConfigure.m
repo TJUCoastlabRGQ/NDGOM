@@ -126,8 +126,7 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE1d/@SWEPreBlanaced1d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux1d.c'], ...
-    [path, 'mxEvaluateSourceTopography1d.c']};
+srcfile = {[path, 'mxEvaluateSourceTopography1d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE2d
@@ -226,7 +225,24 @@ libfile = {};
 % RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgNonhydrostaticSolver1d\private\';
+srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
+    [path,'mxAssemblePointToCellInformation.c']};
+libfile = {};
+FuncHandle(path, srcfile, libfile);
+
+
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
+libfile = {};
+srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEPrebalanceVolumeFlux1d\private\';
+libfile = {};
+srcfile = {[path, 'mxEvaluateFlux1d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver1d\private\';
 libfile = {};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);

@@ -134,14 +134,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] physClass The hydrostatic solver
         %> @param[in] fphys The fphys field
         fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys);
-        %> @brief Function to calculate the characteristic matrix
-        %> @details Function to calculate the characteristic matrix in the x direction
-        %> @param[in] BoundaryEdge the boundary edge object
-        %> @param[in] InnerEdge the inner edge object
-        %> @param[in] Variable variable used to calculate the characteristic matrix
-        %> @param[in] ftype enumeration type used to impose the non-hydro static relalated boundary condition at the wet dry interface
-        %> @param[out] termX the calculated characteristic matrix in x direction        
-        [ termX, termY ] = matCalculateCharacteristicMatrix( obj, mesh, BoundaryEdge, InnerEdge, qx, qy, ftype);
         %> @brief Function to calculate the conservative variable related partial derivative operator
         %> @details Function to calculate the conservative variable related partial derivative operator
         %> @param[in] physClass The hydrostatic solver

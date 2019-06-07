@@ -2,7 +2,8 @@ classdef SWEPreBlanaced1d < SWEConventional1d
     
     methods( Hidden )
         function [ E ] = matEvaluateFlux( obj, mesh, fphys )
-            [ E ] = mxEvaluateFlux1d( obj.hmin, obj.gra, mesh.EToR, fphys );
+%             [ E ] = mxEvaluateFlux1d( obj.hmin, obj.gra, mesh.EToR, fphys );
+            [ E ] = obj.volumefluxSolver.evaluate( obj.hmin, obj.gra, mesh, fphys );
         end
     end
     
