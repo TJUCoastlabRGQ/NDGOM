@@ -23,7 +23,7 @@ end
 [ obj.frictionSolver ] = initFrictionSolver( obj );
 %Wind Term
 [ obj.windSolver ] = initWindSolver( obj );
-[ obj.numfluxSolver ] = initNumFluxSolver( obj );
+[ obj.numfluxSolver, obj.surfluxSolver, obj.volumefluxSolver ] = initFluxSolver( obj );
 [ obj.limiterSolver ] = initLimiter( obj );
 
 end% func

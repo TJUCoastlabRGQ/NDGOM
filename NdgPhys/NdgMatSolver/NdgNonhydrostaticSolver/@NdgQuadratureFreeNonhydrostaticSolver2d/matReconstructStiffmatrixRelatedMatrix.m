@@ -1,4 +1,4 @@
-function [UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY, UpdatedFNPBX, UpdatedFNPBY]...
+function [UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY]...
     = matReconstructStiffmatrixRelatedMatrix(obj, PhysClass)
 %> @brief Function to assemble the characteristic matrix
 %> @details
@@ -26,9 +26,6 @@ UpdatedSPNPY(:,DryToWetPoint) = obj.SPNPY(:,DryToWetPoint);
 NewWetDryFace  = setdiff(obj.ZeroFluxBoundary, obj.TempZeroFluxBoundary, 'rows');
 TempWetToDryPoint = obj.matGetTempWetToDryPoint(mesh.cell.Np, mesh.cell.Nfp(1), NewWetDryFace, mesh.cell.Fmask);
 
-[obj.NonhydroFmPoint, obj.NonhydroFpPoint] = obj.matAssemblePointRelatedInformation...
-    (obj.ZeroFluxBoundary, obj.AdjacentDryCellAndFace, PhysClass.meshUnion(1).InnerEdge.FToE...
-    ,PhysClass.meshUnion(1).InnerEdge.FToN1);
 
 if obj.WetNum == mesh.K
     %doing nothing

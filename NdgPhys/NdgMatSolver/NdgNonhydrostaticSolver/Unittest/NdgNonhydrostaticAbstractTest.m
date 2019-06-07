@@ -15,6 +15,12 @@ classdef NdgNonhydrostaticAbstractTest < SWEConventional2d
             obj.initPhysFromOptions( mesh );
         end
         
+        function testWetDryFaceOrder(obj)
+            EcactWetDryFaceOrder = obj.getExactWetDryFaceOrder;
+            [ ~, ~, WetDryFaceOrder ] = obj.NonhydrostaticSolver.getWetDryFaceInformation( obj );
+            obj.Assert(EcactWetDryFaceOrder', WetDryFaceOrder);
+        end
+        
         function testSecondOrderTermCalculation(obj)
             [Exactqx, Exactqy, Exactq2x, Exactq2y] = obj.getExactSecondOrderTerm;
             [qx, qy, q2x, q2y] = obj.NonhydrostaticSolver.getLDGFluxTerm( obj.meshUnion(1), num2cell(obj.fphys{1}(:,:,1),[1 2]));

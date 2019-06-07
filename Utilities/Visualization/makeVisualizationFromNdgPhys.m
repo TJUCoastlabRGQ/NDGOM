@@ -9,7 +9,7 @@ end
 function [ visual ] = makeVisualizationFromNdgPhys1d( physMat )
     visual = [];
     for m = 1 : physMat.Nmesh
-        visual = [ visual, Visual2d( physMat.meshUnion(m) ) ];
+        visual = [ visual, Visual1d( physMat.meshUnion(m) ) ];
     end
 end
 

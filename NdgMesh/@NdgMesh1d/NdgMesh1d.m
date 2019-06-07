@@ -3,7 +3,7 @@ classdef NdgMesh1d < NdgMesh
     %   Detailed explanation goes here
     
     properties(Constant)
-        dim = enumMeshDim.One
+        type = enumMeshDim.One 
     end
     
     methods(Hidden, Access = protected)
@@ -13,7 +13,7 @@ classdef NdgMesh1d < NdgMesh
         
         function obj = assembleJacobiFactor( obj )
             xr = obj.cell.Dr*obj.x;
-            obj.J = xr; 
+            obj.J = xr;
             obj.rx = 1./obj.J;
             
             obj.ry = zeros(size(obj.rx));
@@ -53,10 +53,10 @@ classdef NdgMesh1d < NdgMesh
         %> \brief draw mesh
         draw( obj, zvar );
         %> construction function
-        function obj = NdgMesh1d( cell, Nv, vx, K, EToV, EToR, BCToV )
+        function obj = NdgMesh1d( cell, Nv, vx, K, EToV, EToR )
             vy = zeros(size(vx)); % vy is all zeros
             vz = zeros(size(vx)); % vz is all zeros
-%             obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR, BCToV);
+            %             obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR, BCToV);
             obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR);
         end% func
     end

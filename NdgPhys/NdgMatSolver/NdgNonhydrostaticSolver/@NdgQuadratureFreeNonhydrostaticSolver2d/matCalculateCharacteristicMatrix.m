@@ -13,8 +13,16 @@ function [ termX, termY] = matCalculateCharacteristicMatrix(obj, mesh,  Boundary
 %< Inner edge contribution
 fluxMY = InnerEdge.ny.*fmy; fluxMX = InnerEdge.nx.*fmx;
 fluxPY = InnerEdge.ny.*fpy; fluxPX = InnerEdge.nx.*fpx;
-termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
+
+% fluxSx = ( ( fmx + fpx ) ./ 2 - 1/2 .* ( fmx - fpx ) ) .* InnerEdge.nx;
+% fluxSy = ( ( fmy + fpy ) ./ 2 - 1/2 .* ( fmy - fpy ) ) .* InnerEdge.ny;
+
 termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);
+termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
+
+% termY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
+% termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
+
 
 
 [fmy, fpy] = BoundaryEdge.matEvaluateSurfValue( VariableY );    [fmx, fpx] = BoundaryEdge.matEvaluateSurfValue( VariableX );     
@@ -26,6 +34,10 @@ fpx = obj.matImposeNonhydroRelatedBoundaryCondition(fmx, fpx, ftype, obj.EidBoun
 %< Boundary edge contribution
 fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;
 fluxSY = BoundaryEdge.ny.*(fpy + fmy)./2; fluxSX = BoundaryEdge.nx.*(fpx + fmx)./2;
+
+% fluxSX = ( ( fmx + fpx ) ./ 2 - 1/2 .* ( fmx - fpx ) ) .* BoundaryEdge.nx;
+% fluxSY = ( ( fmy + fpy ) ./ 2 - 1/2 .* ( fmy - fpy ) ) .* BoundaryEdge.ny;
+
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
 

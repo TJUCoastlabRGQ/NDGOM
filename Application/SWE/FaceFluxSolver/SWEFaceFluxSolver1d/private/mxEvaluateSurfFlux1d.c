@@ -1,5 +1,5 @@
 #include "mex.h"
-#include "mxSWE1d.h"
+#include "../../../SWE1d/@SWEAbstract1d/private/mxSWE1d.h"
 #include <math.h>
 
 #ifdef _OPENMP

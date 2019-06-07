@@ -125,16 +125,16 @@ classdef ParabolicBowl1d < SWEConventional1d
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('cfl') = 1/obj.meshUnion(1).cell.N;
-            option('obcType') = NdgBCType.None;
-            option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
+%             option('obcType') = NdgBCType.None;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
-            option('outputNetcdfCaseName') = mfilename;
-            option('temporalDiscreteType') = NdgTemporalDiscreteType.RK33;
-            option('limiterType') = NdgLimiterType.TVB;
+            option('outputCaseName') = mfilename;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
+            option('limiterType') = enumLimiter.None;
             option('limiterParameter') = 1e-6;
-            option('SWELimiterType') = SWELimiterType.OnDepth;
-            option('equationType') = NdgDiscreteEquationType.Strong;
-            option('integralType') = NdgDiscreteIntegralType.QuadratureFree;
+%             option('SWELimiterType') = SWELimiterType.OnDepth;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
         end
         
         function fext = evaluateExactFunc( obj, time )
@@ -193,6 +193,6 @@ end
 
 function [ mesh ] = makeUniformMesh( N, M )
 xlim = [-5000, 5000];
-bcType = [NdgEdgeType.ZeroGrad, NdgEdgeType.ZeroGrad];
+bcType = [enumBoundaryCondition.ZeroGrad, enumBoundaryCondition.ZeroGrad];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
 end
