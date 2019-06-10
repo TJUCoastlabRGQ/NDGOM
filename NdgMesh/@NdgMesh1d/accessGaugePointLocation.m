@@ -7,7 +7,7 @@ cellId = zeros( Ng, 1 );
 for n = 1:Ng
     dx = xb - xg(n);
     id = find( dx(1,:).*dx(2,:) <= 0 );
-    temprd = ( xg(n) - obj.x(1, id) )./( obj.x(2, id) - obj.x(1, id) )*obj.cell.LAV - 1;
+    temprd = ( xg(n) - xb(1, id) )./( xb(2, id) - xb(1, id) )*obj.cell.LAV - 1;
     cellId(n) = id(abs(temprd)<=1);
     rd(n) = temprd(abs(temprd)<=1);
 end

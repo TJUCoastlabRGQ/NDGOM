@@ -38,7 +38,7 @@ classdef NonhydrostaticStandingWave1d < SWEConventional1d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 17.5;
+            x0 = 12.8;
             h = obj.d;
             a = obj.A;
 %             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
