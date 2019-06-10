@@ -26,7 +26,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
                              
             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*obj.d/obj.Lambda));
             obj.T = obj.Lambda/c;
-            obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
+            obj.fexact = -obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
         end
                 
         function NonhydroPostprocess(obj)  
@@ -35,12 +35,14 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 7.5;
+            x0 = 17.5;
             h = obj.d;
             a = obj.A;
-%             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda));
+%             c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
+%             Period = obj.Lambda / c;
             for t = 1:Ntime
-                exactEta(t) = obj.A * cos(2*pi/obj.Lambda*x0)*cos(2*pi/obj.T*outputTime(t));
+%                 exactEta(t) = -obj.A * cos(2*pi*x0/obj.Lambda + 2*pi*outputTime(t) /obj.T);
+                exactEta(t) = -obj.A * cos(2*pi/obj.Lambda*x0)*cos(2*pi/obj.T*outputTime(t));
                 tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
                 Eta(t) = tempdata(1);
             end
@@ -99,7 +101,8 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
 %                 fphys{m}(:,:,1) =  obj.d;
-                fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);                
+%                 fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);
+                fphys{m}(:,:,1) =  -obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
             end
         end
         
@@ -115,8 +118,8 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
+%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
     

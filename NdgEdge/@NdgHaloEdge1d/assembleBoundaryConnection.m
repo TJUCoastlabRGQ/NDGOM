@@ -7,13 +7,13 @@ Nb = size( BCToV, 2 );
 
 ftype = zeros( Ne, 1 );
 for n = 1:Ne
-    vert = sort( obj.FToV(:, n) );
+    vert = obj.FToV(:, n) ;
     
     for m = 1:Nb
-        vert1 = sort( BCToV(1:2, m) );
+        vert1 = BCToV(1, m);
         
-        if all( vert == vert1 )
-            ftype(n) = BCToV( 3, m );
+        if vert == vert1
+            ftype(n) = BCToV( 2, m );
             break;
         end
     end

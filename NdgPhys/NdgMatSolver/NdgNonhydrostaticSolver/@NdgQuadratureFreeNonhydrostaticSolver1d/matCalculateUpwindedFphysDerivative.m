@@ -1,4 +1,4 @@
-function [ UpwindedTermX, UpwindedTermY ] = matCalculateUpwindedFphysDerivative(obj, mesh, fphys, physClass, variableX, variableY)
+function [ UpwindedTermX ] = matCalculateUpwindedFphysDerivative(obj, mesh, fphys, physClass, variableX )
 
 InnerEdge = mesh.InnerEdge;
 [fm, fp] = InnerEdge.matEvaluateSurfValue( fphys );
@@ -10,12 +10,10 @@ fluxX = InnerEdge.nx .* ( vfmx + vfpx )./2;
 % getUpwindFluxTerm
 temphum = fm(:,:,2); 
 temphup = fp(:,:,2); 
-Index = ( temphum .* InnerEdge.nx  > 0 &...
-    - temphup .* InnerEdge.nx  <= 0 );
+Index = ( temphum .* InnerEdge.nx  > 0 & - temphup .* InnerEdge.nx  <= 0 );
 fluxX(Index) = vfmx(Index) .* InnerEdge.nx(Index);
 
-Index = ( temphum .* InnerEdge.nx  <= 0 & ...
-    - temphup .* InnerEdge.nx > 0 );
+Index = ( temphum .* InnerEdge.nx  <= 0 & - temphup .* InnerEdge.nx > 0 );
 fluxX( Index ) =  vfpx(Index) .* InnerEdge.nx(Index);
 % wet-dry interface considered
 [vfmx, vfpx, fluxX] = obj.matGetWetDryFaceVariableAndFlux( vfmx, vfpx, fluxX );

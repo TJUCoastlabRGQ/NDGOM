@@ -57,7 +57,7 @@ for i = 1:K*Nface
         FToF(1, sk) = f;
         FToE(2, sk) = mesh.EToE(f, k);
         FToF(2, sk) = mesh.EToF(f, k);
-        FToV(1:2, sk) = ind(1:2, i);
+        FToV(1, sk) = ind(1, i);
         FToM(2, sk) = mesh.EToM(f, k);
         sk = sk + 1;
     end

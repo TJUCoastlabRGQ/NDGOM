@@ -14,7 +14,7 @@ classdef SWENonhydroHLLNumFluxSolver1d < SWEHLLNumFluxSolver1d
             tempfluxS( Index ) =  ( temphum(Index) .* temphwm(Index) ./ temphm(Index) ) .* nx( Index ) ;
             Index = ( temphum .* nx  <= 0 & - temphup .* nx > 0 );
             tempfluxS( Index ) =   ( temphup(Index) .* temphwp(Index) ./ temphp(Index) ) .* nx( Index );
-            fluxS(:,:,4) =  tempfluxS;            
+            fluxS(:,:,3) =  tempfluxS;            
         end        
         
     end

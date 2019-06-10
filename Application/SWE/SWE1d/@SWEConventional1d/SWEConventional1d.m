@@ -29,7 +29,7 @@ classdef SWEConventional1d < SWEAbstract1d
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
-                obj.frhs{m} = obj.frhs{m} + mxEvaluateSourceTopography1d...
+                obj.frhs{m}(:,:,1:2) = obj.frhs{m}(:,:,1:2) + mxEvaluateSourceTopography1d...
                     ( obj.gra, mesh.EToR, fphys{m}, obj.zGrad{m} );
             end
         end
