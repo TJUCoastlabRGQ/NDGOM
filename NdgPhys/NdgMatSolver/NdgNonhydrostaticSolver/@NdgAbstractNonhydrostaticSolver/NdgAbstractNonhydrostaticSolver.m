@@ -104,5 +104,56 @@ classdef NdgAbstractNonhydrostaticSolver < handle
         %> @param[in] Fmask order of the face interpolation points 
         %> @param[out] TempWetToDryPoint point that change status from wet to dry
         TempWetToDryPoint = matGetTempWetToDryPoint( obj, Np, Nfp, NewWetDryFace, Fmask)
+        %> @brief Function to calculate the numerical flux of the inner edge corresponding to the primitive variable
+        %> with LDG method adopted
+        %> @details Function to calculate the numerical flux of the inner edge corresponding to the primitive variable
+        %> with LDG method adopted, this version is programmed following the numerical flux for LDG method provided 
+        %> by Peraire and Perssony (2008)
+        %> @param[in] WetDryFaceOrder order of wet-dry interface
+        %> @param[in] fluxS the numerical flux without wet-dry interface taking into consideration
+        %> @param[in] Nfp number of interpolation points per face
+        %> @param[out] fluxS the numerical flux with wet-dry interface taking into consideration      
+        fluxS = matGetPrimitiveVariableInnerEdgeFlux( obj, WetDryFaceOrder, fluxS, Nfp)
+        %> @brief Function to calculate the numerical flux of the boundary edge corresponding to the primitive variable
+        %> with LDG method adopted
+        %> @details Function to calculate the numerical flux of the boundary edge corresponding to the primitive variable
+        %> with LDG method adopted, this version is programmed following the numerical flux for LDG method provided 
+        %> by Peraire and Perssony (2008)
+        %> @param[in] vector the directional vector in x or y direction
+        %> @param[in] Um value of the local non-hydrostatic pressure
+        %> @param[out] fluxS the numerical flux in direction x or y 
+        fluxS = matGetPrimitiveVariableBoundaryEdgeFlux( obj, vector, Um) 
+        %> @brief Function to calculate the numerical flux of the inner edge corresponding to the auxialary variable
+        %> with LDG method adopted
+        %> @details Function to calculate the numerical flux of the inner edge corresponding to the auxialary variable
+        %> with LDG method adopted, this version is programmed following the numerical flux for LDG method provided 
+        %> by Peraire and Perssony (2008)
+        %> @param[in] fluxS the numerical flux without wet-dry interface taking into consideration
+        %> @param[in] Um value of the local non-hydrostatic pressure
+        %> @param[in] Up value of the adjacent non-hydrostatic pressure
+        %> @param[in] Sigmam value of the local auxialary pressure
+        %> @param[in] Sigmap value of the adjacent auxialary pressure        
+        %> @param[in] vector the directional vector in x or y direction
+        %> @param[out] fluxS the numerical flux with wet-dry interface taking into consideration           
+        fluxS = matGetAuxialaryVariableInnerEdgeFlux( obj, fluxS, Um, Up, Sigmam, Sigmap, vector)
+        %> @brief Function to calculate the numerical flux of the boundary edge corresponding to the auxialary variable
+        %> with LDG method adopted
+        %> @details Function to calculate the numerical flux of the boundary edge corresponding to the auxialary variable
+        %> with LDG method adopted, this version is programmed following the numerical flux for LDG method provided 
+        %> by Peraire and Perssony (2008)
+        %> @param[in] Um value of the local non-hydrostatic pressure
+        %> @param[in] Sigmam value of the local auxialary pressure
+        %> @param[in] vector the directional vector in x or y direction
+        %> @param[out] fluxS the numerical flux with boundary contion taking into consideration           
+        fluxS = matGetAuxialaryVariableBoundaryEdgeFlux( obj,  Um, Sigmam, vector)
+        %> @brief Function to get the variable value and the numerical flux at the wet-dry interface
+        %> @details Function to get the variable value and the numerical flux at the wet-dry interface
+        %> @param[in] Um value of the local cell
+        %> @param[in] Up value of the adjacent cell
+        %> @param[in] fluxS the flux without wet-dry interface considered
+        %> @param[out] Um value of the local cell with wet-dry interface considered   
+        %> @param[out] Up value of the adjacent cell with wet-dry interface considered
+        %> @param[in] fluxS the flux with wet-dry interface considered
+        [Um, Up, fluxS] = matGetWetDryFaceVariableAndFlux( obj, Um, Up, fluxS)
     end
 end

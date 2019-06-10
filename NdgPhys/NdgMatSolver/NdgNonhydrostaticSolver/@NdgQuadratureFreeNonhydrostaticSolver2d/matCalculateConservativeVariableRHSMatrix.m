@@ -14,8 +14,15 @@ mesh = physClass.meshUnion(1);
 %< Inner edge contribution
 fluxMX = InnerEdge.nx.*fm;  fluxMY = InnerEdge.ny.*fm;
 fluxPX = InnerEdge.nx.*fp;  fluxPY = InnerEdge.ny.*fp;
+
+% fluxSx = ( ( fm + fp ) ./ 2 - 1/2 .* ( fm - fp ) ) .* InnerEdge.nx;
+% fluxSy = ( ( fm + fp ) ./ 2 - 1/2 .* ( fm - fp ) ) .* InnerEdge.ny;
+
 termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);
 termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
+
+% termY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
+% termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
 
 
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys ); 
@@ -29,7 +36,12 @@ termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
 
 %< Boundary edge contribution
 fluxMX = BoundaryEdge.nx.*fm(:,:,index); fluxMY = BoundaryEdge.ny.*fm(:,:,index);
+
 fluxSX = BoundaryEdge.nx.*(fp(:,:,index) + fm(:,:,index))./2; fluxSY = BoundaryEdge.ny.*(fp(:,:,index) + fm(:,:,index))./2;
+
+% fluxSX = ( ( fm(:,:,index) + fp(:,:,index) ) ./ 2 - 1/2 .* ( fm(:,:,index) - fp(:,:,index) ) ) .* BoundaryEdge.nx;
+% fluxSY = ( ( fm(:,:,index) + fp(:,:,index) ) ./ 2 - 1/2 .* ( fm(:,:,index) - fp(:,:,index) ) ) .* BoundaryEdge.ny;
+
 termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 

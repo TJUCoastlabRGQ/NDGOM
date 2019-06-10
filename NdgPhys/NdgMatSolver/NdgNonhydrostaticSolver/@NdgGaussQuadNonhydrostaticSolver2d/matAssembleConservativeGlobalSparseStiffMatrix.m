@@ -18,6 +18,6 @@ tempH = obj.Vq{1} * H;
 
 for i = 1:numel(fphys{1}(:,:,1))
 StiffMatrix(:,i) =  ( 2 * obj.dt * UpdatedNP(:,i) + obj.dt * ( Hx(:) .* Qx(:,i)) + obj.dt * ( Hy(:) .* Qy(:,i)) - ...
-    obj.dt * ( tempH(:) .* Q2x(:,i) ) - obj.dt * ( tempH(:) .* Q2y(:,i) )) ./ 1000;
+    obj.dt * ( tempH(:) .* Q2x(:,i) ) - obj.dt * ( tempH(:) .* Q2y(:,i) ));
 end
 end

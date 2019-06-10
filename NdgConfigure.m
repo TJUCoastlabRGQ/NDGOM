@@ -97,26 +97,36 @@ srcfile = {[path, 'mxVertLimit2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE1d
-path = 'Application/SWE/SWE1d/@SWEAbstract1d/private/';
+path = 'D:\PhdResearch\Application\SWE\SWE1d\@SWEAbstract1d\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
 libfile = {};
 srcfile = { ...
     [path, 'mxEvaluateSurfaceValue1d.c'], ...
-    [path, 'mxEvaluateSurfFlux1d.c'], ...
     [path, 'mxUpdateTimeInterval1d.c']};
+FuncHandle(path, srcfile, libfile);
+% Surface flux for SWE1d
+path = 'Application\SWE\FaceFluxSolver\SWEFaceFluxSolver1d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateSurfFlux1d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEVolumeFluxSolver1d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateFlux1d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE1d/@SWEConventional1d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux1d.c'], ...
+srcfile = {...
     [path, 'mxEvaluateSourceTopography1d.c'], ...
     [path, 'mxEvaluatePostFunc1d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE1d/@SWEPreBlanaced1d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux1d.c'], ...
-    [path, 'mxEvaluateSourceTopography1d.c']};
+srcfile = {[path, 'mxEvaluateSourceTopography1d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE2d
@@ -126,20 +136,37 @@ libfile = {};
 srcfile = { ...
     [path, 'mxImposeBoundaryCondition.c'], ...
     [path, 'mxHydrostaticReconstruction.c'], ...
-    [path, 'mxEvaluateSurfFlux.c'], ...
     [path, 'mxUpdateTimeInterval2d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\FaceFluxSolver\SWEFaceFluxSolver2d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateSurfFlux.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEVolumeFluxSolver2d\private\';
+libfile = {};
+srcfile = {...
+    [path, 'mxEvaluateFlux2d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEPrebalanceVolumeFlux2d\private\';
+libfile = {};
+srcfile = {...
+    [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
     
 path = 'Application/SWE/SWE2d/@SWEConventional2d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux2d.c'], ...
+srcfile = { ...
     [path, 'mxEvaluatePostFunc2d.c'], ...
     [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE2d/@SWEPreBlanaced2d/private/';
 libfile = {};
-srcfile = {[path, 'mxEvaluateFlux2d.c'], ...
+srcfile = { ...
     [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
@@ -160,6 +187,8 @@ path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver1d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
+% 
+
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver2d/private/';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver2d/private/';
@@ -176,7 +205,7 @@ path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver2d/
 srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
     [path, 'mxAssemblePointToCellInformation.c']};
 libfile = {};
-RemoveMexFile(path, srcfile, libfile);
+% RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgAbstractNonhydrostaticSolver/private/';
@@ -186,9 +215,36 @@ srcfile = {[path, 'mxAssembleWetDryInterface.c'],...
     [path, 'mxAssemblePointRelatedInformation.c'],...
     [path,'mxImposeNonhydroRelatedBoundaryCondition.c'],...
     [path,'mxGetFaceValue.c'],...
-    [path,'mxGetTempWetToDryPoint.c']};
+    [path,'mxGetTempWetToDryPoint.c'],...
+    [path, 'mxGetPrimitiveVariableInnerEdgeFlux.c'],...
+    [path,'mxGetPrimitiveVariableBoundaryEdgeFlux.c'],...
+    [path,'mxGetAuxialaryVariableInnerEdgeFlux.c'],...
+    [path, 'mxGetAuxialaryVariableBoundaryEdgeFlux.c'],...
+    [path,'mxGetWetDryFaceVariableAndFlux.c']};
 libfile = {};
-RemoveMexFile(path, srcfile, libfile);
+% RemoveMexFile(path, srcfile, libfile);
+FuncHandle(path, srcfile, libfile);
+
+path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgNonhydrostaticSolver1d\private\';
+srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
+    [path,'mxAssemblePointToCellInformation.c']};
+libfile = {};
+FuncHandle(path, srcfile, libfile);
+
+
+path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
+libfile = {};
+srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEPrebalanceVolumeFlux1d\private\';
+libfile = {};
+srcfile = {[path, 'mxEvaluateFlux1d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver1d\private\';
+libfile = {};
+srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);

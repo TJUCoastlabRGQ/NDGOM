@@ -65,15 +65,15 @@ classdef TriHump1d < SWEWD1d
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('cfl') = 1/obj.meshUnion(1).cell.N;
-            option('obcType') = NdgBCType.None;
-            option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
+%             option('obcType') = enumBCType.None;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
-            option('outputNetcdfCaseName') = mfilename;
-            option('temporalDiscreteType') = NdgTemporalDiscreteType.RK45;
-            option('limiterType') = NdgLimiterType.TVB;
+            option('outputCaseName') = mfilename;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('limiterType') = enumLimiter.None;
             option('limiterParameter') = 1e-10;
-            option('equationType') = NdgDiscreteEquationType.Strong;
-            option('integralType') = NdgDiscreteIntegralType.QuadratureFree;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
         end
     end
     
@@ -94,6 +94,6 @@ end
 
 function [ mesh ] = makeUniformMesh( N, M )
 xlim = [0, 38];
-bcType = [NdgEdgeType.SlipWall, NdgEdgeType.ZeroGrad];
+bcType = [enumBoundaryCondition.SlipWall, enumBoundaryCondition.ZeroGrad];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
 end

@@ -28,18 +28,10 @@ else % the option does not exist
     obj.frictionSolver = NonFrictionTermSolver();
 end
 
-% Numerical flux
-if obj.option.isKey('NumFluxType')
-    if obj.getOption('NumFluxType') == SWENumFluxType.HLL
-        obj.numfluxSolver = SWEHLLNumFluxSolver1d( );
-    elseif( obj.getOption('NumFluxType') == SWENumFluxType.LF )
-        obj.numfluxSolver = SWELFNumFluxSolver1d( );
-    elseif( obj.getOption('NumFluxType') == SWENumFluxType.ROE )
-        obj.numfluxSolver = SWERoeNumFluxSolver1d( );
-    end
-else
-    obj.numfluxSolver = SWEHLLNumFluxSolver1d( );
-end
+[ obj.numfluxSolver, obj.surfluxSolver, obj.volumefluxSolver ] = initFluxSolver( obj );
+
+%Set NonhydrostaticSolver
+[obj.NonhydrostaticSolver] = initNonhydrostaticSolver(obj);
 
 if obj.option.isKey('SWELimiterType')
     switch obj.getOption('SWELimiterType')
@@ -54,5 +46,22 @@ end
 
 end% func
 
-
+function [NonhydrostaticSolver] = initNonhydrostaticSolver(obj)
+if obj.option.isKey('nonhydrostaticType')
+    switch obj.getOption('nonhydrostaticType')
+        case enumNonhydrostaticType.Hydrostatic
+            NonhydrostaticSolver = NdghydrostaticSolver1d(obj);
+        case enumNonhydrostaticType.Nonhydrostatic
+            % if Nonhydrostatic Solver included , the output variable is [ h, hu, hv, hw ]
+            switch obj.getOption('integralType')
+                case enumDiscreteIntegral.GaussQuadrature
+                    NonhydrostaticSolver = NdgGaussQuadNonhydrostaticSolver1d(obj, obj.meshUnion);
+                case enumDiscreteIntegral.QuadratureFree
+                    NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver1d(obj);
+            end
+    end% switch
+else
+    NonhydrostaticSolver = NdghydrostaticSolver1d( obj );
+end
+end
 

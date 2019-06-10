@@ -7,6 +7,9 @@ fluxMY = InnerEdge.ny.*fmy; fluxMX = InnerEdge.nx.*fmx;
 fluxPY = InnerEdge.ny.*fpy; fluxPX = InnerEdge.nx.*fpx;
 fluxSx = ( ( fmx + fpx ) ./ 2 - 1/2 .* ( Um - Up ) ) .* InnerEdge.nx;
 fluxSy = ( ( fmy + fpy ) ./ 2 - 1/2 .* ( Um - Up ) ) .* InnerEdge.ny;
+fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  obj.WetDryFaceOrder, fluxSx, mesh.cell.Nfp);
+fluxSy = obj.matGetPrimitiveVariableInnerEdgeFlux(  obj.WetDryFaceOrder, fluxSy, mesh.cell.Nfp);
+
 % termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
 % termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);
 termY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
@@ -19,8 +22,8 @@ termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
 fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;
 % Boundary condition at the wet-dry interface need to be considered,
 % follow matCalculateCharacteristicMatrix
-fluxSX = ( fmx ) .* BoundaryEdge.nx;
-fluxSY = ( fmy ) .* BoundaryEdge.ny;
+fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );
+fluxSY = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.ny, fmy );
 
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);

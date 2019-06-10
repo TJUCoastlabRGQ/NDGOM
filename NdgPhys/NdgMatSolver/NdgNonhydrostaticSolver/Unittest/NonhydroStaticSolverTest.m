@@ -83,13 +83,19 @@ Norder = [2 3];
 % 
 % end
 
+% for i = 1:numel(Norder)
+%     %> This part is  mainly used to test the calculation of the upwinded advective term in the RHS
+%     Solver = NdgFlatBottomForSecondOrderTerm(Norder(i), enumStdCell.Quad);
+%     Solver.testSecondOrderTermCalculation;      
+%     clear Solver;    
+% end
 for i = 1:numel(Norder)
-    %> This part is  mainly used to test the calculation of the upwinded advective term in the RHS
-    Solver = NdgFlatBottomForSecondOrderTerm(Norder(i), enumStdCell.Quad);
-    Solver.testSecondOrderTermCalculation;      
-    clear Solver;    
+    %> This part is  mainly used to test the calculation wet-dry interface
+    %> Added on 2019/6/3
+Solver = NdgFlatBottomWetDryTestWithWallBoundary(Norder(i), enumStdCell.Quad);
+Solver.testWetDryFaceOrder;
+clear Solver;
 end
-
 
 % for i = 1:numel(Norder)
 %     %> This part is  mainly used to test the calculation of the upwinded advective term in the RHS

@@ -14,7 +14,7 @@ open( video );
 figure('Color', 'w');
 [ fphys2d, ~ ] = obj.outputFile.readOutputResult( obj, 1);
 visual.drawResult( fphys2d(:, :, 1) );
-zlim([9.85, 10.15]);
+zlim([7.1, 8.2]);
 zlabel('$\xi$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 xlabel('$x$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);
 % ylabel('$y$ (m)', 'Interpreter', 'Latex', 'FontSize', 14);

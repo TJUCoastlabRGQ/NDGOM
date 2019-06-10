@@ -10,27 +10,10 @@ function StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, Updat
 %> @param[in] UpdatedFNPBY The product of Nonhydrostatic pressure with bottom gradient in y direction and this term is included in a flux term
 %> @param[in] fphys The physical field
 %> @param[in] PhysClass The hydrostatic Solver
-mesh = PhysClass.meshUnion(1);
+% mesh = PhysClass.meshUnion(1);
 
-% rho = PhysClass.rho;
 h = fphys{1}(:,:,1);
-BoundaryEdge = PhysClass.meshUnion(1).BoundaryEdge;
-InnerEdge = PhysClass.meshUnion(1).InnerEdge;
 
-[ fhx, fhy ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 1);
-
-[ obj.HBx, obj.HBy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]),  num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);  
-
-[TempHBx, TempHBy] = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]));
-[ H2Bx, H2By ] = obj.matCalculateLDGSecondOrderVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]) );
-
-% [ TempHBx, TempHBy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), enumNonhydroBoundaryCondition.Zero);
-% [ H2Bx, H2By ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(TempHBx,[1 2]), num2cell(TempHBy,[1 2]), enumNonhydroBoundaryCondition.ZeroGrad);
-
-
-
-% obj.NP =  obj.NP;
-
-StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, UpdatedSPNPX, UpdatedSPNPY, UpdatedPNPX, fhx, UpdatedPNPY, fhy,...
-    obj.NP, H2Bx, H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
+StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, UpdatedSPNPX, UpdatedSPNPY, UpdatedPNPX, obj.fhx, UpdatedPNPY, obj.fhy,...
+    obj.NP, obj.H2Bx, obj.H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
 end

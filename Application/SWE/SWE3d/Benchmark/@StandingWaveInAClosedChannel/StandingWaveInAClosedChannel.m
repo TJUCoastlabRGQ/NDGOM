@@ -14,7 +14,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 200;
+        finalTime = 65;
     end
     
     properties
@@ -73,7 +73,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 200;
+            ftime = 65;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

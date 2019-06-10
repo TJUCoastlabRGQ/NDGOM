@@ -7,13 +7,15 @@ classdef SWEAbstract1d < NdgPhysMat
         gra
     end
     
-    properties( Constant )
+    properties
         %> number of physical field: [ h, hu, z, eta ]
-        Nfield = 4
+        Nfield = 6
         %> number of variable field
         Nvar = 2
         %> index of variable in physical field
         varFieldIndex = [ 1, 2 ]
+        %> order of the field to be written in the output file     
+        outputFieldOrder = [1 2]
     end
     
     properties
@@ -23,6 +25,10 @@ classdef SWEAbstract1d < NdgPhysMat
         frictionSolver
         %> solver for evaluating numerical flux
         numfluxSolver
+        % solver for local face flux
+        surfluxSolver
+        %> solver for volume flux
+        volumefluxSolver        
         %> slope limiter
         limiterSolver
     end
@@ -37,6 +43,9 @@ classdef SWEAbstract1d < NdgPhysMat
         
         %> initilize from options
         initPhysFromOptions( obj, mesh );
+        
+        %> impose boundary condition and evaluate cell boundary values
+        [ fM, fP ] = matImposeBoundaryCondition( obj, edge, nx, fM, fP, fext );
     end
     
     methods( Abstract, Hidden )
@@ -56,7 +65,7 @@ classdef SWEAbstract1d < NdgPhysMat
         [ fphys ] = matEvaluatePostFunc(obj, fphys);
     end
         
-    methods( Access = protected, Sealed )
+    methods( Access = protected )
         
         %> apply slope limiter on conservative variables
         [ fphys ] = matEvaluateLimiter( obj, fphys )
@@ -66,6 +75,8 @@ classdef SWEAbstract1d < NdgPhysMat
         
         %> evaluate source term
         [ ] = matEvaluateSourceTerm( obj, fphys )
+        
+        outputObj = matInitOutput( obj, mesh ) 
     end
     
     methods( Hidden, Sealed )
@@ -77,7 +88,8 @@ classdef SWEAbstract1d < NdgPhysMat
         
         %> evaluate local boundary flux
         function [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, fm )
-            [ fluxM ] = mxEvaluateSurfFlux1d( obj.hmin, obj.gra, nx, fm);
+%             [ fluxM ] = mxEvaluateSurfFlux1d( obj.hmin, obj.gra, nx, fm);
+            [ fluxM ] = obj.surfluxSolver.evaluate( obj.hmin, obj.gra, nx, fm);
         end
         
         %> evaluate boundary numerical flux

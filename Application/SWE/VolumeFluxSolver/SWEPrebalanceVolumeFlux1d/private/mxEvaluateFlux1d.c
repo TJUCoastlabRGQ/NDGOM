@@ -1,4 +1,5 @@
-#include "../../@SWEAbstract1d/private/mxSWE1d.h"
+// #include "../../@SWEAbstract1d/private/mxSWE1d.h"
+#include "../../../SWE1d/@SWEAbstract1d/private/mxSWE1d.h"
 #include "mex.h"
 
 #ifdef _OPENMP

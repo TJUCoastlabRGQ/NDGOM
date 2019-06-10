@@ -18,6 +18,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
         %> HBx the partial derivative of H + 2b with respect to the x direction
         %> HBy the partial derivative of H + 2b with respect to the y direction
+        %> H2Bx the second order derivative of H + 2b with respect to the x direction
+        %> H2By the second order derivative of H + 2b with respect to the y direction 
+        %> fhx the partial derivative of H with respect to the x direction
+        %> fhy the partial derivative of H with respect to the y direction
+        %> hux the partial derivative of Hu with respect to the x direction
+        %> hvy the partial derivative of Hv with respect to the y direction        
         TempPNPX
         PNPX
         TempPNPY
@@ -31,6 +37,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempZeroFluxBoundary
         ZeroFluxBoundary
         ZeroFluxBoundaryIndex
+        WetDryFaceOrder
         NonhydroFmPoint
         NonhydroFpPoint
         EidBoundaryType
@@ -41,10 +48,16 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempWetDryPoint
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
-        HBx
-        HBy
         IETau
         BETau
+        HBx
+        HBy
+        H2Bx
+        H2By
+        fhx
+        fhy
+        hux
+        hvy
     end
     
     methods
@@ -121,14 +134,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[in] physClass The hydrostatic solver
         %> @param[in] fphys The fphys field
         fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys);
-        %> @brief Function to calculate the characteristic matrix
-        %> @details Function to calculate the characteristic matrix in the x direction
-        %> @param[in] BoundaryEdge the boundary edge object
-        %> @param[in] InnerEdge the inner edge object
-        %> @param[in] Variable variable used to calculate the characteristic matrix
-        %> @param[in] ftype enumeration type used to impose the non-hydro static relalated boundary condition at the wet dry interface
-        %> @param[out] termX the calculated characteristic matrix in x direction        
-        [ termX, termY ] = matCalculateCharacteristicMatrix( obj, mesh, BoundaryEdge, InnerEdge, qx, qy, ftype);
         %> @brief Function to calculate the conservative variable related partial derivative operator
         %> @details Function to calculate the conservative variable related partial derivative operator
         %> @param[in] physClass The hydrostatic solver
@@ -159,6 +164,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
          [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
          
          matCalculateLDGPenaltyParameter( obj, mesh)
+         
+         matCalculateFphysDerivative(obj, mesh, fphys, physClass)
     end
     
 end

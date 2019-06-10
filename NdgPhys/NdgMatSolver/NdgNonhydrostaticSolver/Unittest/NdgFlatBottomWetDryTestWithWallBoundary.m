@@ -7,6 +7,11 @@ classdef NdgFlatBottomWetDryTestWithWallBoundary < NdgNonhydrostaticAbstractTest
             obj = obj@NdgNonhydrostaticAbstractTest(N, cellType);
         end
         
+        function EcactWetDryFaceOrder = getExactWetDryFaceOrder(obj)
+            %> added on 2019/6/3
+            EcactWetDryFaceOrder = [4 5 7 9];
+        end
+        
         function ExactWetCellIndex=getExactWetCellIndex(obj)
             ExactWetCellIndex = [1 2 3 4 6 7 8 9];
         end
