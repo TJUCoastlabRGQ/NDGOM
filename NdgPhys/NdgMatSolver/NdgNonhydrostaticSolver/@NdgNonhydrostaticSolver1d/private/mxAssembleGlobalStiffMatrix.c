@@ -96,7 +96,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		  size_t rowIndex = irNp[j];
 		  temprhsu[rowIndex] =  dt *NP[j]*\
               ( H2Bx[rowIndex]  - 1 / height[rowIndex]\
-                  * ( HBxSquare[rowIndex] + 2 ) );
+                  * ( HBxSquare[rowIndex] + 4 ) );
 	  }
 
 	  for (mwIndex j = jcTempSPNPX[i]; j<jcTempSPNPX[i + 1] && jcTempSPNPX[i + 1] - jcTempSPNPX[i]>0; j++)

@@ -13,6 +13,6 @@ end
 
 % fphys{1}(:,:,6) = fphys{1}(:,:,6) + NonhydrostaticPressure;
 fphys{1}(:,:,6) =  NonhydrostaticPressure;
-fphys{1}(:,:,5) = fphys{1}(:,:,6) + 2 * obj.dt .* NonhydrostaticPressure;
+fphys{1}(:,:,5) = fphys{1}(:,:,5) + 2 * obj.dt .* NonhydrostaticPressure;
 fphys{1}(:,:,2) = fphys{1}(:,:,2) - obj.dt * ( fphys{1}(:,:,1) .* qx + NonhydrostaticPressure .* obj.HBx );
 end
