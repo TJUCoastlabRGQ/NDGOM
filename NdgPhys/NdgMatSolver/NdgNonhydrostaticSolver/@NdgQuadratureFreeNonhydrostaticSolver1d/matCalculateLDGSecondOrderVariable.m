@@ -1,5 +1,5 @@
-function [q2x, q2y] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable, VariableX )
-% C11 = 100;
+function [ q2x ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable, VariableX )
+
 [fmx, fpx] = InnerEdge.matEvaluateSurfValue( VariableX ); 
 [Um, Up] = InnerEdge.matEvaluateSurfValue( Variable ); 
 JumpUx = InnerEdge.nx .* Um - InnerEdge.nx .* Up;

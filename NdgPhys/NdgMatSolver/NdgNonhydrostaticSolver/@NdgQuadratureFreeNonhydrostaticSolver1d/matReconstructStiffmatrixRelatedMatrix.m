@@ -24,10 +24,10 @@ if obj.WetNum == mesh.K
     %doing nothing
 else
     for i = 1:numel(TempWetToDryPoint)
-    [tempPNPX,  tempSPNPX, tempNp]...
+    [tempPNPX,  tempSPNPX, ~]...
         = obj.matAssembleCharacteristicMatrix( mesh, i);
-    [obj.PNPX(:,i), obj.SPNPX(:,i), obj.NP(:,i)]...
-        = VectorConvert(tempPNPX, tempSPNPX, tempNp);
+    [UpdatedPNPX(:,i), UpdatedSPNPX(:,i) ]...
+        = VectorConvert( tempPNPX, tempSPNPX );
     end
 end
 obj.TempPNPX = UpdatedPNPX; 
@@ -36,8 +36,7 @@ obj.TempWetDryPoint = obj.WetDryPoint;
 obj.TempZeroFluxBoundary = obj.ZeroFluxBoundary;
 end
 
-function [PNPX, SPNPX , Np]=VectorConvert(tempPNPX, tempSPNPX)
+function [ PNPX, SPNPX ]=VectorConvert( tempPNPX, tempSPNPX )
 PNPX = sparse(tempPNPX);
 SPNPX = sparse(tempSPNPX);
-Np = sparse(tempNp);
 end

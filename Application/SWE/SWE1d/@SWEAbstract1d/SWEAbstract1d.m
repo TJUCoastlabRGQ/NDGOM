@@ -8,7 +8,7 @@ classdef SWEAbstract1d < NdgPhysMat
     end
     
     properties
-        %> number of physical field: [ h, hu, z, eta ]
+        %> number of physical field: [ h, hu, z, hc, w, p ]
         Nfield = 6
         %> number of variable field
         Nvar = 2

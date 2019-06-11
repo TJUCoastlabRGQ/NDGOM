@@ -7,7 +7,7 @@ if obj.option.isKey('nonhydrostaticType')
         case enumNonhydrostaticType.Hydrostatic
             % Doing nothing
         case enumNonhydrostaticType.Nonhydrostatic
-            % if Nonhydrostatic Solver included , the output variable is [ h, hu, hv, hw ]
+            % if Nonhydrostatic Solver included , the output variable is [ h, hu, hw ]
             obj.Nvar = 3;
             obj.varFieldIndex = [1 2 5];
             obj.outputFieldOrder = [1 2 5 6];

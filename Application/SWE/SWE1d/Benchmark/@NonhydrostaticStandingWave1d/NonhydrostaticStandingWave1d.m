@@ -118,8 +118,8 @@ classdef NonhydrostaticStandingWave1d < SWEConventional1d
             option('limiterType') = enumLimiter.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+%             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
     
