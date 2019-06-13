@@ -1,4 +1,5 @@
 #include "mex.h"
+#include "../../../SWE1d/@SWEAbstract1d/private/mxSWE1d.h"
                 
 #ifdef _OPENMP
 #include <omp.h>
@@ -23,7 +24,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
         mexPrintf("%d inputs required.\n", NLHS);
     }
     
-    double *status = mxGetPr(prhs[0]);
+//     double *status = mxGetPr(prhs[0]);
+    signed char* regType = (signed char*)mxGetData(prhs[0]);
     double *hu = mxGetPr(prhs[1]);
     //double *hv = mxGetPr(prhs[2]);
     double *hw = mxGetPr(prhs[2]);
@@ -41,7 +43,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for(mwIndex i = 0; i< Ne; i++){
-        if (status[i] == 4){ // The considered cell is a wet cell
+        NdgRegionType type = (NdgRegionType)regType[i];
+        if (type == NdgRegionWet){ // The considered cell is a wet cell
             for(mwIndex j = i*Np; j< (i+1)*Np; j++ ){
                 huw[j] = hu[j] * hw[j] / h[j];
 //                hvw[j] = hv[j] * hw[j] / h[j];

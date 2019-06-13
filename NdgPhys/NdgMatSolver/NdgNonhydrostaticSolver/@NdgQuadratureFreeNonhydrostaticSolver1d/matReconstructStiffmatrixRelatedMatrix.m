@@ -24,9 +24,10 @@ if obj.WetNum == mesh.K
     %doing nothing
 else
     for i = 1:numel(TempWetToDryPoint)
+    num = TempWetToDryPoint(i);    
     [tempPNPX,  tempSPNPX, ~]...
-        = obj.matAssembleCharacteristicMatrix( mesh, i);
-    [UpdatedPNPX(:,i), UpdatedSPNPX(:,i) ]...
+        = obj.matAssembleCharacteristicMatrix( mesh, num);
+    [UpdatedPNPX(:,num), UpdatedSPNPX(:,num) ]...
         = VectorConvert( tempPNPX, tempSPNPX );
     end
 end

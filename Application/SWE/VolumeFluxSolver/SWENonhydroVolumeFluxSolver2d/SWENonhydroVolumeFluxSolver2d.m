@@ -8,7 +8,7 @@ classdef SWENonhydroVolumeFluxSolver2d < SWEVolumeFluxSolver2d
     methods
         function [ E, G ] = evaluate( obj, hmin, gra, mesh, fphys )
             [ E, G ] = evaluate@SWEVolumeFluxSolver2d( obj, hmin, gra, mesh, fphys );
-            [ E(:,:,4), G(:,:,4) ] = obj.matGetNonhydroVerticalVolumeFlux( mesh.status,...
+            [ E(:,:,4), G(:,:,4) ] = obj.matGetNonhydroVerticalVolumeFlux( int8(mesh.status),...
                 fphys(:,:,2), fphys(:,:,3), fphys(:,:,6), fphys(:,:,1));
         end 
     end

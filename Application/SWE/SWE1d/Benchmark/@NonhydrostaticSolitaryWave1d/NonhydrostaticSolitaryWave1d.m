@@ -153,8 +153,8 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
                 fphys{m}(:,:,1) = obj.H0;
 %                 fphys{m}(:,:,1) = obj.Eta0;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1).*obj.U0;
-                fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0;
-                fphys{m}(:,:,7) =  obj.P0;
+                fphys{m}(:,:,5) =  fphys{m}(:,:,1).*obj.W0;
+                fphys{m}(:,:,6) =  obj.P0;
 %                 fphys{m}(:,:,6) =  fphys{m}(:,:,1).*obj.W0./2;
             end       
         end

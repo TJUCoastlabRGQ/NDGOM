@@ -60,8 +60,8 @@ fluxY( Index ) =  vfpy(Index) .* BoundaryEdge.ny(Index);
 fluxMx = BoundaryEdge.nx .* vfmx; fluxMy = BoundaryEdge.ny .* vfmy;
 
 % the boundary edge contribution
-UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX);
-UpwindedTermY = -UpwindedTermY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxY);
+UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX );
+UpwindedTermY = -UpwindedTermY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxY );
 
 [VolumeX, VolumeY] = obj.matVolumeIntegral( mesh, cell2mat(variableX), cell2mat(variableY));
 UpwindedTermX = UpwindedTermX + VolumeX;
