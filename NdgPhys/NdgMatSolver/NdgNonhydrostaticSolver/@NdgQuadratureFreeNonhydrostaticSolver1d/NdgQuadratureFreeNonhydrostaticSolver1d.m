@@ -5,9 +5,24 @@ classdef NdgQuadratureFreeNonhydrostaticSolver1d < NdgNonhydrostaticSolver1d
     methods
         
         function obj = NdgQuadratureFreeNonhydrostaticSolver1d(PhysClass)
-            
             obj = obj@NdgNonhydrostaticSolver1d(PhysClass);
-            
+        end
+        
+        function evaluateNonhydroRHS(obj, PhysClass, fphys)
+%             mesh = PhysClass.meshUnion(1);
+%             BoundaryEdge = mesh.BoundaryEdge;
+%             InnerEdge = mesh.InnerEdge;
+%             
+%             
+%             HBx = obj.matCalculateUpwindedFphysDerivative( mesh, fphys, PhysClass, ...
+%                 num2cell(fphys{1}(:,:,1) + 2*fphys{1}(:,:,4)  ,[1 2]));
+%             
+%             [ px ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(fphys{1}(:,:,6),[1 2]));
+%             %
+%             
+%             %
+%             PhysClass.frhs{1}(:,:,2) = PhysClass.frhs{1}(:,:,2) - fphys{1}(:,:,1) .* px - fphys{1}(:,:,6) .* HBx;
+%             PhysClass.frhs{1}(:,:,3) = PhysClass.frhs{1}(:,:,3) + 2 * fphys{1}(:,:,6);
         end
         
     end
@@ -41,7 +56,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver1d < NdgNonhydrostaticSolver1d
         
         [ DownwindedTermX ] = matCalculateDownwindedFphysDerivative( obj, mesh, fphys, physClass, variableX );
         
-    end    
+    end
     
 end
 

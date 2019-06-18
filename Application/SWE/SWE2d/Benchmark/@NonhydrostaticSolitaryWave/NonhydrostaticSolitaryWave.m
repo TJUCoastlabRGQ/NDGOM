@@ -185,7 +185,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 450], [0, 3], 450/deltax, 3/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [-10, 30], [0, deltax], 40/deltax, 1, bctype);
+    mesh = makeUniformQuadMesh(N, [-20, 40], [0, 2 * deltax], ceil(60/deltax), 2, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

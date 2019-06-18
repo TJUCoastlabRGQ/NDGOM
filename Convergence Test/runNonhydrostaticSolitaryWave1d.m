@@ -1,10 +1,10 @@
-function runNonhydrostaticSolitaryWave
+function runNonhydrostaticSolitaryWave1d
 % deltax = [0.25 0.2 0.125 0.1 0.05 0.025];
-deltax = [ 1 0.625 0.5 0.4 0.25 0.2 0.125 0.1];
+deltax = [ 1 0.625 0.5 0.4 0.25 0.2 0.125 0.1 0.05];
+% deltax = 0.025;
 Order =[ 1 2 ];
 % Order = 2;
 len = deltax;
-type = enumStdCell.Quad;
 Nmesh = numel(deltax);
 Ndeg = numel(Order);
 dofs = zeros(Nmesh, Ndeg);
@@ -19,7 +19,7 @@ marker = {'o', 's', '^'};%circle for Eta, square for U, triangle for Ws
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = (40 * deltax(m)) / (deltax(m) * deltax(m)) * (Order(n)+1).^2;
+        dofs(m, n) = ceil( (60 / deltax(m)) ) * (Order(n)+1);
     end
 end
 
@@ -28,17 +28,16 @@ EtaErr2 = zeros(Nmesh, Ndeg);   UErr2 = zeros(Nmesh, Ndeg);    WsErr2 = zeros(Nm
 EtaErr1 = zeros(Nmesh, Ndeg);   UErr1 = zeros(Nmesh, Ndeg);    WsErr1 = zeros(Nmesh, Ndeg);PErr1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-    Solver = NonhydrostaticSolitaryWave(Order(n),deltax(m),type);
+    Solver = NonhydrostaticSolitaryWave1d(Order(n),deltax(m));
     Solver.matSolve;
-    PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticSolitaryWave','/','NonhydrostaticSolitaryWave'));
+    PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticSolitaryWave1d','/','NonhydrostaticSolitaryWave1d'));
     fext = cell(1);
     fext{1}(:,:,1) = Solver.H5;fext{1}(:,:,2) = Solver.U5;fext{1}(:,:,3) = Solver.W5;fext{1}(:,:,4) = Solver.P5;fext{1}(:,:,5) = zeros( size( Solver.P5 ) );
     fphys = cell(1);
-    %> methods from Lu
-%     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1) - Solver.Depth;fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)*2;fphys{1}(:,:,4) = zeros(size(Solver.fphys{1}(:,:,6)));
-    %> methods from Stelling
+
+    
     fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);fphys{1}(:,:,2) = Solver.fphys{1}(:,:,2)./Solver.fphys{1}(:,:,1);
-    fphys{1}(:,:,3) = Solver.fphys{1}(:,:,6)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = Solver.fphys{1}(:,:,7);
+    fphys{1}(:,:,3) = Solver.fphys{1}(:,:,5)./Solver.fphys{1}(:,:,1);fphys{1}(:,:,4) = Solver.fphys{1}(:,:,6);
     fphys{1}(:,:,5) = zeros( size( fphys{1}(:,:,3) ) );
     err = PostProcess.evaluateNormErrInf( fphys, fext );
     EtaErrInf( m, n ) = err(1); UErrInf( m, n ) = err(2); WsErrInf( m, n ) = err(3);PErrInf( m, n ) = err(4);

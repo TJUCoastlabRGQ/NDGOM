@@ -11,29 +11,17 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
     properties
         H0
         H5
-%         H8
-%         H12
-%         H16
         U0
         U5
-%         U8
-%         U12
-%         U16
         W0
         W5
-%         W8
-%         W12
-%         W16
         P0
         P5
-%         P8
-%         P12 
-%         P16
     end
     
     methods
         function obj = NonhydrostaticSolitaryWave1d(N, deltax)
-            [ mesh ] = makeUniformMesh(N, deltax);
+            [ mesh ] = makeUniformMesh( N, deltax);
             obj = obj@SWEConventional1d();
             obj.Solitarywave(mesh);  
             obj.initPhysFromOptions( mesh );       
@@ -180,8 +168,8 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
     
 end
 
-function [ mesh ] = makeUniformMesh(N, deltax)
-xlim = [-10, 30];
+function [ mesh ] = makeUniformMesh( N, deltax)
+xlim = [-10, 10];
 M = ceil(( xlim(2) - xlim(1) ) / deltax);
 bcType = [...
     enumBoundaryCondition.SlipWall, ...

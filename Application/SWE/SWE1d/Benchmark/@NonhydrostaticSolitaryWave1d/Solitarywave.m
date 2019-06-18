@@ -36,35 +36,36 @@ P = A*C0^2*d^2/2/l^2/h^2*((2*H0-h)*(diff(sech((x - C0 * t)/l),x) * l )^2+...
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
         obj.P0(i,j) = double(subs(P,{x,t},{mesh.x(i,j),0}));
-        obj.P5(i,j) = double(subs(P,{x,t},{mesh.x(i,j),5}));
-%         obj.P8(i,j) = double(subs(P,{x,t},{mesh.x(i,j),8}));
-%         obj.P12(i,j) = double(subs(P,{x,t},{mesh.x(i,j),12}));
-%         obj.P16(i,j) = double(subs(P,{x,t},{mesh.x(i,j),16}));
-        obj.H0(i,j) = double(subs(h,{x,t},{mesh.x(i,j),0}));
-        obj.H5(i,j) = double(subs(h,{x,t},{mesh.x(i,j),5}));
-%         obj.H8(i,j) = double(subs(h,{x,t},{mesh.x(i,j),8}));
-%         obj.H12(i,j) = double(subs(h,{x,t},{mesh.x(i,j),12}));
-%         obj.H16(i,j) = double(subs(h,{x,t},{mesh.x(i,j),16}));
-    end
-end
-
-for i = 1:size(mesh.x,1)
-    for j = 1:size(mesh.x,2)
         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
-        obj.U5(i,j) = double(subs(U,{x,t},{mesh.x(i,j),5}));
-%         obj.U8(i,j) = double(subs(U,{x,t},{mesh.x(i,j),8}));
-%         obj.U12(i,j) = double(subs(U,{x,t},{mesh.x(i,j),12}));
-%         obj.U16(i,j) = double(subs(U,{x,t},{mesh.x(i,j),16}));
+        obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
+        obj.H0(i,j) = double(subs(h,{x,t},{mesh.x(i,j),0}));
     end
 end
-
+       obj.U5 = zeros(size(mesh.x));
+       obj.H5 = zeros(size(mesh.x));
+       obj.P5 = zeros(size(mesh.x));
+       obj.W5 = zeros(size(mesh.x));
 for i = 1:size(mesh.x,1)
     for j = 1:size(mesh.x,2)
-        obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
+%         T = ( obj.xlim(2) - obj.xlim(1) ) / C0;
+%         tempt = mod(C0*5, obj.xlim(2) - obj.xlim(1) )/C0;
+%         Index = mesh.x + mod(C0*5, obj.xlim(2) - obj.xlim(1) ) > obj.xlim(2);
+%         obj.U5(Index) = double(subs(U,{x,t},{mesh.x(Index), - (T - tempt)}));
+%         obj.H5(Index) = double(subs(h,{x,t},{mesh.x(Index), - (T - tempt)}));
+%         obj.P5(Index) = double(subs(P,{x,t},{mesh.x(Index), - (T - tempt)}));
+%         obj.W5(Index) = double(subs(W,{x,t},{mesh.x(Index), - (T - tempt)} ));
+%         
+%         Index = mesh.x + mod(C0*5, obj.xlim(2) - obj.xlim(1) ) <= obj.xlim(2);
+% 
+%         obj.U5(Index) = double(subs(U,{x,t},{mesh.x(Index),  tempt}));
+%         obj.H5(Index) = double(subs(h,{x,t},{mesh.x(Index),  tempt}));
+%         obj.P5(Index) = double(subs(P,{x,t},{mesh.x(Index),  tempt}));
+%         obj.W5(Index) = double(subs(W,{x,t},{mesh.x(Index),  tempt}));
+        
+        obj.U5(i,j) = double(subs(U,{x,t},{mesh.x(i,j),5}));
+        obj.H5(i,j) = double(subs(h,{x,t},{mesh.x(i,j),5}));
+        obj.P5(i,j) = double(subs(P,{x,t},{mesh.x(i,j),5}));
         obj.W5(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),5} ));
-%         obj.W8(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),8} ));
-%         obj.W12(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),12} ));
-%         obj.W16(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),16} ));
     end
 end
 end
