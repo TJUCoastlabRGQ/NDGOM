@@ -24,7 +24,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
             [ mesh ] = makeUniformMesh( N, deltax);
             obj = obj@SWEConventional1d();
             obj.Solitarywave(mesh);  
-            obj.initPhysFromOptions( mesh );       
+            obj.initPhysFromOptions( mesh );
 %             obj.matSolve;
 %             obj.Postprocess;
         end
@@ -169,10 +169,52 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
 end
 
 function [ mesh ] = makeUniformMesh( N, deltax)
-xlim = [-10, 10];
+xlim = [-10, 30];
 M = ceil(( xlim(2) - xlim(1) ) / deltax);
 bcType = [...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
+mesh.InnerEdge.Ne = mesh.InnerEdge.Ne + 1;
+mesh.BoundaryEdge.ftype = [];
+mesh.BoundaryEdge.Ne = [];
+FToV = zeros(1, numel(mesh.InnerEdge.FToV) + 1 );
+FToV(1) = mesh.BoundaryEdge.FToV(1);
+% FToV(end) = mesh.BoundaryEdge.FToV(2);
+FToV(2:end) = mesh.InnerEdge.FToV;
+mesh.InnerEdge.FToV = FToV;
+mesh.BoundaryEdge.FToV = [];
+
+FToE = zeros(2, mesh.InnerEdge.Ne);
+FToE(1) = mesh.K; FToE(2) = 1;
+FToE(3:end) = mesh.InnerEdge.FToE(:);
+mesh.InnerEdge.FToE = FToE;
+mesh.BoundaryEdge.FToE = [];
+
+FToF = zeros(2, mesh.InnerEdge.Ne);
+FToF(1) = 2; FToF(2) = 1;
+FToF(3:end) = mesh.InnerEdge.FToF(:);
+mesh.InnerEdge.FToF = FToF;
+mesh.BoundaryEdge.FToF = [];
+
+FToN1 = zeros(1,mesh.InnerEdge.Ne);
+FToN2 = zeros(1,mesh.InnerEdge.Ne);
+FToN1(1) = mesh.BoundaryEdge.FToN1(2);
+FToN1(2:end) = mesh.InnerEdge.FToN1;
+mesh.InnerEdge.FToN1 = FToN1;
+FToN2(1) = mesh.BoundaryEdge.FToN1(1);
+FToN2(2:end) = mesh.InnerEdge.FToN2;
+mesh.InnerEdge.FToN2 = FToN2;
+mesh.BoundaryEdge.FToN1 = [];
+mesh.BoundaryEdge.FToN2 = [];
+
+mesh.InnerEdge.nx = ones(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.nx = [];
+mesh.InnerEdge.ny = zeros(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.ny = [];
+mesh.InnerEdge.nz = zeros(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.nz = [];
+mesh.InnerEdge.Js = ones(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.Js = [];
+
 end% func

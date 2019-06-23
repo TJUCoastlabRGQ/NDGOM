@@ -7,7 +7,7 @@
 % ======================================================================
 classdef NdgInnerEdge < handle
     
-    properties ( SetAccess = protected )
+    properties %( SetAccess = protected )
         %> mesh obj
         mesh
         %> local interp node coodinate

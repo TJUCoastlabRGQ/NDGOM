@@ -7,7 +7,7 @@
 % ======================================================================
 classdef NdgHaloEdge < NdgInnerEdge
     
-    properties ( SetAccess = protected )
+    properties %( SetAccess = protected )
         %> face type of each edge
         ftype
         %> boundary coordinate
