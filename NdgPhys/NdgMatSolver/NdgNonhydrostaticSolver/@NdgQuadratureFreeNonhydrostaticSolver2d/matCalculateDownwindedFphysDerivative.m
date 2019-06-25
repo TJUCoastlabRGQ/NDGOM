@@ -6,29 +6,15 @@ InnerEdge = mesh.InnerEdge;
 [vfmx, vfpx] = InnerEdge.matEvaluateSurfValue(variableX);
 [vfmy, vfpy] = InnerEdge.matEvaluateSurfValue(variableY);
 
-% getCentralFluxTerm
-fluxX = InnerEdge.nx .* ( vfmx + vfpx )./2;
-fluxY = InnerEdge.ny .* ( vfmy + vfpy )./2;
+[ fluxX, fluxY ] = mxEvaluateDownwindNumFlux( mesh.status, InnerEdge.FToE, ...
+    fm(:,:,2), fm(:,:,3), fp(:,:,2), fp(:,:,3), vfmx, vfpx, vfmy, vfpy, ... 
+    InnerEdge.nx, InnerEdge.ny);
 
-% getUpwindFluxTerm
-temphum = fm(:,:,2); temphvm = fm(:,:,3);
-temphup = fp(:,:,2); temphvp = fp(:,:,3);
-Index = ( temphum .* InnerEdge.nx + temphvm .* InnerEdge.ny > 0 &...
-    - temphup .* InnerEdge.nx - temphvp .* InnerEdge.ny <= 0 );
-fluxX(Index) = vfpx(Index) .* InnerEdge.nx(Index);
-fluxY(Index) = vfpy(Index) .* InnerEdge.ny(Index);
+[ fluxMx, fluxMy ] = mxEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
+    vfmx, vfmy, InnerEdge.nx, InnerEdge.ny);
 
-Index = ( temphum .* InnerEdge.nx + temphvm .* InnerEdge.ny <= 0 & ...
-    - temphup .* InnerEdge.nx - temphvp .* InnerEdge.ny > 0 );
-fluxX( Index ) =  vfmx(Index) .* InnerEdge.nx(Index);
-fluxY(Index) = vfmy(Index) .* InnerEdge.ny(Index);
-% wet-dry interface considered
-[vfmx, vfpx, fluxX] = obj.matGetWetDryFaceVariableAndFlux( vfmx, vfpx, fluxX );
-[vfmy, vfpy, fluxY] = obj.matGetWetDryFaceVariableAndFlux( vfmy, vfpy, fluxY );
-
-% getLocalAndAdjacentFluxTerm
-fluxMx = InnerEdge.nx .* vfmx; fluxMy = InnerEdge.ny .* vfmy;
-fluxPx = InnerEdge.nx .* vfpx; fluxPy = InnerEdge.ny .* vfpy;
+[ fluxPx, fluxPy ] = mxEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
+    vfpx, vfpy, InnerEdge.nx, InnerEdge.ny);
 
 % the Inner edge contribution
 DownwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
@@ -41,26 +27,15 @@ BoundaryEdge = mesh.BoundaryEdge;
 [vfmx, vfpx] = BoundaryEdge.matEvaluateSurfValue(variableX);
 [vfmy, vfpy] = BoundaryEdge.matEvaluateSurfValue(variableY);
 
-vfpx = obj.matImposeNonhydroRelatedBoundaryCondition( vfmx, vfpx, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
-vfpy = obj.matImposeNonhydroRelatedBoundaryCondition( vfmy, vfpy, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
+% vfpx = obj.matImposeNonhydroRelatedBoundaryCondition( vfmx, vfpx, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
+% vfpy = obj.matImposeNonhydroRelatedBoundaryCondition( vfmy, vfpy, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
 
-% getCentralFluxTerm
-fluxX = BoundaryEdge.nx .* ( vfmx + vfpx )./2; fluxY = BoundaryEdge.ny .* ( vfmy + vfpy )./2;
-temphum = fm(:,:,2); temphvm = fm(:,:,3);
-temphup = fp(:,:,2); temphvp = fp(:,:,3);
+[ fluxX, fluxY ] = mxEvaluateDownwindNumFlux( mesh.status, BoundaryEdge.FToE, ...
+    fm(:,:,2), fm(:,:,3), fp(:,:,2), fp(:,:,3), vfmx, vfpx, vfmy, vfpy, ... 
+    InnerEdge.nx, InnerEdge.ny);
 
-Index = ( temphum .* BoundaryEdge.nx + temphvm .* BoundaryEdge.ny > 0 & ...
-    - temphup .* BoundaryEdge.nx - temphvp .* BoundaryEdge.ny <= 0 );
-fluxX(Index) = vfpx(Index) .* BoundaryEdge.nx(Index);
-fluxY(Index) = vfpy(Index) .* BoundaryEdge.ny(Index);
-
-Index = ( temphum .* BoundaryEdge.nx + temphvm .* BoundaryEdge.ny <= 0 & ...
-    - temphup .* BoundaryEdge.nx - temphvp .* BoundaryEdge.ny > 0 );
-fluxX( Index ) =  vfmx(Index) .* BoundaryEdge.nx(Index);
-fluxY( Index ) =  vfmy(Index) .* BoundaryEdge.ny(Index);
-
-% getLocalFluxTerm
-fluxMx = BoundaryEdge.nx .* vfmx; fluxMy = BoundaryEdge.ny .* vfmy;
+[ fluxMx, fluxMy ] = mxEvaluateSurfFlux( mesh.status, BoundaryEdge.FToE, ...
+    vfmx, vfmy, BoundaryEdge.nx, BoundaryEdge.ny);
 
 % the boundary edge contribution
 DownwindedTermX = -DownwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX);

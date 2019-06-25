@@ -1,13 +1,13 @@
 #include <math.h>
 #include "mex.h"
-//#include "../../../SWE2d/@SWEAbstract2d/private/mxSWE2d.h"
-#include "mxSWE2d.h"
+#include "../../../SWE2d/@SWEAbstract2d/private/mxSWE2d.h"
+//#include "mxSWE2d.h"
 
 #ifdef _OPENMP
 #include <omp.h>
 #endif
 
-inline void evaluateSurfFluxTerm(const double hmin,  ///< water depth threshold
+void evaluateSurfFluxTerm(const double hmin,  ///< water depth threshold
                                  const double gra,   ///< gravity acceleration
                                  const double h,     ///< water depth
                                  const double hu,    ///< water flux

@@ -56,8 +56,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             continue;
         }
         else{
-            for (mwIndex i = 0; i < M*N; i++){
-                if(h[i] > hcrit)
+            for (mwIndex j = 0; j < M; j++){
+            	mwIndex i = k*M + j;
                     surfFlux[i] = hu[i] * hw[i]/h[i] * nx[i] + hv[i] * hw[i]/h[i] * ny[i];
             }
         }

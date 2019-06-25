@@ -140,13 +140,13 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\FaceFluxSolver\SWEFaceFluxSolver2d\private\';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxEvaluateSurfFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\FaceFluxSolver\SWENonhydroFaceFluxSolver2d\private\';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxEvaluateVerticalSurfFlux.c']};
 FuncHandle(path, srcfile, libfile);
@@ -232,6 +232,13 @@ srcfile = {[path, 'mxAssembleWetDryInterface.c'],...
     [path,'mxGetWetDryFaceVariableAndFlux.c']};
 libfile = {};
 % RemoveMexFile(path, srcfile, libfile);
+FuncHandle(path, srcfile, libfile);
+
+path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgQuadratureFreeNonhydrostaticSolver2d\private\';
+srcfile = {[path, 'mxEvaluateUpwindNumFlux.c'],...
+    [path, 'mxEvaluateDownwindNumFlux.c'],...
+    [path, 'mxEvaluateSurfFlux.c']};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgNonhydrostaticSolver1d\private\';
