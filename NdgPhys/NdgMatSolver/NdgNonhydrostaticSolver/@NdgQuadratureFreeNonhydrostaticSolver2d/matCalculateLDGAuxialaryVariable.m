@@ -1,6 +1,6 @@
 function [qx, qy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, Variable)
 [fmy, fpy] = InnerEdge.matEvaluateSurfValue( Variable );  [fmx, fpx] = InnerEdge.matEvaluateSurfValue( Variable );
-% Boundary condition at the wet-dry interface need to be considered
+% Boundary condition at the wet-dry interface has been considered by setting the flux at the wet-dry interface flaged by WetDryFaceOrder directly
 [Um, Up] = InnerEdge.matEvaluateSurfValue( Variable );
 %< Inner edge contribution
 fluxMY = InnerEdge.ny.*fmy; fluxMX = InnerEdge.nx.*fmx; 
@@ -20,8 +20,7 @@ termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
 
 %< Boundary edge contribution
 fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;
-% Boundary condition at the wet-dry interface need to be considered,
-% follow matCalculateCharacteristicMatrix
+
 fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );
 fluxSY = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.ny, fmy );
 

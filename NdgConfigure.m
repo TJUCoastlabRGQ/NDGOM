@@ -145,6 +145,12 @@ srcfile = { ...
     [path, 'mxEvaluateSurfFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'Application\SWE\FaceFluxSolver\SWENonhydroFaceFluxSolver2d\private\';
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateVerticalSurfFlux.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'Application\SWE\VolumeFluxSolver\SWEVolumeFluxSolver2d\private\';
 libfile = {};
 srcfile = {...
@@ -199,6 +205,9 @@ srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
+FuncHandle(path, srcfile, libfile);
+path = 'Application\SWE\NumFluxSolver\SWENonhydroHLLNumFluxSolver2d\private\';
+srcfile = {[path, 'mxEvaluateUpwindNumFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver2d/private/';

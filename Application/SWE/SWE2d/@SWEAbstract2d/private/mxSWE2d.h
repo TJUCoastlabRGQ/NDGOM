@@ -2,8 +2,8 @@
 #define __mxSWE_H__
 
 #include "mex.h"
-#define max(a, b) ((a > b) ? a : b)
-#define min(a, b) ((a < b) ? a : b)
+// #define max(a, b) ((a > b) ? a : b)
+// #define min(a, b) ((a < b) ? a : b)
 
 #define EPS 1e-6
 
@@ -29,7 +29,7 @@ typedef struct {
 } PhysField;
 
 /** convert mex variable to PhysVolField structure */
-inline PhysField convertMexToPhysField(const mxArray *mxfield) {
+ PhysField convertMexToPhysField(const mxArray *mxfield) {
   const mwSize *dims = mxGetDimensions(mxfield);
   PhysField field;
   field.Np = dims[0];
@@ -45,7 +45,7 @@ inline PhysField convertMexToPhysField(const mxArray *mxfield) {
 }
 
 /** Evaluate the flow rate depending on the depth threshold */
-inline void evaluateFlowRateByDeptheThreshold(
+ void evaluateFlowRateByDeptheThreshold(
     const double hcrit,  ///< depth threshold
     const double h,      ///< depth
     const double hu,     ///< water flux
@@ -66,6 +66,25 @@ inline void evaluateFlowRateByDeptheThreshold(
   }
 
   return;
+}
+
+/* Evaluate whether the cell adjacent to a given cell is dry*/
+ void evaluateWetDryInterface(
+        signed char *status,
+        const mxArray *FToE,
+        double *DryFaceFlag
+        ){
+  const mwSize *dims = mxGetDimensions(FToE);
+  double *FaceToElement = mxGetPr(FToE);
+  const size_t Ne = dims[1];
+  for( mwIndex i = 0; i<Ne; i++ ){
+	  mwIndex Local_Element = (int)FaceToElement[2 * i];
+	  mwIndex Adjacent_Element = (int)FaceToElement[2 * i + 1];
+	  NdgRegionType Local_type = (NdgRegionType)status[Local_Element-1];
+	  NdgRegionType Adjacent_type = (NdgRegionType)status[Adjacent_Element - 1];
+      if( Local_type != NdgRegionWet || Adjacent_type != NdgRegionWet)
+          DryFaceFlag[i] = 1;
+  }
 }
 
 #endif  //__mxSWE_H__
