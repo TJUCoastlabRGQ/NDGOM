@@ -1,4 +1,4 @@
-classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
+classdef WavetransformOverAnSurbmergedBar < SWEConventional2d
     %WAVETRANSFORMOVERANELLIPTICALSHOAL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -30,7 +30,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
     methods (Access = public)
         function obj = WavetransformOverAnSurbmergedBar(N, deltax, cellType)
             
-            obj = obj@SWEPreBlanaced2d();
+            obj = obj@SWEConventional2d();
             obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
@@ -122,13 +122,15 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-            matEvaluateTopographySourceTerm@SWEPreBlanaced2d( obj, fphys );
+            matEvaluateTopographySourceTerm@SWEConventional2d( obj, fphys );
 
             for m = 1:obj.Nmesh
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...
                     - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,2);
                 obj.frhs{m}(:,:,3) = obj.frhs{m}(:,:,3)...
                     - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,3);
+                obj.frhs{m}(:,:,4) = obj.frhs{m}(:,:,4)...
+                    - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,6);                
             end
         end
         
@@ -199,7 +201,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
@@ -225,6 +227,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
                 enumBoundaryCondition.SlipWall, ...
                 enumBoundaryCondition.ClampedVel, ...
                 enumBoundaryCondition.ZeroGrad];
+%                 enumBoundaryCondition.ZeroGrad];
             
             if (type == enumStdCell.Tri)
                 mesh = makeUniformTriMesh(N, [-10, 10], [-10, 12], 20/0.1, 22/0.05, bctype);
