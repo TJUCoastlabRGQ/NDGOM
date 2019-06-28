@@ -68,10 +68,10 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,1)' - d,'k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H4(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H8(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H12(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H16(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H5(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H8(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H12(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H16(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$\it x \;\rm{(m)}$'},'Interpreter','latex');
             ylabel({'$\eta \;\rm {(m)}$'},'Interpreter','latex');    
@@ -88,10 +88,10 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,2)'./fg(:,1)','k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U4(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$\it x(m)$'},'Interpreter','latex');
             ylabel({'$U\;\rm{(m/s)}$'},'Interpreter','latex');    
@@ -108,10 +108,10 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,4)'./fg(:,1)','k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W4(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
             ylabel({'$w\;\rm {(m/s)}$'},'Interpreter','latex');   
@@ -128,10 +128,10 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,5)','k','Linewidth',1.5);
             end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P4(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P5(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P8(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P12(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             set(gca,'Fontsize',12);
             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
             ylabel({'$P$'},'Interpreter','latex');   
