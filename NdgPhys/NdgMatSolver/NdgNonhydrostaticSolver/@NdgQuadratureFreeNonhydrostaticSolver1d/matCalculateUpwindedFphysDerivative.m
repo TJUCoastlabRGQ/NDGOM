@@ -27,10 +27,10 @@ UpwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
 
 BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys );
-% [fm, fp] = physClass.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx,...
-%     BoundaryEdge.ny, fm, fp, physClass.fext{1} );
+[fm, fp] = physClass.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx,...
+     fm, fp, physClass.fext{1} );
 [vfmx, vfpx] = BoundaryEdge.matEvaluateSurfValue(variableX);
-
+% [ vfpx ] = ImposeBoundaryCondition(  vfmx, vfpx, obj.EidBoundaryType);
 % getCentralFluxTerm
 fluxX = BoundaryEdge.nx .* ( vfmx + vfpx )./2; 
 temphum = fm(:,:,2);
@@ -52,3 +52,10 @@ UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxM
 [ VolumeX ] = obj.matVolumeIntegral( mesh, cell2mat(variableX));
 UpwindedTermX = UpwindedTermX + VolumeX;
 end
+
+% function [ vfpx ] = ImposeBoundaryCondition(  vfmx, vfpx, EidBoundaryType)
+% Index = ( EidBoundaryType == 1 );
+% vfpx(Index) = vfmx(Index);
+% Index = ( EidBoundaryType == -1 );
+% vfpx(Index) = -vfmx(Index);
+% end

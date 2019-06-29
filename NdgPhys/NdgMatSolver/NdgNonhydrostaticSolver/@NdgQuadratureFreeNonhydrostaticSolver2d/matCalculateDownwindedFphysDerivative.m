@@ -27,8 +27,8 @@ BoundaryEdge = mesh.BoundaryEdge;
 [vfmx, vfpx] = BoundaryEdge.matEvaluateSurfValue(variableX);
 [vfmy, vfpy] = BoundaryEdge.matEvaluateSurfValue(variableY);
 
-% vfpx = obj.matImposeNonhydroRelatedBoundaryCondition( vfmx, vfpx, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
-% vfpy = obj.matImposeNonhydroRelatedBoundaryCondition( vfmy, vfpy, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
+vfpx = obj.matImposeNonhydroRelatedBoundaryCondition( vfmx, vfpx, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
+vfpy = obj.matImposeNonhydroRelatedBoundaryCondition( vfmy, vfpy, enumNonhydroBoundaryCondition.ZeroGrad, obj.EidBoundaryType);
 
 [ fluxX, fluxY ] = mxEvaluateDownwindNumFlux( mesh.status, BoundaryEdge.FToE, ...
     fm(:,:,2), fm(:,:,3), fp(:,:,2), fp(:,:,3), vfmx, vfpx, vfmy, vfpy, ... 

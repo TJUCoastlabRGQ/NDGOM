@@ -1,4 +1,4 @@
-classdef WavetransformOverAnSurbmergedBar1d < SWEConventional1d
+classdef WavetransformOverAnSurbmergedBar1d < SWEPreBlanaced1d
     %WAVETRANSFORMOVERANELLIPTICALSHOAL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -30,7 +30,7 @@ classdef WavetransformOverAnSurbmergedBar1d < SWEConventional1d
     methods (Access = public)
         function obj = WavetransformOverAnSurbmergedBar1d(N, deltax)
             
-            obj = obj@SWEConventional1d();
+            obj = obj@SWEPreBlanaced1d();
 %             obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax);
             obj.initPhysFromOptions( mesh );
@@ -122,7 +122,7 @@ classdef WavetransformOverAnSurbmergedBar1d < SWEConventional1d
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-            matEvaluateTopographySourceTerm@SWEConventional1d( obj, fphys );
+            matEvaluateTopographySourceTerm@SWEPreBlanaced1d( obj, fphys );
             
             for m = 1:obj.Nmesh
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...
@@ -186,7 +186,7 @@ classdef WavetransformOverAnSurbmergedBar1d < SWEConventional1d
             fphys{1}(index) = 0.2;
             %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
             
-            fphys{1}(:,:,4) = -fphys{1}(:,:,1);
+            fphys{1}(:,:,3) = -fphys{1}(:,:,1);
             obj.initial_fphys = fphys{1};
             
         end
@@ -224,7 +224,7 @@ classdef WavetransformOverAnSurbmergedBar1d < SWEConventional1d
             bcType = [...
                 enumBoundaryCondition.ClampedVel, ...
                 enumBoundaryCondition.ZeroGrad ];
-            [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
+            [ mesh ] = makeUniformMesh1d( N, obj.Xlim, M, bcType );
         end% func
         
     end

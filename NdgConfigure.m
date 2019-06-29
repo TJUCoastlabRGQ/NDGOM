@@ -132,7 +132,7 @@ FuncHandle(path, srcfile, libfile);
 % SWE2d
 path = 'Application/SWE/SWE2d/@SWEAbstract2d/private/';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
-libfile = {};
+libfile = {'Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxImposeBoundaryCondition.c'], ...
     [path, 'mxHydrostaticReconstruction.c'], ...
@@ -152,32 +152,32 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\VolumeFluxSolver\SWEVolumeFluxSolver2d\private\';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {...
     [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\VolumeFluxSolver\SWEPrebalanceVolumeFlux2d\private\';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {...
     [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
     
 path = 'Application/SWE/SWE2d/@SWEConventional2d/private/';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxEvaluatePostFunc2d.c'], ...
     [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE2d/@SWEPreBlanaced2d/private/';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE2d/@SWEWDPreBlanaced2d/private/';
-libfile = {};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxUpdateWDWetDryState.c'], ...
     [path, 'mxEvaluateSourceTopography2d.c'], ...
     [path, 'mxEvaluateFlux2d.c']};

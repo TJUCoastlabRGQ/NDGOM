@@ -48,16 +48,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
  
  for(mwIndex e = 0; e< N; e++){
 	 NdgEdgeType type = (NdgEdgeType)ftype[e];
-	 if (type == NdgEdgeSlipWall || type == NdgEdgeClamped || type == NdgEdgeNonSlipWall  || type == NdgEdgeClampedDepth || type == NdgEdgeClampedVel ){
+	 if (type == NdgEdgeSlipWall || type == NdgEdgeClamped || type == NdgEdgeNonSlipWall  || type == NdgEdgeClampedDepth || type == NdgEdgeClampedVel || type == NdgEdgeZeroGrad){
 		 for (mwIndex n = 0; n < M; n++){
 			 EidBoundaryType[e*M + n] = 1;
 		 }
 	 }
-	 else if (type == NdgEdgeZeroGrad){
-		 for (mwIndex n = 0; n < M; n++){
-			 EidBoundaryType[e*M + n] = -1;
-		 }
-	 }
+// 	 else if (type == NdgEdgeZeroGrad){
+// 		 for (mwIndex n = 0; n < M; n++){
+// 			 EidBoundaryType[e*M + n] = -1;
+// 		 }
+// 	 }
 		 else{
              mexPrintf("Unknown or Unrealized boundary type\n");			 
 		 }

@@ -1,4 +1,4 @@
-classdef WavetransformOverAnSurbmergedBar < SWEConventional2d
+classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
     %WAVETRANSFORMOVERANELLIPTICALSHOAL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -30,7 +30,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEConventional2d
     methods (Access = public)
         function obj = WavetransformOverAnSurbmergedBar(N, deltax, cellType)
             
-            obj = obj@SWEConventional2d();
+            obj = obj@SWEPreBlanaced2d();
             obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
@@ -122,7 +122,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEConventional2d
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-            matEvaluateTopographySourceTerm@SWEConventional2d( obj, fphys );
+            matEvaluateTopographySourceTerm@SWEPreBlanaced2d( obj, fphys );
 
             for m = 1:obj.Nmesh
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2)...

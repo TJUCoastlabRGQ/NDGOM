@@ -6,7 +6,7 @@
 #include <omp.h>
 #endif
 
-inline void evaluateFlowRateByCellState(
+void evaluateFlowRateByCellState(
     const NdgRegionType type,  ///< cell types
     const double h,            ///< water depth
     const double hu,           ///< flux
