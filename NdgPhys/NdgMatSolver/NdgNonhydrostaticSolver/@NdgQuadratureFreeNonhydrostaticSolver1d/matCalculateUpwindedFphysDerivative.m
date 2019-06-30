@@ -4,19 +4,8 @@ InnerEdge = mesh.InnerEdge;
 [fm, fp] = InnerEdge.matEvaluateSurfValue( fphys );
 [vfmx, vfpx] = InnerEdge.matEvaluateSurfValue(variableX);
 
-% getCentralFluxTerm
-fluxX = InnerEdge.nx .* ( vfmx + vfpx )./2;
-
-% getUpwindFluxTerm
-temphum = fm(:,:,2); 
-temphup = fp(:,:,2); 
-Index = ( temphum .* InnerEdge.nx  > 0 & - temphup .* InnerEdge.nx  <= 0 );
-fluxX(Index) = vfmx(Index) .* InnerEdge.nx(Index);
-
-Index = ( temphum .* InnerEdge.nx  <= 0 & - temphup .* InnerEdge.nx > 0 );
-fluxX( Index ) =  vfpx(Index) .* InnerEdge.nx(Index);
-% wet-dry interface considered
-[vfmx, vfpx, fluxX] = obj.matGetWetDryFaceVariableAndFlux( vfmx, vfpx, fluxX );
+[ fluxX ] = mxEvaluateUpwindNumFlux( mesh.status, InnerEdge.FToE, ...
+    fm(:,:,2), fp(:,:,2), vfmx, vfpx, InnerEdge.nx );
 
 % getLocalAndAdjacentFluxTerm
 fluxMx = InnerEdge.nx .* vfmx;
@@ -30,21 +19,11 @@ BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = physClass.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx,...
      fm, fp, physClass.fext{1} );
 [vfmx, vfpx] = BoundaryEdge.matEvaluateSurfValue(variableX);
-% [ vfpx ] = ImposeBoundaryCondition(  vfmx, vfpx, obj.EidBoundaryType);
-% getCentralFluxTerm
-fluxX = BoundaryEdge.nx .* ( vfmx + vfpx )./2; 
-temphum = fm(:,:,2);
-temphup = fp(:,:,2);
 
-% getUpwindFluxTerm
-Index = ( temphum .* BoundaryEdge.nx  > 0 & - temphup .* BoundaryEdge.nx  <= 0 );
-fluxX(Index) = vfmx(Index) .* BoundaryEdge.nx(Index);
+[ fluxX ] = mxEvaluateUpwindNumFlux( mesh.status, BoundaryEdge.FToE, ...
+    fm(:,:,2), fp(:,:,2), vfmx, vfpx, BoundaryEdge.nx );
 
-Index = ( temphum .* BoundaryEdge.nx &  - temphup .* BoundaryEdge.nx > 0 );
-fluxX( Index ) =  vfpx(Index) .* BoundaryEdge.nx(Index);
-
-% getLocalFluxTerm
-fluxMx = BoundaryEdge.nx .* vfmx;
+[ fluxMx ] = mxEvaluateSurfFlux( mesh.status, BoundaryEdge.FToE, vfmx, BoundaryEdge.nx );
 
 % the boundary edge contribution
 UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX);
@@ -52,10 +31,3 @@ UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxM
 [ VolumeX ] = obj.matVolumeIntegral( mesh, cell2mat(variableX));
 UpwindedTermX = UpwindedTermX + VolumeX;
 end
-
-% function [ vfpx ] = ImposeBoundaryCondition(  vfmx, vfpx, EidBoundaryType)
-% Index = ( EidBoundaryType == 1 );
-% vfpx(Index) = vfmx(Index);
-% Index = ( EidBoundaryType == -1 );
-% vfpx(Index) = -vfmx(Index);
-% end

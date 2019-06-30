@@ -45,38 +45,15 @@ typedef struct {
 } PhysField1d;
 
 /** convert mex variable to PhysVolField structure */
-inline PhysField1d convertMexToPhysField(const mxArray *mxfield) {
-  const mwSize *dims = mxGetDimensions(mxfield);
-  PhysField1d field;
-  field.Np = dims[0];
-  field.K = dims[1];
-  field.Nfield = dims[2];
-  const size_t Ntmp = field.Np * field.K;
-
-  field.h = mxGetPr(mxfield);
-  field.hu = field.h + Ntmp;
-  field.z = field.hu + Ntmp;
-  return field;
-}
+PhysField1d convertMexToPhysField(const mxArray * ); 
 
 /** Evaluate the flow rate depending on the depth threshold */
-inline void
-evaluateFlowRateByDeptheThreshold(const double hcrit, ///< depth threshold
-                                  const double h,     ///< depth
-                                  const double hu,    ///< water flux
-                                  double *u           ///< result velocity
-) {
-  if (h > hcrit) {
-    //     const double sqrt2 = 1.414213562373095;
-    //     double h4 = pow(h, 4);
-    //     *u = sqrt2 * h * hu / sqrt( h4 + max( hcrit, h4 ) );
-    //     *v = sqrt2 * h * hv / sqrt( h4 + max( hcrit, h4 ) );
-    *u = hu / h;
-  } else {
-    *u = 0.0;
-  }
+void evaluateFlowRateByDeptheThreshold(const double , ///< depth threshold
+                                  const double ,     ///< depth
+                                  const double ,    ///< water flux
+                                  double *           ///< result velocity
+);
 
-  return;
-}
+void evaluateWetDryInterface( signed char *, const mxArray *, double * );
 
 #endif // MXSWE1D_H

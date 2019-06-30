@@ -6,7 +6,7 @@ classdef SWEFaceFluxSolver1d < SWEAbstractFaceFluxSolver
     end
     
     methods
-        function [ fluxS ] = evaluate( obj, hmin, gra, nx, fm)
+        function [ fluxS ] = evaluate( obj, hmin, gra, nx, fm, ~ , ~)
             [ fluxS ] = mxEvaluateSurfFlux1d( hmin, gra, nx, fm);
         end
     end
