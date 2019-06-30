@@ -130,24 +130,24 @@ libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
 srcfile = {[path, 'mxEvaluateFlux1d.c']};
 FuncHandle(path, srcfile, libfile);
 
-%Volume flux of the vertical momentum equation in both the conventional and prebalanced SWE1d
+%Volume flux of the vertical momentum equation for both the conventional and prebalanced SWE1d
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver1d\private\';
 libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
 
-
 %Numerical flux for SWE1d
 path = 'Application\SWE\NumFluxSolver\SWEHLLNumFluxSolver1d\private\';
-srcfile = {[path, 'mxEvaluateUpwindNumFlux.c']};
+srcfile = {[path, 'mxEvaluate.c']};
+libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
 FuncHandle(path, srcfile, libfile);
-
 
 path = 'Application\SWE\NumFluxSolver\SWENonhydroHLLNumFluxSolver1d\private\';
 srcfile = {[path, 'mxEvaluateUpwindNumFlux.c']};
 libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
 FuncHandle(path, srcfile, libfile);
 
+% Source function and post function for both conventional and prebalanced SWE1d
 path = 'Application/SWE/SWE1d/@SWEConventional1d/private/';
 libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
 srcfile = {...
@@ -284,6 +284,12 @@ srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
 libfile = {};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgQuadratureFreeNonhydrostaticSolver1d\private\';
+srcfile = {[path, 'mxEvaluateUpwindNumFlux.c'],...
+    [path, 'mxEvaluateDownwindNumFlux.c'],...
+    [path, 'mxEvaluateSurfFlux.c']};
+libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
+FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};

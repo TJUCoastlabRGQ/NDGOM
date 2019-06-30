@@ -6,6 +6,6 @@ function RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, PhysClass)
 % [ fhux, ~ ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 2);
 % [ ~, fhvy ] = obj.matCalculateConservativeVariableRHSMatrix( PhysClass, BoundaryEdge, InnerEdge, fphys, enumNonhydroBoundaryCondition.Zero, 3);
 
-RHS = 2 * fphys{1}(:,:,5) ./ fphys{1}(:,:,1) + obj.hux  - fphys{1}(:,:,2) ./ fphys{1}(:,:,1) .* obj.HBx;
+RHS = 2 * fphys{1}(:,:,5) + fphys{1}(:,:,1) .* obj.hux  - fphys{1}(:,:,2) .* obj.HBx;
 
 end

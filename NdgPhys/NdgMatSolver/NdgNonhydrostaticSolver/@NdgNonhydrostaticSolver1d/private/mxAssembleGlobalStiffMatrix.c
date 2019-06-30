@@ -95,14 +95,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  {
 		  size_t rowIndex = irNp[j];
 		  temprhsu[rowIndex] =  dt *NP[j]*\
-              ( H2Bx[rowIndex]  - 1 / height[rowIndex]\
-                  * ( HBxSquare[rowIndex] + 4 ) );
+              height[rowIndex] * ( H2Bx[rowIndex]  - \
+                   ( HBxSquare[rowIndex] + 4 ) );
 	  }
 
 	  for (mwIndex j = jcTempSPNPX[i]; j<jcTempSPNPX[i + 1] && jcTempSPNPX[i + 1] - jcTempSPNPX[i]>0; j++)
 	  {
 		  size_t rowIndex = irTempSPNPX[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt * ( height[rowIndex] * TempSPNPX[j] );
+		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt * height[rowIndex] * ( height[rowIndex] * TempSPNPX[j] );
 	  }
 
 // 	  for (mwIndex j = jcTempSPNPY[i]; j<jcTempSPNPY[i + 1] && jcTempSPNPY[i + 1]-jcTempSPNPY[i]>0; j++)
@@ -114,7 +114,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  for (mwIndex j = jcTempPNPX[i]; j<jcTempPNPX[i + 1] && jcTempPNPX[i + 1]-jcTempPNPX[i]>0; j++)
 	  {
 		  size_t rowIndex = irTempPNPX[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] +  dt *( TempPNPX[j] * fhx[rowIndex] );
+		  temprhsu[rowIndex] = temprhsu[rowIndex] +  dt * height[rowIndex] * ( TempPNPX[j] * fhx[rowIndex] );
 	  }
  
 // 	  for (mwIndex j = jcTempPNPY[i]; j<jcTempPNPY[i + 1] && jcTempPNPY[i + 1] - jcTempPNPY[i]>0; j++)

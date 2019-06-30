@@ -1,5 +1,5 @@
 #include "mex.h"
-#include "../../../../../Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.h"
+#include "../../../../../Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.h"
 
 #ifdef _OPENMP
 #include <omp.h>
