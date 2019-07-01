@@ -50,9 +50,9 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             deltapoint = (mesh.cell.N + 1);
             d = 1;
             a = 0.2;          
-            time = [4 8 12 16];
+            time = [5];
             Nintp = 400;
-            xd = linspace(-10, 70, Nintp)';
+            xd = linspace(-20, 40, Nintp)';
             yd = 0.025*ones(size(xd));
 %             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
