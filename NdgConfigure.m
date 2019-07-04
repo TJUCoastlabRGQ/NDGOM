@@ -125,6 +125,12 @@ srcfile = { ...
     [path, 'mxEvaluateFlux1d.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'Application\SWE\VolumeFluxSolver\SWEWDVolumeFluxSolver1d\private\';
+libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
+srcfile = { ...
+    [path, 'mxEvaluateFlux1d.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'Application\SWE\VolumeFluxSolver\SWEPrebalanceVolumeFlux1d\private\';
 libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
 srcfile = {[path, 'mxEvaluateFlux1d.c']};
@@ -156,6 +162,11 @@ srcfile = {...
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE1d/@SWEPreBlanaced1d/private/';
+libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
+srcfile = {[path, 'mxEvaluateSourceTopography1d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application/SWE/SWE1d/@SWEWD1d/private/';
 libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
 srcfile = {[path, 'mxEvaluateSourceTopography1d.c']};
 FuncHandle(path, srcfile, libfile);
