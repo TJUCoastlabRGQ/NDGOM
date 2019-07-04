@@ -20,10 +20,10 @@ classdef SolitaryWaveRunOnBeach1d < SWEWD1d
         function obj = SolitaryWaveRunOnBeach1d(N, deltax)
             
             obj = obj@SWEWD1d();
-%             obj.hmin = 1e-3;
+            %             obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax);
             obj.initPhysFromOptions( mesh );
-            obj.outputFieldOrder = [1, 2, 3, 6];            
+            obj.outputFieldOrder = [1, 2, 3, 6];
         end
         %> Compared numerical water elevation with measured data
         CheckGaugeResult( obj );
@@ -64,7 +64,7 @@ classdef SolitaryWaveRunOnBeach1d < SWEWD1d
         
     end
     
-    methods(Access = protected)    
+    methods(Access = protected)
         
         function fphys = setInitialField( obj )
             
@@ -76,15 +76,22 @@ classdef SolitaryWaveRunOnBeach1d < SWEWD1d
             bot = zeros(size(mesh.x));
             index =  ( mesh.x >= -19.85);
             bot(index) =  (mesh.x(index) + 19.85)./19.85;
-
+            
             fphys{1}(:,:,1) = obj.H0 - bot;
             index = fphys{1}(:,:,1)<=0;
             fphys{1}(index) = 0;
             
-            fphys{1}(:,:,2) = obj.U0 .* fphys{1}(:,:,1);
+            temphu = obj.U0 .* fphys{1}(:,:,1);
+            index = temphu<=10^(-4);
+            temphu(index) = 0;
+            fphys{1}(:,:,2) = temphu;
             
-            fphys{1}(:,:,3) = bot;      
-            fphys{1}(:,:,5) = obj.W0 .* fphys{1}(:,:,1);
+            fphys{1}(:,:,3) = bot;
+            %             fphys{1}(:,:,5) = obj.W0 .* fphys{1}(:,:,1);
+            temphw = obj.W0 .* fphys{1}(:,:,1);
+            index = temphw<=10^(-4);
+            temphw(index) = 0;
+            fphys{1}(:,:,5) = temphw;
         end
         
         function [ option ] = setOption( obj, option )
@@ -97,7 +104,7 @@ classdef SolitaryWaveRunOnBeach1d < SWEWD1d
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputNcfileNum') = 500;
-%             option('limiterType') = enumLimiter.Vert;
+            %             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
