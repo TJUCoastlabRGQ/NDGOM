@@ -35,7 +35,7 @@ while( time < ftime )
                 = fphys{n}(:,:, obj.varFieldIndex) + dt*obj.frhs{n};
         end
         
-        fphys = obj.matEvaluateLimiter( fphys );
+%         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys );
         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);
     end

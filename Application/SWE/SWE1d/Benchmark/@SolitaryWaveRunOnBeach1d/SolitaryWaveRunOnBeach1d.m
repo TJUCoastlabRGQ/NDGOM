@@ -9,7 +9,7 @@ classdef SolitaryWaveRunOnBeach1d < SWEWD1d
     end
     
     properties
-        Xlim = [-100 20]
+        Xlim = [-40 20]
         H0
         U0
         W0
