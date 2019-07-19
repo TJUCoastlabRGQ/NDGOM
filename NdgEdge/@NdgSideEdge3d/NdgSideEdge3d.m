@@ -1,5 +1,7 @@
 classdef NdgSideEdge3d < handle
     properties ( SetAccess = protected )
+        %> std cell of the three dimensional side edge        
+        cell
         %> mesh obj
         mesh
         %> num of face nodes
@@ -24,6 +26,8 @@ classdef NdgSideEdge3d < handle
         nx, ny, nz
         %> determination of edge Jacabian
         Js
+        %> length, area or volume of the studied edge
+        LAV        
     end
 
     methods ( Access = public )

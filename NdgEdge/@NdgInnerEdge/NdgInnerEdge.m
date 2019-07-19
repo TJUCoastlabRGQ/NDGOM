@@ -8,6 +8,8 @@
 classdef NdgInnerEdge < handle
     
     properties %( SetAccess = protected )
+        %> std cell of the inner edge
+        cell
         %> mesh obj
         mesh
         %> local interp node coodinate
@@ -34,6 +36,13 @@ classdef NdgInnerEdge < handle
         nx, ny, nz
         %> determination of edge Jacabian
         Js
+        %> length, area or volume of the studied edge
+        LAV
+    end
+    
+    methods ( Hidden, Access=protected )
+
+        obj = GetCellSize( obj )
     end
     
     methods ( Access = public )
@@ -52,7 +61,7 @@ classdef NdgInnerEdge < handle
         [ frhs ] = matEvaluateStrongFromEdgeRHS( obj, fluxM, fluxP, fluxS );
         [ frhs ] = matEvaluateStrongFormEdgeCentralRHS( obj, fluxM, fluxP );
         [ frhs ] = matEvaluateStrongFormEdgeAlterRHS( obj, fluxM, fluxP );
-        [ fM, fP ] = matEvaluateSurfValue( obj, fphys );        
+        [ fM, fP ] = matEvaluateSurfValue( obj, fphys );
     end
     
     methods ( Access = public, Abstract )

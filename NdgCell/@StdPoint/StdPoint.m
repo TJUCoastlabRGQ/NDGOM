@@ -31,7 +31,7 @@ classdef StdPoint < StdCell
             rq = 0;
             sq = 0;
             tq = 0;
-            wq = 0;
+            wq = 1;
         end
     end
     
