@@ -49,6 +49,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
         Tau
+        edgeType
         HBx
         HBy
         H2Bx
@@ -68,6 +69,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.NonhydroFpPoint = [];
             
             obj.matCalculatePenaltyParameter( mesh );
+            obj.matAssembleElementBoundaryCondition( mesh );
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
                 obj.NP);
