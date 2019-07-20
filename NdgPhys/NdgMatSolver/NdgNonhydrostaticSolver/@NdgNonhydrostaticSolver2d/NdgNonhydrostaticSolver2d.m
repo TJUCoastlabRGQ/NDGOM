@@ -48,8 +48,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempWetDryPoint
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
-        IETau
-        BETau
+        Tau
         HBx
         HBy
         H2Bx
@@ -68,7 +67,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.NonhydroFmPoint = [];
             obj.NonhydroFpPoint = [];
             
-            obj.matCalculateLDGPenaltyParameter( mesh );
+            obj.matCalculatePenaltyParameter( mesh );
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
                 obj.NP);
