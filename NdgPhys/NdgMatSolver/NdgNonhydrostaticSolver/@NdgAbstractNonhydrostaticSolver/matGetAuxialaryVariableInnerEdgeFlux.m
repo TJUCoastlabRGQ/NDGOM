@@ -12,7 +12,7 @@ function fluxS = matGetAuxialaryVariableInnerEdgeFlux( obj, fluxS, Um, Up, Sigma
 %> @param[in] vector the directional vector in x or y direction
 %> @param[out] fluxS the numerical flux with wet-dry interface taking into consideration
 
-[ fluxS ] = mxGetAuxialaryVariableInnerEdgeFlux( obj.WetDryFaceOrder, fluxS, obj.IETau, ...
+[ fluxS ] = mxGetAuxialaryVariableInnerEdgeFlux( obj.WetDryFaceOrder, fluxS, obj.Tau, ...
     obj.NonhydroFmPoint, obj.NonhydroFpPoint, Um, Up, Sigmam, Sigmap, vector);
 
 end
