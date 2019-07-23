@@ -29,8 +29,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     double Tau = mxGetScalar(prhs[2]);
     double *NonhydroFmPoint = mxGetPr(prhs[3]);
     double *NonhydroFpPoint = mxGetPr(prhs[4]);
-    mwSize Nfp = mxGetM(prhs[2]);
-    mwSize Ne = mxGetN(prhs[2]);
+    mwSize Nfp = mxGetM(prhs[1]);
+    mwSize Ne = mxGetN(prhs[1]);
     double *Um = mxGetPr(prhs[5]);
     double *Up = mxGetPr(prhs[6]);
     double *Sigmam = mxGetPr(prhs[7]);
