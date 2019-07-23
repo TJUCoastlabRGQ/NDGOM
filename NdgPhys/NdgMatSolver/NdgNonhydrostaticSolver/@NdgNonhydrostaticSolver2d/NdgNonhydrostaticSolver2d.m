@@ -163,9 +163,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
          [TempHBx, TempHBy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, variable)
          
          [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
-         
-         matCalculateLDGPenaltyParameter( obj, mesh)
-         
+                  
          matCalculateFphysDerivative(obj, mesh, fphys, physClass)
     end
     

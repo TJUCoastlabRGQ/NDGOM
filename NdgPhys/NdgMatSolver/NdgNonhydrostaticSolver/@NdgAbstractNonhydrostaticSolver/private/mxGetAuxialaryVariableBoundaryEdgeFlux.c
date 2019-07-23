@@ -26,7 +26,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     double *EidBoundaryType = mxGetPr(prhs[0]);
     mwSize Nfp = mxGetM(prhs[0]);
     mwSize Ne = mxGetN(prhs[0]);
-    double *BETau = mxGetPr(prhs[1]);
+    double Tau = mxGetScalar(prhs[1]);
     double *Um = mxGetPr(prhs[2]);
     double *Sigmam = mxGetPr(prhs[3]);
     double *vector = mxGetPr(prhs[4]);
@@ -43,7 +43,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
         if ( (int)EidBoundaryType[i*Nfp] == -1 ){
             for( mwIndex j = i*Nfp; j< (i+1)*Nfp; j++ ){
                 // Homogeneous Dirichlet boundary condition for pressure
-                fluxS[j] = ( Sigmam[j] - BETau[j] * Um[j] * vector[j] ) * vector[j];
+                fluxS[j] = ( Sigmam[j] - Tau * Um[j] * vector[j] ) * vector[j];
             }
         }
     }

@@ -26,7 +26,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
     double *WetDryFaceOrder = mxGetPr(prhs[0]);
     mwSize NumFace = mxGetM(prhs[0]);
     double *fluxS = mxGetPr(prhs[1]);
-    double *IETau = mxGetPr(prhs[2]);
+    double Tau = mxGetScalar(prhs[2]);
     double *NonhydroFmPoint = mxGetPr(prhs[3]);
     double *NonhydroFpPoint = mxGetPr(prhs[4]);
     mwSize Nfp = mxGetM(prhs[2]);
@@ -54,9 +54,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
                 mexPrintf("Matlab:%s:InvalidWetDryStatus,\n", __FILE__);
             if(NonhydroFmPoint[j] == -1)
                 // Homogeneous Dirichlet boundary condition for pressure 
-                NewfluxS[j] = ( Sigmam[j] - IETau[j] * Um[j] * vector[j] ) * vector[j];
+                NewfluxS[j] = -1 * ( Sigmap[j] + Tau * Up[j] * vector[j] ) * vector[j];
             if(NonhydroFpPoint[j] == -1)
-                NewfluxS[j] = ( Sigmap[j] - IETau[j] * Up[j] * vector[j] ) * vector[j];
+                NewfluxS[j] = ( Sigmam[j] - Tau * Um[j] * vector[j] ) * vector[j];
             
         }
     }
