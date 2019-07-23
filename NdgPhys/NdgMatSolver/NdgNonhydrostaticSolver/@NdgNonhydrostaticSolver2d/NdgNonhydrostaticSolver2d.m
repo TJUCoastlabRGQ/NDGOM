@@ -71,16 +71,16 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.matCalculatePenaltyParameter( mesh );
             obj.matAssembleElementBoundaryCondition( mesh );
 
-%             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-%             obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
-%                 obj.NP);
-%             
-%             obj.ZeroFluxBoundaryIndex = 0;
-%             obj.ZeroFluxBoundary = ones(0,2);
-%             obj.TempZeroFluxBoundary = ones(0,2);
-%             obj.AdjacentDryCellAndFace = [];
-%             obj.WetDryPoint = [];
-%             obj.TempWetDryPoint = [];
+            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
+            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY, obj.SPNPX, obj.SPNPY,...
+                obj.NP);
+            
+            obj.ZeroFluxBoundaryIndex = 0;
+            obj.ZeroFluxBoundary = ones(0,2);
+            obj.TempZeroFluxBoundary = ones(0,2);
+            obj.AdjacentDryCellAndFace = [];
+            obj.WetDryPoint = [];
+            obj.TempWetDryPoint = [];
         end
         
         function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)

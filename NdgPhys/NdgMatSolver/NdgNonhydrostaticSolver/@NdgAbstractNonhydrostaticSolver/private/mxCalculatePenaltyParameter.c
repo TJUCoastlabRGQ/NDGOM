@@ -54,14 +54,19 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     mxArray *PenaltyParameter = mxCreateDoubleMatrix(1, K, mxREAL);
     double *TempPenaltyParameter = mxGetPr(PenaltyParameter);
     /*Loop for all the elements adjacent to the inner edge*/
-	for (mwIndex i = 0; i < 2 * NOIE; i++){
+	for (mwIndex i = 0; i <  NOIE; i++){
         /*Length or Area of the studied inner edge*/
         double IELAV = InnerEdgeLAV[i];
-        /*Cell adjacent to the inner edge*/
-        mwIndex ele = (mwIndex)InnerEdgeFToE[i];
-        /*Length, area or volume of the cell adjacent to the studied inner edge */
-        double CellLAV = LAV[ele-1];
-        TempPenaltyParameter[ele-1] += (IELAV/2)/CellLAV;
+        /*Local cell index adjacent to the inner edge*/
+        mwIndex LocalEle = (mwIndex)InnerEdgeFToE[2*i];
+		/*Adjacent cell index adjacent to the inner edge*/
+		mwIndex AdjacentEle = (mwIndex)InnerEdgeFToE[2*i + 1];
+        /*Length, area or volume of the local cell adjacent to the studied inner edge */
+		double LocalCellLAV = LAV[LocalEle - 1];
+		/*Length, area or volume of the adjacent cell adjacent to the studied inner edge */
+		double AdjacentCellLAV = LAV[AdjacentEle - 1];
+		TempPenaltyParameter[LocalEle - 1] += (IELAV / 2) / LocalCellLAV;
+		TempPenaltyParameter[AdjacentEle - 1] += (IELAV / 2) / AdjacentCellLAV;
     }
     /*Loop for all the elements adjacent to the boundary edge*/
 	for (mwIndex i = 0; i < NOBE; i++){
