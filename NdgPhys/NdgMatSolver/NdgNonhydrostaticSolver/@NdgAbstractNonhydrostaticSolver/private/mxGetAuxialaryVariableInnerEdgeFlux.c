@@ -53,9 +53,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
             if( NonhydroFmPoint[j] == NonhydroFpPoint[j] )
                 mexPrintf("Matlab:%s:InvalidWetDryStatus,\n", __FILE__);
             if(NonhydroFmPoint[j] == -1)
-                // Homogeneous Dirichlet boundary condition for pressure 
-                NewfluxS[j] = -1 * ( Sigmap[j] + Tau * Up[j] * vector[j] ) * vector[j];
+                /* Homogeneous Dirichlet boundary condition for pressure
+                 * for this situation, the local cell is wet while the adjacent cell is dry
+                 */ 
+                NewfluxS[j] = ( Sigmap[j] + Tau * Up[j] * vector[j] ) * vector[j];
             if(NonhydroFpPoint[j] == -1)
+                /* Homogeneous Dirichlet boundary condition for pressure
+                 * for this situation, the adjacent cell is dry while the local cell is wet
+                 */                 
                 NewfluxS[j] = ( Sigmam[j] - Tau * Um[j] * vector[j] ) * vector[j];
             
         }
