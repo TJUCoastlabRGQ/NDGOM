@@ -75,9 +75,9 @@ for face = 1:numel(edgeType)
             
             EdgeMassMatrix = zeros(Np);
             AdjacentElementMassMatrix = diag(mesh.J(:,adjacentEle))*mesh.cell.M;
-            EdgeMassMatrix(eidP, eidP) =  Js * mesh.InnerEdge.M;
-            QX12 = - AdjacentElementMassMatrix\(nx .* EdgeMassMatrix );
-            QY12 = - AdjacentElementMassMatrix\(nx .* EdgeMassMatrix );
+            EdgeMassMatrix(eidP, eidM) =  Js * mesh.InnerEdge.M;
+            QX12 = - AdjacentElementMassMatrix\(0.5 * nx .* EdgeMassMatrix );
+            QY12 = - AdjacentElementMassMatrix\(0.5 * ny .* EdgeMassMatrix );
             SecondOrderTerm( adjacentrows(:), cols(:) ) = OP12;
             qx( adjacentrows(:), cols(:) ) = QX12;
             qy( adjacentrows(:), cols(:) ) = QY12;

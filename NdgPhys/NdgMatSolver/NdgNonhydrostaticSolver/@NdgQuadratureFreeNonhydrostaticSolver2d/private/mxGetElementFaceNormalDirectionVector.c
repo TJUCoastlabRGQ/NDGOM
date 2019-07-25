@@ -67,8 +67,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     if ( ele == adjacentEle ){ /*the studied element is adjacent to the boundary edge*/
         for(mwIndex i = 0; i < BoundaryEdge_Ne; i++){
             if ( ele == BoundaryEdge_FToE[2*i] && face == BoundaryEdge_FToF[2*i] ){
-                plhs[0] = mxCreateDoubleScalar(BoundaryEdge_nx[2*i]);
-                plhs[1] = mxCreateDoubleScalar(BoundaryEdge_ny[2*i]);
+				plhs[0] = mxCreateDoubleScalar(BoundaryEdge_nx[BoundaryEdge_Nfp*i]);
+				plhs[1] = mxCreateDoubleScalar(BoundaryEdge_ny[BoundaryEdge_Nfp*i]);
                 plhs[2] = mxCreateDoubleScalar(BoundaryEdge_Js[BoundaryEdge_Nfp*i]);
                 break;
             }
@@ -79,14 +79,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
             mwIndex ele1 = (mwIndex)InnerEdge_FToE[2*i];
             mwIndex ele2 = (mwIndex)InnerEdge_FToE[2*i+1];
             if( ele == ele1 && adjacentEle == ele2 ){
-              plhs[0] = mxCreateDoubleScalar(InnerEdge_nx[2*i]);
-              plhs[1] = mxCreateDoubleScalar(InnerEdge_ny[2*i]);
+			  plhs[0] = mxCreateDoubleScalar(InnerEdge_nx[InnerEdge_Nfp*i]);
+			  plhs[1] = mxCreateDoubleScalar(InnerEdge_ny[InnerEdge_Nfp*i]);
               plhs[2] = mxCreateDoubleScalar(InnerEdge_Js[InnerEdge_Nfp*i]);
               break;
             }
             else if ( ele == ele2 && adjacentEle == ele1 ){
-              plhs[0] = mxCreateDoubleScalar( -1 * InnerEdge_nx[2*i] );
-              plhs[1] = mxCreateDoubleScalar( -1 * InnerEdge_ny[2*i] );
+			  plhs[0] = mxCreateDoubleScalar(-1 * InnerEdge_nx[InnerEdge_Nfp*i]);
+			  plhs[1] = mxCreateDoubleScalar(-1 * InnerEdge_ny[InnerEdge_Nfp*i]);
               plhs[2] = mxCreateDoubleScalar(InnerEdge_Js[InnerEdge_Nfp*i]);
               break;                
             }

@@ -73,6 +73,9 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
                EdgeType[(ele - 1)*Nf + face - 1] = 1;
                break;               
            /*Face type at other boundary is set to be the homogeneous Dirichlet boundary, and is flagged by 2*/
+           case ClampedVel:
+               EdgeType[(ele - 1)*Nf + face - 1] = 1;
+               break;                   
            default:
                EdgeType[(ele - 1)*Nf + face - 1] = 2;
        }
