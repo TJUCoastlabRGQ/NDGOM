@@ -11,7 +11,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         T = 2.02
         ChLength = 30
 %         ChWidth = 0.05
-        ChWidth = 0.025
+        ChWidth = 0.125
     end
     
     properties
