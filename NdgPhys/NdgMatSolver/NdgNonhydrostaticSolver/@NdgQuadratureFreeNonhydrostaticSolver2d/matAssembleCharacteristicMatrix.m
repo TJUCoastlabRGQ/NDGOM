@@ -78,12 +78,12 @@ for face = 1:numel(edgeType)
             EdgeMassMatrix(eidP, eidM) =  Js * mesh.InnerEdge.M;
             QX12 = - AdjacentElementMassMatrix\(0.5 * nx .* EdgeMassMatrix );
             QY12 = - AdjacentElementMassMatrix\(0.5 * ny .* EdgeMassMatrix );
-            SecondOrderTerm( adjacentrows(:), cols(:) ) = OP12;
+            SecondOrderTerm( adjacentrows(:), cols(:) ) = AdjacentElementMassMatrix\( - OP12 );
             qx( adjacentrows(:), cols(:) ) = QX12;
             qy( adjacentrows(:), cols(:) ) = QY12;
     end
 end
-SecondOrderTerm( localrows(:), cols(:) ) = OP11;
+SecondOrderTerm( localrows(:), cols(:) ) = ElementMassMatrix\( - OP11 );
 qx( localrows(:), cols(:) ) = QX11;
 qy( localrows(:), cols(:) ) = QY11;
 

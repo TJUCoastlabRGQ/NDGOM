@@ -14,6 +14,10 @@ function StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, Updat
 
 h = fphys{1}(:,:,1);
 
-StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, UpdatedSPNPX, UpdatedSPNPY, UpdatedPNPX, obj.fhx, UpdatedPNPY, obj.fhy,...
+% StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, UpdatedSPNPX, UpdatedSPNPY, UpdatedPNPX, obj.fhx, UpdatedPNPY, obj.fhy,...
+%     obj.NP, obj.H2Bx, obj.H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
+
+StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, obj.TempSecondOrderTerm, UpdatedPNPX, obj.fhx, UpdatedPNPY, obj.fhy,...
     obj.NP, obj.H2Bx, obj.H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
+
 end

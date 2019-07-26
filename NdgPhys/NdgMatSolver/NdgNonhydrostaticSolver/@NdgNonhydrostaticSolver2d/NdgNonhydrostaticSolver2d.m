@@ -38,12 +38,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         WetDryFaceOrder
 %         NonhydroFmPoint
 %         NonhydroFpPoint
-        EidBoundaryType
+%         EidBoundaryType
         AdjacentDryCellAndFace
         WetNum
         dt
-        WetDryPoint
-        TempWetDryPoint
+%         WetDryPoint
+%         TempWetDryPoint
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
         Tau
@@ -62,7 +62,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         function obj = NdgNonhydrostaticSolver2d(PhysClass)
 %             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
             mesh = PhysClass.meshUnion(1);
-            obj.matSetBoundaryType(mesh);
+%             obj.matSetBoundaryType(mesh);
 %             obj.NonhydroFmPoint = [];
 %             obj.NonhydroFpPoint = [];
             
@@ -77,8 +77,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.ZeroFluxBoundary = ones(0,2);
             obj.TempZeroFluxBoundary = ones(0,2);
             obj.AdjacentDryCellAndFace = [];
-            obj.WetDryPoint = [];
-            obj.TempWetDryPoint = [];
+%             obj.WetDryPoint = [];
+%             obj.TempWetDryPoint = [];
         end
         
         function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)

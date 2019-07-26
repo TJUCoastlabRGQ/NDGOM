@@ -5,7 +5,7 @@
 #include <omp.h>
 #endif
 
-#define NRHS 15
+#define NRHS 14
 #define NLHS 1
 
 #if defined(NAN_EQUALS_ZERO)
@@ -31,48 +31,45 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double dt = mxGetScalar(prhs[0]);
   double *height = mxGetPr(prhs[1]);
   
-  double *TempSPNPX = mxGetPr(prhs[2]);
-  mwIndex *jcTempSPNPX = mxGetJc(prhs[2]);
-  mwIndex *irTempSPNPX = mxGetIr(prhs[2]);
+  double *TempSecondOrderTerm = mxGetPr(prhs[2]);
+  mwIndex *jcTempSecondOrderTerm = mxGetJc(prhs[2]);
+  mwIndex *irTempSecondOrderTerm = mxGetIr(prhs[2]);
   
-  double *TempSPNPY = mxGetPr(prhs[3]);
-  mwIndex *jcTempSPNPY = mxGetJc(prhs[3]);
-  mwIndex *irTempSPNPY = mxGetIr(prhs[3]);  
   
-  double *TempPNPX = mxGetPr(prhs[4]);
-  mwIndex *jcTempPNPX = mxGetJc(prhs[4]);
-  mwIndex *irTempPNPX = mxGetIr(prhs[4]);
+  double *TempPNPX = mxGetPr(prhs[3]);
+  mwIndex *jcTempPNPX = mxGetJc(prhs[3]);
+  mwIndex *irTempPNPX = mxGetIr(prhs[3]);
   
-  double *fhx = mxGetPr(prhs[5]);
+  double *fhx = mxGetPr(prhs[4]);
     
-  double *TempPNPY = mxGetPr(prhs[6]);
-  mwIndex *jcTempPNPY = mxGetJc(prhs[6]);
-  mwIndex *irTempPNPY = mxGetIr(prhs[6]);
+  double *TempPNPY = mxGetPr(prhs[5]);
+  mwIndex *jcTempPNPY = mxGetJc(prhs[5]);
+  mwIndex *irTempPNPY = mxGetIr(prhs[5]);
   
-  double *fhy = mxGetPr(prhs[7]);
+  double *fhy = mxGetPr(prhs[6]);
   
-  double *NP = mxGetPr(prhs[8]);
-  mwIndex *jcNp = mxGetJc(prhs[8]);
-  mwIndex *irNp = mxGetIr(prhs[8]);
+  double *NP = mxGetPr(prhs[7]);
+  mwIndex *jcNp = mxGetJc(prhs[7]);
+  mwIndex *irNp = mxGetIr(prhs[7]);
   
-  double *H2Bx = mxGetPr(prhs[9]);
+  double *H2Bx = mxGetPr(prhs[8]);
   
-  double *H2By = mxGetPr(prhs[10]);
+  double *H2By = mxGetPr(prhs[9]);
   
-  double *HBxSquare = mxGetPr(prhs[11]);
+  double *HBxSquare = mxGetPr(prhs[10]);
   
-  double *HBySquare = mxGetPr(prhs[12]);
+  double *HBySquare = mxGetPr(prhs[11]);
   
   mwSize row,col;
   
-  row = mxGetM(prhs[8]);
-  col = mxGetN(prhs[8]);
+  row = mxGetM(prhs[7]);
+  col = mxGetN(prhs[7]);
   
   double *pi,*sr;
   mwIndex *irs,*jcs;
 
-  double *JcStiffMatrix = mxGetPr(prhs[13]);
-  double *JrStiffMatrix = mxGetPr(prhs[14]);
+  double *JcStiffMatrix = mxGetPr(prhs[12]);
+  double *JrStiffMatrix = mxGetPr(prhs[13]);
 
   plhs[0] = mxCreateSparse(row, col, JcStiffMatrix[col], 0);
   sr = mxGetPr(plhs[0]);
@@ -99,16 +96,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                    ( HBxSquare[rowIndex] + HBySquare[rowIndex] + 4 ) ) ;
 	  }
 
-	  for (mwIndex j = jcTempSPNPX[i]; j<jcTempSPNPX[i + 1] && jcTempSPNPX[i + 1] - jcTempSPNPX[i]>0; j++)
+	  for (mwIndex j = jcTempSecondOrderTerm[i]; j<jcTempSecondOrderTerm[i + 1] && jcTempSecondOrderTerm[i + 1] - jcTempSecondOrderTerm[i]>0; j++)
 	  {
-		  size_t rowIndex = irTempSPNPX[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt * height[rowIndex] * ( height[rowIndex] * TempSPNPX[j] );
-	  }
-
-	  for (mwIndex j = jcTempSPNPY[i]; j<jcTempSPNPY[i + 1] && jcTempSPNPY[i + 1]-jcTempSPNPY[i]>0; j++)
-	  {
-		  size_t rowIndex = irTempSPNPY[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt  * height[rowIndex] * ( height[rowIndex] * TempSPNPY[j] );
+		  size_t rowIndex = irTempSecondOrderTerm[j];
+		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt * height[rowIndex] * ( height[rowIndex] * TempSecondOrderTerm[j] );
 	  }
 
 	  for (mwIndex j = jcTempPNPX[i]; j<jcTempPNPX[i + 1] && jcTempPNPX[i + 1]-jcTempPNPX[i]>0; j++)

@@ -22,20 +22,20 @@
  */
 
 typedef enum {
-        Inner = 0,
-        GaussEdge = 1,
-        SlipWall = 2,
-        NonSlipWall = 3,
-        ZeroGrad = 4,
-        Clamped = 5,
-        ClampedDepth = 6,
-        ClampedVel = 7,
-        Flather = 8,
-        NonLinearFlatherDepth = 9,
-        NonLinearFlatherFlow = 10,
-        NonReflectFlux = 11,
-        BottomBoundary  = 12,
-        UpperSurfaceBoundary =13
+    Inner = 0,
+    GaussEdge = 1,
+    SlipWall = 2,
+    NonSlipWall = 3,
+    ZeroGrad = 4,
+    Clamped = 5,
+    ClampedDepth = 6,
+    ClampedVel = 7,
+    Flather = 8,
+    NonLinearFlatherDepth = 9,
+    NonLinearFlatherFlow = 10,
+    NonReflectFlux = 11,
+    BottomBoundary  = 12,
+    UpperSurfaceBoundary =13
 } NdgEdgeType;
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
@@ -61,24 +61,52 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     double * EdgeType = mxGetPr(plhs[0]);
     /*Program to define the face type of the computation mesh at the boundary*/
     for(mwIndex i = 0; i< NBe; i++){
-       mwIndex ele = (mwIndex)BoundaryEdgeFToE[2*i];
-       mwIndex face = (mwIndex)BoundaryEdgeFToF[2*i];
-       NdgEdgeType Boundarytype = (NdgEdgeType)BoundaryEdgeFtype[i];
-       switch(Boundarytype){
-           /*Face type at the wall boundary is set to be the Neumann boundary, and is flagged by 1*/
-	      case SlipWall:
-               EdgeType[(ele - 1)*Nf + face - 1] = 1;
-               break;
-	      case NonSlipWall:
-               EdgeType[(ele - 1)*Nf + face - 1] = 1;
-               break;               
-           /*Face type at other boundary is set to be the homogeneous Dirichlet boundary, and is flagged by 2*/
-           case ClampedVel:
-               EdgeType[(ele - 1)*Nf + face - 1] = 1;
-               break;                   
-           default:
-               EdgeType[(ele - 1)*Nf + face - 1] = 2;
-       }
+        mwIndex ele = (mwIndex)BoundaryEdgeFToE[2*i];
+        mwIndex face = (mwIndex)BoundaryEdgeFToF[2*i];
+        NdgEdgeType Boundarytype = (NdgEdgeType)BoundaryEdgeFtype[i];
+        switch(Boundarytype){
+            
+            /*Face type at the wall boundary is set to be the Neumann boundary, and is flagged by 1*/
+            case GaussEdge:
+                
+            case SlipWall:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+                
+            case NonSlipWall:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case ZeroGrad:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case Clamped:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case ClampedDepth:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case ClampedVel:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case Flather:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case NonLinearFlatherDepth:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case NonLinearFlatherFlow:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case NonReflectFlux:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case BottomBoundary:
+                EdgeType[(ele - 1)*Nf + face - 1] = 1;
+                break;
+            case UpperSurfaceBoundary:
+                EdgeType[(ele - 1)*Nf + face - 1] = 2;
+                break;
+        }
     }
     
 }
