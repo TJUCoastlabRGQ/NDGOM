@@ -31,15 +31,16 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         TempSecondOrderTerm
         SecondOrderTerm
         NP
-        WetCellIndex
-        TempZeroFluxBoundary
-        ZeroFluxBoundary
-        ZeroFluxBoundaryIndex
-        WetDryFaceOrder
+        WetDryCell
+%         WetCellIndex
+%         TempZeroFluxBoundary
+%         ZeroFluxBoundary
+%         ZeroFluxBoundaryIndex
+%         WetDryFaceOrder
 %         NonhydroFmPoint
 %         NonhydroFpPoint
-%         EidBoundaryType
-        AdjacentDryCellAndFace
+        EidBoundaryType
+%         AdjacentDryCellAndFace
         WetNum
         dt
 %         WetDryPoint
@@ -62,7 +63,7 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         function obj = NdgNonhydrostaticSolver2d(PhysClass)
 %             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
             mesh = PhysClass.meshUnion(1);
-%             obj.matSetBoundaryType(mesh);
+            obj.matSetBoundaryType(mesh);
 %             obj.NonhydroFmPoint = [];
 %             obj.NonhydroFpPoint = [];
             
@@ -70,13 +71,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             obj.matAssembleElementBoundaryCondition( mesh );
 
             obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, obj.PNPX, obj.PNPY,...
-                obj.SecondOrderTerm, obj.NP);
+            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);
             
-            obj.ZeroFluxBoundaryIndex = 0;
-            obj.ZeroFluxBoundary = ones(0,2);
-            obj.TempZeroFluxBoundary = ones(0,2);
-            obj.AdjacentDryCellAndFace = [];
+%             obj.ZeroFluxBoundaryIndex = 0;
+%             obj.ZeroFluxBoundary = ones(0,2);
+%             obj.TempZeroFluxBoundary = ones(0,2);
+%             obj.AdjacentDryCellAndFace = [];
 %             obj.WetDryPoint = [];
 %             obj.TempWetDryPoint = [];
         end

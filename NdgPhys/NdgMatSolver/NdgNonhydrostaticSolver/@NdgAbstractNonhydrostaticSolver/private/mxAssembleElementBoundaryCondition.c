@@ -1,5 +1,6 @@
 # include "mex.h"
 # include <math.h>
+# include "mxNonhydroSWE.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -20,23 +21,6 @@
  * Output:
  * 		double[Nf x K] 	EdgeType the edge type of the studied mesh
  */
-
-typedef enum {
-    Inner = 0,
-    GaussEdge = 1,
-    SlipWall = 2,
-    NonSlipWall = 3,
-    ZeroGrad = 4,
-    Clamped = 5,
-    ClampedDepth = 6,
-    ClampedVel = 7,
-    Flather = 8,
-    NonLinearFlatherDepth = 9,
-    NonLinearFlatherFlow = 10,
-    NonReflectFlux = 11,
-    BottomBoundary  = 12,
-    UpperSurfaceBoundary =13
-} NdgEdgeType;
 
 void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     /* check input & output */
@@ -64,49 +48,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
         mwIndex ele = (mwIndex)BoundaryEdgeFToE[2*i];
         mwIndex face = (mwIndex)BoundaryEdgeFToF[2*i];
         NdgEdgeType Boundarytype = (NdgEdgeType)BoundaryEdgeFtype[i];
-        switch(Boundarytype){
-            
-            /*Face type at the wall boundary is set to be the Neumann boundary, and is flagged by 1*/
-            case GaussEdge:
-                
-            case SlipWall:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-                
-            case NonSlipWall:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case ZeroGrad:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case Clamped:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case ClampedDepth:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case ClampedVel:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case Flather:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case NonLinearFlatherDepth:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case NonLinearFlatherFlow:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case NonReflectFlux:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case BottomBoundary:
-                EdgeType[(ele - 1)*Nf + face - 1] = 1;
-                break;
-            case UpperSurfaceBoundary:
-                EdgeType[(ele - 1)*Nf + face - 1] = 2;
-                break;
-        }
+        mxSetEdgeType( Boundarytype, EdgeType + (ele - 1)*Nf + face - 1);
     }
     
 }

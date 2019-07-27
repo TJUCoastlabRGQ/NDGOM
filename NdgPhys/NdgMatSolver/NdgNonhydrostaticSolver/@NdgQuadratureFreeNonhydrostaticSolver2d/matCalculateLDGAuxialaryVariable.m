@@ -7,8 +7,13 @@ fluxMY = InnerEdge.ny.*fmy; fluxMX = InnerEdge.nx.*fmx;
 fluxPY = InnerEdge.ny.*fpy; fluxPX = InnerEdge.nx.*fpx;
 fluxSx = ( ( fmx + fpx ) ./ 2 ) .* InnerEdge.nx;
 fluxSy = ( ( fmy + fpy ) ./ 2 ) .* InnerEdge.ny;
-fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  obj.WetDryFaceOrder, fluxSx, mesh.cell.Nfp(1));
-fluxSy = obj.matGetPrimitiveVariableInnerEdgeFlux(  obj.WetDryFaceOrder, fluxSy, mesh.cell.Nfp(1));
+
+faceflag = mxGetWetDryFace( mesh.status, InnerEdge.FToE);
+
+WetDryFaceOrder = find( faceflag == 1);
+
+fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSx, mesh.cell.Nfp(1));
+fluxSy = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSy, mesh.cell.Nfp(1));
 
 % termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
 % termX = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMX, fluxPX);

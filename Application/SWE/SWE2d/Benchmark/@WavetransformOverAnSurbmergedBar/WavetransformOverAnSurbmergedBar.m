@@ -11,7 +11,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         T = 2.02
         ChLength = 30
 %         ChWidth = 0.05
-        ChWidth = 0.5
+        ChWidth = 0.1
     end
     
     properties
@@ -23,7 +23,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
         SpongeCoefficient
-        Ylim = [0 1]
+        Ylim = [0 0.1]
         Xlim = [0 30]
     end
     

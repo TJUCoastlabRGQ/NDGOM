@@ -6,22 +6,19 @@ function fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys)
 %> @param[in] fphys The fphys field
 mesh = physClass.meshUnion(1);
 
-obj.matAssembleWetDryInterface(mesh);
+obj.matAssembleWetDryInterface2d(mesh);
 
 % [obj.NonhydroFmPoint, obj.NonhydroFpPoint, obj.WetDryFaceOrder] = obj.matAssemblePointRelatedInformation...
 %     (obj.ZeroFluxBoundary, obj.AdjacentDryCellAndFace, physClass.meshUnion(1).InnerEdge.FToE...
 %     ,physClass.meshUnion(1).InnerEdge.FToN1);
 
-[UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY]...
-    = obj.matReconstructStiffmatrixRelatedMatrix( physClass);
+obj.matReconstructStiffmatrixRelatedMatrix;
 
-obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np, UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
-    UpdatedSPNPY, obj.NP);
+obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);
 
 obj.matCalculateFphysDerivative( mesh, fphys, physClass);
 
-StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix(UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX,...
-    UpdatedSPNPY, fphys, physClass);
+StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( fphys );
 
 NonhydrostaticRHS  = obj.matEvaluateConservativeNonhydrostaticRHS( fphys, physClass );
 
@@ -29,7 +26,7 @@ NonhydrostaticRHS  = obj.matEvaluateConservativeNonhydrostaticRHS( fphys, physCl
 
 NonhydrostaticPressure = obj.matCalculateNonhydrostaticPressure(StiffMatrix, NonhydrostaticRHS);
 fphys = obj.matUpdateConservativeFinalVelocity( NonhydrostaticPressure , physClass, fphys);
-obj.ZeroFluxBoundary = []; obj.ZeroFluxBoundaryIndex = 0;
-obj.AdjacentDryCellAndFace = [];obj.NonhydroFmPoint = [];
-obj.NonhydroFpPoint = [];
+% obj.ZeroFluxBoundary = []; obj.ZeroFluxBoundaryIndex = 0;
+% obj.AdjacentDryCellAndFace = [];obj.NonhydroFmPoint = [];
+% obj.NonhydroFpPoint = [];
 end
