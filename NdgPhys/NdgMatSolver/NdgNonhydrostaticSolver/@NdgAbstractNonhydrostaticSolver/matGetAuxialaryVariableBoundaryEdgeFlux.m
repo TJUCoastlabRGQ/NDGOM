@@ -8,5 +8,5 @@ function fluxS = matGetAuxialaryVariableBoundaryEdgeFlux( obj,  Um, Sigmam, vect
 %> @param[in] Sigmam value of the local auxialary pressure
 %> @param[in] vector the directional vector in x or y direction
 %> @param[out] fluxS the numerical flux with boundary contion taking into consideration
-fluxS = mxGetAuxialaryVariableBoundaryEdgeFlux( obj.EidBoundaryType, obj.BETau, Um, Sigmam, vector);
+fluxS = mxGetAuxialaryVariableBoundaryEdgeFlux( obj.EidBoundaryType, obj.Tau, Um, Sigmam, vector);
 end

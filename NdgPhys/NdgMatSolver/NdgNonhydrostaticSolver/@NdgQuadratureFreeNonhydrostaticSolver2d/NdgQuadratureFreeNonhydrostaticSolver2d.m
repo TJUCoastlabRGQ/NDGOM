@@ -35,7 +35,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d
     methods(Access=protected)
         
         [qx, qy, q2x, q2y, Np] = ...
-            matAssembleCharacteristicMatrix(obj, mesh, index);
+            matAssembleCharacteristicMatrix(obj, mesh, ele, edgeType);
         
         RHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
         

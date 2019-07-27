@@ -5,7 +5,7 @@ function [ qx ] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, Inn
 %< Inner edge contribution
 fluxMX = InnerEdge.nx.*fmx; 
 fluxPX = InnerEdge.nx.*fpx;
-fluxSx = ( ( fmx + fpx ) ./ 2 - 1/2 .* ( Um - Up ) ) .* InnerEdge.nx;
+fluxSx = ( ( Um + Up ) ./ 2 ) .* InnerEdge.nx;
 
 fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  obj.WetDryFaceOrder, fluxSx, mesh.cell.Nfp(1));
 

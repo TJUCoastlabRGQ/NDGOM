@@ -8,6 +8,8 @@ classdef NdgInnerEdge1d < NdgInnerEdge
     methods
         function obj = NdgInnerEdge1d( meshUnion, meshId )
             obj = obj@NdgInnerEdge( meshUnion, meshId );
+            obj.cell = StdPoint(meshUnion.cell.N);
+            obj = GetCellSize( obj );
         end
         
         [ fnode ] = proj_vert2node( obj, fvert );

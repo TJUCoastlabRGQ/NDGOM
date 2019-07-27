@@ -10,6 +10,8 @@ classdef NdgHaloEdge2d < NdgHaloEdge
     methods
         function obj = NdgHaloEdge2d( meshUnion, locMeshId, BCToV )
             obj = obj@NdgHaloEdge( meshUnion, locMeshId, BCToV );
+            obj.cell = StdLine(meshUnion.cell.N);
+            obj = GetCellSize( obj );            
         end
         
         [ fnode ] = proj_vert2node( obj, fvert );

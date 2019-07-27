@@ -1,4 +1,4 @@
-function matAssembleWetDryInterface(obj, mesh)
+function matAssembleWetDryInterface2d(obj, mesh)
 %> @brief Function to assemble the wet and dry interface
 %> @details
 %> Function to assemble the wet and dry interface
@@ -8,8 +8,8 @@ function matAssembleWetDryInterface(obj, mesh)
 %     obj.ZeroFluxBoundaryIndex, obj.WetNum] =mxAssembleWetDryInterface...
 %     (double(mesh.status), mesh.EToE, mesh.cell.Nface, mesh.cell.Fmask, mesh.cell.Nfp(1), mesh.cell.Np);
 
-[ obj.WetDryCell, obj.WetNum] = mxAssembleWetDryInterface(double(mesh.status), mesh.EToE, ...
-    mesh.BoundaryEdge.FToE, mesh.BoundaryEdge.ftype, mesh.BoundaryEdge.FToF);
+[ obj.WetDryCell ] = mxAssembleWetDryInterface2d(mesh.status, mesh.EToE, ...
+    mesh.InnerEdge.FToE, mesh.BoundaryEdge.FToE, mesh.BoundaryEdge.ftype, mesh.BoundaryEdge.FToF);
 
 
 end

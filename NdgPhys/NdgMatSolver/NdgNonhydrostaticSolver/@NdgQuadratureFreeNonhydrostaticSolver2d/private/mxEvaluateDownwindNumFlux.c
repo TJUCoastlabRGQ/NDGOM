@@ -74,7 +74,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 #endif
     for (mwIndex k = 0; k < Ne; k++) {
         if (DryFaceFlag[k] == 1) {
-            // the considered face is one between two adjacent dry cells, or one dry cell and another wet cell, for this situation, do nothing
+            /* the considered face is one between two adjacent dry cells, or one dry cell and another wet cell, for this situation, do nothing.
+             * numerical flux at the wet-dry interface is set to zero for the current version */
             continue;
         }
         else{

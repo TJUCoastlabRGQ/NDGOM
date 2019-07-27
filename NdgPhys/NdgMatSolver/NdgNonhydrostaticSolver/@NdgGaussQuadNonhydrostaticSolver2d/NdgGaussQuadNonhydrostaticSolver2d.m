@@ -59,7 +59,7 @@ classdef NdgGaussQuadNonhydrostaticSolver2d < NdgNonhydrostaticSolver2d & ...
         
         StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix( obj, PhysClass, UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY, UpdatedNP, fphys)
 
-        [UpdatedPNPX, UpdatedPNPY, UpdatedSPNPX, UpdatedSPNPY, UpdatedNP ] = matReconstructStiffmatrixRelatedMatrix( obj, physClass)
+         matReconstructStiffmatrixRelatedMatrix( obj, physClass)
         
     end
     

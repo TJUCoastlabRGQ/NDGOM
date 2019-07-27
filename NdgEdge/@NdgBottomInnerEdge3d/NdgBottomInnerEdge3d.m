@@ -3,6 +3,8 @@ classdef NdgBottomInnerEdge3d < handle
     %   Detailed explanation goes here
     
     properties ( SetAccess = protected )
+        %> std cell of the three dimensional bottom edge        
+        cell
         %> mesh obj
         mesh
         %> num of face nodes
@@ -27,8 +29,8 @@ classdef NdgBottomInnerEdge3d < handle
         nx, ny, nz
         %> determination of edge Jacabian
         Js
-%         %> edge type
-%         ftypes
+        %> length, area or volume of the studied edge
+        LAV
     end
     
     methods (Access = public)

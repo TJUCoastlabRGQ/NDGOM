@@ -6,17 +6,13 @@ function [StiffMatrix, NonhydrostaticRHS] = matResembleGlobalMatrix(obj, mesh, S
 %> @param[in] FluxTerm The flux term needs to be corrected
 %> @param[in] mesh The mesh object
 %> @param[out] FluxTerm The flux term corrected
-if obj.WetNum == mesh.K
-    %doing nothing
-else
-    cellIndex = 1:mesh.K;
-    DryCell = setdiff(cellIndex, obj.WetCellIndex);
-    data = zeros(mesh.cell.Np, numel(DryCell));
-    for i = 1:numel(DryCell)
-        data(:,i) = ((DryCell(i) - 1)* mesh.cell.Np+1 :DryCell(i)* mesh.cell.Np)';
-    end
-    StiffMatrix(data,:) = [];
-    StiffMatrix(:,data) = [];
-    NonhydrostaticRHS(data) = [];
+
+Index = find(mesh.status ~= enumSWERegion.Wet);
+data = zeros(mesh.cell.Np, numel(Index));
+for i = 1:numel(Index)
+    data(:,i) = (Index - 1) * mesh.cell.Np + 1 : Index * mesh.cell.Np;
 end
+StiffMatrix(data,:) = [];
+StiffMatrix(:,data) = [];
+NonhydrostaticRHS(data) = [];
 end

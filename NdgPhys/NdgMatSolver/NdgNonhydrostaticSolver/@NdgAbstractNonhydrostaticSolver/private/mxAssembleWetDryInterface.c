@@ -1,6 +1,7 @@
 # include "mex.h"
 # include <math.h>
-#include <malloc.h>
+# include <malloc.h>
+# include "mxNonhydroSWE.h"
 
 #define NRHS 6
 #define NLHS 5

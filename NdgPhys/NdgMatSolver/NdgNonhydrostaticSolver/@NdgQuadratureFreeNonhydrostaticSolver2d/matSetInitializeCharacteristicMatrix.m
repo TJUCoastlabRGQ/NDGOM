@@ -6,23 +6,23 @@ function matSetInitializeCharacteristicMatrix(obj, physClass, mesh)
 Num = numel(mesh.x);
 K = mesh.K; Np = mesh.cell.Np;
 obj.PNPX = spalloc(Num,Num,2*Num*Np); obj.PNPY = spalloc(Num,Num,2*Num*Np);
-obj.SPNPX = spalloc(Num,Num,2*Num*Np); obj.SPNPY = spalloc(Num,Num,2*Num*Np);
+obj.SecondOrderTerm = spalloc(Num,Num,2*Num*Np); 
 obj.NP = spalloc(Num,Num,Num);
-for i =  1:K*Np
-    [tempPNPX, tempPNPY, tempSPNPX, tempSPNPY, tempNp]...
-        = obj.matAssembleCharacteristicMatrix( mesh, i);
-    [obj.PNPX(:,i), obj.PNPY(:,i), obj.SPNPX(:,i), obj.SPNPY(:,i), obj.NP(:,i)]...
-        = VectorConvert(tempPNPX, tempPNPY, tempSPNPX, tempSPNPY, tempNp);
+for ele =  1:K
+    obj.NP( (ele - 1)*Np + 1 : (ele - 1)*Np + 1,(ele - 1)*Np + 1 : (ele - 1)*Np + 1 ) = 1;
+    [tempPNPX, tempPNPY, tempSecondOrderTerm]...
+        = obj.matAssembleCharacteristicMatrix( mesh, ele, obj.edgeType(:, ele));
+    [obj.PNPX(:,(ele-1)*Np+1:ele*Np), obj.PNPY(:,(ele-1)*Np+1:ele*Np),...
+        obj.SecondOrderTerm(:,(ele-1)*Np+1:ele*Np)] = ...
+        VectorConvert(tempPNPX, tempPNPY, tempSecondOrderTerm);
 end
 
 obj.TempPNPX = obj.PNPX; obj.TempPNPY = obj.PNPY;
-obj.TempSPNPX = obj.SPNPX; obj.TempSPNPY = obj.SPNPY;
+obj.TempSecondOrderTerm = obj.SecondOrderTerm;
 end
 
-function [PNPX, PNPY, SPNPX, SPNPY, Np]=VectorConvert(tempPNPX, tempPNPY, tempSPNPX, tempSPNPY, tempNp)
+function [PNPX, PNPY, SecondOrderTerm]=VectorConvert(tempPNPX, tempPNPY, tempSecondOrderTerm)
 PNPX = sparse(tempPNPX);
 PNPY = sparse(tempPNPY);
-SPNPX = sparse(tempSPNPX);
-SPNPY = sparse(tempSPNPY);
-Np = sparse(tempNp);
+SecondOrderTerm = sparse(tempSecondOrderTerm);
 end

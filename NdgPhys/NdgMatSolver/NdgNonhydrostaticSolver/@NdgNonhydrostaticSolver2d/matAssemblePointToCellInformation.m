@@ -1,4 +1,4 @@
-function matAssemblePointToCellInformation(obj, K, Np, PNPX, PNPY, SPNPX, SPNPY, NP )   
-tempdata = abs(PNPX) + abs(PNPY) + abs(SPNPX) + abs(SPNPY) + NP;
+function matAssemblePointToCellInformation(obj, K, Np )   
+tempdata = abs(obj.TempPNPX) + abs(obj.TempPNPY) + abs(obj.TempSecondOrderTerm) + obj.NP;
 [obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix] = mxAssemblePointToCellInformation(K*Np, tempdata );
 end

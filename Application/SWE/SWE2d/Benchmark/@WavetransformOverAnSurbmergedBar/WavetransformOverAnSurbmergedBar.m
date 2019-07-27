@@ -11,7 +11,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         T = 2.02
         ChLength = 30
 %         ChWidth = 0.05
-        ChWidth = 0.125
+        ChWidth = 0.1
     end
     
     properties
@@ -23,7 +23,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
         SpongeCoefficient
-        Ylim = [0 0.025]
+        Ylim = [0 0.1]
         Xlim = [0 30]
     end
     
@@ -230,7 +230,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
 %                 enumBoundaryCondition.ZeroGrad];
             
             if (type == enumStdCell.Tri)
-                mesh = makeUniformTriMesh(N, [-10, 10], [-10, 12], 20/0.1, 22/0.05, bctype);
+                mesh = makeUniformTriMesh(N, obj.Xlim, obj.Ylim, ceil((obj.Xlim(2) - obj.Xlim(1))/deltax), ceil((obj.Ylim(2) - obj.Ylim(1))/deltax), bctype);
             elseif(type == enumStdCell.Quad)
                 mesh = makeUniformQuadMesh(N, obj.Xlim, obj.Ylim, ceil((obj.Xlim(2) - obj.Xlim(1))/deltax), ceil((obj.Ylim(2) - obj.Ylim(1))/deltax), bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
             else

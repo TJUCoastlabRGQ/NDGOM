@@ -3,9 +3,11 @@ mesh = physClass.meshUnion(1);
 InnerEdge = mesh.InnerEdge;
 BoundaryEdge = mesh.BoundaryEdge;
 NonhydrostaticPressure = zeros(mesh.cell.Np, mesh.K);
-NonhydroPre = reshape(NonhydroPre, mesh.cell.Np, obj.WetNum);
-for i = 1:numel(obj.WetCellIndex)
-    NonhydrostaticPressure(:,obj.WetCellIndex(i)) = NonhydroPre(:,i);
+
+Index = find(mesh.status == enumSWERegion.Wet);
+NonhydroPre = reshape(NonhydroPre, mesh.cell.Np, numel(Index));
+for i = 1:numel(Index)
+    NonhydrostaticPressure(:,Index(i)) = NonhydroPre(:,i);
 end
 
 % NonhydroVolumeflux = 1/2 * NonhydrostaticPressure .* fphys{1}(:,:,1);
