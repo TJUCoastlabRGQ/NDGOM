@@ -7,9 +7,8 @@ Num = numel(mesh.x);
 K = mesh.K; Np = mesh.cell.Np;
 obj.PNPX = spalloc(Num,Num,2*Num*Np); obj.PNPY = spalloc(Num,Num,2*Num*Np);
 obj.SecondOrderTerm = spalloc(Num,Num,2*Num*Np); 
-obj.NP = spalloc(Num,Num,Num);
+obj.NP = speye(K*Np, K*Np);
 for ele =  1:K
-    obj.NP( (ele - 1)*Np + 1 : (ele - 1)*Np + 1,(ele - 1)*Np + 1 : (ele - 1)*Np + 1 ) = 1;
     [tempPNPX, tempPNPY, tempSecondOrderTerm]...
         = obj.matAssembleCharacteristicMatrix( mesh, ele, obj.edgeType(:, ele));
     [obj.PNPX(:,(ele-1)*Np+1:ele*Np), obj.PNPY(:,(ele-1)*Np+1:ele*Np),...
