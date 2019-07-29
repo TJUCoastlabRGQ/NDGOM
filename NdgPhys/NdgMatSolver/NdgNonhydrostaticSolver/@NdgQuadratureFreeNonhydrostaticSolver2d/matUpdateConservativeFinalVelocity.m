@@ -10,7 +10,7 @@ for i = 1:numel(Index)
     NonhydrostaticPressure(:,Index(i)) = NonhydroPre(:,i);
 end
 
-[ qx, qy ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]));  % abstract, different for Gauss quad and quad free verison
+[ qx, qy ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]));  % abstract in nonhydrostatic solver in 2d and 1d, different for Gauss quad and quad free verison
 
 
 % fphys{1}(:,:,7) = fphys{1}(:,:,7) + NonhydrostaticPressure;

@@ -36,7 +36,7 @@ BoundaryEdge = mesh.BoundaryEdge;
 UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX );
 UpwindedTermY = -UpwindedTermY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxY );
 
-[VolumeX, VolumeY] = obj.matVolumeIntegral( mesh, cell2mat(variableX), cell2mat(variableY));
+[VolumeX, VolumeY] = obj.matVolumeIntegral( mesh, cell2mat(variableX), cell2mat(variableY));   %abstract in nonhydrostatic solver 2d and 1d, different for quad free and quad version
 UpwindedTermX = UpwindedTermX + VolumeX;
 UpwindedTermY = UpwindedTermY + VolumeY;
 end

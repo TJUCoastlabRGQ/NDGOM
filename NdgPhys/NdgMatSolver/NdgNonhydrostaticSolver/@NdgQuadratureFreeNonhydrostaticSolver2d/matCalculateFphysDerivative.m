@@ -1,6 +1,6 @@
 function matCalculateFphysDerivative(obj, mesh, fphys, physClass)
 
-[obj.HBx, obj.HBy] = obj.matCalculateUpwindedFphysDerivative( mesh, fphys, physClass, ...    % abstract, different for Gauss quad and quad free version
+[obj.HBx, obj.HBy] = obj.matCalculateUpwindedFphysDerivative( mesh, fphys, physClass, ...    % abstract in nonhydrostatic solver 2d and 1d, different for Gauss quad and quad free version
     num2cell(fphys{1}(:,:,1) + 2 * fphys{1}(:,:,4),[1 2]), num2cell(fphys{1}(:,:,1) +...
     2 * fphys{1}(:,:,4),[1 2]));
 
