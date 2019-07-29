@@ -10,9 +10,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> EidBoundaryType Index used to impose the zero non-hydrostatic boundary conditions at the open boundary,
         %> and to impose the zero grad non-hydrostatic boundary conditions at the wall
         %> boundary conditions at the open boundary, and zero boundary condition at the wall
-        %> ZeroFluxBoundary Index used to assemble the wet-dry interface information
-        %> ZeroFluxBoundaryIndex Index used to count the wet-dry interface number
-        %> AdjacentDryCellAndFace matrix used to record the adjacent dry cell and the corresponding face index
         %> dt time step
         %> JcsGlobalStiffMatrix the non-zero element contained in precedent column,  for colume j the number of the non-zero element is JcsGlobalStiffMatrix[j+1] - JcsGlobalStiffMatrix[j]
         %> JrsGlobalStiffMatrix the index of the non-zero element in each column, the size of this index is problem dependent, for more information, please refer to mxGetIr
@@ -32,19 +29,9 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         SecondOrderTerm
         NP
         WetDryCell
-%         WetCellIndex
-%         TempZeroFluxBoundary
-%         ZeroFluxBoundary
-%         ZeroFluxBoundaryIndex
-%         WetDryFaceOrder
-%         NonhydroFmPoint
-%         NonhydroFpPoint
         EidBoundaryType
-%         AdjacentDryCellAndFace
         WetNum
         dt
-%         WetDryPoint
-%         TempWetDryPoint
         JcsGlobalStiffMatrix
         JrsGlobalStiffMatrix
         Tau
@@ -60,30 +47,20 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
     end
     
     methods
-        function obj = NdgNonhydrostaticSolver2d(PhysClass)
-%             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
+        function obj = NdgNonhydrostaticSolver2d(PhysClass)    %function in this part should be moved to abstract nonhydrostatic solver
             mesh = PhysClass.meshUnion(1);
-            obj.matSetBoundaryType(mesh);
-%             obj.NonhydroFmPoint = [];
-%             obj.NonhydroFpPoint = [];
+            obj.matSetBoundaryType(mesh);   % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
             
-            obj.matCalculatePenaltyParameter( mesh );
-            obj.matAssembleElementBoundaryCondition( mesh );
+            obj.matCalculatePenaltyParameter( mesh );   % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
+            obj.matAssembleElementBoundaryCondition( mesh );    % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
 
-            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);
-            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);
-            
-%             obj.ZeroFluxBoundaryIndex = 0;
-%             obj.ZeroFluxBoundary = ones(0,2);
-%             obj.TempZeroFluxBoundary = ones(0,2);
-%             obj.AdjacentDryCellAndFace = [];
-%             obj.WetDryPoint = [];
-%             obj.TempWetDryPoint = [];
+            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);  % abstract in abstract nonhydrostatic solver, concrete in 2d and 1d nonhydrostatic solver, but different for guass quad and quad free version
+            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);   % protected for abstract nonhydrostatic solver, reload in quad free version
         end
         
-        function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)
-            obj.dt = deltatime;
-            fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );
+        function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)  %public, move to abstract nonhydrostatic solver, the same for 1d and 2d solver
+            obj.dt = deltatime;      %dt should property of the nonhydrostatic solver
+            fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );   % protected function in non-hydrostatic solver 2d and non-hydrostatic solver 1d
         end
         
     end

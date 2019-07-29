@@ -6,27 +6,21 @@ function fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys)
 %> @param[in] fphys The fphys field
 mesh = physClass.meshUnion(1);
 
-obj.matAssembleWetDryInterface2d(mesh);
+obj.matAssembleWetDryInterface2d(mesh);    % move to 1d and 2d solver, actually this part is same for 1d and 2d solver
 
-% [obj.NonhydroFmPoint, obj.NonhydroFpPoint, obj.WetDryFaceOrder] = obj.matAssemblePointRelatedInformation...
-%     (obj.ZeroFluxBoundary, obj.AdjacentDryCellAndFace, physClass.meshUnion(1).InnerEdge.FToE...
-%     ,physClass.meshUnion(1).InnerEdge.FToN1);
+obj.matReconstructStiffmatrixRelatedMatrix;  % abstract, different for Gauss Quad and Quad Free
 
-obj.matReconstructStiffmatrixRelatedMatrix;
+obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);  % protected for quad free version
+obj.matCalculateFphysDerivative( mesh, fphys, physClass);  % abstract
 
-obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);
+StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( fphys ); % abstract, different for Gauss quad and quad free version
 
-obj.matCalculateFphysDerivative( mesh, fphys, physClass);
+NonhydrostaticRHS  = obj.matEvaluateConservativeNonhydrostaticRHS( fphys, physClass ); % abstract, different for Gauss quad and quad free version
 
-StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( fphys );
+[StiffMatrix, NonhydrostaticRHS] = obj.matResembleGlobalMatrix(mesh, StiffMatrix, NonhydrostaticRHS);% move to abstract nonhydrostatic solver, the same for 1d and 2d solver
 
-NonhydrostaticRHS  = obj.matEvaluateConservativeNonhydrostaticRHS( fphys, physClass );
+NonhydrostaticPressure = obj.matCalculateNonhydrostaticPressure(StiffMatrix, NonhydrostaticRHS);% move to abstract nonhydrostatic solver, the same for 1d and 2d solver
+fphys = obj.matUpdateConservativeFinalVelocity( NonhydrostaticPressure , physClass, fphys); % abstract, different for Gauss quad and quad free version
 
-[StiffMatrix, NonhydrostaticRHS] = obj.matResembleGlobalMatrix(mesh, StiffMatrix, NonhydrostaticRHS);
 
-NonhydrostaticPressure = obj.matCalculateNonhydrostaticPressure(StiffMatrix, NonhydrostaticRHS);
-fphys = obj.matUpdateConservativeFinalVelocity( NonhydrostaticPressure , physClass, fphys);
-% obj.ZeroFluxBoundary = []; obj.ZeroFluxBoundaryIndex = 0;
-% obj.AdjacentDryCellAndFace = [];obj.NonhydroFmPoint = [];
-% obj.NonhydroFpPoint = [];
 end

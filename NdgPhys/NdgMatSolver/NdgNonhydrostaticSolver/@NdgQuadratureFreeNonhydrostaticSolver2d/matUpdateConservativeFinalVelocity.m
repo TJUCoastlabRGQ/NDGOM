@@ -10,12 +10,7 @@ for i = 1:numel(Index)
     NonhydrostaticPressure(:,Index(i)) = NonhydroPre(:,i);
 end
 
-% NonhydroVolumeflux = 1/2 * NonhydrostaticPressure .* fphys{1}(:,:,1);
-% 
-% [ NqHx , NqHy ] = obj.matCalculateCharacteristicMatrix( mesh,  BoundaryEdge, InnerEdge, num2cell(NonhydroVolumeflux,[1 2]), num2cell(NonhydroVolumeflux,[1 2]), enumNonhydroBoundaryCondition.Zero);
-
-% [ qx, qy ]  = obj.matCalculateCharacteristicMatrix( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]), num2cell(NonhydrostaticPressure,[1 2]), enumNonhydroBoundaryCondition.Zero);
-[ qx, qy ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]));
+[ qx, qy ]  = obj.matCalculateLDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]));  % abstract, different for Gauss quad and quad free verison
 
 
 % fphys{1}(:,:,7) = fphys{1}(:,:,7) + NonhydrostaticPressure;

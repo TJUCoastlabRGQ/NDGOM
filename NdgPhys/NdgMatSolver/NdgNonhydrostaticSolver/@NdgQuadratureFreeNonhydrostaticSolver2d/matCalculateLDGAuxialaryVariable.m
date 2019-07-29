@@ -12,7 +12,7 @@ faceflag = mxGetWetDryFace( mesh.status, InnerEdge.FToE);
 
 WetDryFaceOrder = find( faceflag == 1);
 
-fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSx, mesh.cell.Nfp(1));
+fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSx, mesh.cell.Nfp(1));   % protected function move to abstrct nonhydrostatic solver1d
 fluxSy = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSy, mesh.cell.Nfp(1));
 
 % termY = InnerEdge.matEvaluateStrongFormEdgeCentralRHS(fluxMY, fluxPY);
@@ -26,13 +26,13 @@ termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
 %< Boundary edge contribution
 fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;
 
-fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );
+fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );  % protected function move to abstrct nonhydrostatic solver1d
 fluxSY = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.ny, fmy );
 
 termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
 termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
 
-[VolumeIntegralX, VolumeIntegralY] = obj.matVolumeIntegral( mesh, cell2mat(Variable), cell2mat(Variable));
+[VolumeIntegralX, VolumeIntegralY] = obj.matVolumeIntegral( mesh, cell2mat(Variable), cell2mat(Variable));  % protected function in 1d and 2d solver
 
 qy = termY + VolumeIntegralY;
 qx = termX + VolumeIntegralX;
