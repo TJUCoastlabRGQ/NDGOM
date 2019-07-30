@@ -11,6 +11,7 @@ obj.matAssembleWetDryInterface2d(mesh);    % move to 1d and 2d solver, actually 
 obj.matReconstructStiffmatrixRelatedMatrix;  % abstract in abstract nonhydrostatic solver,  different for Gauss Quad and Quad Free
 
 obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);  % protected for abstract nonhydrostatic solver, reload in quad free version
+
 obj.matCalculateFphysDerivative( mesh, fphys, physClass);  % abstract in  abstract nonhydrostatic solver, 
 
 StiffMatrix = obj.matAssembleConservativeGlobalSparseStiffMatrix( fphys ); % abstract in abstract nonhydrostatic solver, different for Gauss quad and quad free version

@@ -16,131 +16,203 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> HBx the partial derivative of H + 2b with respect to the x direction
         %> HBy the partial derivative of H + 2b with respect to the y direction
         %> H2Bx the second order derivative of H + 2b with respect to the x direction
-        %> H2By the second order derivative of H + 2b with respect to the y direction 
+        %> H2By the second order derivative of H + 2b with respect to the y direction
         %> fhx the partial derivative of H with respect to the x direction
         %> fhy the partial derivative of H with respect to the y direction
         %> hux the partial derivative of Hu with respect to the x direction
-        %> hvy the partial derivative of Hv with respect to the y direction        
-        TempPNPX
-        PNPX
-        TempPNPY
+        %> hvy the partial derivative of Hv with respect to the y direction
+        
         PNPY
-        TempSecondOrderTerm
-        SecondOrderTerm
-        NP
+        
+        TempPNPY
+        
         WetDryCell
-        EidBoundaryType
+        
         WetNum
-        dt
-        JcsGlobalStiffMatrix
-        JrsGlobalStiffMatrix
-        Tau
-        edgeType
-        HBx
+        
         HBy
-        H2Bx
+        
         H2By
-        fhx
+        
         fhy
-        hux
+        
         hvy
     end
     
     methods
-        function obj = NdgNonhydrostaticSolver2d(PhysClass)    %function in this part should be moved to abstract nonhydrostatic solver
-            mesh = PhysClass.meshUnion(1);
-            obj.matSetBoundaryType(mesh);   % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
+        function obj = NdgNonhydrostaticSolver2d(PhysClass)
             
-            obj.matCalculatePenaltyParameter( mesh );   % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
-            obj.matAssembleElementBoundaryCondition( mesh );    % move to abstract nonhydrostatic solver, the same for 1d and 2d solver
-
-            obj.matSetInitializeCharacteristicMatrix(PhysClass, mesh);  % abstract in abstract nonhydrostatic solver, concrete in 2d and 1d nonhydrostatic solver, but different for guass quad and quad free version
-            obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);   % protected for abstract nonhydrostatic solver, reload in quad free version
-        end
-        
-        function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)  %public, move to abstract nonhydrostatic solver, the same for 1d and 2d solver
-            obj.dt = deltatime;      %dt should property of the nonhydrostatic solver
-            fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );   % protected function in non-hydrostatic solver 2d and non-hydrostatic solver 1d
+            obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
+            
+            obj.matSetInitializeCharacteristicMatrix( PhysClass.meshUnion(1) );
+            
         end
         
     end
     
-    methods( Access = public, Abstract )
-       evaluateNonhydroRHS(obj, PhysClass, fphys);
-        
-    end
     
-    methods(  Access = protected, Abstract )
-%         [ bx, by ] = matSetBottomGradient(obj, zGrad);
-        
-        matSetInitializeCharacteristicMatrix(obj, physClass, mesh);
-        
-        [Nq, qx, qy, q2x, q2y] = matAssembleCharacteristicMatrix(obj, mesh, index);
-        
-    end
-    
-    methods( Access = protected )
-        %> @brief Function to assemble the global sparse stiff matrix
-        %> @details Function to assemble the global sparse stiff matrix
-        %> @param[in] UpdatedPNPX The updated PNPX
-        %> @param[in] UpdatedSPNPX the updated SPNPX
-        %> @param[in] UpdatedFNPBX the updated FNPBX
-        %> @param[in] fphys the physics field
-        %> @param[in] PhysClass the hydrostatic solver
-        %> @param[out] StiffMatrix the global sparse stiff matrix
-        StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, UpdatedPNPX, UpdatedPNPY,...
-            UpdatedSPNPX, UpdatedSPNPY, fphys, PhysClass);
-        %> @brief function for calculating the right hand side
+    methods ( Access = protected )
+        %> @brief Function to set up the matrix corresponding the Laplace operator and
+        %> the first order operator related to nonhydrostatic pressure
         %> @details
-        %> Function to calculate the right hand side of the Nonhydrostatic model
-        %> @param[in] fphys The fphys field
-        %> @param[in] physClass The hydrostatic solver
-        %> @retval[out] NonhydrostaticRHS the right hand side of the nonhydrostatic model
-        NonhydrostaticRHS = matEvaluateConservativeNonhydrostaticRHS(obj, fphys, physClass);
-        %> @brief function for updating the final flux term and the vertical velocity
-        %> @details
-        %> Function to calculate the final physics field of the Nonhydrostatic model
-        %> @param[in] NonhydrostaticPressure
-        %> @param[in] physClass The hydrostatic solver
-        %> @retval[out] physClass The final updated hydrostatic solver
-        fphys = matUpdateConservativeFinalVelocity(obj, NonhydrostaticPressure, physClass, fphys);
+        %> Function to set up the matrix corresponding the Laplace operator
+        %> and the first order operator related to nonhydrostatic pressure
+        %> @param[in] mesh The mesh object
+        matSetInitializeCharacteristicMatrix(obj, mesh)
         %> @brief Function to make the nonhydrostatic correction
         %> @details
         %> Function to make the nonhydrostatic correction
-        %> @param[in] physClass The hydrostatic solver
+        %> @param[in] physClass The physical object set up
         %> @param[in] fphys The fphys field
-        fphys = matNdgConservativeNonhydrostaticUpdata(obj, physClass, fphys);
-        %> @brief Function to calculate the conservative variable related partial derivative operator
-        %> @details Function to calculate the conservative variable related partial derivative operator
-        %> @param[in] physClass The hydrostatic solver
-        %> @param[in] BoundaryEdge the boundary edge object
-        %> @param[in] InnerEdge the inner edge object
-        %> @param[in] fphys the physics field
-        %> @param[in] ftype the boundary condition at the wet-dry interface
-        %> @param[in] index index of the calculated variable
-        %> @param[out] termX the discrete operator in x direction
-        [ termX, termY ] = matCalculateConservativeVariableRelatedMatrix(obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
-        %> @brief Function to calculate the volume integral in the x direction
-        %> @details Function to calculate the volume integral in the x direction
-        %> @param[in] mesh the mesh object
-        %> @param[in] Variable variable used to calculate the volume integral
-        %> @param[out] VolumeIntegralX the volume integral in x direction       
-        [ VolumeIntegralX, VolumeIntegralY ] = matVolumeIntegral(obj, mesh, VariableX, VariableY )
-        
-         matAssemblePointToCellInformation(obj, K, Np, PNPX,PNPY, SPNPX, SPNPY, NP )
-        %> @brief Function to calculate the volume integral in the x direction
-        %> @details Function to calculate the volume integral in the x direction
-        %> @param[in] mesh the mesh object
-        %> @param[in] Variable variable used to calculate the volume integral
-        %> @param[out] VolumeIntegralX the volume integral in x direction           
-         [ termX, termY ] = matCalculateConservativeVariableRHSMatrix( obj, physClass, BoundaryEdge, InnerEdge, fphys, ftype, index)
-         
-         [TempHBx, TempHBy] = matCalculateLDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, variable)
-         
-         [ H2Bx, H2By ] = matCalculateLDGSecondOrderVariable( obj, mesh, BoundaryEdge, InnerEdge, variable, variablex, variabley )
-                  
-         matCalculateFphysDerivative(obj, mesh, fphys, physClass)
+        fphys = matNdgConservativeNonhydrostaticUpdata( obj, physClass, fphys )
+        %> @brief Function to reassemble the characteristic matrix
+        %> @details
+        %> Function to reassemble the characteristic matrix with wetting and drying considered
+        matReconstructStiffmatrixRelatedMatrix(obj)
+        %> @brief Function to calculate the physical variable related partial derivative
+        %> @details
+        %> Function to calculate the physical variable related partial derivative
+        %> @param[in] mesh The mesh object
+        %> @param[in] fphys The fphys field
+        %> @param[in] physClass The physical object set up
+        matCalculateFphysDerivative( obj, mesh, fphys, physClass )
+        %> @brief Function to get the unit vector and facial Jacobian at
+        %> the studied face
+        %> @details
+        %> Function to get the unit vector and facial Jacobian at the studied face
+        %> @param[in] ele The studied local element
+        %> @param[in] adjacentEle The studied adjacent element
+        %> @param[in] face The studied local face
+        %> @param[in] BoundaryEdgeFToF The face to face topological relation of the boundary edge
+        %> @param[in] BoundaryEdgenx Projection of the unit direction vector in x direction of the boundary edge
+        %> @param[in] BoundaryEdgeny Projection of the unit direction vector in y direction of the boundary edge
+        %> @param[in] BoundaryEdgeFToE The face to element topological relation of the boundary edge
+        %> @param[in] InnerEdgenx Projection of the unit direction vector in x direction of the inner edge
+        %> @param[in] InnerEdgeny Projection of the unit direction vector in y direction of the inner edge
+        %> @param[in] InnerEdgeFToE The face to element topological relation of the inner edge
+        %> @param[in] BoundaryEdgeJs The facial Jacobian of the boundary edge
+        %> @param[in] InnerEdgeJs The facial Jacobian of the inner edge
+        %> @param[out] nx Projection of the unit direction vector in x direction of the studied edge
+        %> @param[out] ny Projection of the unit direction vector in y direction of the studied edge
+        %> @param[out] Js The facial Jacobian of the studied edge
+        [nx, ny, Js] = matGetElementFaceNormalDirectionVector( obj, ele, adjacentEle,...
+            face, BoundaryEdgeFToF, BoundaryEdgenx, BoundaryEdgeny,...
+            BoundaryEdgeFToE, InnerEdgenx, InnerEdgeny, InnerEdgeFToE, BoundaryEdgeJs, InnerEdgeJs );
+        %> @brief Function to get the upwinded numerical flux when calculating the physical variable 
+        %> related first order derivative in upwind manner
+        %> @details
+        %> Function to get the upwinded numerical flux when calculating the physical variable related first
+        %> order derivative in upwind manner, we point out that this flux is set to be zero at the wet-dry 
+        %> interface, such that the complex partial- wet cell problem can be avoided
+        %> @param[in] status The mesh cell status
+        %> @param[in] EdgeFToE The face to edge topological relations of the studied edge object
+        %> @param[in] HUm The HU field of the local face
+        %> @param[in] HVm The HV field of the local face
+        %> @param[in] HUp The HU field of the adjacent face
+        %> @param[in] HVp The HV field of the adjacent face   
+        %> @param[in] vfmx local face value of the studied variable in x direction
+        %> @param[in] vfpx adjacent face value of the studied variable in x direction
+        %> @param[in] vfmy local face value of the studied variable in y direction
+        %> @param[in] vfpy adjacent face value of the studied variable in y direction    
+        %> @param[in] Edgenx Projection of the unit direction vector in x direction of the studied edge object
+        %> @param[in] Edgeny Projection of the unit direction vector in y direction of the studied edge object   
+        %> @param[out] fluxX the upwind numerical flux in x direction
+        %> @param[out] fluxY the upwind numerical flux in y direction        
+        [ fluxX, fluxY ] = matEvaluateUpwindNumFlux( obj, status, EdgeFToE, ...
+            HUm, HVm, HUp, HVp, vfmx, vfpx, vfmy, vfpy, Edgenx, Edgeny);
+        %> @brief Function to get the downwinded numerical flux when calculating the physical variable 
+        %> related first order derivative in downwind manner
+        %> @details
+        %> Function to get the downwinded numerical flux when calculating the physical variable related first
+        %> order derivative in downwind manner, we point out that this flux is set to be zero at the wet-dry 
+        %> interface, such that the complex partial- wet cell problem can be avoided
+        %> @param[in] status The mesh cell status
+        %> @param[in] EdgeFToE The face to edge topological relations of the studied edge object
+        %> @param[in] HUm The HU field of the local face
+        %> @param[in] HVm The HV field of the local face
+        %> @param[in] HUp The HU field of the adjacent face
+        %> @param[in] HVp The HV field of the adjacent face   
+        %> @param[in] vfmx local face value of the studied variable in x direction
+        %> @param[in] vfpx adjacent face value of the studied variable in x direction
+        %> @param[in] vfmy local face value of the studied variable in y direction
+        %> @param[in] vfpy adjacent face value of the studied variable in y direction    
+        %> @param[in] Edgenx Projection of the unit direction vector in x direction of the studied edge object
+        %> @param[in] Edgeny Projection of the unit direction vector in y direction of the studied edge object   
+        %> @param[out] fluxX the downwind numerical flux in x direction
+        %> @param[out] fluxY the downwind numerical flux in y direction        
+        [ fluxX, fluxY ] = matEvaluateDownwindNumFlux( obj, status, EdgeFToE, ...
+            HUm, HVm, HUp, HVp, vfmx, vfpx, vfmy, vfpy, Edgenx, Edgeny);        
+        %> @brief Function to get the local flux when calculating the physical variable related first order derivative
+        %> @details
+        %> Function to get the local flux when calculating the physical variable related first order derivative,
+        %> we point out that this flux is set to be zero at the wet-dry interface, such that the complex partial-wet
+        %> cell problem can be avoided
+        %> @param[in] status The mesh cell status
+        %> @param[in] EdgeFToE The face to edge topological relations of the studied edge object
+        %> @param[in] vfx local or adjacent face value of the studied variable in x direction
+        %> @param[in] vfy local or adjacent face value of the studied variable in y direction
+        %> @param[in] Edgenx Projection of the unit direction vector in x direction of the studied edge object
+        %> @param[in] Edgeny Projection of the unit direction vector in y direction of the studied edge object   
+        %> @param[out] fluxMPx the local or adjacent flux in x direction
+        %> @param[out] fluxMPy the local or adjacent flux in y direction            
+        [ fluxMPx, fluxMPy ] = matEvaluateSurfFlux( obj, status, EdgeFToE, vfmx, vfmy, Edgenx, Edgeny);
     end
     
+    
+    methods(  Access = protected, Abstract )
+        %> @brief Function to set up the matrix corresponding the Laplace operator and
+        %> the first order operator related to nonhydrostatic pressure
+        %> @details
+        %> Function to set up the matrix corresponding the Laplace operator
+        %> and the first order operator related to nonhydrostatic pressure
+        %> @param[in] mesh The mesh object
+        %> @param[in] element The studied element of a given mesh
+        %> @param[in] edgeType the type of the edge of the studied element
+        %> @param[out] PNPX the first order derivative of p with respect to x
+        %> @param[out] PNPY the first order derivative of p with respect to y
+        %> @param[out] SecondOrderTerm the discrete matrix of the Laplace operator regards to p
+        [ PNPX, PNPY, SecondOrderTerm ] = matAssembleCharacteristicMatrix( mesh, element, edgeType)
+        %> @brief Function to calculate the physical variable related partial derivative in a upwind manner
+        %> @details
+        %> Function to calculate the physical variable related partial derivative in a upwind manner
+        %> @param[in] mesh The mesh object
+        %> @param[in] fphys The fphys field
+        %> @param[in] physClass The physical object set up
+        %> @param[in] termX The varialbe used to calculate the partial derivative with respect to x
+        %> @param[in] termY The varialbe used to calculate the partial derivative with respect to y
+        %> @param[out] UpwindedTermX The partial derivative with respect to x in upwind manner
+        %> @param[out] UpwindedTermY The partial derivative with respect to y in upwind manner
+        [ UpwindedTermX, UpwindedTermY ] = matCalculateUpwindedFphysDerivative(obj, mesh, fphys, physClass, termX, termY)
+        %> @brief Function to calculate the physical variable related partial derivative in a downwind manner
+        %> @details
+        %> Function to calculate the physical variable related partial derivative in a downwind manner
+        %> @param[in] mesh The mesh object
+        %> @param[in] fphys The fphys field
+        %> @param[in] physClass The physical object set up
+        %> @param[in] termX The varialbe used to calculate the partial derivative with respect to x
+        %> @param[in] termY The varialbe used to calculate the partial derivative with respect to y
+        %> @param[out] DownwindedTermX The partial derivative with respect to x in downwind manner
+        %> @param[out] DownwindedTermY The partial derivative with respect to y in downwind manner
+        [ DownwindedTermX, DownwindedTermY ] = matCalculateDownwindedFphysDerivative(obj, mesh, fphys, physClass, termX, termY)
+        %> @brief Function to calculate volume integral of the physical variable related partial derivative
+        %> @details
+        %> Function to calculate volume integral of the physical variable related partial derivative
+        %> @param[in] mesh The mesh object
+        %> @param[in] termX The varialbe used to calculate the partial derivative with respect to x
+        %> @param[in] termY The varialbe used to calculate the partial derivative with respect to y
+        %> @param[out] VolumeX The volume integral of partial derivative with respect to x
+        %> @param[out] VolumeY The volume integral of partial derivative with respect to y
+        [VolumeX, VolumeY] = matVolumeIntegral( obj, mesh, termX, termY)
+        %> @brief Function to calculate the auxialary variable related partial derivative for IPDG
+        %> @details
+        %> Function to calculate the auxialary variable related partial derivative for IPDG
+        %> @param[in] mesh The mesh object
+        %> @param[in] BoundaryEdge The boundary edge object
+        %> @param[in] InnerEdge The inner edge object
+        %> @param[in] variable The primitive variable related to the auxialary variable
+        %> @param[out] IPDGTermX The partial derivative with respect to x calculated with IPDG
+        %> @param[out] IPDGTermY The partial derivative with respect to y calculated with IPDG
+        [IPDGTermX, IPDGTermY] = matCalculateIPDGAuxialaryVariable( obj, mesh, BoundaryEdge, InnerEdge, variable)
+    end
 end
 

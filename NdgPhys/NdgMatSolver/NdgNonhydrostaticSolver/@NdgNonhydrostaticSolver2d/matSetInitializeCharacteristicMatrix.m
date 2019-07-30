@@ -1,4 +1,4 @@
-function matSetInitializeCharacteristicMatrix(obj, physClass, mesh)
+function matSetInitializeCharacteristicMatrix(obj, mesh)
 %> @brief Function to set the characteristic matrix at the initial stage
 %> @details
 %> Function to  set the characteristic matrix used when assemble the global stiff matrix

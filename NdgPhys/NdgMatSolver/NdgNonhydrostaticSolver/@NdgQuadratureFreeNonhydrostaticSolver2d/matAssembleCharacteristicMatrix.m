@@ -36,7 +36,7 @@ for face = 1:numel(edgeType)
     eidM = mesh.cell.Fmask(:,face);
     eidP = mesh.cell.Fmask(:,adjacentFace);
     eidP(1:numel(eidP)) = eidP(numel(eidP):-1:1);
-    [nx, ny, Js] = mxGetElementFaceNormalDirectionVector( ele, adjacentEle, face,  mesh.BoundaryEdge.FToF, mesh.BoundaryEdge.nx, mesh.BoundaryEdge.ny,...
+    [nx, ny, Js] = obj.matGetElementFaceNormalDirectionVector( ele, adjacentEle, face,  mesh.BoundaryEdge.FToF, mesh.BoundaryEdge.nx, mesh.BoundaryEdge.ny,...
         mesh.BoundaryEdge.FToE, mesh.InnerEdge.nx, mesh.InnerEdge.ny, mesh.InnerEdge.FToE, mesh.BoundaryEdge.Js, mesh.InnerEdge.Js );
     Dx2 = diag(mesh.rx(:,adjacentEle))*mesh.cell.Dr +  diag(mesh.sx(:,adjacentEle))*mesh.cell.Ds;
     Dy2 = diag(mesh.ry(:,adjacentEle))*mesh.cell.Dr +  diag(mesh.sy(:,adjacentEle))*mesh.cell.Ds;
