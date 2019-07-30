@@ -28,6 +28,8 @@ classdef NdgAbstractNonhydrostaticSolver < handle
         
         dt
         
+        WetDryCell
+        
         HBx
         
         H2Bx
@@ -155,11 +157,5 @@ classdef NdgAbstractNonhydrostaticSolver < handle
         %> @param[in] Um value of the local non-hydrostatic pressure
         %> @param[out] fluxS the numerical flux in direction x or y
         fluxS = matGetPrimitiveVariableBoundaryEdgeFlux( obj, vector, Um)
-        %> @brief Function to get the inner edge that cells located besides are wet and non-wet cell
-        %> @details Function to get the inner edge that cells located besides are wet and non-wet cell
-        %> @param[in] status Status of the mesh cell
-        %> @param[in] InnerEdgeFToE The face to element topological relation of the inner edge
-        %> @param[out] faceflag the face status flag, 1 for wet-dry interface, 0 for wet-wet interface        
-        faceflag = matGetWetDryFace( obj, status, InnerEdgeFToE)
     end
 end

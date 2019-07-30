@@ -42,16 +42,21 @@ classdef NdgMesh < handle
         ind
         %> element status
         status      int8
+
+        
     end
-    
+    properties
+        % properties have been changed to consider the cyclic boundary
+        % condition
+         %> adjacent cell index for each cell
+        EToE
+        %> adjacent face index for each cell
+        EToF
+    end
     % elemental volume infomation
     properties ( SetAccess=protected )
         %> mesh id of adjacent cell
         EToM
-        %> adjacent cell index for each cell
-        EToE
-        %> adjacent face index for each cell
-        EToF
         %> coordinate of interpolation points
         x, y, z
         %> determination of Jacobian matrix at each interpolation points

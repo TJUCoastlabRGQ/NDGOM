@@ -26,10 +26,6 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         
         TempPNPY
         
-        WetDryCell
-        
-        WetNum
-        
         HBy
         
         H2By
@@ -156,6 +152,12 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @param[out] fluxMPx the local or adjacent flux in x direction
         %> @param[out] fluxMPy the local or adjacent flux in y direction            
         [ fluxMPx, fluxMPy ] = matEvaluateSurfFlux( obj, status, EdgeFToE, vfmx, vfmy, Edgenx, Edgeny);
+        %> @brief Function to get the inner edge that cells located besides are wet and non-wet cell
+        %> @details Function to get the inner edge that cells located besides are wet and non-wet cell
+        %> @param[in] status Status of the mesh cell
+        %> @param[in] InnerEdgeFToE The face to element topological relation of the inner edge
+        %> @param[out] faceflag the face status flag, 1 for wet-dry interface, 0 for wet-wet interface        
+        faceflag = matGetWetDryFace( obj, status, InnerEdgeFToE)        
     end
     
     

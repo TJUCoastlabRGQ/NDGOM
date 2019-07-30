@@ -15,7 +15,9 @@
 * Input:
 *       signed char[Ne] status the cell status of the studied mesh, used to identify a cell is dry or wet, so as to determine the numerical flux at the wet-dry and dry-dry interface
 * 		double[nfp x Ne]  variablexmp local or adjacent variable in x direction
+* 		double[nfp x Ne]  variableymp local or adjacent variable in y direction
 *       double[nfp x Ne]  nx the direction vector in x direction of the local cell 
+* 		double[nfp x Ne]  ny the direction vector in y direction of the local cell
 * Output:
 * 		double[nfp x Ne] 	LocalOrAdjacentFluxX the local or adjacent flux term in x direction
 * 		double[nfp x Ne] 	LocalOrAdjacentFluxY the local or adjacent flux term in Y direction
@@ -36,15 +38,14 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
      signed char* regType = (signed char*)mxGetData(prhs[0]);
     //double *FToE = mxGetPr(prhs[1]);
 	double *variablexmp = mxGetPr(prhs[2]);  
-	//double *variableymp = mxGetPr(prhs[3]);
 	double *nx = mxGetPr(prhs[3]);
-	//double *ny = mxGetPr(prhs[5]);
 	
     mwSize Nfp = mxGetM(prhs[2]);
     mwSize Ne = mxGetN(prhs[2]);	
 	
     plhs[0] = mxCreateDoubleMatrix(Nfp, Ne, mxREAL);
     double *LocalOrAdjacentFluxX = mxGetPr(plhs[0]);	
+
 	
     mxArray *TempDryFaceFlag = mxCreateDoubleMatrix(1, Ne, mxREAL);
     double *DryFaceFlag = mxGetPr(TempDryFaceFlag);
@@ -56,7 +57,8 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 #endif
     for (mwIndex k = 0; k < Ne; k++) {
         if (DryFaceFlag[k] == 1) {
-            // the considered face is one between two adjacent dry cells, or one dry cell and another wet cell, for this situation, do nothing
+            /* the considered face is one between two adjacent dry cells, or one dry cell and another wet cell, for this situation, do nothing.
+             * the local flux term and the adjacent flux term is set to zero at the wet-dry interface.*/
             continue;
         }
         else{
