@@ -64,7 +64,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
         %> @brief Function to reassemble the characteristic matrix
         %> @details
         %> Function to reassemble the characteristic matrix with wetting and drying considered
-        matReconstructStiffmatrixRelatedMatrix(obj)
+        %> @param[in] mesh The mesh object
+        matReconstructStiffmatrixRelatedMatrix(obj, mesh)
         %> @brief Function to calculate the physical variable related partial derivative
         %> @details
         %> Function to calculate the physical variable related partial derivative

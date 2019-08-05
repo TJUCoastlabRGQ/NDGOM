@@ -10,7 +10,7 @@ function [StiffMatrix, NonhydrostaticRHS] = matResembleGlobalMatrix(obj, mesh, S
 Index = find(mesh.status ~= enumSWERegion.Wet);
 data = zeros(mesh.cell.Np, numel(Index));
 for i = 1:numel(Index)
-    data(:,i) = (Index - 1) * mesh.cell.Np + 1 : Index * mesh.cell.Np;
+    data(:,i) = (Index(i) - 1) * mesh.cell.Np + 1 : Index(i) * mesh.cell.Np;
 end
 StiffMatrix(data,:) = [];
 StiffMatrix(:,data) = [];

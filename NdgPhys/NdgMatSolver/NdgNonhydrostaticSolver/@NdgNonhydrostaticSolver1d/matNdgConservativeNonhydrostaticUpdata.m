@@ -8,7 +8,7 @@ mesh = physClass.meshUnion(1);
 
 obj.matAssembleWetDryInterface1d(mesh);    
 
-obj.matReconstructStiffmatrixRelatedMatrix; 
+obj.matReconstructStiffmatrixRelatedMatrix( mesh ); 
 
 obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np); 
 

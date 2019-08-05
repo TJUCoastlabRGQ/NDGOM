@@ -18,7 +18,7 @@
  * 		signed char[NOBE]  BoundaryEdgeFtype face type of the boundary edge, used to impose boundary condition when an edge of the studied cell belong to the boundary
  *      double[2 x NOBE] BoundaryEdgeFToF the local face order of the studied boundary edge, used to identify whether the studied face of a cell adjacent to the boudary belongs to the boundary
  * Output:
- * 		double[Nf x K] 	EdgeType the edge type of the studied mesh
+ * 		double[(Nf + 1) x K_Interface] 	EdgeType the edge type of the studied mesh
  */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -36,10 +36,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     /* Status of the studied cell of the given mesh, wet or dry*/
     signed char* regType = (signed char*)mxGetData(prhs[0]);
     /* Element to element conection relationship*/
-    int *EToE = (int *)mxGetPr(prhs[1]);
+    double *EToE = mxGetPr(prhs[1]);
     /*Number of faces for the studied mesh cell*/
     int Nf = (int)mxGetM(prhs[1]);
-    int *InnerEdgeFToE = (int *)mxGetPr(prhs[2]);
+    double *InnerEdgeFToE = mxGetPr(prhs[2]);
     /*Number of inner edges*/
     mwSize NOIE = (mwSize)mxGetN(prhs[2]);
     double *BoundaryEdgeFToE = mxGetPr(prhs[3]);
@@ -62,25 +62,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         /*This part is used to find the cells located at wet-dry interface*/
         if (DryFaceFlag[i] == 1){
             /*The local cell is wet, while the adjacent one is not*/
-            if ( (NdgRegionType)regType[ InnerEdgeFToE[2*i] ] == NdgRegionWet && (NdgRegionType)regType[ InnerEdgeFToE[2*i + 1] ] != NdgRegionWet ){
+            if ( (NdgRegionType)regType[ (int)InnerEdgeFToE[2*i] - 1 ] == NdgRegionWet && (NdgRegionType)regType[ (int)InnerEdgeFToE[2*i + 1] - 1 ] != NdgRegionWet ){
                 TempWetDryCell[(total_element-1) * (Nf + 1)] = InnerEdgeFToE[2*i];
             }
             /*The adjacent cell is wet, while the local one is not*/
-            else if( (NdgRegionType)regType[ InnerEdgeFToE[2*i + 1] ] == NdgRegionWet && (NdgRegionType)regType[ InnerEdgeFToE[2*i] ] != NdgRegionWet ){
+            else if( (NdgRegionType)regType[ (int)InnerEdgeFToE[2*i + 1] - 1 ] == NdgRegionWet && (NdgRegionType)regType[ (int)InnerEdgeFToE[2*i] - 1 ] != NdgRegionWet ){
                 TempWetDryCell[(total_element-1) * (Nf + 1)] = InnerEdgeFToE[2*i + 1];
             }
             else
             {
                 /*The studied inner face is flaged as a face located besides a wet-dry interface, but this is not reflected in the status checking in this part*/
-                mexPrintf("Bugs exist for finding cells located at wet-dry interface, check again!\n");
-                break;
+                continue;
             }
             /*Index of the cell located besides the wet-dry interface*/
             mwIndex ele = (mwIndex)TempWetDryCell[(total_element-1) * (Nf + 1)];
             /*This part is used to check the status of cell adjacent to the studied wet cell*/
-            for(mwIndex j=0; j<Nf; i++){
-                mwIndex AdjacentEle = EToE[ (ele - 1)*Nf + j ];
-                if ( (NdgRegionType)regType[ AdjacentEle ] == NdgRegionWet && AdjacentEle != ele )
+            for(mwIndex j=0; j<Nf; j++){
+                mwIndex AdjacentEle = (mwIndex)EToE[(ele - 1)*Nf + j];
+                if ( (NdgRegionType)regType[ AdjacentEle - 1 ] == NdgRegionWet && AdjacentEle != ele )
                     /*if the adjacent cell is a wet cell and is not the cell itself, then the edge is an inner edge */
                     TempWetDryCell[(total_element-1) * (Nf + 1) + j + 1] = 0;
                 else if ( AdjacentEle == ele ){
@@ -100,7 +99,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                         }
                     }
                 }
-                else if ( (NdgRegionType)regType[ AdjacentEle ] != NdgRegionWet && AdjacentEle != ele )
+                else if ( (NdgRegionType)regType[ AdjacentEle - 1  ] != NdgRegionWet && AdjacentEle != ele )
                     /*if the adjacent cell is not a wet cell, then the edge is an Dirichlet edge */
                     TempWetDryCell[(total_element-1) * (Nf + 1) + j + 1] = 2;
                 
@@ -119,14 +118,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                 TempWetDryCell = ptrWetDryCell;
             }
         }
-        
-        plhs[0] = mxCreateDoubleMatrix( Nf + 1 , total_element - 1 , mxREAL);
-        double * WetToDryCell = mxGetPr(plhs[0]);
-        for(mwIndex i = 0; i < total_element - 1; i++){
-            WetToDryCell[i*(Nf+1)] = TempWetDryCell[i * (Nf + 1)];
-            for (mwIndex j =0; j<Nf; j++){
-                WetToDryCell[i*(Nf+1) + j + 1] = TempWetDryCell[i * (Nf + 1) + j + 1];
-            }
+    }
+    
+    plhs[0] = mxCreateDoubleMatrix( Nf + 1 , total_element - 1 , mxREAL);
+    double * WetToDryCell = mxGetPr(plhs[0]);
+    for(mwIndex i = 0; i < total_element - 1; i++){
+        WetToDryCell[i*(Nf+1)] = TempWetDryCell[i * (Nf + 1)];
+        for (mwIndex j =0; j<Nf; j++){
+            WetToDryCell[i*(Nf+1) + j + 1] = TempWetDryCell[i * (Nf + 1) + j + 1];
         }
     }
 }

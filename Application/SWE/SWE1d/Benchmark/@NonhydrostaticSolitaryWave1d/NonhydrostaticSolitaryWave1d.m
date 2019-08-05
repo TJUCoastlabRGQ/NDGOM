@@ -169,7 +169,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
 end
 
 function [ mesh ] = makeUniformMesh( N, deltax)
-xlim = [-10, 30];
+xlim = [-25, 25];
 M = ceil(( xlim(2) - xlim(1) ) / deltax);
 bcType = [...
     enumBoundaryCondition.SlipWall, ...
