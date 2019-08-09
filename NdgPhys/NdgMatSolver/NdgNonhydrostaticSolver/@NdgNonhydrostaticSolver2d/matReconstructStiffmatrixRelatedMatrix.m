@@ -1,4 +1,4 @@
-function  matReconstructStiffmatrixRelatedMatrix(obj)
+function  matReconstructStiffmatrixRelatedMatrix(obj, mesh)
 %> @brief Function to assemble the characteristic matrix
 %> @details
 %> Function to assemble the characteristic matrix with wetting and drying considered

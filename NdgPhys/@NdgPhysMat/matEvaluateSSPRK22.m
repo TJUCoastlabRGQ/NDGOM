@@ -1,5 +1,6 @@
 function matEvaluateSSPRK22( obj )
 
+tic; 
 Nmesh = obj.Nmesh;
 
 time = obj.getOption('startTime');
@@ -46,7 +47,7 @@ while( time < ftime )
     end
     %     obj.meshUnion(1).draw( fphys{1}(:,:,1) );
     %     drawnow;
-    visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 3) );
+    visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) );
     %     visual.drawResult( fphys{1}(:, :, 6) );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys );
@@ -57,5 +58,6 @@ end
 % hwait.delete();
 obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
+toc;
 end
 

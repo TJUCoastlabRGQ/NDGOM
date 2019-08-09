@@ -8,7 +8,7 @@ mesh = physClass.meshUnion(1);
 
 obj.matAssembleWetDryInterface2d(mesh);    % move to 1d and 2d solver, actually this part is same for 1d and 2d solver
 
-obj.matReconstructStiffmatrixRelatedMatrix;  % abstract in abstract nonhydrostatic solver,  different for Gauss Quad and Quad Free
+obj.matReconstructStiffmatrixRelatedMatrix(mesh);  % abstract in abstract nonhydrostatic solver,  different for Gauss Quad and Quad Free
 
 obj.matAssemblePointToCellInformation(mesh.K, mesh.cell.Np);  % protected for abstract nonhydrostatic solver, reload in quad free version
 
