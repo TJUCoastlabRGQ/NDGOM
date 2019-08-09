@@ -6,6 +6,7 @@ function  matReconstructStiffmatrixRelatedMatrix(obj, mesh)
 
 for i = 1:size(obj.WetDryCell, 2)
     ele = obj.WetDryCell(1 , i );
+    Np = mesh.cell.Np;
     [tempPNPX, tempPNPY, tempSecondOrderTerm]...
         = obj.matAssembleCharacteristicMatrix( mesh, ele, obj.WetDryCell(2:size(obj.WetDryCell, 1), i));   % abstract in nonhydrostatic solver 2d and 1d, different for Gauss quad and quad free version, placed in the abstract solver;
     [obj.TempPNPX(:,(ele-1)*Np+1:ele*Np), obj.TempPNPY(:,(ele-1)*Np+1:ele*Np),...
