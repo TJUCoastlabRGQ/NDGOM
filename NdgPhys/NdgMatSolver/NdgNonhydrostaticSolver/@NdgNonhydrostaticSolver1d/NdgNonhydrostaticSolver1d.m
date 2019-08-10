@@ -11,6 +11,12 @@ classdef NdgNonhydrostaticSolver1d < NdgAbstractNonhydrostaticSolver
             
         end
         
+        function fphys = NdgConservativeNonhydrostaticUpdata(obj, PhysClass, fphys, deltatime)
+            fphys = NdgConservativeNonhydrostaticUpdata@NdgAbstractNonhydrostaticSolver(obj, PhysClass, fphys, deltatime);
+            obj.TempPNPX = obj.PNPX;
+            obj.TempSecondOrderTerm = obj.SecondOrderTerm;
+        end        
+        
     end
     
     methods ( Access = protected )

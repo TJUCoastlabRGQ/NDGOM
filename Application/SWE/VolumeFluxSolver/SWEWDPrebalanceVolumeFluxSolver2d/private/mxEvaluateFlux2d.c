@@ -1,4 +1,4 @@
-#include "../../@SWEAbstract2d/private/mxSWE2d.h"
+#include "../../../SWE2d/@SWEAbstract2d/private/mxSWE2d.h"
 #include "mex.h"
 #include <math.h>
 

@@ -47,12 +47,22 @@ classdef SolitaryWaveRunUpConicalIsland < SWEPreBlanaced2d
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
                 
-                index = ( bot >= obj.H0 );
+                fphys{m}(:,:,1) = obj.H0 - bot;
                 
-                fphys{m}(~index) = obj.H0(~index);
+                index = ( fphys{m}(:,:,1)<= 0 );
+                fphys{m}(index) = 0;
+%                 index = ( bot >= obj.H0 );
+%                 
+%                 fphys{m}(~index) = obj.H0(~index);
                 
-                fphys{m}(:,:,2) = fphys{m}(:,:,1) .* obj.U0;
-                fphys{m}(:,:,6) = fphys{m}(:,:,1).*obj.W0;
+                tempHu =  fphys{m}(:,:,1) .* obj.U0;
+                tempHw =  fphys{m}(:,:,1).*obj.W0;
+                index = ( fphys{m}(:,:,1) <= 0.32 );
+                tempHu(index) = 0;
+                tempHw(index) = 0;
+
+                fphys{m}(:,:,2) = tempHu;
+                fphys{m}(:,:,6) = tempHw;
                 
             end
         end
@@ -65,14 +75,15 @@ classdef SolitaryWaveRunUpConicalIsland < SWEPreBlanaced2d
                 nodeid = bsxfun( @plus, edge.FToN1, (edge.FToE(1, :) - 1) .* mesh.cell.Np);
                 obj.fext{m}( :, :, 4 ) = obj.fphys{m}( nodeid + mesh.K * mesh.cell.Np * 3 );
                 
+                x = 0;
           
                 d = 0.32;
                 A = d * obj.Ratio;
                 l = d*sqrt((A+d)/A);
                 C0 = l/d*sqrt(obj.gra * d^3/(l^2-d^2));
-                h = d + A * ( sech( ( 0 -C0*tloc)/l ) )^2;
+                h = d + A * ( sech( ( x -C0*tloc)/l ) )^2;
                 U = C0 * (1 - d/h);
-                W = -( A * C0 * d )/( l * h ) * sech( (0 - C0 * tloc)/l )*( -sinh((0 - C0*tloc)/l)/(l*cosh((0 - C0*tloc)/l)^2) * l  );
+                W = -( A * C0 * d )/( l * h ) * sech( (x - C0 * tloc)/l )*( -sinh((x - C0*tloc)/l)/(l*cosh((x - C0*tloc)/l)^2) * l  );
                 
                 
                 obj.fext{1}(:,:,1) = h;
@@ -112,7 +123,7 @@ bctype = [...
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 25], [0, 30], 25/deltax, 30/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 25], [13.5, 14.5], 25/deltax, 1/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [0, 18], [13.5, 13.8], 18/deltax, ceil(0.3/deltax), bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

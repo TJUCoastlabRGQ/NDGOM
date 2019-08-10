@@ -208,6 +208,12 @@ libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {...
     [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
+
+path = 'Application\SWE\VolumeFluxSolver\SWEWDPrebalanceVolumeFluxSolver2d\private\';
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
+srcfile = {...
+    [path, 'mxEvaluateFlux2d.c']};
+FuncHandle(path, srcfile, libfile);
     
 path = 'Application/SWE/SWE2d/@SWEConventional2d/private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
@@ -225,8 +231,7 @@ FuncHandle(path, srcfile, libfile);
 path = 'Application/SWE/SWE2d/@SWEWDPreBlanaced2d/private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxUpdateWDWetDryState.c'], ...
-    [path, 'mxEvaluateSourceTopography2d.c'], ...
-    [path, 'mxEvaluateFlux2d.c']};
+    [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE numerical flux
