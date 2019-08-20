@@ -13,24 +13,42 @@ W = -( A * C0 * d )/( l * h ) * sech( (x - C0 * t)/l )*( diff( sech( (x - C0 * t
 % P = A*C0^2*d^2/2/l^2/h^2*((2*H0-h)*(diff(sech((x - C0 * t)/l),x) * l )^2+...
 %     h * sech((x-C0*t)/l) * diff(diff(sech((x - C0 * t)/l),x) * l, x ) * l);
 
+obj.H0 = H0 * ones(size(mesh.x));
+obj.U0 = zeros(size(mesh.x));
+obj.W0 = zeros(size(mesh.x));
 
+Index = find(mesh.x <= 4.5);
 
-for i = 1:size(mesh.x,1)
-    for j = 1:size(mesh.x,2)
-%         obj.P0(i,j) = double(subs(P,{x,t},{mesh.x(i,j),0}));
-        obj.H0(i,j) = double(subs(h,{x,t},{mesh.x(i,j),0}));
-    end
+for i = 1:numel(Index)
+    obj.H0(Index(i)) = double(subs(h,{x,t},{mesh.x(Index(i)),0}));
 end
 
-for i = 1:size(mesh.x,1)
-    for j = 1:size(mesh.x,2)
-        obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
-    end
+for i = 1:numel(Index)
+    obj.U0(Index(i)) = double(subs(U,{x,t},{mesh.x(Index(i)),0}));
 end
 
-for i = 1:size(mesh.x,1)
-    for j = 1:size(mesh.x,2)
-        obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
-    end
+for i = 1:numel(Index)
+    obj.W0(Index(i)) = double(subs(W,{x,t},{mesh.x(Index(i)),0}));
 end
+
 end
+
+% for i = 1:size(mesh.x,1)
+%     for j = 1:size(mesh.x,2)
+% %         obj.P0(i,j) = double(subs(P,{x,t},{mesh.x(i,j),0}));
+%         obj.H0(i,j) = double(subs(h,{x,t},{mesh.x(i,j),0}));
+%     end
+% end
+% 
+% for i = 1:size(mesh.x,1)
+%     for j = 1:size(mesh.x,2)
+%         obj.U0(i,j) = double(subs(U,{x,t},{mesh.x(i,j),0}));
+%     end
+% end
+% 
+% for i = 1:size(mesh.x,1)
+%     for j = 1:size(mesh.x,2)
+%         obj.W0(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),0} ));
+%     end
+% end
+% end

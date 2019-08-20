@@ -3,9 +3,9 @@ classdef ConicalLandRunup2d < SWEWDPreBlanaced2d
     
     properties(Constant)
         %> wet/dry depth threshold
-        hmin = 1e-4
+        
         %> gravity acceleration
-        gra = 9.8
+%         gra = 9.8
         %> initial water depth
         h0 = 0.32
         %> island central
@@ -19,8 +19,9 @@ classdef ConicalLandRunup2d < SWEWDPreBlanaced2d
     methods
         function obj = ConicalLandRunup2d(N, M, cellType)
             [ mesh ] = makeUniformMesh(N, M, cellType);
-            % mesh = readGmshFile( N );
+%             mesh = readGmshFile( N );
             obj = obj@SWEWDPreBlanaced2d();
+            obj.hmin = 1e-4;
             obj.initPhysFromOptions( mesh );
         end
         

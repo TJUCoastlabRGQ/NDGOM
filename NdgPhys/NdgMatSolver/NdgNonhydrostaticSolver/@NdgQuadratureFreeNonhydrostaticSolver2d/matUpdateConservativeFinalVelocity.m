@@ -10,6 +10,11 @@ for i = 1:numel(Index)
     NonhydrostaticPressure(:,Index(i)) = NonhydroPre(:,i);
 end
 
+% Index =  find( physClass.meshUnion.EToR == enumSWERegion.Sponge ) ;
+% for i = 1:numel(Index)
+% NonhydrostaticPressure(:,Index(i)) = 0;
+% end
+
 [ qx, qy ]  = obj.matCalculateIPDGAuxialaryVariable( mesh, BoundaryEdge, InnerEdge, num2cell(NonhydrostaticPressure,[1 2]));  % abstract in nonhydrostatic solver in 2d and 1d, different for Gauss quad and quad free verison
 
 

@@ -63,15 +63,15 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
                 titlestr = strcat('Gauge',num2str(index(i)));
                 data = xlsread(pathstr);
                 figure;
-                set(gcf,'position',[50,50,550,200]);
+                set(gcf,'position',[50,50,265,150]);
                 plot(outputTime,Eta(i,:)*100,'k','LineWidth',1.5);
                 hold on;
                 plot(data(:,1),data(:,2)*100,'rs','markersize',2);
                 ylim([-0.5,2]);
                 ylabel({'$\eta \;\rm {(cm)}$'},'Interpreter','latex');   
                 xlabel({'$t \;\rm {(s)}$'},'Interpreter','latex'); 
-                set(gca,'Fontsize',15);
-                title(titlestr,'position',[4,1.4],'Fontsize',15);
+                set(gca,'Fontsize',10);
+                title(titlestr,'position',[4,1.4],'Fontsize',10);
             end
         end
         
