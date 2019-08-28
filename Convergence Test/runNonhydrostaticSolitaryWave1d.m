@@ -1,7 +1,8 @@
 function runNonhydrostaticSolitaryWave1d
 % deltax = [0.25 0.2 0.125 0.1 0.05 0.025];
 % deltax = [ 1 0.625 0.5 0.4 0.25 0.2 0.125 0.1 0.05 0.025];
-deltax = [ 1 0.625 0.5 0.4 0.25 0.2];
+deltax = [ 0.5 0.25 0.125 0.0625];
+% deltax = [ 1 0.5];
 % deltax = 0.025;
 Order =[ 1 2 ];
 % Order = 2;
@@ -17,10 +18,11 @@ linestyle = '-';
 
 color = {'k', 'r'};  %black for order one, red for order two
 marker = {'o', 's', '^'};%circle for Eta, square for U, triangle for Ws
+time = zeros(Nmesh, Ndeg);
 
 for n = 1:Ndeg
     for m = 1:Nmesh
-        dofs(m, n) = ceil( (60 / deltax(m)) ) * (Order(n)+1);
+        dofs(m, n) = ceil( (50 / deltax(m)) ) * (Order(n)+1);
     end
 end
 
@@ -30,7 +32,9 @@ EtaErr1 = zeros(Nmesh, Ndeg);   UErr1 = zeros(Nmesh, Ndeg);    WsErr1 = zeros(Nm
 for n = 1:Ndeg
     for m = 1:Nmesh
     Solver = NonhydrostaticSolitaryWave1d(Order(n),deltax(m));
+    tic;
     Solver.matSolve;
+    time(m,n) = toc;
     PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('NonhydrostaticSolitaryWave1d','/','NonhydrostaticSolitaryWave1d'));
     fext = cell(1);
     fext{1}(:,:,1) = Solver.H5;fext{1}(:,:,2) = Solver.U5;fext{1}(:,:,3) = Solver.W5;fext{1}(:,:,4) = Solver.P5;fext{1}(:,:,5) = zeros( size( Solver.P5 ) );
@@ -112,35 +116,62 @@ for n = 1:Ndeg
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
         );     
+    
 end
-save EtaErrInf;
-save UErrInf;
-save WsErrInf;
-save PErrInf;
-save EtaErr1;
-save UErr1;
-save WsErr1;
-save PErr1;
-save EtaErr2;
-save UErr2;
-save WsErr2;
-save PErr2;
+
+
+
 ylabel_str = {'$L_1$', '$L_2$', '$L_\infty$'};
-fontsize = 16;
+fontsize = 12;
 for n = 1:3
-    figure(n);
+    h = figure(n);
     box on; grid on;
     set(gca, 'XScale', 'log', 'YScale', 'log');
-%     lendstr = cell(Ndeg, 1);
-%     for m = 1:Ndeg
-%         lendstr{m} = ['$p=', num2str(m), '$'];
-%     end
-%     legend(lendstr, 'box', 'off',...
-%         'Interpreter', 'Latex', 'FontSize', fontsize);
+
+    lendstr = {'$\eta p1$','$U p1$','$W p1$',...
+        '$\eta p2$','$U p2$','$W p2$'};
+    
+    columnlegend(2,lendstr, 12);
+
     xlabel('$DOFs$', 'Interpreter', 'Latex', 'FontSize', fontsize);
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
 end
 
+% time = time./time(end);
+% figure(4);
+% hold on;
+
+
+
+    figure(4);
+    hold on;
+    for n = 1:Ndeg
+    co = color{n};
+    plot(time(:, n), EtaErr2(:, n), [co, marker{1}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        ); 
+    plot(time(:, n), UErr2(:, n), [co, marker{2}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        ); 
+    
+    plot(time(:, n), WsErr2(:, n), [co, marker{3}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );  
+    end
+
+    set(gca, 'XScale', 'log', 'YScale', 'log');
+
+    lendstr = {'$\eta p1$','$U p1$','$W p1$',...
+        '$\eta p2$','$U p2$','$W p2$'};
+    
+    columnlegend(2,lendstr, 12);
+   
+ xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+ ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+    box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)
@@ -164,4 +195,69 @@ for m = 2:Nmesh
     scal_ratio = log2( len(m)/len(m-1) );
     a(m) = log2( err(m)/err(m-1) )./scal_ratio;
 end
+end
+
+function columnlegend( numcolumns, str, fontsize, location)
+%   Author: Simon Henin <shenin@gc.cuny.edu>
+%   Revised by Bill Shawn <bill_shawn@foxmail.com>
+if nargin < 4
+   location = 'NorthEast'; 
+end
+[legend_h,object_h,~,~] = legend( str );
+numlines = length(str);
+numpercolumn = ceil(numlines/numcolumns);
+pos = get(legend_h, 'position');
+width = numcolumns*pos(3);
+rescale = pos(3)/width;
+xdata = get(object_h(numlines+1), 'xdata'); 
+ydata1 = get(object_h(numlines+1), 'ydata');
+ydata2 = get(object_h(numlines+3), 'ydata');
+sheight = ydata1(1)-ydata2(1);
+height = ydata1(1);
+line_width = (xdata(2)-xdata(1))*rescale; 
+spacer = xdata(1)*rescale;
+loci = get(gca, 'position');
+set(legend_h, 'position', [loci(1) pos(2) width pos(4)]);
+col = -1;
+for i=1:numlines,
+    if numpercolumn>1
+        if mod(i,numpercolumn)==1,
+            col = col+1;
+        end
+    else
+        col=i-1;
+    end
+    if i==1
+        linenum = i+numlines;
+    else
+        linenum = linenum+2;
+    end
+    labelnum = i;
+    position = mod(i,numpercolumn);
+    if position == 0,
+         position = numpercolumn;
+    end
+    set(object_h(linenum), 'ydata', ...
+        [(height-(position-1)*sheight) (height-(position-1)*sheight)]);
+    set(object_h(linenum), 'xdata', ...
+        [col/numcolumns+spacer col/numcolumns+spacer+line_width]);
+    set(object_h(linenum+1), 'ydata', ...
+        [height-(position-1)*sheight height-(position-1)*sheight]);
+    set(object_h(linenum+1), 'xdata', ...
+        [col/numcolumns+spacer*3.5 col/numcolumns+spacer*3.5]);
+    set(object_h(labelnum), 'position', ...
+        [col/numcolumns+spacer*2+line_width height-(position-1)*sheight]);
+end
+set(legend_h, 'Color', 'None', 'Box', 'off');
+pos = get(legend_h, 'position');
+fig_pos = get(gca, 'position');
+switch lower(location),
+    case {'northeast'}
+        set(legend_h, 'position', [pos(1)+fig_pos(3)-pos(3) pos(2) pos(3) pos(4)]);
+    case {'southeast'}
+        set(legend_h, 'position', [pos(1)+fig_pos(3)-pos(3) fig_pos(2)-pos(4)/2+pos(4)/4 pos(3) pos(4)]);
+    case {'southwest'}
+        set(legend_h, 'position', [fig_pos(1) fig_pos(2)-pos(4)/2+pos(4)/4 pos(3) pos(4)]);
+end
+set(legend_h, 'Interpreter', 'Latex','Fontsize',fontsize);
 end

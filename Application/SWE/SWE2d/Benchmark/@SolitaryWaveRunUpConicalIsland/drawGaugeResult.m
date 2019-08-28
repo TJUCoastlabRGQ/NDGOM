@@ -23,11 +23,12 @@ for i = 1:numel(gx)
     data = xlsread(pathstr);
     figure;
     set(gcf,'position',[50,50,265,150]);
-%     plot(time + 22,( result(:, 1, i) - 0.32 + bot(i)     )*100,'k','LineWidth',1.5); %case 0.096
-    plot(time + 25.6,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',1.5); %case 0.181
+%     plot(time + 22 + 2.6,( result(:, 1, i) - 0.32 + bot(i)     )*100,'k','LineWidth',1.5); %case 0.096
+%     plot(time + 21.2+2.6,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',1.5); %case 0.181
+    plot(time + 25.6 ,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',1.5); %case 0.045
     hold on;
     plot(data(:,1),( data(:,2) )*100,'ro','markersize',3);
-    ylim([-5,5]);
+    ylim([-5,15]);
     ylabel({'$\eta \;\rm {(cm)}$'},'Interpreter','latex');
     xlabel({'$t \;\rm {(s)}$'},'Interpreter','latex');
     set(gca,'Fontsize',10);
@@ -43,9 +44,9 @@ for i = 1:numel(gx)
     data = xlsread(pathstr);
     figure;
     set(gcf,'position',[50,50,1000,400]);
-%     plot(time + 22,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',2.5);%case 0.096
+    plot(time + 22,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',2.5);%case 0.096
 %     plot(time + 21.2,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',2.5);%case 0.181
-     plot(time + 25.6,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',2.5);%case 0.045
+%      plot(time + 25.6,( result(:, 1, i) - 0.32 + bot(i) )*100,'k','LineWidth',2.5);%case 0.045
     hold on;
     plot(data(:,1),( data(:,2) )*100,'ro','markersize',6.5);
     ylim([-5,5]);
