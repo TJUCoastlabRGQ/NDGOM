@@ -1,12 +1,14 @@
 classdef AdvAbstractVarFlow2d < NdgPhysMat
     
-    properties (Constant)
+    properties
         %> Number of physical field
         Nfield = 3
         %> Number of variable field
         Nvar = 1
         %> field index of variable field
         varFieldIndex = 1
+        
+        outputFieldOrder = 1
     end
     
     methods

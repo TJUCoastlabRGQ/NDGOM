@@ -176,7 +176,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 5;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
