@@ -144,8 +144,8 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 %> Compared the wind stress in our study with that in FVCOM, the FVCOM version is recovered
                 %> by multiplying the stess with \frac{1}{\rho_0}
                 
-                fluxSx = edge.nz .* obj.phys.WindTaux;
-                fluxSy = edge.nz .* obj.phys.WindTauy;
+                fluxSx = edge.nz .* obj.phys.WindTaux{m};
+                fluxSy = edge.nz .* obj.phys.WindTauy{m};
                 
                 
                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
