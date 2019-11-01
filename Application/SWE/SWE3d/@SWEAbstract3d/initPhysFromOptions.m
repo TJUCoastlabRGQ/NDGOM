@@ -26,17 +26,35 @@ for m = 1:obj.Nmesh
     end
 end
 %> wind stress term
-obj.Taux =  cell(obj.Nmesh);
-obj.Tauy =  cell(obj.Nmesh);
+obj.WindTaux =  cell(obj.Nmesh);
+obj.WindTauy =  cell(obj.Nmesh);
 %> bottom friction coefficient
 obj.Cf =  cell(obj.Nmesh);
-%> vertical viscosity coefficient
-obj.miu =  cell(obj.Nmesh); 
+
+[ obj.fphys2d, obj.fphys ] = obj.setInitialField;
+
 for n = 1:obj.Nmesh
-    obj.Taux{n} = zeros(size(mesh2d(n).x));
-    obj.Tauy{n} = zeros(size(mesh2d(n).y));
-    obj.Cf{n} =  zeros(size(mesh2d(n).y));
-    obj.miu{m} = zeros(size(mesh3d(n).x));
+    obj.fphys2d{n}(:,:,5) = ( mesh2d.rx .* ( mesh2d.cell.Dr * obj.fphys2d{n}(:,:,4) ) ) + ...
+        ( mesh2d.sx .* ( mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
+    obj.fphys2d{n}(:,:,6) = ( mesh2d.ry .* ( mesh2d.cell.Dr * obj.fphys2d{n}(:,:,4) ) ) + ...
+        ( mesh2d.sy .* ( mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
+    %> the wind stress is initialized to be zero
+    obj.WindTaux{n} = zeros(size(mesh2d(n).x));
+    obj.WindTauy{n} = zeros(size(mesh2d(n).y));
+    %> H in extended three dimensional fields
+    obj.fphys{n}(:, :, 4) = mesh3d(n).Extend2dField( obj.fphys2d{n}(:, :, 1) );
+    %> the vertical viscosity term is initialized to be 10^(-4)
+    obj.fphys{n}(:,:,5) = 1e-4* ones(size(mesh3d(n).x)); 
+    %> Initially, the bottom roughness is not considered
+    obj.Cf{n} =  0.0025/1000 * ones(size(mesh2d(n).y)); 
+    %> Z in extended three dimensional fields
+    obj.fphys{n}(:,:,6) = mesh3d(n).Extend2dField( obj.fphys2d{n}(:, :, 4) );
+    %> '$\eta$' in extended three dimensional fields
+    obj.fphys{n}(:,:,7) = obj.fphys{n}(:,:,4) + obj.fphys{n}(:,:,6);
+    %> Zx in extended three dimensional fields
+    obj.fphys{n}(:,:,8) = mesh3d(n).Extend2dField( obj.fphys2d{n}(:, :, 5) );
+    %> Zy in extended three dimensional fields
+    obj.fphys{n}(:,:,9) = mesh3d(n).Extend2dField( obj.fphys2d{n}(:, :, 6) );
 end
 % Setup the output NetCDF file object
 initOutput( obj, mesh2d, mesh3d );

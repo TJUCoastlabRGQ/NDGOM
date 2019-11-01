@@ -160,7 +160,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
                 [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
-                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys3d );
+                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
                 
                 %> Friction to be considered in this part. For this version, the friction at the bottom is given as
                 %> '$\frac{\partial u}{\partial sigma} = \frac{H}{\miu}C_f u\sqrt(u^2+v^2)$' and 

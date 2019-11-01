@@ -4,11 +4,11 @@ function matEvaluateRHS( obj, fphys2d, fphys3d )
 
 obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys3d, obj.fext2d);
 
-for m = 1:obj.Nmesh
-    mesh3d = obj.meshUnion(m);
-    fphys3d{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 1) );
-    obj.miu{m} = obj.miu0{m} ./ ( fphys3d{m}(:, :, 4).^2 );
-end
+% for m = 1:obj.Nmesh
+%     mesh3d = obj.meshUnion(m);
+%     fphys3d{m}(:, :, 4) = mesh3d.Extend2dField( fphys2d{m}(:, :, 1) );
+% %     obj.miu{m} = obj.miu0{m} ./ ( fphys3d{m}(:, :, 4).^2 );
+% end
 
 matEvaluateRHS@NdgPhysMat(obj, fphys3d);
 

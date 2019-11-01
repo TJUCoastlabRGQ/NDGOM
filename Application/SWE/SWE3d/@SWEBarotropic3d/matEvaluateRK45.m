@@ -34,7 +34,7 @@ while( time < ftime )
     
     for intRK = 1:5
         tloc = time + rk4c( intRK ) * dt;
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
+        %         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
         obj.matEvaluateRHS( fphys2d, fphys );
         
         for n = 1:Nmesh
@@ -45,6 +45,13 @@ while( time < ftime )
             fphys{n}(:,:,1:2) = fphys{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
             fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
                 obj.mesh3d(n), fphys2d{n}, fphys{n} );
+            
+            fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 1) );
+            fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 2) );
+            fphys{n}(: , :, 4) = obj.meshUnion(n).Extend2dField( fphys2d{n}(:, :, 1) );
+            fphys{n}(: , :, 7) = fphys{n}(: , :, 4) + fphys{n}(: , :, 6);
+            
+            
         end
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         % fphys2d = obj.matEvaluatePostFunc( fphys2d );
@@ -57,8 +64,11 @@ while( time < ftime )
     time = time + dt;
     display(time);
     
-    fphys2d{1}(:, :, 2) = obj.mesh3d(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
-    fphys2d{1}(:, :, 3) = obj.mesh3d(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );    
+%     for m = 1:obj.Nmesh
+%         mesh3d = obj.meshUnion(m);
+%     end
+    
+    
     
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     
