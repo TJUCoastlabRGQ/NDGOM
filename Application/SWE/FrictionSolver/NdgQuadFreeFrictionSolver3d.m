@@ -7,7 +7,8 @@ classdef NdgQuadFreeFrictionSolver3d < AbstractFrictionTermSolver
     
     methods
         function evaluateFrictionTermRHS( obj, physObj, fphys )
-
+% This part need to be deleted, as friction is not a source term but a
+% boundary condition here
             for m = 1:physObj.Nmesh
                 mesh3d = physObj.meshUnion(m);
                 edge = mesh3d.BottomBoundaryEdge;

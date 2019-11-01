@@ -1,5 +1,7 @@
 classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
-    
+    % At present, only the vertical diffusion term is considered, both the
+    % wind term and the friction term need to be added here and not the
+    % source term part
     methods
         function obj = NdgQuadFreeStrongCentralVisSolver3d( phys, varId, rhsId )
             obj = obj@NdgAbstractVisSolver( phys, varId, rhsId );
@@ -15,10 +17,10 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         function matEvaluateAuxiVar( obj, fphys )
             matEvaluateAuxiVarVolumeKernel( obj, fphys );
             matEvaluateAuxiVarSurfaceKernel( obj, fphys );
-            % todo: consider boundary condition
         end
         
         function matEvaluateAuxiVarVolumeKernel( obj, fphys )
+          %> This part is used to calculated the volume contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'  
             for m = 1:obj.Nmesh
                 mesh = obj.phys.mesh3d(m);
                 dfdr = mesh.cell.Dt * fphys{m}(:, :, obj.varId(1));
@@ -29,6 +31,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         end
         
         function matEvaluateAuxiVarSurfaceKernel( obj, fphys3d )
+            %> This part is used to calculated the surface contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'
             for m = 1:obj.Nmesh
                 mesh = obj.phys.mesh3d(m);
                 edge3d = mesh.BottomEdge;
@@ -43,11 +46,37 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                     edge3d.matEvaluateStrongFormEdgeCentralRHS( FluxM_1(:,:,2), FluxP_1(:,:,2) );
                 
                 edge3d = mesh.BottomBoundaryEdge;
-                [ fm, fp ] = edge3d.matEvaluateSurfValue( fphys3d );
+                [ fm, ~ ] = edge3d.matEvaluateSurfValue( fphys3d );
+                
+                % Actually, this is a Newmann boundary, for such a boundary
+                % the exterior value is the same with the inner boundaries,
+                % and the local flux term and the numerical flux term
+                % canceled here. For such a situation, we only consider the
+                % friction term here.
+                
                 FluxM(:, :, 1) = edge3d.nz .* fm(:, :, 1);
                 FluxM(:, :, 2) = edge3d.nz .* fm(:, :, 2);
                 %> $|(Hu)^+ = (Hu)^-|_{\Omega = -1}$
                 %> $|(Hv)^+ = (Hv)^-|_{\Omega = -1}$
+                u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
+                Velocity = sqrt( u.^2 + v.^2 );
+                
+                %> for this version, the friction at the bottom is given as
+                %> '$\frac{\partial u}{\partial sigma} = \frac{H}{\miu}C_f u\sqrt(u^2+v^2)$' and 
+                %> '$\frac{\partial v}{\partial sigma} = \frac{H}{\miu}C_f v\sqrt(u^2+v^2)$'.
+                %> it's noted that '$C_f = \frac{C_d}{\rho_0}$' when we set the current version
+                %> to be the same with the FVCOM. With all of those condition, we know that
+                 %> '$\frac{\partial Hu}{\partial sigma} = \frac{H^2}{\miu}C_f u\sqrt(u^2+v^2)$' and 
+                %> '$\frac{\partial Hv}{\partial sigma} = \frac{H^2}{\miu}C_f v\sqrt(u^2+v^2)$'.
+                
+                fluxS(:,:,1) = edge3d.nz .*obj.phys.Cf{m} .* u .* Velocity;
+                fluxS(:,:,2) = edge3d.nz .*obj.phys.Cf{m} .* v .* Velocity; 
+                
+              physObj.frhs{m} = physObj.frhs{m}...
+                    + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+                
+                
+                
                 FluxS(:, :, 1) = edge3d.nz .* fp(:, :, 1);
                 FluxS(:, :, 2) = edge3d.nz .* fp(:, :, 2);
                 obj.pzx{m} = obj.pzx{m} ...

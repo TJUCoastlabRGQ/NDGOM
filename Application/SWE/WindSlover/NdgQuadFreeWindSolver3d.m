@@ -10,7 +10,7 @@ classdef NdgQuadFreeWindSolver3d < AbstractWindTermSolver
         end
         
         function evaluateWindTermRHS( obj, physClass, fphys )
-            
+        %wind term is not a source term but a boundary term    
             for m = 1:physClass.Nmesh
                 mesh3d = physClass.meshUnion(m);
                 edge = mesh3d.SurfaceBoundaryEdge;
