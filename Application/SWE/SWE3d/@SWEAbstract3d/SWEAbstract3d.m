@@ -21,7 +21,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( Abstract, Constant )
         %> wet/dry depth threshold
-        hmin
+        hcrit
     end
     
 %     properties( SetAccess = protected )
@@ -68,6 +68,8 @@ classdef SWEAbstract3d < NdgPhysMat
         limiterSolver
         %> Solver for the primal continuity equation
         PCESolver2d
+        %> Solver for vertical eddy viscosity
+        EddyViscositySolver
     end
     
     properties
@@ -138,6 +140,8 @@ classdef SWEAbstract3d < NdgPhysMat
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
         
         matEvaluateSourceTerm( obj, fphys );
+        
+       EddyViscositySolver = matInitEddyViscositySolver( obj );
         
     end
     

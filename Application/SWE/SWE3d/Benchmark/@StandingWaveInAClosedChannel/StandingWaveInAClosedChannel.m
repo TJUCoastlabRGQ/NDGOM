@@ -3,11 +3,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     %   此处显示详细说明
     
     properties ( Constant )
-        hmin = 0.001;
         %> channel length
         ChLength = 100;
         %> channel width
-        ChWidth = 50;
+        ChWidth = 2;
         %> channel depth
         H0 = 7.612;
         %> x range
@@ -15,6 +14,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         startTime = 0;
         %> final time
         finalTime = 65;
+        hcrit = 0.001;
     end
     
     properties
@@ -34,13 +34,13 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % set initilize physical field
 %             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
-            obj.dt = 0.03;
+            obj.dt = 0.01;
             
 %             obj.miu0{1} = 0.001;
             obj.miu0{1} = 0;
 %             obj.miu = 0;
-%             obj.Cf{1} = 0.0025/1000;
-            obj.Cf{1} = 0;
+            obj.Cf{1} = 0.0025/1000;
+%             obj.Cf{1} = 0;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -78,7 +78,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
-            option('limiterType') = enumLimiter.Vert;
+            option('EddyViscosityType') = enumEddyViscosity.GOTM;
+            option('GOTMSetupFile') = strcat(pwd,'\gotmturb.nml');
+%             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
         end

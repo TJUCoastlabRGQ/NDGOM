@@ -311,8 +311,16 @@ path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/'
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
+%Compile GOTM part
+path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
+libfile = {[path,'mxGOTM.c']};
+srcfile = {[path,'mxEddyViscosityByGOTMInit.c']};
+objfile = {'.\lib\GOTM'};
+FuncHandle(path, srcfile, libfile, objfile);
+
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
+
 end
 
 function RemoveMexFile(outPath, srcfile, libfile)

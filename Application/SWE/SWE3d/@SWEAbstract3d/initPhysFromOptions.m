@@ -25,6 +25,12 @@ for m = 1:obj.Nmesh
         obj.fext2d{m} = zeros( Nfp, Ne, obj.Nfield2d );
     end
 end
+
+% set option
+obj.option = obj.setOption( obj.option );
+
+% obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
+
 %> wind stress term
 obj.WindTaux =  cell(obj.Nmesh);
 obj.WindTauy =  cell(obj.Nmesh);
