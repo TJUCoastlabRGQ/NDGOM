@@ -1,10 +1,8 @@
 #include "mxGOTM.h"
+#include <string.h>
 
 #define NLHS 0
 #define NRHS 9
-
-//mxEddyViscosityByGOTMInit(mesh2d(1).K, mesh2d(1).cell.Np, mesh3d(1).K, mesh3d(1).cell.Np, ...
-//	mesh3d(1).Nz, hcrit, obj.h0b, physClass.finalTime);
 
 
 
@@ -23,6 +21,9 @@
 *      char*     GOTMNameList the file containing the variable definition of the turbulence model
 */
 
+/*Whether GOTM is initialized or not, this variable is false by default*/
+char *Initialized = "False";
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	/* check input & output */
@@ -36,14 +37,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		mexPrintf("%d inputs required.\n", NLHS);
 	}
 
-	int K2d = (int)mxGetScalar(prhs[0]);
-	int Np2d = (int)mxGetScalar(prhs[1]);
-	int K3d = (int)mxGetScalar(prhs[2]);
-	int Np3d = (int)mxGetScalar(prhs[3]);
-	long long int nlev = (long long int)mxGetScalar(prhs[4]);
-	double hcrit = (double)mxGetScalar(prhs[5]);
-	double h0b = (double)mxGetScalar(prhs[6]);
-	double finalTime = (double)mxGetScalar(prhs[7]);
+	 K2d = (int)mxGetScalar(prhs[0]);
+	 Np2d = (int)mxGetScalar(prhs[1]);
+	 K3d = (int)mxGetScalar(prhs[2]);
+	 Np3d = (int)mxGetScalar(prhs[3]);
+	 nlev = (long long int)mxGetScalar(prhs[4]);
+	 hcrit = (double)mxGetScalar(prhs[5]);
+	 h0b = (double)mxGetScalar(prhs[6]);
+	 finalTime = (double)mxGetScalar(prhs[7]);
 	
 
 	char *buf;
@@ -71,7 +72,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	else{
 		mexPrintf("The turbulence model is not initialized, and we are ready to initialize it\n");
-		InitTurbulenceModelGOTM(&_nNamelist, buf, &nlev, buflen);
+		InitTurbulenceModelGOTM(&_nNamelist, buf, &nlev, buflen - 1);
 		Initialized = "True";
 	}
 

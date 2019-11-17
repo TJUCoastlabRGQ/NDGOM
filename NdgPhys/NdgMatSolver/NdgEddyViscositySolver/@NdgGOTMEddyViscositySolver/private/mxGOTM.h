@@ -1,28 +1,19 @@
-#ifndef __mxGOTM_H__
-#define __mxGOTM_H__
+#ifndef MXGOTM_H
+#define MXGOTM_H
+
 #include "mex.h"
 /*number of elements and interpolation points for the two-dimensional mesh*/
-int K2d, Np2d;
+ int K2d, Np2d;
 /*number of elements and interpolation points for the three-dimensional mesh*/
-int K3d, Np3d;
+ int K3d, Np3d;
 /*layers of the three dimensional shallow water model*/
-long long int nlev;
+ long long int nlev;
 /*the critical water depth, when the depth is less than this value, velosities are set to be zero*/
-double hcrit;
+ double hcrit;
 /*the physical roughness length scale*/
-double h0b;
-/*the Von kamma constant*/
-double kappa = 0.4;
-/*the limit value for the bottom roughness*/
-double z0s_min = 0.02;
-/*this value is used for computing bottom roughness*/
-double avmolu = 1.3e-6;
+ double h0b;
 /*final time of the */
-double finalTime;
-/*The iteration times to calculate the friction velocity, this is set to be 2 by default*/
-int MaxItration = 2;
-/*Whether GOTM is initialized or not, this variable is false by default*/
-char *Initialized = 'False';
+ double finalTime;
 /*This function is used to interpolate the physical value from interpolation point to central point in vertical direction*/
 void InterpolateToCentralPoint(double *InterpolationMatrix, double *FphysField, double *destination);
 /*This function is used to map the date located at the central point to the vertical line that the GOTM adapted*/
@@ -37,11 +28,11 @@ void DGDoTurbulence(double *H2d, double *ShearProductionDate, double *buoyancePr
 /*This function is used to map the date calculated by GOTM to the output matrix*/
 void mapVedgeDateToDof(double *VedgeDate, double *exportDofContainer);
 /*This function is used to initialize the GOTM module*/
-void InitTurbulenceModelGOTM(long long int *, char * , long long int *, long long int *)
+void InitTurbulenceModelGOTM(long long int *, char * , long long int *, long long int );
 
 /*The following is the GOTM part*/
 
-void __stdcall TURBULENCE_mp_INIT_TURBULENCE(long long int *, char *, long long int *, long long int);
+void __stdcall TURBULENCE_mp_INIT_TURBULENCE(long long int *, char *, long long int *, long long int );
 
 //The dealocation part need to be considered
 

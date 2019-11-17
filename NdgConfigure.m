@@ -27,7 +27,7 @@ outPath = 'lib/';
 % Polylib
 path = 'thirdParty/Polylib/';
 srcfile = {[path, 'zwglj.c'], ...
-    [path, 'zwgl.c'], ... 
+    [path, 'zwgl.c'], ...
     [path, 'JacobiP.c'], ...
     [path, 'GradJacobiP.c'] };
 libfile = { [path, 'polylib.c'] };
@@ -214,7 +214,7 @@ libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {...
     [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
-    
+
 path = 'Application/SWE/SWE2d/@SWEConventional2d/private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
@@ -244,7 +244,7 @@ path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver1d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
-% 
+%
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver2d/private/';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
@@ -313,10 +313,10 @@ srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
 %Compile GOTM part
 path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
-libfile = {[path,'mxGOTM.c']};
+libfile = {['.\lib\GOTM\','*.obj'],...
+    [path,'mxGOTM.c']};
 srcfile = {[path,'mxEddyViscosityByGOTMInit.c']};
-objfile = {'.\lib\GOTM'};
-FuncHandle(path, srcfile, libfile, objfile);
+FuncHandle(path, srcfile, libfile);
 
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
@@ -343,7 +343,7 @@ for n = 1:numel(srcfile)
             mfilename, srcfile{n}, outPath);
         fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex('-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
+        mex('-g','-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
             file{:}, '-outdir', outPath);
     end
 end
@@ -362,7 +362,9 @@ srcDateNum = file.datenum;
 for n = 1:numel(libSrdFile)
     file = dir(libSrdFile{n});
     % find the lasted srcDateNum
-    srcDateNum = max(file.datenum, srcDateNum);
+    for m = 1:numel(file)
+        srcDateNum = max(file(m).datenum, srcDateNum);
+    end
 end
 flag = (srcDateNum > mexDateNum);
 end

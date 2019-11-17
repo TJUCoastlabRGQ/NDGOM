@@ -15,6 +15,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> final time
         finalTime = 65;
         hcrit = 0.001;
+        % to be corrected
+        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
     end
     
     properties
@@ -79,7 +81,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputNcfileNum') = 1;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
-            option('GOTMSetupFile') = strcat(pwd,'\gotmturb.nml');
+            option('GOTMSetupFile') = obj.GotmFile;
 %             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

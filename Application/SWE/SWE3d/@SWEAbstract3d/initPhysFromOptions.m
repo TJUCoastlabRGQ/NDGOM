@@ -29,7 +29,7 @@ end
 % set option
 obj.option = obj.setOption( obj.option );
 
-% obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
+obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
 
 %> wind stress term
 obj.WindTaux =  cell(obj.Nmesh);

@@ -9,11 +9,11 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
     methods
         function obj = NdgGOTMEddyViscositySolver( physClass )
             if  physClass.option.isKey('PhysicalBottomRoughnessLength')
-                value = physClass.getOption('PhysicalBottomRoughnessLength');
-                disp('Value of the physical bottom roughness length is set to be: %f\n',value);
+                obj.h0b = physClass.getOption('PhysicalBottomRoughnessLength');
+                fprintf('Value of the physical bottom roughness length is set to be: %f\n',obj.h0b);
             else
-                value = 0.05;
-                disp('Value of the physical bottom roughness length is set to be the default value: %f\n',value);
+                obj.h0b = 0.05;
+                fprintf('Value of the physical bottom roughness length is set to be the default value: %f\n',obj.h0b);
             end
             
             obj.matInitEddyViscosity(physClass, physClass.mesh2d, physClass.mesh3d, physClass.hcrit);
