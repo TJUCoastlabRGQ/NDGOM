@@ -24,5 +24,17 @@ void InterpolationToCentralPoint(double *VCV, double *fphys, double *dest){
 }
 
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate){
+	//This has been verified by tests
+	for (int k = 0; k < K2d; k++){
+		for (int L = 1; L < nlev + 1; L++){
+			for (int p = 0; p < Np2d; p++){
+				verticalLineData(k*(nlev + 1)*Np2d + p*(nlev + 1) + L) = \
+					centralDate(k*nlev*Np2d + (nlev - L)*Np2d + p);
+			}
+		}
+	}
+}
+
+void CalculateShearProductionDate(double *H2d, double *huVertial, double *hvVertical, double *shearProductionDate){
 
 }

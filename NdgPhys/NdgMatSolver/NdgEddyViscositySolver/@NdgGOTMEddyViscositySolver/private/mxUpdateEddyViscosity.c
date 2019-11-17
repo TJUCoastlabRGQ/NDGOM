@@ -40,27 +40,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		mexPrintf("This is the end of the simulation, and we are ready to dealocation the memory");
 		// to be continued
 	else//Update the eddy viscosity
-		mxArray *uCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
-	    double *uC = mxGetPr(uCentralDate);
-	    mxArray *vCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
-		double *vC = mxGetPr(vCentralDate);
+		mxArray *huCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
+	    double *huC = mxGetPr(uCentralDate);
+	    mxArray *hvCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
+		double *hvC = mxGetPr(vCentralDate);
 		//S and T to be continued
-		mxArray *uVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *uvl = mxGetPr(uVertialLine);
-		mxArray *vVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *vvl = mxGetPr(vVertialLine);
+		mxArray *huVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
+		double *huvl = mxGetPr(uVertialLine);
+		mxArray *hvVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
+		double *hvvl = mxGetPr(vVertialLine);
 		//S and T to be continued
 		mxArray *shearFrequencyDate = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
 		double *shearFrequency = mxGetPr(shearFrequencyDate);
 		//Buoyance frequency to be continued
 		mxArray *eddyViscosityDate = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
 		double *eddyViscosity = mxGetPr(eddyViscosityDate);
-		// TDiffParameter to be continued
-		// SDiffParameter to be continued
+		// TDiffusionParameter to be continued
+		// SDiffusionParameter to be continued
 
-		InterpolationToCentralPoint(VCV, hu, uC);
-		InterpolationToCentralPoint(VCV, hv, vC);
-
+		InterpolationToCentralPoint(VCV, hu, huC);
+		InterpolationToCentralPoint(VCV, hv, hvC);
+		//Tc to be continued
+		//Sc to be continued
+		mapCentralPointDateToVerticalDate(huC, huvl);
+		mapCentralPointDateToVerticalDate(hvC, hvvl);
+		//Tuvl to be continued
+		//Suvl to be continued
 
 
 
