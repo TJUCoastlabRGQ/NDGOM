@@ -40,41 +40,75 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		mexPrintf("This is the end of the simulation, and we are ready to dealocation the memory");
 		// to be continued
 	else//Update the eddy viscosity
+		mxArray *layerHeight = mxCreateDoubleMatrix(nlev + 1, Np2d, mxREAL);
+	    double *PtrLayerHeight = mxGetPr(layerHeight);
 		mxArray *huCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
-	    double *huC = mxGetPr(uCentralDate);
+		double *PtrhuCentralDate = mxGetPr(huCentralDate);
 	    mxArray *hvCentralDate = mxCreateDoubleMatrix(Np2d, K3d, mxREAL);
-		double *hvC = mxGetPr(vCentralDate);
+		double *PtrhvCentralDate = mxGetPr(hvCentralDate);
 		//S and T to be continued
 		mxArray *huVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *huvl = mxGetPr(uVertialLine);
+		double *PtrhuVertialLine = mxGetPr(huVertialLine);
 		mxArray *hvVertialLine = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *hvvl = mxGetPr(vVertialLine);
+		double *PtrhvVertialLine = mxGetPr(hvVertialLine);
 		//S and T to be continued
 		mxArray *shearFrequencyDate = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *shearFrequency = mxGetPr(shearFrequencyDate);
+		double *PtrshearFrequency = mxGetPr(shearFrequencyDate);
+		mxArray *buoyanceFrequencyDate = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
+		mxArray *PtrbuoyanceFrequencyDate = mxGetPr(buoyanceFrequencyDate);
 		//Buoyance frequency to be continued
+		mxArray *BottomFrictionLength = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
+		double *PtrBottomFritionLength = mxGetPr(BottoFrictionLength);
+
+		mxArray *BottomFrictionVelocity = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
+		double *PtrBottomFritionVelocity = mxGetPr(BottoFrictionVelocity);
+
+		mxArray *SurfaceFrictionVelocity = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
+		double *PtrSurfaceFritionVelocity = mxGetPr(SurfaceFrictionVelocity);
+
+		mxArray *SurfaceFrictionLength = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
+		double *PtrSurfaceFrictionLength = mxGetPr(Np2d, K2d, mxREAL);
+
+
 		mxArray *eddyViscosityDate = mxCreateDoubleMatrix(nlev + 1, Np2d*K2d, mxREAL);
-		double *eddyViscosity = mxGetPr(eddyViscosityDate);
+		double *PtreddyViscosity = mxGetPr(eddyViscosityDate);
+
+		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d);
+		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
 		// TDiffusionParameter to be continued
 		// SDiffusionParameter to be continued
 
-		InterpolationToCentralPoint(VCV, hu, huC);
-		InterpolationToCentralPoint(VCV, hv, hvC);
+		InterpolationToCentralPoint(VCV, hu, PtrhuCentralDate);
+		InterpolationToCentralPoint(VCV, hv, PtrhvCentralDate);
 		//Tc to be continued
 		//Sc to be continued
-		mapCentralPointDateToVerticalDate(huC, huvl);
-		mapCentralPointDateToVerticalDate(hvC, hvvl);
-		//Tuvl to be continued
-		//Suvl to be continued
+		mapCentralPointDateToVerticalDate(PtrhuCentralDate, PtrhuVertialLine);
+		mapCentralPointDateToVerticalDate(PtrhvCentralDate, PtrhvVertialLine);
+		//Tvl to be continued
+		//Svl to be continued
+		CalculateWaterDepth(double * h, double *PtrLayerHeight);
 
+		CalculateShearFrequencyDate(double *h, double *PtrLayerHeight, double *PtrhuVertialLine, double *PtrhvVertialLine, double *PtrshearFrequency);
 
+		CalculateLengthScaleAndShearVelocity(double *h, double* PtrLayerHeight, double *PtrhuVertialLine, double *PtrhvVertialLine, double* PtrBottomFritionLength, \
+                 double *PtrBottomFritionVelocity, double *PtrSurfaceFrictionLength, double *PtrSurfaceFritionVelocity);
 
+		DGDoTurbulence(&dt, h, PtrSurfaceFritionVelocity, PtrBottomFritionVelocity, PtrSurfaceFrictionLength, PtrBottomFritionLength, \
+			PtrLayerHeight, PtrbuoyanceFrequencyDate, PtrshearFrequency, NULL, PtreddyViscosity);
+
+		mapVedgeDateToDof(PtreddyViscosity, PtrOutEddyViscosity);
 	}
+	mxDestroyArray(layerHeight);
 	mxDestroyArray(uCentralDate);
 	mxDestroyArray(vCentralDate);
 	mxDestroyArray(uVertialLine);
 	mxDestroyArray(vVertialLine);
 	mxDestroyArray(shearFrequencyDate);
+	mxDestroyArray(BottomFrictionLength);
+	mxDestroyArray(BottomFrictionVelocity);
+	mxDestroyArray(SurfaceFrictionLength);
+	mxDestroyArray(SurfaceFrictionVelocity);
+	
 //to do destroy the eddy viscosity array after output
 
 }
