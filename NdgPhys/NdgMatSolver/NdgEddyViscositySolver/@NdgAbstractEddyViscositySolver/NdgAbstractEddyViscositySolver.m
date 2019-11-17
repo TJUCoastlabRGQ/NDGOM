@@ -8,10 +8,12 @@ classdef NdgAbstractEddyViscositySolver < handle
     methods( Abstract, Access = public )
         %> @brief Function to update the vertical eddy viscosity during computation
         %> @details Function to update the vertical eddy viscosity during computation
+        %> @param[in] mesh3d the three-dimensional mesh object, the VTV interpolation  matrix containd in its standard cell is used to calculate its central value from the value at interpolation points
+        %> @param[in] fphys2d the 2d physical field which contains the water depth field, this is used to calculate the height of each cell 
         %> @param[in] fphys the three dimensional physical field, this is used to calculate the shear production and buoyance production related terms
         %> @param[in] dt the time step of the three-dimensional shallow water model, this variable is required for both the TKE equation and the turbulent length scale related equation if GOTM adopted
         %> @param[in] time the time point at the current step, this is used to check whether this is the final point of the simulation, if so, all the resources allocated at the initial stage would be deallocated.
-        matUpdateEddyViscosity( obj, fphys2d, fphys, dt, time );
+        matUpdateEddyViscosity( obj, mesh3d, fphys2d, fphys, dt, time );
         
     end
     

@@ -9,7 +9,7 @@ classdef NdgParabolicEddyViscositySolver < NdgAbstractEddyViscositySolver
 %                 obj.matInitEddyViscosity(physClass, physClass.mesh2d, physClass.mesh3d, physClass.hcrit);
         end
         
-        function  EddyViscosity = matUpdateEddyViscosity( obj, fphys, ~, ~  )
+        function  EddyViscosity = matUpdateEddyViscosity( obj, mesh, fphys2d, fphys, ~, ~  )
 %             EddyViscosity = fphys(:,:,5);
         end
     end
