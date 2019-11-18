@@ -20,8 +20,14 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
         end
         
         function  EddyViscosity = matUpdateEddyViscosity( obj, mesh3d, fphys2d, fphys, dt, time  )  %fphys2d
-            EddyViscosity = mxUpdateEddyViscosity(mesh3d(1).cell.VTV, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2),...
-                dt, time);
+            H2D = [1 2 3 4 5 6 7 8 9];
+           Hu = [0.1 0.2 0.3 0.4 0.5 0.6 0.7 0.8 0.9];
+           Hv = [0.4 0.5 0.6 0.7 0.8 0.9 1.0 1.1 1.2];
+           dt = 0.03;
+           time = 5;
+           EddyViscosity = mxUpdateEddyViscosity(mesh3d(1).cell.VCV, H2D, Hu, Hv, dt, time);
+%             EddyViscosity = mxUpdateEddyViscosity(mesh3d(1).cell.VTV, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2),...
+%                 dt, time);
         end
     end
     

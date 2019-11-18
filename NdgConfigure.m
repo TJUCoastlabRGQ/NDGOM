@@ -315,7 +315,8 @@ FuncHandle(path, srcfile, libfile);
 path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
 libfile = {['.\lib\GOTM\','*.obj'],...
     [path,'mxGOTM.c']};
-srcfile = {[path,'mxEddyViscosityByGOTMInit.c']};
+srcfile = {[path,'mxUpdateEddyViscosity.c'],...
+    [path,'mxEddyViscosityByGOTMInit.c']};
 FuncHandle(path, srcfile, libfile);
 
 
@@ -393,7 +394,7 @@ switch computer('arch')
     case 'win64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
-        LDFLAGS = [LDFLAGS, ' -fopenmp'];
+        LDFLAGS = [LDFLAGS, ' -fopenmp '];
     case 'glnxa64'
 end
 end
