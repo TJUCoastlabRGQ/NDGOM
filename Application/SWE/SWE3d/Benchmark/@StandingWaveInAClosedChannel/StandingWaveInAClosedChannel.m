@@ -33,16 +33,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             obj.outputFieldOrder2d = [ 1 2 3 ];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            % set initilize physical field
-%             [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
             %> time interval
             obj.dt = 0.01;
-            
-%             obj.miu0{1} = 0.001;
             obj.miu0{1} = 0;
-%             obj.miu = 0;
             obj.Cf{1} = 0.0025/1000;
-%             obj.Cf{1} = 0;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -82,7 +76,6 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
-%             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
         end
