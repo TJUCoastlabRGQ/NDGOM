@@ -114,7 +114,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1);
 		Initialized = "True";
 	}
-	else if (finalTime = mxGetScalar(prhs[13])){
+	if (finalTime = mxGetScalar(prhs[13])){
 		free(VCV);
 		free(nuhGOTM); free(numGOTM); free(tkeGOTM); free(epsGOTM); free(LGOTM);
 		free(layerHeight);
@@ -124,9 +124,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(BottomFrictionLength); free(BottomFrictionVelocity);
 		free(SurfaceFrictionLength);free(SurfaceFrictionVelocity);
 		free(eddyViscosityDate);
+		Initialized = "False";
 	}
-	else
-	{
 		double* h = mxGetPr(prhs[8]);
 		double* hu = mxGetPr(prhs[9]);
 		double* hv = mxGetPr(prhs[10]);
@@ -152,10 +151,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		CalculateShearFrequencyDate(h);
 
+		CalculateBuoyanceFrequencyDate();// At present, all are set to zero
+
 		CalculateLengthScaleAndShearVelocity(h);
 
 		DGDoTurbulence(&dt, h, NULL);
 
 		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity);
-	}
 }

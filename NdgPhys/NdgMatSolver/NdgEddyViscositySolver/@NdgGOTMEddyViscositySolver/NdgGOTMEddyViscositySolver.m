@@ -43,7 +43,7 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
             %We note that, at present only one mesh can be considered when
             %initialize the GOTM model
             
-            physClass.fphys{1}(:,:,5) = 1.0e-8*ones(mesh3d(1).Np,mesh3d(1).K);
+%             physClass.fphys{1}(:,:,5) = 1.0e-8*ones(mesh3d(1).cell.Np,mesh3d(1).K);
             
             if  physClass.option.isKey('GOTMSetupFile')
                 obj.GotmFile = physClass.getOption('GOTMSetupFile');

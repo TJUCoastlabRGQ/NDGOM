@@ -25,6 +25,8 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 void mapCentralPointDateToVerticalDate(double *CentralPointData, double *VerticalLineTempdata);
 /*This function is used to calculate the shear production term*/
 void CalculateShearFrequencyDate(double *H2d);
+
+void CalculateBuoyanceFrequencyDate();
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
 void CalculateLengthScaleAndShearVelocity(double *H2d );

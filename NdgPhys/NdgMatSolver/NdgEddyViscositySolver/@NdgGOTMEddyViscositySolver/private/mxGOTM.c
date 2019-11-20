@@ -1,6 +1,8 @@
 #include "mxGOTM.h"
 #include "blas.h"
 #include <math.h>
+#include <stdio.h>
+#include <stdlib.h>
 
 /*the Von kamma constant*/
 double kappa = 0.4;
@@ -127,13 +129,31 @@ void CalculateLengthScaleAndShearVelocity(double *H2d){
  void mapVedgeDateToDof(double *SourceDate, double *DestinationDate){
 	 for (int k = 0; k < K2d; k++){
 		 for (int p = 0; p < Np2d; p++){
-			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*nlev];//the down face of the bottommost cell for each column
-			 DestinationDate[k*nlev*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*nlev + nlev];//the upper face of the topmost cell for each column
+			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1)];//the down face of the bottommost cell for each column
+			 DestinationDate[k*nlev*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1) + nlev];//the upper face of the topmost cell for each column
 			 for (int L = 1; L < nlev; L++){
-				 DestinationDate[k*nlev*Np3d + (nlev - L)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*nlev + L];  //The top layer of the down cell
-				 DestinationDate[k*nlev*Np3d + (nlev - L-1)*Np3d + p+Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*nlev + L];//The bottom layer of the up cell
+				 DestinationDate[k*nlev*Np3d + (nlev - L)*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1) + L];  //The top layer of the down cell
+				 DestinationDate[k*nlev*Np3d + (nlev - L-1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1) + L];//The bottom layer of the up cell
 			 }
 		 }
 	 }
 
+	 FILE *fp;                                     
+	 if ((fp = fopen("date.dat", "w")) == NULL){    
+		 printf("File open error!\n");
+		 exit(0);
+	 }
+	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++){
+		 fprintf(fp, "%f\n", SourceDate[i]);
+	 }      
+
+	 if (fclose(fp)){                        
+		 printf("Can not close the file!\n");
+		 exit(0);
+	 }
+ }
+
+ void CalculateBuoyanceFrequencyDate(){
+	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++)
+		 buoyanceFrequencyDate[i] = 0;
  }
