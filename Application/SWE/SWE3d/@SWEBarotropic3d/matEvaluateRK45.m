@@ -59,7 +59,8 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
     
-    date = obj.EddyViscositySolver.matUpdateEddyViscosity( obj.mesh3d(1), fphys2d, fphys, dt, time  );
+    date = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, obj.mesh3d, fphys2d, fphys, dt  )
+    
     
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );

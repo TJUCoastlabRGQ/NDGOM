@@ -11,22 +11,21 @@ double avmolu = 1.3e-6;
 /*The iteration times to calculate the friction velocity, this is set to be 2 by default*/
 int NMaxItration = 2;
 
-
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int *NumOfVertLayer, long long int buflen){
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, NumOfVertLayer, buflen);
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(NumOfVertLayer);
 }
 
-void InterpolationToCentralPoint(double *VCV, double *fphys, double *dest){
+void InterpolationToCentralPoint(double *VCV, double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d, ptrdiff_t *Np3d){
 	char *chn = "N";
 	double alpha = 1;
 	double beta = 0;
-    ptrdiff_t TempNp2d = (ptrdiff_t)Np2d, TempK3d = (ptrdiff_t)K3d, TempNp3d = (ptrdiff_t)Np3d;
+    //ptrdiff_t TempNp2d = (ptrdiff_t)Np2d, TempK3d = (ptrdiff_t)K3d, TempNp3d = (ptrdiff_t)Np3d;
     
-	dgemm(chn, chn, &TempNp2d, &TempK3d, &TempK3d, &alpha, VCV, &TempNp2d, fphys, &TempNp3d, &beta, dest, &TempNp2d);
+	dgemm(chn, chn, Np2d, K3d, Np3d, &alpha, VCV, Np2d, fphys, Np3d, &beta, dest, Np2d);
 }
 
-void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate){
+void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int nlev, int Np2d, int K2d){
 	//This has been verified by tests
 	for (int k = 0; k < K2d; k++){
 		for (int L = 1; L < nlev + 1; L++){
@@ -38,7 +37,7 @@ void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLine
 	}
 }
 
-void CalculateWaterDepth(double *H2d, double *TempLayerHeight){
+void CalculateWaterDepth(double *H2d, double *TempLayerHeight, double hcrit, int nlev, int Np2d, int K2d){
    /*if the water depth is larger than the threshold value, the layer height is calculated by the ratio of water depth to number of lyers.
    *For the current version, we only consider the equalspace division in vertical. When the water depth is less than the threshold, the water 
    *depth is set to be zero
@@ -54,7 +53,7 @@ void CalculateWaterDepth(double *H2d, double *TempLayerHeight){
 }
 
 
-void CalculateShearFrequencyDate(double *H2d, double *LayerHeight, double *huVertial, double *hvVertical, double *shearProductionDest){
+void CalculateShearFrequencyDate(double *H2d, double *LayerHeight, double *huVertial, double *hvVertical, double *shearProductionDest, double hcrit, int nlev, int Np2d, int K2d){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 	for (int p = 0; p < Np2d*K2d; p++){
 		if (H2d[p] >= hcrit){
@@ -70,7 +69,7 @@ void CalculateShearFrequencyDate(double *H2d, double *LayerHeight, double *huVer
 
 }
 
-void CalculateLengthScaleAndShearVelocity(double *H2d, double* LayerHeight, double *huvl, double *hvvl, double* z0b, double *utaub, double *z0s, double *utaus){
+void CalculateLengthScaleAndShearVelocity(double *H2d, double* LayerHeight, double *huvl, double *hvvl, double* z0b, double *utaub, double *z0s, double *utaus, double hcrit, int nlev, int Np2d, int K2d){
 	/*for surface friction length, another way is the charnock method*/
 	for (int p = 0; p < Np2d * K2d; p++){
 		z0s[p] = z0s_min;
@@ -87,7 +86,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double* LayerHeight, doub
 	}
 }
 
- void DGDoTurbulence(double *TimeStep, double *H2d, double *utaus, double *utaub, double *z0s, double *z0b, double *LayerHeight, double *NN, double *SS, double *Grass, double *EddyViscosity){
+ void DGDoTurbulence(double *TimeStep, double *H2d, double *utaus, double *utaub, double *z0s, double *z0b, double *LayerHeight, double *NN, double *SS, double *Grass, double *EddyViscosity, double hcrit, long long int nlev, int Np2d, int K2d){
 	 //For the current version, grass is not considered
 	 for (int p = 0; p < Np2d * K2d; p++){
 		 if (H2d[p] >= hcrit){
@@ -101,7 +100,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double* LayerHeight, doub
 
 }
 
- void mapVedgeDateToDof(double *SourceDate, double *DestinationDate){
+ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int nlev, int Np2d, int K2d, int Np3d){
 	 for (int k = 0; k < K2d; k++){
 		 for (int p = 0; p < Np2d; p++){
 			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*nlev];//the down face of the bottommost cell for each column
@@ -113,4 +112,8 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double* LayerHeight, doub
 		 }
 	 }
 
+ }
+
+ void printTestNew(){
+	 mexPrintf("Here again we did nothing, we just want to check whether the suppose stands.\n");
  }

@@ -50,7 +50,7 @@ for n = 1:obj.Nmesh
     %> H in extended three dimensional fields
     obj.fphys{n}(:, :, 4) = mesh3d(n).Extend2dField( obj.fphys2d{n}(:, :, 1) );
     %> the vertical viscosity term is initialized to be 10^(-4)
-    obj.fphys{n}(:,:,5) = 1e-4* ones(size(mesh3d(n).x)); 
+%     obj.fphys{n}(:,:,5) = 1e-4* ones(size(mesh3d(n).x)); 
     %> Initially, the bottom roughness is not considered
     obj.Cf{n} =  0.0025/1000 * ones(size(mesh2d(n).y)); 
     %> Z in extended three dimensional fields

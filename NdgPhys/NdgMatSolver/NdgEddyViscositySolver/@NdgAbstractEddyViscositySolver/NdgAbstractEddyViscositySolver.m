@@ -13,8 +13,8 @@ classdef NdgAbstractEddyViscositySolver < handle
         %> @param[in] fphys the three dimensional physical field, this is used to calculate the shear production and buoyance production related terms
         %> @param[in] dt the time step of the three-dimensional shallow water model, this variable is required for both the TKE equation and the turbulent length scale related equation if GOTM adopted
         %> @param[in] time the time point at the current step, this is used to check whether this is the final point of the simulation, if so, all the resources allocated at the initial stage would be deallocated.
-        matUpdateEddyViscosity( obj, mesh3d, fphys2d, fphys, dt, time );
-        
+%         matUpdateEddyViscosity( obj, mesh3d, fphys2d, fphys, dt, time );
+        EddyViscosity = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt  )
     end
     
     methods( Abstract, Access = protected )
@@ -24,8 +24,8 @@ classdef NdgAbstractEddyViscositySolver < handle
         %> @param[in] mesh2d the two-dimensional mesh object, and the cell number and interpolation point number contained in this object is used to initialize the eddy viscosity related matrix during GOTM computation
         %> @param[in] mesh3d the three-dimensional mesh object, and the cell number and interpolation point number contained in this object is used to initialize the eddy viscosity related matrix during GOTM computation
         %> @param[in] hcrit the critical water depth, if the depth is less than this value, the velocity is set to be zero.        
-        matInitEddyViscosity(obj, physClass, mesh2d, mesh3d, hcrit );
-        
+%         matInitEddyViscosity(obj, physClass, mesh2d, mesh3d, hcrit );
+        matInitEddyViscosity(obj, physClass, mesh3d);
     end
     
 end

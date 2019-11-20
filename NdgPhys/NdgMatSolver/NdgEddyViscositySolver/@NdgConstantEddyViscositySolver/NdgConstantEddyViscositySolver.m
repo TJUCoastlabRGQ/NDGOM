@@ -9,13 +9,14 @@ classdef NdgConstantEddyViscositySolver < NdgAbstractEddyViscositySolver
                 obj.matInitEddyViscosity(physClass, physClass.mesh2d, physClass.mesh3d, physClass.hcrit);
         end
         
-        function  EddyViscosity = matUpdateEddyViscosity( obj, ~, ~, fphys, ~, ~  )
+        function  EddyViscosity = matUpdateEddyViscosity( obj, ~, ~, ~, ~, fphys, ~  )
             EddyViscosity = fphys(:,:,5);
-        end
+        end            
+        
     end
     
     methods(Access = protected)
-        function matInitEddyViscosity(obj, physClass, ~, ~, ~)
+        function matInitEddyViscosity(obj, physClass, ~)
           if  obj.option.isKey('ConstantEddyViscosityValue')
               value = obj.getOption('ConstantEddyViscosityValue');
               disp('Value of the constant eddy viscosity is set to be: %f\n',value);
@@ -30,4 +31,3 @@ classdef NdgConstantEddyViscositySolver < NdgAbstractEddyViscositySolver
     end
     
 end
-

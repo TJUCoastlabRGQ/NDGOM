@@ -2,7 +2,7 @@
 #include <string.h>
 
 #define NLHS 0
-#define NRHS 9
+#define NRHS 2
 
 
 
@@ -23,7 +23,7 @@
 
 /*Whether GOTM is initialized or not, this variable is false by default*/
 char *Initialized = "False";
-
+void printTest();
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	/* check input & output */
@@ -37,21 +37,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		mexPrintf("%d inputs required.\n", NLHS);
 	}
 
-	 K2d = (int)mxGetScalar(prhs[0]);
-	 Np2d = (int)mxGetScalar(prhs[1]);
-	 K3d = (int)mxGetScalar(prhs[2]);
-	 Np3d = (int)mxGetScalar(prhs[3]);
-	 nlev = (long long int)mxGetScalar(prhs[4]);
-	 hcrit = (double)mxGetScalar(prhs[5]);
-	 h0b = (double)mxGetScalar(prhs[6]);
-	 finalTime = (double)mxGetScalar(prhs[7]);
+//	 K2d = (int)mxGetScalar(prhs[0]);
+//	 Np2d = (int)mxGetScalar(prhs[1]);
+//	 K3d = (int)mxGetScalar(prhs[2]);
+//	 Np3d = (int)mxGetScalar(prhs[3]);
+	long long int nlev = (long long int)mxGetScalar(prhs[0]);
+//	 hcrit = (double)mxGetScalar(prhs[5]);
+//	 h0b = (double)mxGetScalar(prhs[6]);
+//	 finalTime = (double)mxGetScalar(prhs[7]);
 	
 
 	char *buf;
 	long long int buflen;
 	int status;
 
-	if (!mxIsChar(prhs[8]) || (mxGetM(prhs[8]) != 1))  {
+	if (!mxIsChar(prhs[1]) || (mxGetM(prhs[1]) != 1))  {
 		mexErrMsgIdAndTxt("MATLAB:mxmalloc:invalidInput",
 			"Input argument must be the name of the file that contain the information of the turbulence model.");
 	}
@@ -59,16 +59,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/* Get number of characters in the input string.  Allocate enough
 	memory to hold the converted string. */
 
-	buflen = (long long int)mxGetN(prhs[8]) + 1;
+	buflen = (long long int)mxGetN(prhs[1]) + 1;
 	buf = mxMalloc(buflen);
 
 	/* Copy the string data into buf. */
-	status = mxGetString(prhs[8], buf, (mwSize)buflen);
+	status = mxGetString(prhs[1], buf, (mwSize)buflen);
 
 	long long int  _nNamelist = 2;
 
 	if (!strcmp("True", Initialized)){
 		mexPrintf("The turbulence model has been initialized already\n");
+		printTest();
+		printTestNew();
 	}
 	else{
 		mexPrintf("The turbulence model is not initialized, and we are ready to initialize it\n");
@@ -76,5 +78,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		Initialized = "True";
 	}
 
+	printTest();
+	printTestNew();
 
+}
+
+void printTest(){
+	mexPrintf("Here we did nothing, we just want to check whether the suppose stands.\n");
 }
