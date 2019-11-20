@@ -315,8 +315,7 @@ FuncHandle(path, srcfile, libfile);
 path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
 libfile = {['.\lib\GOTM\','*.obj'],...
     [path,'mxGOTM.c']};
-srcfile = {[path,'mxUpdateEddyViscosity.c'],...
-    [path,'mxEddyViscosityByGOTMInit.c']};
+srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
 
 

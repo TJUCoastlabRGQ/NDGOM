@@ -1,4 +1,5 @@
 #include "mxGOTM.h"
+#include<string.h>
 //#include <blas.h>
 
 //#define NLHS 1
@@ -31,8 +32,8 @@ double *numGOTM = NULL;
 double *layerHeight = NULL;
 double *huCentralDate = NULL;
 double *hvCentralDate = NULL;
-double *huVertialLine = NULL;
-double *hvVertialLine = NULL;
+double *huVerticalLine = NULL;
+double *hvVerticalLine = NULL;
 double *shearFrequencyDate = NULL;
 double *buoyanceFrequencyDate = NULL;
 double *BottomFrictionLength = NULL;
@@ -73,7 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		h0b = mxGetScalar(prhs[14]);
 		VCV = (double*)malloc(sizeof(double)*(int)mxGetNumberOfElements(prhs[7]));
 		double *PtrVCV = mxGetPr(prhs[7]);
-		for (int i = 0; i < (int)mxGetNumberOfElements(prhs[7]))
+		for (int i = 0; i < (int)mxGetNumberOfElements(prhs[7]); i++)
 			VCV[i] = PtrVCV[i];
 		memoryCheck(VCV);
 		int Num2d = Np2d*K2d;
@@ -86,8 +87,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		layerHeight = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(layerHeight);
 		huCentralDate = (double*)malloc(sizeof(double)*(Np2d*K3d)); memoryCheck(huCentralDate);
 		hvCentralDate = (double*)malloc(sizeof(double)*(Np2d*K3d)); memoryCheck(hvCentralDate);
-		huVertialLine = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(huVerticalLine);
-		hvVertialLine = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(hvVerticalLine);
+		huVerticalLine = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(huVerticalLine);
+		hvVerticalLine = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(hvVerticalLine);
 		shearFrequencyDate = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(shearFrequencyDate);
 		buoyanceFrequencyDate = (double*)malloc(sizeof(double)*(Num2d*Interface)); memoryCheck(buoyanceFrequencyDate);
 		BottomFrictionLength = (double*)malloc(sizeof(double)*Num2d); memoryCheck(BottomFrictionLength);
@@ -109,7 +110,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		buf = mxMalloc(buflen);
 		/* Copy the string data into buf. */
 		status = mxGetString(prhs[11], buf, (mwSize)buflen);
-		InitTurbulenceModelGOTM(&_nNamelist, buf, &nlev, buflen - 1);
+		long long int _nNamelist = 2;
+		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1);
 		Initialized = "True";
 	}
 	else if (finalTime = mxGetScalar(prhs[13])){
@@ -117,7 +119,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(nuhGOTM); free(numGOTM); free(tkeGOTM); free(epsGOTM); free(LGOTM);
 		free(layerHeight);
 		free(huCentralDate); free(hvCentralDate);
-		free(huVertialLine); free(hvVertialLine);
+		free(huVerticalLine); free(hvVerticalLine);
 		free(shearFrequencyDate); free(buoyanceFrequencyDate);
 		free(BottomFrictionLength); free(BottomFrictionVelocity);
 		free(SurfaceFrictionLength);free(SurfaceFrictionVelocity);
@@ -125,35 +127,35 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	else
 	{
-
-	}
-	double* h = mxGetPr(prhs[7]);
-	double* hu = mxGetPr(prhs[8]);
-	double* hv = mxGetPr(prhs[9]);
-	double dt = (double)mxGetScalar(prhs[10]);
-	plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
-	double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
+		double* h = mxGetPr(prhs[8]);
+		double* hu = mxGetPr(prhs[9]);
+		double* hv = mxGetPr(prhs[10]);
+		double dt = (double)mxGetScalar(prhs[12]);
+		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
+		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
 		// TDiffusionParameter to be continued
 		// SDiffusionParameter to be continued
 
-	InterpolationToCentralPoint(VCV, hu, PtrhuCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
-	InterpolationToCentralPoint(VCV, hv, PtrhvCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
+		ptrdiff_t TempNp2d = (ptrdiff_t)Np2d;
+		ptrdiff_t TempNp3d = (ptrdiff_t)Np3d;
+		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
+
+		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
+		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
 		//Tc to be continued
 		//Sc to be continued
-	mapCentralPointDateToVerticalDate(PtrhuCentralDate, PtrhuVertialLine,  nlev,  Np2d,  K2d);
-	mapCentralPointDateToVerticalDate(PtrhvCentralDate, PtrhvVertialLine,  nlev,  Np2d,  K2d);
+		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine);
+		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine);
 		//Tvl to be continued
 		//Svl to be continued
-	CalculateWaterDepth(h, PtrLayerHeight, hcrit, nlev, Np2d, K2d);
+		CalculateWaterDepth(h);
 
-	CalculateShearFrequencyDate(h, PtrLayerHeight, PtrhuVertialLine, PtrhvVertialLine, PtrshearFrequency, hcrit, nlev, Np2d, K2d);
+		CalculateShearFrequencyDate(h);
 
-	CalculateLengthScaleAndShearVelocity(h, PtrLayerHeight, PtrhuVertialLine, PtrhvVertialLine, PtrBottomFritionLength, \
-			PtrBottomFritionVelocity, PtrSurfaceFrictionLength, PtrSurfaceFritionVelocity, hcrit, nlev, Np2d, K2d);
+		CalculateLengthScaleAndShearVelocity(h);
 
-	DGDoTurbulence(&dt, h, PtrSurfaceFritionVelocity, PtrBottomFritionVelocity, PtrSurfaceFrictionLength, PtrBottomFritionLength, \
-			PtrLayerHeight, PtrbuoyanceFrequencyDate, PtrshearFrequency, NULL, PtreddyViscosity, hcrit, (long long int)nlev, Np2d, K2d);
+		DGDoTurbulence(&dt, h, NULL);
 
-	mapVedgeDateToDof(PtreddyViscosity, PtrOutEddyViscosity, nlev, Np2d, K2d, Np3d);
-
+		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity);
+	}
 }

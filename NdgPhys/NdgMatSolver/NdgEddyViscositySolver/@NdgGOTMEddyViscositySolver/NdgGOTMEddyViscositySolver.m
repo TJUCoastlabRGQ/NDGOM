@@ -23,11 +23,11 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
             obj.matInitEddyViscosity(physClass, physClass.mesh3d);
         end
         
-        function  EddyViscosity = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt  )  %fphys2d
-            H2D = [1 2 3 4 5 6 7 8 9];
-           Hu = 0.1:0.1:5.4;
-           Hv = 0.1:0.1:5.4;
-           dt = 0.03;
+        function  EddyViscosity = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt, time  )  %fphys2d
+%             H2D = [1 2 3 4 5 6 7 8 9];
+%            Hu = 0.1:0.1:5.4;
+%            Hv = 0.1:0.1:5.4;
+%            dt = 0.03;
 %            EddyViscosity = mxUpdateEddyViscosity(9, 1, 18, ...
 %                3, 3, physClass.hcrit, mesh3d(1).cell.VCV, H2D, Hu, Hv, dt);           
 %            EddyViscosity = mxUpdateEddyViscosity(mesh2d(1).cell.Np, mesh2d(1).K, mesh3d(1).cell.Np, ...
@@ -42,11 +42,6 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
         function matInitEddyViscosity(obj, physClass, mesh3d)
             %We note that, at present only one mesh can be considered when
             %initialize the GOTM model
-            obj.TKE = zeros(mesh3d(1).Nz+1, physClass.mesh2d(1).K*physClass.mesh2d(1).cell.Np);
-            obj.EPS = zeros(mesh3d(1).Nz+1, physClass.mesh2d(1).K*physClass.mesh2d(1).cell.Np);
-            obj.L = zeros(mesh3d(1).Nz+1, physClass.mesh2d(1).K*physClass.mesh2d(1).cell.Np);
-            obj.NUM = zeros(mesh3d(1).Nz+1, physClass.mesh2d(1).K*physClass.mesh2d(1).cell.Np);
-            obj.NUH = zeros(mesh3d(1).Nz+1, physClass.mesh2d(1).K*physClass.mesh2d(1).cell.Np);
             
             physClass.fphys{1}(:,:,5) = 1.0e-8*ones(mesh3d(1).Np,mesh3d(1).K);
             

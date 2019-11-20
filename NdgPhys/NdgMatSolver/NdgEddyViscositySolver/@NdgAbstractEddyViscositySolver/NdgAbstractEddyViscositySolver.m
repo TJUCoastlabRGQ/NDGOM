@@ -14,7 +14,7 @@ classdef NdgAbstractEddyViscositySolver < handle
         %> @param[in] dt the time step of the three-dimensional shallow water model, this variable is required for both the TKE equation and the turbulent length scale related equation if GOTM adopted
         %> @param[in] time the time point at the current step, this is used to check whether this is the final point of the simulation, if so, all the resources allocated at the initial stage would be deallocated.
 %         matUpdateEddyViscosity( obj, mesh3d, fphys2d, fphys, dt, time );
-        EddyViscosity = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt  )
+        EddyViscosity = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt, time  )
     end
     
     methods( Abstract, Access = protected )
