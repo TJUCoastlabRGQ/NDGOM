@@ -52,8 +52,12 @@ void __stdcall TURBULENCE_mp_INIT_TURBULENCE(long long int *, char *, long long 
 
 void __stdcall MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(long long int *);
 
+void __stdcall MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
+
 void __stdcall TURBULENCE_mp_DO_TURBULENCE(long long int *, double *, double *, double *,
 	double *, double *, double *, double *, double *, double *, double *);
+
+void __stdcall TURBULENCE_mp_CLEAN_TURBULENCE();
 
 double * TURBULENCE_mp_TKE;
 double * TURBULENCE_mp_EPS;

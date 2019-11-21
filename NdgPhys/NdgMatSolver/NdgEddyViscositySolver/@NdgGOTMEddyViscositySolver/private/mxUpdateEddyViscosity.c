@@ -1,5 +1,6 @@
 #include "mxGOTM.h"
 #include<string.h>
+#include<math.h>
 //#include <blas.h>
 
 //#define NLHS 1
@@ -60,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	//	mexPrintf("Matlab:%s:InvalidNumberOutput,\n", __FILE__);
 	//	mexPrintf("%d inputs required.\n", NLHS);
 	//}
-
+	double time = mxGetScalar(prhs[13]);
 	if (strcmp("True", Initialized)){
 		mexPrintf("The turbulence model has not been initialized yet, and we are ready to do it\n");
 		/*Memory allocation part*/
@@ -114,18 +115,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1);
 		Initialized = "True";
 	}
-	if (finalTime = mxGetScalar(prhs[13])){
-		free(VCV);
-		free(nuhGOTM); free(numGOTM); free(tkeGOTM); free(epsGOTM); free(LGOTM);
-		free(layerHeight);
-		free(huCentralDate); free(hvCentralDate);
-		free(huVerticalLine); free(hvVerticalLine);
-		free(shearFrequencyDate); free(buoyanceFrequencyDate);
-		free(BottomFrictionLength); free(BottomFrictionVelocity);
-		free(SurfaceFrictionLength);free(SurfaceFrictionVelocity);
-		free(eddyViscosityDate);
-		Initialized = "False";
-	}
+	/*Simulation is continuing*/
+	if (fabs(finalTime - time)>=1e-15){
 		double* h = mxGetPr(prhs[8]);
 		double* hu = mxGetPr(prhs[9]);
 		double* hv = mxGetPr(prhs[10]);
@@ -158,4 +149,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		DGDoTurbulence(&dt, h, NULL);
 
 		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity);
+
+	}
+	else{//Simulation is over
+		free(VCV);
+		free(nuhGOTM); free(numGOTM); free(tkeGOTM); free(epsGOTM); free(LGOTM);
+		free(layerHeight);
+		free(huCentralDate); free(hvCentralDate);
+		free(huVerticalLine); free(hvVerticalLine);
+		free(shearFrequencyDate); free(buoyanceFrequencyDate);
+		free(BottomFrictionLength); free(BottomFrictionVelocity);
+		free(SurfaceFrictionLength); free(SurfaceFrictionVelocity);
+		free(eddyViscosityDate);
+		TURBULENCE_mp_CLEAN_TURBULENCE();
+		MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
+		Initialized = "False";
+		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
+	}
+
 }

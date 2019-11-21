@@ -13,7 +13,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 65;
+        finalTime = 20;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
@@ -65,7 +65,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 65;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
