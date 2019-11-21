@@ -1,41 +1,35 @@
-classdef StandingWaveInAClosedChannel < SWEBarotropic3d
+classdef BottomBoundaryLayerCase < SWEBarotropic3d
     %STANDINGWAVEINACLOSECHANNEL 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties ( Constant )
         %> channel length
-        ChLength = 100;
-        %> channel width
-        ChWidth = 6;
+        ChLength = 10000;
         %> channel depth
-        H0 = 7.612;
+        H0 = 15;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 10;
+        finalTime = 21600;
         hcrit = 0.001;
         % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
+        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@BottomBoundaryLayerCase','\gotmturb.nml');
     end
     
     properties
         dt
-        miu0
-        Lambda = 20;
-        A = 0.1;
     end
     
     methods
-        function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+        function obj = BottomBoundaryLayerCase( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 0.01;
-            obj.miu0{1} = 0;
+            obj.dt = 1.2;
             obj.Cf{1} = 0.0025/1000;
         end
         
@@ -60,12 +54,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*mesh2d.x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) = -mesh2d.x *10^(-5) - fphys2d{m}(:, :, 4);
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 21600;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -92,7 +86,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
+    [ -obj.ChLength/2, obj.ChLength/2 ], 0.1*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.1*ceil(obj.ChLength/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

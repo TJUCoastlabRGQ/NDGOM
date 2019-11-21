@@ -11,7 +11,7 @@ double z0s_min = 0.02;
 /*this value is used for computing bottom roughness*/
 double avmolu = 1.3e-6;
 /*The iteration times to calculate the friction velocity, this is set to be 2 by default*/
-int NMaxItration = 2;
+int NMaxItration = 3;
 
 void getGotmDate(int index){
 	for (int i = 0; i < nlev + 1; i++){
@@ -102,7 +102,10 @@ void CalculateLengthScaleAndShearVelocity(double *H2d){
 		if (H2d[p] >= hcrit){
 			for (int itera = 0; itera < NMaxItration; itera++){
 				Tempz0b = 0.1*avmolu / max(avmolu, BottomFrictionVelocity[p]) + 0.03*h0b;
-				double rr = kappa / log((Tempz0b + layerHeight[p*(nlev + 1) + 1] / 2) / Tempz0b) + 0.03*h0b;
+				/*$rr=\frac{\kappa}{log(\frac{z0b+\frac{h(1)}{2}}{z0b})$, where z0b is the bottom roughness length and h(1) is the height of the first layer of cell,
+				*detail of this part can refer to the friction.F90 file in GOTM
+				*/
+				double rr = kappa / log((Tempz0b + layerHeight[p*(nlev + 1) + 1] / 2) / Tempz0b);
 				BottomFrictionVelocity[p] = rr * sqrt(pow((huVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2) + pow((hvVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2));
 			}
 			BottomFrictionLength[p] = Tempz0b;

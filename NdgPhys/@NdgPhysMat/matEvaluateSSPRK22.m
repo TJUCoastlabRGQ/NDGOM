@@ -48,7 +48,7 @@ while( time < ftime )
     %     obj.meshUnion(1).draw( fphys{1}(:,:,1) );
     %     drawnow;
 %     visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) );
-    %     visual.drawResult( fphys{1}(:, :, 6) );
+        visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys );
     timeRatio = time / ftime;
