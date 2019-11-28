@@ -29,7 +29,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 1.2;
+            obj.dt = 0.5;
             obj.Cf{1} = 0.0025/1000;
         end
         

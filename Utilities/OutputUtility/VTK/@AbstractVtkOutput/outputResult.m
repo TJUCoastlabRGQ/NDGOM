@@ -5,7 +5,7 @@ function outputResult(obj, time, field)
 %
 % Long description
     
-obj.outputStepResult( obj, obj.outputStep, field );
+obj.outputStepResult( obj.outputStep, field );
 % filename = [ obj.casename, '/', obj.casename, '.', ...
 %     num2str(obj.outputStep, '%04d'), '.vtk' ];
 % fp = fopen(filename, 'w');

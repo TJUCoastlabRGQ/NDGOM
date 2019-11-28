@@ -52,7 +52,7 @@ end
 function [ outputObj ] = initNcOutput( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex ) 
 outputObj = [];
 for m = 1:physMat.Nmesh
-    filename = [];
+    filename = cell(OutputFileNum, 1);
     for n = 1:OutputFileNum
     filename{n} = [ casename,'/',casename, '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
     end

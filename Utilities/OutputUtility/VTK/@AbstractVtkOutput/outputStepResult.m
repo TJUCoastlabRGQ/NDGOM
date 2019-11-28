@@ -9,7 +9,7 @@ filename = [ obj.casename, '/', obj.casename, '.', ...
 num2str(step, '%04d'), '.vtk' ];
 fp = fopen(filename, 'w');
 
-fprintf(fp, '# vtk DataFile Version 2\n');
+fprintf(fp, '# vtk DataFile Version 2.0\n');
 fprintf(fp, ['NDG-FEM ', obj.casename, ' Simulation\n']);
 fprintf(fp, 'ASCII\n');
 fprintf(fp, 'DATASET UNSTRUCTURED_GRID\n');

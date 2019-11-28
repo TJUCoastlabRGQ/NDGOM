@@ -59,7 +59,7 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
         
-    visual.drawResult( fphys2d{1}(:,:,1) );
+%     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
     
@@ -73,7 +73,7 @@ while( time < ftime )
     
     
     
-    obj.matUpdateOutputResult( time, fphys2d, fphys );
+%     obj.matUpdateOutputResult( time, fphys2d, fphys );
     
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
@@ -81,7 +81,7 @@ end
 hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
-obj.matUpdateFinalResult( time, fphys );
+% obj.matUpdateFinalResult( time, fphys );
 % obj.outputFile.closeOutputFile();
 end
 

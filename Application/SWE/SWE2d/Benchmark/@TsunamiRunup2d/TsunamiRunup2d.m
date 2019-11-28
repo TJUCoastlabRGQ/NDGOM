@@ -1,8 +1,6 @@
 classdef TsunamiRunup2d < SWEPreBlanaced2d
 
     properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
         n = 0.01.^2
         rho = 1000
     end
@@ -15,6 +13,7 @@ classdef TsunamiRunup2d < SWEPreBlanaced2d
         function obj = TsunamiRunup2d( N )
             meshfile = [ fileparts( mfilename('fullpath') ), '\mesh\24133quad.msh' ];
             mesh = makeGmshFileUMeshUnion2d( N, meshfile );
+            obj.hmin = 1e-3;
             obj.initPhysFromOptions( mesh );
 
             % initialize boundary 
@@ -64,7 +63,7 @@ classdef TsunamiRunup2d < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
