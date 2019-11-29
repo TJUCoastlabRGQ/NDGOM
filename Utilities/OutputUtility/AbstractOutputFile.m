@@ -9,7 +9,7 @@ classdef AbstractOutputFile < handle
         outputTime
     end
 
-    properties ( SetAccess = protected )
+    properties
         timeInterval
         timePrevious
         outputStep

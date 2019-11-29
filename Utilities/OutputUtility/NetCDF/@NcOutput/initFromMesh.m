@@ -23,7 +23,7 @@ varField = NdgNcVar('fphys', [dimNp, dimK, dimNfield, dimTime], enumNcData.NC_DO
 
 % define file
 % obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
-obj.ncfile = NdgNcFile( filename, ...
+obj.ncfile = NdgNcFile( obj, filename, ...
     [dimTime, dimK, dimNp, dimNfield], [varTime, varField]);
 
 if floor(outputIntervalNum/numel(obj.ncfile.fileName))<1
