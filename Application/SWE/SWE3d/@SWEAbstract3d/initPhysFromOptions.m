@@ -64,5 +64,5 @@ for n = 1:obj.Nmesh
 end
 % Setup the output NetCDF file object
 % initOutput( obj, mesh2d, mesh3d );
-obj.matInitOutput;
+obj.outputFile = obj.matInitOutput;
 end

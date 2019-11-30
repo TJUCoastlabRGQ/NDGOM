@@ -161,8 +161,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(BottomFrictionLength); free(BottomFrictionVelocity);
 		free(SurfaceFrictionLength); free(SurfaceFrictionVelocity);
 		free(eddyViscosityDate);
-		TURBULENCE_mp_CLEAN_TURBULENCE();
-		MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
+		//TURBULENCE_mp_CLEAN_TURBULENCE();
+		//MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 		Initialized = "False";
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 	}

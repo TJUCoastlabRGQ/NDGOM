@@ -2,8 +2,8 @@ function initFromMesh( obj, filename2d, filename3d, outputIntervalNum, varIndex2
 
 % set vtk output
 
-obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval);
-obj.vtkOutput3d = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval3d);
+obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex2d);
+obj.vtkOutput3d = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval, varIndex3d);
 % obj.vtkOutput.initFromMesh( mesh );
 
 dimTime = NdgNcDim('Nt', 0);
@@ -25,30 +25,35 @@ varField3 = NdgNcVar('fphys3d', ...
     [ dimNp3, dimK3, dimNfield3, dimTime], ...
     enumNcData.NC_DOUBLE);
 
-obj.ncfile = NdgNcFile( obj, filename2d, ...
+obj.ncfile = NdgNcFile( obj, ...
     [dimTime, dimK2, dimNp2, dimNfield2], ...
     [varTime, varField2]);
 
-obj.ncfile3d = NdgNcFile( obj, filename3d, ...
+obj.ncfile3d = NdgNcFile( obj, ...
     [dimTime,dimK3, dimNp3, dimNfield3], ...
     [varTime, varField3]);
 %
-if floor(outputIntervalNum/numel(obj.ncfile.fileName))<1
+
+obj.ncid = zeros(size(filename2d));obj.ncid3d = zeros(size(filename3d));
+obj.isOpen = false * ones(size(filename2d));obj.isOpen3d = false * ones(size(filename3d));
+obj.fileOrder = 1; obj.fileOrder3d = 1;
+obj.Numfile = numel(filename2d);
+obj.fileName = filename2d;obj.fileName3d = filename3d;        
+
+if floor(outputIntervalNum/numel(obj.fileName))<1
     error( 'Too many output nc file!' );
 else
-    obj.ncfile.StepPerFile = floor(outputIntervalNum/outputIntervalNum);
-    obj.ncfile3d.StepPerFile = floor(outputIntervalNum/outputIntervalNum);
+    obj.StepPerFile = floor(outputIntervalNum/outputIntervalNum);
 end
 %
 % obj.ncfile.varIndex = varIndex;
 % % init file
-for n = 1:numel(obj.ncfile.fileName)
-    obj.ncfile.defineIntoNetcdfFile(n);
-    obj.ncfile3d.defineIntoNetcdfFile(n);
+for n = 1:numel(obj.fileName)
+    obj.defineIntoNetcdfFile(n);
 end
 % % set properties
 obj.timeVarableId = varTime.id;
-% obj.timeVarableId3d = varTime.id;
+obj.timeVarableId3d = varTime.id;
 obj.fieldVarableId = varField2.id;
 obj.fieldVarableId3d = varField3.id;
 end

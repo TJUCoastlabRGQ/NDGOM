@@ -13,7 +13,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
             for m = 1:physClass.Nmesh
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
-                mesh3d = physClass.mesh3d(m);
+                mesh3d = physClass.meshUnion(m);
                 mesh2d = physClass.mesh2d(m);
                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );

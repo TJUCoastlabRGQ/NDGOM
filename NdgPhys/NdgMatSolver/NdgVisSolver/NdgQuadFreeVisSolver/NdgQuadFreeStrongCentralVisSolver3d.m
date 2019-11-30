@@ -22,7 +22,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         function matEvaluateAuxiVarVolumeKernel( obj, fphys )
           %> This part is used to calculated the volume contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'  
             for m = 1:obj.Nmesh
-                mesh = obj.phys.mesh3d(m);
+                mesh = obj.phys.meshUnion(m);
                 dfdr = mesh.cell.Dt * fphys{m}(:, :, obj.varId(1));
                 dfds = mesh.cell.Dt * fphys{m}(:, :, obj.varId(2));
                 obj.pzx{m} = mesh.tz .* dfdr;
@@ -33,7 +33,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         function matEvaluateAuxiVarSurfaceKernel( obj, fphys3d )
             %> This part is used to calculated the surface contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'
             for m = 1:obj.Nmesh
-                mesh = obj.phys.mesh3d(m);
+                mesh = obj.phys.meshUnion(m);
                 edge3d = mesh.BottomEdge;
                 [ fm, fp ] = edge3d.matEvaluateSurfValue( fphys3d );
                 FluxM_1(:, :, 1) = edge3d.nz .* fm(:, :, 1);
@@ -103,7 +103,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         
         function matEvaluateOriVarVolumeKernel( obj, fphys )
             for m = 1:obj.Nmesh
-                mesh = obj.phys.mesh3d(m);
+                mesh = obj.phys.meshUnion(m);
                 
                 obj.phys.frhs{m}(:, :, 1) = obj.phys.frhs{m}(:, :, 1) + ...
                     mesh.rz .* (mesh.cell.Dr * obj.pzx{m}) + mesh.sz .* (mesh.cell.Ds * obj.pzx{m})...
@@ -116,7 +116,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
         
         function matEvaluateOriVarSurfaceKernel( obj, fphys )
             for m = 1:obj.Nmesh
-                mesh = obj.phys.mesh3d(m);
+                mesh = obj.phys.meshUnion(m);
                 %> Before here, pzx is equal to '$\frac{\partial hu}{\partial \sigma}$' and pzy '$\frac{\partial hv}{\partial \sigma}$'
                 %> for the subsequent calculation, they are firstly multiplied by '$\frac{\mu}{H^2}$'
                 obj.pzx{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzx{m};

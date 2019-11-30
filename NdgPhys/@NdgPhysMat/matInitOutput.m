@@ -103,7 +103,7 @@ for m = 1:physMat.Nmesh
         filename3d{n} = [ casename,'/3d/',casename,'-3d', '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
     end
     outputObj = [ outputObj, NcOutput3d( physMat, casename, OutputFieldNum2d, OutputFieldNum3d, dt, varIndex2d, varIndex3d ) ];
-    outputObj(m).initFromMesh( filename2d, filename3d, outputIntervalNum );
+    outputObj(m).initFromMesh( filename2d, filename3d, outputIntervalNum, varIndex2d, varIndex3d );
 end
 end
 

@@ -13,8 +13,8 @@ for n = 1:obj.Nmesh
     K2 = obj.mesh2d(n).K;
     resQ2d{n} = zeros( Np2, K2, 1 );
     
-    Np3 = obj.mesh3d(n).cell.Np;
-    K3 = obj.mesh3d(n).K;
+    Np3 = obj.meshUnion(1).cell.Np;
+    K3 = obj.meshUnion(1).K;
     resQ3d{n} = zeros( Np3, K3, 2 );
 end
 
@@ -44,7 +44,7 @@ while( time < ftime )
             fphys2d{n}(:,:,1) = fphys2d{n}(:,:,1) + rk4b(intRK) * resQ2d{n};
             fphys{n}(:,:,1:2) = fphys{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
             fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
-                obj.mesh3d(n), fphys2d{n}, fphys{n} );
+                obj.meshUnion(n), fphys2d{n}, fphys{n} );
             
             fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 1) );
             fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 2) );
@@ -63,7 +63,7 @@ while( time < ftime )
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
     
-    fphys{1}(:,:,5) = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, obj.mesh3d, fphys2d, fphys, dt , time );
+    fphys{1}(:,:,5) = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, obj.meshUnion(1), fphys2d, fphys, dt , time );
     
     display(time);
     
@@ -81,7 +81,7 @@ end
 hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
-% obj.matUpdateFinalResult( time, fphys );
+obj.matUpdateFinalResult( time, fphys2d, fphys );
 % obj.outputFile.closeOutputFile();
 end
 

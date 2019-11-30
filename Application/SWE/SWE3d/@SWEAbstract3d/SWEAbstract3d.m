@@ -113,7 +113,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matUpdateOutputResult( obj, time, fphys2d, fphys );
         
-        matUpdateFinalResult( obj, time, fphys );
+        matUpdateFinalResult( obj, time, fphys2d, fphys );
         
         matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
         

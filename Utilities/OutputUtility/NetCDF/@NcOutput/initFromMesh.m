@@ -21,21 +21,27 @@ dimNfield = NdgNcDim('Nvar', obj.Nfield);
 varTime = NdgNcVar('time', dimTime, enumNcData.NC_DOUBLE );
 varField = NdgNcVar('fphys', [dimNp, dimK, dimNfield, dimTime], enumNcData.NC_DOUBLE);
 
+
+obj.ncid = zeros(size(filename));
+obj.isOpen = false * ones(size(filename));
+obj.fileOrder = 1;
+obj.Numfile = numel(filename);
+obj.fileName = filename;
 % define file
 % obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
-obj.ncfile = NdgNcFile( obj, filename, ...
+obj.ncfile = NdgNcFile( obj, ...
     [dimTime, dimK, dimNp, dimNfield], [varTime, varField]);
 
-if floor(outputIntervalNum/numel(obj.ncfile.fileName))<1
+if floor(outputIntervalNum/numel(obj.fileName))<1
     error( 'Too many output nc file!' );
 else
-    obj.ncfile.StepPerFile = floor(outputIntervalNum/numel(obj.ncfile.fileName));
+    obj.StepPerFile = floor(outputIntervalNum/numel(obj.fileName));
 end
 
 % obj.ncfile.varIndex = varIndex;
 % init file
-for n = 1:numel(obj.ncfile.fileName)
-obj.ncfile.defineIntoNetcdfFile(n);
+for n = 1:numel(obj.fileName)
+obj.defineIntoNetcdfFile(n);
 end
 
 % set properties

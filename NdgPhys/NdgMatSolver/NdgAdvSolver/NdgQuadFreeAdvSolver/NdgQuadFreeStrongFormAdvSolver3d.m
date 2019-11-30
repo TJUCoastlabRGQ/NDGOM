@@ -12,7 +12,7 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
             
             % evaluate inner edge
             for m = 1:phys.Nmesh
-                mesh3d = phys.mesh3d(m);
+                mesh3d = phys.meshUnion(m);
                 edge = mesh3d.InnerEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
