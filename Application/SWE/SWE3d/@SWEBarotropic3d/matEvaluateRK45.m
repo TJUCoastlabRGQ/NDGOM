@@ -73,7 +73,7 @@ while( time < ftime )
     
     
     
-%     obj.matUpdateOutputResult( time, fphys2d, fphys );
+    obj.matUpdateOutputResult( time, fphys2d, fphys );
     
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);

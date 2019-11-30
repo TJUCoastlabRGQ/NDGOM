@@ -1,4 +1,4 @@
-classdef NcOutput < AbstractOutputFile
+classdef NcOutput < AbstractNcOutput
     
     properties ( SetAccess = protected )
         %> output NetCDF file
@@ -10,8 +10,8 @@ classdef NcOutput < AbstractOutputFile
     end
     
     methods
-        function obj = NcOutput( casename, Nfield, dt )
-            obj = obj@AbstractOutputFile( casename, Nfield, dt );
+        function obj = NcOutput( mesh, casename, Nfield, dt, varIndex )
+            obj = obj@AbstractNcOutput( mesh, casename, Nfield, dt, varIndex );
         end
         
         %> create NetCDF output file

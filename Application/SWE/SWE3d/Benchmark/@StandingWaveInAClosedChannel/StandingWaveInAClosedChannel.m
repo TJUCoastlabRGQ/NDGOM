@@ -29,10 +29,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     methods
         function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
             % setup mesh domain
-            [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             % allocate boundary field with mesh obj
-            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
+            obj.initPhysFromOptions( mesh2d, mesh3d );
             %> time interval
             obj.dt = 0.01;
             obj.miu0{1} = 0;
@@ -53,14 +53,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
-                mesh2d = obj.mesh2d(m);
-                mesh3d = obj.mesh3d(m);
-                fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
-                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
+                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
+                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*mesh2d.x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
             end
         end
         
@@ -72,7 +70,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 1;                  
+            option('outputNcfileNum') = 100;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;

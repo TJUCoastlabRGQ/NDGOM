@@ -1,20 +1,20 @@
-function initFromMesh( obj, mesh, filename, outputIntervalNum, varIndex )
+function initFromMesh( obj, filename, outputIntervalNum, varIndex )
 
 % set vtk output
-if (mesh.type == enumMeshDim.One)
+if (obj.mesh.type == enumMeshDim.One)
     obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
-elseif (mesh.type == enumMeshDim.Two)
-    obj.vtkOutput = VtkOutput2d(obj.casename, obj.Nfield, obj.timeInterval);
-elseif (mesh.type == enumMeshDim.Three)
-    obj.vtkOutput = VtkOutput3d(obj.casename, obj.Nfield, obj.timeInterval);
+elseif (obj.mesh.type == enumMeshDim.Two)
+    obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex);
+elseif (obj.mesh.type == enumMeshDim.Three)
+    obj.vtkOutput = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval3d);
 end
 
 % obj.vtkOutput.initFromMesh( mesh );
 
 % define dimension
 dimTime = NdgNcDim('Nt', 0);
-dimK = NdgNcDim('K', mesh.K);
-dimNp = NdgNcDim('Np', mesh.cell.Np);
+dimK = NdgNcDim('K', obj.mesh.K);
+dimNp = NdgNcDim('Np', obj.mesh.cell.Np);
 dimNfield = NdgNcDim('Nvar', obj.Nfield);
 % dimNfield = NdgNcDim('Nvar', 6);
 % define variable
@@ -32,7 +32,7 @@ else
     obj.ncfile.StepPerFile = floor(outputIntervalNum/numel(obj.ncfile.fileName));
 end
 
-obj.ncfile.varIndex = varIndex;
+% obj.ncfile.varIndex = varIndex;
 % init file
 for n = 1:numel(obj.ncfile.fileName)
 obj.ncfile.defineIntoNetcdfFile(n);
@@ -41,6 +41,6 @@ end
 % set properties
 obj.timeVarableId = varTime.id;
 obj.fieldVarableId = varField.id;
-obj.mesh = mesh;
+% obj.mesh = mesh;
 
 end

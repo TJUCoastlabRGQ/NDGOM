@@ -1,4 +1,4 @@
-function [ outputObj ] = matInitOutput( physMat, mesh )
+function [ outputObj ] = matInitOutput( physMat )
 %INITOUTPUTFILE Summary of this function goes here
 %   Detailed explanation goes here
 %> At present, multiple-file output is only supported for outputIntervalType with value
@@ -34,14 +34,15 @@ else
     OutputFileNum = 1;
 end
 
-if mesh(1).type == enumMeshDim.Three
+if physMat.meshUnion(1).type == enumMeshDim.Three
     OutputFieldNum2d = numel( physMat.outputFieldOrder2d);
     varIndex2d = physMat.outputFieldOrder2d;
     OutputFieldNum3d = numel( physMat.outputFieldOrder );
     varIndex3d = physMat.outputFieldOrder;
     if physMat.option.isKey('outputType')
         if ( physMat.getOption('outputType') == enumOutputFile.NetCDF )
-            [ outputObj ] = initNcOutput3d( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
+            [ outputObj ] = initNcOutput3d( physMat, casename, dt, OutputFieldNum2d, ...
+                OutputFieldNum3d, OutputFileNum, outputIntervalNum, varIndex2d, varIndex3d );
         elseif ( physMat.getOption('outputType') == enumOutputFile.VTK )
             [ outputObj ] = initVtkOutput3d( physMat, casename, mesh, dt );
         elseif ( physMat.getOption('outputType') == enumOutputFile.None )
@@ -49,14 +50,15 @@ if mesh(1).type == enumMeshDim.Three
                 'as one of the following:\nNetCDF\nVTK\n'] );
         end
     else% default output type NetCDF
-        [ outputObj ] = initNcOutput( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
+        [ outputObj ] = initNcOutput3d( physMat, casename, dt, OutputFieldNum2d, ...
+                OutputFieldNum3d, OutputFileNum, outputIntervalNum, varIndex2d, varIndex3d );
     end    
 else
     OutputFieldNum = numel( physMat.outputFieldOrder );
     varIndex = physMat.outputFieldOrder;
     if physMat.option.isKey('outputType')
         if ( physMat.getOption('outputType') == enumOutputFile.NetCDF )
-            [ outputObj ] = initNcOutput( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
+            [ outputObj ] = initNcOutput( physMat, casename, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
         %> we point out that, VTK file format is only valid for two-dimensional and
         %> three-dimensional cases 
         elseif ( physMat.getOption('outputType') == enumOutputFile.VTK )
@@ -66,22 +68,42 @@ else
                 'as one of the following:\nNetCDF\nVTK\n'] );
         end
     else% default output type NetCDF
-        [ outputObj ] = initNcOutput( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
+        [ outputObj ] = initNcOutput( physMat, casename, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex );
     end
 end
 
 end
 
 
-function [ outputObj ] = initNcOutput( physMat, casename, mesh, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex )
+function [ outputObj ] = initNcOutput( physMat, casename, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex )
 outputObj = [];
 for m = 1:physMat.Nmesh
     filename = cell(OutputFileNum, 1);
     for n = 1:OutputFileNum
         filename{n} = [ casename,'/',casename, '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
     end
-    outputObj = [ outputObj, NcOutput( casename, OutputFieldNum, dt ) ];
-    outputObj(m).initFromMesh( mesh(m), filename, outputIntervalNum, varIndex );
+    outputObj = [ outputObj, NcOutput( physMat.meshUnion(m), casename, OutputFieldNum, dt, varIndex ) ];
+    outputObj(m).initFromMesh( filename, outputIntervalNum, varIndex );
+end
+end
+
+function [ outputObj ] = initNcOutput3d( physMat, casename, dt, OutputFieldNum2d, OutputFieldNum3d, OutputFileNum, outputIntervalNum, varIndex2d, varIndex3d )
+outputObj = [];
+if ~isdir([casename,'/2d'])
+    mkdir([casename,'/2d']);
+end
+if ~isdir([casename,'/3d'])
+    mkdir([casename,'/3d']);
+end
+for m = 1:physMat.Nmesh
+    filename2d = cell(OutputFileNum, 1);
+    filename3d = cell(OutputFileNum, 1);
+    for n = 1:OutputFileNum
+        filename2d{n} = [ casename,'/2d/',casename,'-2d', '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
+        filename3d{n} = [ casename,'/3d/',casename,'-3d', '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
+    end
+    outputObj = [ outputObj, NcOutput3d( physMat, casename, OutputFieldNum2d, OutputFieldNum3d, dt, varIndex2d, varIndex3d ) ];
+    outputObj(m).initFromMesh( filename2d, filename3d, outputIntervalNum );
 end
 end
 

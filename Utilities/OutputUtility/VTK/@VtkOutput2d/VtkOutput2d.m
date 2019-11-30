@@ -1,8 +1,8 @@
 classdef VtkOutput2d < AbstractVtkOutput
     
 methods (Access = public)
-    function obj = VtkOutput2d( casename, Nfield, dt )
-        obj = obj@AbstractVtkOutput( casename, Nfield, dt );
+    function obj = VtkOutput2d( mesh, casename, Nfield, dt, varIndex )
+        obj = obj@AbstractVtkOutput( mesh, casename, Nfield, dt, varIndex );
     end
 
     initFromMesh( obj, mesh );

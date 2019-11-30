@@ -135,7 +135,7 @@ classdef NdgPhysMat < NdgPhys
         fphys = matEvaluateLimiter( obj, fphys )
         fphys = matEvaluatePostFunc( obj, fphys )
         
-        outputObj = matInitOutput( obj, mesh )
+        outputObj = matInitOutput( obj )
         
         %> @brief
         matUpdateOutputResult( obj, time, step, fphys )
@@ -144,7 +144,7 @@ classdef NdgPhysMat < NdgPhys
         function matUpdateFinalResult( obj, time, fphys )
             for m = 1:obj.Nmesh
                 obj.outputFile(m).outputFinalResult( ...
-                    time, fphys{m}(:,:,obj.outputFile(m).ncfile.varIndex) );
+                    time, fphys{m}(:,:,obj.outputFile(m).varIndex) );
                 obj.outputFile(m).ncfile.closeNetcdfFile(obj.outputFile(m).ncfile.fileOrder);
             end
         end% function
