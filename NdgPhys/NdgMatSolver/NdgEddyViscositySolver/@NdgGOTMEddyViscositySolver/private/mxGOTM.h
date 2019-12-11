@@ -48,14 +48,12 @@ void mapVedgeDateToDof(double *VedgeDate, double *exportDofContainer);
 
 void __stdcall TURBULENCE_mp_INIT_TURBULENCE(long long int *, char *, long long int *, long long int );
 
-//The dealocation part need to be considered
-
 void __stdcall MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(long long int *);
-
-void __stdcall MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 
 void __stdcall TURBULENCE_mp_DO_TURBULENCE(long long int *, double *, double *, double *,
 	double *, double *, double *, double *, double *, double *, double *);
+
+void __stdcall MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 
 void __stdcall TURBULENCE_mp_CLEAN_TURBULENCE();
 

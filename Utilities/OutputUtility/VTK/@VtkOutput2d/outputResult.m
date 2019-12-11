@@ -1,12 +1,12 @@
-function outputStepResult( obj, step, field )
-%myFun - Description
+function outputResult(obj, time, field)
+%outputResult - Description
 %
-% Syntax: output = myFun(input)
+% Syntax: outputResult(obj, time, field)
 %
 % Long description
-
-filename = [ obj.casename, '/', obj.casename, '.', ...
-num2str(step, '%04d'), '.vtk' ];
+    
+filename = [ obj.casename, '/2d/', obj.casename, '.', ...
+num2str(obj.outputStep, '%04d'), '.vtk' ];
 fp = fopen(filename, 'w');
 
 fprintf(fp, '# vtk DataFile Version 2.0\n');
@@ -27,10 +27,13 @@ fprintf(fp, dataFormat, obj.ctype);
 
 fprintf(fp, '\n\nPOINT_DATA %d\n', obj.Npoint);
 
-fprintf(fp, 'SCALARS field%d double 1\n', 1);
-fprintf(fp, 'LOOKUP_TABLE default\n');
-fprintf(fp, '%20.12f \n', field);
+for i = 1:size(field,3)
+    fprintf(fp, ['SCALARS  ', obj.varName2d{i}, '  double\n']);
+    fprintf(fp, 'LOOKUP_TABLE default\n');
+    fprintf(fp, '%20.12f \n', field(:,:,i));
+end
 
 fclose(fp);
 
+obj.outputStep = obj.outputStep + 1;
 end

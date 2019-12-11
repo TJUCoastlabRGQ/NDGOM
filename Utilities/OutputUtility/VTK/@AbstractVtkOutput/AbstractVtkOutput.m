@@ -23,8 +23,7 @@ classdef AbstractVtkOutput < AbstractOutputFile
             obj = obj@AbstractOutputFile( mesh, casename, Nfield, dt, varIndex );
         end
         
-        outputResult( obj, time, field );
-        %> output result at specific step
-        outputStepResult( obj, step, field );
+
     end
+    
 end

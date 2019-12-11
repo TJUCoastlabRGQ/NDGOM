@@ -32,7 +32,7 @@ classdef NcOutput < AbstractNcOutput
         end
         
         %> create NetCDF output file
-        initFromMesh( obj, mesh, fileName, outputIntervalNum, varIndex );
+        initFromMesh( obj, physMat, mesh, fileName, outputIntervalNum, varIndex );
         %> output result
         outputResult( obj, time, field );
         

@@ -11,7 +11,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 21600;
+        finalTime = 3000;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@BottomBoundaryLayerCase','\gotmturb.nml');
@@ -25,7 +25,8 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         function obj = BottomBoundaryLayerCase( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.outputFieldOrder2d = [ 1 2 3];
+            obj.outputFieldOrder = [ 1 2 3 5];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
@@ -72,6 +73,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.VTK;
         end
         
     end

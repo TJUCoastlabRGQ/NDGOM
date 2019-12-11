@@ -118,8 +118,8 @@ void CalculateLengthScaleAndShearVelocity(double *H2d){
 	 for (int p = 0; p < Np2d * K2d; p++){
 		 if (H2d[p] >= hcrit){
 			 setGotmDate(p);
-			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, H2d + p, SurfaceFrictionVelocity + p, BottomFrictionVelocity + p, SurfaceFrictionLength + p, BottomFrictionLength + p, layerHeight + p*(nlev + 1), \
-				 buoyanceFrequencyDate + p*(nlev + 1), shearFrequencyDate + p*(nlev + 1), NULL);
+			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, H2d + p, SurfaceFrictionVelocity + p, BottomFrictionVelocity + p, SurfaceFrictionLength + p, \
+				 BottomFrictionLength + p, layerHeight + p*(nlev + 1), buoyanceFrequencyDate + p*(nlev + 1), shearFrequencyDate + p*(nlev + 1), NULL);
 			 getGotmDate(p);
 			 for (int L = 0; L < nlev + 1; L++){
 				 eddyViscosityDate[p*(nlev + 1) + L] = TURBULENCE_mp_NUM[L];

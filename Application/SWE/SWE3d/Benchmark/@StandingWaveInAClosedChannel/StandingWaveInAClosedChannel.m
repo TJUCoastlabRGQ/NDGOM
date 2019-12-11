@@ -76,6 +76,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.VTK;
         end
         
     end

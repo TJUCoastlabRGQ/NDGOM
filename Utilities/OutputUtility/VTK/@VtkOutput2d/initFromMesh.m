@@ -24,9 +24,9 @@ function initFromMesh( obj, mesh )
     obj.Ncon = mesh.K * Ncon * Ncell;
     obj.ctype = repmat( int8(ctype), obj.Ncell, 1 );
     
-    if ~isdir(obj.casename)
-        mkdir(obj.casename);
-    end
+%     if ~isdir(obj.casename)
+%         mkdir(obj.casename);
+%     end
 end
 
 function [ Np, Ncell, Ncon, EToV, ctype ] = InitSubConnect( mesh )

@@ -122,7 +122,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
             option('outputNcfileNum') = 20;
-            option('outputType') = enumOutputFile.NetCDF;
+            option('outputType') = enumOutputFile.VTK;
             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end

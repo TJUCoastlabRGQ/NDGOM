@@ -1,9 +1,9 @@
-function initFromMesh( obj, filename2d, filename3d, outputIntervalNum, varIndex2d, varIndex3d )
+function initFromMesh( obj, physMat, filename2d, filename3d, outputIntervalNum, varIndex2d, varIndex3d )
 
 % set vtk output
-
-obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex2d);
-obj.vtkOutput3d = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval, varIndex3d);
+% ( physMat, mesh2d, mesh3d, casename2d,  Nfield2d, Nfield3d, dt, varIndex2d, varIndex3d )
+% obj.vtkOutput = VtkOutput2d(physMat, obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex2d);
+obj.vtkOutput3d = VtkOutput3d( physMat, obj.mesh, obj.mesh3d, obj.casename, obj.Nfield, obj.Nfield3d, obj.timeInterval, varIndex2d, varIndex3d);
 % obj.vtkOutput.initFromMesh( mesh );
 
 dimTime = NdgNcDim('Nt', 0);
