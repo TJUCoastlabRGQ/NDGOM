@@ -44,6 +44,8 @@ for n = 1:obj.Nmesh
         ( obj.mesh2d.sx .* ( obj.mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
     obj.fphys2d{n}(:,:,6) = ( obj.mesh2d.ry .* ( obj.mesh2d.cell.Dr * obj.fphys2d{n}(:,:,4) ) ) + ...
         ( obj.mesh2d.sy .* ( obj.mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
+    obj.fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( obj.fphys{n}(:, :, 1) );
+    obj.fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( obj.fphys{n}(:, :, 2) );
     %> the wind stress is initialized to be zero
     obj.WindTaux{n} = zeros(size(obj.mesh2d(n).x));
     obj.WindTauy{n} = zeros(size(obj.mesh2d(n).y));
