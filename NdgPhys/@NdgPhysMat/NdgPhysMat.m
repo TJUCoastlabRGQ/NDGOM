@@ -114,7 +114,13 @@ classdef NdgPhysMat < NdgPhys
                 case enumTemporalDiscrete.RK33
                     obj.matEvaluateRK33();
                 case enumTemporalDiscrete.SSPRK22
-                    obj.matEvaluateSSPRK22();                    
+                    obj.matEvaluateSSPRK22();  
+                case enumTemporalDiscrete.IMEXRK343 %This is implemented for barotropic swe3d only
+                    obj.matEvaluateIMEXRK343();
+                case enumTemporalDiscrete.IMEXRK222 %This is implemented for barotropic swe3d only
+                    obj.matEvaluateIMEXRK222();    
+                case enumTemporalDiscrete.IMEXRK111 %This is implemented for barotropic swe3d only
+                    obj.matEvaluateIMEXRK111();                      
                 otherwise
                     msgID = [ mfilename, ':UnknownTemproalDicsreteType'];
                     msgtext = ['The temporal discrete type ', ...

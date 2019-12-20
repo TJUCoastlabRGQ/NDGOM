@@ -15,8 +15,8 @@ data{1} = fphys3d;
 % dHVdy = obj.matEvaluatePartialDerivativeTermX( mesh, fphys3d);
 % fphys2d = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
 %         fphys2d, fphys3d );
-fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
-fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
+% fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
+% fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
 
 HU2D = mesh3d.Extend2dField( fphys2d(:, :, 2) );
 HV2D = mesh3d.Extend2dField( fphys2d(:, :, 3) );

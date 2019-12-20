@@ -1,8 +1,6 @@
 #include "mxGOTM.h"
 #include "blas.h"
 #include <math.h>
-#include <stdio.h>
-#include <stdlib.h>
 
 /*the Von kamma constant*/
 double kappa = 0.4;
@@ -93,22 +91,28 @@ void CalculateShearFrequencyDate(double *H2d){
 
 }
 
-void CalculateLengthScaleAndShearVelocity(double *H2d){
+void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, double *Taux, double *Tauy){
 	/*for surface friction length, another way is the charnock method*/
 	for (int p = 0; p < Np2d * K2d; p++){
 		SurfaceFrictionLength[p] = z0s_min;
 		SurfaceFrictionVelocity[p] = 0;
+        DragCoefficient[p] = 0;
 		double Tempz0b = 0;
+        double rr = 0;
 		if (H2d[p] >= hcrit){
 			for (int itera = 0; itera < NMaxItration; itera++){
 				Tempz0b = 0.1*avmolu / max(avmolu, BottomFrictionVelocity[p]) + 0.03*h0b;
 				/*$rr=\frac{\kappa}{log(\frac{z0b+\frac{h(1)}{2}}{z0b})$, where z0b is the bottom roughness length and h(1) is the height of the first layer of cell,
 				*detail of this part can refer to the friction.F90 file in GOTM
 				*/
-				double rr = kappa / log((Tempz0b + layerHeight[p*(nlev + 1) + 1] / 2) / Tempz0b);
+				rr = kappa / log((Tempz0b + layerHeight[p*(nlev + 1) + 1] / 2) / Tempz0b);
 				BottomFrictionVelocity[p] = rr * sqrt(pow((huVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2) + pow((hvVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2));
 			}
 			BottomFrictionLength[p] = Tempz0b;
+            /*Note that, the surface-stress here must be devided by rho_0*/
+            SurfaceFrictionVelocity[p] = pow(pow(Taux[p],2) + pow(Tauy[p],2),1/4);
+            DragCoefficient[p] = pow(rr,2);
+            /*According to GOTM, DragCoefficient[p] = pow(rr,2)/layerHeight[p*(nlev + 1) + 1] should be adopted, see uequation.F90*/
 		}
 	}
 }
@@ -139,20 +143,6 @@ void CalculateLengthScaleAndShearVelocity(double *H2d){
 				 DestinationDate[k*nlev*Np3d + (nlev - L-1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1) + L];//The bottom layer of the up cell
 			 }
 		 }
-	 }
-
-	 FILE *fp;                                     
-	 if ((fp = fopen("date.dat", "w")) == NULL){    
-		 printf("File open error!\n");
-		 exit(0);
-	 }
-	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++){
-		 fprintf(fp, "%f\n", SourceDate[i]);
-	 }      
-
-	 if (fclose(fp)){                        
-		 printf("Can not close the file!\n");
-		 exit(0);
 	 }
  }
 

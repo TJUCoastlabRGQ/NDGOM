@@ -48,10 +48,13 @@ while( time < ftime )
             
             fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 1) );
             fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 2) );
+            fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
+                obj.meshUnion(n), fphys2d{n}, fphys{n} );            
             fphys{n}(: , :, 4) = obj.meshUnion(n).Extend2dField( fphys2d{n}(:, :, 1) );
             fphys{n}(: , :, 7) = fphys{n}(: , :, 4) + fphys{n}(: , :, 6);
             
-            
+%                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
+%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );            
         end
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         % fphys2d = obj.matEvaluatePostFunc( fphys2d );
@@ -59,19 +62,14 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
         
-%     visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
     
-    fphys{1}(:,:,5) = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, obj.meshUnion(1), fphys2d, fphys, dt , time );
+%     [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
+%         obj.meshUnion(1), fphys2d, fphys, dt , time, obj.WindTaux{1}, obj.WindTauy{1} );
     
     display(time);
-    
-%     for m = 1:obj.Nmesh
-%         mesh3d = obj.meshUnion(m);
-%     end
-    
-    
     
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     

@@ -35,11 +35,11 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 % of these term to the right hand is canceled for the
                 % advective part
                 
-%                 edge = mesh3d.SurfaceBoundaryEdge;
-%                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-%                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-%                 [ fluxS ] =  fluxM;
-%                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+                edge = mesh3d.SurfaceBoundaryEdge;
+                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                [ fluxS ] =  zeros(size(fluxM));
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
                 edge = mesh3d.BottomEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );

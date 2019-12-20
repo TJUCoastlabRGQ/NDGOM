@@ -29,8 +29,6 @@ end
 % set option
 obj.option = obj.setOption( obj.option );
 
-obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
-
 %> wind stress term
 obj.WindTaux =  cell(obj.Nmesh);
 obj.WindTauy =  cell(obj.Nmesh);
@@ -52,7 +50,7 @@ for n = 1:obj.Nmesh
     %> H in extended three dimensional fields
     obj.fphys{n}(:, :, 4) = obj.meshUnion(n).Extend2dField( obj.fphys2d{n}(:, :, 1) );
     %> the vertical viscosity term is initialized to be 10^(-4)
-    obj.fphys{n}(:,:,5) = 1e-8* ones(size(obj.meshUnion(n).x)); 
+    obj.fphys{n}(:,:,5) = 0.015* ones(size(obj.meshUnion(n).x)); 
     %> Initially, the bottom roughness is not considered
     obj.Cf{n} =  0.0025/1000 * ones(size(obj.mesh2d(n).y)); 
     %> Z in extended three dimensional fields
@@ -64,6 +62,8 @@ for n = 1:obj.Nmesh
     %> Zy in extended three dimensional fields
     obj.fphys{n}(:,:,9) = obj.meshUnion(n).Extend2dField( obj.fphys2d{n}(:, :, 6) );
 end
+
+obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
 % Setup the output NetCDF file object
 % initOutput( obj, mesh2d, mesh3d );
 obj.outputFile = obj.matInitOutput;

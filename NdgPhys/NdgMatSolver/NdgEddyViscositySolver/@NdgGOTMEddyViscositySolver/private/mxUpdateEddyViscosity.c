@@ -121,8 +121,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		double* hu = mxGetPr(prhs[9]);
 		double* hv = mxGetPr(prhs[10]);
 		double dt = (double)mxGetScalar(prhs[12]);
+        double* WindTaux = mxGetPr(prhs[15]);
+        double* WindTauy = mxGetPr(prhs[16]);
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
+        plhs[1] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
 		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
+        double *PteOutDragCoefficient = mxGetPr(plhs[1]);
 		// TDiffusionParameter to be continued
 		// SDiffusionParameter to be continued
 
@@ -144,7 +148,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		CalculateBuoyanceFrequencyDate();// At present, all are set to zero
 
-		CalculateLengthScaleAndShearVelocity(h);
+		CalculateLengthScaleAndShearVelocity(h, PteOutDragCoefficient, WindTaux, WindTauy);
 
 		DGDoTurbulence(&dt, h, NULL);
 
@@ -165,6 +169,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		//MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 		Initialized = "False";
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
+        plhs[1] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
 	}
 
 }

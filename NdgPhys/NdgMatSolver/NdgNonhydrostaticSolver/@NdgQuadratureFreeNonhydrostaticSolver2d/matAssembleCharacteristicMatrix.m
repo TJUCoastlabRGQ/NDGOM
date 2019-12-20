@@ -73,8 +73,10 @@ for face = 1:numel(edgeType)
         otherwise
             %> $(\tau^k [p_h],[s])_{\epsilon_i}$, this corresponds to the last part in the third term in the governning equation, and we omit the minus here
             OP11(eidM, eidM) = OP11(eidM, eidM) +  obj.Tau* Js * mesh.InnerEdge.M;
-            %> $<{\nabla_h p_h},[s]>_{\epsilon_i}$, this corresponds to the first part in the third term in the governning equation, and we omit the minus here
+            %> $<{\nabla_h p_h},[s]>_{\epsilon_i}$, this corresponds to the first part in the third term in the governning equation, and we omit the minus here.
+            %> For this part, we note that the zero value of the interpolation function at the boundary point doesn't mean its derivative vanishes at the same point
             OP11(eidM, :) = OP11(eidM, :) - 0.5 * Js * mesh.InnerEdge.M * Dn1(eidM,:);
+ 
             %> $<[p_h],{\nabla_h s}>_{\epsilon_i}$, this corresponds to the second term in the governning equation, and we omit the minus here 
             OP11(:, eidM) = OP11(:, eidM) - 0.5 * ( Dn1(eidM,:) )' * ( Js * mesh.InnerEdge.M );
             

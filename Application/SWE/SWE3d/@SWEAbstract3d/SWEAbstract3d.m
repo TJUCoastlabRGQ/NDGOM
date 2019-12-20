@@ -141,7 +141,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matEvaluateSourceTerm( obj, fphys );
         
-       EddyViscositySolver = matInitEddyViscositySolver( obj );
+        EddyViscositySolver = matInitEddyViscositySolver( obj );
         
     end
     

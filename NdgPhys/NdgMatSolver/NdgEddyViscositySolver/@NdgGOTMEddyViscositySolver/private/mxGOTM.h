@@ -29,7 +29,7 @@ void CalculateShearFrequencyDate(double *H2d);
 void CalculateBuoyanceFrequencyDate();
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
-void CalculateLengthScaleAndShearVelocity(double *H2d );
+void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, double *Taux, double *Tauy );
 /*This is the interface to do_turbulence function in GOTM*/
 //void DGDoTurbulence(double *dt, double *H2d, double *ShearProductionDate, double *buoyanceProductionDate, double *utaus, double *utaub, double *z0s, double *z0b);
 void DGDoTurbulence(double *TimeStep, double *H2d, double *Grass);
