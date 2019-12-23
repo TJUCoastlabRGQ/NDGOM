@@ -4,16 +4,17 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     
     properties ( Constant )
         %> channel length
-        ChLength = 100;
+%         ChLength = 100;
+        ChLength = 10;
         %> channel width
-        ChWidth = 6;
+        ChWidth = 2;
         %> channel depth
         H0 = 7.612;
         %> x range
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 10;
+        finalTime = 90;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
@@ -36,7 +37,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             %> time interval
             obj.dt = 0.01;
             obj.miu0{1} = 0;
-            obj.Cf{1} = 0.0025/1000;
+%             obj.Cf{1} = 0.0025/1000;
+            obj.Cf{1} = 0;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -71,7 +73,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;

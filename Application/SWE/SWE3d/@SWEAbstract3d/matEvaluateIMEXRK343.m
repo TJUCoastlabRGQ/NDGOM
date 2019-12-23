@@ -23,14 +23,13 @@ while( time < ftime )
     
     Tempfphys2d = fphys2d{1}(:,:,1);
     Tempfphys = fphys{1}(:,:,1:2);
-    
+    [ExplicitRHS2d(:,:,1), ExplicitRHS3d(:,:,1), ExplicitRHS3d(:,:,1+4)] = ...
+            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);    
     for intRK = 1:3
 %         tloc = time + c( intRK ) * dt;
         %>Actually, boundary condition need to be imposed here
         %         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary
-        [ExplicitRHS2d(:,:,intRK), ExplicitRHS3d(:,:,intRK), ExplicitRHS3d(:,:,intRK+4)] = ...
-            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);
         
         SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
             dt * EXa(intRK+1,3)*ExplicitRHS3d(:,:,3) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2)+...
@@ -46,16 +45,15 @@ while( time < ftime )
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );   
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );        
+        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );       
+        
+       [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+4)] = ...
+            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);          
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         % fphys2d = obj.matEvaluatePostFunc( fphys2d );
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
-    %>Actually, boundary condition need to be imposed here
-    %     obj.matUpdateExternalField( time + dt, fphys2d, fphys );
-    [ExplicitRHS2d(:,:,4), ExplicitRHS3d(:,:,4), ExplicitRHS3d(:,:,4+4)] = ...
-        matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);
     %>Update the velocity
     fphys{1}(:,:,1) = Tempfphys(:,:,1) + dt * EXb(1) * ExplicitRHS3d(:,:,1) + dt * EXb(2) * ExplicitRHS3d(:,:,2)+...
         dt * EXb(3) * ExplicitRHS3d(:,:,3) + dt * EXb(4) * ExplicitRHS3d(:,:,4) + dt * IMb(1) * ImplicitRHS3d(:,:,1)+...
@@ -247,6 +245,10 @@ Explicita = [0 0 0 0;
     GAMA 0 0 0;
     (1+GAMA)/2-alpha1 alpha1 0 0;
     0 1-alpha2 alpha2 0];
+% Explicita = [0 0 0 0;
+%     GAMA 0 0 0;
+%     0.3212788860 0.3966543747 0 0;
+%     -0.105858296 0.5529291479 0.5529291479 0];
 Implicita = [GAMA 0 0;
     (1-GAMA)/2 GAMA 0;
     beta1 beta2 GAMA];
