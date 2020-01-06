@@ -44,6 +44,13 @@ while( time < ftime )
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) ); 
         fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );        
         
+        
+        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS2d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS2d(:,:,2)+...
+            dt * EXa(intRK+1,3)*ExplicitRHS2d(:,:,3);
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);               
+        
+        
         [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+3)] = ...
             matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);        
         %> update the vertical velocity
@@ -188,13 +195,13 @@ for i =1:meshUnion.mesh2d(1).K
     %This part is problematic, we need to consider the date structure
     temphuRHS = SystemRHS(:,(i-1)*meshUnion.Nz + 1:i*meshUnion.Nz,1);
     temphvRHS = SystemRHS(:,(i-1)*meshUnion.Nz + 1:i*meshUnion.Nz,2);
-    hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (eye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphuRHS(:);
-    hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (eye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphvRHS(:);
+    hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (speye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * sparse(StiffMatrix))\temphuRHS(:);
+    hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (speye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * sparse(StiffMatrix))\temphvRHS(:);
     %> This part is problematic, as the diagonal part has been included, this
     %> means that, the StiffMatrix is not the stiffmatrix assembled according to
     %> the weak form of the laplacian operator.
-    ImplicithuRHS3d((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = StiffMatrix * hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np)';
-    ImplicithvRHS3d((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = StiffMatrix * hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np)';
+    ImplicithuRHS3d((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = sparse(StiffMatrix) * hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np)';
+    ImplicithvRHS3d((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = sparse(StiffMatrix) * hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np)';
 end
 end
 
@@ -225,7 +232,7 @@ end
 
 function OP11 = ImposeBottomBoundaryCondition(eidM, OP11, massMatrix2d, hu, hv, h, Cf)
 %> This part is positive, as this is teated implicitly
-OP11(eidM, eidM) = OP11(eidM, eidM) + massMatrix2d * diag(Cf./h(eidM)./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
+OP11(eidM, eidM) = OP11(eidM, eidM) - massMatrix2d * diag(Cf./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
 end
 
 function [huRHS, hvRHS] = ImposeSurfaceBoundaryCondition(eidM, WindTaux, WindTauy, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS, hvRHS)

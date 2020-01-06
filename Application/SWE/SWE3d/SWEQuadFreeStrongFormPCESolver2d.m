@@ -44,6 +44,12 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 % apply clamped boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );
                 fp(:, ind, 1) = fext{m}(:, ind, 1);
+
+                % apply zero-grad boundary condition
+                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ZeroGrad );
+                fp(:, ind, 1) = fm(:, ind, 1);
+                fp(:, ind, 2) = fm(:, ind, 2);
+                fp(:, ind, 3) = fm(:, ind, 3);  
                 
                 % apply slip wall boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.SlipWall );

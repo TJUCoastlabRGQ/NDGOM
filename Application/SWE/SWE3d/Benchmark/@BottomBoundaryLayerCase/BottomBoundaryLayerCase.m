@@ -30,9 +30,10 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 3;
-            obj.Cf{1} = 0.0025;
+            obj.dt = 1;
+%             obj.Cf{1} = 0;
 %             obj.Cf{1} = 0.0025/1000;
+            obj.Cf{1} = 0.0025;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -69,7 +70,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
@@ -88,10 +89,10 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformQuadMesh( N, ...
+mesh2d = makeUniformTriMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], 0.1*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.1*ceil(obj.ChLength/M), bctype);
 
-cell = StdPrismQuad( N, Nz );
+cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );

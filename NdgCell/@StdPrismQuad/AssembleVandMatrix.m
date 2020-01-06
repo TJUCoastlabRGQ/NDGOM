@@ -56,8 +56,10 @@ for n = 1:obj.Np
     fh = obj.EvaluateHorizontalOrthogonalFunc( obj.N, n, obj.r, obj.s );
     ind = ceil( n / obj.Nph ); % vertical orthogonal polynomial index
     if ind == 1
-        fv = LegendreNorm1d( ind+1 , obj.t );
-        Vz(:, n) = ( fv - fv(1) ) ./ sqrt( 2 * ind + 1 );
+%         fv = LegendreNorm1d( ind+1 , obj.t );
+%         Vz(:, n) = ( fv - fv(1) ) ./ sqrt( 2 * ind + 1 );
+        fv = LegendreNorm1d( ind , obj.t );
+        Vz(:, n) = (obj.t+1) .* fv;
     else
         fvm = LegendreNorm1d( ind - 1, obj.t );
         fvp = LegendreNorm1d( ind + 1, obj.t );

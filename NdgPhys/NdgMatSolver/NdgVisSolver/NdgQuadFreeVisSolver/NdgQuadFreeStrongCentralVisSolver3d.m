@@ -173,8 +173,8 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 %> and '$\frac{\mu}{H^2}\frac{\partial Hv}{\partial sigma} = C_f v\sqrt(u^2+v^2)$'
                 u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
                 Velocity = sqrt( u.^2 + v.^2 );                
-                fluxSx = edge.nz .* obj.phys.Cf{m}.* u .* Velocity;
-                fluxSy = edge.nz .* obj.phys.Cf{m}.* v .* Velocity;
+                fluxSx = -1 * edge.nz .* obj.phys.Cf{m}.* u .* Velocity;
+                fluxSy = -1 * edge.nz .* obj.phys.Cf{m}.* v .* Velocity;
 
                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...

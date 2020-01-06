@@ -4,14 +4,14 @@ classdef WindDrivenFlow < SWEBarotropic3d
     
     properties ( Constant )
         %> channel length
-        ChLength = 3400;
-        ChWidth = 300;
+        ChLength = 2000;
+        ChWidth = 800;
         %> channel depth
         H0 = 10;
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 3000;
+        finalTime = 300000;
         hcrit = 0.001;
     end
     
@@ -28,9 +28,9 @@ classdef WindDrivenFlow < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 0.02;
+            obj.dt = 0.5;
             obj.Cf{1} = 0.0025;
-            obj.WindTaux{1} = 1/1000*ones(size(obj.mesh2d(1).x));
+            obj.WindTaux{1} = 1.5/1000*ones(size(obj.mesh2d(1).x));
             obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
 %             obj.Cf{1} = 0.0025/1000;
         end
@@ -69,12 +69,12 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantEddyViscosityValue') = 0.05;
+            option('ConstantEddyViscosityValue') = 0.01;
         end
         
     end    
@@ -83,16 +83,22 @@ end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.ZeroGrad, ...
+%     enumBoundaryCondition.ZeroGrad ];
+
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformQuadMesh( N, ...
+mesh2d = makeUniformTriMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
-cell = StdPrismQuad( N, Nz );
+cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );

@@ -1,6 +1,8 @@
-function f = EvaluateVerticalOrthogonalFunc( obj, n, t )
+function [ f ] = EvaluateVerticalOrthogonalFunc( obj, td, t )
+%EVALUATEVERTICALORTHOGONALFUNC Summary of this function goes here
+%   Detailed explanation goes here
 
-td2 = ceil( n / obj.Nph );
+td2 = ceil( td / obj.Nph );
 [ f ] = line_orthogonal_func( td2, t );
 
 end

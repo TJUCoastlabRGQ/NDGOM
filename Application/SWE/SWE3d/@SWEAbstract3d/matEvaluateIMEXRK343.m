@@ -24,12 +24,13 @@ while( time < ftime )
     Tempfphys2d = fphys2d{1}(:,:,1);
     Tempfphys = fphys{1}(:,:,1:2);
     [ExplicitRHS2d(:,:,1), ExplicitRHS3d(:,:,1), ExplicitRHS3d(:,:,1+4)] = ...
-            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);    
+            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);                    
+        
     for intRK = 1:3
 %         tloc = time + c( intRK ) * dt;
         %>Actually, boundary condition need to be imposed here
         %         obj.matUpdateExternalField( tloc, fphys2d, fphys );
-        %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary
+        %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary        
         
         SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
             dt * EXa(intRK+1,3)*ExplicitRHS3d(:,:,3) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2)+...
@@ -45,10 +46,15 @@ while( time < ftime )
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );   
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );       
+        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+        
+        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS2d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS2d(:,:,2)+...
+            dt * EXa(intRK+1,3)*ExplicitRHS2d(:,:,3) + dt * EXa(intRK+1,4)*ExplicitRHS2d(:,:,4);
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);            
         
        [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+4)] = ...
-            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);          
+            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);      
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         % fphys2d = obj.matEvaluatePostFunc( fphys2d );
         % visual.drawResult( fphys2d{1}(:,:,1) );
@@ -105,11 +111,13 @@ function [ImplicithuRHS3d, ImplicithvRHS3d, hu, hv] = matUpdateImplicitVerticalD
 %>Allocate memory space first
 Tau = 30;
 Nz = meshUnion.Nz;
+Np = meshUnion.cell.Np;
 ImplicithuRHS3d = zeros(size(meshUnion.x));
 ImplicithvRHS3d = zeros(size(meshUnion.x));
+% StiffMatrix     = spalloc(Nz*Np,Nz*Np,(Nz==1)*Np*Np+(Nz==2)*Np*Np*2+(Nz>=3)*(2*Np*Np*2+(Nz-2)*Np*Np*3));
+StiffMatrix     = zeros(Nz*Np);
 hu              = zeros(size(meshUnion.x));
 hv              = zeros(size(meshUnion.x));
-StiffMatrix     = zeros(meshUnion.cell.Np*Nz);
 BottomEidM      = meshUnion.cell.Fmask(:,end-1);
 UpEidM          = meshUnion.cell.Fmask(:,end);
 Np = meshUnion.cell.Np;
@@ -132,12 +140,12 @@ for i =1:meshUnion.mesh2d(1).K
     %> Adjacent bottom integral part
     OP12 = zeros(meshUnion.cell.Np);
     OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP12);
-    %> Boundary part, not considered here
+    %> Impose the surface boundary condition
     [ SystemRHS(:,(i-1)*meshUnion.Nz + 1,1), SystemRHS(:,(i-1)*meshUnion.Nz + 1,2) ] = ImposeSurfaceBoundaryCondition(UpEidM, WindTaux(:,i),...
         WindTauy(:,i), ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1)*meshUnion.Nz + 1,1), SystemRHS(:,(i-1)*meshUnion.Nz + 1,2));
-    %> Assemble into the StiffMatrix, it's noted that, the diagonal part has been included by eye(Np)
-    StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
-    StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+    %> Assemble into the StiffMatrix
+    StiffMatrix(LocalRows(:),LocalColumns) = ElementalMassMatrix3d\OP11;
+    StiffMatrix(AdjacentRows(:),LocalColumns) = ElementalMassMatrix3d\OP12;
     for j = 2:meshUnion.Nz-1
         UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
         LocalRows    = ((j-1)*Np+1:j*Np)';
@@ -153,15 +161,15 @@ for i =1:meshUnion.mesh2d(1).K
         %> Local Up Integral part
         OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP11);
         %> Assemble the local integral part into the StiffMatrix
-        StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
+        StiffMatrix(LocalRows(:),LocalColumns) = ElementalMassMatrix3d\OP11;
         %> The upper adjacent cell part
         OP12 = zeros(meshUnion.cell.Np);
         OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, UpPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP12);
-        StiffMatrix(UpAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+        StiffMatrix(UpAdjacentRows(:),LocalColumns) = ElementalMassMatrix3d\OP12;
         %> The lower adjacent cell part
         OP12 = zeros(meshUnion.cell.Np);
         OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, BottomPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP12);
-        StiffMatrix(BottomAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+        StiffMatrix(BottomAdjacentRows(:),LocalColumns) = ElementalMassMatrix3d\OP12;
     end
     %> for the bottom most cell
     AdjacentRows = ((meshUnion.Nz-2)*Np+1:(meshUnion.Nz-1)*Np)';
@@ -176,17 +184,26 @@ for i =1:meshUnion.mesh2d(1).K
     %> Impose bottom boundary condition
     OP11 = ImposeBottomBoundaryCondition(BottomEidM, OP11, ElementalMassMatrix2d, ...
         fphys(:,i*meshUnion.Nz,1), fphys(:,i*meshUnion.Nz,2), fphys(:,i*meshUnion.Nz,4), Cf);
+%     temphudata = SystemRHS(:,i*meshUnion.Nz,1);temphvdata = SystemRHS(:,i*meshUnion.Nz,2);
+%     [ SystemRHS(:,i*meshUnion.Nz,1), SystemRHS(:,i*meshUnion.Nz,2) ] = ImposeBottomBoundaryCondition(BottomEidM, ElementalMassMatrix2d, ...
+%         ElementalMassMatrix3d,fphys(:,i*meshUnion.Nz,1), fphys(:,i*meshUnion.Nz,2), fphys(:,i*meshUnion.Nz,4), Cf, meshUnion.cell.VCV, ...
+%         dt, ImplicitParameter, SystemRHS(:,i*meshUnion.Nz,1), SystemRHS(:,i*meshUnion.Nz,2) );
+%   
+%     hudata = SystemRHS(:,i*meshUnion.Nz,1);hvdata = SystemRHS(:,i*meshUnion.Nz,2);
+%     temphudata - hudata
+%     temphvdata - hvdata
     %> Assemble the local integral part into the StiffMatrix
-    StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
+    StiffMatrix(LocalRows(:),LocalColumns) = ElementalMassMatrix3d\OP11;
     %> The upper adjacent cell part
     OP12 = zeros(meshUnion.cell.Np);
     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP12);
-    StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+    StiffMatrix(AdjacentRows(:),LocalColumns) = ElementalMassMatrix3d\OP12;
+    StiffMatrix = sparse(StiffMatrix);
     %This part is problematic, we need to consider the date structure
     temphuRHS = SystemRHS(:,(i-1)*meshUnion.Nz + 1:i*meshUnion.Nz,1);
     temphvRHS = SystemRHS(:,(i-1)*meshUnion.Nz + 1:i*meshUnion.Nz,2);
-    hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (eye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphuRHS(:);
-    hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (eye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphvRHS(:);
+    hu((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (speye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphuRHS(:);
+    hv((i-1)*meshUnion.Nz*Np + 1 : i*meshUnion.Nz*Np) = (speye(meshUnion.cell.Np*Nz) - ImplicitParameter * dt * StiffMatrix)\temphvRHS(:);
     %> This part is problematic, as the diagonal part has been included, this
     %> means that, the StiffMatrix is not the stiffmatrix assembled according to
     %> the weak form of the laplacian operator.
@@ -197,33 +214,52 @@ end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
 OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
-OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*Dz(eidM,:);
+% OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*Dz(eidM,:);%this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
+OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
 OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
-OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*Dz(eidM,:);
+% OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*Dz(eidM,:);   %this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
+OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
 OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * Dz(eidM,:);
+% OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * Dz(eidM,:);  %this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
+OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:); 
 OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * Dz(eidM,:);
+% OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * Dz(eidM,:);%this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
+OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:);
 OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
 end
 
 function OP11 = ImposeBottomBoundaryCondition(eidM, OP11, massMatrix2d, hu, hv, h, Cf)
 %> This part is positive, as this is teated implicitly
-OP11(eidM, eidM) = OP11(eidM, eidM) + massMatrix2d * diag(Cf./h(eidM)./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
+% OP11(eidM, eidM) = OP11(eidM, eidM) + massMatrix2d * diag(Cf./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
+%direction vector considered
+% huc = VCV*hu; hvc = VCV*hv;
+OP11(eidM, eidM) = OP11(eidM, eidM) - massMatrix2d * diag(Cf./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
 end
+
+% function [huRHS, hvRHS] = ImposeBottomBoundaryCondition(eidM, massMatrix2d, massMatrix3d, hu, hv, h, Cf, VCV, dt, ImplicitParameter, huRHS, hvRHS)
+% %> This part is positive, as this is teated implicitly
+% % OP11(eidM, eidM) = OP11(eidM, eidM) + massMatrix2d * diag(Cf./h(eidM).*sqrt(hu(eidM).^2 + hv(eidM).^2));
+% %direction vector considered
+% huc = VCV*hu; hvc = VCV*hv;
+% temphuRHS = zeros(size(huRHS));temphvRHS = zeros(size(hvRHS));
+% temphuRHS(eidM) = massMatrix2d*(dt*ImplicitParameter* Cf./h(eidM)./h(eidM).*huc.*sqrt(huc.^2 + hvc.^2));
+% temphvRHS(eidM) = massMatrix2d*(dt*ImplicitParameter* Cf./h(eidM)./h(eidM).*hvc.*sqrt(huc.^2 + hvc.^2));
+% huRHS = huRHS + massMatrix3d\temphuRHS;
+% hvRHS = hvRHS + massMatrix3d\temphvRHS;
+% end
 
 function [huRHS, hvRHS] = ImposeSurfaceBoundaryCondition(eidM, WindTaux, WindTauy, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS, hvRHS)
 %> This part is negative, as this is teated explicitly

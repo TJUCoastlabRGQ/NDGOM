@@ -43,8 +43,6 @@ while( time < ftime )
             
             fphys2d{n}(:,:,1) = fphys2d{n}(:,:,1) + rk4b(intRK) * resQ2d{n};
             fphys{n}(:,:,1:2) = fphys{n}(:,:,1:2) + rk4b(intRK) * resQ3d{n};
-            fphys{n}(:,:,3) = obj.matEvaluateVerticalVelocity( ...
-                obj.meshUnion(n), fphys2d{n}, fphys{n} );
             
             fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 1) );
             fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( fphys{n}(:, :, 2) );
