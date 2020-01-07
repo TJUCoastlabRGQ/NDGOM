@@ -31,9 +31,9 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
             obj.dt = 1;
-%             obj.Cf{1} = 0;
+            obj.Cf{1} = 0;
 %             obj.Cf{1} = 0.0025/1000;
-            obj.Cf{1} = 0.0025;
+%             obj.Cf{1} = 0.0025;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -70,7 +70,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;

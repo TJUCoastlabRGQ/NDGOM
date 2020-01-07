@@ -57,6 +57,7 @@ classdef BottomBoundaryLayerCase2d < SWEConventional2d
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.VTK;
         end
         
         function [ mesh ] = makeUniformMesh(obj, N, deltax, type)

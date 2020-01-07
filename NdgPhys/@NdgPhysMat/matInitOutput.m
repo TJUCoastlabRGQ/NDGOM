@@ -78,10 +78,13 @@ end
 
 function [ outputObj ] = initNcOutput( physMat, casename, dt, OutputFieldNum, OutputFileNum, outputIntervalNum, varIndex )
 outputObj = [];
+if ~isdir([casename,'/2d'])
+    mkdir([casename,'/2d']);
+end
 for m = 1:physMat.Nmesh
     filename = cell(OutputFileNum, 1);
     for n = 1:OutputFileNum
-        filename{n} = [ casename,'/',casename, '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
+        filename{n} = [ casename,'/2d/',casename, '.', num2str(m), '-', num2str(physMat.Nmesh),'.', num2str(n),'.','nc' ];
     end
     outputObj = [ outputObj, NcOutput( physMat.meshUnion(m), casename, OutputFieldNum, dt, varIndex ) ];
     outputObj(m).initFromMesh( filename, outputIntervalNum, varIndex );
@@ -110,7 +113,9 @@ end
 
 function [ outputObj ] = initVtkOutput2d( physMat, casename, dt, OutputFieldNum, varIndex )
 outputObj = [];
-% casename2d = [casename,'-2d'];
+if ~isdir([casename,'/2d'])
+    mkdir([casename,'/2d']);
+end
 for m = 1:physMat.Nmesh
     outputObj = [ outputObj, VtkOutput2d( physMat, physMat.meshUnion(m), casename, OutputFieldNum, dt, varIndex ) ];
     outputObj(m).initFromMesh( physMat.meshUnion(m) );

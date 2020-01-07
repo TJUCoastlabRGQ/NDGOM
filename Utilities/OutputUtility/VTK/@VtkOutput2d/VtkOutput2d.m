@@ -15,7 +15,8 @@ methods (Access = public)
 
     initFromMesh( obj, mesh );
     
-    function closeOutputFile( obj )
+    function closeOutputFile( obj, ~ )
+        %For vtk, doing nothing
     end
     
             %> output

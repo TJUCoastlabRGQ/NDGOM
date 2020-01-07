@@ -7,14 +7,14 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
 %         ChLength = 100;
         ChLength = 10;
         %> channel width
-        ChWidth = 2;
+        ChWidth = 6;
         %> channel depth
         H0 = 7.612;
         %> x range
         %> start time
         startTime = 0;
-        %> final time
-        finalTime = 90;
+%         %> final time
+        finalTime = 10;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
@@ -60,7 +60,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) =  -obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
             end
         end
         
@@ -73,7 +73,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
