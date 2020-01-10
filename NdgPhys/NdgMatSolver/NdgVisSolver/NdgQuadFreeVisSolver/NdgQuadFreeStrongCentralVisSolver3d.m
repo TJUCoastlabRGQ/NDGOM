@@ -171,10 +171,12 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 %> '$\frac{\partial Hv}{\partial sigma} = \frac{H^2}{\miu}C_f v\sqrt(u^2+v^2)$'. We multiply this by \
                 %> '$\frac{\mu}{H^2}$' to arrive at '$\frac{\mu}{H^2}\frac{\partial Hu}{\partial sigma} = C_f u\sqrt(u^2+v^2)$'
                 %> and '$\frac{\mu}{H^2}\frac{\partial Hv}{\partial sigma} = C_f v\sqrt(u^2+v^2)$'
-                u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
-                Velocity = sqrt( u.^2 + v.^2 );                
-                fluxSx = -1 * edge.nz .* obj.phys.Cf{m}.* u .* Velocity;
-                fluxSy = -1 * edge.nz .* obj.phys.Cf{m}.* v .* Velocity;
+                huc = mesh.cell.VCV * fphys{m}(:,mesh.Nz:mesh.Nz:mesh.mesh2d(m).K*mesh.Nz,1);
+                hvc = mesh.cell.VCV * fphys{m}(:,mesh.Nz:mesh.Nz:mesh.mesh2d(m).K*mesh.Nz,2);
+                uc = huc./fm(:,:,4); vc = hvc./fm(:,:,4); 
+                Velocity = sqrt( uc.^2 + vc.^2 );                
+                fluxSx = -1 * edge.nz .* obj.phys.Cf{m}.* uc .* Velocity;
+                fluxSy = -1 * edge.nz .* obj.phys.Cf{m}.* vc .* Velocity;
 
                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
                     obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...

@@ -30,7 +30,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 1;
+            obj.dt = 0.6;
             obj.Cf{1} = 0;
 %             obj.Cf{1} = 0.0025/1000;
 %             obj.Cf{1} = 0.0025;
@@ -62,20 +62,20 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 21600;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
-            option('finalTime') = ftime;
+            option('finalTime') = obj.finalTime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
-            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
-            option('EddyViscosityType') = enumEddyViscosity.GOTM;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
+            option('ConstantEddyViscosityValue') = 1e-3;
         end
         
     end

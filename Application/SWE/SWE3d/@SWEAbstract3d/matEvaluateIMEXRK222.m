@@ -61,8 +61,6 @@ while( time < ftime )
     end
     %>Actually, boundary condition need to be imposed here
     %     obj.matUpdateExternalField( time + dt, fphys2d, fphys );
-    [ExplicitRHS2d(:,:,3), ExplicitRHS3d(:,:,3), ExplicitRHS3d(:,:,6)] = ...
-        matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);
     %>Update the velocity
     fphys{1}(:,:,1) = Tempfphys(:,:,1) + dt * EXb(1) * ExplicitRHS3d(:,:,1) + dt * EXb(2) * ExplicitRHS3d(:,:,2)+...
         dt * EXb(3) * ExplicitRHS3d(:,:,3) + dt * IMb(1) * ImplicitRHS3d(:,:,1) + dt * IMb(2) * ImplicitRHS3d(:,:,2);
