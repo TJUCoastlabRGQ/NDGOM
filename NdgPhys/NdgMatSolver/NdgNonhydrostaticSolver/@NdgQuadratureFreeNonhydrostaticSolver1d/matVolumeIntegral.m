@@ -1,4 +1,4 @@
-function  [ VolumeIntegralX ] = matVolumeIntegral(obj, mesh, VariableX)
+function  [ VolumeIntegralX ] = matVolumeIntegral( obj, mesh, VariableX )
 %> @brief Function to calculate the volume integral in y direction
 %> @details Function to calculate the volume integral in y direction
 %> @param[in] mesh the mesh object

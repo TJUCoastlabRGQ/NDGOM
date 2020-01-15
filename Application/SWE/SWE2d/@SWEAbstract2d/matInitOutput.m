@@ -1,4 +1,4 @@
-function [ outputObj ] = matInitOutput( obj, mesh )
+function [ outputObj ] = matInitOutput( obj )
 %INITOUTPUTFILE Summary of this function goes here
 %   Detailed explanation goes here
 
@@ -13,8 +13,7 @@ if obj.option.isKey('nonhydrostaticType')
             obj.outputFieldOrder = [1 2 3 6 7];
     end% switch
 end
-
-outputObj = matInitOutput@NdgPhysMat(obj, mesh);
+outputObj = matInitOutput@NdgPhysMat(obj);
 
 end
 

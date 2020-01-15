@@ -1,7 +1,7 @@
 function drawResult( obj )
           
             timeFrac = [0.3, 0.4, 0.45, 0.52];
-            [ conicalPos ] = makeNdgPostProcessFromNdgPhys( obj );
+            conicalPos = NdgPostProcess(obj.meshUnion(1),strcat('ConicalLandRunup2d','/','ConicalLandRunup2d'));
             [ time ] = ncread( conicalPos.outputFile{1}, 'time' );
             Nt = numel( timeFrac );
             timeStep = zeros(Nt, 1);

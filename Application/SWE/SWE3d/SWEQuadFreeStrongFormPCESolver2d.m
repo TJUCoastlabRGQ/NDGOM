@@ -6,17 +6,17 @@ classdef SWEQuadFreeStrongFormPCESolver2d
     end
     
     methods
-        function evaluateAdvectionRHS( obj, physClass, fphys2d, fphys3d, fext )
+        function evaluateAdvectionRHS( obj, physClass, fphys2d, ~, fext )
             
             fphys = cell(1);
             % evaluate inner edge
             for m = 1:physClass.Nmesh
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
-                mesh3d = physClass.mesh3d(m);
+                mesh3d = physClass.meshUnion(m);
                 mesh2d = physClass.mesh2d(m);
-                fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
-                fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
+%                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
+%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
                 fphys{1} = fphys2d{m};
                 
                 %Function used to calculate the two dimentional PCE volume term

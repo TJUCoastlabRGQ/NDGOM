@@ -1,27 +1,16 @@
 classdef NdgNcFile < handle
     
     properties(SetAccess = protected)
-        %> true for file is open
-        isOpen
-        %> ID of ncfile
-        ncid
+        %         %> true for file is open
+        %         isOpen
+        %         %> ID of ncfile
+        %         ncid
         %> array of dimensions in NetCDF file
         ncDim
         %> array of variables in NetCDF file
         ncVar
-        %> file name of NetCDF file
-        fileName
-    end
-    
-    properties
-        %> order of the nc file to be written
-        fileOrder
-        %> Step contained in each nc file
-        StepPerFile
-        %> Index of variable to be output
-        varIndex
-        %> Number of the nc files
-        Numfile
+        
+        NcOutPut
     end
     
     methods
@@ -39,56 +28,15 @@ classdef NdgNcFile < handle
         %> This function is part of the NDGOM software.
         %> @author li12242, Tianjin University, li12242@tju.edu.cn
         %======================================================================
-        function obj = NdgNcFile( filename, ncdim, ncvar )
-            obj.fileName = filename;
+        function obj = NdgNcFile( NcOutPut, ncdim, ncvar )
+            obj.NcOutPut = NcOutPut;
             obj.ncDim = ncdim;
             obj.ncVar = ncvar;
-            obj.ncid = zeros(size(filename));
-            obj.isOpen = false * ones(size(filename));
-            obj.fileOrder = 1;
-            obj.Numfile = numel(filename);
+            %             obj.ncid = zeros(size(filename));
+            %             obj.isOpen = false * ones(size(filename));
+            %             obj.fileOrder = 1;
+            %             obj.Numfile = numel(filename);
         end% func
-        
-        function delete( obj )
-            for n = 1:numel(obj.ncid)
-                obj.closeNetcdfFile(n);
-            end
-        end% func
-        
-        function closeNetcdfFile( obj, index )
-            if(obj.isOpen(index)) % if netcdf file is still open
-                obj.isOpen(index) = false;
-                netcdf.close( obj.ncid(index) );
-            end
-        end
-        
-        
-        function openNetcdfFile(obj)
-            for i = 1:numel(obj.fileName)
-                if obj.isOpen(i) == false
-                    obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
-                    obj.isOpen(i) = true;
-                end
-            end
-        end
-        
-        function defineIntoNetcdfFile( obj, index )
-            obj.ncid(index) = netcdf.create( obj.fileName{index}, 'CLOBBER');
-            obj.isOpen(index) = true;
-            for n = 1:numel(obj.ncDim)
-                obj.ncDim(n).defineIntoNetcdfFile( obj.ncid(index) );
-            end
-            
-            for n = 1:numel(obj.ncVar)
-                obj.ncVar(n).defineIntoNetcdfFile( obj.ncid(index) );
-            end
-            netcdf.endDef(obj.ncid(index));
-        end
-        
-        function deleteNetcdfFile(obj, index)
-            str = obj.fileName(index);
-            delete(str{1});
-        end
     end
 end
 

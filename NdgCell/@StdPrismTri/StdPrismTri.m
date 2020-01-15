@@ -49,6 +49,9 @@ classdef StdPrismTri < handle
     properties ( SetAccess = protected)
         %> Vandermonde matrix
         V, Vh, Vint
+        %> project matrx from interpolation points to central point in
+        %> vertical direction, and this is needed for GOTM implementation
+        VCV
         %> project matrx from interpolation points to quadrature points
         Vq
         %> mass matrix

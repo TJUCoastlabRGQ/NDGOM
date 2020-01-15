@@ -19,12 +19,11 @@ classdef AbstractVtkOutput < AbstractOutputFile
     end
 
     methods ( Access = public )
-        function obj = AbstractVtkOutput( casename, Nfield, dt )
-            obj = obj@AbstractOutputFile( casename, Nfield, dt );
+        function obj = AbstractVtkOutput( mesh, casename, Nfield, dt, varIndex )
+            obj = obj@AbstractOutputFile( mesh, casename, Nfield, dt, varIndex );
         end
         
-        outputResult( obj, time, field );
-        %> output result at specific step
-        outputStepResult( obj, step, field );
+
     end
+    
 end

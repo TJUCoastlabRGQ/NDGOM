@@ -5,6 +5,6 @@ function matCalculatePenaltyParameter( obj, mesh )
 %> @param[in] mesh The mesh object
 InnerEdge = mesh.InnerEdge;
 BoundaryEdge = mesh.BoundaryEdge;
-obj.Tau = mxCalculatePenaltyParameter(mesh.LAV, InnerEdge.FToE, InnerEdge.LAV,...
+obj.Tau = 2 * mxCalculatePenaltyParameter(mesh.LAV, InnerEdge.FToE, InnerEdge.LAV,...
     BoundaryEdge.FToE, BoundaryEdge.LAV, int8(mesh.type), mesh.cell.N);
 end

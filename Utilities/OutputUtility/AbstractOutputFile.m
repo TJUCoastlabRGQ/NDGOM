@@ -7,21 +7,24 @@ classdef AbstractOutputFile < handle
         Nfield
         casename
         outputTime
+        varIndex
     end
 
-    properties ( SetAccess = protected )
+    properties
         timeInterval
         timePrevious
         outputStep
     end
     
     methods
-        function obj = AbstractOutputFile( casename, Nfield, timeInterval ) 
+        function obj = AbstractOutputFile( mesh, casename, Nfield, timeInterval, varIndex ) 
+            obj.mesh = mesh;
             obj.Nfield = Nfield;
             obj.casename = casename;
             obj.timeInterval = timeInterval;
             obj.timePrevious = 0;
             obj.outputStep = 0;
+            obj.varIndex = varIndex;
         end
 
         %> output 

@@ -1,13 +1,10 @@
-classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
+classdef NonhydrostaticSolitaryWaveRunUpWall < SWEWDPreBlanaced2d
     %NONHYDROSTATICSOLITARYWAVERUNUPWALL 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties(Constant)
-        gra = 9.81
-        hmin = 1e-3
 %         n = 0.01.^2
         n = 0
-        rho = 1000
         Depth = 0.218
     end
     
@@ -16,14 +13,14 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
         Ng
         xg
         yg
-        A = 0.054
-%         A = 0.0085
+%         A = 0.054
+        A = 0.0085
 %         x0 = 5.95
 %         x0 = 2.7096
-%         x0 = 2.705
+        x0 = 2.705
         
         
-        x0 = -5
+%         x0 = -5
         Eta0
         U0
         W0
@@ -32,46 +29,45 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
     methods
         function obj = NonhydrostaticSolitaryWaveRunUpWall(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
-            obj = obj@SWEConventional2d();
+            obj = obj@SWEWDPreBlanaced2d();
+            obj.hmin = 1e-3;
             obj.SolitaryWaveRunUpWall(mesh); 
             obj.initPhysFromOptions( mesh );
             [ obj.Ng, obj.xg, obj.yg ] = setGaugePoint();
-            obj.matSolve;
-            obj.Postprocess;
-            %             [ obj.cellId, obj.Vg ] = accessGaugePointMatrix( obj );
+%             obj.matSolve;
         end
         
         function Postprocess(obj)
             index = [5 6 7 8 9];
             Coor = [15.04 17.22 19.4 20.86 22.32];
             d = [0.218 0.1769 0.1357 0.1259 0.1162];
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
-            Ntime = PostProcess.Nt;
+%             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('NonhydrostaticSolitaryWaveRunUpWall','/','NonhydrostaticSolitaryWaveRunUpWall'));
+            [ result ] = PostProcess.interpolateOutputResultToGaugePoint( Coor, 0.01*ones(size(Coor)), Coor );
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
-            Eta = zeros(Ntime,numel(Coor));
-            for ind = 1:numel(index)
-                for t = 1:Ntime
-                    tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  Coor(ind), 0.01,  Coor(ind), t );
-                    Eta(ind, t) = tempdata(1) - d(ind);
-                end
-            end
-%             fpath = 'D:\PhdResearch\Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data';
-           fpath ='D:\PhdResearch\Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data';
+
+            fpath ='Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data\SmallWaveHeight';
             for i = 1:numel(Coor)
                 str = strcat('\Gauge',num2str(index(i)),'.csv');
                 pathstr = strcat(fpath,str);
-                titlestr = strcat('Gauge',num2str(index(i)));
+                titlestr = strcat('Gauge',32,num2str(index(i)));
                 data = xlsread(pathstr);
                 figure;
-                set(gcf,'position',[50,50,550,200]);
-                plot(outputTime,Eta(i,:)*100,'k','LineWidth',1.5);
+                set(gcf,'position',[50,50,500,200]);
+%                 plot(outputTime - 6.7,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
+                plot(outputTime - 0.1,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
                 hold on;
-                plot(data(:,1),data(:,2)*100,'rs','markersize',2);
-                ylim([-0.5,2]);
+                plot(data(:,1),data(:,2)*100,'ro','markersize',2);
+%                 ylim([-1.5,10]);
+%                 xlim([0,25]);
+                ylim([-0.3,2]);
+                xlim([0,30]);                
                 ylabel({'$\eta \;\rm {(cm)}$'},'Interpreter','latex');   
                 xlabel({'$t \;\rm {(s)}$'},'Interpreter','latex'); 
-                set(gca,'Fontsize',15);
-                title(titlestr,'position',[4,1.4],'Fontsize',15);
+                set(gca,'Fontsize',13.5);
+                set(gca,'Fontsize',14);
+                title(titlestr,'position',[4.6,1.4],'Fontsize',14);
+%                 title(titlestr,'position',[4.8,7],'Fontsize',14);
             end
         end
         
@@ -105,42 +101,49 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEConventional2d
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 fphys{m}(:,:,4) = bot;
                 
-                fphys{m}(:,:,1) = d + obj.Eta0 - fphys{m}(:,:,4) ;
+                fphys{m}(:,:,1) = obj.Eta0 - fphys{m}(:,:,4) ;
                 fphys{m}(:,:,2) = fphys{m}(:,:,1) .* obj.U0;
-                fphys{m}(:,:,6) = fphys{m}(:,:,1).*obj.W0./2;
+                fphys{m}(:,:,6) = fphys{m}(:,:,1).*obj.W0;
                 
-%                 fphys{m}(:,:,1) = d + a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x - (5.95) - c*0) )).^2 - fphys{m}(:,:,4) ;
-%                 fphys{m}(:,:,2) = fphys{m}(:,:,1) .* (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x - (5.95) - c * 0) )).^2)./...
-%                     (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x - (5.95) - c * 0) )).^2 +d )*c;
             end
         end
         
         function matUpdateExternalField(obj, tloc, ~)
             a = obj.A;
             d = obj.Depth;
-            c = sqrt(obj.gra*(a + d));
 
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
                 edge = obj.meshUnion(m).BoundaryEdge;
                 nodeid = bsxfun( @plus, edge.FToN1, (edge.FToE(1, :) - 1) .* mesh.cell.Np);
                 obj.fext{m}( :, :, 4 ) = obj.fphys{m}( nodeid + mesh.K * mesh.cell.Np * 3 );
-                obj.fext{1}(:,:,1) = d + a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c*tloc) )).^2 - obj.fext{m}( :, :, 4 );
-                obj.fext{1}(:,:,2) = obj.fext{m}(:,:,1) .* (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c * tloc) )).^2)./...
-                    (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c * tloc) )).^2 +d )*c;
+                
+%                 obj.fext{1}(:,:,1) = d + a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c*tloc) )).^2 - obj.fext{m}( :, :, 4 );
+%                 obj.fext{1}(:,:,2) = obj.fext{m}(:,:,1) .* (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c * tloc) )).^2)./...
+%                     (a*(sech(sqrt(3*a/(4*(d)^3)) * (mesh.x(nodeid) - obj.x0 - c * tloc) )).^2 +d )*c;
+                x = 0;
+                a = obj.A;
+                l = d*sqrt((a+d)/a);
+                C0 = l/d*sqrt(obj.gra * d^3/(l^2-d^2));
+                h = d + a * ( sech( ( x - obj.x0 -C0*tloc)/l ) )^2;
+                U = C0 * (1 - d/h);
+                W = -( a * C0 * d )/( l * h ) * sech( (x - obj.x0 - C0 * tloc)/l )*( -sinh((x - obj.x0 - C0*tloc)/l)/(l*cosh((x - obj.x0 - C0*tloc)/l)^2) * l  );
+                obj.fext{1}(:,:,1) = h;
+                obj.fext{1}(:,:,2) = h * U;
+                obj.fext{1}(:,:,6) = h * W;                
             end
             
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 30;
+            ftime = 35;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -156,13 +159,13 @@ function [ mesh ] = makeUniformMesh(N, deltax, type)
 bctype = [...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 23.22], [0, deltax], 23.2/deltax, deltax/deltax, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N, [0, 23.22], [0, deltax], 23.2/deltax, deltax/deltax, bctype);
+    mesh = makeUniformQuadMesh(N, [-15, 23.22], [0, deltax], ceil(38.22/deltax), deltax/deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

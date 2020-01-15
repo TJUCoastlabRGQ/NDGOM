@@ -1,11 +1,18 @@
 function AssembleVandMatrix(obj)
 V = zeros(obj.Np, obj.Np);
+tempVCV = zeros(obj.Nph, obj.Np);
 
 for n = 1:obj.Np
     fh = obj.EvaluateHorizontalOrthogonalFunc( obj.N, n, obj.r, obj.s );
     fv = obj.EvaluateVerticalOrthogonalFunc( n, obj.t );
     V(:, n) = fh .* fv;
 end% for
+
+for n = 1:obj.Np
+    fh = obj.EvaluateHorizontalOrthogonalFunc( obj.N, n, obj.r1, obj.s1 );
+    fv = obj.EvaluateVerticalOrthogonalFunc( n, zeros(size(obj.r1)) );
+    tempVCV(:, n) = fh .* fv;
+end
 
 Vh = zeros(obj.Nph, obj.Nph);
 for n = 1:obj.Nph
@@ -19,6 +26,7 @@ Vint = EvaluateVerticalIntegralOrthogonalFunc( obj );
 obj.V = V;
 obj.Vh = Vh;
 obj.Vint = Vint;
+obj.VCV = tempVCV/V;
 end
 
 % function Vz = EvaluateVerticalIntegralOrthogonalFunc( obj )

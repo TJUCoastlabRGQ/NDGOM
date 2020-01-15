@@ -19,7 +19,7 @@
 % ======================================================================
 classdef NdgPhys < handle
     
-    properties( SetAccess = protected )
+    properties
         %> cell array for physical field variable
         fphys
     end

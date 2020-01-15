@@ -1,38 +1,46 @@
 function [ UpwindedTermX ] = matCalculateUpwindedFphysDerivative(obj, mesh, fphys, physClass, variableX )
+%> @brief Function to calculate the physical variable related partial derivative in a upwind manner
+%> @details
+%> Function to calculate the physical variable related partial derivative in a upwind manner
+%> @param[in] mesh The mesh object
+%> @param[in] fphys The fphys field
+%> @param[in] physClass The physical object set up
+%> @param[in] termX The varialbe used to calculate the partial derivative with respect to x
+%> @param[out] UpwindedTermX The partial derivative with respect to x in upwind manner
 
 InnerEdge = mesh.InnerEdge;
 [fm, fp] = InnerEdge.matEvaluateSurfValue( fphys );
 [vfmx, vfpx] = InnerEdge.matEvaluateSurfValue(variableX);
 
-[ fluxX ] = mxEvaluateUpwindNumFlux( mesh.status, InnerEdge.FToE, ...
-    fm(:,:,2), fp(:,:,2), vfmx, vfpx, InnerEdge.nx );
 
-% % getLocalAndAdjacentFluxTerm
-% fluxMx = InnerEdge.nx .* vfmx;
-% fluxPx = InnerEdge.nx .* vfpx;
+[ fluxX ] = obj.matEvaluateUpwindNumFlux( mesh.status, InnerEdge.FToE, ...
+    fm(:,:,2), fp(:,:,2), vfmx, vfpx, ...
+    InnerEdge.nx );
 
-[ fluxMx ] = mxEvaluateSurfFlux( mesh.status, InnerEdge.FToE, vfmx, InnerEdge.nx );
+[ fluxMx ] = obj.matEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
+    vfmx, InnerEdge.nx );
 
-[ fluxPx ] = mxEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
+[ fluxPx ] = obj.matEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
     vfpx, InnerEdge.nx );
 
-% the Inner edge contribution
 UpwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
 
 BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys );
 [fm, fp] = physClass.matImposeBoundaryCondition( BoundaryEdge, BoundaryEdge.nx,...
-     fm, fp, physClass.fext{1} );
+    fm, fp, physClass.fext{1} );
 [vfmx, vfpx] = BoundaryEdge.matEvaluateSurfValue(variableX);
+ 
+[ fluxX ] = obj.matEvaluateUpwindNumFlux( mesh.status, BoundaryEdge.FToE, ...
+    fm(:,:,2), fp(:,:,2), vfmx, vfpx, ...
+    BoundaryEdge.nx );
 
-[ fluxX ] = mxEvaluateUpwindNumFlux( mesh.status, BoundaryEdge.FToE, ...
-    fm(:,:,2), fp(:,:,2), vfmx, vfpx, BoundaryEdge.nx );
+[ fluxMx ] = obj.matEvaluateSurfFlux( mesh.status, BoundaryEdge.FToE, ...
+    vfmx, BoundaryEdge.nx );
 
-[ fluxMx ] = mxEvaluateSurfFlux( mesh.status, BoundaryEdge.FToE, vfmx, BoundaryEdge.nx );
-% fluxMx = BoundaryEdge.nx .* vfmx;
 % the boundary edge contribution
-UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX);
+UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX );
 
-[ VolumeX ] = obj.matVolumeIntegral( mesh, cell2mat(variableX));
+[ VolumeX ] = obj.matVolumeIntegral( mesh, cell2mat(variableX) ); 
 UpwindedTermX = UpwindedTermX + VolumeX;
 end

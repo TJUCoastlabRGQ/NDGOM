@@ -1,46 +1,52 @@
-function initFromMesh( obj, mesh, filename, outputIntervalNum, varIndex )
+function initFromMesh( obj, filename, outputIntervalNum, varIndex )
 
 % set vtk output
-if (mesh.type == enumMeshDim.One)
+if (obj.mesh.type == enumMeshDim.One)
     obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
-elseif (mesh.type == enumMeshDim.Two)
-    obj.vtkOutput = VtkOutput2d(obj.casename, obj.Nfield, obj.timeInterval);
-elseif (mesh.type == enumMeshDim.Three)
-    obj.vtkOutput = VtkOutput3d(obj.casename, obj.Nfield, obj.timeInterval);
+elseif (obj.mesh.type == enumMeshDim.Two)
+    obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex);
+elseif (obj.mesh.type == enumMeshDim.Three)
+    obj.vtkOutput = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval3d);
 end
 
 % obj.vtkOutput.initFromMesh( mesh );
 
 % define dimension
 dimTime = NdgNcDim('Nt', 0);
-dimK = NdgNcDim('K', mesh.K);
-dimNp = NdgNcDim('Np', mesh.cell.Np);
+dimK = NdgNcDim('K', obj.mesh.K);
+dimNp = NdgNcDim('Np', obj.mesh.cell.Np);
 dimNfield = NdgNcDim('Nvar', obj.Nfield);
 % dimNfield = NdgNcDim('Nvar', 6);
 % define variable
 varTime = NdgNcVar('time', dimTime, enumNcData.NC_DOUBLE );
 varField = NdgNcVar('fphys', [dimNp, dimK, dimNfield, dimTime], enumNcData.NC_DOUBLE);
 
+
+obj.ncid = zeros(size(filename));
+obj.isOpen = false * ones(size(filename));
+obj.fileOrder = 1;
+obj.Numfile = numel(filename);
+obj.fileName = filename;
 % define file
 % obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
-obj.ncfile = NdgNcFile( filename, ...
+obj.ncfile = NdgNcFile( obj, ...
     [dimTime, dimK, dimNp, dimNfield], [varTime, varField]);
 
-if floor(outputIntervalNum/numel(obj.ncfile.fileName))<1
+if floor(outputIntervalNum/numel(obj.fileName))<1
     error( 'Too many output nc file!' );
 else
-    obj.ncfile.StepPerFile = floor(outputIntervalNum/numel(obj.ncfile.fileName));
+    obj.StepPerFile = floor(outputIntervalNum/numel(obj.fileName));
 end
 
-obj.ncfile.varIndex = varIndex;
+% obj.ncfile.varIndex = varIndex;
 % init file
-for n = 1:numel(obj.ncfile.fileName)
-obj.ncfile.defineIntoNetcdfFile(n);
+for n = 1:numel(obj.fileName)
+obj.defineIntoNetcdfFile(n);
 end
 
 % set properties
 obj.timeVarableId = varTime.id;
 obj.fieldVarableId = varField.id;
-obj.mesh = mesh;
+% obj.mesh = mesh;
 
 end

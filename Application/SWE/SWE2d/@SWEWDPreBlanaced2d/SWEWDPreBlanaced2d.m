@@ -2,8 +2,18 @@ classdef SWEWDPreBlanaced2d < SWEPreBlanaced2d
     
     methods( Hidden )
         function [ E, G ] = matEvaluateFlux( obj, mesh, fphys )
-            [ E, G ] = mxEvaluateFlux2d( obj.hmin, obj.gra, mesh.status, fphys );
+            [ E, G ] = obj.volumefluxSolver.evaluate( obj.hmin, obj.gra, mesh, fphys );
+%             [ E, G ] = mxEvaluateFlux2d( obj.hmin, obj.gra, mesh.status, fphys );
         end
+    end
+    
+    methods
+        function matUpdateWetDryState(obj, fphys)
+            for n = 1:obj.Nmesh
+                mesh = obj.meshUnion(n);
+                mesh.status = mxUpdateWDWetDryState( obj.hmin, fphys{n} );
+            end
+        end% func        
     end
     
     methods( Access = protected )
@@ -32,17 +42,10 @@ classdef SWEWDPreBlanaced2d < SWEPreBlanaced2d
 %             obj.matUpdateWetDryState( fphys );
 %         end% func
         
-%         function matUpdateWetDryState(obj, fphys)
-%             for n = 1:obj.Nmesh
-%                 mesh = obj.meshUnion(n);
-%                 mesh.status = mxUpdateWDWetDryState( obj.hmin, fphys{n} );
-%             end
-%         end% func
-        
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh
                 mesh = obj.meshUnion(m);
-                obj.frhs{m} = obj.frhs{m} + mxEvaluateSourceTopography2d...
+                obj.frhs{m}(:,:,1:3) = obj.frhs{m}(:,:,1:3) + mxEvaluateSourceTopography2d...
                     ( obj.gra, mesh.status, fphys{m}, obj.zGrad{m} );
             end
         end

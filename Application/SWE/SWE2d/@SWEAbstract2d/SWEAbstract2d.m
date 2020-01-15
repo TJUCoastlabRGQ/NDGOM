@@ -32,6 +32,7 @@ classdef SWEAbstract2d < NdgPhysMat
     properties
         %> number of physical field [h hu hv z hc w q]
         Nfield = 7
+        fieldName2d = {'H','HU','HV','z','HC','HW','q'};
         %> number of variable field
         Nvar = 3
         %> index of variable in physical field

@@ -11,7 +11,16 @@ addpath( genpath( 'Utilities') );
 addpath( genpath( 'Application') );
 fprintf('\n----------------------------------------------------------\n')
 
+fprintf('Compile GOTM source files.\n');
+
+NdgCompileGOTMSourceCode();
+
+fprintf('GOTM source files compiled.\n');
+
+fprintf('\n----------------------------------------------------------\n')
+
 fprintf('%s:: Compile mex files.\n', mfilename);
 NdgConfigure(12)
 fprintf('\n----------------------------------------------------------\n')
+
 fprintf('%s:: Finish all the setup process.\n\n', mfilename);
