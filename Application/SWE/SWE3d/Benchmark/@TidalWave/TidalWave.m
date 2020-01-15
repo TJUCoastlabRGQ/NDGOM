@@ -1,43 +1,35 @@
-classdef StandingWaveInAClosedChannel < SWEBarotropic3d
-    %STANDINGWAVEINACLOSECHANNEL 此处显示有关此类的摘要
+classdef TidalWave< SWEBarotropic3d
+    %WINDDRIVENFLOW 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties ( Constant )
         %> channel length
-        hmin = 0.01;
-%         ChLength = 100;
-        ChLength = 10;
-        %> channel width
-        ChWidth = 6;
+        ChLength = 24000;
+        ChWidth = 1200;
         %> channel depth
-        H0 = 7.612;
-        %> x range
+        H0 = 30;
         %> start time
         startTime = 0;
-%         %> final time
-        finalTime = 10;
-        % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
+        %> final time
+        finalTime = 216000;
+        hmin = 0.001;
     end
     
     properties
         dt
-        miu0
-        Lambda = 20;
-        A = 0.1;
     end
     
     methods
-        function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+        function obj = TidalWave( N, Nz, M, Mz )
             % setup mesh domain
-            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3 ];
+            [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.outputFieldOrder2d = [ 1 2 3];
+            obj.outputFieldOrder = [ 1 2 3 4];
             % allocate boundary field with mesh obj
-            obj.initPhysFromOptions( mesh2d, mesh3d );
-            %> time interval
-            obj.dt = 0.005;
-%             obj.Cf{1} = 0.0025/1000;
-            obj.Cf{1} = 0*ones(size(mesh2d.x));
+            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
+            obj.WindTaux{1} = zeros(size(obj.mesh2d(1).y));
+            obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));
+            obj.Cf{1} = 0*ones(size(obj.mesh2d(1).x));
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -54,27 +46,40 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
-                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
-                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
+                mesh2d = obj.mesh2d(m);
+                mesh3d = obj.mesh3d(m);
+                fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
+                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) = -obj.H0;                
+                fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
-                fphys2d{m}(:,:,1) =  -obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) = obj.H0*ones(mesh2d.cell.Np, mesh2d.K);
             end
         end
         
+        function matUpdateExternalField( obj, time, ~, ~ )
+            A = 0.5;
+            omega = 2*pi/12/3600;
+            L = 7.4110e+05;
+            k = 2*pi/L;
+            for m = 1:obj.Nmesh
+                obj.fext2d{m}(:, :, 1) = obj.H0 + A*cos(omega*time-k*L + pi/2);
+                obj.fext3d{m}(:, :, 4) = obj.H0 + A*cos(omega*time-k*L + pi/2);
+            end
+            
+        end
+        
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 216000;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 20;                  
+            option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.ARK232;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
-            option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
@@ -82,18 +87,25 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
     end
+    
 end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
+
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.ZeroGrad, ...
+%     enumBoundaryCondition.ZeroGrad ];
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedDepth ];
 
 mesh2d = makeUniformTriMesh( N, ...
-    [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
+    [ 0, obj.ChLength ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

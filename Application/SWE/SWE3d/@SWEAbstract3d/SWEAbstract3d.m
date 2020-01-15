@@ -21,7 +21,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( Abstract, Constant )
         %> wet/dry depth threshold
-        hcrit
+        hmin
     end
     
 %     properties( SetAccess = protected )
@@ -82,6 +82,14 @@ classdef SWEAbstract3d < NdgPhysMat
         function obj = SWEAbstract3d(  )
             % Doing nothing
         end
+        %> function to update the wet-dry state of cells
+        function matUpdateWetDryState(obj, fphys2d)
+            for m = 1:obj.Nmesh
+                wetflag = all( fphys2d{m}(:,:,1) > obj.hmin );
+                obj.meshUnion(m).mesh2d.status( ~wetflag ) = int8( enumSWERegion.Dry );
+                obj.meshUnion(m).mesh2d.status(  wetflag ) = int8( enumSWERegion.Wet );
+            end            
+        end
         
         initPhysFromOptions( obj, mesh2d, mesh3d );
         AnimationSurfaceLevel( obj );
@@ -91,9 +99,15 @@ classdef SWEAbstract3d < NdgPhysMat
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
         [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );
+        
     end
     % ======================================================================
-    
+    % ======================================================================
+    methods ( Abstract, Access = protected )
+        %> determine wetting and drying status
+         matEvaluatePostFunc(obj, fphys);
+    end
+    % ======================================================================    
     
     methods( Access = protected )
         
@@ -138,12 +152,19 @@ classdef SWEAbstract3d < NdgPhysMat
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
-        
-        matEvaluateSourceTerm( obj, fphys );
-        
+                
         EddyViscositySolver = matInitEddyViscositySolver( obj );
         
     end
+    
+    methods ( Sealed, Access = protected )
+        
+        %> determine time interval
+        [ dt ] = matUpdateTimeInterval( obj, fphys )
+        
+        %> evaluate source term
+        matEvaluateSourceTerm( obj, fphys );        
+    end    
     
 end
 

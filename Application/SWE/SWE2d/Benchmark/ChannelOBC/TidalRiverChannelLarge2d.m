@@ -19,25 +19,25 @@ classdef TidalRiverChannelLarge2d < TidalRiverChannel2d
             outputIntervalNum = 1000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
-            option('obcType') = NdgBCType.None;
-            option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
+%             option('obcType') = NdgBCType.None;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
-            option('outputNetcdfCaseName') = ...
+            option('outputCaseName') = ...
                 [mfilename, '.', num2str(obj.meshUnion.cell.N)];
-            option('temporalDiscreteType') = NdgTemporalDiscreteType.RK22;
-            option('limiterType') = NdgLimiterType.None;
-            option('equationType') = NdgDiscreteEquationType.Strong;
-            option('integralType') = NdgDiscreteIntegralType.GaussQuadrature;
-            option('CoriolisType') = SWECoriolisType.None;
-            option('WindType') = SWEWindType.None;
-            option('FrictionType') = SWEFrictionType.None;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK22;
+            option('limiterType') = enumLimiter.None;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('CoriolisType') = enumSWECoriolis.None;
+            option('WindType') = enumSWEWind.None;
+            option('FrictionType') = enumSWEFriction.None;
         end
     end
     
     methods( Access = protected, Static  )
         %> set open boundary condition
         function obtype = setOpenBoundaryCondition(  )
-            obtype = [NdgEdgeType.Clamped, NdgEdgeType.ClampedVel];
+            obtype = [enumBoundaryCondition.Clamped, enumBoundaryCondition.ClampedVel];
         end
     end
     

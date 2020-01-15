@@ -307,6 +307,14 @@ srcfile = {[path,'mxAssembleGlobalStiffMatrix.c'],...
 libfile = { };
 FuncHandle(path, srcfile, libfile);
 
+% SWE2d
+path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
+srcfile = { ...
+    [path, 'mxUpdateTimeInterval3d.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};

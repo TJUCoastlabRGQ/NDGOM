@@ -23,11 +23,11 @@ classdef NdgGOTMEddyViscositySolver < NdgAbstractEddyViscositySolver
             obj.matInitEddyViscosity(physClass, physClass.mesh3d);
         end
         
-        function  [ EddyViscosity, DragCoefficient ] = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt, time, WindTaux, WindTauy)  
+        function  [ EddyViscosity, DragCoefficient ] = matUpdateEddyViscosity( obj, physClass, mesh2d, mesh3d, fphys2d, fphys, dt, time, WindTaux, WindTauy, ~)  
             
             [EddyViscosity, DragCoefficient]  = mxUpdateEddyViscosity(mesh2d(1).cell.Np, mesh2d(1).K, mesh3d(1).cell.Np,...
-                mesh3d(1).K, mesh3d(1).Nz, physClass.hcrit, physClass.finalTime, mesh3d(1).cell.VCV,...
-                fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2), obj.GotmFile, dt, time, obj.h0b, WindTaux, WindTauy);
+                mesh3d(1).K, mesh3d(1).Nz, physClass.hmin, physClass.finalTime, mesh3d(1).cell.VCV,...
+                fphys2d(:,:,1), fphys(:,:,1), fphys(:,:,2), obj.GotmFile, dt, time, obj.h0b, WindTaux, WindTauy);
             
         end
     end

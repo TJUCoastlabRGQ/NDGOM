@@ -41,10 +41,21 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 BoundaryEdge = mesh2d.BoundaryEdge;
                 [ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( fphys );
                 
+                % apply clamped depth boundary condition
+                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+                fp(:, ind, 1) = fext{m}(:, ind, 1);
+
                 % apply clamped boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );
                 fp(:, ind, 1) = fext{m}(:, ind, 1);
-
+                fp(:, ind, 2) = fext{m}(:, ind, 2);
+                fp(:, ind, 3) = fext{m}(:, ind, 3);
+                
+                % apply clamped velocity boundary condition
+                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+                fp(:, ind, 2) = fext{m}(:, ind, 2);
+                fp(:, ind, 3) = fext{m}(:, ind, 3);                
+                
                 % apply zero-grad boundary condition
                 ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ZeroGrad );
                 fp(:, ind, 1) = fm(:, ind, 1);

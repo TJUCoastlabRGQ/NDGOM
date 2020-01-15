@@ -16,7 +16,7 @@ dt = obj.dt;
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    %     dt = obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.2*obj.matUpdateTimeInterval( fphys2d );
     if( time + dt > ftime )
         dt = ftime - time;
     end

@@ -1,5 +1,5 @@
 function matEvaluateIMEXRK343( obj )
-[EXa, IMa, EXb, IMb, ~] = GetRKParamter();
+[EXa, IMa, EXb, IMb, c] = GetRKParamter();
 time = obj.startTime;
 ftime = obj.finalTime;
 
@@ -12,24 +12,29 @@ ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
 visual = Visual2d( obj.mesh2d );
-dt = obj.dt;
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    %     dt = obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.2*obj.matUpdateTimeInterval( fphys2d );
+    display(dt);
     if( time + dt > ftime )
         dt = ftime - time;
     end
     
     Tempfphys2d = fphys2d{1}(:,:,1);
     Tempfphys = fphys{1}(:,:,1:2);
+    
+    %Update the boundary condition before calculation of the explicit term
+    tloc = time + c( 1 ) * dt;
+    obj.matUpdateExternalField( tloc, fphys2d, fphys );
+    
     [ExplicitRHS2d(:,:,1), ExplicitRHS3d(:,:,1), ExplicitRHS3d(:,:,1+4)] = ...
             matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);                    
         
     for intRK = 1:3
-%         tloc = time + c( intRK ) * dt;
+        tloc = time + c( intRK+1 ) * dt;
         %>Actually, boundary condition need to be imposed here
-        %         obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
         %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary        
         
         SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
@@ -40,9 +45,9 @@ while( time < ftime )
             dt * EXa(intRK+1,3)*ExplicitRHS3d(:,:,7) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,4) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,5)+...
             dt * IMa(intRK,3)*ImplicitRHS3d(:,:,6);
         %Information about the 2d mesh is contained in meshUnion
-        [ImplicitRHS3d(:,:,intRK), ImplicitRHS3d(:,:,intRK+3), fphys{1}(:,:,1), fphys{1}(:,:,2)] = ...
-            matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient, obj.meshUnion(1), fphys{1},IMa(intRK,intRK), dt, obj.Cf{1},...
-            obj.WindTaux{1}, obj.WindTauy{1});
+%         [ImplicitRHS3d(:,:,intRK), ImplicitRHS3d(:,:,intRK+3), fphys{1}(:,:,1), fphys{1}(:,:,2)] = ...
+%             matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient, obj.meshUnion(1), fphys{1},IMa(intRK,intRK), dt, obj.Cf{1},...
+%             obj.WindTaux{1}, obj.WindTauy{1});
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );   
         %> update the vertical velocity
@@ -55,10 +60,6 @@ while( time < ftime )
         
        [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+4)] = ...
             matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);      
-        % fphys2d = obj.matEvaluateLimiter( fphys2d );
-        % fphys2d = obj.matEvaluatePostFunc( fphys2d );
-        % visual.drawResult( fphys2d{1}(:,:,1) );
-        % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
     %>Update the velocity
     fphys{1}(:,:,1) = Tempfphys(:,:,1) + dt * EXb(1) * ExplicitRHS3d(:,:,1) + dt * EXb(2) * ExplicitRHS3d(:,:,2)+...
@@ -79,9 +80,11 @@ while( time < ftime )
     ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
     time = time + dt;
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
-    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);       
-%     [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
-%         obj.meshUnion(1), fphys2d, fphys, dt , time, obj.WindTaux{1}, obj.WindTauy{1} );
+    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6); 
+    
+    obj.matEvaluatePostFunc( fphys2d );
+    [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
+        obj.meshUnion(1), fphys2d, fphys{1}, dt , time, obj.WindTaux{1}, obj.WindTauy{1}, obj.Cf{1} );
     
     %> Update the diffusion coefficient
     DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
@@ -109,7 +112,7 @@ end
 function [ImplicithuRHS3d, ImplicithvRHS3d, hu, hv] = matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient,...
     meshUnion, fphys, ImplicitParameter, dt, Cf, WindTaux, WindTauy)
 %>Allocate memory space first
-Tau = matCalculatePenaltyParameter(meshUnion.cell.Fmask(:,end-1), meshUnion.cell.Fmask(:,end), meshUnion.mesh2d(1).cell.N, ...
+Tau = matCalculatePenaltyParameter(meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1), meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end), meshUnion.mesh2d(1).cell.N, ...
     meshUnion.mesh2d(1).K, DiffusionCoefficient, meshUnion.Nz);
 Nz = meshUnion.Nz;
 Np = meshUnion.cell.Np;
@@ -119,8 +122,8 @@ ImplicithvRHS3d = zeros(size(meshUnion.x));
 StiffMatrix     = zeros(Nz*Np);
 hu              = zeros(size(meshUnion.x));
 hv              = zeros(size(meshUnion.x));
-BottomEidM      = meshUnion.cell.Fmask(:,end-1);
-UpEidM          = meshUnion.cell.Fmask(:,end);
+BottomEidM      = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
+UpEidM          = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
 Np = meshUnion.cell.Np;
 for i =1:meshUnion.mesh2d(1).K
     %> At present, we assume the mesh is uniform in the vertical direction
@@ -187,7 +190,7 @@ for i =1:meshUnion.mesh2d(1).K
 %         fphys(:,i*meshUnion.Nz,1), fphys(:,i*meshUnion.Nz,2), fphys(:,i*meshUnion.Nz,4), Cf);
 %     temphudata = SystemRHS(:,i*meshUnion.Nz,1);temphvdata = SystemRHS(:,i*meshUnion.Nz,2);
     [ SystemRHS(:,i*meshUnion.Nz,1), SystemRHS(:,i*meshUnion.Nz,2), bottomFrictionX, bottomFrictionY ] = ImposeBottomBoundaryCondition(BottomEidM, ElementalMassMatrix2d, ...
-        ElementalMassMatrix3d,fphys(:,i*meshUnion.Nz,1), fphys(:,i*meshUnion.Nz,2), fphys(:,i*meshUnion.Nz,4), Cf, meshUnion.cell.VCV, ...
+        ElementalMassMatrix3d,fphys(:,i*meshUnion.Nz,1), fphys(:,i*meshUnion.Nz,2), fphys(:,i*meshUnion.Nz,4), Cf(:,i), meshUnion.cell.VCV, ...
         dt, ImplicitParameter, SystemRHS(:,i*meshUnion.Nz,1), SystemRHS(:,i*meshUnion.Nz,2) );
 %   
 %     hudata = SystemRHS(:,i*meshUnion.Nz,1);hvdata = SystemRHS(:,i*meshUnion.Nz,2);
@@ -225,36 +228,36 @@ MaxDiffusionCoefficient = max(DiffusionCoefficient([eidM, eidP],:));
 %> interpolation order, n0 =5, but  neglect, A the total area of the prism, but is
 %> substituted by the sum of  the surface and bottom area. V is the volume of the cell, and mu is the
 %> maximum diffusion coefficient at the surface and bottom boundary for each cell
-PenaltyParameter = (N2d + 1)*(N2d + 3)/3*(2*NLayer).*reshape(MaxDiffusionCoefficient,[NLayer,K2d]);
+PenaltyParameter = 1.5*2.5 * (N2d + 1)*(N2d + 3)/3*(2*NLayer).*reshape(MaxDiffusionCoefficient,[NLayer,K2d]);
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
+OP11(:, eidM)   = OP11(:, eidM)   + 0.5*0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
 % OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*Dz(eidM,:);%this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
-OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
+OP11(eidM, :)   = OP11(eidM, :)   + 0.5*0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
+OP11(eidM,eidM) = OP11(eidM,eidM) - 0.25*Tau*massMatrix2d;
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
+OP11(:, eidM)   = OP11(:, eidM)   - 0.5*0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
 % OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*Dz(eidM,:);   %this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
-OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
+OP11(eidM, :)   = OP11(eidM, :)   - 0.5*0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
+OP11(eidM,eidM) = OP11(eidM,eidM) - 0.25*Tau*massMatrix2d;
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
+OP12(:,eidM)    = OP12(:,eidM) - 0.5*0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
 % OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * Dz(eidM,:);  %this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:); 
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
+OP12(eidP,:)    = OP12(eidP,:) + 0.5*0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:); 
+OP12(eidP,eidM) = OP12(eidP,eidM) + 0.25*Tau * massMatrix2d;
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
-OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
+OP12(:,eidM)    = OP12(:,eidM) + 0.5*0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
 % OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * Dz(eidM,:);%this term corresponds to the interior face integral contained in flux for primitive variable, need to check again
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:);
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
+OP12(eidP,:)    = OP12(eidP,:) - 0.5*0.5 * massMatrix2d * AdjacentPhysicalDiffMatrix(eidM,:);
+OP12(eidP,eidM) = OP12(eidP,eidM) + 0.25*Tau * massMatrix2d;
 end
 
 % function OP11 = ImposeBottomBoundaryCondition(eidM, OP11, massMatrix2d, hu, hv, h, Cf)
@@ -293,7 +296,8 @@ GAMA = 0.435866521508460;
 beta1 = 1.208496649176012;
 beta2 = -0.644363170684471;
 alpha1 = -0.35;
-alpha2 = -0.989175724679855;
+% alpha2 = -0.989175724679855;
+alpha2 = (1/3-2*GAMA*GAMA-2*beta2*alpha1*GAMA)/GAMA/(1-GAMA);
 Parameterc = [0 GAMA (1+GAMA)/2 1];
 Explicita = [0 0 0 0;
     GAMA 0 0 0;

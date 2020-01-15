@@ -2,9 +2,9 @@ classdef TidalRiverChannel2d < SWEConventional2d
     
     properties(Constant)
         %> water depth threshold
-        hmin = 1e-4; 
+        
         %> gravity acceleration
-        gra = 9.8; 
+%         gra = 9.8; 
         
         %> channel depth
         H = 320;
@@ -30,6 +30,7 @@ classdef TidalRiverChannel2d < SWEConventional2d
         function obj = TidalRiverChannel2d( N, M )
             obj = obj@SWEConventional2d();
             mesh = obj.makeUniformMesh( N, M );
+            obj.hmin = 1e-4; 
             obj.initPhysFromOptions( mesh );
         end
     end
@@ -42,7 +43,7 @@ classdef TidalRiverChannel2d < SWEConventional2d
     methods( Access = private )
         function mesh = makeUniformMesh( obj, N, M )
             obtype = obj.setOpenBoundaryCondition();
-            bctype = [ NdgEdgeType.SlipWall, NdgEdgeType.SlipWall, ...
+            bctype = [ enumBoundaryCondition.SlipWall, enumBoundaryCondition.SlipWall, ...
                 obtype(1), obtype(2) ];
             mesh = makeUniformQuadMesh(N, ...
                 [ obj.ChLeft, obj.ChRight ], [0, obj.ChWidth], M, 1, bctype);
@@ -65,7 +66,7 @@ classdef TidalRiverChannel2d < SWEConventional2d
                 a = 1 - 1./exp( time/obj.T/2 );
                 mesh = obj.meshUnion(m);
                 [ obj.fext{m}(:,:,1), obj.fext{m}(:,:,2) ] ...
-                    = obj.setOBC( mesh.x, time );
+                    = obj.setOBC( mesh.BoundaryEdge.xb, time );
                 
                 if time < obj.T/2
                     obj.fext{m}(:, :, 1) = a.* ( obj.fext{m}(:, :, 1) - obj.H ) + obj.H;

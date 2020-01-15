@@ -36,7 +36,7 @@ obj.WindTauy =  cell(obj.Nmesh);
 obj.Cf =  cell(obj.Nmesh);
 
 [ obj.fphys2d, obj.fphys ] = obj.setInitialField;
-
+obj.matUpdateWetDryState( obj.fphys2d );
 for n = 1:obj.Nmesh
     obj.fphys2d{n}(:,:,5) = ( obj.mesh2d.rx .* ( obj.mesh2d.cell.Dr * obj.fphys2d{n}(:,:,4) ) ) + ...
         ( obj.mesh2d.sx .* ( obj.mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
@@ -50,7 +50,7 @@ for n = 1:obj.Nmesh
     %> H in extended three dimensional fields
     obj.fphys{n}(:, :, 4) = obj.meshUnion(n).Extend2dField( obj.fphys2d{n}(:, :, 1) );
     %> the vertical viscosity term is initialized to be 10^(-4)
-    obj.fphys{n}(:,:,5) = 0.00015* ones(size(obj.meshUnion(n).x)); 
+    obj.fphys{n}(:,:,5) = zeros(size(obj.meshUnion(n).x)); 
     %> Initially, the bottom roughness is not considered
     obj.Cf{n} =  0.0025/1000 * ones(size(obj.mesh2d(n).y)); 
     %> Z in extended three dimensional fields

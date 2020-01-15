@@ -1,4 +1,4 @@
-function matEvaluateIMEXRK222( obj )
+function matEvaluateARK232( obj )
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 time = obj.startTime;
 ftime = obj.finalTime;
@@ -8,82 +8,76 @@ fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
 ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
-ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
+ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
 visual = Visual2d( obj.mesh2d );
-dt = obj.dt;
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.0000005*obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.1*obj.matUpdateTimeInterval( fphys2d );
+    display(dt);
     if( time + dt > ftime )
         dt = ftime - time;
     end
     
     Tempfphys2d = fphys2d{1}(:,:,1);
     Tempfphys = fphys{1}(:,:,1:2);
-    [ExplicitRHS2d(:,:,1), ExplicitRHS3d(:,:,1), ExplicitRHS3d(:,:,1+3)] = ...
-         matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);    
-    for intRK = 1:2
+    
+    for intRK = 1:3
         tloc = time + c( intRK ) * dt;
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
-        %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary
+        [ExplicitRHS2d(:,:,intRK), ExplicitRHS3d(:,:,intRK), ExplicitRHS3d(:,:,intRK+3)] = ...
+            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);   
+        %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary        
         
-        SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
-             dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2);
+        SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK,2)*ExplicitRHS3d(:,:,2)+...
+            dt * EXa(intRK,3)*ExplicitRHS3d(:,:,3) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2)+...
+            dt * IMa(intRK,3)*ImplicitRHS3d(:,:,3);
         
-        SystemRHS(:,:,2) = Tempfphys(:,:,2) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,4)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,5)+...
-            dt * IMa(intRK,1)*ImplicitRHS3d(:,:,3) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,4);
+        SystemRHS(:,:,2) = Tempfphys(:,:,2) + dt * EXa(intRK,1)*ExplicitRHS3d(:,:,4)+ dt * EXa(intRK,2)*ExplicitRHS3d(:,:,5)+...
+            dt * EXa(intRK,3)*ExplicitRHS3d(:,:,6) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,4) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,5)+...
+            dt * IMa(intRK,3)*ImplicitRHS3d(:,:,6);
         %Information about the 2d mesh is contained in meshUnion
-        [ImplicitRHS3d(:,:,intRK), ImplicitRHS3d(:,:,intRK+2), fphys{1}(:,:,1), fphys{1}(:,:,2)] = ...
-            matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient, obj.meshUnion(1), fphys{1},IMa(intRK,intRK), dt, obj.Cf{1},...
-            obj.WindTaux{1}, obj.WindTauy{1});
+%         [ImplicitRHS3d(:,:,intRK), ImplicitRHS3d(:,:,intRK+3), fphys{1}(:,:,1), fphys{1}(:,:,2)] = ...
+%             matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient, obj.meshUnion(1), fphys{1},IMa(intRK,intRK), dt, obj.Cf{1},...
+%             obj.WindTaux{1}, obj.WindTauy{1});
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
-        fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) ); 
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );        
-        
-        
-        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS2d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS2d(:,:,2)+...
-            dt * EXa(intRK+1,3)*ExplicitRHS2d(:,:,3);
-        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
-        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);               
-        
-        
-        [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+3)] = ...
-            matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);        
+        fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );   
         %> update the vertical velocity
-        % fphys2d = obj.matEvaluateLimiter( fphys2d );
-        % fphys2d = obj.matEvaluatePostFunc( fphys2d );
-        % visual.drawResult( fphys2d{1}(:,:,1) );
-        % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
+        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+        
+        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK,1)*ExplicitRHS2d(:,:,1)+ dt * EXa(intRK,2)*ExplicitRHS2d(:,:,2)+...
+            dt * EXa(intRK,3)*ExplicitRHS2d(:,:,3);
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);            
+        
     end
-    %>Actually, boundary condition need to be imposed here
-    %     obj.matUpdateExternalField( time + dt, fphys2d, fphys );
     %>Update the velocity
     fphys{1}(:,:,1) = Tempfphys(:,:,1) + dt * EXb(1) * ExplicitRHS3d(:,:,1) + dt * EXb(2) * ExplicitRHS3d(:,:,2)+...
-        dt * EXb(3) * ExplicitRHS3d(:,:,3) + dt * IMb(1) * ImplicitRHS3d(:,:,1) + dt * IMb(2) * ImplicitRHS3d(:,:,2);
+        dt * EXb(3) * ExplicitRHS3d(:,:,3) + dt * IMb(1) * ImplicitRHS3d(:,:,1)+ dt * IMb(2) * ImplicitRHS3d(:,:,2) +...
+        dt * IMb(3) * ImplicitRHS3d(:,:,3);
     
     fphys{1}(:,:,2) = Tempfphys(:,:,2) + dt * EXb(1) * ExplicitRHS3d(:,:,4) + dt * EXb(2) * ExplicitRHS3d(:,:,5)+...
-        dt * EXb(3) * ExplicitRHS3d(:,:,6) + dt * IMb(1) * ImplicitRHS3d(:,:,3) + dt * IMb(2) * ImplicitRHS3d(:,:,4);
+        dt * EXb(3) * ExplicitRHS3d(:,:,6)  + dt * IMb(1) * ImplicitRHS3d(:,:,4) + dt * IMb(2) * ImplicitRHS3d(:,:,5)...
+        + dt * IMb(3) * ImplicitRHS3d(:,:,6);
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * ExplicitRHS2d(:,:,1) + dt * EXb(2) * ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * ExplicitRHS2d(:,:,3);
-%     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
-%     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );     
-    fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
     ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
     ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
-    ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
+    ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
     time = time + dt;
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
-    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);       
-%     [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
-%         obj.meshUnion(1), fphys2d, fphys, dt , time, obj.WindTaux{1}, obj.WindTauy{1} );
+    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6); 
+    
+    obj.matEvaluatePostFunc( fphys2d );
+    [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
+        obj.meshUnion(1), fphys2d{1}, fphys{1}, dt , time, obj.WindTaux{1}, obj.WindTauy{1}, obj.Cf{1} );
     
     %> Update the diffusion coefficient
     DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
@@ -291,14 +285,16 @@ hvRHS = hvRHS - windTermRHSY;
 end
 
 function [Explicita, Implicita, Explicitb, Implicitb, Parameterc] = GetRKParamter()
-GAMA = (2-sqrt(2))/2;
-delta = 1-1/(2*GAMA);
-Parameterc = [0 GAMA 1];
+GAMA = 1-1/sqrt(2);
+alpha = 1/6*(3+2*sqrt(2));
+delta = 1/(2*sqrt(2));
+Parameterc = [0 2*GAMA  1];
 Explicita = [0 0 0;
-    GAMA 0 0;
-    delta 1-delta 0];
-Implicita = [GAMA 0;
-    (1-GAMA) GAMA];
-Explicitb = [delta 1-delta 0];
-Implicitb = [1-GAMA GAMA];
+    2*GAMA 0 0;
+    1-alpha alpha 0];
+Implicita = [0 0 0;
+    GAMA GAMA 0;
+    delta delta GAMA];
+Explicitb = [delta delta GAMA];
+Implicitb = [delta delta GAMA];
 end

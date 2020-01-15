@@ -12,7 +12,7 @@ classdef OpenChannel2d_TransposeBC < OpenChannel2d
     
     methods( Access = protected, Static )
         function obtype = setOpenBoundaryCondition( )
-            obtype = [ NdgEdgeType.ClampedDepth, NdgEdgeType.ClampedDepth ];
+            obtype = [ enumBoundaryCondition.ClampedDepth, enumBoundaryCondition.ClampedDepth ];
         end
         
         %> Set exact solution for propagation wave

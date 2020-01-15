@@ -2,9 +2,9 @@ classdef OpenChannel2d < SWEConventional2d
     
     properties(Constant)
         %> water depth threshold
-        hmin = 1e-4; 
+%         hmin = 1e-4; 
         %> gravity acceleration
-        gra = 9.8; 
+%         gra = 9.8; 
         %> channel depth
         H = 320;
         %> delta = amplitude / depth
@@ -29,6 +29,7 @@ classdef OpenChannel2d < SWEConventional2d
             obj = obj@SWEConventional2d();
             mesh = obj.makeUniformMesh( N, M );
             obj.initPhysFromOptions( mesh );
+            obj.hmin = 1e-4; 
         end
         
         %> draw the numerical results at gauge points
@@ -44,11 +45,13 @@ classdef OpenChannel2d < SWEConventional2d
     methods( Access = protected, Static  )
         %> set open boundary condition
         obtype = setOpenBoundaryCondition( )
+        %> set open boundary condition
+
     end
     
-    methods( Abstract, Access = protected )
-        [h, hu] = setExactSolution( obj, x, time );
-    end
+%     methods( Abstract, Access = protected )
+%         [h, hu] = setExactSolution( obj, x, time );
+%     end
     
     methods( Access = private, Sealed )
         function mesh = makeUniformMesh( obj, N, M )

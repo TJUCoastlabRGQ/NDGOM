@@ -9,9 +9,16 @@ classdef NdgConstantEddyViscositySolver < NdgAbstractEddyViscositySolver
                 obj.matInitEddyViscosity(physClass,  physClass.mesh3d);
         end
         
-        function  EddyViscosity = matUpdateEddyViscosity( obj, ~, ~, ~, ~, fphys, ~, ~ )
+        function  [EddyViscosity, Cf] = matUpdateEddyViscosity( obj, ~, ~, ~, ~, fphys, ~,~,~,~,Cf )
             EddyViscosity = fphys(:,:,5);
-        end            
+        end 
+        
+% matUpdateEddyViscosity( obj, ~, ~, ...
+%         ~, ~, fphys{1}, ~ , ~, ~, ~, obj.Cf{1} );        
+ 
+%      [fphys{1}(:,:,5), obj.Cf{1}] = obj.EddyViscositySolver.matUpdateEddyViscosity( obj, obj.mesh2d, ...
+%         obj.meshUnion(1), fphys2d, fphys, dt , time, obj.WindTaux{1}, obj.WindTauy{1}, obj.Cf{1} );       
+        
         
     end
     

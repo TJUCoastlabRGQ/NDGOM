@@ -23,18 +23,17 @@ fphys = obj.fphys;
 
 visual = Visual2d( obj.mesh2d );
 
-dt = obj.dt;
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    %     dt = obj.matUpdateTimeInterval( fphys2d );
+     dt = obj.matUpdateTimeInterval( fphys2d );
     if( time + dt > ftime )
         dt = ftime - time;
     end
     
     for intRK = 1:5
         tloc = time + rk4c( intRK ) * dt;
-        %         obj.matUpdateExternalField( tloc, fphys2d, fphys3d );
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
         obj.matEvaluateRHS( fphys2d, fphys );
         
         for n = 1:Nmesh

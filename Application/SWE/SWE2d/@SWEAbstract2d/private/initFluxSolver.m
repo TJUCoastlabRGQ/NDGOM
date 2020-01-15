@@ -38,6 +38,7 @@ else  % No numerical flux type pointed
     end
 end
     parent = metaclass(obj);
+%     volumefluxSolver = SWEVolumeFluxSolver2d();
     if strcmp(parent.SuperclassList.Name, 'SWEConventional2d')
         if obj.option.isKey('nonhydrostaticType')
             if obj.getOption('nonhydrostaticType') == enumNonhydrostaticType.Hydrostatic

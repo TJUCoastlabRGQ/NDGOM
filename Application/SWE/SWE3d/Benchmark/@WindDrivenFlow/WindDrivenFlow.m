@@ -12,7 +12,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         startTime = 0;
         %> final time
         finalTime = 300000;
-        hcrit = 0.001;
+        hmin = 0.001;
     end
     
     properties
@@ -29,10 +29,10 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
             obj.dt = 0.5;
-            obj.Cf{1} = 0.0025;
+%             obj.Cf{1} = 0.25;
             obj.WindTaux{1} = 1.5/1000*ones(size(obj.mesh2d(1).x));
             obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
-%             obj.Cf{1} = 0.0025/1000;
+            obj.Cf{1} = 0*ones(size(obj.mesh2d(1).x));
         end
         
         EntropyAndEnergyCalculation(obj);

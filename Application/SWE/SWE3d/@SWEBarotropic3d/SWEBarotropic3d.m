@@ -30,6 +30,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
     
     methods( Hidden )
         [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );
+        
     end
     
     methods ( Hidden, Access = public ) % public function, not allow to inherit
@@ -38,12 +39,18 @@ classdef SWEBarotropic3d < SWEAbstract3d
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, nz, fm, fp )
-            [ fluxS ] = obj.numfluxSolver.evaluate( obj, obj.hcrit, obj.gra, nx, ny, nz, fm, fp );
+            [ fluxS ] = obj.numfluxSolver.evaluate( obj, obj.hmin, obj.gra, nx, ny, nz, fm, fp );
         end% func
     end
     
     methods ( Access = protected )
+        
         matEvaluateRK45( obj );
+        
+        function matEvaluatePostFunc(obj, fphys2d)
+            obj.matUpdateWetDryState(fphys2d);
+        end
+        
     end
     
 end
