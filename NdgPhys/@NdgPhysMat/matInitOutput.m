@@ -110,6 +110,9 @@ end
 
 function [ outputObj ] = initVtkOutput2d( physMat, casename, dt, OutputFieldNum, varIndex )
 outputObj = [];
+if ~isdir([casename,'/2d'])
+    mkdir([casename,'/2d']);
+end
 % casename2d = [casename,'-2d'];
 for m = 1:physMat.Nmesh
     outputObj = [ outputObj, VtkOutput2d( physMat, physMat.meshUnion(m), casename, OutputFieldNum, dt, varIndex ) ];
