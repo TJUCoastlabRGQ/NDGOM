@@ -312,11 +312,11 @@ libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
 %Compile GOTM part
-path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
-libfile = {['.\lib\GOTM\','*.obj'],...
-    [path,'mxGOTM.c']};
-srcfile = {[path,'mxUpdateEddyViscosity.c']};
-FuncHandle(path, srcfile, libfile);
+% path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
+% libfile = {['.\lib\GOTM\','*.obj'],...
+%     [path,'mxGOTM.c']};
+% srcfile = {[path,'mxUpdateEddyViscosity.c']};
+% FuncHandle(path, srcfile, libfile);
 
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);

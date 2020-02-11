@@ -61,9 +61,6 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     mwSize InnerEdge_Nfp = mxGetM(prhs[7]);
     mwSize InnerEdge_Ne = mxGetN(prhs[7]);
     
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
     if ( ele == adjacentEle ){ /*the studied element is adjacent to the boundary edge*/
         for(mwIndex i = 0; i < BoundaryEdge_Ne; i++){
             if ( ele == BoundaryEdge_FToE[2*i] && face == BoundaryEdge_FToF[2*i] ){

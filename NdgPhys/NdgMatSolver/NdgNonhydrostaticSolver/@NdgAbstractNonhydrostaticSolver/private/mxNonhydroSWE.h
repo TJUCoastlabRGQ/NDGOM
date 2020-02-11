@@ -16,11 +16,13 @@ typedef enum {
     NonReflectFlux = 11,
     BottomBoundary  = 12,
     UpperSurfaceBoundary =13
-} NdgEdgeType;
+} NdgNonhydroEdgeType;
 
-void mxSetEdgeType( NdgEdgeType EdgeType, double * EdgeIndex ){
+void mxSetEdgeType( NdgNonhydroEdgeType EdgeType, double * EdgeIndex ){
         switch(EdgeType){
             /*Face type at the wall boundary is set to be the Neumann boundary, and is flagged by 1*/
+            case Inner:
+                
             case GaussEdge:
                 
             case SlipWall:
