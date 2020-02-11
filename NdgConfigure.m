@@ -27,7 +27,7 @@ outPath = 'lib/';
 % Polylib
 path = 'thirdParty/Polylib/';
 srcfile = {[path, 'zwglj.c'], ...
-    [path, 'zwgl.c'], ... 
+    [path, 'zwgl.c'], ...
     [path, 'JacobiP.c'], ...
     [path, 'GradJacobiP.c'] };
 libfile = { [path, 'polylib.c'] };
@@ -208,7 +208,13 @@ libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {...
     [path, 'mxEvaluateFlux2d.c']};
 FuncHandle(path, srcfile, libfile);
-    
+
+path = 'Application\SWE\VolumeFluxSolver\SWEWDPrebalanceVolumeFluxSolver2d\private\';
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
+srcfile = {...
+    [path, 'mxEvaluateFlux2d.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'Application/SWE/SWE2d/@SWEConventional2d/private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = { ...
@@ -225,8 +231,7 @@ FuncHandle(path, srcfile, libfile);
 path = 'Application/SWE/SWE2d/@SWEWDPreBlanaced2d/private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxUpdateWDWetDryState.c'], ...
-    [path, 'mxEvaluateSourceTopography2d.c'], ...
-    [path, 'mxEvaluateFlux2d.c']};
+    [path, 'mxEvaluateSourceTopography2d.c']};
 FuncHandle(path, srcfile, libfile);
 
 % SWE numerical flux
@@ -239,7 +244,7 @@ path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver1d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
-% 
+%
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver2d/private/';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
@@ -259,59 +264,63 @@ libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver2d/private/';
-srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
-    [path, 'mxAssemblePointToCellInformation.c']};
-libfile = {};
+srcfile = {[path,'mxAssembleWetDryInterface2d.c'],...
+    [path,'mxEvaluateDownwindNumFlux.c'],...
+    [path,'mxEvaluateSurfFlux.c'],...
+    [path,'mxEvaluateUpwindNumFlux.c'],...
+    [path,'mxGetElementFaceNormalDirectionVector.c'],...
+    [path,'mxGetWetDryFace.c']};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 % RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgAbstractNonhydrostaticSolver/private/';
-srcfile = {[path, 'mxAssembleWetDryInterface.c'],...
-    [path, 'mxSetBoundaryType.c'],...
-    [path, 'mxGetFaceValue.c'],...
-    [path, 'mxAssemblePointRelatedInformation.c'],...
-    [path,'mxImposeNonhydroRelatedBoundaryCondition.c'],...
-    [path,'mxGetFaceValue.c'],...
-    [path,'mxGetTempWetToDryPoint.c'],...
-    [path, 'mxGetPrimitiveVariableInnerEdgeFlux.c'],...
+srcfile = {[path,'mxAssembleElementBoundaryCondition.c'],...
+    [path,'mxCalculatePenaltyParameter.c'],...
     [path,'mxGetPrimitiveVariableBoundaryEdgeFlux.c'],...
-    [path,'mxGetAuxialaryVariableInnerEdgeFlux.c'],...
-    [path, 'mxGetAuxialaryVariableBoundaryEdgeFlux.c'],...
-    [path,'mxGetWetDryFaceVariableAndFlux.c'],...
-    [path, 'mxCalculatePenaltyParameter.c'],...
-    [path, 'mxAssembleElementBoundaryCondition.c']};
-libfile = {};
+    [path,'mxGetPrimitiveVariableInnerEdgeFlux.c'],...
+    [path,'mxSetBoundaryType.c']};
+libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 % RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgQuadratureFreeNonhydrostaticSolver2d\private\';
-srcfile = {[path, 'mxEvaluateUpwindNumFlux.c'],...
-    [path, 'mxEvaluateDownwindNumFlux.c'],...
-    [path, 'mxEvaluateSurfFlux.c'],...
-    [path, 'mxAssembleWetDryInterface2d.c'],...
-    [path, 'mxGetWetDryFace.c']};
-libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
+srcfile = {[path,'mxAssembleGlobalStiffMatrix.c'],...
+    [path,'mxAssemblePointToCellInformation.c']};
+libfile = { };
 FuncHandle(path, srcfile, libfile);
 
-path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgNonhydrostaticSolver1d\private\';
-srcfile = {[path, 'mxAssembleGlobalStiffMatrix.c'],...
-    [path,'mxAssemblePointToCellInformation.c']};
-libfile = {};
+path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgNonhydrostaticSolver1d/private/';
+srcfile = {[path,'mxAssembleWetDryInterface1d.c'],...
+    [path,'mxEvaluateDownwindNumFlux.c'],...
+    [path,'mxEvaluateSurfFlux.c'],...
+    [path,'mxEvaluateUpwindNumFlux.c'],...
+    [path,'mxGetElementFaceNormalDirectionVector.c'],...
+    [path,'mxGetWetDryFace.c']};
+libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
+% RemoveMexFile(path, srcfile, libfile);
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgNonhydrostaticSolver\@NdgQuadratureFreeNonhydrostaticSolver1d\private\';
-srcfile = {[path, 'mxEvaluateUpwindNumFlux.c'],...
-    [path, 'mxEvaluateDownwindNumFlux.c'],...
-    [path, 'mxEvaluateSurfFlux.c']};
-libfile = {'Application\SWE\SWE1d\@SWEAbstract1d\private\mxSWE1d.c'};
+srcfile = {[path,'mxAssembleGlobalStiffMatrix.c'],...
+    [path,'mxAssemblePointToCellInformation.c']};
+libfile = { };
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
+%Compile GOTM part
+path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
+libfile = {['.\lib\GOTM\','*.obj'],...
+    [path,'mxGOTM.c']};
+srcfile = {[path,'mxUpdateEddyViscosity.c']};
+FuncHandle(path, srcfile, libfile);
+
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
+
 end
 
 function RemoveMexFile(outPath, srcfile, libfile)
@@ -334,8 +343,8 @@ for n = 1:numel(srcfile)
             mfilename, srcfile{n}, outPath);
         fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex(COMPILER, CFLAGS, '-O', LDFLAGS, ...
-            file{:}, '-outdir', outPath, '-largeArrayDims','-v');
+        mex('-g','-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
+            file{:}, '-outdir', outPath);
     end
 end
 end
@@ -353,7 +362,9 @@ srcDateNum = file.datenum;
 for n = 1:numel(libSrdFile)
     file = dir(libSrdFile{n});
     % find the lasted srcDateNum
-    srcDateNum = max(file.datenum, srcDateNum);
+    for m = 1:numel(file)
+        srcDateNum = max(file(m).datenum, srcDateNum);
+    end
 end
 flag = (srcDateNum > mexDateNum);
 end
@@ -382,7 +393,7 @@ switch computer('arch')
     case 'win64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
-        LDFLAGS = [LDFLAGS, ' -fopenmp'];
+        LDFLAGS = [LDFLAGS, ' -fopenmp '];
     case 'glnxa64'
 end
 end

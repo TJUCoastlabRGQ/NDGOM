@@ -50,6 +50,9 @@ classdef StdPrismQuad < handle
     properties ( SetAccess = protected)
         %> Vandermonde matrix
         V, Vh,Vint
+        %> project matrx from interpolation points to central point in
+        %> vertical direction, and this is needed for GOTM implementation
+        VCV        
         %> project matrx from interpolation points to quadrature points
         Vq
         %> mass matrix
@@ -99,7 +102,7 @@ classdef StdPrismQuad < handle
         
         [ fun ] = orthogonal_func(obj, N1, N2, ind, r, s, t);
         [ node_val ] = project_vert2node(obj, vert_val);
-        [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J ] = assembleJacobianMatrix( obj, x, y, z );
+        [ rx, ry, rz, sx, sy, sz, tx, ty, tz, J, Jz ] = assembleJacobianMatrix( obj, x, y, z );
         [ nx, ny, nz, Js ] = assembleNormalVector( obj, x, y, z );
         
         %> @brief Evaluate all the nodal basis function values at points

@@ -21,7 +21,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( Abstract, Constant )
         %> wet/dry depth threshold
-        hmin
+        hcrit
     end
     
 %     properties( SetAccess = protected )
@@ -54,8 +54,6 @@ classdef SWEAbstract3d < NdgPhysMat
         mesh2d
         %> vertical extended mesh
         mesh3d
-        %> viscosity
-        miu
         %> linear slip parameter
         K
         %> output file object
@@ -64,21 +62,19 @@ classdef SWEAbstract3d < NdgPhysMat
     properties
         %> solver for coriolis source term
         coriolisSolver
-        %> solver for friction source term
-        frictionSolver
-        %> solver for wind source term
-        windSolver
         %> solver for unmerical flux
         numfluxSolver
         %> limiter type
         limiterSolver
         %> Solver for the primal continuity equation
         PCESolver2d
+        %> Solver for vertical eddy viscosity
+        EddyViscositySolver
     end
     
     properties
-        Taux
-        Tauy
+        WindTaux
+        WindTauy
         Cf
     end
     
@@ -102,7 +98,10 @@ classdef SWEAbstract3d < NdgPhysMat
     methods( Access = protected )
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-            %doing nothing
+            for m = 1:obj.Nmesh
+                obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,8);
+                obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
+            end
         end
     end
     
@@ -114,7 +113,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matUpdateOutputResult( obj, time, fphys2d, fphys );
         
-        matUpdateFinalResult( obj, time, fphys );
+        matUpdateFinalResult( obj, time, fphys2d, fphys );
         
         matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
         
@@ -141,6 +140,8 @@ classdef SWEAbstract3d < NdgPhysMat
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
         
         matEvaluateSourceTerm( obj, fphys );
+        
+        EddyViscositySolver = matInitEddyViscositySolver( obj );
         
     end
     

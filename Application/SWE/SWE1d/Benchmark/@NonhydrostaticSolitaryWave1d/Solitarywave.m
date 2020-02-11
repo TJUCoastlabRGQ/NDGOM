@@ -45,15 +45,9 @@ end
        obj.H5 = zeros(size(mesh.x));
        obj.P5 = zeros(size(mesh.x));
        obj.W5 = zeros(size(mesh.x));
-% for i = 1:size(mesh.x,1)
-%     for j = 1:size(mesh.x,2)
+
         xmax = max( max(mesh.x) );
         xmin = min( min(mesh.x) );
-%         T = -5;
-%         obj.U5 = double(subs(U,{x,t},{ mod(mesh.x + xmax + C0 * T, xmax - xmin) - xmax,  0}));
-%         obj.H5 = double(subs(h,{x,t},{ mod(mesh.x + xmax + C0 * T, xmax - xmin) - xmax,  0}));
-%         obj.P5 = double(subs(P,{x,t},{ mod(mesh.x + xmax + C0 * T, xmax - xmin) - xmax,  0}));
-%         obj.W5 = double(subs(W,{x,t},{ mod(mesh.x + xmax + C0 * T, xmax - xmin) - xmax,  0}));
 
         T = mod(5, (xmax - xmin)/C0);
         Index = mesh.x - xmin >= C0 * T;
@@ -68,15 +62,26 @@ end
         obj.P5(Index) = double(subs(P,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));
         obj.W5(Index) = double(subs(W,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));         
         
-%         obj.U5 = double(subs(U,{x,t},{ mesh.x + C0 * T,  T}));
-%         obj.H5 = double(subs(h,{x,t},{ mesh.x + C0 * T,  T}));
-%         obj.P5 = double(subs(P,{x,t},{ mesh.x + C0 * T,  T}));
-%         obj.W5 = double(subs(W,{x,t},{ mesh.x + C0 * T,  T}));        
+       obj.U10 = zeros(size(mesh.x));
+       obj.H10 = zeros(size(mesh.x));
+       obj.P10 = zeros(size(mesh.x));
+       obj.W10 = zeros(size(mesh.x));
+
+        xmax = max( max(mesh.x) );
+        xmin = min( min(mesh.x) );
+
+        T = mod(10, (xmax - xmin)/C0);
+        Index = mesh.x - xmin >= C0 * T;
+        obj.U10(Index) = double(subs(U,{x,t},{ mesh.x(Index) - C0 * T,  0}));
+        obj.H10(Index) = double(subs(h,{x,t},{ mesh.x(Index) - C0 * T,  0}));
+        obj.P10(Index) = double(subs(P,{x,t},{ mesh.x(Index) - C0 * T,  0}));
+        obj.W10(Index) = double(subs(W,{x,t},{ mesh.x(Index) - C0 * T,  0})); 
         
-%         obj.U5(i,j) = double(subs(U,{x,t},{mesh.x(i,j),5}));
-%         obj.H5(i,j) = double(subs(h,{x,t},{mesh.x(i,j),5}));
-%         obj.P5(i,j) = double(subs(P,{x,t},{mesh.x(i,j),5}));
-%         obj.W5(i,j) = double(subs(W, {x,t}, {mesh.x(i,j),5} ));
-%     end
-% end
+        Index = mesh.x - xmin <= C0 * T;
+        obj.U10(Index) = double(subs(U,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));
+        obj.H10(Index) = double(subs(h,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));
+        obj.P10(Index) = double(subs(P,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));
+        obj.W10(Index) = double(subs(W,{x,t},{ mesh.x(Index) - C0 * T + xmax - xmin,  0}));            
+        
+
 end

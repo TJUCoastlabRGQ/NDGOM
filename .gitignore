@@ -37,3 +37,6 @@ NdgMex
 *.png
 *.dvi
 *.map
+*.obj
+*.mod
+*.vtk

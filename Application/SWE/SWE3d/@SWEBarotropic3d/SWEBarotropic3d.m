@@ -4,9 +4,11 @@ classdef SWEBarotropic3d < SWEAbstract3d
     
     properties
         %> number of physical field
-        Nfield2d = 7 %[eta HU HV H Z Zx Zy]
+        Nfield2d = 6 %[H HU HV Z Zx Zy]
         %> num of 3d physical field
-        Nfield = 11 % [ Hu, Hv, w, tau_x, tau_y, H, eta, Z, Zx, Zy, MUy ]
+        Nfield = 9 % [ Hu, Hv, w, H, miu, Z, eta, Zx, Zy ]
+        
+        fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy'};
         %> number of variable field
         Nvar = 2
         %> index of variable in physical field
@@ -15,6 +17,8 @@ classdef SWEBarotropic3d < SWEAbstract3d
         Nvar2d = 1
         %> index of variable in physical field
         varFieldIndex2d = 1
+        
+        fieldName2d = {'h','hU','hV'};
     end
     
     properties
@@ -34,7 +38,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, nz, fm, fp )
-            [ fluxS ] = obj.numfluxSolver.evaluate( obj, obj.hmin, obj.gra, nx, ny, nz, fm, fp );
+            [ fluxS ] = obj.numfluxSolver.evaluate( obj, obj.hcrit, obj.gra, nx, ny, nz, fm, fp );
         end% func
     end
     

@@ -50,7 +50,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             set(gcf,'position',[50,50,1050,400]);
             plot(outputTime,Eta,'k','LineWidth',1.5);
             hold on;
-            set(gca,'YLIM',[-1.3*a, 1.3*a],'Fontsize',12);
+            set(gca,'YLIM',[-1.3*a, 1.3*a],'Fontsize',15);
             xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
             ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
             
@@ -61,13 +61,14 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 %             YData1=get(D1,'YData'); %get the y data
 %             close(h);
 %             plot(XData1, YData1,'k--','LineWidth',1.5);
-            plot(outputTime,exactEta,'ro','markersize',1.5);
-            legend('Nonhydro','Hydro','Exact');
+            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5);
+            h = legend('SWE','Theory');
+            set(h,'fontsize',15);
             legend('boxoff');
         end
         
         function HydroPostprocess(obj)  
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
@@ -102,6 +103,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
                 fphys{m}(:,:,4) = bot;
 %                 fphys{m}(:,:,1) =  obj.d;
 %                 fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);
+%                 fphys{m}(:,:,1) =  -obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
                 fphys{m}(:,:,1) =  -obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
             end
         end
@@ -119,6 +121,8 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('outputNcfileNum') = 20;
+            option('outputType') = enumOutputFile.VTK;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end

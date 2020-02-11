@@ -55,6 +55,8 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         %> Compared numerical water elevation with measured data
         CheckGaugeResult( obj );
         
+        drawResult( obj );
+        
         function ResetPhys(obj)
             obj.fphys = obj.setInitialField;
         end
@@ -242,7 +244,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
@@ -265,7 +267,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         function [ mesh ] = makeUniformMesh(obj, N, ~, type)
             bctype = [...
                 enumBoundaryCondition.ClampedVel, ...
-                enumBoundaryCondition.ZeroGrad, ...
+                enumBoundaryCondition.SlipWall, ...
                 enumBoundaryCondition.SlipWall, ...
                 enumBoundaryCondition.SlipWall];
             
