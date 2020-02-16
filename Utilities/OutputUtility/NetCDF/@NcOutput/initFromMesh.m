@@ -1,13 +1,13 @@
 function initFromMesh( obj, filename, outputIntervalNum, varIndex )
 
-% set vtk output
-if (obj.mesh.type == enumMeshDim.One)
-    obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
-elseif (obj.mesh.type == enumMeshDim.Two)
-    obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex);
-elseif (obj.mesh.type == enumMeshDim.Three)
-    obj.vtkOutput = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval3d);
-end
+% % set vtk output
+% if (obj.mesh.type == enumMeshDim.One)
+%     obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
+% elseif (obj.mesh.type == enumMeshDim.Two)
+%     obj.vtkOutput = VtkOutput2d(obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex);
+% elseif (obj.mesh.type == enumMeshDim.Three)
+%     obj.vtkOutput = VtkOutput3d(obj.mesh3d, obj.casename, obj.Nfield3d, obj.timeInterval3d);
+% end
 
 % obj.vtkOutput.initFromMesh( mesh );
 
