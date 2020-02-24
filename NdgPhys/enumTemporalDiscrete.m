@@ -9,6 +9,7 @@ classdef enumTemporalDiscrete < int8
         IMEXRK343 (6)
         IMEXRK222 (7)
         IMEXRK111 (8)
+        EXRK33 (9)
     end
     
 end

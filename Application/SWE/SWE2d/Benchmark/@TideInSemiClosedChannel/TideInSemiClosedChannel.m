@@ -58,7 +58,7 @@ classdef TideInSemiClosedChannel < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.EXRK33;
             option('outputNcfileNum') = 1;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
