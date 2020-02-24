@@ -5,7 +5,9 @@
  *
  * [1] Giraldo FX, Hesthaven JS, Warburton T. Nodal High-Order Discontinuous
  * Galerkin Methods for the Spherical Shallow Water Equations. Journal of
- * Computational Physics 2002;181:499â€“525.
+ * Computational Physics 2002;181:499â€?25.
+ *[2] Aizinger V. A discontinuous Galerkin method for two-and three-dimensional
+ * shallow-water equations[D].2004.
  */
 
 #include "../../SWEAbstractNumFluxSolver2d/private/SWENumFlux2d.h"
@@ -26,7 +28,10 @@ void evaluateLocalJacobian(
     u = hu / h;
     v = hv / h;
     // evaluate local eigenvalues of the flux Jacobian
-    *lambda = sqrt(u * u + v * v) + sqrt(gra * h);
+    /*For the following manner, please refer to reference [1]*/
+    //*lambda = sqrt(u * u + v * v) + sqrt(gra * h);
+    /*For the alternative manner, please refer to reference [2]*/
+    *lambda = max(abs(u+sqrt(gra*h)),max(abs(u-sqrt(gra*h)),abs(u)));
   } else {
     u = 0.0;
     v = 0.0;
