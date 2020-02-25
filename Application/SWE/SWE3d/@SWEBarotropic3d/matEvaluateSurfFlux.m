@@ -1,4 +1,4 @@
-function [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, ny, nz, fm )
+function [ fluxM ] = matEvaluateSurfFlux( obj, edge, nx, ny, nz, fm )
 
 %> $ ( hu^2 + \frac{1}{2}g(H^2 - Z^2) ) * nx + huv * ny + u\omega * nz$
 fluxM(:, :, 1) = ( fm(:,:,1).^2./fm(:,:,4)  + 1/2 * obj.gra * ( fm(:,:,4).^2 - fm(:,:,6).^2 ) ) .* nx +...

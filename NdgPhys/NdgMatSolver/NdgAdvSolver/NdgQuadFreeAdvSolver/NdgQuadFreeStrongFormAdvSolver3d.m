@@ -17,15 +17,15 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
-                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
-                [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
+                [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS(:,:,[1,2]) );
 
                 edge = mesh3d.BoundaryEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, fm, fp, phys.fext3d{m} );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
-                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+                [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS(:,:,[1,2]) );
                 
                 % we note that for the three dimensional nonlinear shallow
                 % water equation, Newmann boundary about the velocity is
@@ -35,18 +35,18 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 % of these term to the right hand is canceled for the
                 % advective part
                 
-                edge = mesh3d.SurfaceBoundaryEdge;
-                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-                [ fluxS ] =  zeros(size(fluxM));
-                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
-                
-                edge = mesh3d.BottomEdge;
-                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-                [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-                [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
-                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
-                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
+%                 edge = mesh3d.SurfaceBoundaryEdge;
+%                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+%                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+%                 [ fluxS ] =  zeros(size(fluxM));
+%                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+%                 
+%                 edge = mesh3d.BottomEdge;
+%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
+%                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+%                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
+%                 [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, edge.nx, edge.ny, edge.nz, fm, fp );
+%                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
                 
 %                 edge = mesh3d.BottomBoundaryEdge;
 %                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );

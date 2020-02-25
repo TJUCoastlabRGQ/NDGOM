@@ -258,6 +258,13 @@ path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver3d/private/';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+path = 'Application/SWE/NumFluxSolver/SWELFNumFluxSolver3d/private/';
+srcfile = {[path, 'mxEvaluate.c']};
+FuncHandle(path, srcfile, libfile);
+
+
 path = 'Application\SWE\NumFluxSolver\SWENonhydroHLLNumFluxSolver2d\private\';
 srcfile = {[path, 'mxEvaluateUpwindNumFlux.c']};
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};

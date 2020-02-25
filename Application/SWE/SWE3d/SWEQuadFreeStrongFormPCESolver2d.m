@@ -13,7 +13,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
             for m = 1:physClass.Nmesh
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
-                mesh3d = physClass.meshUnion(m);
+%                 mesh3d = physClass.meshUnion(m);
                 mesh2d = physClass.mesh2d(m);
 %                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
 %                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
@@ -30,12 +30,12 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 InnerEdge = mesh2d.InnerEdge;
                 [ fm, fp ] = InnerEdge.matEvaluateSurfValue( fphys );
                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
+%                 lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
                 FluxM = fm(:, :, 2) .* InnerEdge.nx + fm(:, :, 3) .* InnerEdge.ny;
                 FluxP = fp(:, :, 2) .* InnerEdge.nx + fp(:, :, 3) .* InnerEdge.ny;
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1)  ) ) );
-                physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
+                FluxS = physClass.matEvaluateSurfNumFlux(mesh2d, InnerEdge.nx, InnerEdge.ny, fm, fp, InnerEdge);
+                physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS(:,:,1) );
                 
                 % Function used to calculate the two dimentional PCE boundary surface integration term
                 BoundaryEdge = mesh2d.BoundaryEdge;
@@ -54,15 +54,16 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 fp(:, ind, 3) = - Hun .* BoundaryEdge.ny(:, ind) + Hvn .* BoundaryEdge.nx(:, ind);
                 
                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
+%                 lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
                 % lambda = zeros(size(lambda));
                 
                 FluxM = fm(:, :, 2) .* BoundaryEdge.nx + fm(:, :, 3) .* BoundaryEdge.ny;
-                FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
+%                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
+%                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
+                FluxS = physClass.matEvaluateSurfNumFlux(mesh2d, BoundaryEdge.nx, BoundaryEdge.ny, fm, fp, BoundaryEdge);
                 
-                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxS );
+                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxS(:,:,1) );
                 
             end
         end
