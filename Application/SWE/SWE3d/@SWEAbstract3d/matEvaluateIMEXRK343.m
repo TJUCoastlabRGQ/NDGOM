@@ -1,7 +1,7 @@
 function matEvaluateIMEXRK343( obj )
 [EXa, IMa, EXb, IMb, ~] = GetRKParamter();
-time = obj.startTime;
-ftime = obj.finalTime;
+time = obj.getOption('startTime');
+ftime = obj.getOption('finalTime');
 
 fphys2d = obj.fphys2d;
 fphys = obj.fphys;
@@ -112,8 +112,8 @@ ImplicithvRHS3d = zeros(size(meshUnion.x));
 hu              = zeros(size(meshUnion.x));
 hv              = zeros(size(meshUnion.x));
 StiffMatrix     = zeros(meshUnion.cell.Np*Nz);
-BottomEidM      = meshUnion.cell.Fmask(:,end-1);
-UpEidM          = meshUnion.cell.Fmask(:,end);
+BottomEidM      = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
+UpEidM          = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
 Np = meshUnion.cell.Np;
 for i =1:meshUnion.mesh2d(1).K
     %> At present, we assume the mesh is uniform in the vertical direction
