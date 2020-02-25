@@ -24,11 +24,11 @@ classdef SWEAbstract3d < NdgPhysMat
         hcrit
     end
     
-%     properties( SetAccess = protected )
-%         %> cell array for physical field variable
-%         fphys2d
-%     end
-
+    %     properties( SetAccess = protected )
+    %         %> cell array for physical field variable
+    %         fphys2d
+    %     end
+    
     properties
         %> cell array for physical field variable
         fphys2d
@@ -103,6 +103,15 @@ classdef SWEAbstract3d < NdgPhysMat
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
             end
         end
+        
+        function   [ fphys ] = matEvaluatePostFunc(obj, fphys)
+            for m = 1:obj.Nmesh
+                wetflag = all( fphys{m}(:,:,1) > obj.hcrit );
+                obj.meshUnion(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
+                obj.meshUnion(m).status(  wetflag ) = int8( enumSWERegion.Wet );
+            end            
+        end
+        
     end
     
     methods ( Access = protected )
@@ -143,6 +152,11 @@ classdef SWEAbstract3d < NdgPhysMat
         
         EddyViscositySolver = matInitEddyViscositySolver( obj );
         
+    end
+    
+    methods ( Sealed, Access = protected )
+        %> determine time interval
+        [ dt ] = matUpdateTimeInterval( obj, fphys )
     end
     
 end

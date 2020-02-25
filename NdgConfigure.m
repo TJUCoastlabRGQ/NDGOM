@@ -325,6 +325,13 @@ FuncHandle(path, srcfile, libfile);
 % srcfile = {[path,'mxUpdateEddyViscosity.c']};
 % FuncHandle(path, srcfile, libfile);
 
+% SWE3d
+path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
+srcfile = { ...
+    [path, 'mxUpdateTimeInterval3d.c']};
+FuncHandle(path, srcfile, libfile);
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
 
