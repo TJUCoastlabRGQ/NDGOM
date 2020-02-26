@@ -4,7 +4,7 @@ dt = nan;
 for m = 1:obj.Nmesh
     dx = sqrt( obj.mesh2d(m).LAV );
     N = obj.mesh2d(m).cell.N;
-    dtm = mxUpdateTimeInterval2d( obj.hcrit, ...
+    dtm = mxUpdateTimeInterval3d( obj.hcrit, ...
         obj.gra, N, dx, obj.mesh2d(m).status, fphys{m} );
     
     if ( dtm > 0 )

@@ -85,6 +85,14 @@ classdef SWEAbstract3d < NdgPhysMat
         
         initPhysFromOptions( obj, mesh2d, mesh3d );
         AnimationSurfaceLevel( obj );
+        
+        function matUpdateWetDryState(obj, fphys)
+            for m = 1:obj.Nmesh
+                wetflag = all( fphys{m}(:,:,1) > obj.hcrit );
+                obj.mesh2d(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
+                obj.mesh2d(m).status(  wetflag ) = int8( enumSWERegion.Wet );
+            end
+        end        
     end
     
     % ======================================================================
@@ -105,13 +113,9 @@ classdef SWEAbstract3d < NdgPhysMat
         end
         
         function   [ fphys ] = matEvaluatePostFunc(obj, fphys)
-            for m = 1:obj.Nmesh
-                wetflag = all( fphys{m}(:,:,1) > obj.hcrit );
-                obj.meshUnion(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
-                obj.meshUnion(m).status(  wetflag ) = int8( enumSWERegion.Wet );
-            end            
+              obj.matUpdateWetDryState(fphys);            
         end
-        
+                
     end
     
     methods ( Access = protected )

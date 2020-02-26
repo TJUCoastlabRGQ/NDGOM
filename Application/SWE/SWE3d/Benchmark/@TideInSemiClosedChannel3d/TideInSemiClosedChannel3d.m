@@ -16,7 +16,6 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
     properties
         Length
         k
-        dt
     end
     
     methods
@@ -28,7 +27,6 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.dt = 0.02;
             obj.Cf{1} = 0;
             obj.WindTaux{1} = zeros(size(obj.mesh2d(1).x));
             obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
@@ -44,9 +42,10 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
             obj.Length = fzero(f,[0.01 20000000]);
         end
         
-        function matUpdateExternalField( obj, time, ~ )
+        function matUpdateExternalField( obj, time, ~, ~ )
             
-            obj.fext{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.Depth;
+            obj.fext2d{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
+            obj.fext3d{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
             
         end
         
@@ -94,8 +93,8 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.ClampedDepth ];
 
-mesh2d = makeUniformTriMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+mesh2d = makeUniformTriMesh(N, [0, obj.ChLength],...
+    [-obj.ChWidth/2, obj.ChWidth/2], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

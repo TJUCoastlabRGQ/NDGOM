@@ -22,7 +22,7 @@ classdef NdgConstantEddyViscositySolver < NdgAbstractEddyViscositySolver
               fprintf('Value of the constant eddy viscosity is set to be: %f\n',value);
           else 
               value = 1.0e-4;
-              disp('Value of the constant eddy viscosity is set to be the default value: %f\n',value);
+              fprintf('Value of the constant eddy viscosity is set to be the default value: %f\n',value);
           end
             for m = 1:physClass.Nmesh
                 physClass.fphys{m}(:,:,5) = value;

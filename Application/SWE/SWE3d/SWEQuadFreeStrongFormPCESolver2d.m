@@ -42,7 +42,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 [ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( fphys );
                 
                 % apply clamped boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );
+                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
                 fp(:, ind, 1) = fext{m}(:, ind, 1);
                 
                 % apply slip wall boundary condition
