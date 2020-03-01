@@ -15,7 +15,8 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.2 * obj.matUpdateTimeInterval( fphys2d );
+%     dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 2.7;
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -24,14 +25,14 @@ while( time < ftime )
     Tempfphys = fphys{1}(:,:,1:2);
     
     tloc = time + c( 1 ) * dt;
-%     obj.matUpdateExternalField( tloc, fphys2d, fphys );
+    obj.matUpdateExternalField( tloc, fphys2d, fphys );
     [ExplicitRHS2d(:,:,1), ExplicitRHS3d(:,:,1), ExplicitRHS3d(:,:,1+4)] = ...
         matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);
     
     for intRK = 1:3
         tloc = time + c( intRK + 1 ) * dt;
         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
         %This part need to consider the impact of the fext3d, as this is needed when impose the three-dimensional boundary
         
         %         SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...

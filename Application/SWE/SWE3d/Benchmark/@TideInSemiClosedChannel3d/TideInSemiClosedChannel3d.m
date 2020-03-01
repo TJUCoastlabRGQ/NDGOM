@@ -45,7 +45,7 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
         function matUpdateExternalField( obj, time, ~, ~ )
             
             obj.fext2d{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
-            obj.fext3d{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
+            obj.fext3d{1}( :, :, 4 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
             
         end
         

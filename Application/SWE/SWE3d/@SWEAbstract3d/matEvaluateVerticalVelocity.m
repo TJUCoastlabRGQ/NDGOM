@@ -7,11 +7,11 @@ function [ W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d )
 % HUt = mesh3d.Extend2dField( fphys2d(:, :, 2) ) - fphys3d(:, :, 5) .* fphys3d(:, :, 1);
 % HVt = mesh3d.Extend2dField( fphys2d(:, :, 3) ) - fphys3d(:, :, 5) .* fphys3d(:, :, 2);
 
-% dHUdx = mesh3d.rx .* ( mesh3d.cell.Dr * fphys3d(:, :, 1) ) + mesh3d.sx .* ( mesh3d.cell.Ds * fphys3d(:, :, 1) ) + mesh3d.tx .* ( mesh3d.cell.Dt * fphys3d(:, :, 1) );
-% dHVdy = mesh3d.ry .* ( mesh3d.cell.Dr * fphys3d(:, :, 2) ) + mesh3d.sy .* ( mesh3d.cell.Ds * fphys3d(:, :, 2) ) + mesh3d.ty .* ( mesh3d.cell.Dt * fphys3d(:, :, 2) );
-data = cell(1);
-data{1} = fphys3d;
-[ dHUdx, dHVdy ] = obj.matEvaluateHorizontalPartialDerivativeTerm( mesh3d,data );
+dHUdx = mesh3d.rx .* ( mesh3d.cell.Dr * fphys3d(:, :, 1) ) + mesh3d.sx .* ( mesh3d.cell.Ds * fphys3d(:, :, 1) ) + mesh3d.tx .* ( mesh3d.cell.Dt * fphys3d(:, :, 1) );
+dHVdy = mesh3d.ry .* ( mesh3d.cell.Dr * fphys3d(:, :, 2) ) + mesh3d.sy .* ( mesh3d.cell.Ds * fphys3d(:, :, 2) ) + mesh3d.ty .* ( mesh3d.cell.Dt * fphys3d(:, :, 2) );
+% data = cell(1);
+% data{1} = fphys3d;
+% [ dHUdx, dHVdy ] = obj.matEvaluateHorizontalPartialDerivativeTerm( mesh3d,data );
 % dHVdy = obj.matEvaluatePartialDerivativeTermX( mesh, fphys3d);
 % fphys2d = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
 %         fphys2d, fphys3d );

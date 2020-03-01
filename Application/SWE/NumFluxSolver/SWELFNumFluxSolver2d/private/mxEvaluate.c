@@ -32,6 +32,7 @@ void evaluateLocalJacobian(
     //*lambda = sqrt(u * u + v * v) + sqrt(gra * h);
     /*For the alternative manner, please refer to reference [2]*/
     *lambda = max(abs(u+sqrt(gra*h)),max(abs(u-sqrt(gra*h)),abs(u)));
+    //*lambda = 0;
   } else {
     u = 0.0;
     v = 0.0;

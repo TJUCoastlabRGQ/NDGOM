@@ -51,8 +51,8 @@ classdef TideInSemiClosedChannel < SWEPreBlanaced2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 60*3600;
-            outputIntervalNum = 2500;
+            ftime = 21600;
+            outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -63,6 +63,7 @@ classdef TideInSemiClosedChannel < SWEPreBlanaced2d
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.VTK;
         end
         
         function [ mesh ] = makeUniformMesh(obj, N, deltax, type)
