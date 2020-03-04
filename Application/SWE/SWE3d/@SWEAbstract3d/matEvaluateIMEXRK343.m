@@ -150,7 +150,7 @@ for i =1:meshUnion.mesh2d(1).K
     OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(2,i), OP11);
     %> Adjacent bottom integral part
     OP12 = zeros(meshUnion.cell.Np);
-    OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(2,i), OP12);
+    OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(2,i), OP12);
     %> Boundary part, not considered here
     [ SystemRHS(:,(i-1)*meshUnion.Nz + 1,1), SystemRHS(:,(i-1)*meshUnion.Nz + 1,2), SurfhuStiffMatrix, SurfhvStiffMatrix ] = ImposeSurfaceBoundaryCondition(UpEidM, WindTaux(:,i),...
         WindTauy(:,i), ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1)*meshUnion.Nz + 1,1), SystemRHS(:,(i-1)*meshUnion.Nz + 1,2));
@@ -175,11 +175,11 @@ for i =1:meshUnion.mesh2d(1).K
         StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
         %> The upper adjacent cell part
         OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, UpPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(j,i), OP12);
+        OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(j,i), OP12);
         StiffMatrix(UpAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
         %> The lower adjacent cell part
         OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, BottomPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(j+1,i), OP12);
+        OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(j+1,i), OP12);
         StiffMatrix(BottomAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
     end
     %> for the bottom most cell
@@ -198,7 +198,7 @@ for i =1:meshUnion.mesh2d(1).K
     StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
     %> The upper adjacent cell part
     OP12 = zeros(meshUnion.cell.Np);
-    OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(Nz,i), OP12);
+    OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(Nz,i), OP12);
     StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
     %This part is problematic, we need to consider the date structure
     temphuRHS = SystemRHS(:,(i-1)*meshUnion.Nz + 1:i*meshUnion.Nz,1);
@@ -264,16 +264,16 @@ OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
 end
 
-function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
+function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
 OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * Dz(eidM,:);
+OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);
 OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
 end
 
-function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
+function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * Dz(eidM,:);
+OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);
 OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
 end
 
