@@ -137,17 +137,9 @@ classdef SWEAbstract3d < NdgPhysMat
         [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fext);
         
         [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys);
-        
-        [ SideSurface_rhs3d ]  = matEvaluate3dSideSurfaceTerm( obj, InnerEdge, fphys );
-        
-        [ HorizontalBoundarySurface_rhs3d ] = matEvaluate3dHorizontalBoundaryTerm( obj, BoundaryEdge, fphys, fext );
-        
-        [ SurfaceBoundary_rhs3d ] = matEvaluate3dSurfaceBoundaryTerm( obj, Edge, fphys );
-        
-        [ BottomBoundary_rhs3d ] = matEvaluate3dBottomBoundaryTerm( obj, BottomEdge, fphys);
-        
-        [ AuxialaryVariableFace_rhs3d ] = matEvaluate3dVerticalAuxialaryVariableFaceTerm( obj, mesh3d, fphys );
-        
+              
+        [ TermX, TermY ] = matEvaluateDepthAveragedHorizontalPartialDerivativeTerm(obj, mesh3d, fphys3d);
+                
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
         [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);

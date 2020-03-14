@@ -36,6 +36,7 @@ while( time < ftime )
         %> Calculate the intermediate water depth
         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1) * ExplicitRHS2d(:,:,1) + dt * EXa(intRK+1,2) * ExplicitRHS2d(:,:,2)+...
             dt * EXa(intRK+1,3) * ExplicitRHS2d(:,:,3) + dt * EXa(intRK+1,4) * ExplicitRHS2d(:,:,4);
+        
         %> Calculate the right hand side for the global system about the three-dimensional horizontal momentum
         SystemRHS(:,:,1) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
             dt * EXa(intRK+1,3)*ExplicitRHS3d(:,:,3) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2)+...
@@ -56,6 +57,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
+        
         %> Calculation of the right hand side corresponds to the discretization of the non-stiff term at stage intRK+1 with the
         %> newly calculated intermediate water depth and three-dimensional horizontal momentum
         [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+4)] = ...
@@ -63,6 +65,7 @@ while( time < ftime )
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         fphys2d = obj.matEvaluatePostFunc( fphys2d );
+        DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
@@ -244,37 +247,37 @@ for i = 1:mesh2d.K
     %> The surface most face for each column
 %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
     for j = 2:Nz
-        Tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+        Tau(j,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
             max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
     end
     %> The bottom most face for each column
-    Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+    Tau(Nz+1,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
 end
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
-OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
+OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d;
-OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;
+OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;   %checked
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
+OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   
+OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;    %checked
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
-OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;
+OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
+OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;          %checked
 end
 
 function [ OP11 ] = ImposeBottomBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP11)
@@ -283,21 +286,29 @@ end
 
 function [huRHS, hvRHS, huStiffMatrix, hvStiffMatrix] = ImposeSurfaceBoundaryCondition(eidM, WindTaux, WindTauy, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS, hvRHS)
 %> This part is negative, as this is teated explicitly
-temphuRHS = zeros(size(WindTaux)); temphvRHS = zeros(size(WindTauy));
-temphuRHS(eidM) = massMatrix2d*(dt*ImplicitParameter*WindTaux);
-temphvRHS(eidM) = massMatrix2d*(dt*ImplicitParameter*WindTauy);
+temphuRHS = zeros(size(huRHS)); temphvRHS = zeros(size(hvRHS));
+temphuRHS(eidM) = massMatrix2d * WindTaux;
+temphvRHS(eidM) = massMatrix2d * WindTauy;
 huStiffMatrix = massMatrix3d\temphuRHS;
 hvStiffMatrix = massMatrix3d\temphvRHS;
-huRHS = huRHS - huStiffMatrix;
-hvRHS = hvRHS - hvStiffMatrix;
+% huRHS = huRHS - huStiffMatrix;
+% hvRHS = hvRHS - hvStiffMatrix;
+huRHS = huRHS + dt*ImplicitParameter*huStiffMatrix;
+hvRHS = hvRHS + dt*ImplicitParameter*hvStiffMatrix;
 end
 
 function [Explicita, Implicita, Explicitb, Implicitb, Parameterc] = GetRKParamter()
-GAMA = 0.435866521508460;
-beta1 = 1.208496649176012;
-beta2 = -0.644363170684471;
+data = roots([6 -18 9 -1]);
+GAMA = data(2);
+beta1 = -1.5*GAMA^2+4*GAMA-1/4;
+beta2 = 1.5*GAMA^2-5*GAMA+5/4;
 alpha1 = -0.35;
-alpha2 = -0.989175724679855;
+alpha2 = (1/3-2*GAMA^2-2*beta2*alpha1*GAMA)/(GAMA*(1-GAMA));
+% GAMA = 0.435866521508460;
+% beta1 = 1.208496649176012;
+% beta2 = -0.644363170684471;
+% alpha1 = -0.35;
+% alpha2 = -0.989175724679855;
 Parameterc = [0 GAMA (1+GAMA)/2 1];
 Explicita = [0 0 0 0;
     GAMA 0 0 0;

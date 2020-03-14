@@ -116,11 +116,11 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;                
-            option('temporalDiscreteType') = enumTemporalDiscrete.EXRK33;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
             option('outputNcfileNum') = 20;
             option('outputType') = enumOutputFile.VTK;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
@@ -137,7 +137,7 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 100], [0, 6], 100/deltax, 6/deltax, bctype);
+    mesh = makeUniformTriMesh(N, [0, 20], [0, 4*deltax], 20/deltax, 4, bctype);
 elseif(type == enumStdCell.Quad)
     mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 else

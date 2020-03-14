@@ -1,4 +1,4 @@
-function [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys3d)
+function [ TermX, TermY ] = matEvaluateDepthAveragedHorizontalPartialDerivativeTerm(obj, mesh3d, fphys3d)
 
     edge = mesh3d.InnerEdge;
 

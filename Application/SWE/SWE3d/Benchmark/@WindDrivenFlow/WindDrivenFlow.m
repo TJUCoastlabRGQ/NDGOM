@@ -4,7 +4,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
     
     properties ( Constant )
         %> channel length
-        ChLength = 3400;
+        ChLength = 2000;
         ChWidth = 300;
         %> channel depth
         H0 = 10;
@@ -30,7 +30,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             %> time interval
 %             obj.dt = 0.02;
             obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
-            obj.WindTaux{1} = 1/1000*ones(size(obj.mesh2d(1).x));
+            obj.WindTaux{1} = 1.5/1000*ones(size(obj.mesh2d(1).x));
             obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
 %             obj.Cf{1} = 0.0025/1000;
         end
@@ -69,12 +69,12 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantEddyViscosityValue') = 0.05;
+            option('ConstantEddyViscosityValue') = 0.01;
         end
         
     end    
