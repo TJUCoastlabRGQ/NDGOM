@@ -262,6 +262,7 @@ OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
+
 % OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;   %checked
