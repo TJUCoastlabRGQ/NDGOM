@@ -23,7 +23,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         function obj = WindDrivenFlow( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3];
+            obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder = [ 1 2 3 4];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
