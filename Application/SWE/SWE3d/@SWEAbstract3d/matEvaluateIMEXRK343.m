@@ -247,37 +247,41 @@ for i = 1:mesh2d.K
     %> The surface most face for each column
 %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
     for j = 2:Nz
-        Tau(j,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+        Tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
             max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
     end
     %> The bottom most face for each column
-    Tau(Nz+1,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+    Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
 end
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+epsilon = 0;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
-OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;   %checked
+epsilon = 0;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d;   %checked
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;    %checked
+epsilon = 0;
+OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   
+OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;    %checked
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
-OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;          %checked
+epsilon = 0;
+OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
+OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;          %checked
 end
 
 function [ OP11 ] = ImposeBottomBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP11)

@@ -69,7 +69,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

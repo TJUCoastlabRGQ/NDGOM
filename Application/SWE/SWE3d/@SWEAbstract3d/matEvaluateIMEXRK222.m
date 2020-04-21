@@ -15,7 +15,7 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.25 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -69,6 +69,10 @@ while( time < ftime )
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * ExplicitRHS2d(:,:,1) + dt * EXb(2) * ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * ExplicitRHS2d(:,:,3);
+    
+    fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
+    fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
+    
     fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
@@ -123,9 +127,8 @@ for i =1:meshUnion.mesh2d(1).K
     %> At present, we assume the mesh is uniform in the vertical direction
     ElementalMassMatrix3d = diag(meshUnion.J(:,(i-1)*Nz+1))*meshUnion.cell.M;
     ElementalMassMatrix2d = diag(meshUnion.mesh2d(1).J(:,i))*meshUnion.mesh2d(1).cell.M;
-%     Dz3d = diag(meshUnion.rz(:,(i-1)*Nz+1))*meshUnion.cell.Dr + diag(meshUnion.sz(:,(i-1)*Nz+1))*meshUnion.cell.Ds+...
-%         diag(meshUnion.tz(:,(i-1)*Nz+1))*meshUnion.cell.Dt;
-    Dz3d = diag(meshUnion.tz(:,(i-1)*Nz+1))*meshUnion.cell.Dt;    
+    Dz3d = diag(meshUnion.rz(:,(i-1)*Nz+1))*meshUnion.cell.Dr + diag(meshUnion.sz(:,(i-1)*Nz+1))*meshUnion.cell.Ds+...
+        diag(meshUnion.tz(:,(i-1)*Nz+1))*meshUnion.cell.Dt;
     %> first cell first, then the other cells left
     LocalRows    = (1:Np)';
     AdjacentRows = (Np+1:2*Np)';
@@ -232,37 +235,41 @@ for i = 1:mesh2d.K
     %> The surface most face for each column
     %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
     for j = 2:Nz
-        Tau(j,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+        Tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
             max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
     end
     %> The bottom most face for each column
-    Tau(Nz+1,i) = 10*(P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+    Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
 end
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   + 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+epsilon = 0;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   - 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
-OP11(eidM, :)   = OP11(eidM, :)   - 0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
-OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d;   %checked
+epsilon = 0;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d;   %checked
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-OP12(:,eidM)    = OP12(:,eidM) - 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) + 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;    %checked
+epsilon = 0;
+OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
+OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;    %checked
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
-OP12(:,eidM)    = OP12(:,eidM) + 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
-OP12(eidP,:)    = OP12(eidP,:) - 0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) + Tau * massMatrix2d;          %checked
+epsilon = 0;
+OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
+OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
+OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;          %checked
 end
 
 function [ OP11 ] = ImposeBottomBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP11)

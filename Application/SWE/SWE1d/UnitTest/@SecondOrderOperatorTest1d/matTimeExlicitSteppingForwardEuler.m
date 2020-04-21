@@ -5,7 +5,7 @@ fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.005;
+dt = 0.01;
 % visual = Visual2d( obj.mesh2d );
 visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');
@@ -135,7 +135,7 @@ edge = meshUnion.BoundaryEdge;
 [ Qxfm, ~ ] = edge.matEvaluateSurfValue( Qx );
 [ fluxM ] = edge.nx .* Qxfm(:,:,1);
 miu = 0.01; %this parameter should equal to the setted value exactly
-fluxS(1) = miu*1/sqrt(4*tloc+1)*2*(0-0.5)^3/miu^2/(4*tloc+1)/(4*tloc+1)*exp(-(0-0.5).^2/miu/(4*tloc+1))*(-1);
+fluxS(1) = miu*1/sqrt(4*tloc+1)*(-2)*(0-0.5)/miu/(4*tloc+1)*exp(-(0-0.5).^2/miu/(4*tloc+1))*(-1);
 fluxS(2) = edge.nx(2) * sigmafm(2) - Tau(1) * (fm(2) - 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1)));
 
 [ RHS1d ] = RHS1d + edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxS );

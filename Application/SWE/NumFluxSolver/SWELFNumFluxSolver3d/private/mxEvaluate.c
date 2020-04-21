@@ -29,9 +29,9 @@ void evaluateLocalJacobian(
     v = hv / h;
     // evaluate local eigenvalues of the flux Jacobian
     /*For the following manner, please refer to reference [1]*/
-    //*lambda = sqrt(u * u + v * v) + sqrt(gra * h);
+    *lambda = sqrt(u * u + v * v) + sqrt(gra * h);
     /*For the alternative manner, please refer to reference [2]*/
-    *lambda = max(abs(u+sqrt(gra*h)),max(abs(u-sqrt(gra*h)),abs(u)));
+    //*lambda = max(abs(u+sqrt(gra*h)),max(abs(u-sqrt(gra*h)),abs(u)));
 	//*lambda = 0;
   } else {
     u = 0.0;
