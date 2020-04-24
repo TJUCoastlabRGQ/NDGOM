@@ -142,7 +142,7 @@ classdef SWEAbstract3d < NdgPhysMat
                 
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
         
-        [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
+        [ Term ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
         
         matEvaluateSourceTerm( obj, fphys );
         

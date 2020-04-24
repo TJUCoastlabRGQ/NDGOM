@@ -17,5 +17,6 @@ end
 
 % the mon coefficient need to devide the \varphi_{z,0}
 % field2d = obj.mesh2d.cell.V * ( field2d ./ obj.mesh2d.cell.V(:, 1) );
-field2d = obj.mesh2d.cell.V * bsxfun(@rdivide, field2d, obj.mesh2d.cell.V(:, 1) );
+% field2d = obj.mesh2d.cell.V * bsxfun(@rdivide, field2d, obj.mesh2d.cell.V(:, 1) );
+field2d = obj.mesh2d.cell.V * field2d / (sqrt(2)/2);
 end

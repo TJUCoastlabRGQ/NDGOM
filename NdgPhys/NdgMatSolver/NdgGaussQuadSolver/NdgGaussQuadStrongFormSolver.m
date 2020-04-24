@@ -180,6 +180,7 @@ classdef NdgGaussQuadStrongFormSolver < handle
             for k = 1:K
                 Jq = cell.project_node2quad( mesh.J(:, k) );
                 M = ( cell.Vq' * diag( Jq.*cell.wq ) ) * cell.Vq;
+%                 M2 = inv((cell.V)')*(cell.Vq)'* diag( Jq.*cell.wq ) * (inv(cell.V)'*(cell.Vq)')';
                 invM(:, :, k) = inv( M );
             end
         end
