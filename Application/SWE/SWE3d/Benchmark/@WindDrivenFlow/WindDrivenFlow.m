@@ -72,7 +72,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('ConstantEddyViscosityValue') = 0.01;
         end

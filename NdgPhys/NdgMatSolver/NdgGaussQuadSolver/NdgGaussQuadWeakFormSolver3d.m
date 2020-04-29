@@ -54,7 +54,7 @@ classdef NdgGaussQuadWeakFormSolver3d < NdgGaussQuadWeakFormSolver
     
     methods( Static )
         function [ SBFVfq, BOTFVfq, BBFVfq, SBwJs, BOTwJs, BBwJs] = assemble3dFacialVandMatrixFaceQuadrature( mesh )
-            fcell = getStdCell( mesh.cell.N, mesh.SurfaceBoundaryEdge.type );
+            fcell = getStdCell( mesh.cell.N, mesh.mesh2d.type );
             SBFVfq = fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq);
             BOTFVfq = SBFVfq; BBFVfq = SBFVfq;
             SBwJs = bsxfun(@times, fcell.wq, SBFVfq * mesh.SurfaceBoundaryEdge.Js);
@@ -69,7 +69,7 @@ classdef NdgGaussQuadWeakFormSolver3d < NdgGaussQuadWeakFormSolver
         end
         
         function [ SBLIFT, BOTLIFT, BBLIFT ] = assemble3dBoundaryLiftMatrix( mesh )
-            fcell = getStdCell( mesh.cell.N, mesh.SurfaceBoundaryEdge.type );
+            fcell = getStdCell( mesh.cell.N, mesh.mesh2d.type );
             SBLIFT = ( fcell.nodal_func(fcell.rq, fcell.sq, fcell.tq) )';
             BOTLIFT = SBLIFT; BBLIFT = SBLIFT;
         end

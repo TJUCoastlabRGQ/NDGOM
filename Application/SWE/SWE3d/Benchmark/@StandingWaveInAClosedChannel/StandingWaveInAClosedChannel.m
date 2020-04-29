@@ -71,12 +71,13 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('EddyViscosityType') = enumEddyViscosity.Constant;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
             option('outputType') = enumOutputFile.VTK;
+            option('ConstantEddyViscosityValue') = 0;
         end
         
     end

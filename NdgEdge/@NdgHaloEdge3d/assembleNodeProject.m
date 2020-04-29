@@ -49,6 +49,8 @@ end
 
 obj.FToN1 = FToN1;
 obj.FToN2 = FToN2;
+obj.GFToN1 = bsxfun(@plus, ( obj.FToE(1,:) - 1 ) * mesh.cell.Np , FToN1);
+obj.GFToN2 = bsxfun(@plus, ( obj.FToE(2,:) - 1 ) * mesh.cell.Np , FToN2);
 obj.nx = nx;
 obj.ny = ny;
 obj.nz = nz;

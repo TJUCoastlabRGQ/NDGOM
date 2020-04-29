@@ -23,8 +23,12 @@ classdef NdgBottomInnerEdge3d < handle
         FToM
         %> interp node index of 1st ele on each edge
         FToN1
+        %> global interp node index of 1st ele on each edge
+        GFToN1
         %> interp node index of 2nd ele on each edge
         FToN2
+        %> global interp node index of 2nd ele on each edge
+        GFToN2        
         %> outward normal vector
         nx, ny, nz
         %> determination of edge Jacabian
