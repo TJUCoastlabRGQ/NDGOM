@@ -10,12 +10,12 @@ ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
 ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
 ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
-DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
+DiffusionCoefficient = zeros(size(fphys{1}(:,:,5)./fphys{1}(:,:,4).^2));
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 1/200 * 0.4 * obj.matUpdateTimeInterval( fphys2d );
 %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -88,7 +88,7 @@ while( time < ftime )
     %         obj.meshUnion(1), fphys2d, fphys, dt , time, obj.WindTaux{1}, obj.WindTauy{1} );
     
     %> Update the diffusion coefficient
-    DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
+    DiffusionCoefficient = zeros(size(fphys{1}(:,:,5)./fphys{1}(:,:,4).^2));
     display(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
@@ -105,6 +105,7 @@ function [ExplicitRHS2d, ExplicitHuRHS3d, ExplicitHvRHS3d] = matCalculateExplici
 obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys, fext2d);
 ExplicitRHS2d = obj.frhs2d{1}(:,:,1);
 obj.advectionSolver.evaluateAdvectionRHS( fphys );
+obj.viscositySolver.matEvaluateRHS( fphys );
 obj.matEvaluateSourceTerm( fphys );
 ExplicitHuRHS3d = obj.frhs{1}(:,:,1);
 ExplicitHvRHS3d = obj.frhs{1}(:,:,2);

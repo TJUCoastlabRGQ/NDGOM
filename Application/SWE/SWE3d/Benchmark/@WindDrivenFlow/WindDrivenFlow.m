@@ -35,6 +35,9 @@ classdef WindDrivenFlow < SWEBarotropic3d
 %             obj.Cf{1} = 0.0025/1000;
         end
         
+        matExplicitRK222(obj);
+        
+        
         EntropyAndEnergyCalculation(obj);
         
         AnalysisResult2d( obj );
@@ -89,10 +92,10 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
