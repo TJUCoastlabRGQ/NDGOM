@@ -1,5 +1,5 @@
 classdef NdgSideEdge3d < handle
-    properties ( SetAccess = protected )
+    properties %( SetAccess = protected )
         %> std cell of the three dimensional side edge        
         cell
         %> mesh obj
