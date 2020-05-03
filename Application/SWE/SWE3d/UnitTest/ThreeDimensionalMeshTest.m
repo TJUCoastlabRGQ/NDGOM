@@ -29,7 +29,8 @@ classdef ThreeDimensionalMeshTest < SWE3DAbstractTest & ...
         
         function QuadMeshMatrixTest(obj)
             % for this test,the mesh is carefully designed
-            % used to verify the equality between mass matrix of standard cell and that of edge 
+            % used to verify the equality between mass matrix of standard cell and that of edge
+            
             obj.Assert(obj.mesh2d.cell.M, obj.mesh3d.InnerEdge.M);
             obj.Assert(obj.mesh2d.cell.M, obj.mesh3d.BoundaryEdge.M);
             obj.Assert(obj.mesh2d.cell.M, obj.mesh3d.BottomBoundaryEdge.M);

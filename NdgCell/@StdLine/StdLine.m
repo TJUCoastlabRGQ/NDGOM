@@ -35,7 +35,7 @@ classdef StdLine < StdCell
         end
 
         function [ Nq,rq,sq,tq,wq ] = quad_coor_func(obj, N)
-            Nq = 3*N;
+            Nq = 6*N;
             [ rq, wq ] = zwglj( Nq );
             sq = zeros(Nq, 1);
             tq = zeros(Nq, 1);
