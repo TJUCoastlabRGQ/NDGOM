@@ -83,11 +83,11 @@ bctype = [ ...
     enumBoundaryCondition.ZeroGrad ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -1, 0 ], [ -1, 0 ], 5, 5, bctype);
+    [ -1, 0 ], [ -1, 0 ], 3, 3, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
-mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 5 );
+mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 3 );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );

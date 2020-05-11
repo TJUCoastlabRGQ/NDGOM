@@ -31,6 +31,10 @@ classdef WindDrivenFlow < SWEBarotropic3d
 %             obj.dt = 0.02;
             obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
             obj.WindTaux{1} = 1.5/1000*ones(size(obj.mesh2d(1).x));
+%             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
+%             obj.WindTaux{1}(:,Index) = 0;
+%             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
+%             obj.WindTaux{1}(:,Index) = 0;
             obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
 %             obj.Cf{1} = 0.0025/1000;
         end
@@ -64,7 +68,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 21600;
+            ftime = 3000;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

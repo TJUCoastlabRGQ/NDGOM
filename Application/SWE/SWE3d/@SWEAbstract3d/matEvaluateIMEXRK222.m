@@ -58,6 +58,8 @@ while( time < ftime )
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         fphys2d = obj.matEvaluatePostFunc( fphys2d );
+        
+        DiffusionCoefficient = fphys{1}(:,:,5)./fphys{1}(:,:,4).^2;
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
