@@ -45,11 +45,11 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
-                [ OmegafluxS(:,:,1) ] = edge.nz .* fm(:,:,1).*fm(:,:,3)./fm(:,:,4) .* ( edge.nz .* fm(:,:,3)>=0 ) + edge.nz .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) .* ( edge.nz .* fm(:,:,3)<0 );
-                [ OmegafluxS(:,:,2) ] = edge.nz .* fm(:,:,2).*fm(:,:,3)./fm(:,:,4) .* ( edge.nz .* fm(:,:,3)>=0 ) + edge.nz .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) .* ( edge.nz .* fm(:,:,3)<0 );                
+%                 [ OmegafluxS(:,:,1) ] = edge.nz .* fm(:,:,1).*fm(:,:,3)./fm(:,:,4) .* ( edge.nz .* fm(:,:,3)>=0 ) + edge.nz .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) .* ( edge.nz .* fm(:,:,3)<0 );
+%                 [ OmegafluxS(:,:,2) ] = edge.nz .* fm(:,:,2).*fm(:,:,3)./fm(:,:,4) .* ( edge.nz .* fm(:,:,3)>=0 ) + edge.nz .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) .* ( edge.nz .* fm(:,:,3)<0 );                
                 
-%                 [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*(fm(:,:,1).*fm(:,:,3)./fm(:,:,4)+fp(:,:,1).*fp(:,:,3)./fp(:,:,4));
-%                 [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*(fm(:,:,2).*fm(:,:,3)./fm(:,:,4)+fp(:,:,2).*fp(:,:,3)./fp(:,:,4));
+                [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*(fm(:,:,1).*fm(:,:,3)./fm(:,:,4)+fp(:,:,1).*fp(:,:,3)./fp(:,:,4));
+                [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*(fm(:,:,2).*fm(:,:,3)./fm(:,:,4)+fp(:,:,2).*fp(:,:,3)./fp(:,:,4));
                 [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, OmegafluxS );
                 
 %                 edge = mesh3d.BottomBoundaryEdge;

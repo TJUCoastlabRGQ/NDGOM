@@ -107,7 +107,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition( obj, mesh2d, mesh3d );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition( obj, mesh2d, mesh3d );
 end
 
 
