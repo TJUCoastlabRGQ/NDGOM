@@ -31,10 +31,10 @@ classdef SWE3DFluxConsistencyTest < SWE3DAbstractTest & ...
         function FluxConsistencyTest(obj)
             obj.fphys{1}(:,:,1) = 0.5 * ones(size(obj.mesh3d.x));
             index = (obj.mesh3d(1).z==-0.5);
-%             obj.fphys{1}(index) = 0.9;
+            obj.fphys{1}(index) = 0.75;
             
             obj.fphys{1}(:,:,2) = 0.5 * ones(size(obj.mesh3d.x));
-%             obj.fphys{1}(index + numel(obj.mesh3d.x)) = 0.9;
+            obj.fphys{1}(5 + numel(obj.mesh3d.x)) = 0.9;
             
             obj.fphys2d{1}(:,:,1) = 10 * ones(size(obj.mesh2d.x)); 
             obj.fphys{1}(: , :, 4) = obj.mesh3d.Extend2dField( obj.fphys2d{1}(:, :, 1) );
@@ -50,10 +50,7 @@ classdef SWE3DFluxConsistencyTest < SWE3DAbstractTest & ...
             [ fm3d, fp3d ] = InnerEdge3d.matEvaluateSurfValue( obj.fphys );
             FluxS3d = obj.matEvaluateSurfNumFlux(obj.mesh3d, InnerEdge3d.nx, InnerEdge3d.ny, fm3d(:,:,[4,1,2]), fp3d(:,:,[4,1,2]), InnerEdge3d);
             
-            
-            BottomEdge = obj.mesh3d.BottomEdge;
-            display(BottomEdge.nz);
-%             obj.Assert(obj.mesh3d.VerticalColumnIntegralField(FluxS3d(:,:,1)),FluxS2d(:,:,1));
+            obj.Assert(InnerEdge3d.VerticalColumnIntegralField(FluxS3d(:,:,1)),FluxS2d(:,:,1));
             
         end        
     end
@@ -107,14 +104,14 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformTriMesh( N, ...
-    [ 0, 10 ], [ 0, 10 ], 1, 6, bctype);
+    [ 0, 10 ], [ 0, 10 ], 1, 5, bctype);
 
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
-mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 6 );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
+mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 5 );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, 5 );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, 5 );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 

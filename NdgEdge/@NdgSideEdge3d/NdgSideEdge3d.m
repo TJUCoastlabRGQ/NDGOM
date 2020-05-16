@@ -2,6 +2,12 @@ classdef NdgSideEdge3d < handle
     properties %( SetAccess = protected )
         %> std cell of the three dimensional side edge        
         cell
+        %> Vandmonde matrix corresponding to the horizontal interpolation point
+        V1d
+        %> Vandmonde matrix corresponding to the facial interpolation point
+        V2d
+        %> number of vertical layers
+        Nz
         %> mesh obj
         mesh
         %> num of face nodes
@@ -30,24 +36,30 @@ classdef NdgSideEdge3d < handle
         nx, ny, nz
         %> determination of edge Jacabian
         Js
+        %> determination of Jacobian in vertical direction
+        Jz
         %> length, area or volume of the studied edge
         LAV        
     end
 
     methods ( Access = public )
-        function obj = NdgSideEdge3d( meshUnion3d, meshId )
+        function obj = NdgSideEdge3d( meshUnion3d, meshId, Nz )
             mesh = meshUnion3d( meshId );
             
+            obj.Nz = Nz;
             obj.mesh = mesh;
             obj = assembleMassMatrix( obj, mesh.cell.N, mesh.cell.Nz );
             obj = assembleEdgeConnect( obj, mesh );
             obj = assembleNodeProject( obj, mesh );
+            obj.Jz = mesh.Jz(obj.GFToN1);
         end
 
         %> access boundary values at edges
         [ fM, fP ] = matEvaluateSurfValue( obj, fphys );
         %> evaluate strong-form surface term rhs
         [ frhs ] = matEvaluateStrongFromEdgeRHS( obj, fluxM, fluxP, fluxS )
+        
+        [ value2d ] = VerticalColumnIntegralField( obj, fphys );
     end
 
     methods ( Access = protected )
