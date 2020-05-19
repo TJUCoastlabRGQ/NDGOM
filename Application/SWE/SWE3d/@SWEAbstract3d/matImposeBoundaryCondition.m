@@ -1,4 +1,4 @@
-function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, nz, fm, fp, fext3d )
+function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext3d )
 
 ind = ( edge.ftype == enumBoundaryCondition.ClampedDepth );
 fp(:, ind, 4) = fext3d(:, ind, 4);

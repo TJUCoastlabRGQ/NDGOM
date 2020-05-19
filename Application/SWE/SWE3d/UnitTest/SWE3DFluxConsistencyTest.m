@@ -104,7 +104,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformTriMesh( N, ...
-    [ 0, 10 ], [ 0, 10 ], 1, 5, bctype);
+    [ 0, 10 ], [ 0, 10 ], 2, 5, bctype);
 
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

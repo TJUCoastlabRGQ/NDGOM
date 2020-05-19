@@ -90,11 +90,11 @@ obj.matUpdateFinalResult( time, fphys2d, fphys );
 end
 
 function [ExplicitRHS2d, ExplicitHuRHS3d, ExplicitHvRHS3d] = matCalculateExplicitRHSTerm(obj, fphys2d, fphys, fext2d)
-obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys, fext2d);
-ExplicitRHS2d = obj.frhs2d{1}(:,:,1);
+% obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys, fext2d);
 obj.advectionSolver.evaluateAdvectionRHS( fphys );
 obj.viscositySolver.matEvaluateRHS( fphys );
 obj.matEvaluateSourceTerm( fphys );
+ExplicitRHS2d = obj.frhs2d{1}(:,:,1);
 ExplicitHuRHS3d = obj.frhs{1}(:,:,1);
 ExplicitHvRHS3d = obj.frhs{1}(:,:,2);
 end
