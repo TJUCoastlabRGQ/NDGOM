@@ -63,7 +63,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) = obj.H0*ones(mesh2d.cell.Np, mesh2d.K);
+                fphys2d{m}(:,:,1) = obj.H0 .* ones(mesh2d.cell.Np, mesh2d.K);
             end
         end
         

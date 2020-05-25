@@ -6,7 +6,7 @@ integralType = physMat.getOption('integralType');
 if (integralType == enumDiscreteIntegral.QuadratureFree)
     adv = NdgQuadFreeStrongFormAdvSolver3d( physMat );
     vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
-    flux = SWEHLLNumFluxSolver3d;
+    flux = SWELFNumFluxSolver3d;
     PCESolver2d = SWEQuadFreeStrongFormPCESolver2d;
 elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     adv = NdgGaussQuadWeakFormAdvSolver3d( physMat, physMat.meshUnion );
