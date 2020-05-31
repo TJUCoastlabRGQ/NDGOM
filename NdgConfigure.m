@@ -323,12 +323,6 @@ path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/'
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
 srcfile = {[path, 'mxGetNonhydroVerticalVolumeFlux.c']};
 FuncHandle(path, srcfile, libfile);
-%Compile GOTM part
-% path = 'NdgPhys\NdgMatSolver\NdgEddyViscositySolver\@NdgGOTMEddyViscositySolver\private\';
-% libfile = {['.\lib\GOTM\','*.obj'],...
-%     [path,'mxGOTM.c']};
-% srcfile = {[path,'mxUpdateEddyViscosity.c']};
-% FuncHandle(path, srcfile, libfile);
 
 % SWE3d
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
@@ -338,6 +332,19 @@ srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@AbstractDiffSolver\private\';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+libfile = {};
+srcfile = { ...
+    [path, 'mxEvaluateStrongFromEdgeRHS.c'],...
+    [path, 'mxEvaluateSurfValue.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertGOTMDiffSolver\private\';
+libfile = {['.\lib\GOTM\','*.obj'],...
+    [path,'mxGOTM.c']};
+srcfile = {[path,'mxUpdateEddyViscosity.c']};
+FuncHandle(path, srcfile, libfile);
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
 
 end
@@ -420,8 +427,8 @@ end
 function configureCompilerSetting()
 global CFLAGS LDFLAGS
 global COMPILER
-CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims ';
-LDFLAGS = 'LDFLAGS=$LDFLAGS ';
+CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
+LDFLAGS = 'LDFLAGS=$LDFLAGS';
 COMPILER = [''];
 if ( strcmp(computer('arch'), 'maci64') )
     COMPILER = 'CC=/opt/intel/composer_xe_2015.5.222/bin/intel64/icc';

@@ -10,11 +10,28 @@ for m = 1:obj.Nmesh
     Np = obj.meshUnion(m).cell.Np;
     K = obj.meshUnion(m).K;
     obj.frhs{m} = zeros( Np, K, obj.Nvar );
+    %> This is used to contain the right hand side corresponding to the implicit discretization of vertical diffusion term
+    obj.ImplicitRHS{m} = zeros( Np, K, obj.Nvar );
     if ~isempty( mesh3d(m).BoundaryEdge )
         Nfp = obj.meshUnion(m).BoundaryEdge.Nfp;
         Ne = obj.meshUnion(m).BoundaryEdge.Ne;
         obj.fext3d{m} = zeros( Nfp, Ne, obj.Nfield );
+        %> These public variable are used to avoid the calculation of these terms repeatly during computation
+        obj.BoundaryEdgeFluxS3d{m} = zeros( Nfp, Ne, obj.Nvar );
+        obj.BoundaryEdgeFluxM3d{m} = zeros( Nfp, Ne, obj.Nvar );
+        %> The following two variables are used when calculating the horizontal diffusion term
+        obj.BoundaryEdgefm3d{m} = zeros( Nfp, Ne, obj.Nvar );
+        obj.BoundaryEdgefp3d{m} = zeros( Nfp, Ne, obj.Nvar );
     end
+    %> These public variable are used to avoid the calculation of these terms repeatly during computation
+    Nfp = obj.meshUnion(m).InnerEdge.Nfp;
+    Ne = obj.meshUnion(m).InnerEdge.Ne;
+    obj.InnerEdgeFluxS3d{m} = zeros( Nfp, Ne, obj.Nvar );
+    obj.InnerEdgeFluxM3d{m} = zeros( Nfp, Ne, obj.Nvar );
+    obj.InnerEdgeFluxP3d{m} = zeros( Nfp, Ne, obj.Nvar );
+    %> The following two variables are used when calculating the horizontal diffusion term
+    obj.InnerEdgefm3d{m} = zeros( Nfp, Ne, obj.Nfield );
+    obj.InnerEdgefp3d{m} = zeros( Nfp, Ne, obj.Nfield );
     
     Np = obj.mesh2d(m).cell.Np;
     K = obj.mesh2d(m).K;
@@ -23,7 +40,14 @@ for m = 1:obj.Nmesh
         Nfp = obj.mesh2d(m).BoundaryEdge.Nfp;
         Ne = obj.mesh2d(m).BoundaryEdge.Ne;
         obj.fext2d{m} = zeros( Nfp, Ne, obj.Nfield2d );
+        obj.BoundaryEdgeFluxM2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
+        obj.BoundaryEdgeFluxS2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
     end
+    Nfp = obj.mesh2d(m).InnerEdge.Nfp;
+    Ne = obj.mesh2d(m).InnerEdge.Ne;
+    obj.InnerEdgeFluxM2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
+    obj.InnerEdgeFluxP2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
+    obj.InnerEdgeFluxS2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
 end
 
 % set option
@@ -41,9 +65,6 @@ else
     obj.cfl = 1;
 end
 
-%> wind stress term
-obj.WindTaux =  cell(obj.Nmesh);
-obj.WindTauy =  cell(obj.Nmesh);
 %> bottom friction coefficient
 obj.Cf =  cell(obj.Nmesh);
 
@@ -56,9 +77,6 @@ for n = 1:obj.Nmesh
         ( obj.mesh2d.sy .* ( obj.mesh2d.cell.Ds * obj.fphys2d{n}(:,:,4) ) );
     obj.fphys2d{n}(:, :, 2) = obj.meshUnion(n).VerticalColumnIntegralField( obj.fphys{n}(:, :, 1) );
     obj.fphys2d{n}(:, :, 3) = obj.meshUnion(n).VerticalColumnIntegralField( obj.fphys{n}(:, :, 2) );
-    %> the wind stress is initialized to be zero
-    obj.WindTaux{n} = zeros(size(obj.mesh2d(n).x));
-    obj.WindTauy{n} = zeros(size(obj.mesh2d(n).y));
     %> H in extended three dimensional fields
     obj.fphys{n}(:, :, 4) = obj.meshUnion(n).Extend2dField( obj.fphys2d{n}(:, :, 1) );
     %> the vertical viscosity term is initialized to be 10^(-2)
@@ -75,7 +93,11 @@ for n = 1:obj.Nmesh
     obj.fphys{n}(:,:,9) = obj.meshUnion(n).Extend2dField( obj.fphys2d{n}(:, :, 6) );
 end
 
-obj.EddyViscositySolver = obj.matInitEddyViscositySolver( );
+% we currently only consider one mesh only
+obj.BotBoundNewmannDate = zeros(size(obj.mesh2d(1).x));
+obj.SurfBoundNewmannDate = zeros(size(obj.mesh2d(1).y));
+
+obj.matInitEddyViscositySolver( );
 % Setup the output NetCDF file object
 % initOutput( obj, mesh2d, mesh3d );
 obj.outputFile = obj.matInitOutput;

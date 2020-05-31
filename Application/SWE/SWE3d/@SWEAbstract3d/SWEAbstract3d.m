@@ -69,13 +69,46 @@ classdef SWEAbstract3d < NdgPhysMat
         %> Solver for the primal continuity equation
         PCESolver2d
         %> Solver for vertical eddy viscosity
-        EddyViscositySolver
+        VerticalEddyViscositySolver
+        %>
+        HorizontalEddyViscositySolver
     end
     
     properties
-        WindTaux
-        WindTauy
+        SurfBoundNewmannDate
+        BotBoundNewmannDate
         Cf
+    end
+    
+    properties ( SetAccess = public )
+        InnerEdgefm3d
+        BoundaryEdgefm3d
+        InnerEdgefp3d
+        BoundaryEdgefp3d
+        
+        InnerEdgeFluxS3d
+        BoundaryEdgeFluxS3d
+        InnerEdgeFluxM3d
+        BoundaryEdgeFluxM3d
+        InnerEdgeFluxP3d
+        
+        InnerEdgeFluxS2d
+        BoundaryEdgeFluxS2d
+        InnerEdgeFluxM2d
+        BoundaryEdgeFluxM2d
+        InnerEdgeFluxP2d
+        
+        ImplicitRHS
+    end
+    
+    properties ( SetAccess = protected )
+        %These variable are needed when time stepping
+        ExplicitRHS2d = []
+        ExplicitRHS3d = []
+        ImplicitRHS3d = []
+        % This parameter is used to calculate the horizontal viscosity when smagorinsky model is adopted 
+        SmagorinskyConstant = []
+        Prantl = []
     end
     
     methods
@@ -92,7 +125,7 @@ classdef SWEAbstract3d < NdgPhysMat
                 obj.mesh2d(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
                 obj.mesh2d(m).status(  wetflag ) = int8( enumSWERegion.Wet );
             end
-        end        
+        end
     end
     
     % ======================================================================
@@ -113,9 +146,9 @@ classdef SWEAbstract3d < NdgPhysMat
         end
         
         function   [ fphys ] = matEvaluatePostFunc(obj, fphys)
-              obj.matUpdateWetDryState(fphys);            
+            obj.matUpdateWetDryState(fphys);
         end
-                
+        
     end
     
     methods ( Access = protected )
@@ -127,27 +160,16 @@ classdef SWEAbstract3d < NdgPhysMat
         matUpdateOutputResult( obj, time, fphys2d, fphys );
         
         matUpdateFinalResult( obj, time, fphys2d, fphys );
-        
-        matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
-        
-        [ VolumeTerm_rhs2d ] = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d );
-        
-        [ InnerSurface_rhs2d ] = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge);
-        
-        [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fext);
-        
-        [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys);
-              
-        [ TermX, TermY ] = matEvaluateDepthAveragedHorizontalPartialDerivativeTerm(obj, mesh3d, fphys3d);
-                
+                                                        
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
-        
-        [ Term ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
-        
+                
         matEvaluateSourceTerm( obj, fphys );
         
-        EddyViscositySolver = matInitEddyViscositySolver( obj );
+        matInitEddyViscositySolver( obj );
         
+        matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex);
+        
+        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa);
     end
     
     methods ( Sealed, Access = protected )
