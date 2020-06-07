@@ -47,7 +47,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     for(mwIndex i = 0; i< NBe; i++){
         mwIndex ele = (mwIndex)BoundaryEdgeFToE[2*i];
         mwIndex face = (mwIndex)BoundaryEdgeFToF[2*i];
-        NdgEdgeType Boundarytype = (NdgEdgeType)BoundaryEdgeFtype[i];
+        NdgNonhydroEdgeType Boundarytype = (NdgNonhydroEdgeType)BoundaryEdgeFtype[i];
         mxSetEdgeType( Boundarytype, EdgeType + (ele - 1)*Nf + face - 1);
     }
     

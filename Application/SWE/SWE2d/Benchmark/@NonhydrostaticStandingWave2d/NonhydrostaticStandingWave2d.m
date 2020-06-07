@@ -137,7 +137,7 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 10], [0, 6], 10/deltax, 6/deltax, bctype);
+    mesh = makeUniformTriMesh(N, [0, 20], [0, 4*deltax], 20/deltax, 4, bctype);
 elseif(type == enumStdCell.Quad)
     mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 else

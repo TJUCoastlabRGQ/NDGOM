@@ -10,17 +10,14 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
         function  obj = SWEGaussQuadWeakFormPCESolver2d( phys, meshUnion )
             obj = obj@NdgGaussQuadWeakFormSolver( phys, meshUnion );
         end
-        function evaluateAdvectionRHS( obj, physClass, fphys2d, fphys3d, fext )
+        function evaluateAdvectionRHS( obj, physClass, fphys2d, ~, fext )
             
             fphys = cell(1);
             % evaluate inner edge
             for m = 1:physClass.Nmesh
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
-                mesh3d = physClass.mesh3d(m);
                 mesh2d = physClass.mesh2d(m);
-                fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
-                fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
                 fphys{1} = fphys2d{m};
                 fq = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq{m}, fphys2d{m} );
                 
@@ -35,13 +32,13 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 
                 [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( InnerEdge, obj.IEFVfq{m}, fm, fp);
                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
+%                 lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
                 
-                FluxM = fm(:, :, 2) .* obj.IEnx{m} + fm(:, :, 3) .* obj.IEny{m};
-                FluxP = fp(:, :, 2) .* obj.IEnx{m} + fp(:, :, 3) .* obj.IEny{m};
+%                 FluxM = fm(:, :, 2) .* obj.IEnx{m} + fm(:, :, 3) .* obj.IEny{m};
+%                 FluxP = fp(:, :, 2) .* obj.IEnx{m} + fp(:, :, 3) .* obj.IEny{m};
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1)  ) ) );
-                EdgeRHS = - ( obj.IELIFT{m} * ( obj.IEwJs{m} .* ( FluxS ) ));
+                FluxS = physClass.matEvaluateSurfNumFlux( mesh2d, obj.IEnx{m}, obj.IEny{m}, fm, fp, InnerEdge );
+                EdgeRHS = - ( obj.IELIFT{m} * ( obj.IEwJs{m} .* ( FluxS(:,:,1) ) ));
                 physClass.frhs2d{m} = obj.matAssembleIntoRHS( InnerEdge, EdgeRHS, physClass.frhs2d{m});
                 %                 physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
                 
@@ -61,18 +58,17 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
                 fp(:, ind, 2) = - Hun .* BoundaryEdge.nx(:, ind) - Hvn .* BoundaryEdge.ny(:, ind);
                 fp(:, ind, 3) = - Hun .* BoundaryEdge.ny(:, ind) + Hvn .* BoundaryEdge.nx(:, ind);
                 
-                [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( InnerEdge, obj.BEFVfq{m}, fm, fp);
+                [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( BoundaryEdge, obj.BEFVfq{m}, fm, fp);
                 
-                %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
-                % lambda = zeros(size(lambda));
-                
-                FluxM = fm(:, :, 2) .* obj.BEnx{m} + fm(:, :, 3) .* obj.BEny{m};
-                FluxP = fp(:, :, 2) .* obj.BEnx{m} + fp(:, :, 3) .* obj.BEny{m};
+%                 %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
+%                 lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
+%                 % lambda = zeros(size(lambda));
+%                 
+%                 FluxM = fm(:, :, 2) .* obj.BEnx{m} + fm(:, :, 3) .* obj.BEny{m};
+%                 FluxP = fp(:, :, 2) .* obj.BEnx{m} + fp(:, :, 3) .* obj.BEny{m};
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
-                
-                EdgeRHS = - ( obj.BELIFT{m} * ( obj.BEwJs{m} .* ( FluxS ) ));
+                FluxS = physClass.matEvaluateSurfNumFlux( mesh2d, obj.BEnx{m}, obj.BEny{m}, fm, fp, BoundaryEdge );                
+                EdgeRHS = - ( obj.BELIFT{m} * ( obj.BEwJs{m} .* ( FluxS(:,:,1) ) ));
                 
                 physClass.frhs2d{m} = obj.matAssembleBoundaryAndSourceTermIntoRHS( BoundaryEdge, EdgeRHS, physClass.frhs2d{m});
                 

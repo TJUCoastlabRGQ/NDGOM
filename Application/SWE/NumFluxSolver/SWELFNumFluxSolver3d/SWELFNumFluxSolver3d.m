@@ -3,9 +3,9 @@ classdef SWELFNumFluxSolver3d
     %   此处显示详细说明
     
     methods
-        function [ fluxS ] = evaluate( obj,physClass, hmin, gra, nx, ny, nz, fm, fp )
-            %             fluxS = mxEvaluate( hmin, gra, nx, ny, fm, fp );
-            fluxS = obj.LFNumFluxTerm( physClass, hmin, gra, fm, fp, nx, ny, nz );
+        function [ fluxS ] = evaluate( obj, hmin, gra, nx, ny, fm, fp, ~, ~ )
+              fluxS = mxEvaluate( hmin, gra, nx, ny, fm, fp );
+%             fluxS = obj.LFNumFluxTerm( hmin, gra, fm, fp, nx, ny, nz );
         end
     end
     

@@ -1,7 +1,7 @@
 classdef SWELFNumFluxSolver2d
     
     methods
-        function [ fluxS ] = evaluate( obj, hmin, gra, nx, ny, fm, fp )
+        function [ fluxS ] = evaluate( obj, hmin, gra, nx, ny, fm, fp, ~, ~ )
             fluxS = mxEvaluate( hmin, gra, nx, ny, fm, fp );
             % fluxS = obj.LFNumFluxTerm( hmin, gra, fm, fp, nx, ny );
         end

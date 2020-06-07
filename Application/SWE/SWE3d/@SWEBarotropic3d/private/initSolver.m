@@ -11,7 +11,7 @@ if (integralType == enumDiscreteIntegral.QuadratureFree)
 elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     adv = NdgGaussQuadWeakFormAdvSolver3d( physMat, physMat.meshUnion );
     vis = NdgGaussQuadWeakFormCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
-    flux = SWELFNumFluxSolver3d;
+    flux = SWEHLLNumFluxSolver3d;
     PCESolver2d = SWEGaussQuadWeakFormPCESolver2d( physMat, physMat.mesh2d );
 end
 % vis = NdgNonVisSolver( physMat );

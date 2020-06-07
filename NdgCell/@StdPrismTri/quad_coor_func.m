@@ -14,13 +14,13 @@ function [Nq, rq, sq, tq, wq] = quad_coor_func( obj, N, N2 )
 end
 
 function [ Nq,rq,wq ] = line_quadrature_coor_func( N )
-    Nq = N+1;
+    Nq = 6*N;
     [ rq, wq ] = zwglj( Nq );
 end
 
 function [ Nq, rq, sq, wq ] = tri_quadrature_coor_func( N )
 % third party function, see references
-    qOrd = N+1;
+    qOrd = 6*N;
     [X,Y,Wx,Wy] = triquad(qOrd, [-1 -1; 1 -1; -1 1]); 
     rq = X(:);
     sq = Y(:);

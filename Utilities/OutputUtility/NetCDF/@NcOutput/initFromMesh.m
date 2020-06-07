@@ -1,6 +1,6 @@
 function initFromMesh( obj, filename, outputIntervalNum, varIndex )
 
-% set vtk output
+% % set vtk output
 % if (obj.mesh.type == enumMeshDim.One)
 %     obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
 % elseif (obj.mesh.type == enumMeshDim.Two)

@@ -86,10 +86,11 @@ classdef NdgExtendMesh3d < handle
             % interp nodes
             obj = GetNodeCoor( obj );
             
+            
             % Jacobian coefficients at IP nodes
             [ obj.rx, obj.ry, obj.rz, obj.sx, obj.sy, obj.sz, obj.tx, obj.ty,...
                 obj.tz, obj.J, obj.Jz ] = cell.assembleJacobianMatrix( obj.x, obj.y, obj.z);
-            
+            obj = GetCellSize( obj );
         end% func
         
         function nodeQ = proj_vert2node(obj, vertQ)

@@ -14,6 +14,9 @@ end
 invV = inv(V);
 M = (invV')*invV;
 
+cell = StdLine(N);
+obj.V1d = cell.V;
+obj.V2d = V;
 obj.Nfp = Nfp;
 obj.M = M;
 end

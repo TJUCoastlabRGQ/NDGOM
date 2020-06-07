@@ -14,7 +14,7 @@ if obj.option.isKey('nonhydrostaticType')
     end% switch
 end
 
-outputObj = matInitOutput@NdgPhysMat(obj, mesh);
+outputObj = matInitOutput@NdgPhysMat( obj );
 
 end
 

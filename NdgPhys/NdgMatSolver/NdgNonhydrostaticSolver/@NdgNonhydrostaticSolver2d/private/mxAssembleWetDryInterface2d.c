@@ -93,7 +93,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
                          * BoundaryEdgeFtype property.
                          */
                         if ( BoundaryEdgeFToE[2*k] == AdjacentEle && BoundaryEdgeFToF[2*k] == j ){
-                            NdgEdgeType Boundarytype = (NdgEdgeType)BoundaryEdgeFtype[k];
+                            NdgNonhydroEdgeType Boundarytype = (NdgNonhydroEdgeType)BoundaryEdgeFtype[k];
                             mxSetEdgeType( Boundarytype, TempWetDryCell + (total_element-1) * (Nf + 1) + j + 1);
                             break;
                         }

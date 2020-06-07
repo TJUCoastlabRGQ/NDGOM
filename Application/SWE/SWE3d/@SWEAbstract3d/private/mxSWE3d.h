@@ -1,5 +1,5 @@
-#ifndef __mxSWE_H__
-#define __mxSWE_H__
+#ifndef __mxSWE3D_H__
+#define __mxSWE3D_H__
 
 #include "mex.h"
 // #define max(a, b) ((a > b) ? a : b)
@@ -41,6 +41,6 @@ typedef struct {
     double *            ///< velocity
 ) ;
 
-void evaluateWetDryInterface( signed char *, const mxArray *, double * );
+//void evaluateWetDryInterface( signed char *, const mxArray *, double * );
 
 #endif  //__mxSWE_H__

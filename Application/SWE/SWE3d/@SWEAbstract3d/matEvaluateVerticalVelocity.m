@@ -2,28 +2,27 @@ function [ W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
 
-% fphys3d(:, :, 6) = mesh3d.Extend2dField( fphys2d(:, :, 1) - fphys2d(:, :, 5) );
 
-% HUt = mesh3d.Extend2dField( fphys2d(:, :, 2) ) - fphys3d(:, :, 5) .* fphys3d(:, :, 1);
-% HVt = mesh3d.Extend2dField( fphys2d(:, :, 3) ) - fphys3d(:, :, 5) .* fphys3d(:, :, 2);
+    edge = mesh3d.InnerEdge;
+    edge2d = obj.mesh2d(1).InnerEdge;     
 
-dHUdx = mesh3d.rx .* ( mesh3d.cell.Dr * fphys3d(:, :, 1) ) + mesh3d.sx .* ( mesh3d.cell.Ds * fphys3d(:, :, 1) ) + mesh3d.tx .* ( mesh3d.cell.Dt * fphys3d(:, :, 1) );
-dHVdy = mesh3d.ry .* ( mesh3d.cell.Dr * fphys3d(:, :, 2) ) + mesh3d.sy .* ( mesh3d.cell.Ds * fphys3d(:, :, 2) ) + mesh3d.ty .* ( mesh3d.cell.Dt * fphys3d(:, :, 2) );
-% data = cell(1);
-% data{1} = fphys3d;
-% [ dHUdx, dHVdy ] = obj.matEvaluateHorizontalPartialDerivativeTerm( mesh3d,data );
 
-% dHVdy = obj.matEvaluatePartialDerivativeTermX( mesh, fphys3d);
-% fphys2d = obj.matEvaluate2dHorizonMomentum( mesh3d, ...
-%         fphys2d, fphys3d );
-% fphys2d(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 1) );
-% fphys2d(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d(:, :, 2) );
+    InnerSurface_frhs3d = edge.matEvaluateStrongFromEdgeRHS( obj.InnerEdgeFluxM3d{1}(:,:,1), obj.InnerEdgeFluxP3d{1}(:,:,1), obj.InnerEdgeFluxS3d{1}(:,:,1) );
+    InnerSurface_frhs2d = edge2d.matEvaluateStrongFromEdgeRHS( obj.InnerEdgeFluxM2d{1}(:,:,1), obj.InnerEdgeFluxP2d{1}(:,:,1), obj.InnerEdgeFluxS2d{1}(:,:,1) );
+    
+    edge = mesh3d.BoundaryEdge;
+    edge2d = obj.mesh2d(1).BoundaryEdge;
+    
+    BoundarySurface_frhs3d = edge.matEvaluateStrongFormEdgeRHS( obj.BoundaryEdgeFluxM3d{1}(:,:,1), obj.BoundaryEdgeFluxS3d{1}(:,:,1) );
+    BoundarySurface_frhs2d = edge2d.matEvaluateStrongFromEdgeRHS( obj.BoundaryEdgeFluxM2d{1}(:,:,1), obj.BoundaryEdgeFluxS2d{1}(:,:,1) );
+   
+dHUHV =...
+    ( mesh3d.rx .* (mesh3d.cell.Dr * fphys3d{1}(:,:,1)) + mesh3d.sx .* (mesh3d.cell.Ds * fphys3d{1}(:,:,1)) ) - ...
+    InnerSurface_frhs3d - BoundarySurface_frhs3d  + ( mesh3d.ry .* (mesh3d.cell.Dr * fphys3d{1}(:,:,2)) + mesh3d.sy .* (mesh3d.cell.Ds * fphys3d{1}(:,:,2)) ) ;
+% Term2d = ;
+dHU2DHV2D = obj.meshUnion(1).Extend2dField( obj.mesh2d.rx .* (obj.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) + obj.mesh2d.sx .* (obj.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) - ...
+    InnerSurface_frhs2d - BoundarySurface_frhs2d + obj.mesh2d.ry .* (obj.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) + obj.mesh2d.sy .* (obj.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
 
-HU2D = mesh3d.Extend2dField( fphys2d(:, :, 2) );
-HV2D = mesh3d.Extend2dField( fphys2d(:, :, 3) );
-dHU2Ddx = mesh3d.rx .* ( mesh3d.cell.Dr * HU2D ) + mesh3d.sx .* ( mesh3d.cell.Ds * HU2D ) + mesh3d.tx .* ( mesh3d.cell.Dt * HU2D );
-dHV2Ddy = mesh3d.ry .* ( mesh3d.cell.Dr * HV2D ) + mesh3d.sy .* ( mesh3d.cell.Ds * HV2D ) + mesh3d.ty .* ( mesh3d.cell.Dt * HV2D );
-
-W = mesh3d.VerticalIntegralField( - dHUdx - dHVdy )+dHU2Ddx.*(1+mesh3d.z)+dHV2Ddy.*(1+mesh3d.z);
+W =  mesh3d.VerticalIntegralField( -1 * dHUHV ) + dHU2DHV2D .* (1+mesh3d.z);
 end
 

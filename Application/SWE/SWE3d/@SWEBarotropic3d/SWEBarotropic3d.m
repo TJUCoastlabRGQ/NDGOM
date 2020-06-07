@@ -38,8 +38,8 @@ classdef SWEBarotropic3d < SWEAbstract3d
         [ fluxM ] = matEvaluateSurfFlux( obj, mesh, nx, ny, nz, fm )
         
         %> evaluate boundary numerical flux
-        function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, nz, fm, fp )
-            [ fluxS ] = obj.numfluxSolver.evaluate( obj, obj.hmin, obj.gra, nx, ny, nz, fm, fp );
+        function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp, edge )
+            [ fluxS ] = obj.numfluxSolver.evaluate( obj.hcrit, obj.gra, nx, ny, fm, fp, mesh, edge );
         end% func
     end
     

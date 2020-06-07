@@ -26,14 +26,14 @@ if obj.option.isKey('NumFluxType')
 else  % No numerical flux type pointed
     if obj.option.isKey('nonhydrostaticType')
         if obj.getOption('nonhydrostaticType') == enumNonhydrostaticType.Hydrostatic
-            numfluxSolver = SWEHLLNumFluxSolver2d( );
+            numfluxSolver = SWELFNumFluxSolver2d( );
             surfluxSolver = SWEFaceFluxSolver2d( );
         elseif obj.getOption('nonhydrostaticType') == enumNonhydrostaticType.Nonhydrostatic
             numfluxSolver = SWENonhydroHLLNumFluxSolver2d( );
             surfluxSolver = SWENonhydroFaceFluxSolver2d( );            
         end
     else % No nonhydrostatic type pointed, and hydrostatic by default
-            numfluxSolver = SWEHLLNumFluxSolver2d( );
+            numfluxSolver = SWELFNumFluxSolver2d( );
             surfluxSolver = SWEFaceFluxSolver2d( );          
     end
 end

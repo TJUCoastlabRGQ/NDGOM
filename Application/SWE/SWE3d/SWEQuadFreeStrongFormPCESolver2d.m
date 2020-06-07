@@ -6,19 +6,15 @@ classdef SWEQuadFreeStrongFormPCESolver2d
     end
     
     methods
-        function evaluateAdvectionRHS( obj, physClass, fphys2d, ~, fext )
-            
-            fphys = cell(1);
-            % evaluate inner edge
+        function evaluateAdvectionRHS( obj, physClass, fphys2d )
+             % evaluate inner edge
             for m = 1:physClass.Nmesh
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
                 mesh3d = physClass.meshUnion(m);
                 mesh2d = physClass.mesh2d(m);
 %                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 1) );
-%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );
-                fphys{1} = fphys2d{m};
-                
+%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys3d{m}(:, :, 2) );                
                 %Function used to calculate the two dimentional PCE volume term
                 physClass.frhs2d{m} = -( ...
                     mesh2d.rx .* ( mesh2d.cell.Dr * fphys2d{m}(:, :, 2) ) + ...
@@ -27,59 +23,25 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                     mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:, :, 3) ) );
                 
                 % Function used to calculate the two dimentional PCE inner surface term
-                InnerEdge = mesh2d.InnerEdge;
-                [ fm, fp ] = InnerEdge.matEvaluateSurfValue( fphys );
-                %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) )) );
-                FluxM = fm(:, :, 2) .* InnerEdge.nx + fm(:, :, 3) .* InnerEdge.ny;
-                FluxP = fp(:, :, 2) .* InnerEdge.nx + fp(:, :, 3) .* InnerEdge.ny;
+                InnerEdge = mesh3d.InnerEdge;
+                InnerEdge2d = mesh2d.InnerEdge;
+                physClass.InnerEdgeFluxM2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxM3d{m}(:,:,1) );
+                physClass.InnerEdgeFluxP2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxP3d{m}(:,:,1) );
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1)  ) ) );
-                physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxP, FluxS );
+                physClass.InnerEdgeFluxS2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxS3d{m}(:,:,1) );
+                physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge2d.matEvaluateStrongFromEdgeRHS( physClass.InnerEdgeFluxM2d{m}, physClass.InnerEdgeFluxP2d{m}, physClass.InnerEdgeFluxS2d{m} );
                 
                 % Function used to calculate the two dimentional PCE boundary surface integration term
-                BoundaryEdge = mesh2d.BoundaryEdge;
-                [ fm, fp ] = BoundaryEdge.matEvaluateSurfValue( fphys );
-                
-                % apply clamped depth boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-                fp(:, ind, 1) = fext{m}(:, ind, 1);
+                BoundaryEdge = mesh3d.BoundaryEdge;
+                BoundaryEdge2d = mesh2d.BoundaryEdge;
 
-                % apply clamped boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.Clamped );
-                fp(:, ind, 1) = fext{m}(:, ind, 1);
-                fp(:, ind, 2) = fext{m}(:, ind, 2);
-                fp(:, ind, 3) = fext{m}(:, ind, 3);
-                
-                % apply clamped velocity boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
-                fp(:, ind, 2) = fext{m}(:, ind, 2);
-                fp(:, ind, 3) = fext{m}(:, ind, 3);                
-                
-                % apply zero-grad boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.ZeroGrad );
-                fp(:, ind, 1) = fm(:, ind, 1);
-                fp(:, ind, 2) = fm(:, ind, 2);
-                fp(:, ind, 3) = fm(:, ind, 3);  
-                
-                % apply slip wall boundary condition
-                ind = ( BoundaryEdge.ftype == enumBoundaryCondition.SlipWall );
-                Hun =  fm( :, ind, 2 ) .* BoundaryEdge.nx(:, ind) + fm( :, ind, 3).* BoundaryEdge.ny(:, ind);
-                Hvn = -fm( :, ind, 2 ) .* BoundaryEdge.ny(:, ind) + fm( :, ind, 3).* BoundaryEdge.nx(:, ind);
-                
-                fp(:, ind, 2) = - Hun .* BoundaryEdge.nx(:, ind) - Hvn .* BoundaryEdge.ny(:, ind);
-                fp(:, ind, 3) = - Hun .* BoundaryEdge.ny(:, ind) + Hvn .* BoundaryEdge.nx(:, ind);
-                
-                %> $\lambda = abs( max(sqrt{(gH^_)},sqrt{(gH^+)}))$
-                lambda = abs( max( max( sqrt( physClass.gra .* fm(:, :, 1) ), sqrt( physClass.gra .* fp(:, :, 1) ) ) ) );
-                % lambda = zeros(size(lambda));
-                
-                FluxM = fm(:, :, 2) .* BoundaryEdge.nx + fm(:, :, 3) .* BoundaryEdge.ny;
-                FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
+%                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
+%                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
+                physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM3d{m}(:,:,1) );
+                physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS3d{m}(:,:,1) );
                 
-                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge.matEvaluateStrongFromEdgeRHS( FluxM, FluxS );
+                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge2d.matEvaluateStrongFromEdgeRHS( physClass.BoundaryEdgeFluxM2d{m}, physClass.BoundaryEdgeFluxS2d{m} );
                 
             end
         end

@@ -21,14 +21,14 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( Abstract, Constant )
         %> wet/dry depth threshold
-        hmin
+        hcrit
     end
     
-%     properties( SetAccess = protected )
-%         %> cell array for physical field variable
-%         fphys2d
-%     end
-
+    %     properties( SetAccess = protected )
+    %         %> cell array for physical field variable
+    %         fphys2d
+    %     end
+    
     properties
         %> cell array for physical field variable
         fphys2d
@@ -69,45 +69,72 @@ classdef SWEAbstract3d < NdgPhysMat
         %> Solver for the primal continuity equation
         PCESolver2d
         %> Solver for vertical eddy viscosity
-        EddyViscositySolver
+        VerticalEddyViscositySolver
+        %>
+        HorizontalEddyViscositySolver
     end
     
     properties
-        WindTaux
-        WindTauy
+        SurfBoundNewmannDate
+        BotBoundNewmannDate
         Cf
+    end
+    
+    properties ( SetAccess = public )
+        InnerEdgefm3d
+        BoundaryEdgefm3d
+        InnerEdgefp3d
+        BoundaryEdgefp3d
+        
+        InnerEdgeFluxS3d
+        BoundaryEdgeFluxS3d
+        InnerEdgeFluxM3d
+        BoundaryEdgeFluxM3d
+        InnerEdgeFluxP3d
+        
+        InnerEdgeFluxS2d
+        BoundaryEdgeFluxS2d
+        InnerEdgeFluxM2d
+        BoundaryEdgeFluxM2d
+        InnerEdgeFluxP2d
+        
+        ImplicitRHS3d
+    end
+    
+    properties ( SetAccess = protected )
+        %These variable are needed when time stepping
+        ExplicitRHS2d = []
+        ExplicitRHS3d = []
+%         ImplicitRHS3d = []
+        % This parameter is used to calculate the horizontal viscosity when smagorinsky model is adopted 
+        SmagorinskyConstant = []
+        Prantl = []
     end
     
     methods
         function obj = SWEAbstract3d(  )
             % Doing nothing
         end
-        %> function to update the wet-dry state of cells
-        function matUpdateWetDryState(obj, fphys2d)
-            for m = 1:obj.Nmesh
-                wetflag = all( fphys2d{m}(:,:,1) > obj.hmin );
-                obj.meshUnion(m).mesh2d.status( ~wetflag ) = int8( enumSWERegion.Dry );
-                obj.meshUnion(m).mesh2d.status(  wetflag ) = int8( enumSWERegion.Wet );
-            end            
-        end
         
         initPhysFromOptions( obj, mesh2d, mesh3d );
         AnimationSurfaceLevel( obj );
+        
+        function matUpdateWetDryState(obj, fphys)
+            for m = 1:obj.Nmesh
+                wetflag = all( fphys{m}(:,:,1) > obj.hcrit );
+                obj.mesh2d(m).status( ~wetflag ) = int8( enumSWERegion.Dry );
+                obj.mesh2d(m).status(  wetflag ) = int8( enumSWERegion.Wet );
+            end
+        end
     end
     
     % ======================================================================
     methods ( Hidden, Abstract ) % Abstract function, hidden
         %> abstract function to evaluate volume flux term
         [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );
-        
     end
     % ======================================================================
-    % ======================================================================
-    methods ( Abstract, Access = protected )
-        %> determine wetting and drying status
-         matEvaluatePostFunc(obj, fphys);
-    end
-    % ======================================================================    
+    
     
     methods( Access = protected )
         
@@ -117,6 +144,11 @@ classdef SWEAbstract3d < NdgPhysMat
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
             end
         end
+        
+        function   [ fphys ] = matEvaluatePostFunc(obj, fphys)
+            obj.matUpdateWetDryState(fphys);
+        end
+        
     end
     
     methods ( Access = protected )
@@ -128,43 +160,21 @@ classdef SWEAbstract3d < NdgPhysMat
         matUpdateOutputResult( obj, time, fphys2d, fphys );
         
         matUpdateFinalResult( obj, time, fphys2d, fphys );
-        
-        matEvaluate2dHorizonMomentum(obj, mesh3d, fphys);
-        
-        [ VolumeTerm_rhs2d ] = matEvaluate2dHorizonPCEVolumeTerm( obj, mesh2d );
-        
-        [ InnerSurface_rhs2d ] = matEvaluate2dHorizonPCEInnerSurfaceTerm( obj, InnerEdge);
-        
-        [ BoundarySurface_rhs2d ] = matEvaluate2dHorizonPCEBoundaryTerm( obj, BoundaryEdge, fext);
-        
-        [ fphys3d  ] = matEvaluate3dAuxiliaryVariable(  obj, mesh3d, fphys);
-        
-        [ SideSurface_rhs3d ]  = matEvaluate3dSideSurfaceTerm( obj, InnerEdge, fphys );
-        
-        [ HorizontalBoundarySurface_rhs3d ] = matEvaluate3dHorizontalBoundaryTerm( obj, BoundaryEdge, fphys, fext );
-        
-        [ SurfaceBoundary_rhs3d ] = matEvaluate3dSurfaceBoundaryTerm( obj, Edge, fphys );
-        
-        [ BottomBoundary_rhs3d ] = matEvaluate3dBottomBoundaryTerm( obj, BottomEdge, fphys);
-        
-        [ AuxialaryVariableFace_rhs3d ] = matEvaluate3dVerticalAuxialaryVariableFaceTerm( obj, mesh3d, fphys );
-        
+                                                        
         [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
-        
-        [ TermX, TermY ] = matEvaluateHorizontalPartialDerivativeTerm(obj, mesh3d, fphys);
                 
-        EddyViscositySolver = matInitEddyViscositySolver( obj );
+        matEvaluateSourceTerm( obj, fphys );
         
+        matInitEddyViscositySolver( obj );
+        
+        matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex);
+        
+        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa);
     end
     
     methods ( Sealed, Access = protected )
-        
         %> determine time interval
         [ dt ] = matUpdateTimeInterval( obj, fphys )
-        
-        %> evaluate source term
-        matEvaluateSourceTerm( obj, fphys );        
-    end    
+    end
     
 end
-

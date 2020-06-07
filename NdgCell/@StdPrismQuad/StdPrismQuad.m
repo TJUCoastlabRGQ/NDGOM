@@ -80,12 +80,12 @@ classdef StdPrismQuad < handle
             obj.Nz = Nz;
             EvaluaetNodeCoor( obj, Nh, Nz );
             
-%             [ obj.Nq, obj.rq, obj.sq, obj.tq, obj.wq ] ...
-%                 = obj.quad_coor_func( Nh, Nz );
+            [ obj.Nq, obj.rq, obj.sq, obj.tq, obj.wq ] ...
+                = obj.quad_coor_func( Nh, Nz );
             
             AssembleVandMatrix( obj );
             
-%             [ obj.Vq ] = obj.assembleQuadratureMatrix( );
+            [ obj.Vq ] = obj.assembleQuadratureMatrix( );
             [ obj.M, obj.invM ] = obj.assembleMassMatrix( );
             [ obj.Dr, obj.Ds, obj.Dt ] ...
                 = obj.nodal_derivative_func(obj.r, obj.s, obj.t);
@@ -114,7 +114,9 @@ classdef StdPrismQuad < handle
         function [ func ] = nodal_func(obj, r, s, t)
             func = zeros(numel(r), obj.Np);
             for n = 1:obj.Np
-                func(:, n) = obj.orthogonal_func(obj.N, obj.Nz, n, r, s, t);
+                fh = obj.EvaluateHorizontalOrthogonalFunc( obj.N, n, r, s );
+                fv = obj.EvaluateVerticalOrthogonalFunc( n, t );
+                func(:, n) = fh .* fv;
             end
             func = func/obj.V;
         end

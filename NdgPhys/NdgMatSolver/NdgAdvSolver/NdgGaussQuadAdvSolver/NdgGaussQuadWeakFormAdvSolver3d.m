@@ -29,16 +29,18 @@ classdef NdgGaussQuadWeakFormAdvSolver3d < NdgGaussQuadWeakFormSolver3d & ...
             end
             % evaluate inner edge
             for m = 1:phys.Nmesh
-                mesh3d = phys.mesh3d(m);
+                mesh3d = phys.meshUnion(m);
                 edge = mesh3d.InnerEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.IEFVfq{m}, fm, fp);
                 
                 %                 [ fluxM ] = phys.matEvaluateSurfFlux( edge, obj.IEnx, obj.IEny, obj.IEnz, fm );
                 %                 [ fluxP ] = phys.matEvaluateSurfFlux( edge, obj.IEnx, obj.IEny, obj.IEnz, fp );
-                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, obj.IEnx{m}, obj.IEny{m}, obj.IEnz{m}, fm, fp );
+                [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh3d, obj.IEnx{m}, obj.IEny{m}, fm(:,:,[4 1 2]), fp(:,:,[4 1 2]), edge );
                 for i = 1:phys.Nvar
-                    EdgeRHS = - ( obj.IELIFT{m} * ( obj.IEwJs{m} .* ( fluxS(:,:,i) ) ));
+                    %because only the last two numerical flux returned by
+                    %HLL Riemann solver is used here
+                    EdgeRHS = - ( obj.IELIFT{m} * ( obj.IEwJs{m} .* ( fluxS(:,:,i + 1 ) ) ));
                     phys.frhs{m}(:,:,i) = obj.matAssembleIntoRHS( edge, EdgeRHS, phys.frhs{m}(:,:,i));
                 end
                 
@@ -48,10 +50,20 @@ classdef NdgGaussQuadWeakFormAdvSolver3d < NdgGaussQuadWeakFormSolver3d & ...
                 [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, fm, fp, phys.fext3d{m} );
                 [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.BEFVfq{m}, fm, fp);
                 
-                [ fluxS ] = phys.matEvaluateSurfNumFlux( edge, obj.BEnx{m}, obj.BEny{m}, obj.BEnz{m}, fm, fp );
+                [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh3d, obj.BEnx{m}, obj.BEny{m}, fm(:,:,[4 1 2]), fp(:,:,[4 1 2]), edge );
                 for i = 1:phys.Nvar
-                    EdgeRHS = - ( obj.IELIFT{m} * ( obj.BEwJs{m} .* ( fluxS(:,:,i) ) ));
+                    EdgeRHS = - ( obj.BELIFT{m} * ( obj.BEwJs{m} .* ( fluxS(:,:,i+1) ) ));
                     phys.frhs{m}(:,:,i) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, EdgeRHS, phys.frhs{m}(:,:,i));
+                end
+
+                edge = mesh3d.BottomEdge;
+                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
+                [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.BOTFVfq{m}, fm, fp);
+                [ OmegafluxS(:,:,1) ] = obj.BOTnz{m} .* fm(:,:,1).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );
+                [ OmegafluxS(:,:,2) ] = obj.BOTnz{m} .* fm(:,:,2).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );               
+                for i = 1:phys.Nvar
+                    EdgeRHS = - ( obj.BOTLIFT{m} * ( obj.BOTwJs{m} .* ( OmegafluxS(:,:,i) ) ));
+                    phys.frhs{m}(:,:,i) = obj.matAssembleIntoRHS( edge, EdgeRHS, phys.frhs{m}(:,:,i));
                 end
                 
                 for i = 1:phys.Nvar

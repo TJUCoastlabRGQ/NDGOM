@@ -45,16 +45,16 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 obj.pzy{m} = obj.pzy{m} - ...
                     edge3d.matEvaluateStrongFormEdgeCentralRHS( FluxM_1(:,:,2), FluxP_1(:,:,2) );
                 
-%                 edge3d = mesh.BottomBoundaryEdge;
-%                 [ fm, ~ ] = edge3d.matEvaluateSurfValue( fphys3d );
+                edge3d = mesh.BottomBoundaryEdge;
+                [ fm, ~ ] = edge3d.matEvaluateSurfValue( fphys3d );
                 
                 % Actually, this is a Newmann boundary, for such a boundary
                 % the exterior value is the same with the inner boundaries,
                 % and the local flux term and the numerical flux term
                 % canceled here. 
                 
-%                 FluxM(:, :, 1) = edge3d.nz .* fm(:, :, 1);
-%                 FluxM(:, :, 2) = edge3d.nz .* fm(:, :, 2);
+                FluxM(:, :, 1) = edge3d.nz .* fm(:, :, 1);
+                FluxM(:, :, 2) = edge3d.nz .* fm(:, :, 2);
 %                 %> $|(Hu)^+ = (Hu)^-|_{\Omega = -1}$
 %                 %> $|(Hv)^+ = (Hv)^-|_{\Omega = -1}$
 %                 u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
@@ -63,9 +63,14 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 
 %                 fluxS(:,:,1) = edge3d.nz .*obj.phys.Cf{m} .* u .* Velocity;
 %                 fluxS(:,:,2) = edge3d.nz .*obj.phys.Cf{m} .* v .* Velocity; 
+                fluxS(:,:,1) = zeros(size(FluxM(:,:,1)));
+                fluxS(:,:,2) = zeros(size(FluxM(:,:,2)));
+
 %                 
-%               physObj.frhs{m} = physObj.frhs{m}...
-%                     + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+              obj.pzx{m} = obj.pzx{m}...
+                    - edge3d.matEvaluateStrongFormEdgeRHS( FluxM(:,:,1), fluxS(:,:,1) );
+              obj.pzy{m} = obj.pzy{m}...
+                    - edge3d.matEvaluateStrongFormEdgeRHS( FluxM(:,:,2), fluxS(:,:,2) );                
 %                 
 %                 
 %                 
@@ -122,17 +127,19 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 obj.pzx{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzx{m};
                 obj.pzy{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzy{m};
                 
+                tau = 1;
                 edge = mesh.BottomEdge;
                 [ fmx, fpx ] = edge.matEvaluateSurfValue( obj.pzx );
                 [ fmy, fpy ] = edge.matEvaluateSurfValue( obj.pzy );
+                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
+                fluxSx = edge.nz .* (( fmx + fpx )./2 - tau * (edge.nz .* fm(:,:,1) - edge.nz .* fp(:,:,1)));
+                fluxSy = edge.nz .* (( fmy + fpy )./2 - tau * (edge.nz .* fm(:,:,2) - edge.nz .* fp(:,:,2)));
                 fluxPx = edge.nz .* fpx; fluxPy = edge.nz .* fpy;
-                obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...
-                    edge.matEvaluateStrongFormEdgeCentralRHS( fluxMx, fluxPx );
-                obj.phys.frhs{m}(:, :, obj.rhsId(2)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(2)) + ...
-                    edge.matEvaluateStrongFormEdgeCentralRHS( fluxMy, fluxPy );
+                obj.phys.frhs{m}(:, :, obj.rhsId(1)) = obj.phys.frhs{m}(:, :, obj.rhsId(1)) - ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxPx, fluxSx );
+                obj.phys.frhs{m}(:, :, obj.rhsId(2)) = obj.phys.frhs{m}(:, :, obj.rhsId(2)) - ...
+                    edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxPy, fluxSy );
                 
                 edge = mesh.SurfaceBoundaryEdge;
                 [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
@@ -149,41 +156,39 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 
                 
                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId(1)) - ...
                     edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxSx );
                 obj.phys.frhs{m}(:, :, obj.rhsId(2)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(2)) + ...
+                    obj.phys.frhs{m}(:, :, obj.rhsId(2)) - ...
                     edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
                 
-                %only one mesh considered
-                edge = mesh.BottomBoundaryEdge;
-                [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
-                [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy );
-                fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
-                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-                
-                %> Friction to be considered in this part. For this version, the friction at the bottom is given as
-                %> '$\frac{\partial u}{\partial sigma} = \frac{H}{\miu}C_f u\sqrt(u^2+v^2)$' and 
-                %> '$\frac{\partial v}{\partial sigma} = \frac{H}{\miu}C_f v\sqrt(u^2+v^2)$'.
-                %> it's noted that '$C_f = \frac{C_d}{\rho_0}$' when we set the current version
-                %> to be the same with the FVCOM. With all of those condition, we know that
-                 %> '$\frac{\partial Hu}{\partial sigma} = \frac{H^2}{\miu}C_f u\sqrt(u^2+v^2)$' and 
-                %> '$\frac{\partial Hv}{\partial sigma} = \frac{H^2}{\miu}C_f v\sqrt(u^2+v^2)$'. We multiply this by \
-                %> '$\frac{\mu}{H^2}$' to arrive at '$\frac{\mu}{H^2}\frac{\partial Hu}{\partial sigma} = C_f u\sqrt(u^2+v^2)$'
-                %> and '$\frac{\mu}{H^2}\frac{\partial Hv}{\partial sigma} = C_f v\sqrt(u^2+v^2)$'
-                huc = mesh.cell.VCV * fphys{m}(:,mesh.Nz:mesh.Nz:mesh.mesh2d(m).K*mesh.Nz,1);
-                hvc = mesh.cell.VCV * fphys{m}(:,mesh.Nz:mesh.Nz:mesh.mesh2d(m).K*mesh.Nz,2);
-                uc = huc./fm(:,:,4); vc = hvc./fm(:,:,4); 
-                Velocity = sqrt( uc.^2 + vc.^2 );                
-                fluxSx = -1 * edge.nz .* obj.phys.Cf{m}.* uc .* Velocity;
-                fluxSy = -1 * edge.nz .* obj.phys.Cf{m}.* vc .* Velocity;
-
-                obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...
-                    edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxSx );
-                obj.phys.frhs{m}(:, :, obj.rhsId(2)) = ...
-                    obj.phys.frhs{m}(:, :, obj.rhsId(2)) + ...
-                    edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
+%                 %only one mesh considered
+%                 edge = mesh.BottomBoundaryEdge;
+%                 [ fmx, ~ ] = edge.matEvaluateSurfValue( obj.pzx );
+%                 [ fmy, ~ ] = edge.matEvaluateSurfValue( obj.pzy );
+%                 fluxMx = edge.nz .* fmx; fluxMy = edge.nz .* fmy;
+%                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+%                 
+%                 %> Friction to be considered in this part. For this version, the friction at the bottom is given as
+%                 %> '$\frac{\partial u}{\partial sigma} = \frac{H}{\miu}C_f u\sqrt(u^2+v^2)$' and 
+%                 %> '$\frac{\partial v}{\partial sigma} = \frac{H}{\miu}C_f v\sqrt(u^2+v^2)$'.
+%                 %> it's noted that '$C_f = \frac{C_d}{\rho_0}$' when we set the current version
+%                 %> to be the same with the FVCOM. With all of those condition, we know that
+%                  %> '$\frac{\partial Hu}{\partial sigma} = \frac{H^2}{\miu}C_f u\sqrt(u^2+v^2)$' and 
+%                 %> '$\frac{\partial Hv}{\partial sigma} = \frac{H^2}{\miu}C_f v\sqrt(u^2+v^2)$'. We multiply this by \
+%                 %> '$\frac{\mu}{H^2}$' to arrive at '$\frac{\mu}{H^2}\frac{\partial Hu}{\partial sigma} = C_f u\sqrt(u^2+v^2)$'
+%                 %> and '$\frac{\mu}{H^2}\frac{\partial Hv}{\partial sigma} = C_f v\sqrt(u^2+v^2)$'
+%                 u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
+%                 Velocity = sqrt( u.^2 + v.^2 );                
+%                 fluxSx = edge.nz .* obj.phys.Cf{m}.* u .* Velocity;
+%                 fluxSy = edge.nz .* obj.phys.Cf{m}.* v .* Velocity;
+% 
+%                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
+%                     obj.phys.frhs{m}(:, :, obj.rhsId(1)) + ...
+%                     edge.matEvaluateStrongFormEdgeRHS( fluxMx, fluxSx );
+%                 obj.phys.frhs{m}(:, :, obj.rhsId(2)) = ...
+%                     obj.phys.frhs{m}(:, :, obj.rhsId(2)) + ...
+%                     edge.matEvaluateStrongFormEdgeRHS( fluxMy, fluxSy );
                               
                 
             end

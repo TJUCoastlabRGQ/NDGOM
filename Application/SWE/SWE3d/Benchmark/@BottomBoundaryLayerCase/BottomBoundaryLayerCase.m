@@ -69,13 +69,19 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
-            option('EddyViscosityType') = enumEddyViscosity.GOTM;
-            option('GOTMSetupFile') = obj.GotmFile;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+%             option('EddyViscosityType') = enumEddyViscosity.GOTM;
+%             option('GOTMSetupFile') = obj.GotmFile;
+%             option('equationType') = enumDiscreteEquation.Strong;
+%             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+%             option('outputType') = enumOutputFile.VTK;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantEddyViscosityValue') = 1e-3;
+            option('ConstantVerticalEddyViscosityValue') = 0.01;
+            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Constant;
+            option('ConstantHorizontalEddyViscosityValue') = 100;
         end
         
     end
@@ -95,9 +101,9 @@ mesh2d = makeUniformTriMesh( N, ...
 cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 

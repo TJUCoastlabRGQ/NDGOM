@@ -1,5 +1,5 @@
 classdef NdgHaloEdge3d < NdgSideEdge3d
-    properties ( SetAccess = protected )
+    properties %( SetAccess = protected )
         %> face type of each edge
         ftype
         %> boundary coordinate
@@ -7,8 +7,8 @@ classdef NdgHaloEdge3d < NdgSideEdge3d
     end
 
     methods (Access = public)
-        function obj = NdgHaloEdge3d( meshUnion3d, meshId )
-            obj = obj@NdgSideEdge3d(meshUnion3d, meshId);
+        function obj = NdgHaloEdge3d( meshUnion3d, meshId, Nz )
+            obj = obj@NdgSideEdge3d(meshUnion3d, meshId, Nz);
         end
 
         %> evaluate right-hand-side for surface integral term
