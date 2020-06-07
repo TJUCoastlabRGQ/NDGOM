@@ -5,19 +5,21 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     properties
     end
     
+    methods
+        %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
+        %> return the physical field with vertical diffusion considered
+        %> @detail this function is used to calculate the right hand side corresponding to the vertical
+        %> diffusion term and return the updated physical field at each Runge-Kutta time stage
+        %> @param[in] physClass The physical solver establised
+        %> @param[in] Height The water depth
+        %> @param[in] ImplicitParameter The implicit parameter at the corresponding IMEXRK stage
+        %> @param[in] dt The time step
+        %> @param[out] fphys The physical field with vertical diffusion
+        %> considered
+        fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
+    end
+    
     methods( Access = protected )
-            %> @brief Calculating the right hand side corresponding to the vertical diffusion term and 
-            %> return the physical field with vertical diffusion considered
-            %> @detail this function is used to calculate the right hand side corresponding to the vertical
-            %> diffusion term and return the updated physical field at each Runge-Kutta time stage
-            %> @param[in] physClass The physical solver establised
-            %> @param[in] Height The water depth
-            %> @param[in] ImplicitParameter The implicit parameter at the corresponding IMEXRK stage
-            %> @param[in] dt The time step
-            %> @param[out] fphys The physical field with vertical diffusion
-            %> considered
-        fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height, ImplicitParameter, dt)
-        
         
         function matUpdatePenaltyParameter( obj, physClass, Height )
             %> @brief Evaluating the penalty parameter used to penalize the jump between adjacet cell used in IPDG for second order operator
@@ -30,8 +32,10 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             %> The formula is '$\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$'
             %> @param[in] physClass The physical solver establised
             %> @param[in] Height The water depth
+            BotEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
+            UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
             DiffusionCoefficient = obj.nv./Height.^2;
-            obj.Tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
+            obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
             P = physClass.mesh2d(1).cell.N;
             %> for tri-prisms, number of faces is 5, for quad-prism, number of face is 6
             n0 = physClass.meshUnion(1).cell.Nface;
@@ -41,11 +45,11 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                 %> The surface most face for each column
                 %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
                 for j = 2:Nz
-                    obj.Tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+                    obj.tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
                         max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
                 end
                 %> The bottom most face for each column
-                obj.Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+                obj.tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
             end
         end
     end

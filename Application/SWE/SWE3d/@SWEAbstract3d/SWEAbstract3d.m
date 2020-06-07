@@ -98,14 +98,14 @@ classdef SWEAbstract3d < NdgPhysMat
         BoundaryEdgeFluxM2d
         InnerEdgeFluxP2d
         
-        ImplicitRHS
+        ImplicitRHS3d
     end
     
     properties ( SetAccess = protected )
         %These variable are needed when time stepping
         ExplicitRHS2d = []
         ExplicitRHS3d = []
-        ImplicitRHS3d = []
+%         ImplicitRHS3d = []
         % This parameter is used to calculate the horizontal viscosity when smagorinsky model is adopted 
         SmagorinskyConstant = []
         Prantl = []

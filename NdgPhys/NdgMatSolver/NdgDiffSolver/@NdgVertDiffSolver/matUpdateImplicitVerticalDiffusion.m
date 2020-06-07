@@ -14,9 +14,10 @@ function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, H
 %> considered
 
 obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, dt, time);
-
-BottomEidM   = physClass.meshUnion(1).cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
-UpEidM     = physClass.meshUnion(1).cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
+obj.matUpdatePenaltyParameter( physClass, Height );
+BottomEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
+UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
+K = physClass.meshUnion(1).K;
 Nz = physClass.meshUnion(1).Nz;
 Np = physClass.meshUnion(1).cell.Np;
 % ImplicithuRHS3d = zeros(size(meshUnion.x));
@@ -26,7 +27,7 @@ Np = physClass.meshUnion(1).cell.Np;
 fphys = zeros( Np, physClass.meshUnion(1).K, physClass.Nvar );
 StiffMatrix     = zeros( Np*Nz, Np*Nz, physClass.Nvar );
 DiffusionCoefficient = obj.nv ./ Height.^2;
-for i =1:meshUnion.mesh2d(1).K
+for i =1:physClass.meshUnion(1).mesh2d(1).K
     %> At present, we assume the mesh is uniform in the vertical direction
     ElementalMassMatrix3d = diag(physClass.meshUnion(1).J(:,(i-1)*Nz+1)) * physClass.meshUnion(1).cell.M;
     ElementalMassMatrix2d = diag(physClass.meshUnion(1).mesh2d(1).J(:,i)) * physClass.meshUnion(1).mesh2d(1).cell.M;
@@ -40,19 +41,23 @@ for i =1:meshUnion.mesh2d(1).K
     %> Volume Integral Part
     OP11 = -Dz3d' * ElementalMassMatrix3d * LocalPhysicalDiffMatrix;
     %> Local Bottom Integral part
-    OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(2,i), OP11);
+    OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(2,i), OP11);
     %> Adjacent bottom integral part
-    OP12 = zeros(meshUnion.cell.Np);
-    OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(2,i), OP12);
+    OP12 = zeros(physClass.meshUnion(1).cell.Np);
+    OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(2,i), OP12);
     %> Boundary part, not considered here
-    [ SystemRHS(:,(i-1)*meshUnion.Nz + 1,:), SurfStiffMatrix ] = ImposeNewmannBoundaryCondition(UpEidM, physClass.SurfBoundNewmannDate(:,i),...
-        ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1)*meshUnion.Nz + 1,:));
+    [ SystemRHS(:,(i-1) * Nz + 1,:), SurfStiffMatrix ] = ImposeNewmannBoundaryCondition(UpEidM, physClass.SurfBoundNewmannDate(:,i,:),...
+        ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1) * Nz + 1,:));
     %> Assemble into the StiffMatrix, it's noted that, the diagonal part has been included by eye(Np)
-    StiffMatrix(LocalRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP11;
-    StiffMatrix(AdjacentRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP12;
-    StiffMatrix(LocalRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP11./obj.Prantl);
-    StiffMatrix(AdjacentRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP12./obj.Prantl);
-    for j = 2:meshUnion.Nz-1
+    for var = 1:2
+        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
+        StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
+    end
+    for var = 3:physClass.Nvar
+        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
+        StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+    end
+    for j = 2:physClass.meshUnion(1).Nz-1
         UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
         LocalRows    = ((j-1)*Np+1:j*Np)';
         BottomAdjacentRows = (j*Np+1:(j+1)*Np)';
@@ -63,53 +68,84 @@ for i =1:meshUnion.mesh2d(1).K
         %> Volume Integral Part
         OP11 = -Dz3d' * ElementalMassMatrix3d * LocalPhysicalDiffMatrix;
         %> Local Bottom Integral part
-        OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(j+1,i), OP11);
+        OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(j+1,i), OP11);
         %> Local Up Integral part
-        OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(j,i), OP11);
+        OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(j,i), OP11);
         %> Assemble the local integral part into the StiffMatrix
-        StiffMatrix(LocalRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP11;
-        StiffMatrix(LocalRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP11./obj.Prantl);
+        %         StiffMatrix(LocalRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP11;
+        %         StiffMatrix(LocalRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP11./obj.Prantl);
+        for var = 1:2
+            StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
+        end
+        for var = 3:physClass.Nvar
+            StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
+        end
+        
         %> The upper adjacent cell part
-        OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(j,i), OP12);
-        StiffMatrix(UpAdjacentRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP12;
-        StiffMatrix(UpAdjacentRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+        OP12 = zeros(physClass.meshUnion(1).cell.Np);
+        OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(j,i), OP12);
+        
+        for var = 1:2
+            StiffMatrix(UpAdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
+        end
+        for var = 3:physClass.Nvar
+            StiffMatrix(UpAdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+        end
+        
         %> The lower adjacent cell part
-        OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(j+1,i), OP12);
-        StiffMatrix(BottomAdjacentRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP12;
-        StiffMatrix(BottomAdjacentRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+        OP12 = zeros(Np);
+        OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(j+1,i), OP12);
+        for var = 1:2
+            StiffMatrix(BottomAdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
+        end
+        for var = 3:physClass.Nvar
+            StiffMatrix(BottomAdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+        end
     end
     %> for the bottom most cell
-    AdjacentRows = ((physClass.meshUnion(1).Nz-2)*Np+1:(physClass.meshUnion(1).Nz-1)*Np)';
-    LocalRows    = ((physClass.meshUnion(1).Nz-1)*Np+1:physClass.meshUnion(1).Nz*Np)';
-    LocalColumns = (physClass.meshUnion(1).Nz-1)*Np+1:physClass.meshUnion(1).Nz*Np;
+    AdjacentRows = ((Nz-2)*Np+1:(Nz-1)*Np)';
+    LocalRows    = ((Nz-1)*Np+1:Nz*Np)';
+    LocalColumns = (Nz-1)*Np+1:Nz*Np;
     LocalPhysicalDiffMatrix = diag(DiffusionCoefficient(:,(i-1)*Nz+Nz))*Dz3d;
     AdjacentPhysicalDiffMatrix = diag(DiffusionCoefficient(:,(i-1)*Nz+Nz-1))*Dz3d;
     %> Volume Integral Part
     OP11 = -Dz3d' * ElementalMassMatrix3d * LocalPhysicalDiffMatrix;
     %> Local Up Integral part
-    OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(Nz,i), OP11);
+    OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz,i), OP11);
     %> Impose Newmann boundary for the third to the last physical field
-    StiffMatrix(LocalRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP11./obj.Prantl);
-    [ SystemRHS(:,i*meshUnion.Nz - 1,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i),...
-        ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*meshUnion.Nz - 1,:));
+    for var = 3:physClass.Nvar
+        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
+    end
+    [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
+        ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
     %> Impose bottom boundary condition
-    [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(Nz+1,i), OP11);
+    [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz+1,i), OP11);
     %> Assemble the local integral part into the StiffMatrix
-    StiffMatrix(LocalRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP11;
+    for var = 1:2
+        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
+    end
+    
     %> The upper adjacent cell part
-    OP12 = zeros(meshUnion.cell.Np);
-    OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.Tau(Nz,i), OP12);
-    StiffMatrix(AdjacentRows(:),LocalColumns(:),1:2) = ElementalMassMatrix3d\OP12;
-    StiffMatrix(AdjacentRows(:),LocalColumns(:),3:end) = ElementalMassMatrix3d\(OP12./obj.Prantl);
-    %This part is problematic, we need to consider the date structure
+    OP12 = zeros(Np);
+    OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz,i), OP12);
+    
+    for var = 1:2
+        StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
+    end
+    for var = 3:physClass.Nvar
+        StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
+    end
+    %这一块儿有问题
     for var = 1:physClass.Nvar
-        temphuRHS = SystemRHS(:,(i-1)*physClass.meshUnion(1).Nz + 1:i*physClass.meshUnion(1).Nz,var);
-        fphys(:,(i-1)*meshUnion.Nz + 1 : i*physClass.meshUnion(1).Nz,var) = (eye(Np*Nz) - ImplicitParameter * dt * StiffMatrix(:,:,var))\temphuRHS(:);
-        physClass.ImplicitRHS3d(:,:,(var-1)*IMStage + RKIndex ) = StiffMatrix(:,:,var) * fphys(:,(i-1)*physClass.meshUnion(1).Nz + 1 : i*physClass.meshUnion(1).Nz,var)';
-        physClass.ImplicitRHS3d(:,(i-1)*physClass.meshUnion(1).Nz + 1,(var-1)*IMStage + RKIndex ) = physClass.ImplicitRHS3d(:,(i-1)*physClass.meshUnion(1).Nz + 1,(var-1)*IMStage + RKIndex ) + SurfStiffMatrix(:,:,Nvar);
-        physClass.ImplicitRHS3d(:,i*physClass.meshUnion(1).Nz - 1,(var-1)*IMStage + RKIndex ) = physClass.ImplicitRHS3d(:,i*physClass.meshUnion(1).Nz - 1,(var-1)*IMStage + RKIndex ) + BotStiffMatrix(:,:,Nvar);
+        temphuRHS = SystemRHS(:,(i-1)*Nz + 1 : i*Nz,var);
+        fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)...
+            = (eye(Np*Nz) - ImplicitParameter * dt * StiffMatrix(:,:,var))\temphuRHS(:);
+        physClass.ImplicitRHS3d( ((var-1)* ( IMStage - 1 ) + RKIndex - 1 )* K * Np + (i-1)*Nz * Np + 1 :...
+            ( (var-1) * ( IMStage - 1) + RKIndex - 1 )* K * Np + i*Nz * Np ) = ...
+            StiffMatrix(:,:,var) * fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)';
+        
+        physClass.ImplicitRHS3d(:,(i-1)*Nz + 1,(var-1) * ( IMStage - 1 ) + RKIndex ) = physClass.ImplicitRHS3d(:,(i-1)*Nz + 1,(var-1)*( IMStage - 1 ) + RKIndex ) + SurfStiffMatrix(:,:,var);
+        physClass.ImplicitRHS3d(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS3d(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var);
     end
     
 end
@@ -147,16 +183,17 @@ end
 
 function [ huRHS, huStiffMatrix ] = ImposeNewmannBoundaryCondition(eidM, BoundNewmannDate, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS)
 %> This part is negative, as this is teated explicitly
+huStiffMatrix = zeros( size( huRHS ) );
 for i = 1:size(huRHS,3)
-temphuRHS = zeros(size(huRHS(:,:,i)));
-temphuRHS(eidM) = massMatrix2d * BoundNewmannDate;
-huStiffMatrix = massMatrix3d\temphuRHS;
-% huRHS = huRHS - huStiffMatrix;
-% hvRHS = hvRHS - hvStiffMatrix;
-huRHS(:,:,i) = huRHS(:,:,i) + dt*ImplicitParameter*huStiffMatrix;
+    temphuRHS = zeros(size(huRHS(:,:,i)));
+    temphuRHS(eidM) = massMatrix2d * BoundNewmannDate(:,:,i);
+    huStiffMatrix(:,:,i) = massMatrix3d\temphuRHS;
+    % huRHS = huRHS - huStiffMatrix;
+    % hvRHS = hvRHS - hvStiffMatrix;
+    huRHS(:,:,i) = huRHS(:,:,i) + dt*ImplicitParameter*huStiffMatrix(:,:,i);
 end
 end
 
-function [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau, OP11)
-OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, 2 * Tau, OP11);
+function [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, Tau, OP11)
+OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, 2 * Tau, OP11);
 end

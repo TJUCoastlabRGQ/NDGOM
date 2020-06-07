@@ -11,7 +11,8 @@ for m = 1:obj.Nmesh
     K = obj.meshUnion(m).K;
     obj.frhs{m} = zeros( Np, K, obj.Nvar );
     %> This is used to contain the right hand side corresponding to the implicit discretization of vertical diffusion term
-    obj.ImplicitRHS{m} = zeros( Np, K, obj.Nvar );
+    %> Only one mesh considered
+%     obj.ImplicitRHS3d = zeros( Np, K, obj.Nvar );
     if ~isempty( mesh3d(m).BoundaryEdge )
         Nfp = obj.meshUnion(m).BoundaryEdge.Nfp;
         Ne = obj.meshUnion(m).BoundaryEdge.Ne;
@@ -94,8 +95,8 @@ for n = 1:obj.Nmesh
 end
 
 % we currently only consider one mesh only
-obj.BotBoundNewmannDate = zeros(size(obj.mesh2d(1).x));
-obj.SurfBoundNewmannDate = zeros(size(obj.mesh2d(1).y));
+obj.SurfBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
+obj.BotBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 
 obj.matInitEddyViscositySolver( );
 % Setup the output NetCDF file object
