@@ -39,6 +39,10 @@ srcfile = {[path, 'mxGetMeshIntegralValue.c'], ...
 libfile = {};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgMesh\@NdgExtendMesh3d\private\';
+srcfile = {[path, 'mxGetMeshIntegralValue.c']};
+libfile = {};
+FuncHandle(path, srcfile, libfile);
 % NdgEdge
 path = 'NdgEdge/@NdgInnerEdge/private/';
 srcfile = {[path, 'mxEvaluateStrongFromEdgeRHS.c'], ...

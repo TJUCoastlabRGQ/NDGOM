@@ -49,7 +49,7 @@ while( time < ftime )
         %> update the vertical velocity
         fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
-      %gai  obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
+       obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         fphys2d = obj.matEvaluatePostFunc( fphys2d );
