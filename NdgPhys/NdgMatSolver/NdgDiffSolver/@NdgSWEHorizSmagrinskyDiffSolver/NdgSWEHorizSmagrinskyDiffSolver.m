@@ -8,8 +8,8 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
     
     methods
         function obj = NdgSWEHorizSmagrinskyDiffSolver( physClass )
-            if physClass.SmagorinskyConstant == NULL
-                obj.C = 100;
+            if isempty(physClass.SmagorinskyConstant)
+                obj.C = 0.01;
             else
                 obj.C = physClass.SmagorinskyConstant;
             end
@@ -20,8 +20,7 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
     
     methods( Access = protected )
         function matUpdateViscosity( obj, physClass, hu, hv, h )
-            Area = reshape(physClass.meshUnion(1).LAV, physClass.meshUnion(1).Nz, physClass.mesh2d.K)./physClass.meshUnion(1).Nz;
-            obj.nv = 0.5 * obj.C .* Area .*...
+            obj.nv = obj.C .* bsxfun(@times, physClass.meshUnion(1).LAV./physClass.meshUnion(1).Nz ,...
                 sqrt( ( physClass.meshUnion(1).rx .* ( physClass.meshUnion(1).cell.Dr * ( hu./h )) + ...
                 physClass.meshUnion(1).sx .* ( physClass.meshUnion(1).cell.Ds * ( hu./h )) ).^2 + ...
                 0.5 * ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * ( hu./h )) + ...
@@ -29,7 +28,7 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
                 physClass.meshUnion(1).rx .* ( physClass.meshUnion(1).cell.Dr * ( hv./h )) + ...
                 physClass.meshUnion(1).sx .* ( physClass.meshUnion(1).cell.Ds * ( hv./h )) ).^2 +...
                ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * ( hv./h )) + ...
-               physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * ( hv./h ))).^2 );
+               physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * ( hv./h ))).^2 ));
         end
     end
     

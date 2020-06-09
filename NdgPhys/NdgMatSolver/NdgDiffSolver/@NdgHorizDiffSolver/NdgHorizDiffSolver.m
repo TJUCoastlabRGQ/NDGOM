@@ -49,11 +49,11 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             
             edge = physClass.meshUnion(1).BoundaryEdge;
             %             [fM, fP] = obj.matEvaluateSurfValue(edge, fphys );
-            [KappaM, KappaP] = obj.matEvaluateSurfValue(edge, Kappa );
-            obj.px(:,:,VarIndex) = obj.px(:,:,VarIndex) - obj.matEvaluateStrongFormEdgeRHS(edge, ...
-                BoundaryEdgefm .* edge.nx, BoundaryEdgefp .* edge.nx , 0.5 * (BoundaryEdgefm + BoundaryEdgefp) .* edge.nx, KappaM, KappaP);
-            obj.py(:,:,VarIndex) = obj.py(:,:,VarIndex) - obj.matEvaluateStrongFormEdgeRHS(edge, ...
-                BoundaryEdgefm .* edge.ny, BoundaryEdgefp .* edge.ny , 0.5 * (BoundaryEdgefm + BoundaryEdgefp) .* edge.ny, KappaM, KappaP);
+            [KappaM, ~] = obj.matEvaluateSurfValue(edge, Kappa );
+            obj.px(:,:,VarIndex) = obj.px(:,:,VarIndex) - edge.matEvaluateStrongFormEdgeRHS( ...
+                KappaM .* BoundaryEdgefm .* edge.nx , 0.5 * KappaM .* (BoundaryEdgefm + BoundaryEdgefp) .* edge.nx );
+            obj.py(:,:,VarIndex) = obj.py(:,:,VarIndex) - edge.matEvaluateStrongFormEdgeRHS( ...
+                KappaM .* BoundaryEdgefm .* edge.ny , 0.5 * KappaM .* (BoundaryEdgefm + BoundaryEdgefp) .* edge.ny);
         end
         
         function frhs = matCalculatePartDerivTermX(obj, physClass, pfield, Kappa, fphys, Prantl, InnerEdgefm, InnerEdgefp, BoundaryEdgefm, BoundaryEdgefp)
@@ -100,12 +100,12 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             frhs = frhs - edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS);
             
             edge = physClass.meshUnion(1).BoundaryEdge;
-            [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
+            [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.nx;
-            [ fluxP ] = pfieldP .* edge.nx;
+%             [ fluxP ] = pfieldP .* edge.nx;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
             [ fluxS ] = edge.nx .* LocalVariableM - edge.nx .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.nx - BoundaryEdgefp .* edge.nx);
-            frhs = frhs - edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS);
+            frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM,  fluxS);
         end
         
         function frhs = matCalculatePartDerivTermY(obj, physClass, pfield, Kappa, fphys, Prantl, InnerEdgefm, InnerEdgefp, BoundaryEdgefm, BoundaryEdgefp)
@@ -152,12 +152,12 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             frhs = frhs - edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS);
             
             edge = physClass.meshUnion(1).BoundaryEdge;
-            [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
+            [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.ny;
-            [ fluxP ] = pfieldP .* edge.ny;
+%             [ fluxP ] = pfieldP .* edge.ny;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
             [ fluxS ] = edge.ny .* LocalVariableM  - edge.ny .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.ny - BoundaryEdgefp .* edge.ny);
-            frhs = frhs - edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS);
+            frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
         end
     end
     

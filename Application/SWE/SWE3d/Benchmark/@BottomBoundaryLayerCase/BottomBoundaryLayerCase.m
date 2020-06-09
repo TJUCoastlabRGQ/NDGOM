@@ -12,7 +12,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         startTime = 0;
         %> final time
         finalTime = 86400;
-        hmin = 0.001;
+        hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@BottomBoundaryLayerCase','\gotmturb.nml');
     end
@@ -58,6 +58,9 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
                 fphys2d{m}(:,:,1) = -mesh2d.x *10^(-5) - fphys2d{m}(:, :, 4);
+%                 Index = ( mesh2d.x <= 0 );
+%                 fphys2d{m}(Index) = 0.15/5000 * (mesh2d.x(Index) + 5000)./5000;
+%                 fphys2d{m}(~Index) = -0.15/5000 * (mesh2d.x(~Index) - 5000)./5000;
             end
         end
         
@@ -80,8 +83,8 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
-            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Constant;
-            option('ConstantHorizontalEddyViscosityValue') = 100;
+            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('ConstantHorizontalEddyViscosityValue') = 0;
         end
         
     end
@@ -95,10 +98,10 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], 0.1*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.1*ceil(obj.ChLength/M), bctype);
 
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
@@ -106,6 +109,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

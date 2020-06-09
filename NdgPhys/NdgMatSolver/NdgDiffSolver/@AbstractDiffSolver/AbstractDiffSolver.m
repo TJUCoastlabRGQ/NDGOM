@@ -26,12 +26,11 @@ classdef AbstractDiffSolver < handle
         end
         
         function [ frhs ] = matEvaluateStrongFormEdgeRHS( obj, edge, fluxM, fluxP, fluxS, fm, fp )
-            frhs = mxEvaluateStrongFromEdgeRHS( ...
+            frhs = mxEvaluateStrongFormEdgeRHS( ...
                 edge.mesh.cell.invM, edge.M, ...
                 edge.FToE, edge.FToN1, edge.FToN2, ...
                 edge.Js, edge.mesh.J, fluxM, fluxP, fluxS, fm, fp );
-        end
-        
+        end      
     end
     
 end

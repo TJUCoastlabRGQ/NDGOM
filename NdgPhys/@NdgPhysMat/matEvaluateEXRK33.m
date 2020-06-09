@@ -16,8 +16,8 @@ visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');
 
 while( time < ftime )
-%     dt = 0.2* obj.matUpdateTimeInterval( fphys );
-    dt = 2.7;
+    dt = 0.2* obj.matUpdateTimeInterval( fphys );
+%     dt = 2.7;
     if( time + dt > ftime )
         dt = ftime - time;
     end

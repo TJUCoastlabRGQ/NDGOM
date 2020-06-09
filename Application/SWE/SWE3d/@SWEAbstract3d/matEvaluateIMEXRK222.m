@@ -32,7 +32,7 @@ while( time < ftime )
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         
         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1) * obj.ExplicitRHS2d(:,:,1) + dt * EXa(intRK+1,2) * obj.ExplicitRHS2d(:,:,2);        
-        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:));
+        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:), dt);
         %dt here is problematic
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
@@ -50,7 +50,7 @@ while( time < ftime )
         
        obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
                 % fphys2d = obj.matEvaluateLimiter( fphys2d );
-        fphys2d = obj.matEvaluatePostFunc( fphys2d );
+%         fphys2d = obj.matEvaluatePostFunc( fphys2d );
         
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )

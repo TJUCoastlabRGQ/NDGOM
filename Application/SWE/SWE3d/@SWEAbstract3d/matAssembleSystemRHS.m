@@ -1,4 +1,4 @@
-function SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa)
+function SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa, dt)
 %> @brief Function to calculate the right hand of the system corresponding to the discretization of the vertical diffusion term
 %> @details
 %> Function to calculate the right hand of the system corresponding to the discretization of the vertical diffusion term
@@ -6,14 +6,15 @@ function SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa)
 %> @param[in] SystemRHS The right hand side to be calculated and returned
 %> @param[in] EXa The coefficient corresponding to the explicit part
 %> @param[in] IMa The coefficient corresponding to the implicit part
+%> @param[in] dt The time step
 %> @param[out] SystemRHS The right hand side calculated already
 EXStage = numel(EXa);
 IMStage = numel(IMa);
 for i = 1:obj.Nvar
     SystemRHS(:,:,i) = Tempfphys(:,:,i);
 for j = 1:numel(IMa)
-     SystemRHS(:,:,i) = SystemRHS(:,:,i) + EXa(j)*obj.ExplicitRHS3d(:,:,(i-1)*EXStage+j) + ...
-         IMa(j)*obj.ImplicitRHS3d(:,:,(i-1)*IMStage+j);
+     SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(j)*obj.ExplicitRHS3d(:,:,(i-1)*EXStage+j) + ...
+         dt * IMa(j)*obj.ImplicitRHS3d(:,:,(i-1)*IMStage+j);
 end
-     SystemRHS(:,:,i) = SystemRHS(:,:,i) + EXa(EXStage) * obj.ExplicitRHS3d(:,:,(i-1)*EXStage+EXStage);
+     SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(EXStage) * obj.ExplicitRHS3d(:,:,(i-1)*EXStage+EXStage);
 end 

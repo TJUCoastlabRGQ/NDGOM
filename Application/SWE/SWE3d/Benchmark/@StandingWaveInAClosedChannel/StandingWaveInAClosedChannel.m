@@ -4,9 +4,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     
     properties ( Constant )
         %> channel length
-        hmin = 0.01;
+        hcrit = 0.01;
 %         ChLength = 100;
-        ChLength = 10;
+        ChLength = 100;
         %> channel width
         ChWidth = 6;
         %> channel depth
@@ -59,7 +59,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) =  -obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
             end
         end
         
@@ -73,12 +73,20 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;                  
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('EddyViscosityType') = enumEddyViscosity.Constant;
-            option('GOTMSetupFile') = obj.GotmFile;
+%             option('EddyViscosityType') = enumEddyViscosity.Constant;
+%             option('GOTMSetupFile') = obj.GotmFile;
+%             option('equationType') = enumDiscreteEquation.Strong;
+%             option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+%             option('outputType') = enumOutputFile.VTK;
+%             option('ConstantEddyViscosityValue') = 0;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantEddyViscosityValue') = 0;
+            option('ConstantVerticalEddyViscosityValue') = 0.01;
+            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('ConstantHorizontalEddyViscosityValue') = 1; 
+            
         end
         
     end
@@ -92,17 +100,19 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
 
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 
 end
 

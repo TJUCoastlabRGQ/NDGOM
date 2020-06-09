@@ -169,7 +169,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex);
         
-        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa);
+        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa, dt);
     end
     
     methods ( Sealed, Access = protected )

@@ -116,12 +116,12 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;                
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK45;
+            option('temporalDiscreteType') = enumTemporalDiscrete.EXRK33;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-            option('outputNcfileNum') = 20;
+            option('outputNcfileNum') = 200;
             option('outputType') = enumOutputFile.VTK;
             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
@@ -137,9 +137,9 @@ bctype = [...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 20], [0, 4*deltax], 20/deltax, 4, bctype);
+    mesh = makeUniformTriMesh(N, [0, 100], [0, 3*deltax], 100/deltax, 3, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 100], [0, 3*deltax], 100/deltax, 3, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
