@@ -135,7 +135,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
     for var = 3:physClass.Nvar
         StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
     end
-    %这一块儿有问题
+    %
     for var = 1:physClass.Nvar
         temphuRHS = SystemRHS(:,(i-1)*Nz + 1 : i*Nz,var);
         fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)...

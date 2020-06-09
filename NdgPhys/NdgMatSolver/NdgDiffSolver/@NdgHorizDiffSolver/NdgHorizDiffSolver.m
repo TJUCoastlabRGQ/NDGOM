@@ -29,7 +29,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
                 obj.M(:,:,k) = ( cell.Vq' * diag( Jq.*cell.wq ) ) * cell.Vq;
                 obj.invM(:, :, k) = inv( obj.M(:,:,k) );
             end
-        end        
+        end
         
         function matCalculateAuxialaryVariable(obj, physClass, fphys, Kappa, VarIndex, InnerEdgefm, InnerEdgefp, BoundaryEdgefm, BoundaryEdgefp)
             %> @brief Calculating the auxialary variable, i.e. the first order partial derivative of variable U
@@ -37,30 +37,43 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> the first order partial derivative  of variable U, i.e. it calculates
             %> $q_x=\Kappa\frac{\partial U}{\partial x}$ and $q_y=\Kappa\frac{\partial U}{\partial y}$
             %> @param[in] physClass The physical solver establised
-            %> @param[in] fphys The physical field to be calculated, i.e. U in the presentation 
-            %> @param[in] Kappa The diffusion coefficient 
-            %> @param[in] VarIndex The index of the calculated variable, it 
+            %> @param[in] fphys The physical field to be calculated, i.e. U in the presentation
+            %> @param[in] Kappa The diffusion coefficient
+            %> @param[in] VarIndex The index of the calculated variable, it
             %> determines the order of $q_x$ and $q_y$ to be placed in obj.px
             %> and obj.py.
             %> @param[in] InnerEdgefm The local value of fphys at InnerEdge
             %> @param[in] InnerEdgefp The adjacent value of fphys at InnerEdge
             %> @param[in] BoundaryEdgefm The local value of fphys at BoundaryEdge,
-            %> we point out that both the local value and the adjacent value at 
+            %> we point out that both the local value and the adjacent value at
             %> the boundary edge and inner edge are input from the physical solver
             %> establised, this is because these variables are frequently
             %> used in the current three-dimensional solver, and we don't
             %> want to fetch it every time when needed and also don't want to impose
             %> the boundary condition, so we choose to fetch once and store it
             %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge
+            %             for k = 1:physClass.meshUnion(1).K
+            %                 % The diffusion coeffcient has been grouped into the test
+            %                 % function, which means the massmatrix need to multiply the
+            %                 % diffusion coefficient
+            %                 obj.px(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+            %                     obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+            %                 physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
+            %                 obj.py(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+            %                     obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+            %                 physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
+            %             end
+            obj.px(:,:,VarIndex) =  permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr *  fphys ) + ...
+                physClass.meshUnion(1).sx .* ( physClass.meshUnion(1).cell.Ds *  fphys )), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
             
-            for k = 1:physClass.meshUnion(1).K
-                obj.px(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
-                    obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
-                physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
-                obj.py(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
-                    obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
-                physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
-            end
+            obj.py(:,:,VarIndex) = permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( physClass.meshUnion(1).ry .* (physClass.meshUnion(1).cell.Dr *  fphys ) + ...
+                physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds *  fphys )), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
             
             edge = physClass.meshUnion(1).InnerEdge;
             %             [fM, fP] = obj.matEvaluateSurfValue(edge, fphys );
@@ -88,40 +101,45 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> @param[in] physClass The physical solver establised
             %> @param[in] pfield Value of the first order derivative of U,
             %> this value has been contained in obj.px or obj.py, we just
-            %> need to fetch it as we need 
+            %> need to fetch it as we need
             %> @param[in] Kappa The diffusion coefficient, this is needed to
-            %> calculate the numerical flux 
-            %> @param[in] fphys The physical field to be calculated, i.e. U 
-            %> in the presentation 
+            %> calculate the numerical flux
+            %> @param[in] fphys The physical field to be calculated, i.e. U
+            %> in the presentation
             %> @param[in] Prantl The Prantl number, for conventional convection-diffusion
             %> problem, this value equals to 1, however, for salt and tempreture contained
-            %> in SWE3d, this value equals to 1.1, this value is needed here, since it 
-            %> influence Kappa and the penalty parameter. 
-            %> @param[in] InnerEdgefp The local value of fphys at InnerEdge, used to 
+            %> in SWE3d, this value equals to 1.1, this value is needed here, since it
+            %> influence Kappa and the penalty parameter.
+            %> @param[in] InnerEdgefp The local value of fphys at InnerEdge, used to
             %> calculate numerical flux
-            %> @param[in] InnerEdgefp The adjacent value of fphys at InnerEdge, used 
+            %> @param[in] InnerEdgefp The adjacent value of fphys at InnerEdge, used
             %> to calculate numerical flux
             %> @param[in] BoundaryEdgefm The local value of fphys at BoundaryEdge,
-            %> we point out that both the local value and the adjacent value at 
+            %> we point out that both the local value and the adjacent value at
             %> the boundary edge and inner edge are input from the physical solver
             %> establised, this is because these variables are frequently
             %> used in the current three-dimensional solver, and we don't
             %> want to fetch it every time when needed and also don't want to impose
             %> the boundary condition, so we choose to fetch once and store it
-            %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge            
+            %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge
             
             frhs = physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * pfield ) + ...
                 physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * pfield );
             
-            LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
-            for k = 1:physClass.meshUnion(1).K
-                LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
-                    obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
-                physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
-            end            
+%             LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
+%             for k = 1:physClass.meshUnion(1).K
+%                 LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+%                     obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+%                     physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
+%             end
+            LocalVariable = permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr *  fphys ) + ...
+                physClass.meshUnion(1).sx .* ( physClass.meshUnion(1).cell.Ds *  fphys )), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
             
-%             LocalVariable = Kappa .* ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * fphys ) + ...
-%                 physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * fphys ));
+            %             LocalVariable = Kappa .* ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * fphys ) + ...
+            %                 physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * fphys ));
             
             edge = physClass.meshUnion(1).InnerEdge;
             [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
@@ -134,7 +152,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             edge = physClass.meshUnion(1).BoundaryEdge;
             [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.nx;
-%             [ fluxP ] = pfieldP .* edge.nx;
+            %             [ fluxP ] = pfieldP .* edge.nx;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
             [ fluxS ] = edge.nx .* LocalVariableM - edge.nx .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.nx - BoundaryEdgefp .* edge.nx);
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM,  fluxS);
@@ -149,39 +167,45 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> @param[in] physClass The physical solver establised
             %> @param[in] pfield Value of the first order derivative of U,
             %> this value has been contained in obj.px or obj.py, we just
-            %> need to fetch it as we need 
+            %> need to fetch it as we need
             %> @param[in] Kappa The diffusion coefficient, this is needed to
-            %> calculate the numerical flux 
-            %> @param[in] fphys The physical field to be calculated, i.e. U 
-            %> in the presentation 
+            %> calculate the numerical flux
+            %> @param[in] fphys The physical field to be calculated, i.e. U
+            %> in the presentation
             %> @param[in] Prantl The Prantl number, for conventional convection-diffusion
             %> problem, this value equals to 1, however, for salt and tempreture contained
-            %> in SWE3d, this value equals to 1.1, this value is needed here, since it 
-            %> influence Kappa and the penalty parameter. 
-            %> @param[in] InnerEdgefp The local value of fphys at InnerEdge, used to 
+            %> in SWE3d, this value equals to 1.1, this value is needed here, since it
+            %> influence Kappa and the penalty parameter.
+            %> @param[in] InnerEdgefp The local value of fphys at InnerEdge, used to
             %> calculate numerical flux
-            %> @param[in] InnerEdgefp The adjacent value of fphys at InnerEdge, used 
+            %> @param[in] InnerEdgefp The adjacent value of fphys at InnerEdge, used
             %> to calculate numerical flux
             %> @param[in] BoundaryEdgefm The local value of fphys at BoundaryEdge,
-            %> we point out that both the local value and the adjacent value at 
+            %> we point out that both the local value and the adjacent value at
             %> the boundary edge and inner edge are input from the physical solver
             %> establised, this is because these variables are frequently
             %> used in the current three-dimensional solver, and we don't
             %> want to fetch it every time when needed and also don't want to impose
             %> the boundary condition, so we choose to fetch once and store it
-            %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge   
+            %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge
             frhs = physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * pfield ) + ...
                 physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * pfield );
             
-            LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
-            for k = 1:physClass.meshUnion(1).K
-                LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
-                    obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
-                physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
-            end
+%             LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
+%             for k = 1:physClass.meshUnion(1).K
+%                 LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+%                     obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+%                     physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
+%             end
             
-%             LocalVariable = Kappa .* ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * fphys ) + ...
-%                 physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * fphys ) );
+            LocalVariable = permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( physClass.meshUnion(1).ry .* (physClass.meshUnion(1).cell.Dr *  fphys ) + ...
+                physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds *  fphys )), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);            
+            
+            %             LocalVariable = Kappa .* ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * fphys ) + ...
+            %                 physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * fphys ) );
             edge = physClass.meshUnion(1).InnerEdge;
             [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.ny;
@@ -194,7 +218,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             edge = physClass.meshUnion(1).BoundaryEdge;
             [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.ny;
-%             [ fluxP ] = pfieldP .* edge.ny;
+            %             [ fluxP ] = pfieldP .* edge.ny;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
             [ fluxS ] = edge.ny .* LocalVariableM  - edge.ny .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.ny - BoundaryEdgefp .* edge.ny);
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
