@@ -120,6 +120,13 @@ classdef StdPrismQuad < handle
             end
             func = func/obj.V;
         end
+        
+        %> @brief Project the scalar field from the interpolation nodes to the Gauss quadrature nodes
+        %> @param[in] obj The StdCell class
+        %> @param[in] node_val The values on these interpolation nodes
+        function quad_val = project_node2quad(obj, node_val)
+            quad_val = obj.Vq * node_val;
+        end% func        
 
         %> @brief Evaluate the derivative nodal function values at points
         function [ fDr, fDs, fDt ] = nodal_derivative_func( obj, r, s, t )

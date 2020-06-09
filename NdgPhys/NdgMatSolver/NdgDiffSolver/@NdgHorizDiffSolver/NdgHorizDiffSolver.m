@@ -7,9 +7,29 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
         py
         InnerEdgeTau
         BoundaryEdgeTau
+        M
+        invM
+    end
+    
+    methods
+        function obj = NdgHorizDiffSolver( physClass )
+            obj.assembleMassMatrix( physClass.meshUnion(1) );
+        end
     end
     
     methods( Access = protected )
+        
+        function [ invM ] = assembleMassMatrix( obj, mesh )
+            cell = mesh.cell;
+            Np = cell.Np;
+            K = mesh.K;
+            invM = zeros( Np, Np, K );
+            for k = 1:K
+                Jq = cell.project_node2quad( mesh.J(:, k) );
+                obj.M(:,:,k) = ( cell.Vq' * diag( Jq.*cell.wq ) ) * cell.Vq;
+                obj.invM(:, :, k) = inv( obj.M(:,:,k) );
+            end
+        end        
         
         function matCalculateAuxialaryVariable(obj, physClass, fphys, Kappa, VarIndex, InnerEdgefm, InnerEdgefp, BoundaryEdgefm, BoundaryEdgefp)
             %> @brief Calculating the auxialary variable, i.e. the first order partial derivative of variable U
@@ -33,11 +53,14 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> the boundary condition, so we choose to fetch once and store it
             %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge
             
-            obj.px(:,:,VarIndex) = Kappa .* ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr *  fphys ) + ...
-                physClass.meshUnion(1).sx .* ( physClass.meshUnion(1).cell.Ds *  fphys ));
-            
-            obj.py(:,:,VarIndex) = Kappa .* ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * fphys ) + ...
-                physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * fphys ));
+            for k = 1:physClass.meshUnion(1).K
+                obj.px(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+                    obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+                physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));
+                obj.py(:,k,VarIndex) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+                    obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+                physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
+            end
             
             edge = physClass.meshUnion(1).InnerEdge;
             %             [fM, fP] = obj.matEvaluateSurfValue(edge, fphys );
@@ -89,8 +112,17 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             
             frhs = physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * pfield ) + ...
                 physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * pfield );
-            LocalVariable = Kappa .* ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * fphys ) + ...
-                physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * fphys ));
+            
+            LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
+            for k = 1:physClass.meshUnion(1).K
+                LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+                    obj.M(:,:,k) * ( physClass.meshUnion(1).rx(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+                physClass.meshUnion(1).sx(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
+            end            
+            
+%             LocalVariable = Kappa .* ( physClass.meshUnion(1).rx .* (physClass.meshUnion(1).cell.Dr * fphys ) + ...
+%                 physClass.meshUnion(1).sx .* (physClass.meshUnion(1).cell.Ds * fphys ));
+            
             edge = physClass.meshUnion(1).InnerEdge;
             [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.nx;
@@ -140,8 +172,16 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> @param[in] BoundaryEdgefp The adjacent value of fphys at BoundaryEdge   
             frhs = physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * pfield ) + ...
                 physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * pfield );
-            LocalVariable = Kappa .* ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * fphys ) + ...
-                physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * fphys ) );
+            
+            LocalVariable = zeros( physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K );
+            for k = 1:physClass.meshUnion(1).K
+                LocalVariable(:,k) = obj.invM(:,:,k) * diag(Kappa(:,k)) *...
+                    obj.M(:,:,k) * ( physClass.meshUnion(1).ry(:,k) .* (physClass.meshUnion(1).cell.Dr *  fphys(:,k) ) + ...
+                physClass.meshUnion(1).sy(:,k) .* ( physClass.meshUnion(1).cell.Ds *  fphys(:,k) ));            
+            end
+            
+%             LocalVariable = Kappa .* ( physClass.meshUnion(1).ry .* ( physClass.meshUnion(1).cell.Dr * fphys ) + ...
+%                 physClass.meshUnion(1).sy .* ( physClass.meshUnion(1).cell.Ds * fphys ) );
             edge = physClass.meshUnion(1).InnerEdge;
             [pfieldM, pfieldP] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.ny;

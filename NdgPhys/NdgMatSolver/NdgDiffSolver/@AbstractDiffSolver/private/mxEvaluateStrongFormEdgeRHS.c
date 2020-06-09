@@ -72,6 +72,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double *fluxM_ = fluxM + Nfp * Ne * fld;
     double *fluxP_ = fluxP + Nfp * Ne * fld;
     double *fluxS_ = fluxS + Nfp * Ne * fld;
+    double *KappaM_ = KappaM + Nfp * Ne * fld;
+    double *KappaP_ = KappaP + Nfp * Ne * fld;
 
     for (int k = 0; k < Ne; k++) {  // evaluate rhs on each edge
       const int e1 = (int)FToE[2 * k] - 1;
@@ -88,15 +90,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
       for (int n = 0; n < Nfp; n++) {
         const int sk = n + ind;
-        double dfM = KappaM[sk] * ( fluxM_[sk] - fluxS_[sk] );
-        double dfP = KappaP[sk] * ( fluxP_[sk] - fluxS_[sk] );
+        //double dfM = KappaM[sk] * ( fluxM_[sk] - fluxS_[sk] );
+        //double dfP = KappaP[sk] * ( fluxP_[sk] - fluxS_[sk] );
+        double dfM =   fluxM_[sk] - fluxS_[sk] ;
+        double dfP =   fluxP_[sk] - fluxS_[sk] ;        
         double j = Js[sk];
 
         double *mb = Mb + n * Nfp;
-
+        //each row of the edge mass matrix is multiplied by the viscosity parameter
         for (int m = 0; m < Nfp; m++) {
-          rhsM[m] += mb[m] * j * dfM;
-          rhsP[m] -= mb[m] * j * dfP;
+          rhsM[m] += KappaM[ ind + m ] * mb[m] * j * dfM;
+          rhsP[m] -= KappaP[ ind + m ] * mb[m] * j * dfP;
         }
       }
 

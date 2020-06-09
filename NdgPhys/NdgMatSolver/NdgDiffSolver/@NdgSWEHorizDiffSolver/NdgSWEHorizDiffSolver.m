@@ -6,6 +6,11 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
     end
     
     methods
+        
+        function obj = NdgSWEHorizDiffSolver( physClass )
+            obj = obj@NdgHorizDiffSolver( physClass );
+        end
+        
         function matEvaluateDiffRHS(obj, physClass, fphys)
             
             obj.matUpdateViscosity(physClass, fphys(:,:,1), fphys(:,:,2), fphys(:,:,4));

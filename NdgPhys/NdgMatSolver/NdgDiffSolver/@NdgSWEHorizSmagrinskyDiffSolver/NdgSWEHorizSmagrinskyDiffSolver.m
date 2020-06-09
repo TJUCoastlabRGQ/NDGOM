@@ -8,6 +8,7 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
     
     methods
         function obj = NdgSWEHorizSmagrinskyDiffSolver( physClass )
+            obj = obj@NdgSWEHorizDiffSolver( physClass );  
             if isempty(physClass.SmagorinskyConstant)
                 obj.C = 0.01;
             else

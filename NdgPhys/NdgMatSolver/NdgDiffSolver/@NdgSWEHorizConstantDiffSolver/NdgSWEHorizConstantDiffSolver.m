@@ -7,6 +7,7 @@ classdef NdgSWEHorizConstantDiffSolver < NdgSWEHorizDiffSolver
     
     methods
         function obj = NdgSWEHorizConstantDiffSolver( physClass )
+          obj = obj@NdgSWEHorizDiffSolver( physClass );  
           if  physClass.option.isKey('ConstantHorizontalEddyViscosityValue')
               value = physClass.getOption('ConstantHorizontalEddyViscosityValue');
               fprintf('Value of the constant horizontal eddy viscosity is set to be: %f\n',value);

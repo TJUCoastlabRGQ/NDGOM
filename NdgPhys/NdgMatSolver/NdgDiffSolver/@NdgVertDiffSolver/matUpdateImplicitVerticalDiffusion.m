@@ -152,14 +152,14 @@ end
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
-epsilon = 0;
+epsilon = -1;
 OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) - Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
-epsilon = 0;
+epsilon = -1;
 OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d;   %checked
@@ -167,14 +167,14 @@ end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-epsilon = 0;
+epsilon = -1;
 OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
 OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
 OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;    %checked
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
-epsilon = 0;
+epsilon = -1;
 OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
 OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
 OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;          %checked
