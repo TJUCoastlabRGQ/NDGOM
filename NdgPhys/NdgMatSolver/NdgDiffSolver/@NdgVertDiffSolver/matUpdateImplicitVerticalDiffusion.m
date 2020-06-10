@@ -14,6 +14,7 @@ function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, H
 %> considered
 
 obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, dt, time);
+
 obj.matUpdatePenaltyParameter( physClass, Height );
 BottomEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
 UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
