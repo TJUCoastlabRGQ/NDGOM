@@ -29,7 +29,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
             %             obj.dt = 0.02;
-            obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));
             %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
@@ -65,6 +65,19 @@ classdef WindDrivenFlow < SWEBarotropic3d
                 %water depth
                 fphys2d{m}(:,:,1) = obj.H0 .* ones(mesh2d.cell.Np, mesh2d.K);
             end
+        end
+        
+        function matUpdateExternalField( obj, time, fphys2d, fphys )
+%             obj.BotBoundNewmannDate(:,:,1)  = obj. 
+           VCV = obj.meshUnion(1).cell.VCV;
+           Nz = obj.meshUnion(1).Nz;
+           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
         end
         
         function [ option ] = setOption( obj, option )
@@ -104,10 +117,10 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
