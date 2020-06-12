@@ -140,8 +140,13 @@ classdef SWEAbstract3d < NdgPhysMat
         
         function matEvaluateTopographySourceTerm( obj, fphys )
             for m = 1:obj.Nmesh
-                obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,8);
-                obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
+                obj.frhs{m}(:,:,1) = -obj.gra .* fphys{m}(:,:,4) .* ( obj.meshUnion(m).rx .*  ( obj.meshUnion(m).cell.Dr * fphys{m}(:,:,4)) + ...
+                   obj.meshUnion(m).sx .*  ( obj.meshUnion(m).cell.Ds * fphys{m}(:,:,4)) );
+                obj.frhs{m}(:,:,2) = -obj.gra .* fphys{m}(:,:,4) .* ( obj.meshUnion(m).ry .*  ( obj.meshUnion(m).cell.Dr * fphys{m}(:,:,4)) + ...
+                   obj.meshUnion(m).sy .*  ( obj.meshUnion(m).cell.Ds * fphys{m}(:,:,4)) );
+               
+%                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,8);
+%                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
             end
         end
         
