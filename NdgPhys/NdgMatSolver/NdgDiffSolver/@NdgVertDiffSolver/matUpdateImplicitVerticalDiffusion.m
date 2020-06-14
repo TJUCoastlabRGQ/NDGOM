@@ -120,17 +120,17 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
     [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
         ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
     %% This part is used to impose Newmann boundary condition for hu and hv
-     for var = 1:2
-        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
-    end
-%     %% This part is used to impose homogeneous Dirichlet boundary condition for hu and hv
-%     %> Impose bottom boundary condition
-%     [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz+1,i), OP11);
-%     %> Assemble the local integral part into the StiffMatrix
-%     for var = 1:2
+%      for var = 1:2
 %         StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
 %     end
-%     %%
+    %% This part is used to impose homogeneous Dirichlet boundary condition for hu and hv
+    %> Impose bottom boundary condition
+    [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz+1,i), OP11);
+    %> Assemble the local integral part into the StiffMatrix
+    for var = 1:2
+        StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
+    end
+    %%
     
     %> The upper adjacent cell part
     OP12 = zeros(Np);

@@ -31,7 +31,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             %             obj.dt = 0.02;
             obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));
+            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
             %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
             %             obj.WindTaux{1}(:,Index) = 0;
             %             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
@@ -68,16 +68,16 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-%             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+% %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
+%            VCV = obj.meshUnion(1).cell.VCV;
+%            Nz = obj.meshUnion(1).Nz;
+%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1}./1000 .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
         end
         
         function [ option ] = setOption( obj, option )
@@ -94,7 +94,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantVerticalEddyViscosityValue') = 0.01;
+            option('ConstantVerticalEddyViscosityValue') = 0.03;
             option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
