@@ -11,7 +11,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 300000;
+        finalTime = 86400;
         hcrit = 0.001;
     end
     
@@ -81,7 +81,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 3000;
+            ftime = 86400;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -94,7 +94,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantVerticalEddyViscosityValue') = 0.03;
+            option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
