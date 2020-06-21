@@ -35,7 +35,8 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             BotEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
             UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
             DiffusionCoefficient = obj.nv./Height.^2;
-            obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
+%             obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
+            obj.tau = zeros( numel(BotEidM), physClass.mesh2d(1).K * ( physClass.meshUnion(1).Nz+1 ) );
             P = physClass.mesh2d(1).cell.N;
             %> for tri-prisms, number of faces is 5, for quad-prism, number of face is 6
             n0 = physClass.meshUnion(1).cell.Nface;
@@ -45,11 +46,14 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                 %> The surface most face for each column
                 %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
                 for j = 2:Nz
-                    obj.tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
-                        max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
+%                     obj.tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+%                         max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
+                    obj.tau(:, (i-1)*( physClass.meshUnion(1).Nz+1 ) + j ) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1),...
+                        DiffusionCoefficient(UpEidM, (i-1)*Nz+j));
                 end
                 %> The bottom most face for each column
-                obj.tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+%                 obj.tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+                obj.tau(:, (i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1 ) = (P+1)*(P+3)/3*n0/2*Nz*DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz);
             end
         end
     end
