@@ -74,9 +74,9 @@ while( time < ftime )
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
-    obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
-    obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
-    obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
+%     obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
+%     obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
+%     obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
     time = time + dt;
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);

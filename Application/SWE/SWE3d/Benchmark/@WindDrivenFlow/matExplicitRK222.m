@@ -41,13 +41,13 @@ while( time < ftime )
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
         [ExplicitRHS2d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1), ExplicitRHS3d(:,:,intRK+1+3)] = ...
             matCalculateExplicitRHSTerm(obj, fphys2d, fphys, obj.fext2d);
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
-        fphys2d = obj.matEvaluatePostFunc( fphys2d );
+%         fphys2d = obj.matEvaluatePostFunc( fphys2d );
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
@@ -64,7 +64,7 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+    fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
@@ -90,9 +90,9 @@ obj.matUpdateFinalResult( time, fphys2d, fphys );
 end
 
 function [ExplicitRHS2d, ExplicitHuRHS3d, ExplicitHvRHS3d] = matCalculateExplicitRHSTerm(obj, fphys2d, fphys, fext2d)
-% obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys, fext2d);
-obj.advectionSolver.evaluateAdvectionRHS( fphys );
+obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
 obj.viscositySolver.matEvaluateRHS( fphys );
+obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d );
 obj.matEvaluateSourceTerm( fphys );
 ExplicitRHS2d = obj.frhs2d{1}(:,:,1);
 ExplicitHuRHS3d = obj.frhs{1}(:,:,1);

@@ -11,7 +11,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 3000;
+
+        finalTime = 86400;
         hcrit = 0.001;
     end
     

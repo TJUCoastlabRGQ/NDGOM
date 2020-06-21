@@ -38,8 +38,10 @@ classdef NcOutput < AbstractNcOutput
         
         [ field ] = readOutputResult( obj, step );
         
-        writeResultToVtk( obj, step, field );
-        writeOutputResultToVtk( obj, step );
+%         writeResultToVtk( obj, step, field );
+        writeOutputResultAtStepToVtk( obj, step );
+        
+        writeOutputResultAtTimePointToVtk(obj, timePoint);
         
         function closeOutputFile( obj )
             obj.delete();
@@ -47,8 +49,10 @@ classdef NcOutput < AbstractNcOutput
         
         function delete( obj )
             for n = 1:numel(obj.ncid)
+               if obj.isOpen(n) ~= false
                 obj.isOpen(n) = false;
                 netcdf.close(obj.ncid(n));
+               end
             end
         end% func
         

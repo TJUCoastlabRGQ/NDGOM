@@ -43,11 +43,14 @@ classdef NcOutput3d  < NcOutput
         
         outputResult( obj, time, field2d, field3d );
         
+        [ field3d, field2d ] = readOutputResult( obj, step );
+        
         function closeOutputFile( obj )
             obj.delete();
         end
         
         function delete( obj )
+            %Problem exists when clear the solver
             for n = 1:numel(obj.ncid3d)
                 obj.isOpen(n) = false;
                 obj.isOpen3d(n) = false;

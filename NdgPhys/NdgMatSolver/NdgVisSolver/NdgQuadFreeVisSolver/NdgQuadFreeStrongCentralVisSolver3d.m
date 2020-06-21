@@ -2,9 +2,15 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
     % At present, only the vertical diffusion term is considered, both the
     % wind term and the friction term need to be added here and not the
     % source term part
+    properties( Access = protected )
+        M
+        invM
+    end
+    
     methods
         function obj = NdgQuadFreeStrongCentralVisSolver3d( phys, varId, rhsId )
             obj = obj@NdgAbstractVisSolver( phys, varId, rhsId );
+            obj.assembleMassMatrix( phys.meshUnion(1) );
         end
         
         function matEvaluateRHS( obj, fphys )
@@ -14,6 +20,20 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
     end
     
     methods ( Access = protected )
+        
+          function assembleMassMatrix( obj, mesh )
+            cell = mesh.cell;
+            Np = cell.Np;
+            K = mesh.K;
+            obj.M = zeros( Np, Np, K );
+            obj.invM = zeros( Np, Np, K );
+            for k = 1:K
+                Jq = cell.project_node2quad( mesh.J(:, k) );
+                obj.M(:,:,k) = ( cell.Vq' * diag( Jq.*cell.wq ) ) * cell.Vq;
+                obj.invM(:, :, k) = inv( obj.M(:,:,k) );
+            end
+        end
+        
         function matEvaluateAuxiVar( obj, fphys )
             matEvaluateAuxiVarVolumeKernel( obj, fphys );
             matEvaluateAuxiVarSurfaceKernel( obj, fphys );
@@ -23,23 +43,39 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
           %> This part is used to calculated the volume contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'  
             for m = 1:obj.Nmesh
                 mesh = obj.phys.meshUnion(m);
-                dfdr = mesh.cell.Dt * fphys{m}(:, :, obj.varId(1));
-                dfds = mesh.cell.Dt * fphys{m}(:, :, obj.varId(2));
-                obj.pzx{m} = mesh.tz .* dfdr;
-                obj.pzy{m} = mesh.tz .* dfds;
+%                 dfdr = mesh.cell.Dt * fphys{m}(:, :, obj.varId(1));
+%                 dfds = mesh.cell.Dt * fphys{m}(:, :, obj.varId(2));
+%                 obj.pzx{m} = mesh.tz .* dfdr;
+%                 obj.pzy{m} = mesh.tz .* dfds;
+            Kappa =  fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2;    
+            obj.pzx{m} =  permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( mesh.tz .* (mesh.cell.Dt *  fphys{m}(:,:,obj.varId(1)) ) ), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+            
+            obj.pzy{m} = permute( sum( bsxfun(@times, obj.invM, ...
+                permute( permute( Kappa .* permute( sum( bsxfun(@times, obj.M, ...
+                permute( permute( ( mesh.tz .* (mesh.cell.Dt *  fphys{m}(:,:,obj.varId(2)) ) ), [1,3,2] ), ...
+                [2,1,3] ) ), 2 ), [1,3,2]), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);                
+                
+                
             end
         end
         
         function matEvaluateAuxiVarSurfaceKernel( obj, fphys3d )
             %> This part is used to calculated the surface contribution to terms '$ pzx = \frac{\partial Hu}{\partial \sigma} and pzy = \frac{\partial Hv}{\partial \sigma}$'
+            Kappa = cell(obj.Nmesh);
             for m = 1:obj.Nmesh
+                Kappa{m} =  fphys3d{m}(:,:,5)./(fphys3d{m}(:,:,4)).^2;                
                 mesh = obj.phys.meshUnion(m);
                 edge3d = mesh.BottomEdge;
                 [ fm, fp ] = edge3d.matEvaluateSurfValue( fphys3d );
-                FluxM_1(:, :, 1) = edge3d.nz .* fm(:, :, 1);
-                FluxM_1(:, :, 2) = edge3d.nz .* fm(:, :, 2);
-                FluxP_1(:, :, 1) = edge3d.nz .* fp(:, :, 1);
-                FluxP_1(:, :, 2) = edge3d.nz .* fp(:, :, 2);
+                [ Kappam, Kappap ] = edge3d.matEvaluateSurfValue( Kappa );
+                
+                FluxM_1(:, :, 1) = edge3d.nz .* Kappam .* fm(:, :, 1);
+                FluxM_1(:, :, 2) = edge3d.nz .* Kappam .* fm(:, :, 2);
+                FluxP_1(:, :, 1) = edge3d.nz .* Kappap .* fp(:, :, 1);
+                FluxP_1(:, :, 2) = edge3d.nz .* Kappap .* fp(:, :, 2);
                 obj.pzx{m} = obj.pzx{m} - ...
                     edge3d.matEvaluateStrongFormEdgeCentralRHS( FluxM_1(:,:,1), FluxP_1(:,:,1) );
                 obj.pzy{m} = obj.pzy{m} - ...
@@ -53,8 +89,9 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 % and the local flux term and the numerical flux term
                 % canceled here. 
                 
-                FluxM(:, :, 1) = edge3d.nz .* fm(:, :, 1);
-                FluxM(:, :, 2) = edge3d.nz .* fm(:, :, 2);
+                [ Kappam, ~ ] = edge3d.matEvaluateSurfValue( Kappa );                
+                FluxM(:, :, 1) = edge3d.nz .* Kappam .* fm(:, :, 1);
+                FluxM(:, :, 2) = edge3d.nz .* Kappam .* fm(:, :, 2);
 %                 %> $|(Hu)^+ = (Hu)^-|_{\Omega = -1}$
 %                 %> $|(Hv)^+ = (Hv)^-|_{\Omega = -1}$
 %                 u = fm(:,:,1)./fm(:,:,4); v = fm(:,:,2)./fm(:,:,4); 
@@ -111,11 +148,9 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 mesh = obj.phys.meshUnion(m);
                 
                 obj.phys.frhs{m}(:, :, 1) = obj.phys.frhs{m}(:, :, 1) + ...
-                    mesh.rz .* (mesh.cell.Dr * obj.pzx{m}) + mesh.sz .* (mesh.cell.Ds * obj.pzx{m})...
-                    + mesh.tz .* (mesh.cell.Dt * obj.pzx{m});
+                    mesh.tz .* (mesh.cell.Dt * obj.pzx{m});
                 obj.phys.frhs{m}(:, :, 2) = obj.phys.frhs{m}(:, :, 2) + ...
-                    mesh.rz .* (mesh.cell.Dr * obj.pzy{m}) + mesh.sz .* (mesh.cell.Ds * obj.pzy{m})...
-                    + mesh.tz .* (mesh.cell.Dt * obj.pzy{m});
+                     mesh.tz .* (mesh.cell.Dt * obj.pzy{m});
             end
         end% func
         
@@ -124,8 +159,8 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 mesh = obj.phys.meshUnion(m);
                 %> Before here, pzx is equal to '$\frac{\partial hu}{\partial \sigma}$' and pzy '$\frac{\partial hv}{\partial \sigma}$'
                 %> for the subsequent calculation, they are firstly multiplied by '$\frac{\mu}{H^2}$'
-                obj.pzx{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzx{m};
-                obj.pzy{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzy{m};
+%                 obj.pzx{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzx{m};
+%                 obj.pzy{m} = fphys{m}(:,:,5)./(fphys{m}(:,:,4)).^2 .*  obj.pzy{m};
                 
                 tau = 1;
                 edge = mesh.BottomEdge;
@@ -151,8 +186,8 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
                 %> Compared the wind stress in our study with that in FVCOM, the FVCOM version is recovered
                 %> by multiplying the stess with \frac{1}{\rho_0}
                 
-                fluxSx = edge.nz .* obj.phys.WindTaux{m};
-                fluxSy = edge.nz .* obj.phys.WindTauy{m};
+                fluxSx = edge.nz .* obj.phys.SurfBoundNewmannDate(:,:,1);
+                fluxSy = edge.nz .* obj.phys.SurfBoundNewmannDate(:,:,2);
                 
                 
                 obj.phys.frhs{m}(:, :, obj.rhsId(1)) = ...
