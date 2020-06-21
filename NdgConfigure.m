@@ -348,7 +348,6 @@ path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@AbstractDiffSolver\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
 libfile = {};
 srcfile = { ...
-    [path, 'mxEvaluateStrongFormEdgeRHS.c'],...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 

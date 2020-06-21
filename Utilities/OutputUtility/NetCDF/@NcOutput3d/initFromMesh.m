@@ -4,7 +4,7 @@ function initFromMesh( obj, physMat, filename2d, filename3d, outputIntervalNum, 
 % ( physMat, mesh2d, mesh3d, casename2d,  Nfield2d, Nfield3d, dt, varIndex2d, varIndex3d )
 % obj.vtkOutput = VtkOutput2d(physMat, obj.mesh, obj.casename, obj.Nfield, obj.timeInterval, varIndex2d);
 obj.vtkOutput3d = VtkOutput3d( physMat, obj.mesh, obj.mesh3d, obj.casename, obj.Nfield, obj.Nfield3d, obj.timeInterval, varIndex2d, varIndex3d);
-% obj.vtkOutput.initFromMesh( mesh );
+obj.vtkOutput3d.initFromMesh( obj.mesh, obj.mesh3d );
 
 dimTime = NdgNcDim('Nt', 0);
 dimK2 = NdgNcDim('K2d', obj.mesh.K);
@@ -17,7 +17,7 @@ dimNfield3 = NdgNcDim('Nfield3d', numel( varIndex3d ) );
 
 % define variable
 varTime = NdgNcVar('time', dimTime, enumNcData.NC_DOUBLE );
-varField2 = NdgNcVar('fphys2d', ...
+varField2 = NdgNcVar('fphys', ...
     [ dimNp2, dimK2, dimNfield2, dimTime], ...
     enumNcData.NC_DOUBLE);
 

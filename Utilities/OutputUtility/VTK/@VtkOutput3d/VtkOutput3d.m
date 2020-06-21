@@ -47,6 +47,10 @@ classdef VtkOutput3d < VtkOutput2d
             end
         end
         
+        function outputStepResult( obj, field2d, field3d )
+            obj.outputResult( [], field2d, field3d );
+        end
+        
         function outputFinalResult( obj, time, field2d, field3d )
             obj.outputResult( time, field2d, field3d);
         end        

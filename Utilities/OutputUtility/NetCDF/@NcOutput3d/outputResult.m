@@ -2,6 +2,10 @@ function outputResult( obj, time, field2d, field3d )
 
 outputResult@NcOutput(obj, time, field2d);
 
+startInd = obj.outputStep3d;
+countInd = 1;
+netcdf.putVar(obj.ncid3d(obj.fileOrder3d), obj.timeVarableId, startInd, countInd, time);
+
 % output physical field
 startInd = [ 0, 0, 0, obj.outputStep3d ];
 countInd = [ obj.mesh3d.cell.Np, obj.mesh3d.K, obj.Nfield3d, 1 ];

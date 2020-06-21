@@ -36,6 +36,5 @@ end
 
 fclose(fp);
 
-
 obj.outputStep3d = obj.outputStep3d + 1;
 end
