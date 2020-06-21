@@ -3,14 +3,15 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
     %   此处显示详细说明
     
     properties(Constant)
-        amplitude = 0.25
-        H0 = 30
+        amplitude = 0.5
+        H0 = 10
         hcrit = 0.01;
         T = 12*3600
 %         omega = 2*pi/12/3600
-        ChLength = 24000
-        ChWidth = 2000
-        
+        ChLength = 3400
+        ChWidth = 200
+        startTime = 0
+        finalTime = 60*3600
     end
     
     properties
@@ -23,29 +24,21 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3];
-            obj.outputFieldOrder = [ 1 2 3 4];
+            obj.outputFieldOrder = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            obj.Cf{1} = 0;
-            obj.WindTaux{1} = zeros(size(obj.mesh2d(1).x));
-            obj.WindTauy{1} = zeros(size(obj.mesh2d(1).y));            
-%             obj.Cf{1} = 0.0025/1000;
+            obj.Cf{1} = 0;         
         end
         
     end
     
     methods(Access = protected)
-
-        function WaveCharacterEstimate(obj)
-            f = @(L) L - obj.gra*(obj.T)^2/(2*pi)*tanh(2*pi/L*obj.Depth);
-            obj.Length = fzero(f,[0.01 20000000]);
-        end
         
         function matUpdateExternalField( obj, time, ~, ~ )
             
-            obj.fext2d{1}( :, :, 1 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
-            obj.fext3d{1}( :, :, 4 ) = obj.amplitude * sin(2*pi/obj.T*time )+obj.H0;
+            obj.fext2d{1}( :, :, 1 ) = obj.amplitude * cos(2*pi/obj.T*time + pi/2 )+obj.H0;
+            obj.fext3d{1}( :, :, 4 ) = obj.amplitude * cos(2*pi/obj.T*time + pi/2 )+obj.H0;
             
         end
         
@@ -65,20 +58,22 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
         end        
         
         function [ option ] = setOption( obj, option )
-            ftime = 21600;
-            outputIntervalNum = 1500;
+            ftime = 60*3600;
+            outputIntervalNum = 3000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;                  
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
-            option('EddyViscosityType') = enumEddyViscosity.Constant;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantEddyViscosityValue') = 0;
+            option('ConstantVerticalEddyViscosityValue') = 0.03;
+            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('ConstantHorizontalEddyViscosityValue') = 100;
         end
         
     end
@@ -93,15 +88,15 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.ClampedDepth ];
 
-mesh2d = makeUniformTriMesh(N, [0, obj.ChLength],...
+mesh2d = makeUniformQuadMesh(N, [0, obj.ChLength],...
     [-obj.ChWidth/2, obj.ChWidth/2], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 

@@ -186,7 +186,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matUpdateFinalResult( obj, time, fphys2d, fphys );
                                                         
-        [ fphys3d ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
+        [ Omega, w ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
                 
         matEvaluateSourceTerm( obj, fphys );
         

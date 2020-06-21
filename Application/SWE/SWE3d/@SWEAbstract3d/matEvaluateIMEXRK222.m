@@ -47,7 +47,7 @@ while( time < ftime )
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
+       [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
 
@@ -70,7 +70,7 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
+    [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
