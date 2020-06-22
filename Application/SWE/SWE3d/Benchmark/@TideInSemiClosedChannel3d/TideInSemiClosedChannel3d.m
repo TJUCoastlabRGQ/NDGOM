@@ -71,7 +71,7 @@ classdef TideInSemiClosedChannel3d < SWEBarotropic3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantVerticalEddyViscosityValue') = 0.03;
+            option('ConstantVerticalEddyViscosityValue') = 0;
             option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end

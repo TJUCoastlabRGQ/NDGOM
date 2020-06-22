@@ -32,8 +32,8 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             %> time interval
             obj.dt = 0.6;
             obj.Cf{1} = 0*ones(size(obj.mesh2d.x));
-%             obj.Cf{1} = 0.0025/1000;
-%             obj.Cf{1} = 0.0025;
+            %             obj.Cf{1} = 0.0025/1000;
+            %             obj.Cf{1} = 0.0025;
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -55,12 +55,12 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) = -obj.H0;                
+                fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
                 fphys2d{m}(:,:,1) = -mesh2d.x *10^(-5) - fphys2d{m}(:, :, 4);
-%                 Index = ( mesh2d.x <= 0 );
-%                 fphys2d{m}(Index) = 0.15/5000 * (mesh2d.x(Index) + 5000)./5000;
-%                 fphys2d{m}(~Index) = -0.15/5000 * (mesh2d.x(~Index) - 5000)./5000;
+                %                 Index = ( mesh2d.x <= 0 );
+                %                 fphys2d{m}(Index) = 0.15/5000 * (mesh2d.x(Index) + 5000)./5000;
+                %                 fphys2d{m}(~Index) = -0.15/5000 * (mesh2d.x(~Index) - 5000)./5000;
             end
         end
         
@@ -71,14 +71,15 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 1;                  
+            option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-%             option('EddyViscosityType') = enumEddyViscosity.GOTM;
-%             option('GOTMSetupFile') = obj.GotmFile;
-%             option('equationType') = enumDiscreteEquation.Strong;
-%             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-%             option('outputType') = enumOutputFile.VTK;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
+            %             option('EddyViscosityType') = enumEddyViscosity.GOTM;
+            %             option('GOTMSetupFile') = obj.GotmFile;
+            %             option('equationType') = enumDiscreteEquation.Strong;
+            %             option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            %             option('outputType') = enumOutputFile.VTK;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.GOTM;
+            option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;

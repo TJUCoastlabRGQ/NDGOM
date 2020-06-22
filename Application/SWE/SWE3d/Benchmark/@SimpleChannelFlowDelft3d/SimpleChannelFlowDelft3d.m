@@ -1,53 +1,31 @@
-classdef WindDrivenFlow < SWEBarotropic3d
-    %WINDDRIVENFLOW 此处显示有关此类的摘要
+classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
+    %SIMPLECHANNELFLOWDELFT3D 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties ( Constant )
         %> channel length
-        ChLength = 2000;
-        ChWidth = 300;
-        %> channel depth
-        H0 = 10;
-        %> start time
+        ChLength = 10000;
+        ChWidth = 2000;
         startTime = 0;
         %> final time
 
-        finalTime = 3000;
+        finalTime = 7200;
         hcrit = 0.001;
-    end
-    
-    properties
-        dt
+        % to be corrected
+        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@SimpleChannelFlowDelft3d','\gotmturb.nml');        
     end
     
     methods
-        function obj = WindDrivenFlow( N, Nz, M, Mz )
+        function obj = SimpleChannelFlowDelft3d( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
-            obj.outputFieldOrder = [ 1 2 3 10];
+            obj.outputFieldOrder = [ 1 2 3 4 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            %> time interval
-            %             obj.dt = 0.02;
-            obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
-            %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             obj.Cf{1} = 0.0025/1000;
-        end
-        
-        matExplicitRK222(obj);
-        
-        
-        EntropyAndEnergyCalculation(obj);
-        
-        AnalysisResult2d( obj );
-        AnalysisResult3d( obj );
-        
+            obj.Cf{1} = zeros(size(obj.Cf{1}));
+        end        
     end
     
     methods ( Access = protected )
@@ -62,9 +40,10 @@ classdef WindDrivenFlow < SWEBarotropic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) = -obj.H0;
+                fphys2d{m}(:, :, 4) =  0.0001 * mesh2d.x;
                 %water depth
-                fphys2d{m}(:,:,1) = obj.H0 .* ones(mesh2d.cell.Np, mesh2d.K);
+                fphys2d{m}(:,:,1) = 2.89677 + 0.0001 * (10000-mesh2d.x);
+%                  fphys2d{m}(:,:,1) = 2.89677;
             end
         end
         
@@ -78,12 +57,30 @@ classdef WindDrivenFlow < SWEBarotropic3d
            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+               (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+           
+           hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
+           hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
+           h3d = zeros(size(obj.fext3d{1}(:,:,1)));
+           h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+           Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+           hu3d(:,Index) = 5;
+           obj.fext3d{1}(:,:,1) = hu3d;
+           Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+           h3d(:,Index) = 2.89677;
+           obj.fext3d{1}(:,:,4) = h3d;
+           
+           Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+           hu2d(:,Index) = 5;
+           obj.fext2d{1}(:,:,2) = hu2d;
+           Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+           h2d(:,Index) = 2.89677;
+           obj.fext2d{1}(:,:,1) = h2d;
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 3000;
-            outputIntervalNum = 1500;
+            ftime = 7200;
+            outputIntervalNum = 3000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -91,35 +88,31 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.GOTM;
+            option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('outputType') = enumOutputFile.NetCDF;
+            option('outputType') = enumOutputFile.VTK;
             option('ConstantVerticalEddyViscosityValue') = 0.03;
             option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
         
-    end
+    end    
     
 end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
-% bctype = [ ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.ZeroGrad, ...
-%     enumBoundaryCondition.ZeroGrad ];
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.ClampedDepth ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+    [ 0, obj.ChLength], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

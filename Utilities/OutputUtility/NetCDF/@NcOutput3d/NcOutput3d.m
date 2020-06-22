@@ -52,10 +52,12 @@ classdef NcOutput3d  < NcOutput
         function delete( obj )
             %Problem exists when clear the solver
             for n = 1:numel(obj.ncid3d)
+                if obj.isOpen(n)~=false || obj.isOpen3d(n) ~= false
                 obj.isOpen(n) = false;
                 obj.isOpen3d(n) = false;
                 netcdf.close(obj.ncid(n));
                 netcdf.close(obj.ncid3d(n));
+                end
             end
         end% func
         

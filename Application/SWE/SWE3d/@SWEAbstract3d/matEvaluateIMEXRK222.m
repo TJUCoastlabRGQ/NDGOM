@@ -62,6 +62,11 @@ while( time < ftime )
     for i = 1:obj.Nvar
         fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS3d(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS3d(:,:,(i-1)*3+2)+...
             dt * EXb(3) * obj.ExplicitRHS3d(:,:,(i-1)*3+3) + dt * IMb(1) * obj.ImplicitRHS3d(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS3d(:,:,(i-1)*2+2);
+        if(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+1)) > 1e-10))
+            fprintf('Nonzero element contained\n');
+        elseif(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+2)) > 1e-10))
+            fprintf('Nonzero element contained\n');
+        end
     end
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
