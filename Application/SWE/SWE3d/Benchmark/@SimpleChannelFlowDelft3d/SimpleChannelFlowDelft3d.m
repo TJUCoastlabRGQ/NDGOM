@@ -88,7 +88,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.GOTM;
+            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
