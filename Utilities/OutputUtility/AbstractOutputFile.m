@@ -6,10 +6,10 @@ classdef AbstractOutputFile < handle
         mesh
         Nfield
         casename
-        outputTime
+        %         outputTime
         varIndex
     end
-
+    
     properties
         timeInterval
         timePrevious
@@ -17,7 +17,7 @@ classdef AbstractOutputFile < handle
     end
     
     methods
-        function obj = AbstractOutputFile( mesh, casename, Nfield, timeInterval, varIndex ) 
+        function obj = AbstractOutputFile( mesh, casename, Nfield, timeInterval, varIndex )
             obj.mesh = mesh;
             obj.Nfield = Nfield;
             obj.casename = casename;
@@ -26,8 +26,8 @@ classdef AbstractOutputFile < handle
             obj.outputStep = 0;
             obj.varIndex = varIndex;
         end
-
-        %> output 
+        
+        %> output
         function outputIntervalResult( obj, time, field )
             if ( time - obj.timePrevious ) > obj.timeInterval
                 obj.outputResult( time, field );

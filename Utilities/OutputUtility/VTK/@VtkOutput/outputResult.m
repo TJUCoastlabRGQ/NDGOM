@@ -1,11 +1,11 @@
-function outputResult(obj, time, field)
+function outputResult(obj, field)
 %outputResult - Description
 %
 % Syntax: outputResult(obj, time, field)
 %
 % Long description
     
-filename = [ obj.casename, '/2d/', obj.casename, '.', ...
+filename = [ obj.folderName, obj.casename, '.', ...
 num2str(obj.outputStep, '%04d'), '.vtk' ];
 fp = fopen(filename, 'w');
 
@@ -28,7 +28,7 @@ fprintf(fp, dataFormat, obj.ctype);
 fprintf(fp, '\n\nPOINT_DATA %d\n', obj.Npoint);
 
 for i = 1:size(field,3)
-    fprintf(fp, ['SCALARS  ', obj.varName2d{i}, '  double\n']);
+    fprintf(fp, ['SCALARS  ', obj.varName{i}, '  double\n']);
     fprintf(fp, 'LOOKUP_TABLE default\n');
     fprintf(fp, '%20.12f \n', field(:,:,i));
 end

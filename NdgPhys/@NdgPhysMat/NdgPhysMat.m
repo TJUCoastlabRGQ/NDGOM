@@ -13,12 +13,6 @@ classdef NdgPhysMat < NdgPhys
         frhs
     end
     
-    properties (Abstract)
-        %> order of the field to be written in the output file     
-        outputFieldOrder
-        
-    end
-    
     properties( SetAccess = protected )
         %> cell array for external value fields
         fext
@@ -145,7 +139,7 @@ classdef NdgPhysMat < NdgPhys
         fphys = matEvaluateLimiter( obj, fphys )
         fphys = matEvaluatePostFunc( obj, fphys )
         
-        outputObj = matInitOutput( obj )
+        outputObj = matInitOutput( obj, fileName, mesh )
         
         %> @brief
         matUpdateOutputResult( obj, time, step, fphys )

@@ -40,5 +40,15 @@ function [ Np, Ncell, Ncon, EToV, ctype ] = InitSubConnect( mesh )
         Np = 4;
         Ncon = 4 + 1;
         ctype = enumVtkCell.VTK_QUAD;
+    elseif ( mesh.cell.type == enumStdCell.PrismTri )
+        [ Ncell, EToV ] = InitPrismTriConnect3d( mesh.cell.N, mesh.cell.Nz );
+        Np = 6;
+        Ncon = Np + 1;
+        ctype = enumVtkCell.VTK_WEDGE;
+    elseif ( mesh.cell.type == enumStdCell.PrismQuad )
+        [ Ncell, EToV ] = InitPrismQuadConnect3d( mesh.cell.N, mesh.cell.Nz );
+        Np = 8;
+        Ncon = Np + 1;
+        ctype = enumVtkCell.VTK_HEXAHEDRON;
     end
 end

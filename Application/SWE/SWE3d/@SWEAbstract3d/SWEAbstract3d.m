@@ -10,6 +10,8 @@ classdef SWEAbstract3d < NdgPhysMat
     properties ( Abstract )
         %> field to be put in the output file
         outputFieldOrder2d
+        
+        outputFieldOrder3d
     end
     
     properties( SetAccess = protected )
@@ -56,7 +58,9 @@ classdef SWEAbstract3d < NdgPhysMat
         mesh3d
         %> linear slip parameter
         K
+        outputFile3d
         %> output file object
+        outputFile2d
     end
     
     properties

@@ -25,7 +25,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
         %> the 2d field to be put in the output file
         outputFieldOrder2d =  1
         %> the 3d field to be put in the output file
-        outputFieldOrder = [1 2 3]
+        outputFieldOrder3d = [1 2 3]
     end
     
     methods( Hidden )

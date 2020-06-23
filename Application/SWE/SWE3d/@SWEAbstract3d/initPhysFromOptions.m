@@ -101,5 +101,6 @@ obj.BotBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 obj.matInitEddyViscositySolver( );
 % Setup the output NetCDF file object
 % initOutput( obj, mesh2d, mesh3d );
-obj.outputFile = obj.matInitOutput;
+obj.outputFile3d = obj.matInitOutput(mesh3d, obj.fieldName3d);
+obj.outputFile2d = obj.matInitOutput(mesh2d, obj.fieldName2d);
 end

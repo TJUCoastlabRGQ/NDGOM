@@ -5,7 +5,6 @@ classdef NcOutput < AbstractNcOutput
         ncfile
         timeVarableId
         fieldVarableId
-        filename
         vtkOutput
     end
     
@@ -17,7 +16,7 @@ classdef NcOutput < AbstractNcOutput
         %> Number of the nc files
         Numfile
         %> file name of NetCDF file
-        fileName
+        filename
         %> true for file is open
         isOpen
         %> ID of ncfile
@@ -32,7 +31,7 @@ classdef NcOutput < AbstractNcOutput
         end
         
         %> create NetCDF output file
-        initFromMesh( obj, physMat, mesh, fileName, outputIntervalNum, varIndex );
+        initFromMesh( obj, mesh, filename, casename, outputIntervalNum, Nfield, VarIndex, fieldName, dt );
         %> output result
         outputResult( obj, time, field );
         
@@ -43,7 +42,7 @@ classdef NcOutput < AbstractNcOutput
         
         writeOutputResultAtTimePointToVtk(obj, timePoint);
         
-        function closeOutputFile( obj )
+        function closeOutputFile(obj)
             obj.delete();
         end
         
@@ -70,9 +69,9 @@ classdef NcOutput < AbstractNcOutput
         %> The merge output result is to be added here
         function mergeOutputResult(obj)
             %> open netcdf file first
-            for i = 1:numel(obj.fileName)
+            for i = 1:numel(obj.filename)
                 if obj.isOpen(i) == false
-                    obj.ncid(i) = netcdf.open( obj.fileName{i}, 'WRITE');
+                    obj.ncid(i) = netcdf.open( obj.filename{i}, 'WRITE');
                     obj.isOpen(i) = true;
                 end
             end
@@ -80,7 +79,7 @@ classdef NcOutput < AbstractNcOutput
             for i = 2:numel(obj.fileName)
                 Time = netcdf.getVar(obj.ncid(i),0);
                 %                 field = netcdf.getVar(obj.ncfile.ncid(i),1);
-                Info = ncinfo(obj.fileName{i});
+                Info = ncinfo(obj.filename{i});
                 for n = 1:numel(Time)
                     startInd = obj.outputStep;
                     countInd = 1;
@@ -105,7 +104,7 @@ classdef NcOutput < AbstractNcOutput
         end
         
         function defineIntoNetcdfFile( obj, index )
-            obj.ncid(index) = netcdf.create( obj.fileName{index}, 'CLOBBER');
+            obj.ncid(index) = netcdf.create( obj.filename{index}, 'CLOBBER');
             obj.isOpen(index) = true;
             for n = 1:numel(obj.ncfile.ncDim)
                 obj.ncfile.ncDim(n).defineIntoNetcdfFile( obj.ncid(index) );

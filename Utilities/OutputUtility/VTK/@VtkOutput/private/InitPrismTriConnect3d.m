@@ -1,4 +1,4 @@
-function [ Ncell, EToV ] = InitPrismTriConnect2d( N, Nz )
+function [ Ncell, EToV ] = InitPrismTriConnect3d( N, Nz )
     
     Np = ( N + 1 ) * ( N + 2 ) / 2;
     Ncell = N ^ 2 * Nz;

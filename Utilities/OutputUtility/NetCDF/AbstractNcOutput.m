@@ -14,9 +14,7 @@ classdef AbstractNcOutput < AbstractOutputFile
     methods(Abstract)
         
         initFromMesh( obj, mesh, fileName, outputIntervalNum, varIndex );
-        
-        closeOutputFile( obj );
-        
+                
         outputResult( obj, time, field );
         
     end

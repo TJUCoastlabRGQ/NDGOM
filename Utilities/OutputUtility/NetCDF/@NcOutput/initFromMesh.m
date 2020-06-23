@@ -1,5 +1,5 @@
-function initFromMesh( obj, filename, outputIntervalNum, varIndex )
-
+function initFromMesh( obj, mesh, filename, casename, outputIntervalNum, OutputFieldNum, VarIndex, fieldname, dt )
+% ( mesh, filename, casename, outputIntervalNum, OutputFieldNum, varIndex, fieldName )
 % % set vtk output
 % if (obj.mesh.type == enumMeshDim.One)
 %     obj.vtkOutput = VtkOutput1d(obj.casename, obj.Nfield, obj.timeInterval);
@@ -11,10 +11,13 @@ function initFromMesh( obj, filename, outputIntervalNum, varIndex )
 
 % obj.vtkOutput.initFromMesh( mesh );
 
+obj.vtkOutput = VtkOutput( mesh, fieldname, casename, OutputFieldNum, dt, VarIndex );
+obj.vtkOutput.initFromMesh( mesh );
+
 % define dimension
 dimTime = NdgNcDim('Nt', 0);
-dimK = NdgNcDim('K', obj.mesh.K);
-dimNp = NdgNcDim('Np', obj.mesh.cell.Np);
+dimK = NdgNcDim('K', mesh.K);
+dimNp = NdgNcDim('Np', mesh.cell.Np);
 dimNfield = NdgNcDim('Nvar', obj.Nfield);
 % dimNfield = NdgNcDim('Nvar', 6);
 % define variable
@@ -26,22 +29,18 @@ obj.ncid = zeros(size(filename));
 obj.isOpen = false * ones(size(filename));
 obj.fileOrder = 1;
 obj.Numfile = numel(filename);
-obj.fileName = filename;
+obj.filename = filename;
 % define file
 % obj.filename = [ obj.casename, '/', obj.casename, '.nc' ];
 obj.ncfile = NdgNcFile( obj, ...
     [dimTime, dimK, dimNp, dimNfield], [varTime, varField]);
 
-if floor(outputIntervalNum/numel(obj.fileName))<1
-    error( 'Too many output nc file!' );
-else
-    obj.StepPerFile = floor(outputIntervalNum/numel(obj.fileName));
-end
+obj.StepPerFile = ceil(outputIntervalNum/numel(obj.filename));
 
 % obj.ncfile.varIndex = varIndex;
 % init file
-for n = 1:numel(obj.fileName)
-obj.defineIntoNetcdfFile(n);
+for n = 1:numel(obj.filename)
+    obj.defineIntoNetcdfFile(n);
 end
 
 % set properties
