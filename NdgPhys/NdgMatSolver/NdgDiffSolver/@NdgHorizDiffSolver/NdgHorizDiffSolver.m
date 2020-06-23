@@ -14,7 +14,36 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
     methods
         function obj = NdgHorizDiffSolver( physClass )
             obj.assembleMassMatrix( physClass.meshUnion(1) );
+            obj.nv = 0.001 * ones(size(physClass.meshUnion(1).x));
+            obj.matUpdatePenaltyParameter( physClass );
+            %InnerEdgeTau and BoundaryEdgeTau to be calculated here when
+            %initialized
         end
+        
+        function matEvaluateDiffRHS(obj, physClass, fphys)
+            Kappa = obj.nv;
+            for i = 1:physClass.Nvar
+                obj.matCalculateAuxialaryVariable( physClass, fphys(:,:,physClass.varFieldIndex(i)), Kappa, i, ...
+                    physClass.InnerEdgefm3d{1}(:,:,physClass.varFieldIndex(i)),...
+                    physClass.InnerEdgefp3d{1}(:,:,physClass.varFieldIndex(i)), ...
+                    physClass.BoundaryEdgefm3d{1}(:,:,physClass.varFieldIndex(i)),...
+                    physClass.BoundaryEdgefp3d{1}(:,:,physClass.varFieldIndex(i)));
+            end
+            %> this part is used to calculate $\frac{\partial}{\partial x}(\nv_h \frac{\partial c}{\partial x})
+            %> + \frac{\partial}{\partial y}(\nv (\frac{\partial c}{\partial y}))$
+            for i = 1:physClass.Nvar
+            physClass.frhs{1}(:,:,i) = physClass.frhs{1}(:,:,i) + obj.matCalculatePartDerivTermX( physClass, obj.px(:,:,i),...
+                Kappa, fphys(:,:,physClass.varFieldIndex(i)), 1, physClass.InnerEdgefm3d{1}(:,:,physClass.varFieldIndex(i)), ...
+                physClass.InnerEdgefp3d{1}(:,:,physClass.varFieldIndex(i)), physClass.BoundaryEdgefm3d{1}(:,:,physClass.varFieldIndex(i)),...
+                physClass.BoundaryEdgefp3d{1}(:,:,physClass.varFieldIndex(i))) + ...
+                obj.matCalculatePartDerivTermY( physClass, obj.py(:,:,i),...
+                Kappa, fphys(:,:,physClass.varFieldIndex(i)), 1, physClass.InnerEdgefm3d{1}(:,:,physClass.varFieldIndex(i)), ...
+                physClass.InnerEdgefp3d{1}(:,:,physClass.varFieldIndex(i)), physClass.BoundaryEdgefm3d{1}(:,:,physClass.varFieldIndex(i)),...
+                physClass.BoundaryEdgefp3d{1}(:,:,physClass.varFieldIndex(i)));
+           
+            end
+       
+        end        
     end
     
     methods( Access = protected )
@@ -225,7 +254,27 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             [ fluxS ] = edge.ny .* LocalVariableM  - edge.ny .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.ny - BoundaryEdgefp .* edge.ny);
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
         end
+        
+        function matUpdatePenaltyParameter( obj, physClass )
+            %> this penalty parameter is calculated as $\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$
+            [ HnvM, HnvP ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).InnerEdge, obj.nv );
+            
+            InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
+            InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, physClass.meshUnion(1).Nz );
+            InnerEdgeTau_fm = bsxfun(@times,  ( InnerEdgeA_fm(:) )',...
+                ( physClass.meshUnion(1).cell.N + 1 )*(physClass.meshUnion(1).cell.N + ...
+                double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvM);
+            InnerEdgeTau_fp = bsxfun(@times,  ( InnerEdgeA_fp(:) )',...
+                ( physClass.meshUnion(1).cell.N + 1 )*(physClass.meshUnion(1).cell.N + ...
+                double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvP);
+            obj.InnerEdgeTau = max( InnerEdgeTau_fm, InnerEdgeTau_fp );
+            
+            BoundaryEdgeA_fm = repmat( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
+            [ Hnv, ~ ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).BoundaryEdge, obj.nv .* Height);
+            obj.BoundaryEdgeTau = bsxfun(@times, ( BoundaryEdgeA_fm(:) )', ...
+                ( physClass.meshUnion(1).cell.N + 1 )*( physClass.meshUnion(1).cell.N + ...
+                double(physClass.meshUnion(1).type) )./double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* Hnv);
+        end        
     end
-    
 end
 

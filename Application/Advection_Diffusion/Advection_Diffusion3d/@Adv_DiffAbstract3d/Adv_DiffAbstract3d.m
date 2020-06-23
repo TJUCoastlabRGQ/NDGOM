@@ -15,8 +15,40 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         outputFieldOrder = 4
     end
     
+    properties
+        SurfBoundNewmannDate
+        BotBoundNewmannDate
+    end
+    
+    properties ( SetAccess = public )
+        InnerEdgefm3d
+        BoundaryEdgefm3d
+        InnerEdgefp3d
+        BoundaryEdgefp3d
+        %for shallow water equation in sigma coordinate, the following four
+        %part is not used
+        SurfaceBoundaryEdgefm3d
+        SurfaceBoundaryEdgefp3d
+        BottomBoundaryEdgefm3d
+        BottomBoundaryEdgefp3d
+        
+        InnerEdgeFluxS3d
+        BoundaryEdgeFluxS3d
+        InnerEdgeFluxM3d
+        BoundaryEdgeFluxM3d
+        InnerEdgeFluxP3d
+        %for shallow water equation in sigma coordinate, the following four
+        %part is not used        
+        SurfaceBoundaryEdgeFluxS3d
+        SurfaceBoundaryEdgeFluxM3d
+        BottomBoundaryEdgeFluxS3d
+        BottomBoundaryEdgeFluxM3d
+   
+        ImplicitRHS3d
+    end
+    
     methods
-        function obj = AdvAbstractVarFlow3d()
+        function obj = Adv_DiffAbstract3d()
             obj = obj@NdgPhysMat();
         end
     end

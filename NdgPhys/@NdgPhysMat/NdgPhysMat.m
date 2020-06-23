@@ -16,8 +16,6 @@ classdef NdgPhysMat < NdgPhys
     properties( SetAccess = protected )
         %> cell array for external value fields
         fext
-        %> output netcdf file objects
-        outputFile
         %> limiter object
         limiter
         %> 

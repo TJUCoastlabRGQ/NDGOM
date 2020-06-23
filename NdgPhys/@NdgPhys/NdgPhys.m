@@ -35,9 +35,9 @@ classdef NdgPhys < handle
         %> number of physical field
         Nfield
         %> number of variable field
-        Nvar        
+        Nvar 
         %> index of variable in physical field
-        varFieldIndex
+        varFieldIndex                
     end
     
     properties( SetAccess = protected )

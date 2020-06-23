@@ -23,8 +23,8 @@ classdef AdvRotationUniformMesh3d < AdvAbstractVarFlow3d
     
     methods
         function obj = AdvRotationUniformMesh3d(N, Nz, M, Mz, cellType)
-            [ obj.mesh2d, obj.mesh3d ]  = makeUniformMesh(N, Nz, M, Mz, cellType);
             obj = obj@AdvAbstractVarFlow3d( );
+            [ obj.mesh2d, obj.mesh3d ]  = makeUniformMesh(N, Nz, M, Mz, cellType);
             obj.N = N;
             obj.M = M;
             obj.Nz = Nz;
