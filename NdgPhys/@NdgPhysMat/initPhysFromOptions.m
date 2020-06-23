@@ -20,6 +20,8 @@ function initPhysFromOptions( obj, mesh )
     
     % initilize the solver methods
     [ obj.advectionSolver, obj.viscositySolver ] = initSolver( obj );
+    
+    obj.NonhydrostaticSolver = NdghydrostaticSolver2d(obj);
 
     %> set the final time
     obj.ftime = obj.getOption('finalTime');

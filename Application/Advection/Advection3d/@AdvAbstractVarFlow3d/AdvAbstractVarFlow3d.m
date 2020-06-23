@@ -2,13 +2,17 @@ classdef AdvAbstractVarFlow3d < NdgPhysMat
     %ADVABSTRACTVARFLOW3D Summary of this class goes here
     %   Detailed explanation goes here
     
-    properties(Constant)
+    properties
         %> Number of physical field
         Nfield = 4
         %> Number of variable field
         Nvar = 1
         %> field index of variable field
         varFieldIndex = 1
+    end
+    
+    properties
+        outputFieldOrder = 4
     end
     
     methods

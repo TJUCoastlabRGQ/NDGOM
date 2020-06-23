@@ -139,32 +139,7 @@ classdef SWEAbstract3d < NdgPhysMat
     methods( Access = protected )
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-%             fm3d = cell(obj.Nmesh);
-%             fp3d = cell(obj.Nmesh);
-            for m = 1:obj.Nmesh                
-%                 edge = obj.mesh3d.InnerEdge;
-%                 [ fm3d{m}, fp3d{m} ] = edge.matEvaluateSurfValue( fphys );
-%               
-%                 fluxM(:,:,1) = edge.nx .* fm3d{m}(:,:,4);fluxP(:,:,1) = edge.nx .* fp3d{m}(:,:,4);
-%                 fluxM(:,:,2) = edge.ny .* fm3d{m}(:,:,4);fluxP(:,:,2) = edge.ny .* fp3d{m}(:,:,4);
-%                 [ InnerEdgefrhs(:,:,1) ] = edge.matEvaluateStrongFromEdgeRHS( fluxM(:,:,1), fluxP(:,:,1), ( fluxM(:,:,1)+ fluxP(:,:,1) )./2 );
-%                 [ InnerEdgefrhs(:,:,2) ] = edge.matEvaluateStrongFromEdgeRHS( fluxM(:,:,2), fluxP(:,:,2), ( fluxM(:,:,2)+ fluxP(:,:,2) )./2 );
-%                 
-%                 edge = obj.mesh3d.BoundaryEdge;
-%                 [ fm3d{m}, fp3d{m} ] = edge.matEvaluateSurfValue( fphys );
-%                 clear fluxM;
-%                 clear fluxP; 
-%                 fluxM(:,:,1) = edge.nx .* fm3d{m}(:,:,4);fluxP(:,:,1) = edge.nx .* fp3d{m}(:,:,4);
-%                 fluxM(:,:,2) = edge.ny .* fm3d{m}(:,:,4);fluxP(:,:,2) = edge.ny .* fp3d{m}(:,:,4);
-%                 
-%                 [ BoundaryEdgefrhs(:,:,1) ] = edge.matEvaluateStrongFromEdgeRHS( fluxM(:,:,1), fluxP(:,:,1), ( fluxM(:,:,1)+ fluxP(:,:,1) )./2 );
-%                 [ BoundaryEdgefrhs(:,:,2) ] = edge.matEvaluateStrongFromEdgeRHS( fluxM(:,:,2), fluxP(:,:,2), ( fluxM(:,:,2)+ fluxP(:,:,2) )./2 );
-%                                 
-%                 obj.frhs{m}(:,:,1) = -obj.gra .* fphys{m}(:,:,4) .* ( obj.meshUnion(m).rx .*  ( obj.meshUnion(m).cell.Dr * fphys{m}(:,:,4)) + ...
-%                    obj.meshUnion(m).sx .*  ( obj.meshUnion(m).cell.Ds * fphys{m}(:,:,4)) - InnerEdgefrhs(:,:,1) - BoundaryEdgefrhs(:,:,1) );
-%                 obj.frhs{m}(:,:,2) = -obj.gra .* fphys{m}(:,:,4) .* ( obj.meshUnion(m).ry .*  ( obj.meshUnion(m).cell.Dr * fphys{m}(:,:,4)) + ...
-%                    obj.meshUnion(m).sy .*  ( obj.meshUnion(m).cell.Ds * fphys{m}(:,:,4))  - InnerEdgefrhs(:,:,2) - BoundaryEdgefrhs(:,:,2) );
-               
+            for m = 1:obj.Nmesh                             
                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,8);
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
             end

@@ -11,7 +11,7 @@ classdef AdvRotationUniformMesh3d < AdvAbstractVarFlow3d
     
     properties (Constant)
         %> domain central
-        x0 = 0, 
+        x0 = 0,
         y0 = 0
         %> distance of the initial Gauss mount from the central point
         rd = 0.5
@@ -23,7 +23,7 @@ classdef AdvRotationUniformMesh3d < AdvAbstractVarFlow3d
     
     methods
         function obj = AdvRotationUniformMesh3d(N, Nz, M, Mz, cellType)
-            mesh = makeUniformMesh(N, Nz, M, Mz, cellType);
+            [ obj.mesh2d, obj.mesh3d ]  = makeUniformMesh(N, Nz, M, Mz, cellType);
             obj = obj@AdvAbstractVarFlow3d( );
             obj.N = N;
             obj.M = M;
@@ -46,7 +46,7 @@ classdef AdvRotationUniformMesh3d < AdvAbstractVarFlow3d
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = 2;
-            option('outputType') = enumOutputFile.NetCDF;
+            option('outputType') = enumOutputFile.VTK;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = 2.4/outputIntervalNum;
             option('outputCaseName') = mfilename;
@@ -81,25 +81,33 @@ classdef AdvRotationUniformMesh3d < AdvAbstractVarFlow3d
     end% methods
 end
 
-function mesh = makeUniformMesh(N, Nz, M, Mz, type)
-    bctype = [...
-        enumBoundaryCondition.Clamped, ...
-        enumBoundaryCondition.Clamped, ...
-        enumBoundaryCondition.Clamped, ...
-        enumBoundaryCondition.Clamped];
+function [mesh2d, mesh] = makeUniformMesh(N, Nz, M, Mz, type)
+bctype = [...
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped];
 
-    if (type == enumStdCell.PrismTri)
-        mesh2d = makeUniformTriMesh(N, [-1, 1], [-1, 1], M, M, bctype);
-        std = StdPrismTri( N, Nz );
-    elseif(type == enumStdCell.PrismQuad)
-        mesh2d = makeUniformQuadMesh(N, [-1, 1], [-1, 1], M, M, bctype);
-        std = StdPrismQuad( N, Nz );
-    end
+if (type == enumStdCell.PrismTri)
+    mesh2d = makeUniformTriMesh(N, [-1, 1], [-1, 1], M, M, bctype);
+    cell = StdPrismTri( N, Nz );
+elseif(type == enumStdCell.PrismQuad)
+    mesh2d = makeUniformQuadMesh(N, [-1, 1], [-1, 1], M, M, bctype);
+    cell = StdPrismQuad( N, Nz );
+end
 
-    zs = ones(mesh2d.Nv, 1);
-    zb = ones(mesh2d.Nv, 1) - 2.0;
-    mesh = NdgExtendMesh3d( std, mesh2d, zs, zb, Mz );
-    mesh.InnerSideEdge = NdgSideEdge3d( mesh, 1 );
-    mesh.BottomEdge = NdgBottomEdge3d( mesh, 1 );
+%     zs = ones(mesh2d.Nv, 1);
+%     zb = ones(mesh2d.Nv, 1) - 2.0;
+%     mesh = NdgExtendMesh3d( std, mesh2d, zs, zb, Mz );
+%     mesh.InnerSideEdge = NdgSideEdge3d( mesh, 1 );
+%     mesh.BottomEdge = NdgBottomEdge3d( mesh, 1 );
+
+zb = zeros(mesh2d.Nv, 1); zs = zb + 1;
+mesh = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
+mesh.InnerEdge = NdgSideEdge3d( mesh, 1, Mz );
+mesh.BottomEdge = NdgBottomInnerEdge3d( mesh, 1 );
+mesh.BoundaryEdge = NdgHaloEdge3d( mesh, 1, Mz );
+mesh.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh, 1 );
+mesh.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh, 1 );
 end% func
 
