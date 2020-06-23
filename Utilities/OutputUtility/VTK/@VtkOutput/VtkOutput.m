@@ -7,7 +7,7 @@ classdef VtkOutput < AbstractVtkOutput
         
         initFromMesh( obj, mesh );
         
-        
+        outputResult(obj, field);
         
         function closeOutputFile(obj)
             obj.delete();

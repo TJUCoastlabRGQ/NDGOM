@@ -7,7 +7,7 @@ fprintf('Time of the current output is:%f\n',time(step));
 fprintf('Date has been written into the VTK file of order:%d\n',obj.vtkOutput.outputStep);
 fprintf('===============================\n');
 field = obj.readOutputResult( step );
-obj.vtkOutput.outputStepResult( step, field );
+obj.vtkOutput.outputResult( step, field );
 
 end
 
