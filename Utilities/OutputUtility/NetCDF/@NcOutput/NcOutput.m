@@ -55,6 +55,14 @@ classdef NcOutput < AbstractNcOutput
             end
         end% func
         
+        function outputFinalResult( obj, time, field )
+            obj.outputResult( time, field);
+            if obj.isOpen(obj.fileOrder) == true
+                obj.isOpen(obj.fileOrder) = false;
+                netcdf.close(obj.ncid(obj.fileOrder));
+            end
+        end
+        
         function closeFile( obj, varargin  )
             if(nargin == 0)
                 obj.isOpen(obj.fileOrder) = false;
@@ -76,7 +84,7 @@ classdef NcOutput < AbstractNcOutput
                 end
             end
             obj.outputStep = numel(netcdf.getVar(obj.ncid(1),0)); % Get number of time points
-            for i = 2:numel(obj.fileName)
+            for i = 2:numel(obj.filename)
                 Time = netcdf.getVar(obj.ncid(i),0);
                 %                 field = netcdf.getVar(obj.ncfile.ncid(i),1);
                 Info = ncinfo(obj.filename{i});
@@ -97,7 +105,7 @@ classdef NcOutput < AbstractNcOutput
                 end
                 obj.isOpen(i) = false;
                 netcdf.close(obj.ncid(i));
-                str = obj.fileName(i);
+                str = obj.filename(i);
                 delete(str{1});
             end
             obj.closeFile(1);

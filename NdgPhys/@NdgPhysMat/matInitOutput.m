@@ -81,6 +81,15 @@ end
 
 function [ outputObj ] = initNcOutput( obj, mesh, casename, OutputFieldNum, dt, OutputFileNum, outputIntervalNum, varIndex, fieldName )
 outputObj = [];
+if mesh.type == enumMeshDim.Three
+    if ~isdir([casename,'/3d'])
+        mkdir([casename,'/3d']);
+    end
+elseif mesh.type == enumMeshDim.Two
+    if ~isdir([casename,'/2d'])
+        mkdir([casename,'/2d']);
+    end
+end
 for m = 1:obj.Nmesh
     filename = cell(OutputFileNum, 1);
     if mesh.type == enumMeshDim.Three
