@@ -13,6 +13,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                    value = physClass.getOption('ConstantAdvDiffHorizontalEddyViscosityValue');
                    obj.nv = value * ones(size(physClass.meshUnion(1).x));
                    fprintf('Value of the constant horizontal diffusion coefficient is set to be: %f\n',value);
+                   obj.matUpdatePenaltyParameter(  physClass, obj.nv );
                end
             end            
          end
@@ -26,12 +27,16 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         %> @param[in] dt The time step
         %> @param[out] fphys The physical field with vertical diffusion
         %> considered
-        fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
+        function  fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, SystemRHS, ImplicitParameter, dt, intRK, Stage )
+            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage);
+        end
     end
     
     methods( Access = protected )
         
-        function matUpdatePenaltyParameter( obj, physClass, Height )
+        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, intRK, Stage);
+        
+        function matUpdatePenaltyParameter( obj, physClass, DiffusionCoefficient )
             %> @brief Evaluating the penalty parameter used to penalize the jump between adjacet cell used in IPDG for second order operator
             %>@detail In this version, the Interior Penalty Discontinuous Galerkin(IPDG) method is used to treat
             %> the second order diffusion operator. To do so, the penalty parameter is calculated according to
@@ -41,10 +46,9 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             %> UCL-Universit¨¦ Catholique de Louvain, 2015. pg:28.
             %> The formula is '$\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$'
             %> @param[in] physClass The physical solver establised
-            %> @param[in] Height The water depth
+            %> @param[in] DiffusionCoefficient The diffusion coefficient
             BotEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
             UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
-            DiffusionCoefficient = obj.nv./Height.^2;
 %             obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
             obj.tau = zeros( numel(BotEidM), physClass.mesh2d(1).K * ( physClass.meshUnion(1).Nz+1 ) );
             P = physClass.mesh2d(1).cell.N;
@@ -66,6 +70,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                 obj.tau(:, (i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1 ) = (P+1)*(P+3)/3*n0/2*Nz*DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz);
             end
         end
+        
     end
     
 end

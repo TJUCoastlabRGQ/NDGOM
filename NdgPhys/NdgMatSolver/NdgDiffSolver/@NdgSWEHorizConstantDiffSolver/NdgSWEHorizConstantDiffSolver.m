@@ -12,7 +12,7 @@ classdef NdgSWEHorizConstantDiffSolver < NdgSWEHorizDiffSolver
               value = physClass.getOption('ConstantHorizontalEddyViscosityValue');
               fprintf('Value of the constant horizontal eddy viscosity is set to be: %f\n',value);
           else 
-              value = 100;
+              value = 0.01;
               fprintf('Value of the constant horizontal eddy viscosity is set to be the default value: %f\n',value);
           end
             obj.nv = value * ones(size(physClass.meshUnion(1).x));

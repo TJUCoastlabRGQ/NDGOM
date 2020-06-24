@@ -1,4 +1,4 @@
-function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
+function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage)
 %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
 %> return the physical field with vertical diffusion considered
 %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -13,9 +13,6 @@ function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, H
 %> @param[out] fphys The physical field with vertical diffusion
 %> considered
 
-obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, dt, time);
-
-obj.matUpdatePenaltyParameter( physClass, Height );
 BottomEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
 UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
 K = physClass.meshUnion(1).K;
@@ -27,7 +24,6 @@ Np = physClass.meshUnion(1).cell.Np;
 % hv              = zeros(size(meshUnion.x));
 fphys = zeros( Np, physClass.meshUnion(1).K, physClass.Nvar );
 StiffMatrix     = zeros( Np*Nz, Np*Nz, physClass.Nvar );
-DiffusionCoefficient = obj.nv ./ Height.^2;
 for i =1:physClass.meshUnion(1).mesh2d(1).K
     %> At present, we assume the mesh is uniform in the vertical direction
     ElementalMassMatrix3d = diag(physClass.meshUnion(1).J(:,(i-1)*Nz+1)) * physClass.meshUnion(1).cell.M;

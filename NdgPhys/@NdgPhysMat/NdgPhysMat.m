@@ -109,7 +109,7 @@ classdef NdgPhysMat < NdgPhys
                     obj.matEvaluateSSPRK22();  
                 case enumTemporalDiscrete.IMEXRK343 %This is implemented for barotropic swe3d only
                     obj.matEvaluateIMEXRK343();
-                case enumTemporalDiscrete.IMEXRK222 %This is implemented for barotropic swe3d only
+                case enumTemporalDiscrete.IMEXRK222 
                     obj.matEvaluateIMEXRK222();    
                 case enumTemporalDiscrete.IMEXRK111 %This is implemented for barotropic swe3d only
                     obj.matEvaluateIMEXRK111(); 

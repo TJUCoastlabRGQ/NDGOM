@@ -351,7 +351,7 @@ srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
-path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertGOTMDiffSolver\private\';
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEVertGOTMDiffSolver\private\';
 libfile = {['.\lib\GOTM\','*.obj'],...
     [path,'mxGOTM.c']};
 srcfile = {[path,'mxUpdateEddyViscosity.c']};
