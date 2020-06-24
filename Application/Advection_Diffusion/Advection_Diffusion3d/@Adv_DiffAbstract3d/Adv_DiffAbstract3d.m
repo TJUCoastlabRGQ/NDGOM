@@ -18,6 +18,7 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
     properties
         SurfBoundNewmannDate
         BotBoundNewmannDate
+        BoundaryEdgeNewmannDate
     end
     
     properties ( SetAccess = public )
@@ -28,24 +29,18 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         %for shallow water equation in sigma coordinate, the following four
         %part is not used
         SurfaceBoundaryEdgefm3d
-        SurfaceBoundaryEdgefp3d
         BottomBoundaryEdgefm3d
+        SurfaceBoundaryEdgefp3d
         BottomBoundaryEdgefp3d
-        
-        InnerEdgeFluxS3d
-        BoundaryEdgeFluxS3d
-        InnerEdgeFluxM3d
-        BoundaryEdgeFluxM3d
-        InnerEdgeFluxP3d
-        %for shallow water equation in sigma coordinate, the following four
-        %part is not used        
-        SurfaceBoundaryEdgeFluxS3d
-        SurfaceBoundaryEdgeFluxM3d
-        BottomBoundaryEdgeFluxS3d
-        BottomBoundaryEdgeFluxM3d
-   
         ImplicitRHS3d
     end
+    
+    properties
+        %> Solver for vertical eddy viscosity
+        VerticalEddyViscositySolver
+        %>
+        HorizontalEddyViscositySolver
+    end    
     
     methods
         function obj = Adv_DiffAbstract3d()
@@ -60,6 +55,9 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
     methods ( Hidden )
         function initPhysFromOptions( obj, mesh )
             initPhysFromOptions@NdgPhysMat( obj, mesh );
+            %here the viscosity solver is to be added
+            
+            
             finalTime = obj.getOption('finalTime');
             for m = 1:obj.Nmesh
                 obj.fext{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
@@ -79,16 +77,16 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
                 + fp(:,:,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
         end
         
-        function [ flux ] = matEvaluateSurfFlux( obj, mesh, nx, ny, nz, fm )
+        function [ flux ] = matEvaluateSurfFlux( obj, edge, nx, ny, nz, fm )
             Em = fm(:,:,1) .* fm(:,:,2);
             Gm = fm(:,:,1) .* fm(:,:,3);
             Hm = fm(:,:,1) .* fm(:,:,4);
             flux = Em .* nx + Gm .* ny + Hm .* nz;
         end
         
-        function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext )
-            ind = ( edge.ftype == 5 );
-            fp(:, ind) = 0;
+        function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, nz, fm, fp, fext )
+%             ind = ( edge.ftype == 5 );
+%             fp(:, ind) = 0;
         end
     end
     

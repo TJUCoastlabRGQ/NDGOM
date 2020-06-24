@@ -1,4 +1,4 @@
-classdef enumHorizontalEddyViscosity < int8
+classdef enumSWEHorizontalEddyViscosity < int8
     
     enumeration
         Constant        (0)

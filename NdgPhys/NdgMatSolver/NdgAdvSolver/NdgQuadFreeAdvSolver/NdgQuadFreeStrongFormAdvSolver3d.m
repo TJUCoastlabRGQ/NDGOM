@@ -15,36 +15,33 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 edge = mesh3d.InnerEdge;
                 [ physClass.InnerEdgefm3d{m}, physClass.InnerEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
               
-                [ physClass.InnerEdgeFluxM3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefm3d{m} );
-                [ physClass.InnerEdgeFluxP3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefp3d{m} );
-                [ physClass.InnerEdgeFluxS3d{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.InnerEdgefm3d{m}(:,:,[4, 1, 2]), physClass.InnerEdgefp3d{m}(:,:,[4, 1, 2]), edge );
-                [ physClass.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( physClass.InnerEdgeFluxM3d{m}(:,:,[2,3]), physClass.InnerEdgeFluxP3d{m}(:,:,[2,3]), physClass.InnerEdgeFluxS3d{m}(:,:,[2,3]) );
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefm3d{m} );
+                [ fluxP ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefp3d{m} );
+                [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefm3d{m}, physClass.InnerEdgefp3d{m}, edge );
+                [ physClass.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
 
                 edge = mesh3d.BoundaryEdge;
                 [ physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
     
-                [ physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, physClass.fext3d{m} );
-                [ physClass.BoundaryEdgeFluxM3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m} );
-                [ physClass.BoundaryEdgeFluxS3d{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.BoundaryEdgefm3d{m}(:,:,[4, 1, 2]), physClass.BoundaryEdgefp3d{m}(:,:,[4, 1, 2]), edge );
-                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM3d{m}(:,:,[2,3]), physClass.BoundaryEdgeFluxS3d{m}(:,:,[2,3]) );
-                
-                % we note that for the three dimensional nonlinear shallow
-                % water equation, Newmann boundary about the velocity is
-                % imposed at both the surface and bottom boundary, under
-                % this kind of circumastances, the numerical flux is the
-                % same with the local numerical flux, so the contribution
-                % of these term to the right hand is canceled for the
-                % advective part
+                [ physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, physClass.fext3d{m} );
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m} );
+                [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, edge );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
         
-                edge = mesh3d.BottomEdge;
-                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-                [ fluxP ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );                
+                edge = mesh3d.BottomBoundaryEdge;
+                [ physClass.BottomBoundaryEdgefm3d{m}, physClass.BottomBoundaryEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
+                [ physClass.BottomBoundaryEdgefm3d{m}, physClass.BottomBoundaryEdgefp3d{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, physClass.fext3d{m} );                
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.BottomBoundaryEdgefm3d{m} );
+                [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, edge );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
-                [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*(fm(:,:,1).*fm(:,:,3)./fm(:,:,4)+fp(:,:,1).*fp(:,:,3)./fp(:,:,4));
-                [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*(fm(:,:,2).*fm(:,:,3)./fm(:,:,4)+fp(:,:,2).*fp(:,:,3)./fp(:,:,4));
-                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), fluxP(:,:,[2,3]), OmegafluxS );
+                edge = mesh3d.SurfaceBoundaryEdge;
+                [ physClass.SurfaceBoundaryEdgefm3d{m}, physClass.SurfaceBoundaryEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
+                [ physClass.SurfaceBoundaryEdgefm3d{m}, physClass.SurfaceBoundaryEdgefp3d{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, physClass.SurfaceBoundaryEdgefm3d{m}, physClass.SurfaceBoundaryEdgefp3d{m}, physClass.fext3d{m} );                                
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.SurfaceBoundaryEdgefm3d{m} );
+                [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, physClass.SurfaceBoundaryEdgefm3d{m}, physClass.SurfaceBoundaryEdgefp3d{m}, edge );                
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                   
             end
             

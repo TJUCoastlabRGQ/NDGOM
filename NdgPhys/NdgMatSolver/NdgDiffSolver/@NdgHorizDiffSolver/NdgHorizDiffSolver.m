@@ -15,12 +15,10 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
         function obj = NdgHorizDiffSolver( physClass )
             obj.assembleMassMatrix( physClass.meshUnion(1) );
             obj.nv = 0.001 * ones(size(physClass.meshUnion(1).x));
-            obj.matUpdatePenaltyParameter( physClass );
-            %InnerEdgeTau and BoundaryEdgeTau to be calculated here when
-            %initialized
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
+            obj.matUpdatePenaltyParameter( physClass );
             Kappa = obj.nv;
             for i = 1:physClass.Nvar
                 obj.matCalculateAuxialaryVariable( physClass, fphys(:,:,physClass.varFieldIndex(i)), Kappa, i, ...

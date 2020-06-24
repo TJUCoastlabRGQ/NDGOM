@@ -4,7 +4,7 @@ function [ adv, vis, flux,  PCESolver2d ] = initSolver( physMat )
 
 integralType = physMat.getOption('integralType');
 if (integralType == enumDiscreteIntegral.QuadratureFree)
-    adv = NdgQuadFreeStrongFormAdvSolver3d( physMat );
+    adv = NdgQuadFreeStrongFormAdvSWE3dSolver3d( physMat );
     vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
     flux = SWEHLLNumFluxSolver3d;
     PCESolver2d = SWEQuadFreeStrongFormPCESolver2d;
