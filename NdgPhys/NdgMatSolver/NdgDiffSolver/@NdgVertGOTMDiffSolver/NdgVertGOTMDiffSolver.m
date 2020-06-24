@@ -12,6 +12,7 @@ classdef NdgVertGOTMDiffSolver < NdgVertDiffSolver
     
     methods
         function obj = NdgVertGOTMDiffSolver( physClass )
+            obj = obj@NdgVertDiffSolver( physClass );
             if  physClass.option.isKey('PhysicalBottomRoughnessLength')
                 obj.h0b = physClass.getOption('PhysicalBottomRoughnessLength');
                 fprintf('Value of the physical bottom roughness length is set to be: %f\n',obj.h0b);

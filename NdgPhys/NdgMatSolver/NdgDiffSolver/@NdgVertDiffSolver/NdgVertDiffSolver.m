@@ -6,6 +6,16 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     end
     
     methods
+        
+         function obj = NdgVertDiffSolver( physClass )
+            if physClass.option.isKey('AdvDiffVerticalEddyViscosityType')
+               if physClass.option.isKey('AdvDiffVerticalEddyViscosityValue')
+                   value = physClass.getOption('ConstantAdvDiffHorizontalEddyViscosityValue');
+                   obj.nv = value * ones(size(physClass.meshUnion(1).x));
+                   fprintf('Value of the constant horizontal diffusion coefficient is set to be: %f\n',value);
+               end
+            end            
+         end
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
         %> return the physical field with vertical diffusion considered
         %> @detail this function is used to calculate the right hand side corresponding to the vertical

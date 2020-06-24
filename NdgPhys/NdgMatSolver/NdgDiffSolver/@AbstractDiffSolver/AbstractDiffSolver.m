@@ -11,6 +11,13 @@ classdef AbstractDiffSolver < handle
         Prantl
     end
     
+    methods
+        function   obj = AbstractDiffSolver( physClass )
+            obj.nv = zeros(size(physClass.meshUnion(1).x));
+        end
+    end
+    
+    
     methods( Access = protected, Abstract)
         %> this function is used to update the viscosity
         matUpdateViscosity(obj)
@@ -24,7 +31,7 @@ classdef AbstractDiffSolver < handle
         function [ fm, fp ] = matEvaluateSurfValue(obj, edge, Kappa )
             [ fm, fp ] = mxEvaluateSurfValue( edge.FToE, edge.FToN1, edge.FToN2, Kappa );
         end
-              
+        
     end
     
 end

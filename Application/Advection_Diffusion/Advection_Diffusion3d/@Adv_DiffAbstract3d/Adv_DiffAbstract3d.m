@@ -12,7 +12,7 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
     end
     
     properties
-        outputFieldOrder = 4
+        outputFieldOrder3d = 1
     end
     
     properties
@@ -56,7 +56,27 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         function initPhysFromOptions( obj, mesh )
             initPhysFromOptions@NdgPhysMat( obj, mesh );
             %here the viscosity solver is to be added
+            if obj.option.isKey('AdvDiffHorizontalEddyViscosityType')
+                type = obj.getOption('AdvDiffHorizontalEddyViscosityType');
+                if type == enumHorizontalEddyViscosity.Constant;
+                    obj.HorizontalEddyViscositySolver = NdgHorizDiffSolver( obj );
+                else
+                    obj.HorizontalEddyViscositySolver = NdgNoneHorizDiffSolver( obj );
+                end
+            else
+                obj.HorizontalEddyViscositySolver = NdgNoneHorizDiffSolver( obj );
+            end
             
+            if obj.option.isKey('AdvDiffVerticalEddyViscosityType')
+                type = obj.getOption('AdvDiffVerticalEddyViscosityType');
+                if type == enumVerticalEddyViscosity.Constant;
+                    obj.VerticalEddyViscositySolver = NdgVertDiffSolver( obj );
+                else
+                    obj.VerticalEddyViscositySolver = NdgNoneVertDiffSolver( obj );
+                end
+            else
+                obj.VerticalEddyViscositySolver = NdgNoneVertDiffSolver( obj );
+            end
             
             finalTime = obj.getOption('finalTime');
             for m = 1:obj.Nmesh

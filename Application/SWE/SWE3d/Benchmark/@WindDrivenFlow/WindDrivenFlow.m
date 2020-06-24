@@ -91,12 +91,12 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
             option('ConstantVerticalEddyViscosityValue') = 0.03;
-            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
         

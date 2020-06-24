@@ -13,8 +13,8 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
     
     methods
         function obj = NdgHorizDiffSolver( physClass )
+            obj = obj@AbstractDiffSolver( physClass );
             obj.assembleMassMatrix( physClass.meshUnion(1) );
-            obj.nv = 0.001 * ones(size(physClass.meshUnion(1).x));
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
