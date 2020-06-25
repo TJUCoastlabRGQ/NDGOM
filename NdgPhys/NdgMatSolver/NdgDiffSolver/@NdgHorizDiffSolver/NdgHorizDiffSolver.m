@@ -15,10 +15,17 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
         function obj = NdgHorizDiffSolver( physClass )
             obj = obj@AbstractDiffSolver( physClass );
             obj.assembleMassMatrix( physClass.meshUnion(1) );
+            if physClass.option.isKey('AdvDiffHorizontalDiffusionType')
+               if physClass.option.isKey('AdvDiffConstantHorizontalDiffusionValue')
+                   value = physClass.getOption('AdvDiffConstantHorizontalDiffusionValue');
+                   obj.nv = value * ones(size(physClass.meshUnion(1).x));
+                   fprintf('Value of the constant horizontal diffusion coefficient is set to be: %f\n',value);
+                   obj.matUpdatePenaltyParameter(  physClass, obj.nv );
+               end
+            end            
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
-            obj.matUpdatePenaltyParameter( physClass );
             Kappa = obj.nv;
             for i = 1:physClass.Nvar
                 obj.matCalculateAuxialaryVariable( physClass, fphys(:,:,physClass.varFieldIndex(i)), Kappa, i, ...
@@ -45,6 +52,10 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
     end
     
     methods( Access = protected )
+        
+        function matUpdateViscosity(obj)
+            %doing nothing
+        end
         
         function [ invM ] = assembleMassMatrix( obj, mesh )
             cell = mesh.cell;
@@ -253,9 +264,9 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
         end
         
-        function matUpdatePenaltyParameter( obj, physClass )
+        function matUpdatePenaltyParameter( obj, physClass, DiffusionCoefficient )
             %> this penalty parameter is calculated as $\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$
-            [ HnvM, HnvP ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).InnerEdge, obj.nv );
+            [ HnvM, HnvP ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).InnerEdge, DiffusionCoefficient );
             
             InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
             InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, physClass.meshUnion(1).Nz );
@@ -268,7 +279,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             obj.InnerEdgeTau = max( InnerEdgeTau_fm, InnerEdgeTau_fp );
             
             BoundaryEdgeA_fm = repmat( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
-            [ Hnv, ~ ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).BoundaryEdge, obj.nv .* Height);
+            [ Hnv, ~ ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).BoundaryEdge, DiffusionCoefficient);
             obj.BoundaryEdgeTau = bsxfun(@times, ( BoundaryEdgeA_fm(:) )', ...
                 ( physClass.meshUnion(1).cell.N + 1 )*( physClass.meshUnion(1).cell.N + ...
                 double(physClass.meshUnion(1).type) )./double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* Hnv);

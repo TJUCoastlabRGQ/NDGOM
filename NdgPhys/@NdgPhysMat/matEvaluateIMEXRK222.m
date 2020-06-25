@@ -1,13 +1,13 @@
 function matEvaluateIMEXRK222( obj )
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
+dt = 0.0005;
 Stage = size(EXa,2);
-time = obj.startTime;
-ftime = obj.finalTime;
-fphys2d = obj.fphys2d;
+time = obj.getOption('startTime');
+ftime = obj.getOption('finalTime');
 fphys = obj.fphys;
 %> allocate space for the rhs to be stored
-obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
-obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
+obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
+obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 hwait = waitbar(0,'Runing MatSolver....');
 % try
@@ -22,7 +22,7 @@ while( time < ftime )
     
     tloc = time + c( 1 ) * dt;
     obj.matUpdateExternalField( tloc, fphys );
-    obj.matCalculateExplicitRHSTerm( fphys, Stage, 1);
+    obj.matCalculateExplicitRHSTerm( fphys, tloc,  Stage, 1);
     for intRK = 1:2
         tloc = time + c( intRK+1 ) * dt;
         %>Actually, boundary condition need to be imposed here
@@ -32,24 +32,24 @@ while( time < ftime )
         %da gai
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-             SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );
+            SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );
         
-        obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
+        obj.matCalculateExplicitRHSTerm( fphys, tloc , Stage, intRK + 1);
         
     end
     %>Update the velocity
     
     for i = 1:obj.Nvar
-        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS3d(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS3d(:,:,(i-1)*3+2)+...
-            dt * EXb(3) * obj.ExplicitRHS3d(:,:,(i-1)*3+3) + dt * IMb(1) * obj.ImplicitRHS3d(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS3d(:,:,(i-1)*2+2);
+        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS(:,:,(i-1)*3+2)+...
+            dt * EXb(3) * obj.ExplicitRHS(:,:,(i-1)*3+3) + dt * IMb(1) * obj.ImplicitRHS(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS(:,:,(i-1)*2+2);
     end
     
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
-    obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
-    obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
+    obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
+    obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
-    
+%     fphys{1}(:,:,1) = obj.matGetExtFunc( time );    
     %> Update the diffusion coefficient
     display(time);
     obj.matUpdateOutputResult( time,  fphys );

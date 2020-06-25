@@ -56,8 +56,7 @@ classdef SWEAbstract3d < NdgPhysMat
         mesh2d
         %> vertical extended mesh
         mesh3d
-        %> linear slip parameter
-        K
+        
         outputFile3d
         %> output file object
         outputFile2d
@@ -173,7 +172,6 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex);
         
-        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa, dt);
     end
     
     methods ( Sealed, Access = protected )

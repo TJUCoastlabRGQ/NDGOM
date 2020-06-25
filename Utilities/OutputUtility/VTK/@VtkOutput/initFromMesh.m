@@ -19,7 +19,8 @@ function initFromMesh( obj, mesh )
     end
 
     obj.Npoint = mesh.K * mesh.cell.Np;
-    obj.Points = [ mesh.x(:), mesh.y(:), zeros(obj.Npoint, 1) ]';
+%     obj.Points = [ mesh.x(:), mesh.y(:), zeros(obj.Npoint, 1) ]';
+    obj.Points = [ mesh.x(:), mesh.y(:), mesh.z(:) ]';
     obj.Ncell = mesh.K * Ncell;
     obj.Ncon = mesh.K * Ncon * Ncell;
     obj.ctype = repmat( int8(ctype), obj.Ncell, 1 );

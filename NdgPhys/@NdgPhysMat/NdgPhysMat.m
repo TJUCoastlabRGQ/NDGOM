@@ -87,7 +87,16 @@ classdef NdgPhysMat < NdgPhys
         %> matEvaluateRHS2d; For the 3d problem, the function
         %> matEvaluateRHS3d should be called.
         matEvaluateRHS( obj, fphys )
-        
+        %> @brief A functions used to assemble the right hand side corresponding to a stiff matrix
+        %> @details
+        %> This function is called when we time step the advection
+        %> diffusion type equation with the IMEXRK method        
+        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa, dt)
+        %> @brief A functions used to assemble the right hand side corresponding to the non-stiff part
+        %> @details
+        %> This function is called when we time step the advection
+        %> diffusion type equation with the IMEXRK method     
+        matCalculateExplicitRHSTerm( obj, fphys, time, Stage, RKindex )     
         %> @brief Temporal discrete function
         %> @details
         %> The temporal discrete function will solve the function with the

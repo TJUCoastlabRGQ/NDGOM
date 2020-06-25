@@ -1,4 +1,4 @@
-function [ Ncell, EToV ] = InitQuadConnect3d(N, Nz)
+function [ Ncell, EToV ] = InitPrismQuadConnect3d(N, Nz)
     %InitQuadConnect2d - Description
     %
     % Syntax: [ Ncell, EToV ] = InitQuadConnect2d(input)

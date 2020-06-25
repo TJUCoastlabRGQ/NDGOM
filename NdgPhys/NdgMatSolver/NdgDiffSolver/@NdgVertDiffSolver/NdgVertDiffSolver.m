@@ -8,11 +8,12 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     methods
         
          function obj = NdgVertDiffSolver( physClass )
-            if physClass.option.isKey('AdvDiffVerticalEddyViscosityType')
-               if physClass.option.isKey('AdvDiffVerticalEddyViscosityValue')
-                   value = physClass.getOption('ConstantAdvDiffHorizontalEddyViscosityValue');
+             obj = obj@AbstractDiffSolver( physClass );
+            if physClass.option.isKey('AdvDiffVerticalDiffusionType')
+               if physClass.option.isKey('AdvDiffConstantVerticalDiffusionValue')
+                   value = physClass.getOption('AdvDiffConstantVerticalDiffusionValue');
                    obj.nv = value * ones(size(physClass.meshUnion(1).x));
-                   fprintf('Value of the constant horizontal diffusion coefficient is set to be: %f\n',value);
+                   fprintf('Value of the constant vertical diffusion coefficient is set to be: %f\n',value);
                    obj.matUpdatePenaltyParameter(  physClass, obj.nv );
                end
             end            
@@ -33,6 +34,10 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     end
     
     methods( Access = protected )
+        
+        function matUpdateViscosity(obj)
+            %doing nothing
+        end        
         
         fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         

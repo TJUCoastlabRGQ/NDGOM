@@ -1,7 +1,7 @@
 function [ Adv, HorizVis, VertVis ] = initSolver( obj )
-if obj.option.isKey('AdvDiffHorizontalEddyViscosityType')
-    type = obj.getOption('AdvDiffHorizontalEddyViscosityType');
-    if type == enumHorizontalEddyViscosity.Constant
+if obj.option.isKey('AdvDiffHorizontalDiffusionType')
+    type = obj.getOption('AdvDiffHorizontalDiffusionType');
+    if type == enumHorizontalDiffusion.Constant
         HorizVis = NdgHorizDiffSolver( obj );
     else
         HorizVis = NdgNoneHorizDiffSolver( obj );
@@ -10,9 +10,9 @@ else
     HorizVis = NdgNoneHorizDiffSolver( obj );
 end
 
-if obj.option.isKey('AdvDiffVerticalEddyViscosityType')
-    type = obj.getOption('AdvDiffVerticalEddyViscosityType');
-    if type == enumVerticalEddyViscosity.Constant
+if obj.option.isKey('AdvDiffVerticalDiffusionType')
+    type = obj.getOption('AdvDiffVerticalDiffusionType');
+    if type == enumVerticalDiffusion.Constant
         VertVis = NdgVertDiffSolver( obj );
     else
         VertVis = NdgNoneVertDiffSolver( obj );
@@ -20,6 +20,9 @@ if obj.option.isKey('AdvDiffVerticalEddyViscosityType')
 else
     VertVis = NdgNoneVertDiffSolver( obj );
 end
+
+integralType = obj.getOption('integralType');
+equType = obj.getOption('equationType');
 
 if (integralType == enumDiscreteIntegral.QuadratureFree)
     if( equType == enumDiscreteEquation.Strong )

@@ -13,9 +13,9 @@ IMStage = numel(IMa);
 for i = 1:obj.Nvar
     SystemRHS(:,:,i) = Tempfphys(:,:,i);
     for j = 1:numel(IMa)
-        SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(j)*obj.ExplicitRHS3d(:,:,(i-1)*EXStage+j) + ...
-            dt * IMa(j)*obj.ImplicitRHS3d(:,:,(i-1)*IMStage+j);
+        SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(j)*obj.ExplicitRHS(:,:,(i-1)*EXStage+j) + ...
+            dt * IMa(j)*obj.ImplicitRHS(:,:,(i-1)*IMStage+j);
     end
-    SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(EXStage) * obj.ExplicitRHS3d(:,:,(i-1)*EXStage+EXStage);
+    SystemRHS(:,:,i) = SystemRHS(:,:,i) + dt * EXa(EXStage) * obj.ExplicitRHS(:,:,(i-1)*EXStage+EXStage);
 end
 end

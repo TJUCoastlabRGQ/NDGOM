@@ -36,7 +36,7 @@ for m = 1:obj.Nmesh
         %> The following two variables are used when calculating the horizontal diffusion term
         obj.BottomBoundaryEdgefm3d{m} = zeros( Nfp, Ne, obj.Nvar );
         obj.BottomBoundaryEdgefp3d{m} = zeros( Nfp, Ne, obj.Nvar );
-    end    
+    end
     
     %> These public variable are used to avoid the calculation of these terms repeatly during computation
     Nfp = obj.meshUnion(m).InnerEdge.Nfp;
@@ -44,7 +44,7 @@ for m = 1:obj.Nmesh
     %> The following two variables are used when calculating the horizontal diffusion term
     obj.InnerEdgefm3d{m} = zeros( Nfp, Ne, obj.Nfield );
     obj.InnerEdgefp3d{m} = zeros( Nfp, Ne, obj.Nfield );
-   
+    
 end
 
 % set option
@@ -52,14 +52,16 @@ obj.option = obj.setOption( obj.option );
 
 [ obj.advectionSolver, obj.HorizontalEddyViscositySolver, obj.VerticalEddyViscositySolver ] = obj.initSolver();
 
-%> set the final time
-obj.ftime = obj.getOption('finalTime');
-
 [ obj.fphys ] = obj.setInitialField;
 
 % we currently only consider one mesh only
 obj.SurfBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 obj.BotBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 
+finalTime = obj.getOption('finalTime');
+for m = 1:obj.Nmesh
+    obj.fext{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
+end
+obj.fext3d = cell(obj.Nmesh);
 obj.outputFile3d = obj.matInitOutput(mesh3d, obj.fieldName3d);
 end

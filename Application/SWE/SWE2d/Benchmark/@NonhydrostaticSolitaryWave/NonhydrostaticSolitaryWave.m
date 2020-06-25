@@ -83,7 +83,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             set(gcf,'position',[50,50,1050,400]);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            for i = 1:numel(time);           
+            for i = 1:numel(time)           
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,2)'./fg(:,1)','k','Linewidth',1.5);

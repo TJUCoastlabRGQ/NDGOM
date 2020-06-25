@@ -156,13 +156,13 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
     for var = 1:physClass.Nvar
         temphuRHS = SystemRHS(:,(i-1)*Nz + 1 : i*Nz,var);
         fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)...
-            = inv(eye(Np*Nz) - ImplicitParameter * dt * StiffMatrix(:,:,var))*temphuRHS(:);
-        physClass.ImplicitRHS3d( ((var-1)* ( IMStage - 1 ) + RKIndex - 1 )* K * Np + (i-1)*Nz * Np + 1 :...
+            = (eye(Np*Nz) - ImplicitParameter * dt * StiffMatrix(:,:,var))\temphuRHS(:);
+        physClass.ImplicitRHS( ((var-1)* ( IMStage - 1 ) + RKIndex - 1 )* K * Np + (i-1)*Nz * Np + 1 :...
             ( (var-1) * ( IMStage - 1) + RKIndex - 1 )* K * Np + i*Nz * Np ) = ...
             StiffMatrix(:,:,var) * fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)';
         
-        physClass.ImplicitRHS3d(:,(i-1)*Nz + 1,(var-1) * ( IMStage - 1 ) + RKIndex ) = physClass.ImplicitRHS3d(:,(i-1)*Nz + 1,(var-1)*( IMStage - 1 ) + RKIndex ) + SurfStiffMatrix(:,:,var);
-        physClass.ImplicitRHS3d(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS3d(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var);
+        physClass.ImplicitRHS(:,(i-1)*Nz + 1,(var-1) * ( IMStage - 1 ) + RKIndex ) = physClass.ImplicitRHS(:,(i-1)*Nz + 1,(var-1)*( IMStage - 1 ) + RKIndex ) + SurfStiffMatrix(:,:,var);
+        physClass.ImplicitRHS(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var);
     end
     
 end

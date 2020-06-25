@@ -9,6 +9,8 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         Nvar = 1
         %> field index of variable field
         varFieldIndex = 1
+        
+        fieldName3d = {'C'};
     end
     
     properties( Access = protected )
@@ -17,12 +19,23 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         w0 = 0
     end
     
+    properties( SetAccess = protected )
+        %> cell array for three dimensional external value fields
+        fext3d
+    end
+    
     properties( Access = protected )
         miu = 0
     end
     
     properties
+        mesh2d
+        %> vertical extended mesh
+        mesh3d
+        
         outputFieldOrder3d = 1
+        
+        outputFile3d
     end
     
     properties
@@ -42,7 +55,13 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         BottomBoundaryEdgefm3d
         SurfaceBoundaryEdgefp3d
         BottomBoundaryEdgefp3d
-        ImplicitRHS3d
+        
+        BoundaryEdgefext3d
+        SurfaceBoundaryfext3d
+        BottomBoundaryEdgefext3d
+        
+        ExplicitRHS
+        ImplicitRHS
     end
     
     properties
@@ -50,7 +69,7 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         VerticalEddyViscositySolver
         %>
         HorizontalEddyViscositySolver
-    end    
+    end
     
     methods
         function obj = Adv_DiffAbstract3d()
@@ -62,16 +81,22 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         f_ext = getExtFunc( obj, mesh, time );
     end
     
+    methods ( Access = protected )
+        
+        matEvaluateRHS( obj, fphys2d, fphys );
+        
+        matUpdateOutputResult( obj, time, fphys );
+        
+        matUpdateFinalResult( obj, time, fphys );
+        
+        matEvaluateSourceTerm( obj, fphys );
+                
+    end
+    
     methods ( Hidden )
-        function initPhysFromOptions( obj, mesh )
-            initPhysFromOptions@NdgPhysMat( obj, mesh );
-            %here the viscosity solver is to be added
-            
-            finalTime = obj.getOption('finalTime');
-            for m = 1:obj.Nmesh
-                obj.fext{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
-            end
-        end
+        initPhysFromOptions( obj, mesh2d, mesh3d );
+        
+        
         
         function [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys )
             E = fphys(:,:,2) .* fphys(:,:,1);
@@ -79,7 +104,7 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
             H = fphys(:,:,4) .* fphys(:,:,1);
         end
         
-        function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, nz, fm, fp )
+        function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, nz, fm, fp, edge )
             [ uNorm ] = fm(:,:,2) .* nx + fm(:,:,3) .* ny + fm(:,:,4) .* nz;
             sign_um = sign( uNorm );
             fluxS = ( fm(:,:,1) .* ( sign_um + 1 ) ...
@@ -94,8 +119,8 @@ classdef Adv_DiffAbstract3d < NdgPhysMat
         end
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, nz, fm, fp, fext )
-%             ind = ( edge.ftype == 5 );
-%             fp(:, ind) = 0;
+            %             ind = ( edge.ftype == 5 );
+            %             fp(:, ind) = 0;
         end
     end
     
