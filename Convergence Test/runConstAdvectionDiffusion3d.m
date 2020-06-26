@@ -1,13 +1,14 @@
-function runConstAdvection3d
-M = [ 5 10];
+function runConstAdvectionDiffusion3d
+M = [ 5 10 20 40];
 
 Order =[ 1 2 ];
 % len = deltax;
 Nmesh = numel(M);
 Ndeg = numel(Order);
+len = zeros(Nmesh, Ndeg);
 dofs = zeros(Nmesh, Ndeg);
 
-linewidth = 1.5; 
+linewidth = 1.5;
 markersize = 8;
 
 linestyle = '-';
@@ -21,63 +22,57 @@ time = zeros(Nmesh, Ndeg);
 %         dofs(m, n) = ceil( (50 / deltax(m)) ) * (Order(n)+1);
 %     end
 % end
-ErrInf = zeros(Nmesh, Ndeg); 
-Err2 = zeros(Nmesh, Ndeg);   
-Err1 = zeros(Nmesh, Ndeg); 
+ErrInf = zeros(Nmesh, Ndeg);
+Err2 = zeros(Nmesh, Ndeg);
+Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-    Solver = ConstAdvection3d(Order(n), Order(n), M(m), M(m));
-    tic;
-    Solver.matSolve;
-    time(m,n) = toc;
-    PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvection3d','/','3d'));
-    fext = cell(1);
-    fext{1}(:,:,1) = Solver.fext{1};
-    fphys = cell(1);
-    fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);
-    ErrInf = PostProcess.evaluateNormErrInf( fphys, fext );
-
-    Err2 = PostProcess.evaluateNormErr2( fphys, fext );
-    
-    Err1 = PostProcess.evaluateNormErr1( fphys, fext );
-    
-    clear Solver;
-    clear PostProcess;
-    end
-    
+        Solver = ConstAdvectionDiffusion3d(Order(n), Order(n), M(m), M(m));
+        tic;
+        Solver.matSolve;
+        time(m,n) = toc;
+        len(m, n) = 2/Solver.M;
+        dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionDiffusion3d/3d','/','ConstAdvectionDiffusion3d'));
+        fext = cell(1);
+        fext{1}(:,:,1) = Solver.fext{1};
+        fphys = cell(1);
+        fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);
+        ErrInf(m,n) = PostProcess.evaluateNormErrInf( fphys, fext );
+        
+        Err2(m,n) = PostProcess.evaluateNormErr2( fphys, fext );
+        
+        Err1(m,n) = PostProcess.evaluateNormErr1( fphys, fext );
+        
+        clear Solver;
+        clear PostProcess;
+    end  
     % print table
     fprintf('\n==================deg = %d==================\n', Order(n));
-    convergence_table(len, Err1(:, n))
-
-    fprintf('\n==================deg = %d==================\n', Order(n));
-    convergence_table(len, Err2(:, n))   
-
-    fprintf('\n==================deg = %d==================\n', Order(n));
-    convergence_table(len, Err1(:, n)) 
-
-
+    convergence_table(len(:,n), Err1(:, n), Err2(:, n), ErrInf(:, n));
+    
+    
     % plot figure
     co = color{n};
     figure(1); plot(dofs(:, n), Err1(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
-        ); 
+        );
+    hold on;
     
     
     figure(2); plot(dofs(:, n), Err2(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
-        ); 
+        );
+    hold on;
     
     figure(3); plot(dofs(:, n), ErrInf(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
-        ); 
-    hold on;     
-    
-end
-
-
+        );
+    hold on;
+end    
 
 ylabel_str = {'$L_1$', '$L_2$', '$L_\infty$'};
 fontsize = 12;
@@ -85,12 +80,12 @@ for n = 1:3
     h = figure(n);
     box on; grid on;
     set(gca, 'XScale', 'log', 'YScale', 'log');
-
-    lendstr = {'$\eta p1$','$U p1$','$W p1$',...
-        '$\eta p2$','$U p2$','$W p2$'};
     
-    columnlegend(2,lendstr, 12);
-
+    lendstr = {'$C1$',...
+        '$C2$'};
+    legend(lendstr,'Interpreter','Latex');
+    %     columnlegend(2,lendstr, 12);
+    
     xlabel('$DOFs$', 'Interpreter', 'Latex', 'FontSize', fontsize);
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
 end
@@ -101,26 +96,25 @@ end
 
 
 
-    figure(4);
-    hold on;
-    for n = 1:Ndeg
+figure(4);
+hold on;
+for n = 1:Ndeg
     co = color{n};
     plot(time(:, n)./max(max(time)), Err1(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
-        ); 
-    end
+        );
+end
 
-    set(gca, 'XScale', 'log', 'YScale', 'log');
+set(gca, 'XScale', 'log', 'YScale', 'log');
 
-    lendstr = {'$\eta p1$','$U p1$','$W p1$',...
-        '$\eta p2$','$U p2$','$W p2$'};
-    
-    columnlegend(2,lendstr, 12);
-   
- xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
- ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-    box on; grid on;
+lendstr = {'$C1$','$C2$'};
+legend(lendstr,'Interpreter','Latex');
+%     columnlegend(2,lendstr, 12);
+
+xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)
@@ -150,7 +144,7 @@ function columnlegend( numcolumns, str, fontsize, location)
 %   Author: Simon Henin <shenin@gc.cuny.edu>
 %   Revised by Bill Shawn <bill_shawn@foxmail.com>
 if nargin < 4
-   location = 'NorthEast'; 
+    location = 'NorthEast';
 end
 [legend_h,object_h,~,~] = legend( str );
 numlines = length(str);
@@ -158,12 +152,12 @@ numpercolumn = ceil(numlines/numcolumns);
 pos = get(legend_h, 'position');
 width = numcolumns*pos(3);
 rescale = pos(3)/width;
-xdata = get(object_h(numlines+1), 'xdata'); 
+xdata = get(object_h(numlines+1), 'xdata');
 ydata1 = get(object_h(numlines+1), 'ydata');
 ydata2 = get(object_h(numlines+3), 'ydata');
 sheight = ydata1(1)-ydata2(1);
 height = ydata1(1);
-line_width = (xdata(2)-xdata(1))*rescale; 
+line_width = (xdata(2)-xdata(1))*rescale;
 spacer = xdata(1)*rescale;
 loci = get(gca, 'position');
 set(legend_h, 'position', [loci(1) pos(2) width pos(4)]);
@@ -183,8 +177,8 @@ for i=1:numlines,
     end
     labelnum = i;
     position = mod(i,numpercolumn);
-    if position == 0,
-         position = numpercolumn;
+    if position == 0
+        position = numpercolumn;
     end
     set(object_h(linenum), 'ydata', ...
         [(height-(position-1)*sheight) (height-(position-1)*sheight)]);

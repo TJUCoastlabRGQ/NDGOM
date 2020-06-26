@@ -1,5 +1,5 @@
-classdef ConstAdvection3d < Adv_DiffAbstract3d
-    %CONSTADVECTIONDIFFUSION3D 此处显示有关此类的摘要
+classdef ConstAdvectionNoSource3d < Adv_DiffAbstract3d
+    %CONSTADVECTION3D 此处显示有关此类的摘要
     %   此处显示详细说明
     properties
         M
@@ -8,71 +8,73 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
         Nz
     end
     
+    properties
+        x0
+        y0
+    end
+    
     methods
-        function obj = ConstAdvection3d( N, Nz, M, Mz )
+        function obj = ConstAdvectionNoSource3d( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.miu = 0;
+            obj.u0 = 0.5;
+            obj.v0 = 0.5;
+            obj.x0 = -0.5;
+            obj.y0 = -0.5;
+            obj.w0 = 0;
             obj.M = M;
             obj.Mz = Mz;
             obj.N = N;
-            obj.Nz = Nz;
-            obj.miu = 0;
-            obj.u0 = 1;
-            obj.v0 = 1;
-            obj.w0 = 1;
+            obj.Nz = Nz;            
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );            
         end
         
         function fext = matGetExtFunc(obj, time)
-            fext = obj.getExtFunc(obj.meshUnion(1), time);
+            fext = obj.getExtFunc(obj.meshUnion(1).x, obj.meshUnion(1).y, time);
         end
     end
-
+    
     methods ( Access = protected )
         
         %> set initial function
         function [ fphys ] = setInitialField( obj )
             fphys = cell( obj.Nmesh, 1 );
-            for m = 1 : obj.Nmesh
-                mesh3d = obj.mesh3d(m);
-                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
-                fphys{m}(:,:,1) = obj.getExtFunc( mesh3d, 0);
-                fphys{m}(:,:,2) = obj.u0 * ones(size(mesh3d.x));
-                fphys{m}(:,:,3) = obj.v0 * ones(size(mesh3d.x));
-                fphys{m}(:,:,4) = obj.w0 * ones(size(mesh3d.x));
+            for m = 1:obj.Nmesh
+                mesh = obj.meshUnion(m);
+                fphys{m}(:,:,1) = getExtFunc(obj, mesh.x, mesh.y, 0);
+                fphys{m}(:,:,2) = obj.u0 .* ones(size(fphys{m}(:,:,1)));
+                fphys{m}(:,:,3) = obj.v0 .* ones(size(fphys{m}(:,:,1)));
+                fphys{m}(:,:,4) = obj.w0 .* ones(size(fphys{m}(:,:,1)));
             end
         end
         
         function matUpdateExternalField( obj, time, fphys )
-            obj.BoundaryEdgefp3d{1} = sin(2*pi*time)*sin(2*pi*obj.mesh3d.BoundaryEdge.xb).*...
-                sin(pi*obj.mesh3d.BoundaryEdge.yb).*sin(2*pi*obj.mesh3d.BoundaryEdge.zb);
-            obj.SurfaceBoundaryEdgefp3d{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y).*sin(2*pi*1 );              
-            obj.BottomBoundaryEdgefp3d{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y).*sin(2*pi*0);
-            obj.SurfBoundNewmannDate(:,:,1) = 2 * pi * obj.miu * sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y).*cos(2*pi*1) .* 1;
-            obj.BotBoundNewmannDate(:,:,1) = 2 * pi * obj.miu * sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y).*cos(2*pi*0) .* (-1);            
+            obj.BoundaryEdgefp{1} = obj.getExtFunc( obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, time);
+            obj.SurfaceBoundaryEdgefp{1} = obj.getExtFunc( obj.mesh2d.x, obj.mesh2d.y, time);
+            obj.BottomBoundaryEdgefp{1} = obj.getExtFunc( obj.mesh2d.x, obj.mesh2d.y, time);
+            obj.SurfBoundNewmannDate(:,:,1) =zeros(size(obj.mesh2d.x));  
+            obj.BotBoundNewmannDate(:,:,1) = zeros(size(obj.mesh2d.x));            
 %         BotBoundNewmannDate
         end
         
         function matEvaluateSourceTerm( obj, time )
-            obj.frhs{1} = obj.frhs{1} + ...
-                2*pi* (cos(2*pi*time).*sin(2*pi*obj.meshUnion.x) + cos(2*pi*obj.meshUnion.x).*sin(2*pi*time)).* sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z)...
-                + pi*(cos(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z)+2*cos(2*pi*obj.meshUnion.z).*sin(pi*obj.meshUnion.y))*sin(2*pi*time).*sin(2*pi*obj.meshUnion.x) + ...
-                9*obj.miu*pi^2*sin(2*pi*time).*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z);
+                %doing nothing
         end
         
-        function f_ext = getExtFunc( obj, mesh, time )
-            f_ext = sin(2*pi*time)*sin(2*pi*mesh.x).*sin(pi*mesh.y).*...
-                    sin(2*pi*mesh.z);
+        function f_ext = getExtFunc( obj, x, y , time )
+            xc = obj.x0 + obj.u0.*time;
+            yc = obj.y0 + obj.v0.*time;
+            
+            sigma = 125*1e3/(33*33);
+            t = -( (x-xc).^2+(y-yc).^2 )*sigma;
+            f_ext = exp(t);
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 0.2;
-            outputIntervalNum = 100;
+            ftime = 1;
+            outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -84,15 +86,14 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
             dthu = 1/(2*obj.N+1) *  dx/obj.u0;
             dthv = 1/(2*obj.N+1) *  dx/obj.v0; 
-            dtz = 1/(2*obj.Nz+1) *  dx/obj.w0; 
-            option('timeInterval') = 0.25 * min(min(dthu, dthv), dtz);
+            option('timeInterval') = 0.6 * min(dthu, dthv);
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
             option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.None;
         end
         
-    end    
+    end      
 end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
@@ -107,7 +108,7 @@ mesh2d = makeUniformQuadMesh( N, ...
     [ -1, 1 ], [ -1, 1 ], M, M, bctype);
 
 cell = StdPrismQuad( N, Nz );
-zs = ones(mesh2d.Nv, 1); zb = -1 * ones(mesh2d.Nv, 1);
+zs = ones(mesh2d.Nv, 1); zb = -1 * zs;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );

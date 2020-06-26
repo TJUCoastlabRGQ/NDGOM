@@ -6,6 +6,11 @@ classdef NdgNoneHorizDiffSolver
     end
     
     methods
+        
+        function obj = NdgNoneHorizDiffSolver( physClass )
+            %Doing nothing
+        end
+        
         function matEvaluateDiffRHS(obj, ~, ~)
             %Doing nothing
         end

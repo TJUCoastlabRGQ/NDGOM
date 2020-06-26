@@ -91,7 +91,17 @@ classdef NdgExtendMesh3d < handle
             [ obj.rx, obj.ry, obj.rz, obj.sx, obj.sy, obj.sz, obj.tx, obj.ty,...
                 obj.tz, obj.J, obj.Jz ] = cell.assembleJacobianMatrix( obj.x, obj.y, obj.z);
             obj = GetCellSize( obj );
+            
         end% func
+        
+        function integralValue = GetMeshIntegralValue(obj, nodeVal)
+            integralValue = mxGetMeshIntegralValue(nodeVal, obj.cell.wq, obj.J, obj.cell.Vq);
+        end
+        
+        function avergeValue = GetMeshAverageValue(obj, nodeVal)
+            integralValue = mxGetMeshIntegralValue(nodeVal, obj.cell.wq, obj.J, obj.cell.Vq);
+            avergeValue = integralValue ./ obj.LAV;
+        end
         
         function nodeQ = proj_vert2node(obj, vertQ)
             % project scalars from mesh verts to nodes
@@ -109,6 +119,7 @@ classdef NdgExtendMesh3d < handle
         field3d = Extend2dField( obj, field2d );
         %> evaluate vertical integral from bottom to each node
         fint3d = VerticalIntegralField( obj, field3d )
+        
     end
     
     methods ( Access = protected )

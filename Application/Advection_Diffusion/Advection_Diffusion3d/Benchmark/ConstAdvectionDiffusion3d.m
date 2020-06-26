@@ -1,12 +1,21 @@
 classdef ConstAdvectionDiffusion3d < Adv_DiffAbstract3d
     %CONSTADVECTIONDIFFUSION3D 此处显示有关此类的摘要
     %   此处显示详细说明
-    
+    properties
+        M
+        Mz
+        N
+        Nz
+    end
     
     methods
         function obj = ConstAdvectionDiffusion3d( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.M = M;
+            obj.Mz = Mz;
+            obj.N = N;
+            obj.Nz = Nz;
             obj.miu = 0.001;
             obj.u0 = 1;
             obj.v0 = 1;
@@ -62,7 +71,7 @@ classdef ConstAdvectionDiffusion3d < Adv_DiffAbstract3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 0.15;
+            ftime = 0.2;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -70,8 +79,13 @@ classdef ConstAdvectionDiffusion3d < Adv_DiffAbstract3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.Constant;
+            dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
+            dthu = min( 1/(2*obj.N+1) *  dx/obj.u0, 1/(2*obj.Nz+1) * dx^2/obj.miu);
+            dthv = min( 1/(2*obj.N+1) *  dx/obj.v0, 1/(2*obj.Nz+1) * dx^2/obj.miu); 
+            dtz = min( 1/(2*obj.Nz+1) *  dx/obj.w0, 1/(2*obj.Nz+1) * dx^2/obj.miu); 
+            option('timeInterval') = min(min(dthu, dthv), dtz);
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
@@ -92,10 +106,10 @@ bctype = [ ...
     enumBoundaryCondition.Clamped ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, 1 ], [ 0, 1 ], M, M, bctype);
+    [ -1, 1 ], [ -1, 1 ], M, M, bctype);
 
 cell = StdPrismQuad( N, Nz );
-zs = ones(mesh2d.Nv, 1); zb = zs - 1;
+zs = ones(mesh2d.Nv, 1); zb = -1 * ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
