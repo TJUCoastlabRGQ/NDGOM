@@ -10,7 +10,7 @@ obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 hwait = waitbar(0,'Runing MatSolver....');
-% visual = Visual2d( obj.mesh2d );
+visual = Visual2d( obj.mesh2d );
 % try
 while( time < ftime )
     %     dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
@@ -41,9 +41,9 @@ while( time < ftime )
     %>Update the velocity
     
     for i = 1:obj.Nvar
-        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS(:,:,(i-1)*3+2)+...
-            dt * EXb(3) * obj.ExplicitRHS(:,:,(i-1)*3+3) + dt * EXb(4) * obj.ExplicitRHS(:,:,(i-1)*3+4) + ...
-            dt * IMb(1) * obj.ImplicitRHS(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS(:,:,(i-1)*2+2) + dt * IMb(3) * obj.ImplicitRHS(:,:,(i-1)*2+2);
+        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS(:,:,(i-1)*4+1) + dt * EXb(2) * obj.ExplicitRHS(:,:,(i-1)*4+2)+...
+            dt * EXb(3) * obj.ExplicitRHS(:,:,(i-1)*4+3) + dt * EXb(4) * obj.ExplicitRHS(:,:,(i-1)*4+4) + ...
+            dt * IMb(1) * obj.ImplicitRHS(:,:,(i-1)*3+1) + dt * IMb(2) * obj.ImplicitRHS(:,:,(i-1)*3+2) + dt * IMb(3) * obj.ImplicitRHS(:,:,(i-1)*3+3);
     end
     
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
@@ -53,7 +53,7 @@ while( time < ftime )
     time = time + dt;
     %     fphys{1}(:,:,1) = obj.matGetExtFunc( time );
     %> Update the diffusion coefficient
-%     visual.drawResult( fphys{1}(:,:,1) );
+    visual.drawResult( fphys{1}(:,:,1) );
 %     display(time);
     obj.matUpdateOutputResult( time,  fphys );
     timeRatio = time / ftime;
