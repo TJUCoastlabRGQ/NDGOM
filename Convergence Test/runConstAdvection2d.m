@@ -1,7 +1,8 @@
 function runConstAdvection2d
-M = [ 10 20 30];
+M = [ 40 50 60 70 80 90 100];
 
-Order =[ 3 ];
+Order = 2;
+% Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -108,7 +109,7 @@ end
 
 set(gca, 'XScale', 'log', 'YScale', 'log');
 
-lendstr = {'$C1$','$C2$'};
+lendstr = {'$C1$','$C2$','$C3$'};
 legend(lendstr,'Interpreter','Latex');
 %     columnlegend(2,lendstr, 12);
 

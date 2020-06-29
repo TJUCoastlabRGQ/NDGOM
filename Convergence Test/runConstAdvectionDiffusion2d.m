@@ -1,7 +1,7 @@
-function runConstAdvectionNoSource2d
-M = [ 10 20 30];
+function runConstAdvectionDiffusion2d
+M = [ 10 20 40 60 80];
 
-Order =[ 1 2 3 ];
+Order =[ 1 2 ];
 % len = deltax;
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -13,7 +13,7 @@ markersize = 8;
 
 linestyle = '-';
 
-color = {'k', 'r','b'};  %black for order one, red for order two
+color = {'k', 'r'};  %black for order one, red for order two
 marker = {'o'};%circle for Eta, square for U, triangle for Ws
 time = zeros(Nmesh, Ndeg);
 
@@ -27,13 +27,13 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ConstAdvectionNoSource2d(Order(n), M(m));
+        Solver = ConstAdvectionDiffusion2d(Order(n), M(m));
         tic;
         Solver.matSolve;
         time(m,n) = toc;
         len(m, n) = 2/Solver.M;
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionNoSource2d/2d','/','ConstAdvectionNoSource2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionDiffusion3d/3d','/','ConstAdvectionDiffusion3d'));
         fext = cell(1);
         fext{1}(:,:,1) = Solver.fext{1};
         fphys = cell(1);
@@ -82,7 +82,7 @@ for n = 1:3
     set(gca, 'XScale', 'log', 'YScale', 'log');
     
     lendstr = {'$C1$',...
-        '$C2$','$C3$'};
+        '$C2$'};
     legend(lendstr,'Interpreter','Latex');
     %     columnlegend(2,lendstr, 12);
     
@@ -100,7 +100,7 @@ figure(4);
 hold on;
 for n = 1:Ndeg
     co = color{n};
-    plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
+    plot(time(:, n)./max(max(time)), Err1(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
         );
@@ -108,7 +108,7 @@ end
 
 set(gca, 'XScale', 'log', 'YScale', 'log');
 
-lendstr = {'$C1$','$C2$','$C3$'};
+lendstr = {'$C1$','$C2$'};
 legend(lendstr,'Interpreter','Latex');
 %     columnlegend(2,lendstr, 12);
 

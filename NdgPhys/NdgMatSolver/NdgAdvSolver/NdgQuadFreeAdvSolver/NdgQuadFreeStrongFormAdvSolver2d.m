@@ -27,7 +27,7 @@ classdef NdgQuadFreeStrongFormAdvSolver2d < NdgQuadFreeStrongFormSolver & ...
                 [ physClass.BoundaryEdgefm{m}, ~ ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m}, physClass.fext2d{m} );
                 [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, physClass.BoundaryEdgefm{m} );
                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh, edge.nx, edge.ny, physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m}, edge );
-                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxS );                
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );                
             end
             
             for m = 1:phys.Nmesh % calculate RHS term on each mesh

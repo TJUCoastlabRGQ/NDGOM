@@ -1,7 +1,8 @@
-function runConstAdvectionNoSource2d
-M = [ 10 20 30];
+function runConstAdvection3d
+M = [ 10 20 30 40 ];
 
-Order =[ 1 2 3 ];
+Order = [1];
+% Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -27,13 +28,13 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ConstAdvectionNoSource2d(Order(n), M(m));
+        Solver = ConstAdvection3d(Order(n), Order(n), M(m), M(m));
         tic;
         Solver.matSolve;
         time(m,n) = toc;
         len(m, n) = 2/Solver.M;
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionNoSource2d/2d','/','ConstAdvectionNoSource2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvection3d/3d','/','ConstAdvection3d'));
         fext = cell(1);
         fext{1}(:,:,1) = Solver.fext{1};
         fphys = cell(1);
