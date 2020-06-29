@@ -1,4 +1,4 @@
-classdef ConstAdvection2d < Adv_DiffAbstract2d
+classdef ConstAdvectionDiffusion2d < Adv_DiffAbstract2d
     %CONSTADVECTIONDIFFUSION3D 此处显示有关此类的摘要
     %   此处显示详细说明
     properties
@@ -7,17 +7,21 @@ classdef ConstAdvection2d < Adv_DiffAbstract2d
     end
     
     methods
-        function obj = ConstAdvection2d( N,  M )
+        function obj = ConstAdvectionDiffusion2d( N,  M )
             % setup mesh domain
             [ obj.mesh2d  ] = makeChannelMesh( obj, N, M );
             obj.M = M;
             obj.N = N;
+            obj.miu = 0.001;
             obj.u0 = 1;
             obj.v0 = 1;
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d );            
         end
         
+        function fext = matGetExtFunc(obj, time)
+            fext = obj.getExtFunc(obj.meshUnion(1), time);
+        end
     end
 
     methods ( Access = protected )
@@ -25,7 +29,7 @@ classdef ConstAdvection2d < Adv_DiffAbstract2d
         %> set initial function
         function [ fphys ] = setInitialField( obj )
             fphys = cell( obj.Nmesh, 1 );
-            for m = 1:obj.Nmesh
+            for m = 1 : obj.Nmesh
                 mesh = obj.meshUnion(m);
                 fphys{m}(:,:,1) = getExtFunc(obj, mesh, 0);
                 fphys{m}(:,:,2) = obj.u0 .* ones(size(fphys{m}(:,:,1)));
@@ -34,17 +38,17 @@ classdef ConstAdvection2d < Adv_DiffAbstract2d
         end
         
         function matUpdateExternalField( obj, time, fphys )
-            obj.BoundaryEdgefp{1}(:,:,1) = sin(2*pi*time)*sin(2*pi*obj.meshUnion.BoundaryEdge.xb)...
-                .*sin(pi*obj.meshUnion.BoundaryEdge.yb);
-            obj.BoundaryEdgefp{1}(:,:,2) = obj.u0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
-            obj.BoundaryEdgefp{1}(:,:,3) = obj.v0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
+            obj.BoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.BoundaryEdge.xb).*...
+                sin(pi*obj.mesh2d.BoundaryEdge.yb);
+%         BotBoundNewmannDate
         end
         
         function matEvaluateSourceTerm( obj, time )
             obj.frhs{1} = obj.frhs{1} + ...
                 2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y) + ...
                 2*pi*sin(2*pi*time)*cos(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y) + ...
-                pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(pi*obj.meshUnion.y);
+                pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(pi*obj.meshUnion.y) + ...
+                5*pi^2*obj.miu*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y);
         end
         
         function f_ext = getExtFunc( obj, mesh, time )
@@ -59,16 +63,19 @@ classdef ConstAdvection2d < Adv_DiffAbstract2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 1;
+            option('outputNcfileNum') = 5;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
             dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
-            dthu = 1/(2*obj.N+1) *  dx/obj.u0;
-            dthv = 1/(2*obj.N+1) *  dx/obj.v0; 
-            option('timeInterval') = 0.3 *  min(dthu, dthv);
+            dthu = min( 1/(2*obj.N+1) *  dx/obj.u0, 1/(2*obj.N+1) * dx^2/obj.miu);
+            dthv = min( 1/(2*obj.N+1) *  dx/obj.v0, 1/(2*obj.N+1) * dx^2/obj.miu); 
+            option('timeInterval') = 0.2 * min(dthu, dthv);
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.None;
+            option('AdvDiffConstantVerticalDiffusionValue') = obj.miu;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffConstantHorizontalDiffusionValue') = obj.miu;
         end
         
     end    

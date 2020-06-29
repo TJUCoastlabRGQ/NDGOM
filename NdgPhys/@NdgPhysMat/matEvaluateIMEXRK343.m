@@ -10,7 +10,7 @@ obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 hwait = waitbar(0,'Runing MatSolver....');
-visual = Visual2d( obj.mesh2d );
+% visual = Visual2d( obj.mesh2d );
 % try
 while( time < ftime )
     %     dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
@@ -53,7 +53,7 @@ while( time < ftime )
     time = time + dt;
     %     fphys{1}(:,:,1) = obj.matGetExtFunc( time );
     %> Update the diffusion coefficient
-    visual.drawResult( fphys{1}(:,:,1) );
+%     visual.drawResult( fphys{1}(:,:,1) );
 %     display(time);
     obj.matUpdateOutputResult( time,  fphys );
     timeRatio = time / ftime;
