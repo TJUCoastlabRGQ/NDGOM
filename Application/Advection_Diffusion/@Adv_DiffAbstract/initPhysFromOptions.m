@@ -41,7 +41,6 @@ obj.option = obj.setOption( obj.option );
 finalTime = obj.getOption('finalTime');
 for m = 1:obj.Nmesh
         obj.fext{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
-%     obj.fext{m} = obj.getExtFunc( obj.meshUnion(m).x, obj.meshUnion(m).y, finalTime );
 end
 obj.outputFile = obj.matInitOutput(mesh, obj.fieldName);
 end

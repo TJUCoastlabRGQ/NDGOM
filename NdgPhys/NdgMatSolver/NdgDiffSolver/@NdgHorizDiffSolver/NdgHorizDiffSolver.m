@@ -268,8 +268,8 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> this penalty parameter is calculated as $\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$
             [ HnvM, HnvP ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).InnerEdge, DiffusionCoefficient );
             
-            InnerEdgeA_fm = (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))';
-            InnerEdgeA_fp = (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))';
+            InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
+            InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, physClass.meshUnion(1).Nz );
             InnerEdgeTau_fm = bsxfun(@times,  ( InnerEdgeA_fm(:) )',...
                 ( physClass.meshUnion(1).cell.N + 1 )*(physClass.meshUnion(1).cell.N + ...
                 double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvM);
@@ -278,7 +278,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
                 double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvP);
             obj.InnerEdgeTau = max( InnerEdgeTau_fm, InnerEdgeTau_fp );
             
-            BoundaryEdgeA_fm = (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))';
+            BoundaryEdgeA_fm = repmat ( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
             [ Hnv, ~ ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).BoundaryEdge, DiffusionCoefficient);
             obj.BoundaryEdgeTau = bsxfun(@times, ( BoundaryEdgeA_fm(:) )', ...
                 ( physClass.meshUnion(1).cell.N + 1 )*( physClass.meshUnion(1).cell.N + ...

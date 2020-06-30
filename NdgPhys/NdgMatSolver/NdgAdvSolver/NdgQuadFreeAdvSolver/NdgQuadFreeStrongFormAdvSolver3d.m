@@ -28,7 +28,13 @@ classdef NdgQuadFreeStrongFormAdvSolver3d < NdgQuadFreeStrongFormSolver & ...
                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m}, edge );
                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
-        
+                edge = mesh3d.BottomEdge;
+                [ fm, fp ]  = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                [ fluxP ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );                
+                [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, edge.nz, fm, fp, edge );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );                
+
                 edge = mesh3d.BottomBoundaryEdge;
                 [ physClass.BottomBoundaryEdgefm{m}, ~ ] = edge.matEvaluateSurfValue( fphys );
                 [ physClass.BottomBoundaryEdgefm{m}, ~ ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, physClass.BottomBoundaryEdgefm{m}, physClass.BottomBoundaryEdgefp{m}, physClass.fext3d{m} );                
