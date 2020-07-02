@@ -28,7 +28,7 @@ classdef NdgPostProcess < handle
 %             
 %             [ obj.Nt ] = accessOutputStepNumber( obj );
 %             [ obj.Nvar ] = accessOutputVarNumber( obj );
-[ obj.Nvar ] = 3;
+[ obj.Nvar ] = 4;
 %             [ obj.time ] = cell( obj.Nmesh, 1 );
 %             for m = 1:obj.Nmesh
 %                 obj.time{m} = obj.assessOutputVar( m, 'time' );

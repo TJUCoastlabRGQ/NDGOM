@@ -10,24 +10,6 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
     
     methods ( Access = protected )
         
-        function matEvaluateError( obj, fphys, time)
-            [ h, hu, hv ] = obj.matGetExactSolution( obj.mesh3d, time);
-            fext = cell(1);
-            fext{1}(:,:,1) = hu;
-            fext{1}(:,:,2) = hv;
-            fext{1}(:,:,3) = h;
-            Tempfphys = cell(1);
-            Tempfphys{1}(:,:,1) = fphys(:,:,1);
-            Tempfphys{1}(:,:,2) = fphys(:,:,2);
-            Tempfphys{1}(:,:,3) = fphys(:,:,4);
-            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-            obj.timePoint(obj.Index) = time;
-            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-            obj.Index = obj.Index + 1;
-        end        
-        
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
             fphys2d = cell( obj.Nmesh, 1 );
