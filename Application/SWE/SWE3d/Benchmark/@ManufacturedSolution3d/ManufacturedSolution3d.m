@@ -105,8 +105,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 %> '$\eta$' in extended three dimensional fields
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
-                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(x+0));
-                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(y+0));
+                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(x+0)) .* fphys{m}(:,:,4);
+                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(y+0)) .* fphys{m}(:,:,4);
                 
                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
@@ -129,9 +129,10 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             mesh2d = obj.mesh2d(1);
             matEvaluateSourceTerm@SWEAbstract3d( obj, fphys);
             h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
-            obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + obj.e*(obj.w * cos(obj.w.*(mesh2d.x+time)) + obj.w * cos(obj.w.*(mesh2d.y+time))) + ...
-                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.x+time)) + h2d.*obj.d./2.*sin(obj.w*(mesh2d.x+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.x+time)) - 0.005 ) + ...
-                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.y+time)) + h2d.*obj.d./2.*sin(obj.w*(mesh2d.y+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.y+time)) - 0.005 );
+            %[Problematic
+            obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + obj.e*(obj.w * cos(obj.w.*(mesh2d.x+time)) + obj.w * cos(obj.w.*(mesh2d.y+time))) - ...
+                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.x+time)) - h2d.*obj.d./2.*sin(obj.w*(mesh2d.x+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.x+time)) - 0.005 ) - ...
+                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.y+time)) - h2d.*obj.d./2.*sin(obj.w*(mesh2d.y+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.y+time)) - 0.005 );
             
             h = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
             eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
@@ -208,7 +209,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 500;
+            ftime = 200;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
