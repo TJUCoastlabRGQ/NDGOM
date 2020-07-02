@@ -16,8 +16,8 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             obj.Mz = Mz;
             obj.N = N;
             obj.Nz = Nz;
-            obj.miu = 0;
-            obj.u0 = 0;
+            obj.miu = 0.001;
+            obj.u0 = 1;
             obj.v0 = 1;
             obj.w0 = 1;
             % allocate boundary field with mesh obj
@@ -46,41 +46,30 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
         
         function matUpdateExternalField( obj, time, fphys )
             obj.BoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh3d.BoundaryEdge.xb).*...
-                sin(pi*obj.mesh3d.BoundaryEdge.yb).*sin(2*pi*obj.mesh3d.BoundaryEdge.zb);
+                sin(2*pi*obj.mesh3d.BoundaryEdge.yb).*sin(2*pi*obj.mesh3d.BoundaryEdge.zb);
             obj.SurfaceBoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y)*sin(2*pi*1);              
+                sin(2*pi*obj.mesh2d.y)*sin(2*pi*1);              
             obj.BottomBoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
-                sin(pi*obj.mesh2d.y)*sin(2*pi*(-1));         
+                sin(2*pi*obj.mesh2d.y)*sin(2*pi*(-1));
+            obj.SurfBoundNewmannDate(:,:,1) = 2 * pi * obj.miu * sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
+                sin(2*pi*obj.mesh2d.y).*cos(2*pi*1) .* 1;
+            obj.BotBoundNewmannDate(:,:,1) = 2 * pi * obj.miu * sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
+                sin(2*pi*obj.mesh2d.y).*cos(2*pi*(-1)) .* (-1);               
         end
         
         function matEvaluateSourceTerm( obj, time )
             %u=v=w=1
             obj.frhs{1} = obj.frhs{1} + ...
-                2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-                obj.u0 .* 2*pi*sin(2*pi*time)*cos(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-                obj.v0 .* pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) +...
-                obj.w0 .* 2*pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*cos(2*pi*obj.meshUnion.z);
-           %u=v=1,w=0
-%             obj.frhs{1} = obj.frhs{1} + ...
-%                 2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-%                 obj.u0 .* 2*pi*sin(2*pi*time)*cos(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-%                 obj.v0 .* pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z);
-            %u=w=1,v=0
-%             obj.frhs{1} = obj.frhs{1} + ...
-%                 2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-%                 obj.u0 .* 2*pi*sin(2*pi*time)*cos(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-%                 obj.w0 .* 2*pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*cos(2*pi*obj.meshUnion.z);    
-
-            %u=0, v=w=1
-%             obj.frhs{1} = obj.frhs{1} + ...
-%                 2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
-%                 obj.v0 .* pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) +...
-%                 obj.w0 .* 2*pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(pi*obj.meshUnion.y).*cos(2*pi*obj.meshUnion.z);
+                2*pi*cos(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(2*pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
+                obj.u0 .* 2*pi*sin(2*pi*time)*cos(2*pi*obj.meshUnion.x).*sin(2*pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) + ...
+                obj.v0 .* 2*pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*cos(2*pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z) +...
+                obj.w0 .* 2*pi*sin(2*pi*time)*sin(2*pi*obj.meshUnion.x).*sin(2*pi*obj.meshUnion.y).*cos(2*pi*obj.meshUnion.z) + ...
+                12*obj.miu*pi^2*sin(2*pi*time).*sin(2*pi*obj.meshUnion.x).*sin(2*pi*obj.meshUnion.y).*sin(2*pi*obj.meshUnion.z);
         end
         
         function f_ext = getExtFunc( obj, mesh, time )
             %u=v=1
-            f_ext = sin(2*pi*time)*sin(2*pi*mesh.x).*sin(pi*mesh.y).*sin(2*pi*mesh.z);
+            f_ext = sin(2*pi*time)*sin(2*pi*mesh.x).*sin(2*pi*mesh.y).*sin(2*pi*mesh.z);
         end
         
         function [ option ] = setOption( obj, option )
@@ -93,16 +82,22 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
-            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
+            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.Constant;
             dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
-            dthu = 1/(2*obj.N+1) *  dx/obj.u0;
-            dthv = 1/(2*obj.N+1) *  dx/obj.v0; 
-            dthz = 1/(2*obj.N+1) *  dx/obj.w0; 
-            option('timeInterval') = 0.3 * min(min(dthu, dthv),dthz);
+%             dthu = 1/(2*obj.N+1) *  dx/obj.u0;
+%             dthv = 1/(2*obj.N+1) *  dx/obj.v0; 
+%             dthz = 1/(2*obj.N+1) *  dx/obj.w0; 
+            dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
+            dthu = min( 1/(2*obj.N+1) *  dx/obj.u0, 1/(2*obj.Nz+1) * dx^2/obj.miu);
+            dthv = min( 1/(2*obj.N+1) *  dx/obj.v0, 1/(2*obj.Nz+1) * dx^2/obj.miu); 
+            dtz = min( 1/(2*obj.Nz+1) *  dx/obj.w0, 1/(2*obj.Nz+1) * dx^2/obj.miu);             
+            option('timeInterval') = 0.2 * min(min(dthu, dthv),dtz);
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.None;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffConstantHorizontalDiffusionValue') = obj.miu; 
+            option('AdvDiffConstantVerticalDiffusionValue') = obj.miu;
         end
         
     end    

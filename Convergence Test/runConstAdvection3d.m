@@ -1,7 +1,7 @@
 function runConstAdvection3d
 M = [ 10 20 30 40 ];
 
-Order = [1];
+Order = [1 2];
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);

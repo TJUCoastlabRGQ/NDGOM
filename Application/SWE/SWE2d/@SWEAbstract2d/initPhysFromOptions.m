@@ -26,6 +26,9 @@ end
 [ obj.numfluxSolver, obj.surfluxSolver, obj.volumefluxSolver ] = initFluxSolver( obj );
 [ obj.limiterSolver ] = initLimiter( obj );
 
+    % Setup the output NetCDF file object
+obj.outputFile = obj.matInitOutput(mesh, obj.fieldName);
+
 end% func
 
 function [NonhydrostaticSolver] = initNonhydrostaticSolver(obj)

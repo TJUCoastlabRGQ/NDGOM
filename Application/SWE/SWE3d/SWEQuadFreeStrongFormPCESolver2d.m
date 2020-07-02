@@ -25,10 +25,10 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 % Function used to calculate the two dimentional PCE inner surface term
                 InnerEdge = mesh3d.InnerEdge;
                 InnerEdge2d = mesh2d.InnerEdge;
-                physClass.InnerEdgeFluxM2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxM3d{m}(:,:,1) );
-                physClass.InnerEdgeFluxP2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxP3d{m}(:,:,1) );
+                physClass.InnerEdgeFluxM2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxM{m}(:,:,1) );
+                physClass.InnerEdgeFluxP2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxP{m}(:,:,1) );
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                physClass.InnerEdgeFluxS2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxS3d{m}(:,:,1) );
+                physClass.InnerEdgeFluxS2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxS{m}(:,:,1) );
                 physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge2d.matEvaluateStrongFromEdgeRHS( physClass.InnerEdgeFluxM2d{m}, physClass.InnerEdgeFluxP2d{m}, physClass.InnerEdgeFluxS2d{m} );
                 
                 % Function used to calculate the two dimentional PCE boundary surface integration term
@@ -38,10 +38,10 @@ classdef SWEQuadFreeStrongFormPCESolver2d
 %                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
                 %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
 %                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
-                physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM3d{m}(:,:,1) );
-                physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS3d{m}(:,:,1) );
+                physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
+                physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
                 
-                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge2d.matEvaluateStrongFromEdgeRHS( physClass.BoundaryEdgeFluxM2d{m}, physClass.BoundaryEdgeFluxS2d{m} );
+                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge2d.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM2d{m}, physClass.BoundaryEdgeFluxS2d{m} );
                 
             end
         end

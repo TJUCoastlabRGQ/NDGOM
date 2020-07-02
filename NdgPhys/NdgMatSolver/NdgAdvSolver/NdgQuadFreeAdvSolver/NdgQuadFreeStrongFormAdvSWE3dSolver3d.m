@@ -11,20 +11,20 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 mesh3d = physClass.meshUnion(m);
                 
                 edge = mesh3d.InnerEdge;
-                [ physClass.InnerEdgefm3d{m}, physClass.InnerEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
+                [ physClass.InnerEdgefm{m}, physClass.InnerEdgefp{m} ] = edge.matEvaluateSurfValue( fphys );
               
-                [ physClass.InnerEdgeFluxM3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefm3d{m} );
-                [ physClass.InnerEdgeFluxP3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefp3d{m} );
-                [ physClass.InnerEdgeFluxS3d{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.InnerEdgefm3d{m}(:,:,[4, 1, 2]), physClass.InnerEdgefp3d{m}(:,:,[4, 1, 2]), edge );
-                [ physClass.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( physClass.InnerEdgeFluxM3d{m}(:,:,[2,3]), physClass.InnerEdgeFluxP3d{m}(:,:,[2,3]), physClass.InnerEdgeFluxS3d{m}(:,:,[2,3]) );
+                [ physClass.InnerEdgeFluxM{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefm{m} );
+                [ physClass.InnerEdgeFluxP{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.InnerEdgefp{m} );
+                [ physClass.InnerEdgeFluxS{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.InnerEdgefm{m}(:,:,[4, 1, 2]), physClass.InnerEdgefp{m}(:,:,[4, 1, 2]), edge );
+                [ physClass.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( physClass.InnerEdgeFluxM{m}(:,:,[2,3]), physClass.InnerEdgeFluxP{m}(:,:,[2,3]), physClass.InnerEdgeFluxS{m}(:,:,[2,3]) );
 
                 edge = mesh3d.BoundaryEdge;
-                [ physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m} ] = edge.matEvaluateSurfValue( fphys );
+                [ physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m} ] = edge.matEvaluateSurfValue( fphys );
     
-                [ physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, physClass.BoundaryEdgefm3d{m}, physClass.BoundaryEdgefp3d{m}, physClass.fext3d{m} );
-                [ physClass.BoundaryEdgeFluxM3d{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm3d{m} );
-                [ physClass.BoundaryEdgeFluxS3d{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.BoundaryEdgefm3d{m}(:,:,[4, 1, 2]), physClass.BoundaryEdgefp3d{m}(:,:,[4, 1, 2]), edge );
-                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM3d{m}(:,:,[2,3]), physClass.BoundaryEdgeFluxS3d{m}(:,:,[2,3]) );
+                [ physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m} ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, physClass.BoundaryEdgefm{m}, physClass.BoundaryEdgefp{m}, physClass.fext3d{m} );
+                [ physClass.BoundaryEdgeFluxM{m} ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, physClass.BoundaryEdgefm{m} );
+                [ physClass.BoundaryEdgeFluxS{m} ] = physClass.matEvaluateSurfNumFlux( mesh3d, edge.nx, edge.ny, physClass.BoundaryEdgefm{m}(:,:,[4, 1, 2]), physClass.BoundaryEdgefp{m}(:,:,[4, 1, 2]), edge );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM{m}(:,:,[2,3]), physClass.BoundaryEdgeFluxS{m}(:,:,[2,3]) );
                 
         
                 edge = mesh3d.BottomEdge;

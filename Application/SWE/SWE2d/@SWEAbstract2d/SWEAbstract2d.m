@@ -32,13 +32,26 @@ classdef SWEAbstract2d < NdgPhysMat
     properties
         %> number of physical field [h hu hv z hc w q]
         Nfield = 7
-        fieldName2d = {'H','HU','HV','z','HC','HW','q'};
+        fieldName = {'H','HU','HV','z','HC','HW','q'};
         %> number of variable field
         Nvar = 3
         %> index of variable in physical field
         varFieldIndex = [ 1, 2, 3 ]
         %> index of variable to be output
-        outputFieldOrder = [1, 2, 3]
+        outputFieldOrder2d = [1, 2, 3]
+        
+        outputFile
+    end
+    
+    properties ( SetAccess = public )
+        InnerEdgefm
+        BoundaryEdgefm
+        InnerEdgefp
+        BoundaryEdgefp
+        BoundaryEdgefext
+        
+        ExplicitRHS
+        ImplicitRHS
     end
     
     properties
@@ -105,7 +118,7 @@ classdef SWEAbstract2d < NdgPhysMat
     end
     
     methods( Access = protected )
-        outputObj = matInitOutput( obj, mesh )
+        outputObj = matInitOutput( obj, mesh, fieldName )
     end
     
     methods ( Sealed, Access = protected )

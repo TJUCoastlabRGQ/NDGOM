@@ -4,6 +4,7 @@ classdef enumSWEVerticalEddyViscosity < int8
         Constant        (0)
         Parabolic    (1)
         GOTM        (2)
+        None (3)
     end
     
 end
