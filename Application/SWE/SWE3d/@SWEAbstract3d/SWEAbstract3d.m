@@ -84,16 +84,16 @@ classdef SWEAbstract3d < NdgPhysMat
     end
     
     properties ( SetAccess = public )
-        InnerEdgefm3d
-        BoundaryEdgefm3d
-        InnerEdgefp3d
-        BoundaryEdgefp3d
+        InnerEdgefm
+        BoundaryEdgefm
+        InnerEdgefp
+        BoundaryEdgefp
         
-        InnerEdgeFluxS3d
-        BoundaryEdgeFluxS3d
-        InnerEdgeFluxM3d
-        BoundaryEdgeFluxM3d
-        InnerEdgeFluxP3d
+        InnerEdgeFluxS
+        BoundaryEdgeFluxS
+        InnerEdgeFluxM
+        BoundaryEdgeFluxM
+        InnerEdgeFluxP
         
         InnerEdgeFluxS2d
         BoundaryEdgeFluxS2d
@@ -101,13 +101,13 @@ classdef SWEAbstract3d < NdgPhysMat
         BoundaryEdgeFluxM2d
         InnerEdgeFluxP2d
         
-        ImplicitRHS3d
+        ImplicitRHS
     end
     
     properties ( SetAccess = protected )
         %These variable are needed when time stepping
         ExplicitRHS2d = []
-        ExplicitRHS3d = []
+        ExplicitRHS = []
 %         ImplicitRHS3d = []
         % This parameter is used to calculate the horizontal viscosity when smagorinsky model is adopted 
         SmagorinskyConstant = []

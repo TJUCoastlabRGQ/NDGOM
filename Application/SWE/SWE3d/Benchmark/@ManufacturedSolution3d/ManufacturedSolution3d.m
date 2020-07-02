@@ -2,10 +2,21 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
     %MANUFACTUREDSOLUTION3D 此处显示有关此类的摘要
     %   此处显示详细说明
     
+    properties
+        PostProcess
+        timePoint
+        ErrNorm2
+        Index
+    end
+    
     properties ( Constant )
         %> channel length
         ChLength = 100;
         ChWidth = 100;
+        e = 0.001;
+        w = 0.01;
+        d = 0.1;
+        hcrit = 0.001;
     end
     
     methods
@@ -17,23 +28,55 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
-            %             obj.dt = 0.02;
-            obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
-            
-            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
-            %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             obj.Cf{1} = 0.0025/1000;
+            obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
+                strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
+            obj.ErrNorm2 = cell(3);
+            obj.Index = 1;
+        end
+        
+        function matPlotErrorNorm2(obj)
+            close all
+            figure(1);
+            hold on;
+            color = {'r-','k-','b-'};
+            LWidth = 1.5;
+            FontSize = 15;
+            for i = 1:3
+                plot(obj.timePoint, obj.ErrNorm2{i},color{i},'LineWidth',LWidth);
+            end
+            lendstr = {'$hu$',...
+                '$hv$','$h$'};
+            legend(lendstr,'Interpreter','Latex','FontSize',FontSize);
+            xlabel('$time(s)$','Interpreter','Latex');
+            ylabel('$L_2 error$','Interpreter','Latex');
+            box on;
         end
     end
     
     methods ( Access = protected )
         
+        matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
+        
+        function matEvaluateError( obj, fphys, time)
+            [ h, hu, hv ] = obj.matGetExactSolution( obj.mesh3d, time);
+            fext = cell(1);
+            fext{1}(:,:,1) = hu;
+            fext{1}(:,:,2) = hv;
+            fext{1}(:,:,3) = h;
+            Tempfphys = cell(1);
+            Tempfphys{1}(:,:,1) = fphys(:,:,1);
+            Tempfphys{1}(:,:,2) = fphys(:,:,2);
+            Tempfphys{1}(:,:,3) = fphys(:,:,4);
+            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+            obj.timePoint(obj.Index) = time;
+            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+            obj.Index = obj.Index + 1;
+        end
+        
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
-            e = 0.001; w = 0.01; d = 0.1;
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
@@ -51,7 +94,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys2d{m}(:,:,6) = ( mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{m}(:,:,4) ) ) + ...
                     ( mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:,:,4) ) );
                 %water depth
-                fphys2d{m}(:,:,1) = e*(sin(w*(mesh2d.x+0)) + sin(w*(mesh2d.y+0))) - ...
+                fphys2d{m}(:,:,1) = obj.e*(sin(obj.w*(mesh2d.x+0)) + sin(obj.w*(mesh2d.y+0))) - ...
                     fphys2d{m}(:, :, 4);
                 
                 fphys{m}(:,:,4) = mesh3d.Extend2dField(fphys2d{m}(:,:,1));
@@ -59,27 +102,84 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys{m}(:,:,6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
                 %> '$\eta$' in extended three dimensional fields
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
-                Etax = mesh3d.rx .* (mesh3d.cell.Dr * fphys{m}(:,:,7)) + ...
-                    mesh3d.sx .* (mesh3d.cell.Ds * fphys{m}(:,:,7));
-                Etay = mesh3d.ry .* (mesh3d.cell.Dr * fphys{m}(:,:,7)) + ...
-                    mesh3d.sy .* (mesh3d.cell.Ds * fphys{m}(:,:,7));
                 
-                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*d.*z.*sin(w*(x+t));
-                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*d.*z.*sin(w*(y+t));
+                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(x+0));
+                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(y+0));
                 
                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
                 
-                fphys{m}(:,:,3) = -e*w.*cos(w.*(x+0)).*z - e*w.*cos(w.*(y+0)).*z + ...
-                    fphys{m}(:,:,4).^2 .* (z.^2./2)*d*w.*cos(w.*(x+0)) - fphys{m}(:,:,4) .* d .*z .* sin(w.*(x+0)).*Etax + ...
-                    fphys{m}(:,:,4).^2 .* (z.^2./2)*d*w.*cos(w.*(y+0)) - fphys{m}(:,:,4) .* d .*z .* sin(w.*(y+0)).*Etay;
+                %Omega
+                fphys{m}(:,:,3) = fphys{m}(:,:,4).^2 .* obj.d./2.*obj.w.*z.*cos(obj.w.*(x+0)) + ...
+                    fphys{m}(:,:,4) * obj.d ./2 .* sin(obj.w.*(x+0)).*z.*(obj.e*obj.w.*cos(obj.w.*(x+0)) - 0.005) + ...
+                    fphys{m}(:,:,4).^2 .* obj.d .* z.^2./2*obj.w.*cos(obj.w.*(x+0)) + ...
+                    fphys{m}(:,:,4) .* obj.d .* z.^2./2 .* sin(obj.w.*(x+0)).*(obj.e*obj.w.*cos(obj.w.*(x+0)) - 0.005) + ...
+                    fphys{m}(:,:,4).^2 .* obj.d./2.*obj.w.*z.*cos(obj.w.*(y+0)) + ...
+                    fphys{m}(:,:,4) * obj.d ./2 .* sin(obj.w.*(y+0)).*z.*(obj.e*obj.w.*cos(obj.w.*(y+0)) - 0.005) + ...
+                    fphys{m}(:,:,4).^2 .* obj.d .* z.^2./2*obj.w.*cos(obj.w.*(y+0)) + ...
+                    fphys{m}(:,:,4) .* obj.d .* z.^2./2 .* sin(obj.w.*(y+0)).*(obj.e*obj.w.*cos(obj.w.*(y+0)) - 0.005);
                 
             end
         end
         
+        function  matEvaluateSourceTerm(obj, fphys, time)
+            mesh = obj.meshUnion(1);
+            mesh2d = obj.mesh2d(1);
+            matEvaluateSourceTerm@SWEAbstract3d( obj, fphys);
+            h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
+            obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + obj.e*(obj.w * cos(obj.w.*(mesh2d.x+time)) + obj.w * cos(obj.w.*(mesh2d.y+time))) + ...
+                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.x+time)) + h2d.*obj.d./2.*sin(obj.w*(mesh2d.x+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.x+time)) - 0.005 ) + ...
+                h2d .* h2d * obj.d *obj.w./2.*cos(obj.w*(mesh2d.y+time)) + h2d.*obj.d./2.*sin(obj.w*(mesh2d.y+time)).*( obj.e * obj.w * cos(obj.w.*(mesh2d.y+time)) - 0.005 );
+            
+            h = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
+            eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
+            ht = obj.e*(obj.w*cos(obj.w.*(mesh.x+time)) + obj.w*cos(obj.w.*(mesh.y+time)));
+            u = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.x+time));
+            ut = -h .* obj.d .* mesh.z .* obj.w .* cos(obj.w.*(mesh.x+time));
+            v = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.y+time));
+            vt = -h .* obj.d .* mesh.z .* obj.w .* cos(obj.w.*(mesh.y+time));
+            
+            hx = obj.e * obj.w .* cos(obj.w.*(mesh.x + time)) - 0.005;
+            hy = obj.e * obj.w .* cos(obj.w.*(mesh.y + time)) - 0.005;
+            ux = -h .* obj.d .* mesh.z .*  obj.w .* cos(obj.w.*(mesh.x + time));
+            vy = -h .* obj.d .* mesh.z .*  obj.w .* cos(obj.w.*(mesh.y + time));
+            
+            us = -h .* obj.d .* sin(obj.w.*(mesh.x + time));
+            vs = -h .* obj.d .* sin(obj.w.*(mesh.y + time));
+            
+            Omega = h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.x+time)) + ...
+                h * obj.d ./2 .* sin(obj.w.*(mesh.x+time)).*mesh.z.*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
+                h.^2 .* obj.d .* mesh.z.^2./2*obj.w.*cos(obj.w.*(mesh.x+time)) + ...
+                h .* obj.d .* mesh.z.^2./2 .* sin(obj.w.*(mesh.x+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
+                h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.y+time)) + ...
+                h * obj.d ./2 .* sin(obj.w.*(mesh.y+time)).*mesh.z.*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005) + ...
+                h.^2 .* obj.d .* mesh.z.^2./2*obj.w.*cos(obj.w.*(mesh.y+time)) + ...
+                h .* obj.d .* mesh.z.^2./2 .* sin(obj.w.*(mesh.y+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005);
+            
+            Os = h.^2 .* obj.d./2.*obj.w.*cos(obj.w.*(mesh.x+time)) + ...
+                h * obj.d ./2 .* sin(obj.w.*(mesh.x+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
+                h.^2 .* obj.d .* mesh.z*obj.w.*cos(obj.w.*(mesh.x+time)) + ...
+                h .* obj.d .* mesh.z .* sin(obj.w.*(mesh.x+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
+                h.^2 .* obj.d./2.*obj.w.*cos(obj.w.*(mesh.y+time)) + ...
+                h * obj.d ./2 .* sin(obj.w.*(mesh.y+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005) + ...
+                h.^2 .* obj.d .* mesh.z .* obj.w.*cos(obj.w.*(mesh.y+time)) + ...
+                h .* obj.d .* mesh.z .* sin(obj.w.*(mesh.y+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005);
+            
+            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + u.*ht + h.*ut + u.*(u.*hx+h.*ux) + h.*u.*ux + obj.gra.*h.*hx - ...
+                obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,8) + u .* (v.*hy + h.*vy) + u.*Os + Omega .* us + obj.gra .* eta .* fphys{1}(:,:,8);
+            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + v.*ht + h.*vt + v.*(u.*hx+h.*ux) + v.*(v.*hy + h.*vy) + h.*v.*vy + ...
+                obj.gra.*h.*hy - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,9) + v.*Os + Omega .* vs + obj.gra .* eta .* fphys{1}(:,:,9);
+        end
+        
+        function [ h, hu, hv ] = matGetExactSolution( obj, mesh, time)
+            h = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
+            hu = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.x+time)) .* h;
+            hv = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.y+time)) .* h;
+        end
+        
         
         function [ option ] = setOption( obj, option )
-            ftime = 50;
+            ftime = 1000;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -112,16 +212,16 @@ function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 %     enumBoundaryCondition.ZeroGrad ];
 
 bctype = [ ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped, ...
+    enumBoundaryCondition.Clamped ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
-zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+zs = ones(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );

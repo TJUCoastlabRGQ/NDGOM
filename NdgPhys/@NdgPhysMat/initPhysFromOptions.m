@@ -15,8 +15,8 @@ function initPhysFromOptions( obj, mesh )
         end
     end
 
-    % Setup the output NetCDF file object
-    obj.outputFile = obj.matInitOutput(  );
+%     % Setup the output NetCDF file object
+%    obj.outputFile = obj.matInitOutput(mesh, obj.fieldName);
     
     % initilize the solver methods
     [ obj.advectionSolver, obj.viscositySolver ] = initSolver( obj );

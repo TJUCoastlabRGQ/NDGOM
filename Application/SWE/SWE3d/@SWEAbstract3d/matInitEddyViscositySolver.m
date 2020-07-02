@@ -8,23 +8,25 @@ function  matInitEddyViscositySolver( obj )
     if ~obj.option.isKey('VerticalEddyViscosityType')
         msg = 'Eddy viscosity type must be set in the set option part, or the program will be terminated';
         error(msg);
-    elseif enumVerticalEddyViscosity.Constant == obj.getOption('VerticalEddyViscosityType')
-        obj.VerticalEddyViscositySolver = NdgVertConstantDiffSolver(obj);
+    elseif enumSWEVerticalEddyViscosity.Constant == obj.getOption('VerticalEddyViscosityType')
+        obj.VerticalEddyViscositySolver = NdgSWEVertConstantDiffSolver(obj);
 %     elseif enumEddyViscosity.Parabolic == obj.getOption('EddyViscosityType')  
 %         EddyViscositySolver = NdgParabolicEddyViscositySolver(obj);
-    elseif enumVerticalEddyViscosity.GOTM == obj.getOption('VerticalEddyViscosityType')  
-        obj.VerticalEddyViscositySolver = NdgVertGOTMDiffSolver(obj);    
+    elseif enumSWEVerticalEddyViscosity.GOTM == obj.getOption('VerticalEddyViscosityType')  
+        obj.VerticalEddyViscositySolver = NdgSWEVertGOTMDiffSolver(obj);    
+    elseif enumSWEVerticalEddyViscosity.None == obj.getOption('VerticalEddyViscosityType')  
+        obj.VerticalEddyViscositySolver = NdgSWEVertNoneDiffSolver(obj);          
     else
         msg = 'None recoganized eddy viscosity type, please confirm again';
         error(msg);
     end
-    
+        
     if obj.option.isKey('HorizontalEddyViscosityType')
-        if enumHorizontalEddyViscosity.Constant == obj.getOption('HorizontalEddyViscosityType')
+        if enumSWEHorizontalEddyViscosity.Constant == obj.getOption('HorizontalEddyViscosityType')
             obj.HorizontalEddyViscositySolver = NdgSWEHorizConstantDiffSolver(obj);
-        elseif enumHorizontalEddyViscosity.Smagorinsky == obj.getOption('HorizontalEddyViscosityType')
+        elseif enumSWEHorizontalEddyViscosity.Smagorinsky == obj.getOption('HorizontalEddyViscosityType')
             obj.HorizontalEddyViscositySolver = NdgSWEHorizSmagrinskyDiffSolver(obj);
-        elseif enumHorizontalEddyViscosity.None == obj.getOption('HorizontalEddyViscosityType') 
+        elseif enumSWEHorizontalEddyViscosity.None == obj.getOption('HorizontalEddyViscosityType') 
             obj.HorizontalEddyViscositySolver = NdgSWEHorizNoneDiffSolver(obj);
         end
     else

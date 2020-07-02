@@ -7,8 +7,8 @@ fphys2d = obj.fphys2d;
 fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,Stage);
-obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
-obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
+obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
+obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
@@ -47,10 +47,10 @@ while( time < ftime )
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> update the vertical velocity
-       [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
+        [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
-
+        
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
         %         fphys2d = obj.matEvaluatePostFunc( fphys2d );
         
@@ -60,13 +60,13 @@ while( time < ftime )
     %>Update the velocity
     
     for i = 1:obj.Nvar
-        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS3d(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS3d(:,:,(i-1)*3+2)+...
-            dt * EXb(3) * obj.ExplicitRHS3d(:,:,(i-1)*3+3) + dt * IMb(1) * obj.ImplicitRHS3d(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS3d(:,:,(i-1)*2+2);
-%         if(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+1)) > 1e-10))
-%             fprintf('Nonzero element contained\n');
-%         elseif(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+2)) > 1e-10))
-%             fprintf('Nonzero element contained\n');
-%         end
+        fphys{1}(:,:,obj.varFieldIndex(i)) = Tempfphys(:,:,i) + dt * EXb(1) * obj.ExplicitRHS(:,:,(i-1)*3+1) + dt * EXb(2) * obj.ExplicitRHS(:,:,(i-1)*3+2)+...
+            dt * EXb(3) * obj.ExplicitRHS(:,:,(i-1)*3+3) + dt * IMb(1) * obj.ImplicitRHS(:,:,(i-1)*2+1) + dt * IMb(2) * obj.ImplicitRHS(:,:,(i-1)*2+2);
+        %         if(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+1)) > 1e-10))
+        %             fprintf('Nonzero element contained\n');
+        %         elseif(any(abs(obj.ImplicitRHS3d(:,:,(i-1)*2+2)) > 1e-10))
+        %             fprintf('Nonzero element contained\n');
+        %         end
     end
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
@@ -79,9 +79,9 @@ while( time < ftime )
     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
-%     obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,3);
-%     obj.ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
-%     obj.ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2*obj.Nvar);
+    obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,Stage);
+    obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
+    obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);

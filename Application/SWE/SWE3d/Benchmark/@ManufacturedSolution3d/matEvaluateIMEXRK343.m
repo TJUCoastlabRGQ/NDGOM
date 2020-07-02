@@ -1,15 +1,17 @@
 function matEvaluateIMEXRK343( obj )
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
+Stage = size(EXa,2);
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
-
-fphys2d = obj.fphys2d;
 fphys = obj.fphys;
+fphys2d = obj.fphys2d;
+
 %> allocate space for the rhs to be stored
 obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,4);
 obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
+visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
@@ -24,7 +26,7 @@ while( time < ftime )
     
     tloc = time + c( 1 ) * dt;
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
-    obj.matCalculateExplicitRHSTerm( fphys2d,  fphys, tloc,  Stage, 1);
+    obj.matCalculateExplicitRHSTerm( fphys2d,  fphys,  Stage, 1, tloc);
     
     for intRK = 1:3
         tloc = time + c( intRK + 1 ) * dt;
@@ -37,23 +39,24 @@ while( time < ftime )
         %> Calculate the right hand side for the global system about the three-dimensional horizontal momentum
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-            SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );
+            fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
+            Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+        [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> Calculation of the right hand side corresponds to the discretization of the non-stiff term at stage intRK+1 with the
         %> newly calculated intermediate water depth and three-dimensional horizontal momentum
-        obj.matCalculateExplicitRHSTerm( fphys2d,  fphys, tloc,  Stage, intRK + 1);
+        obj.matCalculateExplicitRHSTerm( fphys2d,  fphys, Stage, intRK + 1, tloc);
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
-        fphys2d = obj.matEvaluatePostFunc( fphys2d );
+%         fphys2d = obj.matEvaluatePostFunc( fphys2d );
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
@@ -70,19 +73,21 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     %> update the vertical velocity
-    fphys{1}(:,:,3) = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d{1}, fphys{1} );
+    [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
     
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
     
     %>Update the velocity
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
     obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,4);
     obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
     obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
+    
+    obj.matEvaluateError( fphys{1}, time);
     
     %> Update the diffusion coefficient
     obj.matUpdateOutputResult( time, fphys2d, fphys );
@@ -95,6 +100,8 @@ obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
 % obj.outputFile.closeOutputFile();
 end
+
+
 
 function [Explicita, Implicita, Explicitb, Implicitb, Parameterc] = GetRKParamter()
 data = roots([6 -18 9 -1]);

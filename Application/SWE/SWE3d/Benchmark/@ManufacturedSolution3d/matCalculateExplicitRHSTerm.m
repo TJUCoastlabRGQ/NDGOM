@@ -1,4 +1,4 @@
-function matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex)
+function matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time)
 %> @brief Function to calculate the explicit part of the adopted time stepping method
 %> @details
 %> Function to calculate the explicit part of the adopted time stepping method
@@ -9,7 +9,7 @@ function matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex)
 obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
 % obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS(obj, fphys{1});
 obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d );
-obj.matEvaluateSourceTerm( fphys );
+obj.matEvaluateSourceTerm( fphys, time );
 obj.ExplicitRHS2d(:,:,RKIndex) = obj.frhs2d{1}(:,:,1);
 obj.ExplicitRHS(:,:,RKIndex:Stage:end) = obj.frhs{1}(:,:,:);
 
