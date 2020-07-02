@@ -122,7 +122,7 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 1000;
+            ftime = 3500;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

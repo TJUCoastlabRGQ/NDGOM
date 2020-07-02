@@ -105,8 +105,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 %> '$\eta$' in extended three dimensional fields
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
-                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(x+0));
-                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(y+0));
+                fphys{m}(:,:,1) = -fphys{m}(:,:,4).*fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(x+0));
+                fphys{m}(:,:,2) = -fphys{m}(:,:,4).*fphys{m}(:,:,4).*obj.d.*z.*sin(obj.w*(y+0));
                 
                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
@@ -183,8 +183,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.fext2d{1}( :, :, 1 ) = obj.e * ( sin(obj.w*(obj.mesh2d.BoundaryEdge.xb+time)) + sin(obj.w*(obj.mesh2d.BoundaryEdge.yb+time)) )...
                 + 2 - 0.005*( obj.mesh2d.BoundaryEdge.xb + obj.mesh2d.BoundaryEdge.yb );
             
-            obj.fext2d{1}( :, :, 2 ) = obj.fext2d{1}( :, :, 1 ) .* obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
-            obj.fext2d{1}( :, :, 3 ) = obj.fext2d{1}( :, :, 1 ) .* obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
+            obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
+            obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
             
         end        
         
@@ -195,11 +195,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             hu = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.x+time)) .* h;
             hv = -h.*obj.d.*mesh.z.*sin(obj.w.*(mesh.y+time)) .* h;
             
-            Omega = h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.x+time)) + ...
+            Omega = -h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.x+time)) - ...
                 h * obj.d ./2 .* sin(obj.w.*(mesh.x+time)).*mesh.z.*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
                 h.^2 .* obj.d .* mesh.z.^2./2*obj.w.*cos(obj.w.*(mesh.x+time)) + ...
-                h .* obj.d .* mesh.z.^2./2 .* sin(obj.w.*(mesh.x+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) + ...
-                h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.y+time)) + ...
+                h .* obj.d .* mesh.z.^2./2 .* sin(obj.w.*(mesh.x+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.x+time)) - 0.005) - ...
+                h.^2 .* obj.d./2.*obj.w.*mesh.z.*cos(obj.w.*(mesh.y+time)) - ...
                 h * obj.d ./2 .* sin(obj.w.*(mesh.y+time)).*mesh.z.*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005) + ...
                 h.^2 .* obj.d .* mesh.z.^2./2*obj.w.*cos(obj.w.*(mesh.y+time)) + ...
                 h .* obj.d .* mesh.z.^2./2 .* sin(obj.w.*(mesh.y+time)).*(obj.e*obj.w.*cos(obj.w.*(mesh.y+time)) - 0.005);            
@@ -208,7 +208,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 1000;
+            ftime = 500;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
