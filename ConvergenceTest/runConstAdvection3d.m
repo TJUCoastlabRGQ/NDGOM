@@ -35,15 +35,15 @@ for n = 1:Ndeg
         len(m, n) = 2/Solver.M;
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
         PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvection3d/3d','/','ConstAdvection3d'));
-        fext = cell(1);
-        fext{1}(:,:,1) = Solver.fext{1};
+        ExactValue = cell(1);
+        ExactValue{1}(:,:,1) = Solver.ExactValue{1};
         fphys = cell(1);
         fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);
-        ErrInf(m,n) = PostProcess.evaluateNormErrInf( fphys, fext );
+        ErrInf(m,n) = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         
-        Err2(m,n) = PostProcess.evaluateNormErr2( fphys, fext );
+        Err2(m,n) = PostProcess.evaluateNormErr2( fphys, ExactValue );
         
-        Err1(m,n) = PostProcess.evaluateNormErr1( fphys, fext );
+        Err1(m,n) = PostProcess.evaluateNormErr1( fphys, ExactValue );
         
         clear Solver;
         clear PostProcess;

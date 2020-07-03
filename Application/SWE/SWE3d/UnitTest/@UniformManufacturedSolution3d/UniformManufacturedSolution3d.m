@@ -5,27 +5,30 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
     methods
         function obj = UniformManufacturedSolution3d( N, Nz, M, Mz )
             obj = obj@ManufacturedSolution3d( N, Nz, M, Mz );
+                        obj.ExactValue = cell(1);
+            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), ~] = ...
+               obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime); 
         end
     end
     
     methods ( Access = protected )
         
         function matEvaluateError( obj, fphys, time)
-            [ h, hu, hv ] = obj.matGetExactSolution( obj.mesh3d, time);
-            fext = cell(1);
-            fext{1}(:,:,1) = hu;
-            fext{1}(:,:,2) = hv;
-            fext{1}(:,:,3) = h;
-            Tempfphys = cell(1);
-            Tempfphys{1}(:,:,1) = fphys(:,:,1);
-            Tempfphys{1}(:,:,2) = fphys(:,:,2);
-            Tempfphys{1}(:,:,3) = fphys(:,:,4);
-            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-            obj.timePoint(obj.Index) = time;
-            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-            obj.Index = obj.Index + 1;
+%             [ h, hu, hv ] = obj.matGetExactSolution( obj.mesh3d, time);
+%             fext = cell(1);
+%             fext{1}(:,:,1) = hu;
+%             fext{1}(:,:,2) = hv;
+%             fext{1}(:,:,3) = h;
+%             Tempfphys = cell(1);
+%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
+%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
+%             Tempfphys{1}(:,:,3) = fphys(:,:,4);
+%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+%             obj.timePoint(obj.Index) = time;
+%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+%             obj.Index = obj.Index + 1;
         end        
         
         %> set initial function
@@ -119,7 +122,7 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 3500;
+            ftime = 100;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

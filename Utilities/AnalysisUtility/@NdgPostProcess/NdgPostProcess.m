@@ -21,18 +21,18 @@ classdef NdgPostProcess < handle
             [ obj.meshUnion ] = meshUnion;
             [ obj.outputFile ] = cell( obj.Nmesh, 1 );
             
-%             for n = 1:obj.Nmesh
-%                 [ obj.outputFile{n} ] = [ casename, '.', num2str(n), '-', ...
-%                     num2str(obj.Nmesh), '.1.nc'];
-%             end
-%             
-%             [ obj.Nt ] = accessOutputStepNumber( obj );
-%             [ obj.Nvar ] = accessOutputVarNumber( obj );
-[ obj.Nvar ] = 4;
-%             [ obj.time ] = cell( obj.Nmesh, 1 );
-%             for m = 1:obj.Nmesh
-%                 obj.time{m} = obj.assessOutputVar( m, 'time' );
-%             end
+            for n = 1:obj.Nmesh
+                [ obj.outputFile{n} ] = [ casename, '.', num2str(n), '-', ...
+                    num2str(obj.Nmesh), '.1.nc'];
+            end
+            
+            [ obj.Nt ] = accessOutputStepNumber( obj );
+            [ obj.Nvar ] = accessOutputVarNumber( obj );
+% [ obj.Nvar ] = 3;
+            [ obj.time ] = cell( obj.Nmesh, 1 );
+            for m = 1:obj.Nmesh
+                obj.time{m} = obj.assessOutputVar( m, 'time' );
+            end
         end
         
         %======================================================================

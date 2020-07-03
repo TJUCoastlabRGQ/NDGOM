@@ -62,7 +62,7 @@ classdef NdgInnerEdge < handle
         end
         
         %> evaluate R.H.S. for surface integral term
-        [ frhs ] = matEvaluateStrongFromEdgeRHS( obj, fluxM, fluxP, fluxS );
+        [ frhs ] = matEvaluateStrongFormEdgeRHS( obj, fluxM, fluxP, fluxS );
         [ frhs ] = matEvaluateStrongFormEdgeCentralRHS( obj, fluxM, fluxP );
         [ frhs ] = matEvaluateStrongFormEdgeAlterRHS( obj, fluxM, fluxP );
         [ fM, fP ] = matEvaluateSurfValue( obj, fphys );

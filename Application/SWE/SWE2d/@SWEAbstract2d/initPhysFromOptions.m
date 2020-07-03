@@ -29,6 +29,8 @@ end
     % Setup the output NetCDF file object
 obj.outputFile = obj.matInitOutput(mesh, obj.fieldName);
 
+obj.VerticalEddyViscositySolver = NdgNoneVertDiffSolver( obj );
+
 end% func
 
 function [NonhydrostaticSolver] = initNonhydrostaticSolver(obj)

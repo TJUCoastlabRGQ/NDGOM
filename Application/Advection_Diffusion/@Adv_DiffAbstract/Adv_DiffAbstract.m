@@ -13,6 +13,7 @@ classdef Adv_DiffAbstract < NdgPhysMat
     
     properties( Access = protected )
         miu = 0
+
     end
     
     properties
@@ -20,14 +21,11 @@ classdef Adv_DiffAbstract < NdgPhysMat
     end
     
     properties ( SetAccess = public )
-        InnerEdgefm
-        BoundaryEdgefm
-        InnerEdgefp
-        BoundaryEdgefp
-        BoundaryEdgefext
         
         ExplicitRHS
         ImplicitRHS
+        %The exact value at the final time point
+        ExactValue        
     end
     
     properties

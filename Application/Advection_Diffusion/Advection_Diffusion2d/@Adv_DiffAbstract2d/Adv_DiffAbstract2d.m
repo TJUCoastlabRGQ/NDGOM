@@ -20,10 +20,6 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
         v0 = 0
     end
     
-    properties( SetAccess = protected )
-        %> cell array for three dimensional external value fields
-        fext2d
-    end
     
     properties
         
@@ -67,15 +63,15 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
                 + fp(:,:,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
         end
         
-        function [ flux ] = matEvaluateSurfFlux( obj, edge, nx, ny, fm )
+        function [ flux ] = matEvaluateSurfFlux( obj, mesh, nx, ny, fm, edge )
             Em = fm(:,:,1) .* fm(:,:,2);
             Gm = fm(:,:,1) .* fm(:,:,3);
             flux = Em .* nx + Gm .* ny;
         end
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext )
-            %             ind = ( edge.ftype == 5 );
-            %             fp(:, ind) = 0;
+                ind = ( edge.ftype == enumBoundaryCondition.Clamped );
+                fp(:, ind) = fext(ind);            
         end
     end
     

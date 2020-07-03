@@ -21,11 +21,6 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
         w0 = 0
     end
     
-    properties( SetAccess = protected )
-        %> cell array for three dimensional external value fields
-        fext3d
-    end
-    
     properties
         mesh2d
         %> vertical extended mesh
@@ -33,22 +28,13 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
     end
     
     properties
+        SurfEdgefext
+        
+        BotEdgefext        
+        
         SurfBoundNewmannDate
+        
         BotBoundNewmannDate
-        BoundaryEdgeNewmannDate
-    end
-    
-    properties ( SetAccess = public )
-        %for shallow water equation in sigma coordinate, the following four
-        %part is not used
-        SurfaceBoundaryEdgefm
-        BottomBoundaryEdgefm
-        SurfaceBoundaryEdgefp
-        BottomBoundaryEdgefp
-        
-        SurfaceBoundaryfext
-        BottomBoundaryEdgefext
-        
     end
 
     methods
@@ -84,7 +70,7 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
                 + fp(:,:,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
         end
         
-        function [ flux ] = matEvaluateSurfFlux( obj, edge, nx, ny, nz, fm )
+        function [ flux ] = matEvaluateSurfFlux( obj, mesh, nx, ny, nz, fm, edge )
             Em = fm(:,:,1) .* fm(:,:,2);
             Gm = fm(:,:,1) .* fm(:,:,3);
             Hm = fm(:,:,1) .* fm(:,:,4);
@@ -92,8 +78,12 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
         end
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, nz, fm, fp, fext )
-            %             ind = ( edge.ftype == 5 );
-            %             fp(:, ind) = 0;
+                ind = ( edge.ftype == enumBoundaryCondition.Clamped );
+                fp(:, ind) = fext(:,ind);
+                ind = (edge.ftype == enumBoundaryCondition.UpperSurfaceBoundary);
+                fp(:, ind) = fext(:,ind);
+                ind = (edge.ftype == enumBoundaryCondition.BottomBoundary);
+                fp(:, ind) = fext(:,ind);   
         end
     end
     

@@ -12,21 +12,6 @@ for m = 1:obj.Nmesh
     %> This is used to contain the right hand side corresponding to the implicit discretization of vertical diffusion term
     %> Only one mesh considered
     %     obj.ImplicitRHS3d = zeros( Np, K, obj.Nvar );
-    if ~isempty( mesh(m).BoundaryEdge )
-        Nfp = obj.meshUnion(m).BoundaryEdge.Nfp;
-        Ne = obj.meshUnion(m).BoundaryEdge.Ne;
-        obj.BoundaryEdgefext{m} = zeros( Nfp, Ne, obj.Nfield );
-        %> The following two variables are used when calculating the horizontal diffusion term
-        obj.BoundaryEdgefm{m} = zeros( Nfp, Ne, obj.Nfield );
-        obj.BoundaryEdgefp{m} = zeros( Nfp, Ne, obj.Nfield );
-    end
-    
-    %> These public variable are used to avoid the calculation of these terms repeatly during computation
-    Nfp = obj.meshUnion(m).InnerEdge.Nfp;
-    Ne = obj.meshUnion(m).InnerEdge.Ne;
-    %> The following two variables are used when calculating the horizontal diffusion term
-    obj.InnerEdgefm{m} = zeros( Nfp, Ne, obj.Nfield );
-    obj.InnerEdgefp{m} = zeros( Nfp, Ne, obj.Nfield );
     
 end
 
@@ -40,7 +25,7 @@ obj.option = obj.setOption( obj.option );
 
 finalTime = obj.getOption('finalTime');
 for m = 1:obj.Nmesh
-        obj.fext{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
+        obj.ExactValue{m} = obj.getExtFunc( obj.meshUnion(m), finalTime );
 end
 obj.outputFile = obj.matInitOutput(mesh, obj.fieldName);
 end

@@ -1,7 +1,7 @@
-function runConstAdvection2d
-M = [ 40 50 60 70 80 90 100];
+function runUniformManufacturedSolutionSWE3d
+M = [ 20 10 5 2.5 ];
 
-Order = 2;
+Order = [1 2];
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
@@ -14,8 +14,8 @@ markersize = 8;
 
 linestyle = '-';
 
-color = {'k', 'r','b'};  %black for order one, red for order two
-marker = {'o'};%circle for Eta, square for U, triangle for Ws
+color = {'k', 'r'};  %black for order one, red for order two
+marker = {'o','s','^'};%circle for H, square for HU, triangle for HV
 time = zeros(Nmesh, Ndeg);
 
 % for n = 1:Ndeg
@@ -23,57 +23,94 @@ time = zeros(Nmesh, Ndeg);
 %         dofs(m, n) = ceil( (50 / deltax(m)) ) * (Order(n)+1);
 %     end
 % end
-ErrInf = zeros(Nmesh, Ndeg);
-Err2 = zeros(Nmesh, Ndeg);
-Err1 = zeros(Nmesh, Ndeg);
+
+HErrInf = zeros(Nmesh, Ndeg); HUErrInf = zeros(Nmesh, Ndeg);  HVErrInf = zeros(Nmesh, Ndeg);
+HErr2 = zeros(Nmesh, Ndeg);   HUErr2 = zeros(Nmesh, Ndeg);    HVErr2 = zeros(Nmesh, Ndeg);
+HErr1 = zeros(Nmesh, Ndeg);   HUErr1 = zeros(Nmesh, Ndeg);    HVErr1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ConstAdvection2d(Order(n), M(m));
+        Solver = UniformManufacturedSolution3d(Order(n), 1, M(m), 5);
         tic;
         Solver.matSolve;
         time(m,n) = toc;
-        len(m, n) = 2/Solver.M;
+        len(m, n) = M(m);
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionNoSource2d/2d','/','ConstAdvectionNoSource2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ManufacturedSolution2d/2d','/','ManufacturedSolution2d'));
         ExactValue = cell(1);
-        ExactValue{1}(:,:,1) = Solver.ExactValue{1};
+        ExactValue{1} = Solver.ExactValue{1};
         fphys = cell(1);
-        fphys{1}(:,:,1) = Solver.fphys{1}(:,:,1);
-        ErrInf(m,n) = PostProcess.evaluateNormErrInf( fphys, ExactValue );
+        fphys{1}(:,:,1:3) = Solver.fphys{1}(:,:,[4 1 2]);
+        err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
+        HErrInf( m, n ) = err(1); HUErrInf( m, n ) = err(2); HVErrInf( m, n ) = err(3);
         
-        Err2(m,n) = PostProcess.evaluateNormErr2( fphys, ExactValue );
+        err = PostProcess.evaluateNormErr2( fphys, ExactValue );
+        HErr2( m, n ) = err(1); HUErr2( m, n ) = err(2); HVErr2( m, n ) = err(3);
         
-        Err1(m,n) = PostProcess.evaluateNormErr1( fphys, ExactValue );
+        err = PostProcess.evaluateNormErr1( fphys, ExactValue );
+        HErr1( m, n ) = err(1); HUErr1( m, n ) = err(2); HVErr1( m, n ) = err(3);
         
         clear Solver;
         clear PostProcess;
-    end  
+    end
+    % print table
     % print table
     fprintf('\n==================deg = %d==================\n', Order(n));
-    convergence_table(len(:,n), Err1(:, n), Err2(:, n), ErrInf(:, n))
+    convergence_table(len(:,n), HErr1(:, n), HErr2(:, n), HErrInf(:, n))
     
+    fprintf('\n==================deg = %d==================\n', Order(n));
+    convergence_table(len(:,n), HUErr1(:, n), HUErr2(:, n), HUErrInf(:, n))
+    
+    fprintf('\n==================deg = %d==================\n', Order(n));
+    convergence_table(len(:,n), HVErr1(:, n), HVErr2(:, n), HVErrInf(:, n))
     
     % plot figure
     co = color{n};
-    figure(1); plot(dofs(:, n), Err1(:, n), [co, marker{1}, linestyle],...
+    figure(1); plot(dofs(:, n), HErr1(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
         );
     hold on;
+    plot(dofs(:, n), HUErr1(:, n), [co, marker{2}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
+    
+    plot(dofs(:, n), HVErr1(:, n), [co, marker{3}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
     
     
-    figure(2); plot(dofs(:, n), Err2(:, n), [co, marker{1}, linestyle],...
+    figure(2); plot(dofs(:, n), HErr2(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
         );
     hold on;
+    plot(dofs(:, n), HUErr2(:, n), [co, marker{2}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
     
-    figure(3); plot(dofs(:, n), ErrInf(:, n), [co, marker{1}, linestyle],...
+    plot(dofs(:, n), HVErr2(:, n), [co, marker{3}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
+    
+    figure(3); plot(dofs(:, n), HErrInf(:, n), [co, marker{1}, linestyle],...
         'LineWidth', linewidth, ...
         'MarkerSize', markersize ...
         );
     hold on;
-end    
+    plot(dofs(:, n), HUErrInf(:, n), [co, marker{2}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
+    
+    plot(dofs(:, n), HVErrInf(:, n), [co, marker{3}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
+end
 
 ylabel_str = {'$L_1$', '$L_2$', '$L_\infty$'};
 fontsize = 12;
@@ -82,10 +119,11 @@ for n = 1:3
     box on; grid on;
     set(gca, 'XScale', 'log', 'YScale', 'log');
     
-    lendstr = {'$C1$',...
-        '$C2$','$C3$'};
-    legend(lendstr,'Interpreter','Latex');
-    %     columnlegend(2,lendstr, 12);
+    lendstr = {'H1',...
+        'HU1','HV1','H2',...
+        'HU2','HV2'};
+%     legend(lendstr,'Interpreter','Latex');
+    columnlegend(2,lendstr, 12);
     
     xlabel('$DOFs$', 'Interpreter', 'Latex', 'FontSize', fontsize);
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
@@ -97,25 +135,25 @@ end
 
 
 
-figure(4);
-hold on;
-for n = 1:Ndeg
-    co = color{n};
-    plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
-        'LineWidth', linewidth, ...
-        'MarkerSize', markersize ...
-        );
-end
-
-set(gca, 'XScale', 'log', 'YScale', 'log');
-
-lendstr = {'$C1$','$C2$','$C3$'};
-legend(lendstr,'Interpreter','Latex');
-%     columnlegend(2,lendstr, 12);
-
-xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-box on; grid on;
+% figure(4);
+% hold on;
+% for n = 1:Ndeg
+%     co = color{n};
+%     plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
+%         'LineWidth', linewidth, ...
+%         'MarkerSize', markersize ...
+%         );
+% end
+%
+% set(gca, 'XScale', 'log', 'YScale', 'log');
+%
+% lendstr = {'$H$','$HU$','$HV$'};
+% legend(lendstr,'Interpreter','Latex');
+% %     columnlegend(2,lendstr, 12);
+%
+% xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+% ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+% box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)
@@ -163,9 +201,9 @@ spacer = xdata(1)*rescale;
 loci = get(gca, 'position');
 set(legend_h, 'position', [loci(1) pos(2) width pos(4)]);
 col = -1;
-for i=1:numlines,
+for i=1:numlines
     if numpercolumn>1
-        if mod(i,numpercolumn)==1,
+        if mod(i,numpercolumn)==1
             col = col+1;
         end
     else
@@ -195,7 +233,7 @@ end
 set(legend_h, 'Color', 'None', 'Box', 'off');
 pos = get(legend_h, 'position');
 fig_pos = get(gca, 'position');
-switch lower(location),
+switch lower(location)
     case {'northeast'}
         set(legend_h, 'position', [pos(1)+fig_pos(3)-pos(3) pos(2) pos(3) pos(4)]);
     case {'southeast'}

@@ -7,6 +7,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         timePoint
         ErrNorm2
         Index
+        ExactValue
     end
     
     properties ( Constant )
@@ -41,7 +42,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             color = {'r-','k-','b-','r-'};
             LWidth = 1.5;
             FontSize = 15;
-            for i = 1:4
+            for i = 1:3
                 plot(obj.timePoint, obj.ErrNorm2{i},color{i},'LineWidth',LWidth);
             end
             lendstr = {'$hu$',...

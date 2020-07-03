@@ -14,8 +14,8 @@ WetDryFaceOrder = find( faceflag == 1);
 fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSx, mesh.cell.Nfp(1));  
 fluxSy = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSy, mesh.cell.Nfp(1));
 
-termY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxPY, fluxSy);
-termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
+termY = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMY, fluxPY, fluxSy);
+termX = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMX, fluxPX, fluxSx);
 
 [fmy, ~] = BoundaryEdge.matEvaluateSurfValue( Variable );    
 [fmx, ~] = BoundaryEdge.matEvaluateSurfValue( Variable ); 
@@ -27,8 +27,8 @@ fluxMY = BoundaryEdge.ny.*fmy;  fluxMX = BoundaryEdge.nx.*fmx;
 fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );  
 fluxSY = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.ny, fmy );
 
-termY = - termY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMY, fluxSY);
-termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
+termY = - termY - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMY, fluxSY);
+termX = - termX - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMX, fluxSX);
 
 [VolumeIntegralX, VolumeIntegralY] = obj.matVolumeIntegral( mesh, cell2mat(Variable), cell2mat(Variable));  
 

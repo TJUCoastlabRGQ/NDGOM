@@ -2,10 +2,6 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     %NONHYDROSTATICSTANDINGWAVE2D 此处显示有关此类的摘要
     %   此处显示详细说明
     
-    properties(Constant)
-        rho = 1000
-    end
-    
     properties
         dt
         d = 7.612

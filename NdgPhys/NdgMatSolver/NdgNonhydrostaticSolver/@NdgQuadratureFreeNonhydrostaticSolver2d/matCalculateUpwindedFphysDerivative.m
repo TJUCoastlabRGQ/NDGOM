@@ -30,8 +30,8 @@ InnerEdge = mesh.InnerEdge;
 [ fluxPx, fluxPy ] = obj.matEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
     vfpx, vfpy, InnerEdge.nx, InnerEdge.ny);
 
-UpwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
-UpwindedTermY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxPy, fluxY);
+UpwindedTermX = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxPx, fluxX);
+UpwindedTermY = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMy, fluxPy, fluxY);
 
 BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys );
@@ -53,8 +53,8 @@ BoundaryEdge = mesh.BoundaryEdge;
     vfmx, vfmy, BoundaryEdge.nx, BoundaryEdge.ny);
 
 % the boundary edge contribution
-UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX );
-UpwindedTermY = -UpwindedTermY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxY );
+UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxX );
+UpwindedTermY = -UpwindedTermY - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMy, fluxY );
 
 [VolumeX, VolumeY] = obj.matVolumeIntegral( mesh, cell2mat(variableX), cell2mat(variableY));   %abstract in nonhydrostatic solver 2d and 1d, different for quad free and quad version
 UpwindedTermX = UpwindedTermX + VolumeX;

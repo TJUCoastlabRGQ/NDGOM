@@ -24,8 +24,8 @@ InnerEdge = mesh.InnerEdge;
     vfpx, vfpy, InnerEdge.nx, InnerEdge.ny);
 
 % the Inner edge contribution
-DownwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
-DownwindedTermY = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxPy, fluxY);
+DownwindedTermX = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxPx, fluxX);
+DownwindedTermY = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMy, fluxPy, fluxY);
 
 BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys );
@@ -47,8 +47,8 @@ BoundaryEdge = mesh.BoundaryEdge;
     vfmx, vfmy, BoundaryEdge.nx, BoundaryEdge.ny);
 
 % the boundary edge contribution
-DownwindedTermX = -DownwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX);
-DownwindedTermY = -DownwindedTermY - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMy, fluxY);
+DownwindedTermX = -DownwindedTermX - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxX);
+DownwindedTermY = -DownwindedTermY - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMy, fluxY);
 
 [VolumeX, VolumeY] = obj.matVolumeIntegral( mesh, cell2mat(variableX), cell2mat(variableY));
 DownwindedTermX = DownwindedTermX + VolumeX;

@@ -16,7 +16,7 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             obj.Mz = Mz;
             obj.N = N;
             obj.Nz = Nz;
-            obj.miu = 0.001;
+            obj.miu = 0;
             obj.u0 = 1;
             obj.v0 = 1;
             obj.w0 = 1;
@@ -45,11 +45,11 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
         end
         
         function matUpdateExternalField( obj, time, fphys )
-            obj.BoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh3d.BoundaryEdge.xb).*...
+            obj.fext{1} = sin(2*pi*time)*sin(2*pi*obj.mesh3d.BoundaryEdge.xb).*...
                 sin(2*pi*obj.mesh3d.BoundaryEdge.yb).*sin(2*pi*obj.mesh3d.BoundaryEdge.zb);
-            obj.SurfaceBoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
+            obj.SurfEdgefext{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
                 sin(2*pi*obj.mesh2d.y)*sin(2*pi*1);              
-            obj.BottomBoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
+            obj.BotEdgefext{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
                 sin(2*pi*obj.mesh2d.y)*sin(2*pi*(-1));
             obj.SurfBoundNewmannDate(:,:,1) = 2 * pi * obj.miu * sin(2*pi*time)*sin(2*pi*obj.mesh2d.x).*...
                 sin(2*pi*obj.mesh2d.y).*cos(2*pi*1) .* 1;
@@ -82,7 +82,7 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
-            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.Constant;
+            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
             dx = (obj.mesh2d.cell.r(2) - obj.mesh2d.cell.r(1))/2*(2/obj.M);
 %             dthu = 1/(2*obj.N+1) *  dx/obj.u0;
 %             dthv = 1/(2*obj.N+1) *  dx/obj.v0; 
@@ -95,7 +95,7 @@ classdef ConstAdvection3d < Adv_DiffAbstract3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.None;
             option('AdvDiffConstantHorizontalDiffusionValue') = obj.miu; 
             option('AdvDiffConstantVerticalDiffusionValue') = obj.miu;
         end

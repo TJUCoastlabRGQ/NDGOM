@@ -44,12 +44,6 @@ classdef SWEAbstract2d < NdgPhysMat
     end
     
     properties ( SetAccess = public )
-        InnerEdgefm
-        BoundaryEdgefm
-        InnerEdgefp
-        BoundaryEdgefp
-        BoundaryEdgefext
-        
         ExplicitRHS
         ImplicitRHS
     end
@@ -74,6 +68,9 @@ classdef SWEAbstract2d < NdgPhysMat
         volumefluxSolver
         %> limiter type
         limiterSolver
+        
+        %> Solver for vertical eddy viscosity
+        VerticalEddyViscositySolver
     end
     
     methods
@@ -121,7 +118,7 @@ classdef SWEAbstract2d < NdgPhysMat
         outputObj = matInitOutput( obj, mesh, fieldName )
     end
     
-    methods ( Sealed, Access = protected )
+    methods ( Access = protected )
         [ fphys ] = matEvaluateLimiter( obj, fphys )
         
         %> determine time interval
