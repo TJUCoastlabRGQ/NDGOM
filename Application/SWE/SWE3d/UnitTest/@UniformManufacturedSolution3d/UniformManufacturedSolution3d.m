@@ -50,15 +50,13 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
                 fphys2d{m}(:,:,1) = obj.e*(sin(obj.w*(mesh2d.x+0)) + sin(obj.w*(mesh2d.y+0))) - ...
                     fphys2d{m}(:, :, 4);
                 
-                fphys{m}(:,:,4) = mesh3d.Extend2dField(fphys2d{m}(:,:,1));
                 %> Z in extended three dimensional fields
                 fphys{m}(:,:,6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
                 %> '$\eta$' in extended three dimensional fields
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
-                fphys{m}(:,:,1) = fphys{m}(:,:,4).* sin(obj.w*(x+0));
-                fphys{m}(:,:,2) = fphys{m}(:,:,4).* sin(obj.w*(y+0));
-                
+                [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
+                                
                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
                 
@@ -80,44 +78,43 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) +  h2dt  + ...
                 h2d .* u2dx + u2d.*h2dx + h2d .* v2dy + v2d .* h2dy;
             
-            h = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
+            h3d = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
             eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
-            ht = obj.e * obj.w * ( cos(obj.w.*(mesh.x+time)) + cos(obj.w.*(mesh.y+time)) );
-            u = sin(obj.w.*(mesh.x+time));
-            ut = obj.w .* cos(obj.w.*(mesh.x+time));
-            v = sin(obj.w.*(mesh.y+time));
-            vt = obj.w .* cos(obj.w.*(mesh.y+time));
+            h3dt = obj.e * obj.w * ( cos(obj.w.*(mesh.x+time)) + cos(obj.w.*(mesh.y+time)) );
+            u3d = sin(obj.w.*(mesh.x+time));
+            u3dt = obj.w .* cos(obj.w.*(mesh.x+time));
+            v3d = sin(obj.w.*(mesh.y+time));
+            v3dt = obj.w .* cos(obj.w.*(mesh.y+time));
             
-            hx = obj.e * obj.w .* cos(obj.w.*(mesh.x + time)) - 0.005;
-            hy = obj.e * obj.w .* cos(obj.w.*(mesh.y + time)) - 0.005;
-            ux = obj.w .* cos(obj.w.*(mesh.x + time));
-            vy = obj.w .* cos(obj.w.*(mesh.y + time));
+            h3dx = obj.e * obj.w .* cos(obj.w.*(mesh.x + time)) - 0.005;
+            h3dy = obj.e * obj.w .* cos(obj.w.*(mesh.y + time)) - 0.005;
+            u3dx = obj.w .* cos(obj.w.*(mesh.x + time));
+            v3dy = obj.w .* cos(obj.w.*(mesh.y + time));
             
             
-            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + u.*ht + h.*ut + u.*(u.*hx+h.*ux) + h.*u.*ux + obj.gra.*h.*hx - ...
-                obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,8) + u .* (v.*hy + h.*vy) + obj.gra .* eta .* fphys{1}(:,:,8);
-            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + v.*ht + h.*vt + v.*(u.*hx+h.*ux) + v.*(v.*hy + h.*vy) + h.*v.*vy + ...
-                obj.gra.*h.*hy - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,9) + obj.gra .* eta .* fphys{1}(:,:,9);
+            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + u3d.*h3dt + h3d.*u3dt + u3d.*(u3d.*h3dx+h3d.*u3dx) + h3d.*u3d.*u3dx + obj.gra.*h3d.*h3dx - ...
+                obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,8) + u3d .* (v3d.*h3dy + h3d.*v3dy) + obj.gra .* eta .* fphys{1}(:,:,8);
+            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + v3d.*h3dt + h3d.*v3dt + v3d.*(u3d.*h3dx+h3d.*u3dx) + v3d.*(v3d.*h3dy + h3d.*v3dy) + h3d.*v3d.*v3dy + ...
+                obj.gra.*h3d.*h3dy - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,9) + obj.gra .* eta .* fphys{1}(:,:,9);
         end
         
         function matUpdateExternalField( obj, time, ~, ~ )
+
+             [obj.fext3d{1}( :, :, 4 ), obj.fext3d{1}( :, :, 1 ), obj.fext3d{1}( :, :, 2 ), ~] = ...
+                obj.matGetExactSolution( obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
             
-            obj.fext2d{1}( :, :, 1 ) = obj.e * ( sin(obj.w*(obj.mesh2d.BoundaryEdge.xb+time)) + sin(obj.w*(obj.mesh2d.BoundaryEdge.yb+time)) )...
-                + 2 - 0.005*( obj.mesh2d.BoundaryEdge.xb + obj.mesh2d.BoundaryEdge.yb );
-            obj.fext2d{1}( :, :, 2 ) = obj.fext2d{1}( :, :, 1 ) .* sin(obj.w*(obj.mesh2d.BoundaryEdge.xb+time));
-            obj.fext2d{1}( :, :, 3 ) = obj.fext2d{1}( :, :, 1 ) .* sin(obj.w*(obj.mesh2d.BoundaryEdge.yb+time));
+           [obj.fext2d{1}( :, :, 1 ), ~, ~, ~] = obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
             
-            obj.fext3d{1}( :, :, 4 ) = obj.e * ( sin(obj.w*(obj.meshUnion.BoundaryEdge.xb+time)) + sin(obj.w*(obj.meshUnion.BoundaryEdge.yb+time)) )...
-                + 2 - 0.005*( obj.meshUnion.BoundaryEdge.xb + obj.meshUnion.BoundaryEdge.yb );
-            obj.fext3d{1}( :, :, 1 ) = obj.fext3d{1}( :, :, 4 ) .* sin(obj.w*(obj.mesh3d.BoundaryEdge.xb+time));
-            obj.fext3d{1}( :, :, 2 ) = obj.fext3d{1}( :, :, 4 ) .* sin(obj.w*(obj.mesh3d.BoundaryEdge.yb+time));
+            obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
+            obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
             
         end
         
-        function [ h, hu, hv ] = matGetExactSolution( obj, mesh, time)
-            h = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
-            hu = sin(obj.w.*(mesh.x+time)) .* h;
-            hv = sin(obj.w.*(mesh.y+time)) .* h;
+        function [ h, hu, hv, Omega ] = matGetExactSolution( obj, x, y, ~, time)
+            h = obj.e*(sin(obj.w.*(x+time)) + sin(obj.w*(y+time))) + (2-0.005.*(x + y));
+            hu = sin(obj.w.*(x+time)) .* h;
+            hv = sin(obj.w.*(y+time)) .* h;
+            Omega = [];
         end
         
         

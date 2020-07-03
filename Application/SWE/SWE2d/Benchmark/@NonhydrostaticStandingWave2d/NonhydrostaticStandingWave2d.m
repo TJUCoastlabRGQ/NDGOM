@@ -116,7 +116,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;                
-            option('temporalDiscreteType') = enumTemporalDiscrete.EXRK33;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
