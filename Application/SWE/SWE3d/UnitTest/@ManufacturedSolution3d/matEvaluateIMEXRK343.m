@@ -16,6 +16,7 @@ hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
     dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+%     dt = 0.5;
     %     dt = 2.7;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -34,7 +35,8 @@ while( time < ftime )
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         %> Calculate the intermediate water depth
         SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:), dt);
-        
+        fphys2d{1}(:,:,1) = Tempfphys2d + dt * EXa(intRK+1,1) * obj.ExplicitRHS2d(:,:,1) + dt * EXa(intRK+1,2) * obj.ExplicitRHS2d(:,:,2)+...
+        dt * EXa(intRK+1,3) * obj.ExplicitRHS2d(:,:,3) + dt * EXa(intRK+1,4) * obj.ExplicitRHS2d(:,:,4);
         
         %> Calculate the right hand side for the global system about the three-dimensional horizontal momentum
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
@@ -46,7 +48,7 @@ while( time < ftime )
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
         %> update the vertical velocity
-%         [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
+        [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
@@ -68,12 +70,12 @@ while( time < ftime )
     end
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
-        dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
+        dt * EXb(3) * obj.ExplicitRHS2d(:,:,3) + dt * EXb(4) * obj.ExplicitRHS2d(:,:,4);
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     %> update the vertical velocity
-%     [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
+    [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys );
     
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);

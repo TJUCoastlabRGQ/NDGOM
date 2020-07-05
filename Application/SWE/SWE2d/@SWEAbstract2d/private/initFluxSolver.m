@@ -33,7 +33,7 @@ else  % No numerical flux type pointed
             surfluxSolver = SWENonhydroFaceFluxSolver2d( );            
         end
     else % No nonhydrostatic type pointed, and hydrostatic by default
-            numfluxSolver = SWELFNumFluxSolver2d( );
+            numfluxSolver = SWEHLLNumFluxSolver2d( );
             surfluxSolver = SWEFaceFluxSolver2d( );          
     end
 end

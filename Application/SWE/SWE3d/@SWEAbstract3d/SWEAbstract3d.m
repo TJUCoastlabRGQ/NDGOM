@@ -46,7 +46,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     properties ( Constant )
         %> gravity acceleration
-        gra = 9.81;
+        gra = 9.8;
     end
     
     properties ( SetAccess = protected )

@@ -59,9 +59,10 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
                 [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
-                                
-                fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
-                fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
+                
+                [ ~, fphys2d{m}(:,:,2), fphys2d{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh2d.x, mesh2d.y, mesh2d.x, 0);
+%                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
+%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
                 
             end
         end
@@ -106,10 +107,11 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
              [obj.fext3d{1}( :, :, 4 ), obj.fext3d{1}( :, :, 1 ), obj.fext3d{1}( :, :, 2 ), ~] = ...
                 obj.matGetExactSolution( obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
             
-           [obj.fext2d{1}( :, :, 1 ), ~, ~, ~] = obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
+           [ obj.fext2d{1}( :, :, 1 ), obj.fext2d{1}( :, :, 2 ), obj.fext2d{1}( :, :, 3 ), ~ ] =...
+               obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
             
-            obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
-            obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
+%             obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
+%             obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
             
         end
         

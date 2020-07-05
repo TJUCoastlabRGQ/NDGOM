@@ -33,6 +33,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
             obj.ErrNorm2 = cell(3);
             obj.Index = 1;
+                        obj.ExactValue = cell(1);
+            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
+               obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);             
         end
         
         function matPlotErrorNorm2(obj)
@@ -59,23 +62,23 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
         
         function matEvaluateError( obj, fphys, time)
-            [ h, hu, hv, Omega ] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
-            fext{1}(:,:,1) = hu;
-            fext{1}(:,:,2) = hv;
-            fext{1}(:,:,3) = h;
-            fext{1}(:,:,4) = Omega;
-            Tempfphys = cell(1);
-            Tempfphys{1}(:,:,1) = fphys(:,:,1);
-            Tempfphys{1}(:,:,2) = fphys(:,:,2);
-            Tempfphys{1}(:,:,3) = fphys(:,:,4);
-            Tempfphys{1}(:,:,4) = fphys(:,:,3);
-            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-            obj.timePoint(obj.Index) = time;
-            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-            obj.ErrNorm2{4}(obj.Index)  = Err2(4);
-            obj.Index = obj.Index + 1;
+%             [ h, hu, hv, Omega ] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
+%             fext{1}(:,:,1) = hu;
+%             fext{1}(:,:,2) = hv;
+%             fext{1}(:,:,3) = h;
+%             fext{1}(:,:,4) = Omega;
+%             Tempfphys = cell(1);
+%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
+%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
+%             Tempfphys{1}(:,:,3) = fphys(:,:,4);
+%             Tempfphys{1}(:,:,4) = fphys(:,:,3);
+%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+%             obj.timePoint(obj.Index) = time;
+%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+%             obj.ErrNorm2{4}(obj.Index)  = Err2(4);
+%             obj.Index = obj.Index + 1;
         end
         
         %> set initial function
@@ -131,15 +134,16 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             h3d = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
             eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
             h3dt = obj.e*obj.w*( cos(obj.w.*(mesh.x+time)) + cos(obj.w.*(mesh.y+time)) );
-            u3d = -h3d.*obj.d.*mesh.z.*sin(obj.w.*(mesh.x+time));
-            u3dt = -h3d .* obj.d .* mesh.z .* obj.w .* cos(obj.w.*(mesh.x+time));
-            v3d = -h3d.*obj.d.*mesh.z.*sin(obj.w.*(mesh.y+time));
-            v3dt = -h3d .* obj.d .* mesh.z .* obj.w .* cos(obj.w.*(mesh.y+time));
+            
+            u3d = -h3d.*obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.x+time));
+            u3dt = -h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.x+time));
+            v3d = -h3d.*obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.y+time));
+            v3dt = -h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.y+time));
             
             h3dx = obj.e * obj.w .* cos(obj.w.*(mesh.x + time)) - 0.005;
             h3dy = obj.e * obj.w .* cos(obj.w.*(mesh.y + time)) - 0.005;
-            u3dx = -h3d .* obj.d .* mesh.z .*  obj.w .* cos(obj.w.*(mesh.x + time));
-            v3dy = -h3d .* obj.d .* mesh.z .*  obj.w .* cos(obj.w.*(mesh.y + time));
+            u3dx = -h3d .* obj.d .* ( mesh.z + 1 ) .*  obj.w .* cos(obj.w.*(mesh.x + time));
+            v3dy = -h3d .* obj.d .* ( mesh.z + 1 ) .*  obj.w .* cos(obj.w.*(mesh.y + time));
             
             u3ds = -h3d .* obj.d .* sin(obj.w.*(mesh.x + time));
             v3ds = -h3d .* obj.d .* sin(obj.w.*(mesh.y + time));
