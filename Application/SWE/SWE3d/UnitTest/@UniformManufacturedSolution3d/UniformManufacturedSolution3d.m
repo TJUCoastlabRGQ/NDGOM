@@ -6,8 +6,9 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
         function obj = UniformManufacturedSolution3d( N, Nz, M, Mz )
             obj = obj@ManufacturedSolution3d( N, Nz, M, Mz );
                         obj.ExactValue = cell(1);
-            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), ~] = ...
-               obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime); 
+%             [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), ~] = ...
+%                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime); 
+           
         end
     end
     
@@ -71,7 +72,11 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             mesh = obj.meshUnion(1);
             mesh2d = obj.mesh2d(1);
             matEvaluateSourceTerm@SWEAbstract3d( obj, fphys);
-            h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
+            
+            h2 = @(x,y,t)obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y );
+            h2d = h2(mesh2d.x, mesh2d.y, time);
+            
+%             h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
             h2dt = obj.e * obj.w .* cos(obj.w*(mesh2d.x+time)) + obj.e * obj.w .* cos(obj.w*(mesh2d.y+time));
             u2d = sin(obj.w*(mesh2d.x+time));
             u2dx = obj.w * cos(obj.w*(mesh2d.x + time));
