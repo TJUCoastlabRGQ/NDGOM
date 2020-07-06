@@ -65,13 +65,13 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             
             
             %> time interval
-%             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
-%                 strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
-%             obj.ErrNorm2 = cell(3);
-%             obj.Index = 1;
-%                         obj.ExactValue = cell(1);
-%             [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
-%                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);             
+            obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
+                strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
+            obj.ErrNorm2 = cell(3);
+            obj.Index = 1;
+                        obj.ExactValue = cell(1);
+            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
+               obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);             
         end
         
         function matPlotErrorNorm2(obj)
@@ -142,31 +142,31 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         
         function matEvaluateError( obj, fphys, time)
-%             fext{1}(:,:,1) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
-%                 .* obj.u(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
-%             fext{1}(:,:,2) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
-%                 .* obj.v(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
-%             fext{1}(:,:,3) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time);
-%             fext{1}(:,:,4) = obj.Ou2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) + ...
-%                 obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.u2dx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
-%                 obj.Ou(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
-%                 obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Oux(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) + ...
-%             obj.Ov2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) + ...
-%             obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.v2dy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
-%             obj.Ov(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
-%             obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Ovy(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
-%             Tempfphys = cell(1);
-%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
-%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
-%             Tempfphys{1}(:,:,3) = fphys(:,:,4);
-%             Tempfphys{1}(:,:,4) = fphys(:,:,3);
-%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-%             obj.timePoint(obj.Index) = time;
-%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-%             obj.ErrNorm2{4}(obj.Index)  = Err2(4);
-%             obj.Index = obj.Index + 1;
+            fext{1}(:,:,1) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
+                .* obj.u(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            fext{1}(:,:,2) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
+                .* obj.v(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            fext{1}(:,:,3) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time);
+            fext{1}(:,:,4) = obj.Ou2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) + ...
+                obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.u2dx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+                obj.Ou(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+                obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Oux(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) + ...
+            obj.Ov2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) + ...
+            obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.v2dy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+            obj.Ov(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+            obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Ovy(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            Tempfphys = cell(1);
+            Tempfphys{1}(:,:,1) = fphys(:,:,1);
+            Tempfphys{1}(:,:,2) = fphys(:,:,2);
+            Tempfphys{1}(:,:,3) = fphys(:,:,4);
+            Tempfphys{1}(:,:,4) = fphys(:,:,3);
+            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+            obj.timePoint(obj.Index) = time;
+            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+            obj.ErrNorm2{4}(obj.Index)  = Err2(4);
+            obj.Index = obj.Index + 1;
         end
         
         %> set initial function
