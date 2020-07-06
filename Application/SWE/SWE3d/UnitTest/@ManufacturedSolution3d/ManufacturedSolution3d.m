@@ -10,6 +10,39 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         ExactValue
     end
     
+    properties
+        h
+        ht
+        hx
+        hy
+        eta
+        u
+        ux
+        uy
+        uz
+        ut
+        v
+        vx
+        vy
+        vz
+        vt
+        u2d
+        u2dx
+        u2dy
+        u2dt
+        v2d
+        v2dx
+        v2dy
+        v2dt
+        Ou2d
+        Ov2d
+        OH
+        Ou
+        Ov
+        Oux
+        Ovy
+    end
+    
     properties ( Constant )
         %> channel length
         ChLength = 100;
@@ -27,14 +60,17 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
+            obj.matGetFunction();
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
+            
+            
             %> time interval
-%             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
-%                 strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
-%             obj.ErrNorm2 = cell(3);
-%             obj.Index = 1;
+            obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
+                strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
+            obj.ErrNorm2 = cell(3);
+            obj.Index = 1;
                         obj.ExactValue = cell(1);
-            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4), ~] = ...
+            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);             
         end
         
@@ -62,12 +98,64 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time );
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
         
+        function matGetFunction(obj)
+            syms x y z t;
+           obj.h = @(x,y,t)obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y );
+           obj.ht = @(x,y,t)cos(t/100 + x/100)/100000 + cos(t/100 + y/100)/100000;
+           obj.hx = @(x,y,t)cos(t/100 + x/100)/100000 - 1/200;
+           obj.hy = @(x,y,t)cos(t/100 + y/100)/100000 - 1/200;
+           obj.eta = @(x,y,t)obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
+           obj.u = @(x,y,z,t)-(obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y ))*obj.d.*( z + 1 ).*sin(obj.w.*(x+t));
+           obj.uz = @(x,y,t)-sin(t/100 + x/100).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5);
+           obj.ut = @(x,y,z,t)- (cos(t/100 + x/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/100 ...
+           - sin(t/100 + x/100).*(z + 1).*(cos(t/100 + x/100)/1000000 + cos(t/100 + y/100)/1000000);
+           obj.ux = @(x,y,z,t)- (cos(t/100 + x/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + ...
+               sin(t/100 + y/100)/10000 + 1/5))/100 - sin(t/100 + x/100).*(cos(t/100 + x/100)/1000000 - 1/2000).*(z + 1);
+           obj.uy = @(x,y,z,t)-sin(t/100 + x/100).*(cos(t/100 + y/100)/1000000 - 1/2000).*(z + 1);
+           obj.v = @(x,y,z,t)-(obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y ))*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)); 
+           obj.vz = @(x,y,t)-sin(t/100 + y/100) .* (sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5);
+           obj.vt = @(x,y,z,t)- (cos(t/100 + y/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/100 ...
+           - sin(t/100 + y/100).*(z + 1).*(cos(t/100 + x/100)/1000000 + cos(t/100 + y/100)/1000000);
+           obj.vx = @(x,y,z,t)-sin(t/100 + y/100).*(cos(t/100 + x/100)/1000000 - 1/2000).*(z + 1);
+           obj.vy = @(x,y,z,t)- (cos(t/100 + y/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + ...
+               sin(t/100 + y/100)/10000 + 1/5))/100 - sin(t/100 + y/100).*(cos(t/100 + y/100)/1000000 - 1/2000).*(z + 1);
+           obj.u2d = @(x,y,t)-(sin(t/100 + x/100).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/2;
+           obj.u2dt = @(x,y,t)- (cos(t/100 + x/100).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/200 ...
+           - (sin(t/100 + x/100).*(cos(t/100 + x/100)/1000000 + cos(t/100 + y/100)/1000000))/2;
+           obj.u2dx = @(x,y,t)- (sin(t/100 + x/100).*(cos(t/100 + x/100)/1000000 - 1/2000))/2 - (cos(t/100 + x/100).*(sin(t/100 + x/100)/10000 -...
+               y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/200;
+           obj.u2dy = @(x,y,t)-(sin(t/100 + x/100).*(cos(t/100 + y/100)/1000000 - 1/2000))/2;
+           obj.v2d = @(x,y,t)-(sin(t/100 + y/100).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/2;
+           obj.v2dt = @(x,y,t)- (cos(t/100 + y/100).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/200 ...
+               - (sin(t/100 + y/100).*(cos(t/100 + x/100)/1000000 + cos(t/100 + y/100)/1000000))/2;
+           obj.v2dy = @(x,y,t)- (sin(t/100 + y/100).*(cos(t/100 + y/100)/1000000 - 1/2000))/2 - (cos(t/100 + y/100).*(sin(t/100 + x/100)/10000 - ...
+               y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/200;
+           obj.v2dx = @(x,y,t)-(sin(t/100 + y/100).*(cos(t/100 + x/100)/1000000 - 1/2000))/2;
+           obj.Ou2d = @(x,y,z,t)-(sin(t/100 + x/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/2;
+           obj.OH = @(x,y,z,t)((z + 1).*(sin(t/100 + x/100) - 5*y - 5*x + sin(t/100 + y/100) + 2000))/1000;
+           obj.Ou = @(x,y,z,t)-(sin(t/100 + x/100).*(z + 1).^2.*(sin(t/100 + x/100) - 5*y - 5*x + sin(t/100 + y/100) + 2000))/20000;
+           obj.Oux = @(x,y,z,t)-((z + 1).^2.*(2000*cos(t/100 + x/100) - 500*sin(t/100 + x/100) - 5*x.*cos(t/100 + x/100) - ...
+               5*y.*cos(t/100 + x/100) + 2*cos(t/100 + x/100).*sin(t/100 + x/100) + cos(t/100 + x/100).*sin(t/100 + y/100)))/2000000;
+           obj.Ov2d = @(x,y,z,t)-(sin(t/100 + y/100).*(z + 1).*(sin(t/100 + x/100)/10000 - y/2000 - x/2000 + sin(t/100 + y/100)/10000 + 1/5))/2;
+           obj.Ov = @(x,y,z,t)-(sin(t/100 + y/100).*(z + 1).^2.*(sin(t/100 + x/100) - 5*y - 5*x + sin(t/100 + y/100) + 2000))/20000;
+           obj.Ovy = @(x,y,z,t)-((z + 1).^2.*(2000*cos(t/100 + y/100) - 500*sin(t/100 + y/100) - 5.*x.*cos(t/100 + y/100) - ...
+               5.*y.*cos(t/100 + y/100) + cos(t/100 + y/100).*sin(t/100 + x/100) + 2*cos(t/100 + y/100).*sin(t/100 + y/100)))/2000000;
+        end
+        
         function matEvaluateError( obj, fphys, time)
-            [ h, hu, hv, Omega] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
-            fext{1}(:,:,1) = hu;
-            fext{1}(:,:,2) = hv;
-            fext{1}(:,:,3) = h;
-            fext{1}(:,:,4) = Omega;
+            fext{1}(:,:,1) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
+                .* obj.u(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            fext{1}(:,:,2) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time) ...
+                .* obj.v(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            fext{1}(:,:,3) = obj.h(obj.meshUnion.x, obj.meshUnion.y, time);
+            fext{1}(:,:,4) = obj.Ou2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) + ...
+                obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.u2dx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+                obj.Ou(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hx(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+                obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Oux(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) + ...
+            obj.Ov2d(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) + ...
+            obj.OH(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.v2dy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+            obj.Ov(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time) .* obj.hy(obj.meshUnion.x, obj.meshUnion.y, time) - ...
+            obj.h(obj.meshUnion.x, obj.meshUnion.y, time) .* obj.Ovy(obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
             Tempfphys = cell(1);
             Tempfphys{1}(:,:,1) = fphys(:,:,1);
             Tempfphys{1}(:,:,2) = fphys(:,:,2);
@@ -100,18 +188,27 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys2d{m}(:,:,6) = ( mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{m}(:,:,4) ) ) + ...
                     ( mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:,:,4) ) );
                 %water depth
-                fphys2d{m}(:,:,1) = obj.e*(sin(obj.w*(mesh2d.x+0)) + sin(obj.w*(mesh2d.y+0))) - ...
-                    fphys2d{m}(:, :, 4);
-                
-                [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), fphys{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
+                fphys2d{m}(:,:,1) = obj.h( mesh2d.x, mesh2d.y, 0 );
+                fphys{m}(:,:,4) = obj.h( mesh3d.x, mesh3d.y, 0 );
+                fphys{m}(:,:,1) = obj.h( mesh3d.x, mesh3d.y, 0 ) .* obj.u( mesh3d.x, mesh3d.y, mesh3d.z, 0 );
+                fphys{m}(:,:,2) = obj.h( mesh3d.x, mesh3d.y, 0 ) .* obj.v( mesh3d.x, mesh3d.y, mesh3d.z, 0 );
+                fphys{m}(:,:,3) = obj.Ou2d( mesh3d.x, mesh3d.y, mesh3d.z, zeros(size(mesh3d.z))) .* obj.hx( mesh3d.x, mesh3d.y, 0) + ...
+                    obj.OH( mesh3d.x, mesh3d.y, mesh3d.z, 0) .* obj.u2dx( mesh3d.x, mesh3d.y, 0) - ...
+                    obj.Ou( mesh3d.x, mesh3d.y, mesh3d.z, 0) .* obj.hx( mesh3d.x, mesh3d.y, 0) - ...
+                    obj.h( mesh3d.x, mesh3d.y, 0) .* obj.Oux( mesh3d.x, mesh3d.y, mesh3d.z, 0) + ...
+                    obj.Ov2d( mesh3d.x, mesh3d.y, mesh3d.z, 0) .* obj.hy( mesh3d.x, mesh3d.y, 0) + ...
+                    obj.OH( mesh3d.x, mesh3d.y, mesh3d.z, 0) .* obj.v2dy( mesh3d.x, mesh3d.y, 0) - ...
+                    obj.Ov( mesh3d.x, mesh3d.y, mesh3d.z, 0) .* obj.hy( mesh3d.x, mesh3d.y, 0) - ...
+                    obj.h( mesh3d.x, mesh3d.y, 0) .* obj.Ovy( mesh3d.x, mesh3d.y, mesh3d.z, 0);
+%                 [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), fphys{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
                 
                 %> Z in extended three dimensional fields
                 fphys{m}(:,:,6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
                 %> '$\eta$' in extended three dimensional fields
                 fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
-                fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
-                fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
+                fphys2d{m}(:, :, 2) = obj.u2d(mesh2d.x,mesh2d.y,0).*obj.h(mesh2d.x,mesh2d.y,0);
+                fphys2d{m}(:, :, 3) = obj.v2d(mesh2d.x,mesh2d.y,0).*obj.h(mesh2d.x,mesh2d.y,0);
                 
             end
         end
@@ -120,102 +217,66 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             mesh = obj.meshUnion(1);
             mesh2d = obj.mesh2d(1);
             matEvaluateSourceTerm@SWEAbstract3d( obj, fphys);
-            h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
-            h2dt =  obj.e * obj.w * ( cos(obj.w*(mesh2d.x+time)) + cos(obj.w*(mesh2d.y+time)) );
-            h2dx = obj.e * obj.w * cos(obj.w*(mesh2d.x+time)) - 0.005;
-            h2dy = obj.e * obj.w * cos(obj.w*(mesh2d.y+time)) - 0.005;
-            u2d = ( -h2d.*obj.d./2 ) .* sin(obj.w*(mesh2d.x+time));
-            v2d = ( -h2d.*obj.d./2 ) .* sin(obj.w*(mesh2d.y+time));
-            u2dx = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.x+time)) - h2dx .* obj.d./2 .* sin(obj.w*(mesh2d.x+time));
-            v2dy = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.y+time)) - h2dy .* obj.d./2 .* sin(obj.w*(mesh2d.y+time));
             %[Problematic
-            obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + h2dt + ...
-                h2d .* u2dx + u2d .* h2dx + h2d .* v2dy + v2d .* h2dy ;
+            obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + obj.ht(mesh2d.x, mesh2d.y, time) + ...
+                obj.h(mesh2d.x, mesh2d.y, time) .* obj.u2dx(mesh2d.x, mesh2d.y, time) + ...
+                obj.u2d(mesh2d.x, mesh2d.y, time) .* obj.hx(mesh2d.x, mesh2d.y, time) + ...
+                obj.h(mesh2d.x, mesh2d.y, time) .* obj.v2dy(mesh2d.x, mesh2d.y, time) + ...
+                obj.v2d(mesh2d.x, mesh2d.y, time) .* obj.hy(mesh2d.x, mesh2d.y, time) ;
             
-            h3d = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time))) + (2-0.005.*(mesh.x + mesh.y));
-            eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
-            h3dt = obj.e*obj.w*( cos(obj.w.*(mesh.x+time)) + cos(obj.w.*(mesh.y+time)) );
             
-            u3d = -h3d.*obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.x+time));
-            u3dt = -h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.x+time)) - h3dt .* obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.x+time));
-            v3d = -h3d.*obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.y+time));
-            v3dt = -h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.y+time)) - h3dt .* obj.d.*( mesh.z + 1 ).*sin(obj.w.*(mesh.y+time));
+            Omega = obj.Ou2d( mesh.x, mesh.y, mesh.z, time) .* obj.hx( mesh.x, mesh.y, time) + ...
+                    obj.OH( mesh.x, mesh.y, mesh.z, time) .* obj.u2dx( mesh.x, mesh.y, time) - ...
+                    obj.Ou( mesh.x, mesh.y, mesh.z, time) .* obj.hx( mesh.x, mesh.y, time) - ...
+                    obj.h( mesh.x, mesh.y, time) .* obj.Oux( mesh.x, mesh.y, mesh.z, time) + ...
+                    obj.Ov2d( mesh.x, mesh.y, mesh.z, time) .* obj.hy( mesh.x, mesh.y, time) + ...
+                    obj.OH( mesh.x, mesh.y, mesh.z, time) .* obj.v2dy( mesh.x, mesh.y, time)- ...
+                    obj.Ov( mesh.x, mesh.y, mesh.z, time) .* obj.hy( mesh.x, mesh.y, time) - ...
+                    obj.h( mesh.x, mesh.y, time) .* obj.Ovy( mesh.x, mesh.y, mesh.z, time);
             
-            h3dx = obj.e * obj.w .* cos(obj.w.*(mesh.x + time)) - 0.005;
-            h3dy = obj.e * obj.w .* cos(obj.w.*(mesh.y + time)) - 0.005;
-            u3dx = -obj.d .* ( mesh.z + 1 ) .* sin(obj.w .*(mesh.x+time)) .* h3dx - ...
-                h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.x+time)) ;
-            v3dy = -obj.d .* ( mesh.z + 1 ) .* sin(obj.w .*(mesh.y+time)) .* h3dy - ...
-                h3d .* obj.d .* ( mesh.z + 1 ) .* obj.w .* cos(obj.w.*(mesh.y+time)) ; 
-            u3ds = -h3d .* obj.d .* sin(obj.w.*(mesh.x + time));
-            v3ds = -h3d .* obj.d .* sin(obj.w.*(mesh.y + time));
+            Os = obj.u2d( mesh.x, mesh.y, time) .* obj.hx( mesh.x, mesh.y, time) + ...
+                obj.h( mesh.x, mesh.y, time).* obj.u2dx( mesh.x, mesh.y, time)  - ...
+                obj.u( mesh.x, mesh.y, mesh.z, time) .* obj.hx( mesh.x, mesh.y, time) - ...
+                obj.h( mesh.x, mesh.y, time).* obj.ux( mesh.x, mesh.y, mesh.z, time)  + ...
+                obj.v2d( mesh.x, mesh.y, time) .* obj.hy( mesh.x, mesh.y, time) + ...
+                obj.h( mesh.x, mesh.y, time).* obj.v2dy( mesh.x, mesh.y, time)  - ...
+                obj.v( mesh.x, mesh.y, mesh.z, time) .* obj.hy( mesh.x, mesh.y, time) - ...
+                obj.h( mesh.x, mesh.y, time).* obj.vy( mesh.x, mesh.y, mesh.z, time);
             
-           [~,~,~,Omega,Os] = obj.matGetExactSolution( mesh.x, mesh.y, mesh.z, time);
             
-            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + u3d.*h3dt + h3d.*u3dt + u3d.*(u3d.*h3dx+h3d.*u3dx) + h3d.*u3d.*u3dx + obj.gra.*h3d.*h3dx - ...
-                obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,8) + u3d .* (v3d.*h3dy + h3d.*v3dy) + u3d.*Os + Omega .* u3ds + obj.gra .* eta .* fphys{1}(:,:,8);
-            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + v3d.*h3dt + h3d.*v3dt + v3d.*(u3d.*h3dx+h3d.*u3dx) + v3d.*(v3d.*h3dy + h3d.*v3dy) + h3d.*v3d.*v3dy + ...
-                obj.gra.*h3d.*h3dy - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,9) + v3d.*Os + Omega .* v3ds + obj.gra .* eta .* fphys{1}(:,:,9);
+            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + obj.u( mesh.x, mesh.y, mesh.z, time ) .* obj.ht( mesh.x, mesh.y, time ) +...
+                obj.h( mesh.x, mesh.y, time ) .* obj.ut( mesh.x, mesh.y, mesh.z, time ) + obj.u( mesh.x, mesh.y, mesh.z, time ).*...
+                (obj.u( mesh.x, mesh.y, mesh.z, time ).*obj.hx( mesh.x, mesh.y, time ) + obj.h( mesh.x, mesh.y, time ).*obj.ux( mesh.x, mesh.y, mesh.z, time ))...
+                + obj.h( mesh.x, mesh.y, time ).*obj.u( mesh.x, mesh.y, mesh.z, time ).*obj.ux( mesh.x, mesh.y, mesh.z, time ) + ...
+                obj.gra .* obj.h( mesh.x, mesh.y, time ) .* obj.hx( mesh.x, mesh.y, time ) - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,8) +...
+                obj.u( mesh.x, mesh.y, mesh.z, time ) .* (obj.v( mesh.x, mesh.y, mesh.z, time ).*obj.hy( mesh.x, mesh.y, time ) + ...
+                obj.h( mesh.x, mesh.y, time ) .* obj.vy( mesh.x, mesh.y, mesh.z, time )) + obj.u( mesh.x, mesh.y, mesh.z, time ).*Os + ...
+                Omega .* obj.uz( mesh.x, mesh.y, time ) + obj.gra .* obj.eta( mesh.x, mesh.y, time ) .* fphys{1}(:,:,8);
+            
+
+            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + obj.v( mesh.x, mesh.y, mesh.z, time ).*obj.ht( mesh.x, mesh.y, time ) + ...
+                obj.h( mesh.x, mesh.y, time ).*obj.vt( mesh.x, mesh.y, mesh.z, time ) + obj.v( mesh.x, mesh.y, mesh.z, time ).* ...
+                (obj.u( mesh.x, mesh.y, mesh.z, time ).*obj.hx( mesh.x, mesh.y, time ) + obj.h( mesh.x, mesh.y, time ).*obj.ux( mesh.x, mesh.y, mesh.z, time ))...
+                + obj.v( mesh.x, mesh.y, mesh.z, time ).*(obj.v( mesh.x, mesh.y, mesh.z, time ).*obj.hy( mesh.x, mesh.y, time ) + obj.h( mesh.x, mesh.y, time ).* ...
+                obj.vy( mesh.x, mesh.y, mesh.z, time )) + obj.h( mesh.x, mesh.y, time ).*obj.v( mesh.x, mesh.y, mesh.z, time ).*obj.vy( mesh.x, mesh.y, mesh.z, time ) + ...
+                obj.gra.*obj.h( mesh.x, mesh.y, time ).*obj.hy( mesh.x, mesh.y, time ) - obj.gra .* fphys{1}(:,:,6).*fphys{1}(:,:,9) + obj.v( mesh.x, mesh.y, mesh.z, time ).*Os + ...
+                Omega .* obj.vz( mesh.x, mesh.y, time ) + obj.gra .* obj.eta( mesh.x, mesh.y, time ) .* fphys{1}(:,:,9);
         end
         
         function matUpdateExternalField( obj, time, ~, ~ ) 
             
-            [obj.fext3d{1}( :, :, 4 ), obj.fext3d{1}( :, :, 1 ), obj.fext3d{1}( :, :, 2 ), ~, ~] = ...
-                obj.matGetExactSolution( obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
-            
-           [obj.fext2d{1}( :, :, 1 ), ~, ~, ~, ~] = obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
-            
+            obj.fext3d{1}( :, :, 1 ) = obj.h(obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, time) .* ...
+                obj.u(obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
+            obj.fext3d{1}( :, :, 2 ) = obj.h(obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, time) .* ...
+                obj.v(obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
+            obj.fext3d{1}( :, :, 4 ) = obj.h(obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, time);
+            obj.fext2d{1}( :, :, 1 ) = obj.h(obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, time);
+                        
             obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
             obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );        
             
         end        
-        
-        
-        function [ h, hu, hv, Omega, Os ] = matGetExactSolution( obj, x, y, z, time)
-            h = obj.e*(sin(obj.w.*(x+time)) + sin(obj.w*(y+time))) + (2-0.005.*(x + y));
-            u = -h.*obj.d.* ( z + 1 ).*sin(obj.w.*(x+time));
-            usigma = -h.*obj.d.* ( z.^2./2 + z ).*sin(obj.w.*(x+time));
-            ubot = -h.*obj.d.* ( -1/2 ).*sin(obj.w.*(x+time));
-            v = -h.*obj.d.* ( z + 1 ) .*sin(obj.w.*(y+time));
-            vsigma = -h.*obj.d.* ( z.^2./2 + z ) .*sin(obj.w.*(y+time));
-            vbot = -h.*obj.d.* ( -1/2 ).*sin(obj.w.*(y+time));
-            u2d = -1/2 * h .* obj.d .* sin(obj.w .*(x+time)); 
-            v2d = -1/2 * h .* obj.d .* sin(obj.w .*(y+time));
-            hu = u .* h;
-            hv = v .* h;            
-            hx = obj.e * obj.w .* cos(obj.w.*(x+time)) - 0.005;
-            hy = obj.e * obj.w .* cos(obj.w.*(y+time)) - 0.005;
-            
-            u2dx = ( -1/2 * obj.d * sin(obj.w .*(x+time)).*hx - ...
-                1/2 .* h .* obj.d .* obj.w .* cos(obj.w.*(x+time)) ) ; 
-            
-            v2dy = ( -1/2 * obj.d * sin(obj.w .*(y+time)).*hy - ...
-                1/2 .* h .* obj.d .* obj.w .* cos(obj.w.*(y+time)) ) ;  
-            
-            ux = -obj.d .* ( z + 1 ) .* sin(obj.w .*(x+time)) .* hx - ...
-                h .* obj.d .* ( z + 1 ) .* obj.w .* cos(obj.w.*(x+time)) ;
-            uxsigma = -obj.d .* ( z.^2./2 + z ) .* sin(obj.w .*(x+time)) .* hx - ...
-                h .* obj.d .* ( z.^2./2 + z ) .* obj.w .* cos(obj.w.*(x+time)) ;
-            uxbot = -obj.d .* ( -1/2 ) .* sin(obj.w .*(x+time)) .* hx - ...
-                h .* obj.d .* ( -1/2 ) .* obj.w .* cos(obj.w.*(x+time)) ;            
-            
-            vy = -obj.d .* ( z + 1 ) .* sin(obj.w .*(y+time)) .* hy - ...
-                h .* obj.d .* ( z + 1 ) .* obj.w .* cos(obj.w.*(y+time)) ; 
-            vysigma = -obj.d .* ( z.^2./2 + z ) .* sin(obj.w .*(y+time)) .* hy - ...
-                h .* obj.d .* ( z.^2./2 + z ) .* obj.w .* cos(obj.w.*(y+time)) ; 
-            vybot = -obj.d .* ( -1/2 ) .* sin(obj.w .*(y+time)) .* hy - ...
-                h .* obj.d .* ( -1/2 ) .* obj.w .* cos(obj.w.*(y+time)) ;
-            
-           Omega = u2d .* hx .* z + h .* u2dx .* z - usigma .* hx - h .* uxsigma - ( u2d .* hx * (-1) ...
-                + h .* u2dx * (-1) - ubot .* hx - h .* uxbot) + v2d .* hy .* z + h .* v2dy .* z - ...
-                vsigma .* hy - h .* vysigma - ( v2d .* hy * (-1) ...
-                + h .* v2dy * (-1) - vbot .* hy - h .* vybot);
-            
-            Os = u2d .* hx + h .* u2dx - u .* hx - h .* ux + v2d .* hy + h .* v2dy - v .* hy - h .* vy;        
-           
-        end
-        
-        
+              
         function [ option ] = setOption( obj, option )
             ftime = 200;
             outputIntervalNum = 100;
