@@ -59,26 +59,27 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
     
     methods ( Access = protected )
         
+        [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time );
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
         
         function matEvaluateError( obj, fphys, time)
-%             [ h, hu, hv, Omega, ~ ] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
-%             fext{1}(:,:,1) = hu;
-%             fext{1}(:,:,2) = hv;
-%             fext{1}(:,:,3) = h;
-%             fext{1}(:,:,4) = Omega;
-%             Tempfphys = cell(1);
-%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
-%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
-%             Tempfphys{1}(:,:,3) = fphys(:,:,4);
-%             Tempfphys{1}(:,:,4) = fphys(:,:,3);
-%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-%             obj.timePoint(obj.Index) = time;
-%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-%             obj.ErrNorm2{4}(obj.Index)  = Err2(4);
-%             obj.Index = obj.Index + 1;
+            [ h, hu, hv, Omega] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
+            fext{1}(:,:,1) = hu;
+            fext{1}(:,:,2) = hv;
+            fext{1}(:,:,3) = h;
+            fext{1}(:,:,4) = Omega;
+            Tempfphys = cell(1);
+            Tempfphys{1}(:,:,1) = fphys(:,:,1);
+            Tempfphys{1}(:,:,2) = fphys(:,:,2);
+            Tempfphys{1}(:,:,3) = fphys(:,:,4);
+            Tempfphys{1}(:,:,4) = fphys(:,:,3);
+            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+            obj.timePoint(obj.Index) = time;
+            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+            obj.ErrNorm2{4}(obj.Index)  = Err2(4);
+            obj.Index = obj.Index + 1;
         end
         
         %> set initial function
@@ -125,8 +126,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             h2dy = obj.e * obj.w * cos(obj.w*(mesh2d.y+time)) - 0.005;
             u2d = ( -h2d.*obj.d./2 ) .* sin(obj.w*(mesh2d.x+time));
             v2d = ( -h2d.*obj.d./2 ) .* sin(obj.w*(mesh2d.y+time));
-            u2dx = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.x+time));
-            v2dy = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.y+time));
+            u2dx = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.x+time)) - h2dx .* obj.d./2 .* sin(obj.w*(mesh2d.x+time));
+            v2dy = ( -h2d.*obj.d./2 ) .* obj.w .* cos(obj.w*(mesh2d.y+time)) - h2dy .* obj.d./2 .* sin(obj.w*(mesh2d.y+time));
             %[Problematic
             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + h2dt + ...
                 h2d .* u2dx + u2d .* h2dx + h2d .* v2dy + v2d .* h2dy ;
@@ -258,7 +259,7 @@ mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
-zs = ones(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1);
+zs = zeros(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1) - ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
