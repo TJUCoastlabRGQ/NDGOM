@@ -56,10 +56,10 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
                 
                 %> Z in extended three dimensional fields
                 fphys{m}(:,:,6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
-                %> '$\eta$' in extended three dimensional fields
-                fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
                 [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
+                %> '$\eta$' in extended three dimensional fields
+                fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);                
                 
                 [ ~, fphys2d{m}(:,:,2), fphys2d{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh2d.x, mesh2d.y, mesh2d.x, 0);
 %                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
