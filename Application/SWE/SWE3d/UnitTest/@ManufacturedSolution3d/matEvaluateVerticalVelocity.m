@@ -1,8 +1,17 @@
 function [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
-% [~,~,~,Omega,~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+[fphys3d{1}(:,:,1), fphys3d{1}(:,:,2), OmegaN, fphys3d{1}(:,:,4)] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+[fphys2d{1}(:,:,1)] = obj.h(obj.mesh2d.x, obj.mesh2d.y, time);
+[fphys2d{1}(:,:,2)] = obj.h(obj.mesh2d.x, obj.mesh2d.y, time) .* obj.u2d(obj.mesh2d.x, obj.mesh2d.y, time);
+[fphys2d{1}(:,:,3)] = obj.h(obj.mesh2d.x, obj.mesh2d.y, time) .* obj.v2d(obj.mesh2d.x, obj.mesh2d.y, time);
+% [ ~, ~, OmegaO, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
 % W = zeros(size(Omega));
+
+
+
+
+
 edge = mesh3d.InnerEdge;
 edge2d = obj.mesh2d(1).InnerEdge;
 [ InnerEdgefm3d{1}, InnerEdgefp3d{1} ] = edge.matEvaluateSurfValue( fphys3d );

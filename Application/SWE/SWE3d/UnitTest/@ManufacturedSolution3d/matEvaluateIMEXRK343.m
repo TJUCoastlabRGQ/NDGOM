@@ -47,10 +47,11 @@ while( time < ftime )
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        
         %> update the vertical velocity
         [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, tloc );
         
-        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> Calculation of the right hand side corresponds to the discretization of the non-stiff term at stage intRK+1 with the
