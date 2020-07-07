@@ -28,7 +28,7 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
             obj.initPhysFromOptions( mesh );
             %> time interval
             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
-                strcat('WindDrivenFlow/3d','/','WindDrivenFlow'));
+                strcat('ManufacturedSolution2d/2d','/','ManufacturedSolution2d'));
             obj.ErrNorm2 = cell(3);
             obj.Index = 1; 
             obj.ExactValue = cell(1);
@@ -60,21 +60,21 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
         
         function matEvaluateError( obj, fphys, time)
-%             [ h, hu, hv ] = obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, time);
-%             fext = cell(1);
-%             fext{1}(:,:,1) = h;
-%             fext{1}(:,:,2) = hu;
-%             fext{1}(:,:,3) = hv;
-%             Tempfphys = cell(1);
-%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
-%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
-%             Tempfphys{1}(:,:,3) = fphys(:,:,3);
-%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-%             obj.timePoint(obj.Index) = time;
-%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-%             obj.Index = obj.Index + 1;
+            [ h, hu, hv ] = obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, time);
+            fext = cell(1);
+            fext{1}(:,:,1) = h;
+            fext{1}(:,:,2) = hu;
+            fext{1}(:,:,3) = hv;
+            Tempfphys = cell(1);
+            Tempfphys{1}(:,:,1) = fphys(:,:,1);
+            Tempfphys{1}(:,:,2) = fphys(:,:,2);
+            Tempfphys{1}(:,:,3) = fphys(:,:,3);
+            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+            obj.timePoint(obj.Index) = time;
+            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+            obj.Index = obj.Index + 1;
         end
         
         %> set initial function

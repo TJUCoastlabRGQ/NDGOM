@@ -5,32 +5,45 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
     methods
         function obj = UniformManufacturedSolution3d( N, Nz, M, Mz )
             obj = obj@ManufacturedSolution3d( N, Nz, M, Mz );
-                        obj.ExactValue = cell(1);
-%             [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), ~] = ...
-%                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime); 
-           
         end
     end
     
     methods ( Access = protected )
         
+        function matGetFunction(obj)
+            %doing nothing
+        end
+        
+        function PostInit(obj)
+            obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.outputFieldOrder3d = [ 1 2 3];
+            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );         
+            obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
+                strcat('UniformManufacturedSolution3d/','3d/','UniformManufacturedSolution3d'));
+            obj.ErrNorm2 = cell(3,1);
+            obj.Index = 1;
+            obj.ExactValue = cell(1);
+            [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), ~] = ...
+                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);
+        end
+        
         function matEvaluateError( obj, fphys, time)
-%             [ h, hu, hv ] = obj.matGetExactSolution( obj.mesh3d, time);
-%             fext = cell(1);
-%             fext{1}(:,:,1) = hu;
-%             fext{1}(:,:,2) = hv;
-%             fext{1}(:,:,3) = h;
-%             Tempfphys = cell(1);
-%             Tempfphys{1}(:,:,1) = fphys(:,:,1);
-%             Tempfphys{1}(:,:,2) = fphys(:,:,2);
-%             Tempfphys{1}(:,:,3) = fphys(:,:,4);
-%             Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
-%             obj.timePoint(obj.Index) = time;
-%             obj.ErrNorm2{1}(obj.Index)  = Err2(1);
-%             obj.ErrNorm2{2}(obj.Index)  = Err2(2);
-%             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
-%             obj.Index = obj.Index + 1;
-        end        
+            [ h, hu, hv, ~ ] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
+            fext = cell(1);
+            fext{1}(:,:,1) = hu;
+            fext{1}(:,:,2) = hv;
+            fext{1}(:,:,3) = h;
+            Tempfphys = cell(1);
+            Tempfphys{1}(:,:,1) = fphys(:,:,1);
+            Tempfphys{1}(:,:,2) = fphys(:,:,2);
+            Tempfphys{1}(:,:,3) = fphys(:,:,4);
+            Err2 = obj.PostProcess.evaluateNormErr2( Tempfphys, fext );
+            obj.timePoint(obj.Index) = time;
+            obj.ErrNorm2{1}(obj.Index)  = Err2(1);
+            obj.ErrNorm2{2}(obj.Index)  = Err2(2);
+            obj.ErrNorm2{3}(obj.Index)  = Err2(3);
+            obj.Index = obj.Index + 1;
+        end
         
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
@@ -39,7 +52,6 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             for m = 1 : obj.Nmesh
                 mesh2d = obj.mesh2d(m);
                 mesh3d = obj.mesh3d(m);
-                x = mesh3d.x; y = mesh3d.y;
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
@@ -59,11 +71,9 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
                 
                 [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
                 %> '$\eta$' in extended three dimensional fields
-                fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);                
+                fphys{m}(:,:,7) = fphys{m}(:,:,4) + fphys{m}(:,:,6);
                 
                 [ ~, fphys2d{m}(:,:,2), fphys2d{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh2d.x, mesh2d.y, mesh2d.x, 0);
-%                 fphys2d{m}(:, :, 2) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 1) );
-%                 fphys2d{m}(:, :, 3) = mesh3d.VerticalColumnIntegralField( fphys{m}(:, :, 2) );
                 
             end
         end
@@ -76,12 +86,12 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             h2 = @(x,y,t)obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y );
             h2d = h2(mesh2d.x, mesh2d.y, time);
             
-%             h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
+            %             h2d =  obj.e * ( sin(obj.w*(mesh2d.x+time)) + sin(obj.w*(mesh2d.y+time)) ) + 2 - 0.005*( mesh2d.x + mesh2d.y );
             h2dt = obj.e * obj.w .* cos(obj.w*(mesh2d.x+time)) + obj.e * obj.w .* cos(obj.w*(mesh2d.y+time));
             u2d = sin(obj.w*(mesh2d.x+time));
             u2dx = obj.w * cos(obj.w*(mesh2d.x + time));
-            v2dy = obj.w * cos(obj.w*(mesh2d.y + time));
             v2d = sin(obj.w*(mesh2d.y+time));
+            v2dy = obj.w * cos(obj.w*(mesh2d.y + time));
             h2dx = obj.e * obj.w *( cos(obj.w*(mesh2d.x+time)) ) - 0.005;
             h2dy = obj.e * obj.w *( cos(obj.w*(mesh2d.y+time)) ) - 0.005;
             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) +  h2dt  + ...
@@ -108,16 +118,13 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
         end
         
         function matUpdateExternalField( obj, time, ~, ~ )
-
-             [obj.fext3d{1}( :, :, 4 ), obj.fext3d{1}( :, :, 1 ), obj.fext3d{1}( :, :, 2 ), ~] = ...
+            
+            [obj.fext3d{1}( :, :, 4 ), obj.fext3d{1}( :, :, 1 ), obj.fext3d{1}( :, :, 2 ), ~] = ...
                 obj.matGetExactSolution( obj.mesh3d.BoundaryEdge.xb, obj.mesh3d.BoundaryEdge.yb, obj.mesh3d.BoundaryEdge.zb, time);
             
-           [ obj.fext2d{1}( :, :, 1 ), obj.fext2d{1}( :, :, 2 ), obj.fext2d{1}( :, :, 3 ), ~ ] =...
-               obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
-            
-%             obj.fext2d{1}( :, :, 2 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 1 ) );      
-%             obj.fext2d{1}( :, :, 3 ) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(  obj.fext3d{1}( :, :, 2 ) );            
-            
+            [ obj.fext2d{1}( :, :, 1 ), obj.fext2d{1}( :, :, 2 ), obj.fext2d{1}( :, :, 3 ), ~ ] =...
+                obj.matGetExactSolution( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, obj.mesh2d.BoundaryEdge.xb, time);
+                        
         end
         
         function [ h, hu, hv, Omega ] = matGetExactSolution( obj, x, y, ~, time)
