@@ -1,0 +1,11 @@
+e = 0.001;
+w = 0.01;
+d = 0.1;
+syms x y z t;
+h = ( e * ( sin(w*(x+t)) + sin(w*(y+t)) ) + 2 - 0.005*( x + y ) );
+ht = cos(t/100 + x/100)/100000 + cos(t/100 + y/100)/100000;
+hx = cos(t/100 + x/100)/100000 - 1/200;
+hy = cos(t/100 + y/100)/100000 - 1/200;
+eta = ( e * ( sin(w*(x+t)) + sin(w*(y+t)) ) );
+u = -(e * ( sin(w*(x+t)) + sin(w*(y+t)) ) + 2 - 0.005*( x + y ))*d*( z + 1 )*sin(w*(x+t));
+momentum = h*u;
