@@ -20,7 +20,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         u2d
         v2d
         Omega
-        OmegaN
         hut
         mhux
         mhuy
@@ -97,8 +96,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.v = -obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t));
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
-            obj.Omega = int( -obj.ht - diff(obj.h*obj.u, x) - diff(obj.h*obj.v, y), z, [-1, z]);
-            obj.OmegaN = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
+            obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
             obj.mhuy = diff( obj.h * obj.u * obj.v, y);
@@ -206,7 +204,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             hv = eval( obj.h ) .* eval( obj.v );
             h = eval( obj.h );
             Omega = eval( obj.Omega );
-            OmegaN = eval( obj.OmegaN );
         end
         
         function [ option ] = setOption( obj, option )

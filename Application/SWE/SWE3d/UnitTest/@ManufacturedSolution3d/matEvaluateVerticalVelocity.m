@@ -1,15 +1,15 @@
 function [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
-[fphys3d{1}(:,:,1), fphys3d{1}(:,:,2), OmegaN, fphys3d{1}(:,:,4)] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
-x = obj.mesh2d.x;
-y = obj.mesh2d.y;
-t = time;
-[fphys2d{1}(:,:,1)] = eval( obj.h );
-[fphys2d{1}(:,:,2)] = eval( obj.h ) .* eval( obj.u2d );
-[fphys2d{1}(:,:,3)] = eval( obj.h ) .* eval( obj.v2d );
+[fphys3d{1}(:,:,1), fphys3d{1}(:,:,2), Omega, fphys3d{1}(:,:,4)] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+% x = obj.mesh2d.x;
+% y = obj.mesh2d.y;
+% t = time;
+% [fphys2d{1}(:,:,1)] = eval( obj.h );
+% [fphys2d{1}(:,:,2)] = eval( obj.h ) .* eval( obj.u2d );
+% [fphys2d{1}(:,:,3)] = eval( obj.h ) .* eval( obj.v2d );
 % [ ~, ~, OmegaO, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
-% W = zeros(size(Omega));
+W = zeros(size(Omega));
 
 
 
