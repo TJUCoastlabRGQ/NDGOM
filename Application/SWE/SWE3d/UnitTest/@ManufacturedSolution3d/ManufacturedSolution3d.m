@@ -8,6 +8,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         ErrNorm2
         Index
         ExactValue
+        lendstr
     end
     
     properties
@@ -36,7 +37,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         ChWidth = 100;
-        e = 0.001;
+        e = 0.01;
         w = 0.01;
         d = 0.1;
         hcrit = 0.001;
@@ -60,9 +61,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             for i = 1:numel(obj.ErrNorm2)
                 plot(obj.timePoint, obj.ErrNorm2{i},color{i},'LineWidth',LWidth);
             end
-            lendstr = {'$hu$',...
-                '$hv$','$h$','$\omega$'};
-            legend(lendstr,'Interpreter','Latex','FontSize',FontSize);
+            legend(obj.lendstr,'Interpreter','Latex','FontSize',FontSize);
             xlabel('$time(s)$','Interpreter','Latex');
             ylabel('$L_2 error$','Interpreter','Latex');
             box on;
@@ -85,15 +84,17 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.ExactValue = cell(1);
             [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
                 obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);
+            obj.lendstr = {'$hu$',...
+                '$hv$','$h$','$\omega$'};
         end
         function matGetFunction(obj)
             syms x y z t;
-            obj.h = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) + 2 - 0.005*( x + y ) );
-            obj.b = - ( 2 - 0.005*( x + y ));
-            obj.ht = diff(obj.h,t);
             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
-            obj.u = -obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t));
-            obj.v = -obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t));
+            obj.b = - ( 2 - 0.005*( x + y ));
+            obj.h = obj.eta - obj.b;
+            obj.u = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t));
+            obj.v = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t));
+            obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
             obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
@@ -105,7 +106,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.mhvx = diff( obj.h * obj.u * obj.v, x);
             obj.mhvy = diff( obj.h * obj.v * obj.v + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), y);
             obj.mhvz = diff( obj.v * obj.Omega, z);
-            
             obj.mh2dx = diff( obj.h * obj.u2d, x);
             obj.mh2dy = diff( obj.h * obj.v2d, y);
             
@@ -156,8 +156,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys{m}(:,:,1) = eval( obj.h ) .* eval( obj.u );
                 fphys{m}(:,:,2) = eval( obj.h ) .* eval( obj.v );
                 fphys{m}(:,:,3) = eval( obj.Omega );
-                %                 [ fphys{m}(:,:,4), fphys{m}(:,:,1), fphys{m}(:,:,2), fphys{m}(:,:,3), ~ ] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
-                
                 %> Z in extended three dimensional fields
                 fphys{m}(:,:,6) = mesh3d.Extend2dField( fphys2d{m}(:, :, 4) );
                 %> '$\eta$' in extended three dimensional fields
@@ -207,7 +205,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 200;
+            ftime = 86.4;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

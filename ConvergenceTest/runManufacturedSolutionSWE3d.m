@@ -1,7 +1,8 @@
 function runManufacturedSolutionSWE3d
-M = [ 20 10 5 2.5 ];
+% M = [ 20 10 5 2.5 ];
+M = [ 20 10 5 2.5];
 
-Order = [1];
+Order = [1 2];
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);

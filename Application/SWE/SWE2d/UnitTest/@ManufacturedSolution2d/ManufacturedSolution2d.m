@@ -10,6 +10,23 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         ExactValue
     end
     
+    properties
+        h
+        b
+        eta
+        u
+        v
+        ht        
+        mhx
+        mhy        
+        hut
+        mhux
+        mhuy
+        hvt
+        mhvx
+        mhvy
+    end
+    
     properties ( Constant )
         %> channel length
         ChLength = 100;
@@ -25,6 +42,7 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEPreBlanaced2d();
             obj.hmin = 1e-3;
+            obj.matGetFunction( );
             obj.initPhysFromOptions( mesh );
             %> time interval
             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
@@ -59,10 +77,29 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex, time);
         
+        function matGetFunction(obj)
+            syms x y z t;
+            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
+            obj.b = - ( 2 - 0.005*( x + y ));
+            obj.h = obj.eta - obj.b;
+            obj.u = sin(obj.w.*(x+t));
+            obj.v = sin(obj.w.*(y+t));
+            obj.ht = diff(obj.h,t);
+            obj.mhx = diff( obj.h * obj.u, x);
+            obj.mhy = diff( obj.h * obj.v, y);            
+            obj.hut = diff( obj.h* obj.u, t);
+            obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
+            obj.mhuy = diff( obj.h * obj.u * obj.v, y);
+            obj.hvt = diff( obj.h* obj.v, t);
+            obj.mhvx = diff( obj.h * obj.u * obj.v, x);
+            obj.mhvy = diff( obj.h * obj.v * obj.v + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), y);
+        end
+        
+        
         function matEvaluateError( obj, fphys, time)
-            [ h, hu, hv ] = obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, time);
+            [ H, hu, hv ] = obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, time);
             fext = cell(1);
-            fext{1}(:,:,1) = h;
+            fext{1}(:,:,1) = H;
             fext{1}(:,:,2) = hu;
             fext{1}(:,:,3) = hv;
             Tempfphys = cell(1);
@@ -82,9 +119,10 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
                 mesh = obj.meshUnion(m);
+                x = mesh.x; y = mesh.y; t=0;
                 fphys{m} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
                 % bottom elevation
-                fphys{m}(:, :, 4) = -(2-0.005*(mesh.x+mesh.y));
+                fphys{m}(:, :, 4) = eval(obj.b);
                 
                 fphys{m}(:,:,5) = ( mesh.rx .* ( mesh.cell.Dr * fphys{m}(:,:,4) ) ) + ...
                     ( mesh.sx .* ( mesh.cell.Ds * fphys{m}(:,:,4) ) );
@@ -92,24 +130,24 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
                 fphys{m}(:,:,6) = ( mesh.ry .* ( mesh.cell.Dr * fphys{m}(:,:,4) ) ) + ...
                     ( mesh.sy .* ( mesh.cell.Ds * fphys{m}(:,:,4) ) );
                 %water depth
-                fphys{m}(:,:,1) = obj.e*(sin(obj.w*(mesh.x+0)) + sin(obj.w*(mesh.y+0))) - ...
-                    fphys{m}(:, :, 4);
-                fphys{m}(:,:,2) = sin(obj.w*(mesh.x+0)) .* fphys{m}(:, :, 1);        
-                fphys{m}(:,:,3) = sin(obj.w*(mesh.y+0)) .* fphys{m}(:, :, 1);                  
+                fphys{m}(:,:,1) = eval(obj.h);
+                fphys{m}(:,:,2) = eval(obj.h) .* eval(obj.u);        
+                fphys{m}(:,:,3) = eval(obj.h) .* eval(obj.v);                
             end
         end
         
         
         function matUpdateExternalField( obj, time, ~, ~ )
             
-            [obj.fext{1}( :, :, 1 ), obj.fext{1}( :, :, 2 ), obj.fext{1}( :, :, 3 )] = obj.matGetExactSolution( obj.meshUnion.BoundaryEdge.xb, obj.meshUnion.BoundaryEdge.yb, time);
+            [obj.fext{1}( :, :, 1 ), obj.fext{1}( :, :, 2 ), obj.fext{1}( :, :, 3 )] =...
+                obj.matGetExactSolution( obj.meshUnion.BoundaryEdge.xb, obj.meshUnion.BoundaryEdge.yb, time);
             
         end
         
-        function [ h, hu, hv ] = matGetExactSolution( obj, x, y, time)
-            h = obj.e*(sin(obj.w.*(x+time)) + sin(obj.w*(y+time))) + (2-0.005.*(x + y));
-            hu = sin(obj.w.*(x+time)) .* h;
-            hv = sin(obj.w.*(y+time)) .* h;
+        function [ h, hu, hv ] = matGetExactSolution( obj, x, y, t)
+            h = eval( obj.h );
+            hu = eval( obj.h ) .* eval( obj.u );
+            hv = eval( obj.h ) .* eval( obj.v );
         end
         
         
@@ -141,27 +179,17 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         function  matEvaluateSourceTerm(obj, fphys, time)
             mesh = obj.meshUnion(1);
             matEvaluateSourceTerm@SWEAbstract2d( obj, fphys);
-            h2d =  obj.e * ( sin(obj.w*(mesh.x+time)) + sin(obj.w*(mesh.y+time)) ) + 2 - 0.005*( mesh.x + mesh.y );
-            h2dt = obj.e * obj.w .* cos(obj.w*(mesh.x+time)) + obj.e * obj.w .* cos(obj.w*(mesh.y+time));
-            u2d = sin(obj.w*(mesh.x+time));
-            u2dx = obj.w * cos(obj.w*(mesh.x + time));
-            u2dt = obj.w * cos(obj.w*(mesh.x + time));
+             x = mesh.x; y = mesh.y; t = time;
+            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.ht ) +...
+                eval( obj.mhx ) + eval( obj.mhy );
             
-            v2d = sin(obj.w*(mesh.y+time));
-            v2dy = obj.w * cos(obj.w*(mesh.y + time));
-            v2dt = obj.w * cos(obj.w*(mesh.y + time));
-            h2dx = obj.e * obj.w *( cos(obj.w*(mesh.x+time)) ) - 0.005;
-            h2dy = obj.e * obj.w *( cos(obj.w*(mesh.y+time)) ) - 0.005;
-            eta = obj.e*(sin(obj.w.*(mesh.x+time)) + sin(obj.w*(mesh.y+time)));
+            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hut ) +...
+                eval( obj.mhux ) + eval( obj.mhuy )...
+                 + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,5);            
             
-            obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) +  h2dt  + ...
-                h2d .* u2dx + u2d.*h2dx + h2d .* v2dy + v2d .* h2dy;
-            
-            
-            obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + u2d.*h2dt + h2d.*u2dt + u2d.*(u2d.*h2dx+h2d.*u2dx) + h2d.*u2d.*u2dx + obj.gra.*h2d.*h2dx - ...
-                obj.gra .* fphys{1}(:,:,4).*fphys{1}(:,:,5) + u2d .* (v2d.*h2dy + h2d.*v2dy) + obj.gra .* eta .* fphys{1}(:,:,5);
-            obj.frhs{1}(:,:,3) = obj.frhs{1}(:,:,3) + v2d.*h2dt + h2d.*v2dt + v2d.*(u2d.*h2dx+h2d.*u2dx) + v2d.*(v2d.*h2dy + h2d.*v2dy) + h2d.*v2d.*v2dy + ...
-                obj.gra.*h2d.*h2dy - obj.gra .* fphys{1}(:,:,4).*fphys{1}(:,:,6) + obj.gra .* eta .* fphys{1}(:,:,6);
+            obj.frhs{1}(:,:,3) = obj.frhs{1}(:,:,3) + eval( obj.hvt ) +...
+                eval( obj.mhvx ) + eval( obj.mhvy )...
+                + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,6);
         end
     end
     
@@ -184,4 +212,8 @@ else
     ME = MException(msgID, msgtext);
     throw(ME);
 end
+
+[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'West-East' );
+[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'South-North' );
+
 end% func
