@@ -6,6 +6,8 @@ classdef NcOutput < AbstractNcOutput
         timeVarableId
         fieldVarableId
         vtkOutput
+% This parameter is used to determine the time point when nc file is converted to vtk file        
+        OutputTime
     end
     
     properties
@@ -41,6 +43,8 @@ classdef NcOutput < AbstractNcOutput
         writeOutputResultAtStepToVtk( obj, step );
         
         writeOutputResultAtTimePointToVtk(obj, timePoint);
+        
+        writeOutputResultToVtk( obj );
         
         function closeOutputFile(obj)
             obj.delete();

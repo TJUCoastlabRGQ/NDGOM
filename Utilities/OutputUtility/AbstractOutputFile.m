@@ -7,7 +7,7 @@ classdef AbstractOutputFile < handle
         Nfield
         casename
         %         outputTime
-        varIndex
+        varIndex     
     end
     
     properties

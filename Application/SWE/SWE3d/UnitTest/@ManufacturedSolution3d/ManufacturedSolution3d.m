@@ -66,6 +66,21 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             ylabel('$L_2 error$','Interpreter','Latex');
             box on;
         end
+        
+        function  matPostProcess( obj )
+            %This function is used to plot the analytical solution and the
+            %numerical solution
+            file = dir([mfilename, '\3d\*.csv']);
+            figure;
+            hold on;
+            for i = 1:numel(file)
+                date = xlsread([mfilename,'\3d\',file(i).name]);
+                [hu,~,vertvelocity,~] = obj.matGetExactSolution( date(:,7), date(:,8), date(:,9), obj.outputFile3d.OutputTime(i));
+                plot(date(:,9)',hu);
+                plot(date(:,9)',date(:,1)');
+            end
+
+        end
     end
     
     methods ( Access = protected )

@@ -1,7 +1,7 @@
 function [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
-% [fphys3d{1}(:,:,1), fphys3d{1}(:,:,2), Omega, fphys3d{1}(:,:,4)] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+% [~, ~, Omega, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
 % % x = obj.mesh2d.x;
 % % y = obj.mesh2d.y;
 % % t = time;

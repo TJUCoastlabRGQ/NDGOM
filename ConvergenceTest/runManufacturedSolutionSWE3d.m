@@ -2,7 +2,7 @@ function runManufacturedSolutionSWE3d
 % M = [ 20 10 5 2.5 ];
 M = [ 20 10 5 2.5];
 
-Order = [1 2];
+Order = [1];
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
@@ -56,16 +56,16 @@ for n = 1:Ndeg
     % print table
     % print table
     fprintf('\n==================deg = %d==================\n', Order(n));
-    convergence_table(len(:,n), HErr1(:, n), HErr2(:, n), HErrInf(:, n))
-    
-    fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len(:,n), HUErr1(:, n), HUErr2(:, n), HUErrInf(:, n))
     
     fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len(:,n), HVErr1(:, n), HVErr2(:, n), HVErrInf(:, n))
-
+    
     fprintf('\n==================deg = %d==================\n', Order(n));
     convergence_table(len(:,n), OmegaErr1(:, n), OmegaErr2(:, n), OmegaErrInf(:, n))
+
+    fprintf('\n==================deg = %d==================\n', Order(n));
+    convergence_table(len(:,n), HErr1(:, n), HErr2(:, n), HErrInf(:, n))
     
     % plot figure
     co = color{n};

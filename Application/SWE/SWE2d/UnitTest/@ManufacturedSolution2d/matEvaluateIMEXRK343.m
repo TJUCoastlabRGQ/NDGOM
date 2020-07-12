@@ -8,7 +8,7 @@ fphys = obj.fphys;
 obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
-visual = Visual2d( obj.meshUnion );
+% visual = Visual2d( obj.meshUnion );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )

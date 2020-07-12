@@ -33,6 +33,7 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         ChWidth = 100;
         e = 0.001;
         w = 0.01;
+%         w = 2*pi/100;
         d = 0.1;
         hcrit = 0.001;
     end
@@ -81,10 +82,13 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
             syms x y z t;
             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
             obj.b = - ( 2 - 0.005*( x + y ));
+%             obj.b = 0*x + 0*y - 2;
             obj.h = obj.eta - obj.b;
-            obj.u = sin(obj.w.*(x+t));
-            obj.v = sin(obj.w.*(y+t));
             obj.ht = diff(obj.h,t);
+            obj.u = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t)), z, [-1,0] );
+            obj.v = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)), z, [-1,0] );            
+%             obj.u = sin(obj.w.*(x+t));
+%             obj.v = sin(obj.w.*(y+t));
             obj.mhx = diff( obj.h * obj.u, x);
             obj.mhy = diff( obj.h * obj.v, y);            
             obj.hut = diff( obj.h* obj.u, t);
@@ -213,7 +217,7 @@ else
     throw(ME);
 end
 
-[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'West-East' );
-[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'South-North' );
+% [ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'West-East' );
+% [ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'South-North' );
 
 end% func
