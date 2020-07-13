@@ -1,14 +1,15 @@
 function runManufacturedSolutionSWE3d
 % M = [ 20 10 5 2.5 ];
-M = [ 20 10 5 2.5];
-
-Order = [1];
+% M = [ 20 10 5 2.5];
+M = [10 5 3 2.5 ];
+Order = [1 2];
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
 Ndeg = numel(Order);
 len = zeros(Nmesh, Ndeg);
 dofs = zeros(Nmesh, Ndeg);
+Vs = 900 * M(1) * 1 * 1;
 
 linewidth = 1.5;
 markersize = 8;
@@ -33,6 +34,7 @@ for n = 1:Ndeg
         Solver = ManufacturedSolution3d(Order(n), 1, M(m), 5);
         tic;
         Solver.matSolve;
+        V = sum( Solver.meshUnion.LAV );
         time(m,n) = toc;
         len(m, n) = M(m);
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
@@ -45,6 +47,7 @@ for n = 1:Ndeg
         HUErrInf( m, n ) = err(1); HVErrInf( m, n ) = err(2); OmegaErrInf( m, n ) = err(3); HErrInf( m, n ) = err(4);
         
         err = PostProcess.evaluateNormErr2( fphys, ExactValue );
+        err = err * sqrt(V/Vs);
         HUErr2( m, n ) = err(1); HVErr2( m, n ) = err(2); OmegaErr2( m, n ) = err(3); HErr2( m, n ) = err(4);
         
         err = PostProcess.evaluateNormErr1( fphys, ExactValue );

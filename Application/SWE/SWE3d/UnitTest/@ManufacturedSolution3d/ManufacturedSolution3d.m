@@ -37,8 +37,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         ChWidth = 100;
-        e = 0.01;
-        w = 0.01;
+        e = 0.001;
+%         w = 0.01;
+        w = 2*pi/900;
         d = 0.1;
         hcrit = 0.001;
     end
@@ -104,11 +105,15 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         function matGetFunction(obj)
             syms x y z t;
-            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
-            obj.b = - ( 2 - 0.005*( x + y ));
+%             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
+            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
+
+%             obj.b = - ( 2 - 0.005*( x + y ));
+%             obj.b = - ( 2 - 0.005*( x + y )*0);
+            obj.b = -( 2 - sin(2*pi/900*x)); 
             obj.h = obj.eta - obj.b;
             obj.u = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t));
-            obj.v = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t));
+            obj.v = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)) * 0;
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
@@ -154,7 +159,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) = -(2-0.005*(mesh2d.x+mesh2d.y));
+                x = mesh2d.x; y = mesh2d.y; t = 0;
+                
+                fphys2d{m}(:, :, 4) = eval(obj.b);
                 
                 fphys2d{m}(:,:,5) = ( mesh2d.rx .* ( mesh2d.cell.Dr * fphys2d{m}(:,:,4) ) ) + ...
                     ( mesh2d.sx .* ( mesh2d.cell.Ds * fphys2d{m}(:,:,4) ) );
@@ -162,7 +169,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 fphys2d{m}(:,:,6) = ( mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{m}(:,:,4) ) ) + ...
                     ( mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:,:,4) ) );
                 %water depth
-                x = mesh2d.x; y = mesh2d.y; t = 0;
                 fphys2d{m}(:,:,1) = eval( obj.h );
                 fphys2d{m}(:, :, 2) = eval( obj.u2d ).* eval( obj.h );
                 fphys2d{m}(:, :, 3) = eval( obj.v2d ).* eval( obj.h );
@@ -258,9 +264,9 @@ bctype = [ ...
     enumBoundaryCondition.Clamped, ...
     enumBoundaryCondition.Clamped ];
 
-mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
-
+% mesh2d = makeUniformQuadMesh( N, ...
+%     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+mesh2d = makeUniformQuadMesh(N,[0, 900], [0, M], 900/M, 1, bctype);
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1) - ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
@@ -269,6 +275,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end

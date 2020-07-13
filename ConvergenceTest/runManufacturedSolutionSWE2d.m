@@ -1,7 +1,16 @@
 function runManufacturedSolutionSWE2d
-M = [ 20 10 5 2.5 ];
+% M = [ 20 10 5 2.5 ];
 
+
+
+
+M = [10 5 3 2.5 ];
 Order = [1 2];
+
+As = 900 * M(1) * 2;
+
+
+
 % Order =[ 1 2 3 ];
 % len = deltax;
 Nmesh = numel(M);
@@ -32,6 +41,7 @@ for n = 1:Ndeg
         Solver = ManufacturedSolution2d(Order(n), M(m), enumStdCell.Quad);
         tic;
         Solver.matSolve;
+        A = sum( Solver.meshUnion.LAV );
         time(m,n) = toc;
         len(m, n) = M(m);
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
@@ -41,9 +51,11 @@ for n = 1:Ndeg
         fphys = cell(1);
         fphys{1}(:,:,1:3) = Solver.fphys{1}(:,:,1:3);
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
+        
         HErrInf( m, n ) = err(1); HUErrInf( m, n ) = err(2); HVErrInf( m, n ) = err(3);
         
         err = PostProcess.evaluateNormErr2( fphys, ExactValue );
+        err = err * sqrt(A/As);
         HErr2( m, n ) = err(1); HUErr2( m, n ) = err(2); HVErr2( m, n ) = err(3);
         
         err = PostProcess.evaluateNormErr1( fphys, ExactValue );

@@ -32,8 +32,8 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         ChLength = 100;
         ChWidth = 100;
         e = 0.001;
-        w = 0.01;
-%         w = 2*pi/100;
+%         w = 0.01;
+        w = 2*pi/900;
         d = 0.1;
         hcrit = 0.001;
     end
@@ -80,13 +80,16 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         
         function matGetFunction(obj)
             syms x y z t;
-            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
-            obj.b = - ( 2 - 0.005*( x + y ));
+            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0 );
+%             obj.b = - ( 2 - 0.005*( x + y ));
+            obj.b = -( 2 - sin(2*pi/900*x)); 
 %             obj.b = 0*x + 0*y - 2;
             obj.h = obj.eta - obj.b;
             obj.ht = diff(obj.h,t);
             obj.u = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t)), z, [-1,0] );
-            obj.v = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)), z, [-1,0] );            
+%             obj.v = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)), z, [-1,0] );  
+            obj.v = int( obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)) * 0, z, [-1,0] );            
+            
 %             obj.u = sin(obj.w.*(x+t));
 %             obj.v = sin(obj.w.*(y+t));
             obj.mhx = diff( obj.h * obj.u, x);
@@ -156,7 +159,7 @@ classdef ManufacturedSolution2d < SWEPreBlanaced2d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 100;
+            ftime = 86.4;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -207,9 +210,9 @@ bctype = [...
     enumBoundaryCondition.Clamped];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 100], [0, 100], 100/deltax, 100/deltax, bctype);
+    mesh = makeUniformTriMesh(N, [0, 900], [0, 2*deltax], 900/deltax, 2, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 100], [0, 100], 100/deltax, 100/deltax, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 900], [0, 2*deltax], 900/deltax, 2, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
@@ -217,7 +220,7 @@ else
     throw(ME);
 end
 
-% [ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'West-East' );
-% [ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'South-North' );
+[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'West-East' );
+[ mesh ] = ImposePeriodicBoundaryCondition2d(  mesh, 'South-North' );
 
 end% func
