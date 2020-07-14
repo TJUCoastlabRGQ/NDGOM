@@ -5,8 +5,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
     properties
         PostProcess
         timePoint
+        timePointRatio
         ErrNorm2
+        ErrRatio
         Index
+        IndexRatio
         ExactValue
         lendstr
     end
@@ -37,9 +40,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         %> channel length
         ChLength = 100;
         ChWidth = 100;
-        e = 0.001;
-%         w = 0.01;
-        w = 2*pi/900;
+        e = 0.01;
+        w = 0.01;
+%         w = 2*pi/900;
         d = 0.1;
         hcrit = 0.001;
     end
@@ -67,6 +70,22 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             ylabel('$L_2 error$','Interpreter','Latex');
             box on;
         end
+        
+        function matPlotErrorRatio(obj)
+            close all
+            figure;
+            hold on;
+            color = {'r-','k-','b-','r-'};
+            LWidth = 1.5;
+            FontSize = 15;
+            for i = 1:numel(obj.ErrRatio)
+                plot(obj.timePointRatio, obj.ErrRatio{i},color{i},'LineWidth',LWidth);
+            end
+            legend(obj.lendstr,'Interpreter','Latex','FontSize',FontSize);
+            xlabel('$time(s)$','Interpreter','Latex');
+            ylabel('$Ratio$','Interpreter','Latex');
+            box on;
+        end        
         
         function  matPostProcess( obj )
             %This function is used to plot the analytical solution and the
@@ -96,24 +115,33 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
                 strcat('ManufacturedSolution3d/','3d/','ManufacturedSolution3d'));
             obj.ErrNorm2 = cell(4,1);
+            obj.ErrRatio = cell(4,1);
             obj.Index = 1;
+            obj.IndexRatio = 1;
             obj.ExactValue = cell(1);
             [obj.ExactValue{1}(:,:,1), obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4)] = ...
                 obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, obj.ftime);
             obj.lendstr = {'$hu$',...
-                '$hv$','$h$','$\omega$'};
+                '$hv$','$\omega$','$h$'};
         end
         function matGetFunction(obj)
             syms x y z t;
-%             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
-            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
+            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
+%             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
+%               obj.eta = 0 - 0.005 .* x;
+%               obj.eta = 0 - 0.005 .* x .* 0;
 
-%             obj.b = - ( 2 - 0.005*( x + y ));
+              
+            obj.b = - ( 2 - 0.005*( x + y ));
 %             obj.b = - ( 2 - 0.005*( x + y )*0);
-            obj.b = -( 2 - sin(2*pi/900*x)); 
+%             obj.b = -( 2 - sin(2*pi/900*x)); 
+%             obj.b = -( 2 + 0.005.*x);
+%             obj.b = -( 2 + 0.005.*x.*0);
+
             obj.h = obj.eta - obj.b;
-            obj.u = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(x+t));
-            obj.v = obj.h*obj.d.*( z + 1 ).*sin(obj.w.*(y+t)) * 0;
+            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
+%             obj.u = obj.h*obj.d.*( z + 1 );
+            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t));
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
@@ -133,7 +161,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         
         function matEvaluateError( obj, fphys, time)
             fext = cell(1);
-            [ fext{1}(:,:,4), fext{1}(:,:,1), fext{1}(:,:,2), fext{1}(:,:,3)] = ...
+            [ fext{1}(:,:,1), fext{1}(:,:,2), fext{1}(:,:,3), fext{1}(:,:,4)] = ...
                 obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
             Tempfphys = cell(1);
             Tempfphys{1}(:,:,1) = fphys(:,:,1);
@@ -148,6 +176,26 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.ErrNorm2{4}(obj.Index)  = Err2(4);
             obj.Index = obj.Index + 1;
         end
+        
+        function matEvaluateErrorRatio( obj, fphys, time)
+            fext = cell(1);
+            [ fext{1}(:,:,1), fext{1}(:,:,2), fext{1}(:,:,3), fext{1}(:,:,4)] = ...
+                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
+            obj.timePointRatio(obj.IndexRatio) = time;
+            TempRatio = ( fext{1}(:,:,1) - fphys(:,:,1) )./fext{1}(:,:,1) * 100;
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
+            obj.ErrRatio{1}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
+            TempRatio = ( fext{1}(:,:,2) - fphys(:,:,2) )./fext{1}(:,:,2) * 100;
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) ); 
+            obj.ErrRatio{2}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
+            TempRatio = ( fext{1}(:,:,3) - fphys(:,:,3) )./fext{1}(:,:,3) * 100;
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );             
+            obj.ErrRatio{3}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
+            TempRatio = ( fext{1}(:,:,4) - fphys(:,:,4) )./fext{1}(:,:,4) * 100;
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );            
+            obj.ErrRatio{4}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
+            obj.IndexRatio = obj.IndexRatio + 1;
+        end        
         
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
@@ -226,7 +274,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 86.4;
+            ftime = 400;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -264,9 +312,9 @@ bctype = [ ...
     enumBoundaryCondition.Clamped, ...
     enumBoundaryCondition.Clamped ];
 
-% mesh2d = makeUniformQuadMesh( N, ...
-%     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
-mesh2d = makeUniformQuadMesh(N,[0, 900], [0, M], 900/M, 1, bctype);
+mesh2d = makeUniformQuadMesh( N, ...
+    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+% mesh2d = makeUniformQuadMesh(N,[0, 900], [0, M], 900/M, 1, bctype);
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1) - ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
@@ -275,6 +323,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
