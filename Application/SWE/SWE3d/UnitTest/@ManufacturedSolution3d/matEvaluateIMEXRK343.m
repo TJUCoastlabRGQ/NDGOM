@@ -52,7 +52,9 @@ while( time < ftime )
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         
         %> update the vertical velocity
-        [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, tloc );
+%         [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, tloc );
+        
+%         obj.matEvaluateErrorRatio( fphys{1}, tloc);
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
@@ -94,8 +96,10 @@ while( time < ftime )
     [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, time );
     
     obj.matEvaluateError( fphys{1}, time);
+
     [hu, hv, Omega, h] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
     OutputFphys = CalculateOutputRatio( OutputFphys, fphys, hu, hv, Omega, h);
+
     %> Update the diffusion coefficient
     obj.matUpdateOutputResult( time, fphys2d, OutputFphys );
     timeRatio = time / ftime;
