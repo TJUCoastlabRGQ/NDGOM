@@ -42,7 +42,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         ChWidth = 100;
         e = 0.01;
         w = 0.01;
-%         w = 2*pi/900;
+        %         w = 2*pi/900;
         d = 0.1;
         hcrit = 0.001;
     end
@@ -78,14 +78,19 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             color = {'r-','k-','b-','r-'};
             LWidth = 1.5;
             FontSize = 15;
-            for i = 1:numel(obj.ErrRatio)
-                plot(obj.timePointRatio, obj.ErrRatio{i},color{i},'LineWidth',LWidth);
-            end
-            legend(obj.lendstr,'Interpreter','Latex','FontSize',FontSize);
+            %             for i = 1:numel(obj.ErrRatio)
+            %                 plot(obj.timePointRatio, obj.ErrRatio{i},color{i},'LineWidth',LWidth);
+            %             end
+            str = {'$hu$',...
+                '$hv$','$h$'};            
+            plot(obj.timePointRatio, obj.ErrRatio{1},color{1},'LineWidth',LWidth);
+            plot(obj.timePointRatio, obj.ErrRatio{2},color{2},'LineWidth',LWidth);
+            plot(obj.timePointRatio, obj.ErrRatio{4},color{4},'LineWidth',LWidth);
+            legend(str,'Interpreter','Latex','FontSize',FontSize);
             xlabel('$time(s)$','Interpreter','Latex');
             ylabel('$Ratio$','Interpreter','Latex');
             box on;
-        end        
+        end
         
         function  matPostProcess( obj )
             %This function is used to plot the analytical solution and the
@@ -99,7 +104,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
                 plot(date(:,9)',hu);
                 plot(date(:,9)',date(:,1)');
             end
-
+            
         end
     end
     
@@ -127,20 +132,20 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         function matGetFunction(obj)
             syms x y z t;
             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
-%             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
-%               obj.eta = 0 - 0.005 .* x;
-%               obj.eta = 0 - 0.005 .* x .* 0;
-
-              
+            %             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
+            %               obj.eta = 0 - 0.005 .* x;
+            %               obj.eta = 0 - 0.005 .* x .* 0;
+            
+            
             obj.b = - ( 2 - 0.005*( x + y ));
-%             obj.b = - ( 2 - 0.005*( x + y )*0);
-%             obj.b = -( 2 - sin(2*pi/900*x)); 
-%             obj.b = -( 2 + 0.005.*x);
-%             obj.b = -( 2 + 0.005.*x.*0);
-
+            %             obj.b = - ( 2 - 0.005*( x + y )*0);
+            %             obj.b = -( 2 - sin(2*pi/900*x));
+            %             obj.b = -( 2 + 0.005.*x);
+            %             obj.b = -( 2 + 0.005.*x.*0);
+            
             obj.h = obj.eta - obj.b;
             obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
-%             obj.u = obj.h*obj.d.*( z + 1 );
+            %             obj.u = obj.h*obj.d.*( z + 1 );
             obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t));
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
@@ -186,16 +191,16 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
             obj.ErrRatio{1}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
             TempRatio = ( fext{1}(:,:,2) - fphys(:,:,2) )./fext{1}(:,:,2) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) ); 
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
             obj.ErrRatio{2}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
             TempRatio = ( fext{1}(:,:,3) - fphys(:,:,3) )./fext{1}(:,:,3) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );             
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
             obj.ErrRatio{3}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
             TempRatio = ( fext{1}(:,:,4) - fphys(:,:,4) )./fext{1}(:,:,4) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );            
+            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
             obj.ErrRatio{4}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
             obj.IndexRatio = obj.IndexRatio + 1;
-        end        
+        end
         
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
