@@ -4,10 +4,12 @@ Stage = size(EXa,2);
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
 fphys = obj.fphys;
+OutputFphys  = cell(1);
+OutputFphys{1}  = zeros(size(fphys{1}));
 fphys2d = obj.fphys2d;
 
 %> allocate space for the rhs to be stored
-obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,4);
+obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K, Stage);
 obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
@@ -92,16 +94,19 @@ while( time < ftime )
     [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, time );
     
     obj.matEvaluateError( fphys{1}, time);
-    
+    [hu, hv, Omega, h] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
+    OutputFphys = CalculateOutputRatio( OutputFphys, fphys, hu, hv, Omega, h);
     %> Update the diffusion coefficient
-    obj.matUpdateOutputResult( time, fphys2d, fphys );
+    obj.matUpdateOutputResult( time, fphys2d, OutputFphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
 hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
-obj.matUpdateFinalResult( time, fphys2d, fphys );
+OutputFphys = CalculateOutputRatio( OutputFphys, fphys, obj.ExactValue{1}(:,:,1),...
+    obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4));
+obj.matUpdateFinalResult( time, fphys2d, OutputFphys );
 % obj.outputFile.closeOutputFile();
 end
 
@@ -129,4 +134,26 @@ Implicita = [GAMA 0 0;
     beta1 beta2 GAMA];
 Explicitb = [0 beta1 beta2 GAMA];
 Implicitb = [beta1 beta2 GAMA];
+end
+
+function OutputFphys = CalculateOutputRatio( OutputFphys, fphys, hu, hv, Omega, h)
+Ratio = ( fphys{1}(:,:,1) - hu )./hu * 100;
+Index = (isnan(Ratio) | isinf(Ratio));
+Ratio(Index) = 0;
+OutputFphys{1}(:,:,1) = Ratio;
+
+Ratio = ( fphys{1}(:,:,2) - hv )./hv * 100;
+Index = (isnan(Ratio) | isinf(Ratio));
+Ratio(Index) = 0;
+OutputFphys{1}(:,:,2) = Ratio;
+
+Ratio = ( fphys{1}(:,:,3) - Omega )./Omega * 100;
+Index = (isnan(Ratio) | isinf(Ratio));
+Ratio(Index) = 0;
+OutputFphys{1}(:,:,3) = Ratio;
+
+Ratio = ( fphys{1}(:,:,4) - h )./h * 100;
+Index = (isnan(Ratio) | isinf(Ratio));
+Ratio(Index) = 0;
+OutputFphys{1}(:,:,4) = Ratio;
 end
