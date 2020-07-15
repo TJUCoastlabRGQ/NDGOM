@@ -144,9 +144,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             %             obj.b = -( 2 + 0.005.*x.*0);
             
             obj.h = obj.eta - obj.b;
-            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
+            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t)) * 1000000;
             %             obj.u = obj.h*obj.d.*( z + 1 );
-            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t));
+            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t)) * 1000000;
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
@@ -285,7 +285,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 400;
+            ftime = 86.4;
             outputIntervalNum = 800;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

@@ -1,16 +1,15 @@
 function [ Omega , W ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys3d, time )
 %MATEVALUATEVERTICALVELOCITY Summary of this function goes here
 %   Detailed explanation goes here
-% [~, ~, Omega, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
-% % x = obj.mesh2d.x;
-% % y = obj.mesh2d.y;
-% % t = time;
-% % [fphys2d{1}(:,:,1)] = eval( obj.h );
-% % [fphys2d{1}(:,:,2)] = eval( obj.h ) .* eval( obj.u2d );
-% % [fphys2d{1}(:,:,3)] = eval( obj.h ) .* eval( obj.v2d );
-% % [ ~, ~, OmegaO, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+[~, ~, OmegaO, ~] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, time);
+x = obj.mesh2d.x;
+y = obj.mesh2d.y;
+t = 0;
+[fphys2d{1}(:,:,1)] = eval( obj.h );
+[fphys2d{1}(:,:,2)] = eval( obj.h ) .* eval( obj.u2d );
+[fphys2d{1}(:,:,3)] = eval( obj.h ) .* eval( obj.v2d );
+[ fphys3d{1}(:,:,1), fphys3d{1}(:,:,2), OmegaO, fphys3d{1}(:,:,4)] = obj.matGetExactSolution( mesh3d.x, mesh3d.y, mesh3d.z, 0);
 % W = zeros(size(Omega));
-
 
 
 
@@ -69,10 +68,12 @@ dHUHV =...
 dHU2DHV2D = obj.meshUnion(1).Extend2dField( obj.mesh2d.rx .* (obj.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) + obj.mesh2d.sx .* (obj.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) - ...
     InnerSurface_frhs2d - BoundarySurface_frhs2d + obj.mesh2d.ry .* (obj.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) + obj.mesh2d.sy .* (obj.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
 
+OmegaN = bsxfun( @times, inv(mesh3d.cell.Dt), 1./mesh3d.tz .* ( dHU2DHV2D - dHUHV ) );
+
 % edge = mesh3d.BottomEdge;
 % fphys3d{1}(edge.GFToN1) = ( fphys3d{1}(edge.GFToN1) + fphys3d{1}(edge.GFToN2) )./2;
 % fphys3d{1}(edge.GFToN2) = fphys3d{1}(edge.GFToN1);
-%
+% 
 % fphys3d{1}(edge.GFToN1 + mesh3d.cell.Np * mesh3d.K) = (fphys3d{1}(edge.GFToN1 + mesh3d.cell.Np * mesh3d.K)+...
 %     fphys3d{1}(edge.GFToN2 + mesh3d.cell.Np * mesh3d.K))./2;
 % fphys3d{1}(edge.GFToN2 + mesh3d.cell.Np * mesh3d.K) = fphys3d{1}(edge.GFToN1 + mesh3d.cell.Np * mesh3d.K);
@@ -95,5 +96,38 @@ W = Omega + ( 1 + mesh3d.z ) .* ( - ( dHUHV ) - mesh3d.tz .* (mesh3d.cell.Dt * O
     + mesh3d.sy .* (mesh3d.cell.Ds * fphys3d{1}(:,:,4)) )+...
     fphys3d{1}(:,:,2)./fphys3d{1}(:,:,4) .* ( mesh3d.ry .* (mesh3d.cell.Dr * fphys3d{1}(:,:,7))...
     + mesh3d.sy .* (mesh3d.cell.Ds * fphys3d{1}(:,:,7)) );
+
+
+Ratio = ( OmegaO - Omega )./OmegaO * 100;
+Index = (isnan(Ratio) | isinf(Ratio));
+Ratio(Index) = 0;
+Index = find( Ratio == max(max(Ratio)));
+disp('The index is:');
+display(Index);
+disp('The coordinate is:');
+display(obj.mesh3d.x(Index));
+display(obj.mesh3d.y(Index));
+display(obj.mesh3d.z(Index));
+disp('The maximum ratio is:');
+display(max(max(Ratio)));
+disp('The true value is:');
+display(OmegaO(Index(1)));
+disp('The calculated value is:');
+display(Omega(Index(1)));
+
+Index = find( Ratio == min(min(Ratio)));
+disp('The index is:');
+display(Index);
+disp('The coordinate is:');
+display(obj.mesh3d.x(Index));
+display(obj.mesh3d.y(Index));
+display(obj.mesh3d.z(Index));
+disp('The minimum ratio is:');
+display(min(min(Ratio)));
+disp('The true value is:');
+display(OmegaO(Index(1)));
+disp('The calculated value is:');
+display(Omega(Index(1)));
+
 end
 
