@@ -12,6 +12,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         IndexRatio
         ExactValue
         lendstr
+        
+        VertSolver
     end
     
     properties
@@ -51,6 +53,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         function obj = ManufacturedSolution3d( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.VertSolver = SWE3dVerticalVelocitySolver( obj.mesh2d, obj.mesh3d );
             obj.matGetFunction();
             obj.PostInit( );
         end
@@ -144,9 +147,9 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             %             obj.b = -( 2 + 0.005.*x.*0);
             
             obj.h = obj.eta - obj.b;
-            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t)) * 1000000;
+            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
             %             obj.u = obj.h*obj.d.*( z + 1 );
-            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t)) * 1000000;
+            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t));
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
@@ -247,20 +250,20 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + eval( obj.ht ) + eval(obj.mh2dx) + eval(obj.mh2dy) ;
             
             x = mesh.x; y = mesh.y; z = mesh.z;
-%             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
-%                 eval( obj.mhux ) + eval( obj.mhuy )...
-%                 + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
                 eval( obj.mhux ) + eval( obj.mhuy )...
-                 + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
+                + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
+%             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
+%                 eval( obj.mhux ) + eval( obj.mhuy )...
+%                  + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
             
             
-%             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
-%                 eval( obj.mhvx ) + eval( obj.mhvy )...
-%                 + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
                 eval( obj.mhvx ) + eval( obj.mhvy )...
-                 + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
+                + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
+%             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
+%                 eval( obj.mhvx ) + eval( obj.mhvy )...
+%                  + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
         end
         
         function matUpdateExternalField( obj, t, ~, ~ )

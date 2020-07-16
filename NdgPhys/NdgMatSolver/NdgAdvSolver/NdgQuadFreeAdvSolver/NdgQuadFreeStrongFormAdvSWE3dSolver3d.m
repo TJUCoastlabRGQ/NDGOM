@@ -27,14 +27,14 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM{m}(:,:,[2,3]), physClass.BoundaryEdgeFluxS{m}(:,:,[2,3]) );
                 
         
-%                 edge = mesh3d.BottomEdge;
-%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-%                 [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-%                 [ fluxP ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );                
-%                 
-%                 [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*( fm(:,:,1).*fm(:,:,3)./fm(:,:,4) + fp(:,:,1).*fp(:,:,3)./fp(:,:,4) );
-%                 [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*( fm(:,:,2).*fm(:,:,3)./fm(:,:,4) + fp(:,:,2).*fp(:,:,3)./fp(:,:,4) );
-%                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), fluxP(:,:,[2,3]), OmegafluxS );
+                edge = mesh3d.BottomEdge;
+                [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                [ fluxP ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );                
+                
+                [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*( fm(:,:,1).*fm(:,:,3)./fm(:,:,4) + fp(:,:,1).*fp(:,:,3)./fp(:,:,4) );
+                [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*( fm(:,:,2).*fm(:,:,3)./fm(:,:,4) + fp(:,:,2).*fp(:,:,3)./fp(:,:,4) );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), fluxP(:,:,[2,3]), OmegafluxS );
                 
                 
                   
@@ -50,8 +50,8 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                         - obj.rx{m}.*( obj.Dr{m} * E(:,:,i) ) ...
                         - obj.sx{m}.*( obj.Ds{m} * E(:,:,i) ) ...
                         - obj.ry{m}.*( obj.Dr{m} * G(:,:,i) ) ...
-                        - obj.sy{m}.*( obj.Ds{m} * G(:,:,i) );% ...
-                        %- obj.tz{m}.*( obj.Dt{m} * H(:,:,i) );
+                        - obj.sy{m}.*( obj.Ds{m} * G(:,:,i) ) ...
+                        - obj.tz{m}.*( obj.Dt{m} * H(:,:,i) );
                 end
              
             end

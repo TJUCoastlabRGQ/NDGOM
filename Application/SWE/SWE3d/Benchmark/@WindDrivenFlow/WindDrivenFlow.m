@@ -12,18 +12,21 @@ classdef WindDrivenFlow < SWEBarotropic3d
         startTime = 0;
         %> final time
 
-        finalTime = 50;
+        finalTime = 3600;
         hcrit = 0.001;
     end
     
     properties
         dt
+        
+        VertSolver
     end
     
     methods
         function obj = WindDrivenFlow( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.VertSolver = SWE3dVerticalVelocitySolver( obj.mesh2d, obj.mesh3d );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
@@ -82,7 +85,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 50;
+            ftime = 3600;
             outputIntervalNum = 100;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -95,8 +98,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('ConstantVerticalEddyViscosityValue') = 0.03;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Smagorinsky;
+            option('ConstantVerticalEddyViscosityValue') = 0.01;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
         
