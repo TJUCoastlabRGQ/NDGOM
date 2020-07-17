@@ -35,7 +35,7 @@ classdef SWE3dVerticalVelocitySolver < handle
             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
             [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
             [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-            [ FluxM2d ] = fm2d(:,:,2) .* edge2d.nx + fp2d(:,:,3) .* edge2d.ny;
+            [ FluxM2d ] = fm2d(:,:,2) .* edge2d.nx + fm2d(:,:,3) .* edge2d.ny;
             [ FluxP3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
             [ FluxP2d ] = fp2d(:,:,2) .* edge2d.nx + fp2d(:,:,3) .* edge2d.ny;
             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );

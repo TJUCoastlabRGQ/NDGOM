@@ -22,63 +22,63 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                     mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{m}(:, :, 3) ) + ...
                     mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{m}(:, :, 3) ) );
                 
-%                 edge = mesh2d.InnerEdge;
-%                 InnerEdge3d = mesh3d.InnerEdge;
-%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-%                 
-%                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
-%                 
-%                 physClass.InnerEdgeFluxM2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxM{m}(:,:,1) );
-%                 Difference = fluxM  - physClass.InnerEdgeFluxM2d{m};
-%                 
-%                 
-%                 [ fluxP ] = edge.nx .* fp(:,:,2) + edge.ny .* fp(:,:,3);
-%                 physClass.InnerEdgeFluxP2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxP{m}(:,:,1) );
-%                 Difference = fluxP  - physClass.InnerEdgeFluxP2d{m};
-%                 
-%                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, fp, edge );
-%                 physClass.InnerEdgeFluxS2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxS{m}(:,:,1) );
-%                 Difference = fluxS(:,:,1)  - physClass.InnerEdgeFluxS2d{m};
-%                 [ physClass.frhs2d{m} ] = physClass.frhs2d{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
-%                 
-%                 edge = mesh2d.BoundaryEdge;
-%                 edge3d = mesh3d.BoundaryEdge;
-%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-%                 
-% %                 [ fm, fp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, physClass.fext2d{m} );
-%                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
-%                 physClass.BoundaryEdgeFluxM2d{m} = edge3d.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
-%                 Difference = fluxM - physClass.BoundaryEdgeFluxM2d{m};
-%                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, physClass.fext2d{m}, edge );
-%                 physClass.BoundaryEdgeFluxS2d{m} = edge3d.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
-%                 Difference = fluxS(:,:,1) - physClass.BoundaryEdgeFluxS2d{m};
-%                 [ physClass.frhs2d{m} ] = physClass.frhs2d{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS(:,:,1) );
-%             end
-            
-            % Function used to calculate the two dimentional PCE inner surface term
-            InnerEdge = mesh3d.InnerEdge;
-            InnerEdge2d = mesh2d.InnerEdge;
-            physClass.InnerEdgeFluxM2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxM{m}(:,:,1) );
-            physClass.InnerEdgeFluxP2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxP{m}(:,:,1) );
-            %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-            physClass.InnerEdgeFluxS2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxS{m}(:,:,1) );
-            physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge2d.matEvaluateStrongFormEdgeRHS( physClass.InnerEdgeFluxM2d{m}, physClass.InnerEdgeFluxP2d{m}, physClass.InnerEdgeFluxS2d{m} );
-            
-            % Function used to calculate the two dimentional PCE boundary surface integration term
-            BoundaryEdge = mesh3d.BoundaryEdge;
-            BoundaryEdge2d = mesh2d.BoundaryEdge;
-            
-            %                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
-            %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-            %                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
-            physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
-            physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
-            
-            physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge2d.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM2d{m}, physClass.BoundaryEdgeFluxS2d{m} );
-            
+                %                 edge = mesh2d.InnerEdge;
+                %                 InnerEdge3d = mesh3d.InnerEdge;
+                %                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
+                %
+                %                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
+                %
+                %                 physClass.InnerEdgeFluxM2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxM{m}(:,:,1) );
+                %                 Difference = fluxM  - physClass.InnerEdgeFluxM2d{m};
+                %
+                %
+                %                 [ fluxP ] = edge.nx .* fp(:,:,2) + edge.ny .* fp(:,:,3);
+                %                 physClass.InnerEdgeFluxP2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxP{m}(:,:,1) );
+                %                 Difference = fluxP  - physClass.InnerEdgeFluxP2d{m};
+                %
+                %                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, fp, edge );
+                %                 physClass.InnerEdgeFluxS2d{m} = InnerEdge3d.VerticalColumnIntegralField( physClass.InnerEdgeFluxS{m}(:,:,1) );
+                %                 Difference = fluxS(:,:,1)  - physClass.InnerEdgeFluxS2d{m};
+                %                 [ physClass.frhs2d{m} ] = physClass.frhs2d{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
+                %
+                %                 edge = mesh2d.BoundaryEdge;
+                %                 edge3d = mesh3d.BoundaryEdge;
+                %                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
+                %
+                % %                 [ fm, fp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, physClass.fext2d{m} );
+                %                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
+                %                 physClass.BoundaryEdgeFluxM2d{m} = edge3d.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
+                %                 Difference = fluxM - physClass.BoundaryEdgeFluxM2d{m};
+                %                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, physClass.fext2d{m}, edge );
+                %                 physClass.BoundaryEdgeFluxS2d{m} = edge3d.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
+                %                 Difference = fluxS(:,:,1) - physClass.BoundaryEdgeFluxS2d{m};
+                %                 [ physClass.frhs2d{m} ] = physClass.frhs2d{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS(:,:,1) );
+                %             end
+                
+                % Function used to calculate the two dimentional PCE inner surface term
+                InnerEdge = mesh3d.InnerEdge;
+                InnerEdge2d = mesh2d.InnerEdge;
+                physClass.InnerEdgeFluxM2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxM{m}(:,:,1) );
+                physClass.InnerEdgeFluxP2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxP{m}(:,:,1) );
+                %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
+                physClass.InnerEdgeFluxS2d{m} = InnerEdge.VerticalColumnIntegralField( physClass.InnerEdgeFluxS{m}(:,:,1) );
+                physClass.frhs2d{m} = physClass.frhs2d{m} + InnerEdge2d.matEvaluateStrongFormEdgeRHS( physClass.InnerEdgeFluxM2d{m}, physClass.InnerEdgeFluxP2d{m}, physClass.InnerEdgeFluxS2d{m} );
+                
+                % Function used to calculate the two dimentional PCE boundary surface integration term
+                BoundaryEdge = mesh3d.BoundaryEdge;
+                BoundaryEdge2d = mesh2d.BoundaryEdge;
+                
+                %                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
+                %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
+                %                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
+                physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
+                physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
+                
+                physClass.frhs2d{m} = physClass.frhs2d{m} + BoundaryEdge2d.matEvaluateStrongFormEdgeRHS( physClass.BoundaryEdgeFluxM2d{m}, physClass.BoundaryEdgeFluxS2d{m} );
+                
+            end
         end
-    end
-    
+        
     end
 end
 
