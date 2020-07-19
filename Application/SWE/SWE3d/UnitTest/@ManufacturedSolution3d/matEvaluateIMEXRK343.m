@@ -4,8 +4,6 @@ Stage = size(EXa,2);
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
 fphys = obj.fphys;
-OutputFphys  = cell(1);
-OutputFphys{1}  = zeros(size(fphys{1}));
 fphys2d = obj.fphys2d;
 
 %> allocate space for the rhs to be stored
@@ -53,7 +51,9 @@ while( time < ftime )
         
         %> update the vertical velocity
 %         [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, tloc );
-        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+%         fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+        [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, tloc);
+        
 %         obj.matEvaluateErrorRatio( fphys{1}, tloc);
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
@@ -94,23 +94,24 @@ while( time < ftime )
     obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
 %     [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, time );
-    fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+%     fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+    [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, time );
 %     obj.matEvaluateError( fphys{1}, time);
 
-    [hu, hv, Omega, h] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
-    OutputFphys = CalculateOutputRatio( OutputFphys, fphys, hu, hv, Omega, h);
+%     [hu, hv, Omega, h] = obj.matGetExactSolution( obj.mesh3d.x, obj.mesh3d.y, obj.mesh3d.z, time);
+%     OutputFphys = CalculateOutputRatio( OutputFphys, fphys, hu, hv, Omega, h);
 
     %> Update the diffusion coefficient
-    obj.matUpdateOutputResult( time, fphys2d, OutputFphys );
+    obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
 hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
-OutputFphys = CalculateOutputRatio( OutputFphys, fphys, obj.ExactValue{1}(:,:,1),...
-    obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4));
-obj.matUpdateFinalResult( time, fphys2d, OutputFphys );
+% OutputFphys = CalculateOutputRatio( OutputFphys, fphys, obj.ExactValue{1}(:,:,1),...
+%     obj.ExactValue{1}(:,:,2), obj.ExactValue{1}(:,:,3), obj.ExactValue{1}(:,:,4));
+obj.matUpdateFinalResult( time, fphys2d, fphys );
 % obj.outputFile.closeOutputFile();
 end
 

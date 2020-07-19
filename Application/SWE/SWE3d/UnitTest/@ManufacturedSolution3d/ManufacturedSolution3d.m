@@ -140,11 +140,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             %               obj.eta = 0 - 0.005 .* x .* 0;
             
             
-            obj.b = - ( 2 - 0.005*( x + y ));
+%             obj.b = - ( 2 - 0.005*( x + y ));
             %             obj.b = - ( 2 - 0.005*( x + y )*0);
             %             obj.b = -( 2 - sin(2*pi/900*x));
             %             obj.b = -( 2 + 0.005.*x);
-            %             obj.b = -( 2 + 0.005.*x.*0);
+            obj.b = -( 2 + 0.005*x*0);
             
             obj.h = obj.eta - obj.b;
             obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
