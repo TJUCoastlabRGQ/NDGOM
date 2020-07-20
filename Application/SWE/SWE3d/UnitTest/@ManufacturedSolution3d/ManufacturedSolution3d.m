@@ -153,7 +153,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
-            obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
+%             obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
+            wz = obj.h * obj.d * ( z + 1 ) * ( diff(obj.b, x) * sin(obj.w*(x+t)) +  diff(obj.b, y) * sin(obj.w*(y+t)) ) - ...
+                1/2 * obj.d * obj.w * ( obj.h * ( z + 1 ))^2 * ( cos(obj.w*(x+t)) + cos(obj.w*(y+t)) );
+            obj.Omega = wz - ( diff( obj.eta, t) + z * obj.ht ) - ...
+                obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x )) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));
+
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
             obj.mhuy = diff( obj.h * obj.u * obj.v, y);
