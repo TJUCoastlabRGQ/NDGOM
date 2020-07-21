@@ -22,10 +22,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         ht
         eta
         u
+        Ut
         v
         u2d
         v2d
         Omega
+        OmegaO
         hut
         mhux
         mhuy
@@ -36,6 +38,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         mhvz
         mh2dx
         mh2dy
+        Continuity
+        W
+        wz
+        f
+        fO
     end
     
     properties ( Constant )
@@ -134,7 +141,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         end
         function matGetFunction(obj)
             syms x y z t;
-            obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) );
+            obj.eta = obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
             %             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
             %               obj.eta = 0 - 0.005 .* x;
             %               obj.eta = 0 - 0.005 .* x .* 0;
@@ -144,20 +151,27 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             %             obj.b = - ( 2 - 0.005*( x + y )*0);
             %             obj.b = -( 2 - sin(2*pi/900*x));
             %             obj.b = -( 2 + 0.005.*x);
-            obj.b = -( 2 + 0.005*x*0);
+            obj.b = -( 2 + 0.005*x*0 );
             
             obj.h = obj.eta - obj.b;
-            obj.u = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(x+t));
+            distance = obj.h * ( z + 1 ); %z-zb, z belongs to -1 to 0
+            obj.u = distance * obj.d * sin(obj.w*(x+t));
             %             obj.u = obj.h*obj.d.*( z + 1 );
-            obj.v = obj.h * obj.d * ( z + 1 ) * sin(obj.w.*(y+t));
+            obj.v = distance * obj.d  * sin(obj.w*(y+t));
             obj.ht = diff(obj.h,t);
-            obj.u2d = int( obj.u, z, [-1,0] );
+            obj.u2d = int( obj.u, z, [-1,0] ); 
             obj.v2d = int( obj.v, z, [-1,0] );
-%             obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
-            wz = obj.h * obj.d * ( z + 1 ) * ( diff(obj.b, x) * sin(obj.w*(x+t)) +  diff(obj.b, y) * sin(obj.w*(y+t)) ) - ...
-                1/2 * obj.d * obj.w * ( obj.h * ( z + 1 ))^2 * ( cos(obj.w*(x+t)) + cos(obj.w*(y+t)) );
-            obj.Omega = wz - ( diff( obj.eta, t) + z * obj.ht ) - ...
-                obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x )) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));
+            obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
+
+            obj.W = obj.d * distance * ( diff(obj.b, x) * sin(obj.w*(x+t)) +  diff(obj.b, y) * sin(obj.w*(y+t)) ) - ...
+                1/2 * obj.d * obj.w * distance^2 * ( cos(obj.w*(x+t)) + cos(obj.w*(y+t)) );
+            obj.f = obj.W - diff(obj.eta,t) - obj.u * diff(obj.eta,x) - obj.v * diff( obj.eta, y);
+            obj.fO = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y); 
+            
+            obj.Continuity = obj.ht + diff(obj.h * obj.u2d, x) + diff(obj.h * obj.v2d, y);
+%             obj.Omega = obj.W - ( diff( obj.eta, t) + z * obj.ht ) - ...
+%                 obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x ) ) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));
+            obj.OmegaO = int(-obj.ht - diff(obj.h*obj.u,x) - diff(obj.h*obj.v,y),z,[-1,z]);
 
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
@@ -169,7 +183,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.mhvz = diff( obj.v * obj.Omega, z);
             obj.mh2dx = diff( obj.h * obj.u2d, x);
             obj.mh2dy = diff( obj.h * obj.v2d, y);
-            
+            % when use, Z is set to be eta
+            syms Z;
+            uz = obj.d * ( Z - obj.b ) * sin( obj.w * ( x + t ));
+            vz = obj.d * ( Z - obj.b ) * sin( obj.w * ( y + t ));
+            obj.wz = diff(obj.eta, t) + uz * diff(obj.eta, x) + vz * diff(obj.eta, y);
         end
         
         function matEvaluateError( obj, fphys, time)
