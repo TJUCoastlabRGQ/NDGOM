@@ -25,12 +25,12 @@ while( time < ftime )
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         
+        obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );        
+        
         obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d );
 
         fphys2d{1}(:,:,1) = Tempfphys2d + c(intRK) * dt * obj.frhs2d{1};
-        
-        obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
-        
+                
         SystemRHS = Tempfphys + c( intRK ) * dt * obj.frhs{1};
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );

@@ -40,8 +40,8 @@ classdef SWE3dVerticalVelocitySolver < handle
             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
             [ FluxS2d ] = edge.VerticalColumnIntegralField(FluxS3d(:,:,1) );
             
-            [ InnerSurface_frhs3d ] = zeros(size(edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ));
-            [ InnerSurface_frhs2d ] = zeros(size(edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ));
+            [ InnerSurface_frhs3d ] = edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ;
+            [ InnerSurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ;
             
             edge = physClass.meshUnion.BoundaryEdge;
             edge2d = physClass.mesh2d.BoundaryEdge;
@@ -52,8 +52,8 @@ classdef SWE3dVerticalVelocitySolver < handle
             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
             [ FluxS2d ] = edge.VerticalColumnIntegralField( FluxS3d(:,:,1) );
             
-            [ BoundarySurface_frhs3d ] = zeros( size(edge.matEvaluateStrongFormEdgeRHS( FluxM3d(:,:,1), FluxS3d(:,:,1) ) ));
-            [ BoundarySurface_frhs2d ] = zeros( size(edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) )));
+            [ BoundarySurface_frhs3d ] = edge.matEvaluateStrongFormEdgeRHS( FluxM3d(:,:,1), FluxS3d(:,:,1) ) ;
+            [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
             
             field3d =...
                 ( physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) + physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) - ...
