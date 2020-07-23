@@ -26,8 +26,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         v
         u2d
         v2d
+        Source2d
         Omega
-        OmegaO
         hut
         mhux
         mhuy
@@ -40,9 +40,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         mh2dy
         Continuity
         W
-        wz
-        f
-        fO
+
     end
     
     properties ( Constant )
@@ -161,17 +159,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] ); 
             obj.v2d = int( obj.v, z, [-1,0] );
-            obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
-
             obj.W = obj.d * distance * ( diff(obj.b, x) * sin(obj.w*(x+t)) +  diff(obj.b, y) * sin(obj.w*(y+t)) ) - ...
                 1/2 * obj.d * obj.w * distance^2 * ( cos(obj.w*(x+t)) + cos(obj.w*(y+t)) );
-            obj.f = obj.W - diff(obj.eta,t) - obj.u * diff(obj.eta,x) - obj.v * diff( obj.eta, y);
-            obj.fO = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y); 
+            obj.Omega = obj.W - ( diff( obj.eta, t) + z * obj.ht ) - ...
+                obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x ) ) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));            
+            obj.Source2d = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y); 
             
-            obj.Continuity = obj.ht + diff(obj.h * obj.u2d, x) + diff(obj.h * obj.v2d, y);
-%             obj.Omega = obj.W - ( diff( obj.eta, t) + z * obj.ht ) - ...
-%                 obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x ) ) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));
-            obj.OmegaO = int(-obj.ht - diff(obj.h*obj.u,x) - diff(obj.h*obj.v,y),z,[-1,z]);
 
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
@@ -183,11 +176,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.mhvz = diff( obj.v * obj.Omega, z);
             obj.mh2dx = diff( obj.h * obj.u2d, x);
             obj.mh2dy = diff( obj.h * obj.v2d, y);
-            % when use, Z is set to be eta
-            syms Z;
-            uz = obj.d * ( Z - obj.b ) * sin( obj.w * ( x + t ));
-            vz = obj.d * ( Z - obj.b ) * sin( obj.w * ( y + t ));
-            obj.wz = diff(obj.eta, t) + uz * diff(obj.eta, x) + vz * diff(obj.eta, y);
         end
         
         function matEvaluateError( obj, fphys, time)
@@ -297,7 +285,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.fext3d{1}( :, :, 4 ) = eval( obj.h );
             x = obj.mesh2d.BoundaryEdge.xb; y = obj.mesh2d.BoundaryEdge.yb;
             obj.fext2d{1}( :, :, 1 ) = eval( obj.h );
-            x = obj.mesh2d.BoundaryEdge.xb; y = obj.mesh2d.BoundaryEdge.yb;
             obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.u2d );
             obj.fext2d{1}( :, :, 3 ) = eval( obj.h ) .* eval( obj.v2d );
             
@@ -349,10 +336,10 @@ bctype = [ ...
     enumBoundaryCondition.Clamped, ...
     enumBoundaryCondition.Clamped ];
 
-mesh2d = makeUniformQuadMesh( N, ...
+mesh2d = makeUniformTriMesh( N, ...
     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 % mesh2d = makeUniformQuadMesh(N,[0, 900], [0, M], 900/M, 1, bctype);
-cell = StdPrismQuad( N, Nz );
+cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1) - ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );

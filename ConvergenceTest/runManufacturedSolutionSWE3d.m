@@ -1,5 +1,6 @@
 function runManufacturedSolutionSWE3d
-M = [ 20 10 5 2.5 ];
+M = [ 100/(2^(1-1)) 100/(2^(2-1)) 100/(2^(3-1)) 100/(2^(4-1)) 100/(2^(5-1)) 100/(2^(6-1))];
+Layer = 1;
 % M = [ 20 10 5 2.5];
 % M = [10 5 3 2.5 ];
 Order = [1 2];
@@ -31,7 +32,7 @@ HErr2 = zeros(Nmesh, Ndeg);   HUErr2 = zeros(Nmesh, Ndeg);    HVErr2 = zeros(Nme
 HErr1 = zeros(Nmesh, Ndeg);   HUErr1 = zeros(Nmesh, Ndeg);    HVErr1 = zeros(Nmesh, Ndeg); OmegaErr1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ManufacturedSolution3d(Order(n), 1, M(m), 5);
+        Solver = ManufacturedSolution3d(Order(n), Order(n), M(m), Layer * 2^(m-1));
         tic;
         Solver.matSolve;
 %         V = sum( Solver.meshUnion.LAV );

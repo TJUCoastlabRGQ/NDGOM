@@ -36,8 +36,15 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*( fm(:,:,2).*fm(:,:,3)./fm(:,:,4) + fp(:,:,2).*fp(:,:,3)./fp(:,:,4) );
                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), fluxP(:,:,[2,3]), OmegafluxS );
                 
-                
-                  
+                edge = mesh3d.BottomBoundaryEdge;
+                [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+                [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), zeros(size(fluxM(:,:,[2,3]) )));                
+
+%                 edge = mesh3d.SurfaceBoundaryEdge;
+%                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+%                 [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+%                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), zeros(size(fluxM(:,:,[2,3]) )) );                        
             end
             
             for m = 1:physClass.Nmesh % calculate RHS term on each mesh

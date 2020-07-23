@@ -50,10 +50,8 @@ while( time < ftime )
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         
         %> update the vertical velocity
-%         [fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, tloc );
-        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
-%         [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, tloc);
-        
+        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys, tloc );
+%         [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, tloc );        
 %         obj.matEvaluateErrorRatio( fphys{1}, tloc);
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
@@ -94,7 +92,7 @@ while( time < ftime )
     obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
 %     [  fphys{1}(:,:,3), fphys{1}(:,:,10)] = obj.matEvaluateVerticalVelocity( obj.meshUnion(1), fphys2d, fphys, time );
-    fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+    fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys, time );
 %     [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, time );
 %     obj.matEvaluateError( fphys{1}, time);
 
