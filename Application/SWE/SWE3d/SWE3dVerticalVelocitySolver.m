@@ -20,12 +20,14 @@ classdef SWE3dVerticalVelocitySolver < handle
             Nz = mesh3d.Nz;
             for i = 1:mesh2d.K
                 M3d = zeros(mesh3d.cell.Np);
-                M3d( BotEidM, BotEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;
-                for j = 1 : Nz
+                M3d( BotEidM, BotEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;     
+                for j = 1 : Nz-1
                     CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt + M3d;
                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\M3d;
                 end
+                    CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + 2 * M3d;
+                    obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);                           
             end
         end
         

@@ -51,7 +51,16 @@ while( time < ftime )
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
         
         %> update the vertical velocity
+        [fphys{1}(:,:,1), fphys{1}(:,:,2), Omega, fphys{1}(:,:,4)] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, 0 ); 
+        
+        x = obj.mesh2d.x;
+        y = obj.mesh2d.y;
+        t = 0;
+        fphys2d{1}(:,:,1) = eval( obj.h );
+        fphys2d{1}(:,:,2) = eval( obj.h ) .* eval( obj.u2d );
+        fphys2d{1}(:,:,3) = eval( obj.h ) .* eval( obj.v2d );
         fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys, tloc );
+        
 %         [~, ~, fphys{1}(:,:,3), ~] = obj.matGetExactSolution( obj.meshUnion(1).x, obj.meshUnion(1).y, obj.meshUnion(1).z, tloc );        
 %         obj.matEvaluateErrorRatio( fphys{1}, tloc);
         

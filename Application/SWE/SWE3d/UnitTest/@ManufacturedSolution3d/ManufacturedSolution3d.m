@@ -310,7 +310,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
-            option('temporalDiscreteType') = enumTemporalDiscrete.MRK244;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
