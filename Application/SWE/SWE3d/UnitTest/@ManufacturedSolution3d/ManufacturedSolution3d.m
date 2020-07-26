@@ -40,7 +40,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         mh2dy
         Continuity
         W
-
+        SurfaceDate
     end
     
     properties ( Constant )
@@ -256,7 +256,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             mesh = obj.meshUnion(1);
             mesh2d = obj.mesh2d(1);
             matEvaluateSourceTerm@SWEAbstract3d( obj, fphys);
-            x = mesh2d.x; y = mesh2d.y; t = time;
+            x = mesh2d.x; y = mesh2d.y; z = zeros(size(x)); t = time;
             %[Problematic
             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + eval( obj.ht ) + eval(obj.mh2dx) + eval(obj.mh2dy) ;
             
@@ -284,9 +284,13 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.fext3d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.v );
             obj.fext3d{1}( :, :, 4 ) = eval( obj.h );
             x = obj.mesh2d.BoundaryEdge.xb; y = obj.mesh2d.BoundaryEdge.yb;
+            z = zeros(size(x));
             obj.fext2d{1}( :, :, 1 ) = eval( obj.h );
             obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.u2d );
             obj.fext2d{1}( :, :, 3 ) = eval( obj.h ) .* eval( obj.v2d );
+            x = obj.mesh2d.x;  y = obj.mesh2d.y; z = zeros(size(x));            
+            obj.SurfaceDate(:,:,1) = eval(obj.u) .* eval(obj.Omega);
+            obj.SurfaceDate(:,:,2) = eval(obj.v) .* eval(obj.Omega);            
             
         end
         
@@ -306,7 +310,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
+            option('temporalDiscreteType') = enumTemporalDiscrete.MRK244;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

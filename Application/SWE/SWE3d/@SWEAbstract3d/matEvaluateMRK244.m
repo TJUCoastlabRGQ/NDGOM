@@ -11,7 +11,7 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -48,7 +48,7 @@ while( time < ftime )
         
         
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys, tloc );
 
                 
         % fphys2d = obj.matEvaluateLimiter( fphys2d );
@@ -57,12 +57,12 @@ while( time < ftime )
         % visual.drawResult( fphys2d{1}(:,:,1) );
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
-    visual.drawResult( fphys2d{1}(:,:,1) );
+%     visual.drawResult( fphys2d{1}(:,:,1) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     time = time + dt;
     
     %> Update the diffusion coefficient
-    display(time);
+%     display(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
