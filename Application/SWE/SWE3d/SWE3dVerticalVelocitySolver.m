@@ -27,11 +27,11 @@ classdef SWE3dVerticalVelocitySolver < handle
                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\M3d;
                 end
                     CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + 2 * M3d;
-                    obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);                           
+                    obj.RHSCoeMatrix{1}(:,:, i*Nz )  = CoeMatrix\(diag(mesh3d.J(:, i*Nz )) * mesh3d.cell.M);                           
             end
         end
         
-        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys )
+        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys, time )
             edge = physClass.meshUnion.InnerEdge;
             edge2d = physClass.mesh2d.InnerEdge;
             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
@@ -63,6 +63,12 @@ classdef SWE3dVerticalVelocitySolver < handle
             % Term2d = ;
             field2d = physClass.meshUnion.Extend2dField( physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) + physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) - ...
                 InnerSurface_frhs2d - BoundarySurface_frhs2d + physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) + physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
+            
+            x = physClass.meshUnion.x;
+            y = physClass.meshUnion.y;
+            z = physClass.meshUnion.z;
+            t = time;
+            field2d = field2d  - eval( physClass.Source2d );            
                         
             Nz = physClass.meshUnion.Nz;
             BotEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end-1) ~= 0, end-1 );
