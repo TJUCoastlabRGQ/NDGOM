@@ -58,8 +58,10 @@ classdef NdgGaussQuadWeakFormAdvSolver3d < NdgGaussQuadWeakFormSolver3d & ...
                 edge = mesh3d.BottomEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fm, fp ] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.BOTFVfq{m}, fm, fp);
-                [ OmegafluxS(:,:,1) ] = obj.BOTnz{m} .* fm(:,:,1).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );
-                [ OmegafluxS(:,:,2) ] = obj.BOTnz{m} .* fm(:,:,2).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );               
+%                 [ OmegafluxS(:,:,1) ] = obj.BOTnz{m} .* fm(:,:,1).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );
+%                 [ OmegafluxS(:,:,2) ] = obj.BOTnz{m} .* fm(:,:,2).*fm(:,:,3)./fm(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)>=0 ) + obj.BOTnz{m} .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) .* ( obj.BOTnz{m} .* fm(:,:,3)<0 );    
+                [ OmegafluxS(:,:,1) ] = 0.5 * obj.BOTnz{m} .* ( fm(:,:,1).*fm(:,:,3)./fm(:,:,4)  + fp(:,:,1).*fp(:,:,3)./fp(:,:,4) );
+                [ OmegafluxS(:,:,2) ] = 0.5 * obj.BOTnz{m} .* ( fm(:,:,2).*fm(:,:,3)./fm(:,:,4)  + fp(:,:,2).*fp(:,:,3)./fp(:,:,4) );
                 for i = 1:physClass.Nvar
                     EdgeRHS = - ( obj.BOTLIFT{m} * ( obj.BOTwJs{m} .* ( OmegafluxS(:,:,i) ) ));
                     physClass.frhs{m}(:,:,i) = obj.matAssembleIntoRHS( edge, EdgeRHS, physClass.frhs{m}(:,:,i));
