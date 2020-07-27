@@ -313,7 +313,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
             option('outputType') = enumOutputFile.NetCDF;
             option('ConstantVerticalEddyViscosityValue') = 0.03;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;

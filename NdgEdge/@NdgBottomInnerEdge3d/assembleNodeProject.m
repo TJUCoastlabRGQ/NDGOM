@@ -47,8 +47,10 @@ end
 
 obj.FToN1 = FToN1;
 obj.FToN2 = FToN2;
-% obj.GFToN1 = bsxfun(@plus, ( obj.FToE(1,:) - 1 ) * mesh.cell.Np , FToN1);
-% obj.GFToN2 = bsxfun(@plus, ( obj.FToE(2,:) - 1 ) * mesh.cell.Np , FToN2);
+if mesh.Nz > 1
+    obj.GFToN1 = bsxfun(@plus, ( obj.FToE(1,:) - 1 ) * mesh.cell.Np , FToN1);
+    obj.GFToN2 = bsxfun(@plus, ( obj.FToE(2,:) - 1 ) * mesh.cell.Np , FToN2);
+end
 obj.nx = nx;
 obj.ny = ny;
 obj.nz = nz;
@@ -71,8 +73,8 @@ elseif f1 == 6
 end
 
 Js = sqrt( nx .* nx + ny .* ny + nz .* nz );
-nx = nx ./ Js; 
-ny = ny ./ Js; 
+nx = nx ./ Js;
+ny = ny ./ Js;
 nz = nz ./ Js;
 Js = Js .* mesh.J( fid, e1 );
 end
@@ -93,8 +95,8 @@ elseif f1 == 5
 end
 
 Js = sqrt( nx .* nx + ny .* ny + nz .* nz );
-nx = nx ./ Js; 
-ny = ny ./ Js; 
+nx = nx ./ Js;
+ny = ny ./ Js;
 nz = nz ./ Js;
 Js = Js .* mesh.J( fid, e1 );
 end
