@@ -39,8 +39,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         mh2dx
         mh2dy
         Continuity
-        W
         SurfaceDate
+        mhuzz
+        mhvzz
+        hufz
+        hvfz
     end
     
     properties ( Constant )
@@ -52,6 +55,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         %         w = 2*pi/900;
         d = 0.1;
         hcrit = 0.001;
+        miu = 0.01;
     end
     
     methods
@@ -90,7 +94,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             %                 plot(obj.timePointRatio, obj.ErrRatio{i},color{i},'LineWidth',LWidth);
             %             end
             str = {'$hu$',...
-                '$hv$','$h$'};            
+                '$hv$','$h$'};
             plot(obj.timePointRatio, obj.ErrRatio{1},color{1},'LineWidth',LWidth);
             plot(obj.timePointRatio, obj.ErrRatio{2},color{2},'LineWidth',LWidth);
             plot(obj.timePointRatio, obj.ErrRatio{4},color{4},'LineWidth',LWidth);
@@ -140,32 +144,20 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         function matGetFunction(obj)
             syms x y z t;
             obj.eta = obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
-            %             obj.eta = ( obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) ) * 0  );
-            %               obj.eta = 0 - 0.005 .* x;
-            %               obj.eta = 0 - 0.005 .* x .* 0;
-            
-            
-%             obj.b = - ( 2 - 0.005*( x + y ));
-            %             obj.b = - ( 2 - 0.005*( x + y )*0);
+            obj.b = - ( 2 - 0.005*( x + y ));
             %             obj.b = -( 2 - sin(2*pi/900*x));
-            %             obj.b = -( 2 + 0.005.*x);
-            obj.b = -( 2 + 0.005*x*0 );
             
             obj.h = obj.eta - obj.b;
-            distance = obj.h * ( z + 1 ); %z-zb, z belongs to -1 to 0
-            obj.u = distance * obj.d * sin(obj.w*(x+t));
-            %             obj.u = obj.h*obj.d.*( z + 1 );
-            obj.v = distance * obj.d  * sin(obj.w*(y+t));
+            distance = obj.h * ( z + 1 ); 
+            obj.u = distance^3 * obj.d * sin(obj.w*(x+t));
+            obj.v = distance^3 * obj.d  * sin(obj.w*(y+t));
             obj.ht = diff(obj.h,t);
-            obj.u2d = int( obj.u, z, [-1,0] ); 
+            obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
-            obj.W = obj.d * distance * ( diff(obj.b, x) * sin(obj.w*(x+t)) +  diff(obj.b, y) * sin(obj.w*(y+t)) ) - ...
-                1/2 * obj.d * obj.w * distance^2 * ( cos(obj.w*(x+t)) + cos(obj.w*(y+t)) );
-            obj.Omega = obj.W - ( diff( obj.eta, t) + z * obj.ht ) - ...
-                obj.u * ( diff( obj.eta, x) + z * diff( obj.h, x ) ) - obj.v * ( diff( obj.eta, y) + z * diff( obj.h, y ));            
-            obj.Source2d = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y); 
+            obj.Omega = int(-obj.ht - diff(obj.h*obj.u, x) - diff(obj.h*obj.v, y), z, [-1,z]);
+            obj.Source2d = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y);
             
-
+            
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
             obj.mhuy = diff( obj.h * obj.u * obj.v, y);
@@ -176,6 +168,10 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.mhvz = diff( obj.v * obj.Omega, z);
             obj.mh2dx = diff( obj.h * obj.u2d, x);
             obj.mh2dy = diff( obj.h * obj.v2d, y);
+            obj.mhuzz = diff( obj.miu/obj.h/obj.h * diff( obj.h*obj.u , z ), z );
+            obj.mhvzz = diff( obj.miu/obj.h/obj.h * diff( obj.h*obj.v , z ), z );
+            obj.hufz = diff( obj.h*obj.u , z );
+            obj.hvfz = diff( obj.h*obj.v , z );
         end
         
         function matEvaluateError( obj, fphys, time)
@@ -263,18 +259,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             x = mesh.x; y = mesh.y; z = mesh.z;
             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
                 eval( obj.mhux ) + eval( obj.mhuy )...
-                + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
-%             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
-%                 eval( obj.mhux ) + eval( obj.mhuy )...
-%                  + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8);
+                + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8) - eval( obj.mhuzz );
             
             
             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
                 eval( obj.mhvx ) + eval( obj.mhvy )...
-                + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
-%             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
-%                 eval( obj.mhvx ) + eval( obj.mhvy )...
-%                  + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9);
+                + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9) - eval( obj.mhvzz );
         end
         
         function matUpdateExternalField( obj, t, ~, ~ )
@@ -288,10 +278,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.fext2d{1}( :, :, 1 ) = eval( obj.h );
             obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.u2d );
             obj.fext2d{1}( :, :, 3 ) = eval( obj.h ) .* eval( obj.v2d );
-            x = obj.mesh2d.x;  y = obj.mesh2d.y; z = zeros(size(x));            
+            x = obj.mesh2d.x;  y = obj.mesh2d.y; z = zeros(size(x));
             obj.SurfaceDate(:,:,1) = eval(obj.u) .* eval(obj.Omega);
-            obj.SurfaceDate(:,:,2) = eval(obj.v) .* eval(obj.Omega);            
+            obj.SurfaceDate(:,:,2) = eval(obj.v) .* eval(obj.Omega);
             
+            obj.SurfBoundNewmannDate(:,:,1) = obj.miu./eval(obj.h)./eval(obj.h).* eval( obj.hufz );
+            obj.SurfBoundNewmannDate(:,:,2) = obj.miu./eval(obj.h)./eval(obj.h).* eval( obj.hvfz );
         end
         
         function  [ hu, hv, Omega, h ] = matGetExactSolution( obj, x, y, z, t)
@@ -311,11 +303,11 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
-            option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('ConstantVerticalEddyViscosityValue') = 0.03;
+            option('ConstantVerticalEddyViscosityValue') = obj.miu;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 100;
         end
