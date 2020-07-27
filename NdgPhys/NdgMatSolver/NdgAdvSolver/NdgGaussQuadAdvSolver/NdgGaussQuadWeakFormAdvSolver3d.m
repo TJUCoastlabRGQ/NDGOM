@@ -68,12 +68,12 @@ classdef NdgGaussQuadWeakFormAdvSolver3d < NdgGaussQuadWeakFormSolver3d & ...
                 end         
                 
                 %> This part is added for validation purpose, generally, this part is not needed
-                edge = mesh3d.SurfaceBoundaryEdge;
-                [omegafluxS(:,:,1), omegafluxS(:,:,2)] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.SBFVfq{m}, physClass.SurfaceDate(:,:,1), physClass.SurfaceDate(:,:,2));
-                for i = 1:physClass.Nvar
-                    EdgeRHS = - ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( omegafluxS(:,:,i) ) ));
-                    physClass.frhs{m}(:,:,i) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, EdgeRHS, physClass.frhs{m}(:,:,i));
-                end                
+%                 edge = mesh3d.SurfaceBoundaryEdge;
+%                 [omegafluxS(:,:,1), omegafluxS(:,:,2)] = obj.matInterpolateToFaceGaussQuadraturePoint( edge, obj.SBFVfq{m}, physClass.SurfaceDate(:,:,1), physClass.SurfaceDate(:,:,2));
+%                 for i = 1:physClass.Nvar
+%                     EdgeRHS = - ( obj.SBLIFT{m} * ( obj.SBwJs{m} .* ( omegafluxS(:,:,i) ) ));
+%                     physClass.frhs{m}(:,:,i) = obj.matAssembleBoundaryAndSourceTermIntoRHS( edge, EdgeRHS, physClass.frhs{m}(:,:,i));
+%                 end                
                 
                 for i = 1:physClass.Nvar
                     physClass.frhs{m}(:,:,i) = permute( sum( ...

@@ -14,44 +14,6 @@ classdef SWEGaussQuadWeakFormPCESolver2d < NdgGaussQuadWeakFormSolver
             
             % evaluate inner edge
                 mesh2d = physClass.mesh2d(1);
-
-%                 %Function used to calculate the two dimentional PCE volume term
-%                 testfrhs = -( ...
-%                     mesh2d.rx .* ( mesh2d.cell.Dr * fphys2d{1}(:, :, 2) ) + ...
-%                     mesh2d.sx .* ( mesh2d.cell.Ds * fphys2d{1}(:, :, 2) ) + ...
-%                     mesh2d.ry .* ( mesh2d.cell.Dr * fphys2d{1}(:, :, 3) ) + ...
-%                     mesh2d.sy .* ( mesh2d.cell.Ds * fphys2d{1}(:, :, 3) ) );
-%                 
-%                 edge = mesh2d.InnerEdge;
-%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-%                 
-%                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
-%                 
-%                 [ fluxP ] = edge.nx .* fp(:,:,2) + edge.ny .* fp(:,:,3);
-%                 
-%                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, fp, edge );
-%                 [ testfrhs ] = testfrhs + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
-%                 
-%                 edge = mesh2d.BoundaryEdge;
-%                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys2d );
-%                 % apply clamped boundary condition
-%                 ind = ( edge.ftype == enumBoundaryCondition.Clamped );
-%                 fp(:, ind, 1) = physClass.fext2d{1}(:, ind, 1);
-%                 fp(:, ind, 2) = physClass.fext2d{1}(:, ind, 2);
-%                 fp(:, ind, 3) = physClass.fext2d{1}(:, ind, 3);
-%                 % apply slip wall boundary condition
-%                 ind = ( edge.ftype == enumBoundaryCondition.SlipWall );
-%                 Hun =  fm( :, ind, 2 ) .* edge.nx(:, ind) + fm( :, ind, 3).* edge.ny(:, ind);
-%                 Hvn = -fm( :, ind, 2 ) .* edge.ny(:, ind) + fm( :, ind, 3).* edge.nx(:, ind);
-%                 
-%                 fp(:, ind, 2) = - Hun .* edge.nx(:, ind) - Hvn .* edge.ny(:, ind);
-%                 fp(:, ind, 3) = - Hun .* edge.ny(:, ind) + Hvn .* edge.nx(:, ind);                
-%                 
-%                 [ fluxM ] = edge.nx .* fm(:,:,2) + edge.ny .* fm(:,:,3);
-%                 [ fluxS ] = physClass.matEvaluateSurfNumFlux( mesh2d, edge.nx, edge.ny, fm, fp, edge );
-%                 [ testfrhs ] = testfrhs + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS(:,:,1) );
-                
-                
                 
                 %  Function used to calculate the vertically averaged horizontal momentum term
                 fq = obj.matInterpolateToVolumeGaussQuadraturePoint(obj.Vq{1}, fphys2d{1} );
