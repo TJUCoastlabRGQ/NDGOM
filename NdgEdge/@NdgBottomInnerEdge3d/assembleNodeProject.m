@@ -47,9 +47,13 @@ end
 
 obj.FToN1 = FToN1;
 obj.FToN2 = FToN2;
-if mesh.Nz > 1
+if strcmp(class(obj), 'NdgBottomInnerEdge3d')
+    if mesh.Nz > 1
+        obj.GFToN1 = bsxfun(@plus, ( obj.FToE(1,:) - 1 ) * mesh.cell.Np , FToN1);
+        obj.GFToN2 = bsxfun(@plus, ( obj.FToE(2,:) - 1 ) * mesh.cell.Np , FToN2);
+    end
+else
     obj.GFToN1 = bsxfun(@plus, ( obj.FToE(1,:) - 1 ) * mesh.cell.Np , FToN1);
-    obj.GFToN2 = bsxfun(@plus, ( obj.FToE(2,:) - 1 ) * mesh.cell.Np , FToN2);
 end
 obj.nx = nx;
 obj.ny = ny;
