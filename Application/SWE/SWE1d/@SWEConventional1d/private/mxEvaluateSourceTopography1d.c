@@ -1,5 +1,5 @@
 #include "mex.h"
-#include "mxSWE1d.h"
+#include "../../@SWEAbstract1d/private/mxSWE1d.h"
 
 #define NRHS 4
 #define NLHS 1
