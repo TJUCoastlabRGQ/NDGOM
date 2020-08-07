@@ -41,7 +41,9 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 edge = mesh3d.BottomBoundaryEdge;
                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
                 [ fluxM ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), zeros(size(fluxM(:,:,[2,3]) )) );                
+                [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), zeros(size(fluxM(:,:,[2,3]) )) );   
+%                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), -1 * fluxM(:,:,[2,3]) );                
+
 
                 edge = mesh3d.SurfaceBoundaryEdge;
                 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );

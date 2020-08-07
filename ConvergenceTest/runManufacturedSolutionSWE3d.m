@@ -143,40 +143,52 @@ for n = 1:3
     box on; grid on;
     set(gca, 'XScale', 'log', 'YScale', 'log');
     
-    lendstr = {'HU1',...
-        'HV1','Omega1','H1'};
+    lendstr = {'$Hu1$','$Hv1$','$\omega1$','$H1$',...
+        '$Hu2$','$Hv2$','$\omega2$','$H2$'};
 %     legend(lendstr,'Interpreter','Latex');
-    columnlegend(1,lendstr, 12);
+    columnlegend(2,lendstr, 12);
     
     xlabel('$DOFs$', 'Interpreter', 'Latex', 'FontSize', fontsize);
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
 end
 
-% time = time./time(end);
-% figure(4);
-% hold on;
+time = time./time(end);
+figure(4);
+hold on;
 
 
 
-% figure(4);
-% hold on;
-% for n = 1:Ndeg
-%     co = color{n};
-%     plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
-%         'LineWidth', linewidth, ...
-%         'MarkerSize', markersize ...
-%         );
-% end
-%
-% set(gca, 'XScale', 'log', 'YScale', 'log');
-%
-% lendstr = {'$H$','$HU$','$HV$'};
-% legend(lendstr,'Interpreter','Latex');
-% %     columnlegend(2,lendstr, 12);
-%
-% xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% box on; grid on;
+figure(4);
+hold on;
+for n = 1:Ndeg
+    co = color{n};
+    plot(time(:, n)./max(max(time)), HUErr2(:, n), [co, marker{1}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );
+    plot(time(:, n)./max(max(time)), HVErr2(:, n), [co, marker{2}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );    
+    plot(time(:, n)./max(max(time)), OmegaErr2(:, n), [co, marker{3}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        ); 
+    plot(time(:, n)./max(max(time)), HErr2(:, n), [co, marker{4}, linestyle],...
+        'LineWidth', linewidth, ...
+        'MarkerSize', markersize ...
+        );    
+end
+
+set(gca, 'XScale', 'log', 'YScale', 'log');
+
+lendstr = {'$Hu1$','$Hv1$','$\omega1$','$H1$',...
+        '$Hu2$','$Hv2$','$\omega2$','$H2$'};
+columnlegend(2,lendstr, 12);
+
+xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
+box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)
@@ -208,7 +220,7 @@ function columnlegend( numcolumns, str, fontsize, location)
 if nargin < 4
     location = 'NorthEast';
 end
-[legend_h,object_h,~,~] = legend( str );
+[legend_h,object_h,~,~] = legend( str, 'Interpreter', 'Latex','Fontsize',fontsize);
 numlines = length(str);
 numpercolumn = ceil(numlines/numcolumns);
 pos = get(legend_h, 'position');

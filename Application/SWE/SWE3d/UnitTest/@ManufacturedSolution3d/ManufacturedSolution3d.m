@@ -145,6 +145,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             syms x y z t;
             obj.eta = obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
             obj.b = - ( 2 - 0.005*( x + y ));
+%             obj.b = - ( 2 - 0.005*( x + y ) * 0 );
+
             %             obj.b = -( 2 - sin(2*pi/900*x));
             
             obj.h = obj.eta - obj.b;
@@ -190,26 +192,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.ErrNorm2{3}(obj.Index)  = Err2(3);
             obj.ErrNorm2{4}(obj.Index)  = Err2(4);
             obj.Index = obj.Index + 1;
-        end
-        
-        function matEvaluateErrorRatio( obj, fphys, time)
-            fext = cell(1);
-            [ fext{1}(:,:,1), fext{1}(:,:,2), fext{1}(:,:,3), fext{1}(:,:,4)] = ...
-                obj.matGetExactSolution( obj.meshUnion.x, obj.meshUnion.y, obj.meshUnion.z, time);
-            obj.timePointRatio(obj.IndexRatio) = time;
-            TempRatio = ( fext{1}(:,:,1) - fphys(:,:,1) )./fext{1}(:,:,1) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
-            obj.ErrRatio{1}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
-            TempRatio = ( fext{1}(:,:,2) - fphys(:,:,2) )./fext{1}(:,:,2) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
-            obj.ErrRatio{2}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
-            TempRatio = ( fext{1}(:,:,3) - fphys(:,:,3) )./fext{1}(:,:,3) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
-            obj.ErrRatio{3}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
-            TempRatio = ( fext{1}(:,:,4) - fphys(:,:,4) )./fext{1}(:,:,4) * 100;
-            tempIndex = ( ~isnan(TempRatio) & ~isinf(TempRatio) );
-            obj.ErrRatio{4}(obj.IndexRatio)  = max(max(abs(TempRatio(tempIndex))));
-            obj.IndexRatio = obj.IndexRatio + 1;
         end
         
         %> set initial function
