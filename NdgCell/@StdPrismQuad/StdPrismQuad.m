@@ -35,7 +35,7 @@ classdef StdPrismQuad < handle
 
     properties ( SetAccess = protected )
         %> num of interpolation points (IP)
-        Np, Nph, Npz
+        Np, Nph, Npz, V1d
         %> coordinates of interpolation points
         r, s, t
         %> horizontal and vertical node coordinate

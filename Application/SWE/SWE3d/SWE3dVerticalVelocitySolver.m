@@ -31,7 +31,7 @@ classdef SWE3dVerticalVelocitySolver < handle
             end
         end
         
-        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys, time )
+        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys )
             edge = physClass.meshUnion.InnerEdge;
             edge2d = physClass.mesh2d.InnerEdge;
             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
@@ -63,12 +63,7 @@ classdef SWE3dVerticalVelocitySolver < handle
             % Term2d = ;
             field2d = physClass.meshUnion.Extend2dField( physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) + physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) - ...
                 InnerSurface_frhs2d - BoundarySurface_frhs2d + physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) + physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
-            
-            x = physClass.meshUnion.x;
-            y = physClass.meshUnion.y;
-            z = physClass.meshUnion.z;
-            t = time;
-            field2d = field2d  - eval( physClass.Source2d );            
+                  
                         
             Nz = physClass.meshUnion.Nz;
             BotEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end-1) ~= 0, end-1 );

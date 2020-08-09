@@ -48,7 +48,7 @@ classdef StdPrismTri < handle
     end
     properties ( SetAccess = protected)
         %> Vandermonde matrix
-        V, Vh, Vint
+        V, Vh, Vint, V1d
         %> project matrx from interpolation points to central point in
         %> vertical direction, and this is needed for GOTM implementation
         VCV

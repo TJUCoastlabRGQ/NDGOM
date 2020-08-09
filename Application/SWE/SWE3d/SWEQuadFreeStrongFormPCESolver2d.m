@@ -34,9 +34,6 @@ classdef SWEQuadFreeStrongFormPCESolver2d
                 BoundaryEdge = mesh3d.BoundaryEdge;
                 BoundaryEdge2d = mesh2d.BoundaryEdge;
                 
-                %                 FluxP = fp(:, :, 2) .* BoundaryEdge.nx + fp(:, :, 3) .* BoundaryEdge.ny;
-                %> $\mathbf n\cdot\mathbf {F^*} = \frac{\mathbf{F^{(+)}}+\mathbf{F^{(-)}}}{2} - \frac{\lambda}{2}(H^+ - H^-)$
-                %                 FluxS = 0.5 * ( FluxM + FluxP - bsxfun( @times, lambda, ( fp(:, :, 1) - fm(:, :, 1) )) );
                 physClass.BoundaryEdgeFluxM2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxM{m}(:,:,1) );
                 physClass.BoundaryEdgeFluxS2d{m} = BoundaryEdge.VerticalColumnIntegralField( physClass.BoundaryEdgeFluxS{m}(:,:,1) );
                 

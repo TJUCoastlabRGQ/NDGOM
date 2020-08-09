@@ -83,26 +83,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             box on;
         end
         
-        function matPlotErrorRatio(obj)
-            close all
-            figure;
-            hold on;
-            color = {'r-','k-','b-','r-'};
-            LWidth = 1.5;
-            FontSize = 15;
-            %             for i = 1:numel(obj.ErrRatio)
-            %                 plot(obj.timePointRatio, obj.ErrRatio{i},color{i},'LineWidth',LWidth);
-            %             end
-            str = {'$hu$',...
-                '$hv$','$h$'};
-            plot(obj.timePointRatio, obj.ErrRatio{1},color{1},'LineWidth',LWidth);
-            plot(obj.timePointRatio, obj.ErrRatio{2},color{2},'LineWidth',LWidth);
-            plot(obj.timePointRatio, obj.ErrRatio{4},color{4},'LineWidth',LWidth);
-            legend(str,'Interpreter','Latex','FontSize',FontSize);
-            xlabel('$time(s)$','Interpreter','Latex');
-            ylabel('$Ratio$','Interpreter','Latex');
-            box on;
-        end
         
         function  matPostProcess( obj )
             %This function is used to plot the analytical solution and the

@@ -20,10 +20,15 @@ for n = 1:obj.Nph
     Vh(:, n) = fh;
 end% for
 
+V1d = zeros(obj.Nz+1, obj.Nz+1);
+for n = 1:obj.Nz+1
+    V1d(:, n) = JacobiP( obj.t1, 0, 0, n-1 );
+end% for
 % vertical integral vandermonde matrix
 Vint = EvaluateVerticalIntegralOrthogonalFunc( obj );
 
 obj.V = V;
+obj.V1d = V1d;
 obj.Vh = Vh;
 obj.Vint = Vint;
 obj.VCV = tempVCV/V;

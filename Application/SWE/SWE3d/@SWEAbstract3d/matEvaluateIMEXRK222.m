@@ -41,6 +41,8 @@ while( time < ftime )
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
+        [ ~ ] = obj.Limiter.matLimit( obj.fphys, 1 );    
+        
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
         

@@ -32,7 +32,7 @@ while( time < ftime )
         %da gai
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-            SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );
+            SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );    
         
         obj.matCalculateExplicitRHSTerm( fphys, tloc , Stage, intRK + 1);
         
