@@ -28,6 +28,13 @@ classdef SWEBarotropic3d < SWEAbstract3d
         outputFieldOrder3d = [1 2 3]
     end
     
+    methods
+        function fphys = matImposeLimiter(obj, fphys)
+            fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(1) );
+            fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(2) );
+        end
+    end
+    
     methods( Hidden )
         [ E, G, H ] = matEvaluateFlux( obj, mesh, fphys );
         
