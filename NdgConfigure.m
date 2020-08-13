@@ -104,6 +104,10 @@ path = 'NdgLimiter/NdgVertLimiter/@NdgVertLimiter3d/private/';
 srcfile = {[path,'mxVertLimit3d.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgFilter/@NdgAbstractFilter/private/';
+srcfile = {[path,'mxFilterSolution.c']};
+FuncHandle(path, srcfile, libfile);
+
 % SWE1d
 path = 'Application\SWE\SWE1d\@SWEAbstract1d\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];

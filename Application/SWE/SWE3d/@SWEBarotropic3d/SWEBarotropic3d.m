@@ -33,6 +33,12 @@ classdef SWEBarotropic3d < SWEAbstract3d
             fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(1) );
             fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(2) );
         end
+        
+        function fphys = matFilterSolution(obj, fphys)
+            fphys = obj.Filter.matFilterSolution( fphys, obj.varFieldIndex(1) );
+            fphys = obj.Filter.matFilterSolution( fphys, obj.varFieldIndex(2) );
+        end
+        
     end
     
     methods( Hidden )

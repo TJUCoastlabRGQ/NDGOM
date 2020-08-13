@@ -43,6 +43,7 @@ while( time < ftime )
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
+        [ fphys ] = obj.matFilterSolution( fphys ); 
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -77,7 +78,8 @@ while( time < ftime )
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
     
-   [ fphys ] = obj.matImposeLimiter( fphys );   
+%    [ fphys ] = obj.matImposeLimiter( fphys );   
+    [ fphys ] = obj.matFilterSolution( fphys ); 
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -118,3 +120,11 @@ Implicita = [GAMA 0;
 Explicitb = [delta 1-delta 0];
 Implicitb = [1-GAMA GAMA];
 end
+
+function fphys = matFilterSolution( obj, fphys )
+Coef = diag([1,0.9,0.8,0.7,0.6,0.5,0.4,0.3]);
+FilterMatrix = (obj.meshUnion.cell.V * Coef) / obj.meshUnion.cell.V;
+fphys{1}(:,:,1) = FilterMatrix * fphys{1}(:,:,1);
+fphys{1}(:,:,2) = FilterMatrix * fphys{1}(:,:,2);
+end
+
