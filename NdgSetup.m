@@ -9,6 +9,7 @@ addpath( genpath( 'NdgNetCDF') );
 addpath( genpath( 'NdgLimiter') );
 addpath( genpath( 'Utilities') );
 addpath( genpath( 'Application') );
+addpath( genpath( 'NdgFilter') );
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('Compile GOTM source files.\n');

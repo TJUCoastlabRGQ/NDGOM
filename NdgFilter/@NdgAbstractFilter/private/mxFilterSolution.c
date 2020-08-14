@@ -9,7 +9,7 @@
 #define NRHS 9
 #define NLHS 1
 
-#define EPS pow(1,-10)
+#define EPS pow(10,-10)
 
 /*
  * Purpose: This function is used to filter the physical value to eliminate unphysical oscillation
@@ -129,6 +129,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         // Decide whether to filter the studied cell
         while(SI > SR)
         {
+
+			sumSqua = 0;
+
+			trunctedSumSqua = 0;
             // filter the solution
             for(int i = 0;i<Np;i++)
                 fmod[i] = fmod[i]* FS[i];

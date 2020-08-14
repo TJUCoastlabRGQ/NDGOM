@@ -28,7 +28,7 @@ classdef NdgFilter3d < NdgAbstractFilter
         end
         
         function  matSetSmoothRequireParameter( obj, mesh )
-            obj.SR = -2 - 4*log10(mesh.cell.N);
+            obj.SR = -2 - 6*log10(mesh.cell.N);
         end
         
         function matSetFilterStrengthMatrix( obj, mesh )
