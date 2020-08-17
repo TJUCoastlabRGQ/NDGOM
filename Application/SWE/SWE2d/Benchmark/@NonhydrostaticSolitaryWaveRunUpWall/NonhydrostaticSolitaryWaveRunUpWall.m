@@ -13,11 +13,11 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEWDPreBlanaced2d
         Ng
         xg
         yg
-%         A = 0.054
-        A = 0.0085
+        A = 0.054
+%         A = 0.0085
 %         x0 = 5.95
-%         x0 = 2.7096
-        x0 = 2.705
+        x0 = 2.7096
+%         x0 = 2.705
         
         
 %         x0 = -5
@@ -42,11 +42,11 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEWDPreBlanaced2d
             Coor = [15.04 17.22 19.4 20.86 22.32];
             d = [0.218 0.1769 0.1357 0.1259 0.1162];
 %             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('NonhydrostaticSolitaryWaveRunUpWall','/','NonhydrostaticSolitaryWaveRunUpWall'));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('NonhydrostaticSolitaryWaveRunUpWall/','2d/','NonhydrostaticSolitaryWaveRunUpWall'));
             [ result ] = PostProcess.interpolateOutputResultToGaugePoint( Coor, 0.01*ones(size(Coor)), Coor );
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
 
-            fpath ='Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data\SmallWaveHeight';
+            fpath ='Application\SWE\SWE2d\Benchmark\@NonhydrostaticSolitaryWaveRunUpWall\Data';
             for i = 1:numel(Coor)
                 str = strcat('\Gauge',num2str(index(i)),'.csv');
                 pathstr = strcat(fpath,str);
@@ -54,20 +54,20 @@ classdef NonhydrostaticSolitaryWaveRunUpWall < SWEWDPreBlanaced2d
                 data = xlsread(pathstr);
                 figure;
                 set(gcf,'position',[50,50,500,200]);
-%                 plot(outputTime - 6.7,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
-                plot(outputTime - 0.1,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
+                plot(outputTime - 6.7,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
+%                 plot(outputTime - 0.1,( result(:, 1, i) - d(i) )*100,'k','LineWidth',1.5);
                 hold on;
                 plot(data(:,1),data(:,2)*100,'ro','markersize',2);
-%                 ylim([-1.5,10]);
-%                 xlim([0,25]);
-                ylim([-0.3,2]);
-                xlim([0,30]);                
+                ylim([-1.5,10]);
+                xlim([0,25]);
+%                 ylim([-0.3,2]);
+%                 xlim([0,30]);                
                 ylabel({'$\eta \;\rm {(cm)}$'},'Interpreter','latex');   
                 xlabel({'$t \;\rm {(s)}$'},'Interpreter','latex'); 
                 set(gca,'Fontsize',13.5);
                 set(gca,'Fontsize',14);
-                title(titlestr,'position',[4.6,1.4],'Fontsize',14);
-%                 title(titlestr,'position',[4.8,7],'Fontsize',14);
+%                 title(titlestr,'position',[4.6,1.4],'Fontsize',14);
+                title(titlestr,'position',[4.8,7],'Fontsize',14);
             end
         end
         

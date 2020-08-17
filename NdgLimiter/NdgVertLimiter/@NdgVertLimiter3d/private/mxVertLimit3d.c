@@ -73,10 +73,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
     for (int k = 0; k < K; k++) {
         /*This part is used to determine the maxmum and minimum allowable value of the studied cell with index k */
-        double amax = avar[(mwIndex)EToE[k*Nface]-1], amin = avar[(mwIndex)EToE[k*Nface]-1];
-        for (int f = 1; f < Nface; f++){
-            amax = max(amax, avar[(mwIndex)EToE[k*Nface + f]-1]);
-            amin = min(amin, avar[(mwIndex)EToE[k*Nface + f]-1]);
+        double amax = -1*pow(10,10), amin = pow(10,10);
+        for (int f = 0; f < Nface; f++){
+            if ((int)EToE[k*Nface + f]-1 != k){
+                amax = max(amax, avar[(mwIndex)EToE[k*Nface + f]-1]);
+                amin = min(amin, avar[(mwIndex)EToE[k*Nface + f]-1]);
+            }
+            else
+                continue;
         }
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         int flag = 0;

@@ -5,7 +5,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
     properties ( Constant )
         %> channel length
         ChLength = 2000;
-        ChWidth = 300;
+        ChWidth = 900;
         %> channel depth
         H0 = 10;
         %> start time
@@ -31,7 +31,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.VertSolver = SWE3dVerticalVelocitySolver( obj.mesh2d, obj.mesh3d );
-            obj.Filter =  NdgFilter3d( obj.mesh3d );
+            obj.Limiter =  NdgVertLimiter3d( obj.mesh3d );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
