@@ -42,7 +42,7 @@ while( time < ftime )
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
-        [ fphys ] = obj.matImposeLimiter( fphys );  
+%         [ fphys ] = obj.matImposeLimiter( fphys );  
 %         [ fphys ] = obj.matFilterSolution( fphys ); 
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
@@ -78,7 +78,7 @@ while( time < ftime )
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
     
-   [ fphys ] = obj.matImposeLimiter( fphys );   
+%    [ fphys ] = obj.matImposeLimiter( fphys );   
 %     [ fphys ] = obj.matFilterSolution( fphys ); 
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );

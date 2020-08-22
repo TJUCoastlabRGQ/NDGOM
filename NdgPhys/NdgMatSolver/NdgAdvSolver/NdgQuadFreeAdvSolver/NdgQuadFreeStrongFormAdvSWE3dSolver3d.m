@@ -34,6 +34,8 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 
                 [ OmegafluxS(:,:,1) ] = 0.5*edge.nz.*( fm(:,:,1).*fm(:,:,3)./fm(:,:,4) + fp(:,:,1).*fp(:,:,3)./fp(:,:,4) );
                 [ OmegafluxS(:,:,2) ] = 0.5*edge.nz.*( fm(:,:,2).*fm(:,:,3)./fm(:,:,4) + fp(:,:,2).*fp(:,:,3)./fp(:,:,4) );
+%                 [ OmegafluxS(:,:,1) ] = edge.nz.*( ( fp(:,:,3)>=0 ) .* fp(:,:,1).*fp(:,:,3)./fp(:,:,4) + ( fp(:,:,3) < 0 ) .* fm(:,:,1).*fp(:,:,3)./fm(:,:,4) ) ;
+%                 [ OmegafluxS(:,:,2) ] = edge.nz.*( ( fp(:,:,3)>=0 ) .* fp(:,:,2).*fp(:,:,3)./fp(:,:,4) + ( fp(:,:,3) < 0 ) .* fm(:,:,2).*fp(:,:,3)./fm(:,:,4) ) ;
                 [ physClass.frhs{m} ] = physClass.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM(:,:,[2,3]), fluxP(:,:,[2,3]), OmegafluxS );
                 
                 edge = mesh3d.BottomBoundaryEdge;

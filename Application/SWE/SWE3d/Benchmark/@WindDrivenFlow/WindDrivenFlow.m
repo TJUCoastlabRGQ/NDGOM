@@ -5,7 +5,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
     properties ( Constant )
         %> channel length
         ChLength = 2000;
-        ChWidth = 900;
+        ChWidth = 300;
         %> channel depth
         H0 = 10;
         %> start time
