@@ -22,11 +22,6 @@ else
     throw( MException(msgID, msgtext) );
 end
 
-path = 'ParrellelTest\';
-srcfile = {[path, 'parallel.c']};
-libfile = {};
-FuncHandle(path, srcfile, libfile);
-
 % set output path
 outPath = 'lib/';
 % Polylib

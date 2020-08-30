@@ -33,6 +33,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
     [ SystemRHS(:,(i-1) * Nz + 1,:), SurfStiffMatrix ] = ImposeNewmannBoundaryCondition(UpEidM, physClass.SurfBoundNewmannDate(:,i,:),...
         ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1) * Nz + 1,:));
     if Nz ~= 1
+        %This is for the local boundary and bottom adjacent boundary integral for the first cell in each column
         AdjacentRows = (Np+1:2*Np)';
         AdjacentPhysicalDiffMatrix = diag(DiffusionCoefficient(:,(i-1)*Nz+2))*Dz3d;
         %> Volume Integral Part
@@ -55,7 +56,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
             StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
         end
-        
+ %If only two layers included, the following part is ignored       
         for j = 2:physClass.meshUnion(1).Nz-1
             UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
             LocalRows    = ((j-1)*Np+1:j*Np)';
@@ -123,6 +124,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
         for var = 3:physClass.Nvar
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
         end
+        %> If homogenerous boundary is to be added for hu and hv, the Boundary Newmann part is set to be zero, so there would have no effect on the RHS and the stiff matrix
         [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
             ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
         %% This part is used to impose Newmann boundary condition for hu and hv
@@ -139,26 +141,26 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
         
         for var = 1:2
             StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
+            StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
         end
         for var = 3:physClass.Nvar
             StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
-        end        
-    else
+        end            
+    else %Nz == 1
         %> Impose Newmann boundary for the third to the last physical field
         for var = 3:physClass.Nvar
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
         end
-        
+ %> This part is used to impose the Newmann boundary for hu, hv and other tracer transport equation, and the Newmann date is by default set to be zero       
         [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
             ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:)); 
-        
+ %> For bottom dirichlet boundary, we just need to ignore the following part       
         [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
         
-    end
-        %> Assemble the local integral part into the StiffMatrix
         for var = 1:2
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
-        end
+        end             
+    end
         %
         for var = 1:physClass.Nvar
             temphuRHS = SystemRHS(:,(i-1)*Nz + 1 : i*Nz,var);
