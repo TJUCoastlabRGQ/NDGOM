@@ -96,7 +96,7 @@ while( time < ftime )
     fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
     %> Update the diffusion coefficient
-    display(time);
+%     display(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);

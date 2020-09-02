@@ -359,6 +359,13 @@ srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertDiffSolver\private\';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+libfile = {};
+srcfile = { ...
+    [path, 'mxUpdateImplicitRHS.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEVertGOTMDiffSolver\private\';
 libfile = {['.\lib\GOTM\','*.obj'],...
     [path,'mxGOTM.c']};
@@ -388,8 +395,8 @@ for n = 1:numel(srcfile)
             mfilename, srcfile{n}, outPath);
         fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex('-g','-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
-            file{:}, '-outdir', outPath);
+        mex('-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
+            file{:}, '-outdir', outPath);        
     end
 end
 end
@@ -436,9 +443,14 @@ switch computer('arch')
             num2str(parallelThreadNum), ' '];
         LDFLAGS = [LDFLAGS, ' -lmwblas -liomp5 '];
     case 'win64'
-        CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
+%% if gcc compiler adopted, -fopenmp command is used
+%         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
+%             num2str(parallelThreadNum), ' '];
+%         LDFLAGS = [LDFLAGS, ' -fopenmp '];
+%% if intel compiler adopted, /openmp command is used
+        CFLAGS = [CFLAGS,' /openmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
-        LDFLAGS = [LDFLAGS, ' -fopenmp '];
+        LDFLAGS = [LDFLAGS, ' /openmp '];
     case 'glnxa64'
 end
 end

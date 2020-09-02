@@ -125,10 +125,6 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             syms x y z t;
             obj.eta = obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
             obj.b = - ( 2 - 0.005*( x + y ));
-%             obj.b = - ( 2 - 0.005*( x + y ) * 0 );
-
-            %             obj.b = -( 2 - sin(2*pi/900*x));
-            
             obj.h = obj.eta - obj.b;
             distance = obj.h * ( z + 1 ); 
             obj.u = distance^3 * obj.d * sin(obj.w*(x+t));
