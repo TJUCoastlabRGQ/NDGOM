@@ -17,33 +17,36 @@ classdef SWE3dVerticalVelocitySolver < handle
             obj.RHSCoeMatrix{1} = zeros( mesh3d.cell.Np, mesh3d.cell.Np, mesh3d.K );
             obj.VertCoeMatrix = obj.RHSCoeMatrix;
 %% we calculate from bottom to surface
-%             BotEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end-1) ~= 0, end-1 );
-%             Nz = mesh3d.Nz;
-%             for i = 1:mesh2d.K
-%                 M3d = zeros(mesh3d.cell.Np);
-%                 M3d( BotEidM, BotEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;     
-%                 for j = 1 : Nz-1
-%                     CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt + M3d;
-%                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
-%                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\M3d;
-%                 end
-%                     CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + 2 * M3d;
-%                     obj.RHSCoeMatrix{1}(:,:, i*Nz )  = CoeMatrix\(diag(mesh3d.J(:, i*Nz )) * mesh3d.cell.M);                           
-%             end
-%% we calculate from surface to bottom
-            UpEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end) ~= 0, end );
+            BotEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end-1) ~= 0, end-1 );
             Nz = mesh3d.Nz;
             for i = 1:mesh2d.K
                 M3d = zeros(mesh3d.cell.Np);
-                M3d( UpEidM, UpEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M; 
-                CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  M3d;
-                obj.RHSCoeMatrix{1}(:,:, (i-1)*Nz+1 )  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz+1 )) * mesh3d.cell.M);                  
-                for j = 2 : Nz
-                    CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt - M3d;
+                M3d( BotEidM, BotEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;     
+                for j = 1 : Nz-1
+                    CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt + M3d;
                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
-                    obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(-1*M3d);
-                end                         
+                    obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\M3d;
+                end
+                    CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + 2 * M3d;
+                    obj.RHSCoeMatrix{1}(:,:, i*Nz )  = CoeMatrix\(diag(mesh3d.J(:, i*Nz )) * mesh3d.cell.M);                           
             end
+%% we calculate from surface to bottom
+%             UpEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end) ~= 0, end );
+%             Nz = mesh3d.Nz;
+%             for i = 1:mesh2d.K
+%                 M3d = zeros(mesh3d.cell.Np);
+%                 M3d( UpEidM, UpEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M; 
+%                 CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  M3d;
+%                 % if the outer value at the surface is taken to be the opposite value of the inner data, then the CoeMatrix for the uppermost cell is set to be the following
+% %                 CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  2*M3d;
+%                 obj.RHSCoeMatrix{1}(:,:, (i-1)*Nz+1 )  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz+1 )) * mesh3d.cell.M);
+%                 %for the uppermost cell, the numerical flux for omega is zero, so the VertCoeMatrix for this cell is set to be zero 
+%                 for j = 2 : Nz
+%                     CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt - M3d;
+%                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
+%                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(-1*M3d);
+%                 end                         
+%             end
         end
         
         function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys )
@@ -73,11 +76,11 @@ classdef SWE3dVerticalVelocitySolver < handle
             [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
             
             field3d =...
-                ( physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) + physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) - ...
-                InnerSurface_frhs3d - BoundarySurface_frhs3d  + ( physClass.meshUnion.ry .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,2)) + physClass.meshUnion.sy .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,2)) ) ;
+                ( - physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) - physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) + ...
+                InnerSurface_frhs3d + BoundarySurface_frhs3d  - ( physClass.meshUnion.ry .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,2)) - physClass.meshUnion.sy .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,2)) ) ;
             % Term2d = ;
-            field2d = physClass.meshUnion.Extend2dField( physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) + physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) - ...
-                InnerSurface_frhs2d - BoundarySurface_frhs2d + physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) + physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
+            field2d = physClass.meshUnion.Extend2dField( - physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) - physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) + ...
+                InnerSurface_frhs2d + BoundarySurface_frhs2d - physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) - physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
                   
                         
             Nz = physClass.meshUnion.Nz;
@@ -85,27 +88,27 @@ classdef SWE3dVerticalVelocitySolver < handle
             UpEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end) ~= 0, end );
             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
 %% we calculate from bottom to surface            
-%             VerticalVelocity(:, Nz:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz:Nz:end), ...
-%                 permute( permute( field2d(:, Nz:Nz:end) - field3d(:, Nz:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-%             
-%             for Layer = 2 : Nz
-%                 BotVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
-%                 BotVertVelocity( BotEidM, : ) = VerticalVelocity( UpEidM, Nz - Layer + 2 : Nz : end);
-%                 VerticalVelocity(:, Nz - Layer + 1:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
-%                 permute( permute( field2d(:, Nz - Layer + 1:Nz:end) - field3d(:, Nz - Layer + 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
-%                 permute( permute( BotVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-%             end
- %% we calculate from surface to bottom           
-            VerticalVelocity(:, 1:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,1:Nz:end), ...
-                permute( permute( field2d(:, 1:Nz:end) - field3d(:, 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+            VerticalVelocity(:, Nz:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz:Nz:end), ...
+                permute( permute( field3d(:, Nz:Nz:end) - field2d(:, Nz:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
             
             for Layer = 2 : Nz
-                UpVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
-                UpVertVelocity( UpEidM, : ) = VerticalVelocity( BotEidM, Layer - 1 : Nz : end);
-                VerticalVelocity(:, Layer:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Layer:Nz:end), ...
-                permute( permute( field2d(:, Layer:Nz:end) - field3d(:, Layer:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Layer:Nz:end), ...
-                permute( permute( UpVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-            end            
+                BotVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
+                BotVertVelocity( BotEidM, : ) = VerticalVelocity( UpEidM, Nz - Layer + 2 : Nz : end);
+                VerticalVelocity(:, Nz - Layer + 1:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
+                permute( permute( field3d(:, Nz - Layer + 1:Nz:end) - field2d(:, Nz - Layer + 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
+                permute( permute( BotVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+            end
+ %% we calculate from surface to bottom           
+%             VerticalVelocity(:, 1:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,1:Nz:end), ...
+%                 permute( permute( field3d(:, 1:Nz:end) - field2d(:, 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+%             
+%             for Layer = 2 : Nz
+%                 UpVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
+%                 UpVertVelocity( UpEidM, : ) = VerticalVelocity( BotEidM, Layer - 1 : Nz : end);
+%                 VerticalVelocity(:, Layer:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Layer:Nz:end), ...
+%                 permute( permute( field3d(:, Layer:Nz:end) - field2d(:, Layer:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Layer:Nz:end), ...
+%                 permute( permute( UpVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+%             end            
         end
     end
     
