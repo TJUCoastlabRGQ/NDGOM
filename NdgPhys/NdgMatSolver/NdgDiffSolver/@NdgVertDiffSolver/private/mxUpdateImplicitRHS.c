@@ -13,7 +13,7 @@
 #endif
 
 #define NRHS 16
-#define NLHS 2
+#define NLHS 1
 
 /*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
 void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
@@ -264,10 +264,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	const size_t NdimOut = 3;
 	const mwSize dimOut[3] = {Np,K3d,Nvar};
 	plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
-	plhs[1] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+//	plhs[1] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
 	double *fphys = mxGetPr(plhs[0]);
 	memcpy(fphys, RHS, Np*K3d*Nvar*sizeof(double));
-	double *ImplicitRHS = mxGetPr(plhs[1]);
+//	double *ImplicitRHS = mxGetPr(plhs[1]);
     /*Here, epsilon is set to be -1, and this correspoinding to the SIPG. This value can be set to 1(IIPG or NIPG) or 0(IIPG or NIPG)*/
 	const double epsilon = -1;
 	int rank, size;
@@ -397,13 +397,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		const ptrdiff_t dimension = Np*Nz;
 		const ptrdiff_t colB = 1;
 		double Alpha = 1.0, Beta = 0.0;
-
+/*
 		for (int var = 0; var < Nvar; var++){
 			dgemm("n", "n", &dimension, &colB, &dimension, &Alpha, StiffMatrix + var*Np*Nz*Np*Nz, &dimension, fphys + var*K3d*Np + i*Nz*Np, &dimension, &Beta, ImplicitRHS + var*K3d*Np + i*Nz*Np, &dimension);
 		}
 		AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np, SurfBoundStiffTerm, Np, K3d, Nvar);
 		AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, Nvar);
-
+*/
 		free(EleMass3d);
 		free(InvEleMass3d);
 		free(EleMass2d);

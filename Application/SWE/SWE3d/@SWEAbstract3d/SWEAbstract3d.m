@@ -121,7 +121,7 @@ classdef SWEAbstract3d < NdgPhysMat
         
         initPhysFromOptions( obj, mesh2d, mesh3d );
         AnimationSurfaceLevel( obj );
-        
+        matEvaluateSemiImplicit22(obj);
         function matUpdateWetDryState(obj, fphys)
             for m = 1:obj.Nmesh
                 wetflag = all( fphys{m}(:,:,1) > obj.hcrit );

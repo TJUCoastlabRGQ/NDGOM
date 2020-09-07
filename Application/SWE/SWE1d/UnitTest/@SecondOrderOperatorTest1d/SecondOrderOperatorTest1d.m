@@ -12,6 +12,14 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     
     properties
         miu = 0.01
+        
+        Cexact
+        
+        DiffCexact
+        
+        DirichExact
+        
+        NewmannExact
     end
     
     methods
@@ -22,7 +30,10 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             %             obj.outputFieldOrder2d = [];
             obj.fphys = obj.setInitialField;
             obj.option = obj.setOption( obj.option );
-            obj.outputFile = obj.matInitOutput;
+            obj.matGetFunction;
+            obj.DirichExact = zeros(1,2);
+            obj.NewmannExact = zeros(1,2);
+%             obj.outputFile = obj.matInitOutput;
         end
         
         matTimeStepping343(obj);
@@ -48,8 +59,25 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
 %             fphys{1}(:,:,1) = 1/obj.miu*exp(-(obj.mesh3d(1).z+0.5).^2);
         end
         
+        function matGetFunction(obj)
+            syms x t;
+            x0 = 0.5;
+            obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
+            obj.DiffCexact = diff(obj.Cexact, t);
+        end
+        
+        function matUpdateExternalField( obj, time )
+            t = time;
+            x = 0;
+            obj.DirichExact(1) = eval(obj.Cexact);
+            obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
+            x = 1;
+            obj.DirichExact(2) = eval(obj.Cexact);
+            obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);           
+        end
+        
         function [ option ] = setOption( obj, option )
-            ftime = 2;
+            ftime = 20;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -58,7 +86,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
-            option('EddyViscosityType') = enumEddyViscosity.Constant;
+            option('EddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('ConstantEddyViscosityValue') = 0.01;

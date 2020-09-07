@@ -40,7 +40,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
             %             obj.dt = 0.02;
             obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
+%             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
+            obj.SurfBoundNewmannDate(:,:,1) = ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1            
             %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
             %             obj.WindTaux{1}(:,Index) = 0;
             %             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
