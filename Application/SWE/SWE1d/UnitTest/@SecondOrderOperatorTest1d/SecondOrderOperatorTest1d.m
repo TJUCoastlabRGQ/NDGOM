@@ -57,16 +57,16 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             fphys = cell( obj.Nmesh, 1 );
             x = obj.meshUnion.x;
             t = 0;
-            fphys{1}(:,:,1) = eval(obj.Cexact);
+            fphys{1}(:,:,1) = eval(obj.Cexact).*ones(size(obj.meshUnion.x));
             %             fphys{1}(:,:,1) = 1/obj.miu*exp(-(obj.mesh3d(1).z+0.5).^2);
         end
         
         function matGetFunction(obj)
             syms x t;
             x0 = 0.5;
-            obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
-            obj.DiffCexact = diff(obj.Cexact, x);
-            %             obj.Cexact = 0*t+0*x;
+%             obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
+%             obj.DiffCexact = diff(obj.Cexact, x);
+                        obj.Cexact = 0*t+0.*x;
             %             obj.DiffCexact = diff(obj.Cexact, x);
             
         end
@@ -74,13 +74,12 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         function matUpdateExternalField( obj, time )
             t = time;
             x = 0;
-            obj.DirichExact(1) = eval(obj.Cexact);
-            obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
-            %             obj.NewmannExact(1) = 1;
+%             obj.DirichExact(1) = eval(obj.Cexact);
+%             obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
+                        obj.NewmannExact(1) = obj.miu*1;
             x = 1;
-            obj.DirichExact(2) = eval(obj.Cexact);
-            obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
-            %             obj.NewmannExact(2) = -1;
+%             obj.DirichExact(2) = eval(obj.Cexact);
+%             obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
         end
         
         function [ option ] = setOption( obj, option )
