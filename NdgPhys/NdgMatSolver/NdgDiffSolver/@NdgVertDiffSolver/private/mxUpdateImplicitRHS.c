@@ -180,7 +180,23 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, co
 	double *TempTau = malloc(Np2d*sizeof(double));
 	for (int i = 0; i < Np2d; i++)
 		TempTau[i] = 2 * Tau[i];
-	LocalBoundaryIntegral(eid, DiffMatrix, mass2d, TempTau, OP11, Np3d, Np2d, Flag, epsilon);
+	//LocalBoundaryIntegral(eid, DiffMatrix, mass2d, TempTau, OP11, Np3d, Np2d, Flag, epsilon);
+	double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
+	AssembleFacialDiffMatrix(FDiffMatrix, DiffMatrix, eid, (int)Np2d, (int)Np3d);
+	double Alpha = -1 * epsilon*Flag*0.5*2, Beta = 0.0;
+	double *EdgeContribution = malloc(Np2d*Np3d*sizeof(double));
+	dgemm("t", "n", &Np3d, &Np2d, &Np2d, &Alpha, FDiffMatrix, &Np2d, mass2d, &Np2d, &Beta, EdgeContribution, &Np3d);
+	AssembleContributionIntoColumn(OP11, EdgeContribution, eid, (int)Np3d, (int)Np2d);
+	Alpha = 0.5*Flag*2;
+	dgemm("n", "n", &Np2d, &Np3d, &Np2d, &Alpha, mass2d, &Np2d, FDiffMatrix, &Np2d, &Beta, EdgeContribution, &Np2d);
+	AssembleContributionIntoRow(OP11, EdgeContribution, eid, (int)Np3d, (int)Np2d);
+	double *DoubleJump = malloc(Np2d*Np2d*sizeof(double));
+	//DiagMultiply(DoubleJump, mass2d, TempTau, (int)Np2d);
+	DiagMultiply(DoubleJump, mass2d, Tau, (int)Np2d);
+	AssembleContributionIntoRowAndColumn(OP11, DoubleJump, eid, eid, (int)Np3d, (int)Np2d, -1);
+	free(FDiffMatrix);
+	free(EdgeContribution);
+	free(DoubleJump);
 	free(TempTau);
 }
 /*Note: This function is used to calculate the adjacent boundary contribution to the adjacent stiff operator OP12, here adjacent means the test function is defined over the adjacent cell and not the local one*/
