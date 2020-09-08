@@ -177,9 +177,10 @@ void LocalBoundaryIntegral(double *eid, double *DiffMatrix, double *mass2d, cons
 /*Note: This function is used to impose the homogeneous Dirichlet boundary condition at the bottom boundary*/
 void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, const double *Tau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, const double epsilon)
 {
-	double *TempTau = malloc(Np2d*sizeof(double));
+/*	double *TempTau = malloc(Np2d*sizeof(double));
 	for (int i = 0; i < Np2d; i++)
 		TempTau[i] = 2 * Tau[i];
+		*/
 	//LocalBoundaryIntegral(eid, DiffMatrix, mass2d, TempTau, OP11, Np3d, Np2d, Flag, epsilon);
 	double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
 	AssembleFacialDiffMatrix(FDiffMatrix, DiffMatrix, eid, (int)Np2d, (int)Np3d);
@@ -197,7 +198,7 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, co
 	free(FDiffMatrix);
 	free(EdgeContribution);
 	free(DoubleJump);
-	free(TempTau);
+//	free(TempTau);
 }
 /*Note: This function is used to calculate the adjacent boundary contribution to the adjacent stiff operator OP12, here adjacent means the test function is defined over the adjacent cell and not the local one*/
 void AdjacentBoundaryIntegral(double *eidM, double *eidP, double *LocalDiff, double *AdjacentDiff, double *mass2d, const double *Tau, double *OP12, ptrdiff_t Np3d, \
