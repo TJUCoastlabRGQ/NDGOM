@@ -6,7 +6,7 @@ fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.015;
+dt = 0.0015;
 % visual = Visual2d( obj.mesh2d );
 visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');
@@ -106,7 +106,7 @@ edge = meshUnion.InnerEdge;
 [ fluxM ] = edge.nx .* fm(:,:,1);
 [ fluxP ] = edge.nx .* fp(:,:,1);
 [ fluxS ] = 0.5 * edge.nx .* (fm(:,:,1) + fp(:,:,1));
-[ qx ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+[ qx ] = edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
 
 edge = meshUnion.BoundaryEdge;
 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
@@ -114,7 +114,7 @@ edge = meshUnion.BoundaryEdge;
 fluxS = zeros(1,2);
 fluxS(1) = edge.nx(1) * fm(1);%Newmann boundary
 fluxS(2) = edge.nx(2) * 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1));
-[ qx ] = qx + edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxS );
+[ qx ] = qx + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
 
 %Volume Intergral
 qx = ...
@@ -137,7 +137,7 @@ edge = meshUnion.InnerEdge;
 [ fluxM ] = edge.nx .* Qxfm(:,:,1);
 [ fluxP ] = edge.nx .* Qxfp(:,:,1);
 [ fluxS ] = 0.5 * edge.nx .* (sigmafm(:,:,1) + sigmafp(:,:,1)) - edge.nx .* (fm(:,:,1) - fp(:,:,1)) * Tau(1);
-[ RHS1d ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+[ RHS1d ] = edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
 
 
 edge = meshUnion.BoundaryEdge;
@@ -149,7 +149,7 @@ miu = 0.01; %this parameter should equal to the setted value exactly
 fluxS(1) = miu*1/sqrt(4*tloc+1)*(-2)*(0-0.5)/miu/(4*tloc+1)*exp(-(0-0.5).^2/miu/(4*tloc+1))*(-1);
 fluxS(2) = edge.nx(2) * sigmafm(2) - Tau(1) * (fm(2) - 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1)));
 
-[ RHS1d ] = RHS1d + edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxS );
+[ RHS1d ] = RHS1d + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
 
 
 RHS1d = ...

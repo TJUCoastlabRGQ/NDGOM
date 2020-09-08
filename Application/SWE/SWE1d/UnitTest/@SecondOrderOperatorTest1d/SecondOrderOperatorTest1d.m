@@ -7,7 +7,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         %> wet/dry depth threshold
         hmin = 0.01
         %> gravity acceleration
-        gra = 9.8        
+        gra = 9.8
     end
     
     properties
@@ -25,15 +25,15 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     methods
         function obj = SecondOrderOperatorTest1d(N, M)
             [ obj.meshUnion ] = makeUniformMesh( N, M );
-%             obj.meshUnion = obj.mesh3d;
+            %             obj.meshUnion = obj.mesh3d;
             obj.Nmesh = 1;
             %             obj.outputFieldOrder2d = [];
-            obj.fphys = obj.setInitialField;
-            obj.option = obj.setOption( obj.option );
             obj.matGetFunction;
+            obj.option = obj.setOption( obj.option );
+            obj.fphys = obj.setInitialField;
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);
-%             obj.outputFile = obj.matInitOutput;
+            %             obj.outputFile = obj.matInitOutput;
         end
         
         matTimeStepping343(obj);
@@ -55,15 +55,20 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         %> set initial function
         function [ fphys ] = setInitialField( obj )
             fphys = cell( obj.Nmesh, 1 );
-            fphys{1}(:,:,1) = 1/sqrt(4*0+1)*exp(-(obj.meshUnion(1).x-0.5).^2/obj.miu/(4*0+1));
-%             fphys{1}(:,:,1) = 1/obj.miu*exp(-(obj.mesh3d(1).z+0.5).^2);
+            x = obj.meshUnion.x;
+            t = 0;
+            fphys{1}(:,:,1) = eval(obj.Cexact);
+            %             fphys{1}(:,:,1) = 1/obj.miu*exp(-(obj.mesh3d(1).z+0.5).^2);
         end
         
         function matGetFunction(obj)
             syms x t;
             x0 = 0.5;
             obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
-            obj.DiffCexact = diff(obj.Cexact, t);
+            obj.DiffCexact = diff(obj.Cexact, x);
+            %             obj.Cexact = 0*t+0*x;
+            %             obj.DiffCexact = diff(obj.Cexact, x);
+            
         end
         
         function matUpdateExternalField( obj, time )
@@ -71,13 +76,15 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             x = 0;
             obj.DirichExact(1) = eval(obj.Cexact);
             obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
+            %             obj.NewmannExact(1) = 1;
             x = 1;
             obj.DirichExact(2) = eval(obj.Cexact);
-            obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);           
+            obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
+            %             obj.NewmannExact(2) = -1;
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 20;
+            ftime = 2;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
