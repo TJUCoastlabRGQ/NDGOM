@@ -11,7 +11,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     end
     
     properties
-        miu = 0.01
+        miu = 0.001
         
         Cexact
         
@@ -66,7 +66,8 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             x0 = 0.5;
 %             obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
 %             obj.DiffCexact = diff(obj.Cexact, x);
-                        obj.Cexact = 0*t+0.*x;
+%                         obj.Cexact = 0*t+0.*x;
+            obj.Cexact =-1* sin(2*pi*x + 0 * t);
             %             obj.DiffCexact = diff(obj.Cexact, x);
             
         end
@@ -83,7 +84,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 400;
+            ftime = 2000;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

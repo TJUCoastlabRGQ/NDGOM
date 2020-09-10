@@ -6,7 +6,7 @@ fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.0015;
+dt = 0.015;
 % visual = Visual2d( obj.mesh2d );
 visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');
@@ -18,11 +18,12 @@ while( time < ftime )
     
     Tempfphys = fphys;
     tloc = time + c(1)*dt;
+    obj.matUpdateExternalField( tloc );
     [ExplicitRHS1d(:,:,1)] = ...
         -1 * matCalculateExplicitRHSTerm(obj, fphys, tloc, DiffusionCoefficient);
     for intRK = 1:2
         tloc = time + c( intRK+1 ) * dt;
-        
+        obj.matUpdateExternalField( tloc );
         fphys{1}(:,:,1) = Tempfphys{1}(:,:,1) + dt * EXa(intRK+1,1) * ExplicitRHS1d(:,:,1) + dt * EXa(intRK+1,2) * ExplicitRHS1d(:,:,2);
         [ExplicitRHS1d(:,:,intRK + 1)] =  -1 * matCalculateExplicitRHSTerm(obj, fphys, tloc, DiffusionCoefficient);
     end
@@ -95,12 +96,11 @@ meshUnion = obj.meshUnion(1);
 %> Calculation of the penalty parameter
 Tau = zeros(1, meshUnion.K);
 Tau = matCalculatePenaltyParameter(meshUnion, DiffusionCoefficient, Tau);
-qx = matCalculateAuxialaryVariable(obj, meshUnion, fphys, tloc, DiffusionCoefficient);
-RHS1d = matCalculateRHS1d(meshUnion, Tau, qx, fphys, tloc, DiffusionCoefficient);
+qx = matCalculateAuxialaryVariable( obj, meshUnion, fphys );
+RHS1d = matCalculateRHS1d(obj, meshUnion, Tau, qx, fphys, tloc);
 end
 
-function qx = matCalculateAuxialaryVariable(obj, meshUnion, fphys, tloc, DiffusionCoefficient)
-miu = 0.01;
+function qx = matCalculateAuxialaryVariable( obj, meshUnion, fphys )
 edge = meshUnion.InnerEdge;
 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
 [ fluxM ] = edge.nx .* fm(:,:,1);
@@ -113,19 +113,21 @@ edge = meshUnion.BoundaryEdge;
 [ fluxM ] = edge.nx .* fm(:,:,1);
 fluxS = zeros(1,2);
 fluxS(1) = edge.nx(1) * fm(1);%Newmann boundary
-fluxS(2) = edge.nx(2) * 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1));
+% fluxS(2) = edge.nx(2) * 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1));
+fluxS(2) = edge.nx(2) * obj.DirichExact(2);
+
 [ qx ] = qx + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
 
 %Volume Intergral
 qx = ...
      -qx +  meshUnion.rx.*( meshUnion.cell.Dr * fphys{1}(:,:,1) );
 
-qx = DiffusionCoefficient .* qx;
+qx = obj.miu .* qx;
 end
 
-function RHS1d = matCalculateRHS1d(meshUnion, Tau, qx, fphys, tloc, DiffusionCoefficient)
+function RHS1d = matCalculateRHS1d(obj, meshUnion, Tau, qx, fphys, tloc)
 sigma = cell(1);
-sigma{1} = DiffusionCoefficient .* (meshUnion.rx .*(meshUnion.cell.Dr * fphys{1}(:,:,1)));
+sigma{1} = obj.miu .* (meshUnion.rx .*(meshUnion.cell.Dr * fphys{1}(:,:,1)));
 Qx = cell(1);
 Qx{1} = qx;
 
@@ -136,7 +138,7 @@ edge = meshUnion.InnerEdge;
 [ Qxfm, Qxfp ] = edge.matEvaluateSurfValue( Qx );
 [ fluxM ] = edge.nx .* Qxfm(:,:,1);
 [ fluxP ] = edge.nx .* Qxfp(:,:,1);
-[ fluxS ] = 0.5 * edge.nx .* (sigmafm(:,:,1) + sigmafp(:,:,1)) - edge.nx .* (fm(:,:,1) - fp(:,:,1)) * Tau(1);
+[ fluxS ] = 0.5 * edge.nx .* (sigmafm(:,:,1) + sigmafp(:,:,1)) - edge.nx .* (fm(:,:,1) - fp(:,:,1)) * Tau(1);   %Here the directional vector should be included, where to include Tau
 [ RHS1d ] = edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
 
 
@@ -145,9 +147,11 @@ edge = meshUnion.BoundaryEdge;
 [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
 [ Qxfm, ~ ] = edge.matEvaluateSurfValue( Qx );
 [ fluxM ] = edge.nx .* Qxfm(:,:,1);
-miu = 0.01; %this parameter should equal to the setted value exactly
-fluxS(1) = miu*1/sqrt(4*tloc+1)*(-2)*(0-0.5)/miu/(4*tloc+1)*exp(-(0-0.5).^2/miu/(4*tloc+1))*(-1);
-fluxS(2) = edge.nx(2) * sigmafm(2) - Tau(1) * (fm(2) - 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1)));
+% miu = 0.01; %this parameter should equal to the setted value exactly
+% fluxS(1) = miu*1/sqrt(4*tloc+1)*(-2)*(0-0.5)/miu/(4*tloc+1)*exp(-(0-0.5).^2/miu/(4*tloc+1))*(-1);
+fluxS(1) = obj.NewmannExact(1)*(-1);
+% fluxS(2) = edge.nx(2) * sigmafm(2) - Tau(1) * (fm(2) - 1/sqrt(4*tloc+1)*exp(-(1-0.5).^2/miu/(4*tloc+1)));
+fluxS(2) = edge.nx(2) * sigmafm(2) - Tau(1) * (fm(2) - obj.DirichExact(2));
 
 [ RHS1d ] = RHS1d + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
 
