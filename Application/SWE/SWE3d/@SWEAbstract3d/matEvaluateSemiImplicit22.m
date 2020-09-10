@@ -12,7 +12,7 @@ obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2);
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -46,15 +46,16 @@ while( time < ftime )
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
     end
     %dt here is problematic
-    dt = 1;
-%     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
-%         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-%         10*ones(size(fphys2d{1}(:,:,1))), 10*ones(size(fphys{1}(:,:,4))), zeros(size(fphys{1}(:,:,obj.varFieldIndex))), dt );
-    [ data ] = ...
+%     dt = 1;
+    [ fphys{1}(:,:,obj.varFieldIndex)] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-        10*ones(size(fphys2d{1}(:,:,1))), 10*ones(size(fphys{1}(:,:,4))), data , dt );
+        fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), dt );
+%     [ data ] = ...
+%         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
+%         10*ones(size(fphys2d{1}(:,:,1))), 10*ones(size(fphys{1}(:,:,4))), data , dt );
     visual.drawResult( fphys2d{1}(:,:,1) );
-    postplot(data(:,:,1));
+%     postplot(data(:,:,1));
+%     postplot(fphys{1}(:,:,1));
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;

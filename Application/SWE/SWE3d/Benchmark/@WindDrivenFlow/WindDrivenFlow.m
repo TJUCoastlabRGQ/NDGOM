@@ -70,6 +70,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
+                Index = ( mesh3d.z == 0 );
+                fphys{m}(Index) = 1.5;
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
