@@ -1,4 +1,4 @@
-function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, dt)
+function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage)
 %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
 %> return the physical field with vertical diffusion considered
 %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -18,9 +18,9 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
 % K = physClass.meshUnion(1).K;
 % Nz = physClass.meshUnion(1).Nz;
 % Np = physClass.meshUnion(1).cell.Np;
-ImplicitParameter = 1;
+
 % tic;
-[ fphys ] = mxUpdateImplicitRHS(...
+[fphys, physClass.ImplicitRHS(:,:,RKIndex:IMStage-1:end)] = mxUpdateImplicitRHS(...
     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
     physClass.meshUnion(1).cell.M, physClass.meshUnion(1).tz, physClass.meshUnion(1).cell.Dt, ...
     DiffusionCoefficient, physClass.SurfBoundNewmannDate, physClass.BotBoundNewmannDate,...
