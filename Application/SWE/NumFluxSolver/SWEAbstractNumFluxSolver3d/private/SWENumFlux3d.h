@@ -32,7 +32,7 @@ typedef struct {
 #define NLHS 1
 
 /** Put input variable into FluxSolver  */
-FluxSolver ConvertInputMexVariable2d(const int Nlhs,        ///< number of LHS
+FluxSolver ConvertInputMexVariable3d(const int Nlhs,        ///< number of LHS
                                      const int Nrhs,        ///< number of RHS
                                      const mxArray *plhs[], ///< LHS pointer
                                      const mxArray *prhs[]  ///< RHS pointer
@@ -71,7 +71,7 @@ FluxSolver ConvertInputMexVariable2d(const int Nlhs,        ///< number of LHS
 }
 
 /** Evaluate flux term in surface integration */
-void evaluateFluxTerm2d(const double hmin, ///< water threshold
+void evaluateFluxTerm3d(const double hmin, ///< water threshold
                         const double gra,  ///< gravity acceleration
                         const double h,    ///< water depth
                         const double hu,   ///< flux variable
@@ -99,7 +99,7 @@ void evaluateFluxTerm2d(const double hmin, ///< water threshold
 }
 
 /** Rotate flux to outward normal direction */
-void RotateFluxToNormal2d(const double hu, ///< flux at x component
+void RotateFluxToNormal3d(const double hu, ///< flux at x component
                           const double hv, ///< flux at y component
                           const double nx, ///< outward normal vector
                           const double ny, ///< outward normal vector
@@ -112,7 +112,7 @@ void RotateFluxToNormal2d(const double hu, ///< flux at x component
 }
 
 /** Rotate normal flux to coordinate direction */
-void RotateNormalFluxToCoordinate2d(const double Fqn, ///< normal flux
+void RotateNormalFluxToCoordinate3d(const double Fqn, ///< normal flux
                                     const double Fqv, ///< tangent flux
                                     const double nx,  ///< outward normal vector
                                     const double ny,  ///< outward normal vector

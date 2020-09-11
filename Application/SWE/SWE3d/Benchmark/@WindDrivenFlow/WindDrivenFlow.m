@@ -93,7 +93,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 500;
+            ftime = 15000;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -140,7 +140,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 
