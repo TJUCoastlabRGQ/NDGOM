@@ -10,7 +10,7 @@ ExplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 4*obj.Nvar);
 ImplicitRHS3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3*obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.005;
+dt = 0.5;
 % visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
@@ -24,7 +24,7 @@ while( time < ftime )
     for intRK = 1:3
         tloc = time + c( intRK + 1 ) * dt;
         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );        
+        obj.matUpdateExternalField( tloc );        
         %> Calculate the right hand side for the global system about the three-dimensional horizontal momentum
         SystemRHS(:,:) = Tempfphys(:,:,1) + dt * EXa(intRK+1,1)*ExplicitRHS3d(:,:,1)+ dt * EXa(intRK+1,2)*ExplicitRHS3d(:,:,2)+...
             dt * EXa(intRK+1,3)*ExplicitRHS3d(:,:,3) + dt * IMa(intRK,1)*ImplicitRHS3d(:,:,1) + dt * IMa(intRK,2)*ImplicitRHS3d(:,:,2)+...
@@ -32,7 +32,7 @@ while( time < ftime )
         
         %> Calculating the right hand side corresponds to the discretization of the stiff diffusion term and return the intermediate horizontal momentum term 
         [ImplicitRHS3d(:,:,intRK), fphys{1}(:,:,1)] = ...
-            matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient, obj.meshUnion(1), obj.mesh2d(1), fphys{1},IMa(intRK,intRK), dt, tloc);
+            matUpdateImplicitVerticalDiffusion(obj, SystemRHS, DiffusionCoefficient, obj.meshUnion(1), obj.mesh2d(1), fphys{1},IMa(intRK,intRK), dt, tloc);
         
     end
     fphys{1}(:,:,1) = Tempfphys(:,:,1) + dt * EXb(1) * ExplicitRHS3d(:,:,1) + dt * EXb(2) * ExplicitRHS3d(:,:,2) + ...
@@ -55,7 +55,7 @@ obj.matUpdateFinalResult( time, fphys2d, fphys );
 % obj.outputFile.closeOutputFile();
 end
 
-function [ImplicithuRHS3d, hu] = matUpdateImplicitVerticalDiffusion(SystemRHS, DiffusionCoefficient,...
+function [ImplicithuRHS3d, hu] = matUpdateImplicitVerticalDiffusion(obj, SystemRHS, DiffusionCoefficient,...
     meshUnion, mesh2d, fphys, ImplicitParameter, dt, time)
 BottomEidM      = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
 UpEidM          = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
@@ -89,11 +89,11 @@ for i =1:meshUnion.mesh2d(1).K
     OP12 = zeros(meshUnion.cell.Np);
     OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(2,i), OP12);
     %> Boundary part, not considered here
-    [ SystemRHS(:,(i-1)*meshUnion.Nz + 1), SurfhuStiffMatrix ] = ImposeSurfaceNewmannBoundaryCondition(UpEidM, time,...
+    [ SystemRHS(:,(i-1)*meshUnion.Nz + 1), SurfhuStiffMatrix ] = ImposeSurfaceNewmannBoundaryCondition(obj, UpEidM, time,...
         ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,(i-1)*meshUnion.Nz + 1));
     
         %> Impose surface Dirichlet boundary condition
-%     [ SystemRHS(:,(i-1)*meshUnion.Nz + 1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(UpEidM,...
+%     [ SystemRHS(:,(i-1)*meshUnion.Nz + 1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, UpEidM,...
 %         LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, Tau(1,i), OP11, SystemRHS(:,(i-1)*meshUnion.Nz + 1), time);
     %> Assemble into the StiffMatrix, it's noted that, the diagonal part has been included by eye(Np)
     StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
@@ -134,7 +134,7 @@ for i =1:meshUnion.mesh2d(1).K
     %> Local Up Integral part
     OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, Tau(Nz,i), OP11);
     %> Impose bottom Dirichlet boundary condition
-    [ SystemRHS(:,i*meshUnion.Nz), BothuStiffMatirx, OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM,...
+    [ SystemRHS(:,i*meshUnion.Nz), BothuStiffMatirx, OP11 ] = ImposeBottomDirichletBoundaryCondition(obj, BottomEidM,...
         LocalPhysicalDiffMatrix, Dz3d, ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, Tau(Nz+1,i), OP11, SystemRHS(:,i*meshUnion.Nz), time);
     %> Assemble the local integral part into the StiffMatrix
     StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
@@ -194,58 +194,79 @@ end
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   +  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+epsilon = -1;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   +  0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d; %checked
 end
 
 function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
-OP11(:, eidM)   = OP11(:, eidM)   -  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+epsilon = -1;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
 OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
 OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d;   %checked
 end
 
 function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
 %> Here, Down or up is relative to local cell
-OP12(:,eidM)    = OP12(:,eidM) -  0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   
+epsilon = -1;
+OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   
 OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
 OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;    %checked
 end
 
 function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz, massMatrix2d, Tau, OP12)
-OP12(:,eidM)    = OP12(:,eidM) +  0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
+epsilon = -1;
+OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
 OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
 OP12(eidP,eidM) = OP12(eidP,eidM) +  Tau * massMatrix2d;          %checked
 end
 
-function [huRHS,BothuStiffMatrix ,OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, massMatrix3d, dt, ImplicitParameter, Tau, OP11, huRHS, time)
-OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
-miu = 0.01;
-BottomTaux = 1/sqrt(4*time+1)*exp(-(-1+0.5).^2/miu/(4*time+1)) * ones(size(massMatrix2d,1),1);
+function [huRHS,BothuStiffMatrix ,OP11 ] = ImposeBottomDirichletBoundaryCondition(obj, BottomEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, massMatrix3d, dt, ImplicitParameter, Tau, OP11, huRHS, time)
+epsilon = -1;
+% OP11 = LocalLeftBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
+OP11 = DirichletBottomBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
+BottomTaux = obj.DirichExact(:,2);
 temphuRHS = zeros(size(huRHS));
 temphuRHS(BottomEidM) = Tau*massMatrix2d * BottomTaux;
-temphuRHS = temphuRHS - LocalPhysicalDiffMatrix(BottomEidM,:)'*massMatrix2d*(-1*BottomTaux);
+temphuRHS = temphuRHS + epsilon * LocalPhysicalDiffMatrix(BottomEidM,:)'*massMatrix2d*(-1*BottomTaux);
 BothuStiffMatrix = massMatrix3d\temphuRHS;
 huRHS = huRHS + dt * ImplicitParameter * BothuStiffMatrix;
 end
 
-function [huRHS,SurfhuStiffMatrix ,OP11 ] = ImposeSurfaceDirichletBoundaryCondition(UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, massMatrix3d, dt, ImplicitParameter, Tau, OP11, huRHS, time)
-OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
-miu = 0.01;
-SurfTaux = 1/sqrt(4*time+1)*exp(-(0+0.5).^2/miu/(4*time+1)) * ones(size(massMatrix2d,1),1);
+function OP11 = DirichletBottomBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
+epsilon = -1;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) * physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   -  massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d;   %checked
+end
+
+function [huRHS,SurfhuStiffMatrix ,OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, massMatrix3d, dt, ImplicitParameter, Tau, OP11, huRHS, time)
+% OP11 = LocalUpBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
+epsilon = -1;
+OP11 = DirichletTopBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, Dz3d, massMatrix2d, Tau, OP11);
+SurfTaux = obj.DirichExact(:,1);
+% miu = 0.01;
+% SurfTaux = 1/sqrt(4*time+1)*exp(-(0+0.5).^2/miu/(4*time+1)) * ones(size(massMatrix2d,1),1);
 temphuRHS = zeros(size(huRHS));
 temphuRHS(UpEidM) = Tau*massMatrix2d * SurfTaux;
-temphuRHS = temphuRHS - LocalPhysicalDiffMatrix(UpEidM,:)'*massMatrix2d*(1*SurfTaux);
+temphuRHS = temphuRHS + epsilon * LocalPhysicalDiffMatrix(UpEidM,:)'*massMatrix2d*(1*SurfTaux);
 SurfhuStiffMatrix = massMatrix3d\temphuRHS;
 huRHS = huRHS + dt * ImplicitParameter * SurfhuStiffMatrix;
 end
 
-function [huRHS, huStiffMatrix] = ImposeSurfaceNewmannBoundaryCondition(eidM, time, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS)
-%> This part is negative, as this is teated explicitly
-miu = 0.01; %this parameter should equal to the setted value exactly
-WindTaux = miu*1/sqrt(4*time+1)*(-2)*0.5/miu/(4*time+1)*exp(-(0+0.5).^2/miu/(4*time+1))*ones(size(massMatrix2d,1),1);
+function OP11 = DirichletTopBoundaryIntegral(eidM, physicalDiffMatrix, Dz, massMatrix2d, Tau, OP11)
+epsilon = -1;
+OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+OP11(eidM, :)   = OP11(eidM, :)   +  massMatrix2d*physicalDiffMatrix(eidM,:); %checked
+OP11(eidM,eidM) = OP11(eidM,eidM) -  Tau*massMatrix2d; %checked
+end
+
+function [huRHS, huStiffMatrix] = ImposeSurfaceNewmannBoundaryCondition(obj, eidM, time, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS)
+
+WindTaux = obj.NewmannExact(:,1);
 temphuRHS = zeros(size(huRHS)); 
-temphuRHS(eidM) = massMatrix2d * WindTaux;
+temphuRHS(eidM) = massMatrix2d * WindTaux*(1);
 huStiffMatrix = massMatrix3d\temphuRHS;
 % huRHS = huRHS - huStiffMatrix;
 % hvRHS = hvRHS - hvStiffMatrix;

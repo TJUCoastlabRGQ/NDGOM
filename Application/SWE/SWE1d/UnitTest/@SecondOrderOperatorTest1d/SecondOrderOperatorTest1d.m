@@ -11,7 +11,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     end
     
     properties
-        miu = 0.001
+        miu = 0.00001
         
         Cexact
         
@@ -34,6 +34,16 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);
             %             obj.outputFile = obj.matInitOutput;
+        end
+        
+        function drawComparison( obj )
+            hold on;
+            t = obj.getOption('finalTime');
+            x = obj.meshUnion.x;
+            ed = eval(obj.Cexact).*ones(size(obj.meshUnion.x));
+            plot(x,ed,'ro','markersize',5);
+            str =['$\mu=$', num2str(obj.miu)];
+            title(str,'Interpreter','Latex','fontsize',15)
         end
         
         matTimeStepping343(obj);
@@ -64,10 +74,10 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         function matGetFunction(obj)
             syms x t;
             x0 = 0.5;
-%             obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
-%             obj.DiffCexact = diff(obj.Cexact, x);
+            obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
+            obj.DiffCexact = diff(obj.Cexact, x);
 %                         obj.Cexact = 0*t+0.*x;
-            obj.Cexact =-1* sin(2*pi*x + 0 * t);
+%             obj.Cexact =-1* sin(2*pi*x + 0 * t);
             %             obj.DiffCexact = diff(obj.Cexact, x);
             
         end
@@ -75,16 +85,16 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         function matUpdateExternalField( obj, time )
             t = time;
             x = 0;
-%             obj.DirichExact(1) = eval(obj.Cexact);
-%             obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
-                        obj.NewmannExact(1) = obj.miu*1;
+            obj.DirichExact(1) = eval(obj.Cexact);
+            obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
+%                         obj.NewmannExact(1) = obj.miu*1;
             x = 1;
-%             obj.DirichExact(2) = eval(obj.Cexact);
-%             obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
+            obj.DirichExact(2) = eval(obj.Cexact);
+            obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 2000;
+            ftime = 400;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
