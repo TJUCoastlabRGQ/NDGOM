@@ -23,7 +23,7 @@ InnerEdge = mesh.InnerEdge;
 [ fluxPx ] = obj.matEvaluateSurfFlux( mesh.status, InnerEdge.FToE, ...
     vfpx, InnerEdge.nx );
 
-UpwindedTermX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxPx, fluxX);
+UpwindedTermX = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxPx, fluxX);
 
 BoundaryEdge = mesh.BoundaryEdge;
 [fm, fp] = BoundaryEdge.matEvaluateSurfValue( fphys );
@@ -39,7 +39,7 @@ BoundaryEdge = mesh.BoundaryEdge;
     vfmx, BoundaryEdge.nx );
 
 % the boundary edge contribution
-UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMx, fluxX );
+UpwindedTermX = -UpwindedTermX - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMx, fluxX );
 
 [ VolumeX ] = obj.matVolumeIntegral( mesh, cell2mat(variableX) ); 
 UpwindedTermX = UpwindedTermX + VolumeX;

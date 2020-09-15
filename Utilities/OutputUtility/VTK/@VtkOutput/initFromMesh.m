@@ -51,5 +51,10 @@ function [ Np, Ncell, Ncon, EToV, ctype ] = InitSubConnect( mesh )
         Np = 8;
         Ncon = Np + 1;
         ctype = enumVtkCell.VTK_HEXAHEDRON;
+    elseif ( mesh.cell.type == enumStdCell.Line )
+        [ Ncell, EToV ] = InitLineConnect1d( mesh.cell.N );
+        Np = 2;
+        Ncon = Np + 1;
+        ctype = enumVtkCell.VTK_LINE;        
     end
 end

@@ -12,7 +12,7 @@ WetDryFaceOrder = find( faceflag == 1);
 
 fluxSx = obj.matGetPrimitiveVariableInnerEdgeFlux(  WetDryFaceOrder', fluxSx, mesh.cell.Nfp(1));  
 
-termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
+termX = InnerEdge.matEvaluateStrongFormEdgeRHS(fluxMX, fluxPX, fluxSx);
 
 [fmx, ~] = BoundaryEdge.matEvaluateSurfValue( Variable ); 
 
@@ -22,7 +22,7 @@ termX = InnerEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxPX, fluxSx);
 
 fluxSX = obj.matGetPrimitiveVariableBoundaryEdgeFlux( BoundaryEdge.nx, fmx );  
 
-termX = - termX - BoundaryEdge.matEvaluateStrongFromEdgeRHS(fluxMX, fluxSX);
+termX = - termX - BoundaryEdge.matEvaluateStrongFormEdgeRHS(fluxMX, fluxSX);
 
 [VolumeIntegralX] = obj.matVolumeIntegral( mesh, cell2mat(Variable) );  
 

@@ -11,6 +11,10 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     end
     
     properties
+        dt
+    end
+    
+    properties
         miu = 0.00001
         
         Cexact
@@ -20,21 +24,24 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         DirichExact
         
         NewmannExact
+        %The final exact solution of C at the final step
+        FCexact
     end
     
     methods
+        
         function obj = SecondOrderOperatorTest1d(N, M)
-            [ obj.meshUnion ] = makeUniformMesh( N, M );
-            %             obj.meshUnion = obj.mesh3d;
-            obj.Nmesh = 1;
-            %             obj.outputFieldOrder2d = [];
+            obj = obj@SWEConventional1d();
+            [ mesh ] = makeUniformMesh( N, M );        
             obj.matGetFunction;
-            obj.option = obj.setOption( obj.option );
-            obj.fphys = obj.setInitialField;
+            obj.fieldName = {'C'};
+            obj.outputFieldOrder1d = [1];
+            obj.initPhysFromOptions( mesh );
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);
-            %             obj.outputFile = obj.matInitOutput;
-        end
+            obj.matGetFinalSolution;
+            obj.dt = 0.5;
+        end        
         
         function drawComparison( obj )
             hold on;
@@ -65,10 +72,17 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         %> set initial function
         function [ fphys ] = setInitialField( obj )
             fphys = cell( obj.Nmesh, 1 );
+            fphys{1} = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K, 3);
             x = obj.meshUnion.x;
             t = 0;
             fphys{1}(:,:,1) = eval(obj.Cexact).*ones(size(obj.meshUnion.x));
             %             fphys{1}(:,:,1) = 1/obj.miu*exp(-(obj.mesh3d(1).z+0.5).^2);
+        end
+        
+        function matGetFinalSolution(obj)
+            x = obj.meshUnion.x;
+            t = obj.getOption('finalTime');
+            obj.FCexact = eval(obj.Cexact).*ones(size(obj.meshUnion.x));            
         end
         
         function matGetFunction(obj)
@@ -94,19 +108,20 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 400;
-            outputIntervalNum = 500;
+            ftime = 40;
+            outputIntervalNum = 5000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('EddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('ConstantEddyViscosityValue') = 0.01;
+            option('limiterType') = enumLimiter.None;
+            option('outputType') = enumOutputFile.NetCDF;
         end
     end
     

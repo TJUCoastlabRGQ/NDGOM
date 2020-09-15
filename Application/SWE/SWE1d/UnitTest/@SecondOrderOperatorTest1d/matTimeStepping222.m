@@ -8,7 +8,7 @@ ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3);
 ImplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.5;
+dt = obj.dt;
 % visual = Visual2d( obj.mesh2d );
 visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');
@@ -41,15 +41,15 @@ while( time < ftime )
     ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3);
     ImplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2);
     time = time + dt;
-    display(time);
-    %     obj.matUpdateOutputResult( time, fphys );
+%     display(time);
+    obj.matUpdateOutputResult( time, fphys );
     timeRatio = time / ftime;
-    visual.drawResult( fphys{1}(:, :, 1) );
+%     visual.drawResult( fphys{1}(:, :, 1) );
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
 hwait.delete();
 obj.fphys = fphys;
-% obj.matUpdateFinalResult( time, fphys );
+obj.matUpdateFinalResult( time, fphys );
 % obj.outputFile.closeOutputFile();
 end
 

@@ -73,7 +73,23 @@ elseif mesh.type == enumMeshDim.Two
             dt, OutputFileNum, outputIntervalNum, varIndex, fieldName );
     end
 else
-    %One dimension problem is not considered at present
+    OutputFieldNum = numel( obj.outputFieldOrder1d );
+    varIndex = obj.outputFieldOrder1d;
+    if obj.option.isKey('outputType')
+        if ( obj.getOption('outputType') == enumOutputFile.NetCDF )
+            [ outputObj ] = initNcOutput( obj, mesh, casename, OutputFieldNum, ...
+                dt, OutputFileNum, outputIntervalNum, varIndex, fieldName );
+        elseif ( obj.getOption('outputType') == enumOutputFile.VTK )
+            [ outputObj ] = initVtkOutput( obj, mesh, casename, OutputFieldNum, dt, ...
+                varIndex, fieldName );
+        elseif ( obj.getOption('outputType') == enumOutputFile.None )
+            error( ['Please set the output file type "outputType" ', ...
+                'as one of the following:\nNetCDF\nVTK\n'] );
+        end
+    else% default output type NetCDF
+        [ outputObj ] = initNcOutput( obj, mesh, casename, OutputFieldNum, ...
+            dt, OutputFileNum, outputIntervalNum, varIndex, fieldName );
+    end
 end
 
 end
@@ -89,6 +105,10 @@ elseif mesh.type == enumMeshDim.Two
     if ~isdir([casename,'/2d'])
         mkdir([casename,'/2d']);
     end
+else
+    if ~isdir([casename,'/1d'])
+        mkdir([casename,'/1d']);
+    end    
 end
 for m = 1:obj.Nmesh
     filename = cell(OutputFileNum, 1);
@@ -96,6 +116,8 @@ for m = 1:obj.Nmesh
         str = '/3d/';
     elseif mesh.type == enumMeshDim.Two
         str = '/2d/';
+    else
+        str = '/1d/';
     end
     for n = 1:OutputFileNum
         filename{n} = [ casename, str ,casename, '.', num2str(m), '-', num2str(obj.Nmesh),'.', num2str(n),'.','nc' ];

@@ -8,8 +8,8 @@ classdef NdgQuadFreeStrongFormAdvSolver1d < NdgAbstractAdvSolver ...
         end
         
         %> Call the flux subroutine from the NdgPhys object.
-        function evaluateAdvectionRHS( obj, fphys )
-            phys = obj.phys;
+        function evaluateAdvectionRHS( obj, phys, fphys )
+%             phys = obj.phys;
             for m = 1:phys.Nmesh % calculate RHS term on each mesh
                 mesh = phys.meshUnion(m);
                 edge = phys.meshUnion(m).InnerEdge;
@@ -17,14 +17,14 @@ classdef NdgQuadFreeStrongFormAdvSolver1d < NdgAbstractAdvSolver ...
                 [ fluxM ] = phys.matEvaluateSurfFlux( mesh, edge.nx, fm, edge );
                 [ fluxP ] = phys.matEvaluateSurfFlux( mesh, edge.nx, fp, edge );
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh, edge.nx, fm, fp, edge );
-                [ phys.frhs{m} ] = edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxP, fluxS );
+                [ phys.frhs{m} ] = edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS );
                 
                 edge = phys.meshUnion(m).BoundaryEdge;
                 [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
                 [ fm, fp ] = phys.matImposeBoundaryCondition( edge, edge.nx, fm, fp, phys.fext{m} );
                 [ fluxM ] = phys.matEvaluateSurfFlux( mesh, edge.nx, fm, edge );
                 [ fluxS ] = phys.matEvaluateSurfNumFlux( mesh, edge.nx, fm, fp, edge );
-                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFromEdgeRHS( fluxM, fluxS );
+                [ phys.frhs{m} ] = phys.frhs{m} + edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
                 
             end
             

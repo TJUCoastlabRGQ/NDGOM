@@ -186,6 +186,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
             option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputFieldOrder') = [1 2 3 6 7];
             option('limiterType') = enumLimiter.None;
+            option('outputType') = enumOutputFile.NetCDF;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;

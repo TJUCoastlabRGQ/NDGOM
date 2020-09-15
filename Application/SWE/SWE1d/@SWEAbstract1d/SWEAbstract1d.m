@@ -10,12 +10,17 @@ classdef SWEAbstract1d < NdgPhysMat
     properties
         %> number of physical field: [ h, hu, z, hc, w, p ]
         Nfield = 6
+        
+        fieldName = {'h', 'hu', 'z', 'hc', 'w', 'p'};
+        
         %> number of variable field
         Nvar = 2
         %> index of variable in physical field
         varFieldIndex = [ 1, 2 ]
         %> order of the field to be written in the output file     
-        outputFieldOrder = [1 2]
+        outputFieldOrder1d = [1 2]
+        
+        outputFile
     end
     
     properties
@@ -76,7 +81,7 @@ classdef SWEAbstract1d < NdgPhysMat
         %> evaluate source term
         [ ] = matEvaluateSourceTerm( obj, fphys )
         
-        outputObj = matInitOutput( obj, mesh ) 
+        outputObj = matInitOutput( obj, mesh, fieldName ) 
     end
     
     methods( Hidden, Sealed )
