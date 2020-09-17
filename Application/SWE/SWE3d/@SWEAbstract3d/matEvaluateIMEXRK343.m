@@ -64,7 +64,7 @@ while( time < ftime )
     end
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
-        dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
+        dt * EXb(3) * obj.ExplicitRHS2d(:,:,3) + dt * EXb(4) * obj.ExplicitRHS2d(:,:,4);
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );

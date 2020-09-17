@@ -38,76 +38,76 @@ classdef SWE3dVerticalVelocitySolver < handle
                 obj.RHSCoeMatrix{1}(:,:, i*Nz )  = CoeMatrix\(diag(mesh3d.J(:, i*Nz )) * mesh3d.cell.M);
             end
             %% we calculate from surface to bottom
-%             UpEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end) ~= 0, end );
-%             Nz = mesh3d.Nz;
-%             for i = 1:mesh2d.K
-%                 M3d = zeros(mesh3d.cell.Np);
-%                 M3d( UpEidM, UpEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;
-%                 %                             CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  M3d;
-%                 % if the outer value at the surface is taken to be the opposite value of the inner data, then the CoeMatrix for the uppermost cell is set to be the following
-%                 CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  2*M3d;
-%                 obj.RHSCoeMatrix{1}(:,:, (i-1)*Nz+1 )  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz+1 )) * mesh3d.cell.M);
-%                 %for the uppermost cell, the numerical flux for omega is zero, so the VertCoeMatrix for this cell is set to be zero
-%                 for j = 2 : Nz
-%                     CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt - M3d;
-%                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
-%                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(-1*M3d);
-%                 end
-%             end
+            %             UpEidM = mesh3d.cell.Fmask( mesh3d.cell.Fmask( :,end) ~= 0, end );
+            %             Nz = mesh3d.Nz;
+            %             for i = 1:mesh2d.K
+            %                 M3d = zeros(mesh3d.cell.Np);
+            %                 M3d( UpEidM, UpEidM ) = diag(mesh2d.J(:,i)) * mesh2d.cell.M;
+            %                 %                             CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  M3d;
+            %                 % if the outer value at the surface is taken to be the opposite value of the inner data, then the CoeMatrix for the uppermost cell is set to be the following
+            %                 CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz+1)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz+1)) * mesh3d.cell.Dt -  2*M3d;
+            %                 obj.RHSCoeMatrix{1}(:,:, (i-1)*Nz+1 )  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz+1 )) * mesh3d.cell.M);
+            %                 %for the uppermost cell, the numerical flux for omega is zero, so the VertCoeMatrix for this cell is set to be zero
+            %                 for j = 2 : Nz
+            %                     CoeMatrix = diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M * diag(mesh3d.tz(:, (i-1)*Nz + j)) * mesh3d.cell.Dt - M3d;
+            %                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
+            %                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(-1*M3d);
+            %                 end
+            %             end
             %% we calculate the vertical velocity globally
-%             obj.StiffMatrix = cell(1);
-%             obj.StiffMatrix{1} = zeros(mesh3d.cell.Np*mesh3d.Nz, mesh3d.cell.Np*mesh3d.Nz, mesh2d.K);
-%             BottomEidM   = mesh3d.cell.Fmask(mesh3d.cell.Fmask(:,end-1)~=0,end-1);
-%             UpEidM     = mesh3d.cell.Fmask(mesh3d.cell.Fmask(:,end)~=0,end);
-%             Np = mesh3d.cell.Np;
-%             Nz = mesh3d.Nz;
-%             for i =1:mesh2d(1).K
-%                 %> At present, we assume the mesh is uniform in the vertical direction
-%                 ElementalMassMatrix3d = diag(mesh3d.J(:,(i-1)*Nz+1)) * mesh3d.cell.M;
-%                 ElementalMassMatrix2d = diag(mesh2d.J(:,i)) * mesh2d.cell.M;
-%                 Dz3d = diag(mesh3d.tz(:,(i-1)*Nz+1)) * mesh3d.cell.Dt;
-%                 %> first cell first, then the other cells left
-%                 LocalRows    = (1:Np)';
-%                 LocalColumns = 1:Np;
-%                 OP11 = ElementalMassMatrix3d * Dz3d;
-%                 OP11 = ImposeSurfaceDirichletBoundary(OP11, UpEidM, ElementalMassMatrix2d);
-%                 if mesh3d.Nz ~= 1
-%                     OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
-%                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
-%                     AdjacentRows = (Np+1:2*Np)';
-%                     OP12 = zeros(Np);
-%                     OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, OP12, ElementalMassMatrix2d);
-%                     obj.StiffMatrix{1}(AdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
-%                     for j = 2:mesh3d.Nz-1
-%                         UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
-%                         LocalRows    = ((j-1)*Np+1:j*Np)';
-%                         BottomAdjacentRows = (j*Np+1:(j+1)*Np)';
-%                         LocalColumns = (j-1)*Np+1:j*Np;
-%                         OP11 = ElementalMassMatrix3d * Dz3d;
-%                         OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
-%                         OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
-%                         obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
-%                         OP12 = zeros(Np);
-%                         OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, OP12, ElementalMassMatrix2d);
-%                         obj.StiffMatrix{1}(UpAdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
-%                         OP12 = zeros(Np);
-%                         OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, OP12, ElementalMassMatrix2d);
-%                         obj.StiffMatrix{1}(BottomAdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
-%                     end
-%                     LocalRows    = ((Nz-1)*Np+1:Nz*Np)';
-%                     LocalColumns = ((Nz-1)*Np+1:Nz*Np);
-%                     AdjacentRows = ((Nz-2)*Np+1:(Nz-1)*Np)';
-%                     OP11 = ElementalMassMatrix3d * Dz3d;
-%                     OP11 = ImposeBottomDirichletBoundary(OP11, BottomEidM, ElementalMassMatrix2d);
-%                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
-%                     OP12 = zeros(Np);
-%                     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, OP12, ElementalMassMatrix2d);
-%                     obj.StiffMatrix{1}(AdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
-%                 else
-%                     OP11 = ImposeBottomDirichletBoundary(OP11, BottomEidM, ElementalMassMatrix2d);
-%                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
-%                 end
-%             end
+            %             obj.StiffMatrix = cell(1);
+            %             obj.StiffMatrix{1} = zeros(mesh3d.cell.Np*mesh3d.Nz, mesh3d.cell.Np*mesh3d.Nz, mesh2d.K);
+            %             BottomEidM   = mesh3d.cell.Fmask(mesh3d.cell.Fmask(:,end-1)~=0,end-1);
+            %             UpEidM     = mesh3d.cell.Fmask(mesh3d.cell.Fmask(:,end)~=0,end);
+            %             Np = mesh3d.cell.Np;
+            %             Nz = mesh3d.Nz;
+            %             for i =1:mesh2d(1).K
+            %                 %> At present, we assume the mesh is uniform in the vertical direction
+            %                 ElementalMassMatrix3d = diag(mesh3d.J(:,(i-1)*Nz+1)) * mesh3d.cell.M;
+            %                 ElementalMassMatrix2d = diag(mesh2d.J(:,i)) * mesh2d.cell.M;
+            %                 Dz3d = diag(mesh3d.tz(:,(i-1)*Nz+1)) * mesh3d.cell.Dt;
+            %                 %> first cell first, then the other cells left
+            %                 LocalRows    = (1:Np)';
+            %                 LocalColumns = 1:Np;
+            %                 OP11 = ElementalMassMatrix3d * Dz3d;
+            %                 OP11 = ImposeSurfaceDirichletBoundary(OP11, UpEidM, ElementalMassMatrix2d);
+            %                 if mesh3d.Nz ~= 1
+            %                     OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
+            %                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
+            %                     AdjacentRows = (Np+1:2*Np)';
+            %                     OP12 = zeros(Np);
+            %                     OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, OP12, ElementalMassMatrix2d);
+            %                     obj.StiffMatrix{1}(AdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
+            %                     for j = 2:mesh3d.Nz-1
+            %                         UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
+            %                         LocalRows    = ((j-1)*Np+1:j*Np)';
+            %                         BottomAdjacentRows = (j*Np+1:(j+1)*Np)';
+            %                         LocalColumns = (j-1)*Np+1:j*Np;
+            %                         OP11 = ElementalMassMatrix3d * Dz3d;
+            %                         OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
+            %                         OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
+            %                         obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
+            %                         OP12 = zeros(Np);
+            %                         OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, OP12, ElementalMassMatrix2d);
+            %                         obj.StiffMatrix{1}(UpAdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
+            %                         OP12 = zeros(Np);
+            %                         OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, OP12, ElementalMassMatrix2d);
+            %                         obj.StiffMatrix{1}(BottomAdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
+            %                     end
+            %                     LocalRows    = ((Nz-1)*Np+1:Nz*Np)';
+            %                     LocalColumns = ((Nz-1)*Np+1:Nz*Np);
+            %                     AdjacentRows = ((Nz-2)*Np+1:(Nz-1)*Np)';
+            %                     OP11 = ElementalMassMatrix3d * Dz3d;
+            %                     OP11 = ImposeBottomDirichletBoundary(OP11, BottomEidM, ElementalMassMatrix2d);
+            %                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
+            %                     OP12 = zeros(Np);
+            %                     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, OP12, ElementalMassMatrix2d);
+            %                     obj.StiffMatrix{1}(AdjacentRows,LocalColumns,i) = ElementalMassMatrix3d\OP12;
+            %                 else
+            %                     OP11 = ImposeBottomDirichletBoundary(OP11, BottomEidM, ElementalMassMatrix2d);
+            %                     obj.StiffMatrix{1}(LocalRows,LocalColumns,i) = ElementalMassMatrix3d\OP11;
+            %                 end
+            %             end
         end
         
         function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys )
@@ -115,26 +115,36 @@ classdef SWE3dVerticalVelocitySolver < handle
             edge2d = physClass.mesh2d.InnerEdge;
             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
             [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-            [ FluxM2d ] = edge.VerticalColumnIntegralField(FluxM3d(:,:,1) );
+            %             [ FluxM2d ] = edge.VerticalColumnIntegralField(FluxM3d(:,:,1) );
             [ FluxP3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
-            [ FluxP2d ] = edge.VerticalColumnIntegralField(FluxP3d(:,:,1) );
+            %             [ FluxP2d ] = edge.VerticalColumnIntegralField(FluxP3d(:,:,1) );
             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
-            [ FluxS2d ] = edge.VerticalColumnIntegralField(FluxS3d(:,:,1) );
+            %             [ FluxS2d ] = edge.VerticalColumnIntegralField(FluxS3d(:,:,1) );
+            [ InnerSurface_frhs3d ] = edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ;            
+            [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
+            [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
+            [ fluxP ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fp2d );
+            [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
+            InnerSurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
             
-            [ InnerSurface_frhs3d ] = edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ;
-            [ InnerSurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ;
+            %             [ InnerSurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ;
             
             edge = physClass.meshUnion.BoundaryEdge;
             edge2d = physClass.mesh2d.BoundaryEdge;
             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
             [ fm, fp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, physClass.fext3d{1} );
             [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-            [ FluxM2d ] = edge.VerticalColumnIntegralField( FluxM3d(:,:,1) );
+            %             [ FluxM2d ] = edge.VerticalColumnIntegralField( FluxM3d(:,:,1) );
             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
-            [ FluxS2d ] = edge.VerticalColumnIntegralField( FluxS3d(:,:,1) );
+            %             [ FluxS2d ] = edge.VerticalColumnIntegralField( FluxS3d(:,:,1) );
             
             [ BoundarySurface_frhs3d ] = edge.matEvaluateStrongFormEdgeRHS( FluxM3d(:,:,1), FluxS3d(:,:,1) ) ;
-            [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
+%             [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
+            [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
+            [ fm2d, fp2d ] = physClass.PCESolver2d.matImposeBoundaryCondition( edge2d, edge2d.nx, edge2d.ny, fm2d, fp2d, physClass.fext2d{1});            
+            [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
+            [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
+            BoundarySurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
             
             field3d =...
                 ( - physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) - physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) + ...
@@ -160,17 +170,17 @@ classdef SWE3dVerticalVelocitySolver < handle
                     permute( permute( BotVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
             end
             %% we calculate from surface to bottom
-%             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
-%             VerticalVelocity(:, 1:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,1:Nz:end), ...
-%                 permute( permute( field3d(:, 1:Nz:end) - field2d(:, 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-%             
-%             for Layer = 2 : Nz
-%                 UpVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
-%                 UpVertVelocity( UpEidM, : ) = VerticalVelocity( BotEidM, Layer - 1 : Nz : end);
-%                 VerticalVelocity(:, Layer:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Layer:Nz:end), ...
-%                     permute( permute( field3d(:, Layer:Nz:end) - field2d(:, Layer:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Layer:Nz:end), ...
-%                     permute( permute( UpVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-%             end
+            %             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
+            %             VerticalVelocity(:, 1:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,1:Nz:end), ...
+            %                 permute( permute( field3d(:, 1:Nz:end) - field2d(:, 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+            %
+            %             for Layer = 2 : Nz
+            %                 UpVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
+            %                 UpVertVelocity( UpEidM, : ) = VerticalVelocity( BotEidM, Layer - 1 : Nz : end);
+            %                 VerticalVelocity(:, Layer:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Layer:Nz:end), ...
+            %                     permute( permute( field3d(:, Layer:Nz:end) - field2d(:, Layer:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Layer:Nz:end), ...
+            %                     permute( permute( UpVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+            %             end
             %% The vertical velocity is calculated implicitly with central flux adopted
             %             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             %             for i = 1:physClass.mesh2d.K
