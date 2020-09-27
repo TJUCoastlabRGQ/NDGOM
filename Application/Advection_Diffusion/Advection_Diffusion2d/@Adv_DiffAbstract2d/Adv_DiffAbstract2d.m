@@ -71,7 +71,9 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext )
                 ind = ( edge.ftype == enumBoundaryCondition.Clamped );
-                fp(:, ind) = fext(ind);            
+                fp(:, ind, 1) = fext(:, ind, 1);
+                fp(:, ind, 2) = fext(:, ind, 2); 
+                fp(:, ind, 3) = fext(:, ind, 3); 
         end
     end
     

@@ -21,6 +21,11 @@ classdef Adv_DiffAbstract < NdgPhysMat
     end
     
     properties ( SetAccess = public )
+        InnerEdgefm
+        BoundaryEdgefm
+        InnerEdgefp
+        BoundaryEdgefp
+        BoundaryEdgefext
         
         ExplicitRHS
         ImplicitRHS

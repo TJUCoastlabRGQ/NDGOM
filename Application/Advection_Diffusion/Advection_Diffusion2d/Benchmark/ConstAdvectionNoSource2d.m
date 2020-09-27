@@ -44,9 +44,9 @@ classdef ConstAdvectionNoSource2d < Adv_DiffAbstract2d
         end
         
         function matUpdateExternalField( obj, time, fphys )
-            obj.BoundaryEdgefp{1}(:,:,1) = obj.getExtFunc( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, time);
-            obj.BoundaryEdgefp{1}(:,:,2) = obj.u0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
-            obj.BoundaryEdgefp{1}(:,:,3) = obj.v0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
+            obj.fext{1}(:,:,1) = obj.getExtFunc( obj.mesh2d.BoundaryEdge.xb, obj.mesh2d.BoundaryEdge.yb, time);
+%             obj.BoundaryEdgefp{1}(:,:,2) = obj.u0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
+%             obj.BoundaryEdgefp{1}(:,:,3) = obj.v0 .* ones(size(obj.BoundaryEdgefp{1}(:,:,1)));
         end
         
         function matEvaluateSourceTerm( obj, time )

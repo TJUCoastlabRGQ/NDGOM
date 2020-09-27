@@ -38,8 +38,10 @@ classdef ConstAdvectionDiffusion2d < Adv_DiffAbstract2d
         end
         
         function matUpdateExternalField( obj, time, fphys )
-            obj.BoundaryEdgefp{1} = sin(2*pi*time)*sin(2*pi*obj.mesh2d.BoundaryEdge.xb).*...
+            obj.fext{1}(:,:,1) = sin(2*pi*time)*sin(2*pi*obj.mesh2d.BoundaryEdge.xb).*...
                 sin(pi*obj.mesh2d.BoundaryEdge.yb);
+            obj.fext{1}(:,:,2) = obj.u0 * ones(size(obj.fext{1}(:,:,1)));
+            obj.fext{1}(:,:,3) = obj.v0 * ones(size(obj.fext{1}(:,:,1)));        
 %         BotBoundNewmannDate
         end
         
