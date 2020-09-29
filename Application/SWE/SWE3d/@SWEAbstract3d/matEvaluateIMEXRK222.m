@@ -1,8 +1,9 @@
 function matEvaluateIMEXRK222( obj )
+tic;
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 Stage = size(EXa,2);
-time = obj.startTime;
-ftime = obj.finalTime;
+time = obj.getOption('startTime');
+ftime = obj.getOption('finalTime');
 fphys2d = obj.fphys2d;
 fphys = obj.fphys;
 %> allocate space for the rhs to be stored
@@ -105,6 +106,7 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
+toc;
 % obj.outputFile.closeOutputFile();
 end
 

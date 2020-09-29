@@ -93,7 +93,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 3600;
+            ftime = 600;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
