@@ -1,15 +1,57 @@
 #include "NdgMath.h"
 //#include <omp.h>
+void FetchInnerEdgeFacialValue(double *fm, double *fp, double *source, \
+	double *FToE, double *FToN1, double *FToN2, int Np, int Nfp){
+	int ind1 = ((int)FToE[0] - 1)*Np;
+	int ind2 = ((int)FToE[1] - 1)*Np;
+	for (int i = 0; i < Nfp; i++){
+		fm[i] = source[ind1 + (int)FToN1[i]];
+		fp[i] = source[ind2 + (int)FToN2[i]];
+	}
+}
 
-void DotProduct(double *source, double *Coefficient, int size){
+void FetchBoundaryEdgeFacialValue(double *fm, double *source, \
+	double *FToE, double *FToN1, int Np, int Nfp){
+	int ind1 = ((int)FToE[0] - 1)*Np;
+	for (int i = 0; i < Nfp; i++){
+		fm[i] = source[ind1 + (int)FToN1[i]];
+	}
+}
+
+void RepmatValue(double *dest, double *source, int Layer){
+	for (int i = 0; i < Layer; i++)
+		dest[i] = *source;
+}
+
+void DotProduct(double *dest, double *sourcea, double *sourceb, int size){
 	for (int i = 0; i < size; i++)
-		source[i] = Coefficient[i] * source[i];
+		dest[i] = sourcea[i] * sourceb[i];
 }
 
 void DotDivide(double *dest, double *source, double *Coefficient, int size){
 	for (int i = 0; i < size; i++)
 		dest[i] = source[i] / Coefficient[i];
 }
+
+void DotCriticalDivide(double *dest, double *source, double *criticalValue, double *Depth, int size){
+	for (int i = 0; i < size; i++){
+		if (Depth[i] >= *criticalValue)
+			dest[i] = source[i] / Depth[i];
+		else
+			dest[i] = 0;
+	}
+}
+
+void Add(double *dest, double *sourcea, double *sourceb, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = sourcea[i] + sourceb[i];
+}
+
+void Minus(double *dest, double *sourcea, double *sourceb, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = sourcea[i] - sourceb[i];
+}
+
 
 void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, int Np,\
 	int Nfp, double *FToN1, double *FToN2, double *fluxM_, double *fluxP_,\

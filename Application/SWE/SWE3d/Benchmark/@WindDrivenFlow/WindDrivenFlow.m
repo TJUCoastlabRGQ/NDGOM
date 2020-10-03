@@ -107,8 +107,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 100;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('ConstantHorizontalEddyViscosityValue') = 0.1;
         end
         
     end
