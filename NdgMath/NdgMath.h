@@ -15,6 +15,8 @@ void DotProduct(double *, double *, double *, int );
 
 void DotDivide(double *, double *, double *, int );
 
+void DotDivideByConstant(double *, double *, double *, int);
+
 void DotCriticalDivide(double *, double *, double *, double *, int);
 
 void StrongFormInnerEdgeRHS(int, double *, int, int, double *, double *, double *, double *, double *, double *, double *, double *);
