@@ -42,6 +42,12 @@ void DotCriticalDivide(double *dest, double *source, double *criticalValue, doub
 	}
 }
 
+void DotDivideByConstant(double *dest, double *Source, double Coefficient, int Np){
+	for (int i = 0; i < Np; i++)
+		dest[i] = Source[i] / Coefficient;
+}
+
+
 void Add(double *dest, double *sourcea, double *sourceb, int size){
 	for (int i = 0; i < size; i++)
 		dest[i] = sourcea[i] + sourceb[i];
@@ -80,9 +86,7 @@ void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, int Np,\
 	const int sk = n + ind;
 	const int m1 = (int)FToN1[sk] + ind1;
 	const int m2 = (int)FToN2[sk] + ind2;
-#pragma omp atomic  
 	rhs[m1] += rhsM[n];
-#pragma omp atomic  
 	rhs[m2] += rhsP[n];
 	}
 	free(rhsM);
@@ -108,7 +112,6 @@ void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, int Np, int Nfp, \
 	for (int n = 0; n < Nfp; n++) {
 		const int sk = n + ind;
 		const int m1 = (int)FToN1[sk] + ind1;
-#pragma omp atomic  
 		rhs[m1] += rhsM[n];
 	}
 	free(rhsM);

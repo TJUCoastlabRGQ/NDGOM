@@ -7,17 +7,26 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
         InnerEdge
         %the struct version of boundary edge contained in mesh union        
         BoundaryEdge
+        
+        mesh
     end
     
     methods
         
         function obj = NdgSWEHorizDiffSolver( physClass )
             obj = obj@NdgHorizDiffSolver( physClass );
+            warning('off');
             obj.InnerEdge = struct(physClass.meshUnion.InnerEdge);
             obj.BoundaryEdge = struct(physClass.meshUnion.BoundaryEdge);
+            obj.mesh = struct(physClass.meshUnion);
+            warning('on');
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
+            physClass.frhs{1} = mxEvaluateHorizontalDiffRHS(physClass.hcrit, physClass.meshUnion.type,...
+              obj.Prantl, obj.InnerEdge, obj.BoundaryEdge, obj.nv, physClass.frhs{1}, fphys,  physClass.varFieldIndex,...
+              physClass.meshUnion.cell, obj.mesh, physClass.BoundaryEdgefp{1});
+            
             
             obj.matUpdateViscosity(physClass, fphys(:,:,1), fphys(:,:,2), fphys(:,:,4));
             obj.matUpdatePenaltyParameter( physClass, fphys(:,:,4) );

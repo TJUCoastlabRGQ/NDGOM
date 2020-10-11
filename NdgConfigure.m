@@ -60,7 +60,8 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgEdge/@NdgSideEdge3d/private/';
 srcfile = {[path, 'mxEvaluateStrongFormEdgeRHS.c'], ...
-    [path, 'mxEvaluateSurfValue.c']};
+    [path, 'mxEvaluateSurfValue.c'], ...
+    [path, 'mxGetMeshIntegralValue.c']};
 % libfile = {};
 libfile = {'NdgMath\NdgMath.c'};
 FuncHandle(path, srcfile, libfile);
@@ -81,7 +82,7 @@ FuncHandle(path, srcfile, libfile);
 path = 'NdgEdge/@NdgHaloEdge3d/private/';
 srcfile = {[path, 'mxEvaluateStrongFormEdgeRHS.c'], ...
     [path, 'mxEvaluateSurfValue.c']};
-libfile = {};
+libfile = {'NdgMath\NdgMath.c'};
 FuncHandle(path, srcfile, libfile);
 
 % Limiter
@@ -372,6 +373,13 @@ libfile = {['.\lib\GOTM\','*.obj'],...
     [path,'mxGOTM.c']};
 srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
+
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEHorizDiffSolver\private\';
+libfile = {'NdgMath\NdgMath.c'};
+srcfile = { ...
+    [path, 'mxEvaluateHorizontalDiffRHS.c']};
+FuncHandle(path, srcfile, libfile);
+
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
 
 end

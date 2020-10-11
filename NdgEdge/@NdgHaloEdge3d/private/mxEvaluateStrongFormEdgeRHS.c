@@ -62,15 +62,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   ptrdiff_t KI = K;
   ptrdiff_t np = Np;
 
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(12)
+#endif
   for (int fld = 0; fld < Nfield; fld++) {
     double *rhs = frhs + Np * K * fld;
     double *fluxM_ = fluxM + Nfp * Ne * fld;
     // double *fluxP_ = fluxP + Nfp * Ne * fld;
     double *fluxS_ = fluxS + Nfp * Ne * fld;
 
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(12)
-#endif
 	for (int k = 0; k < Ne; k++){
 		StrongFormBoundaryEdgeRHS(k, FToE, Np, Nfp, FToN1, fluxM_, fluxS_, Js, Mb, rhs);
 	}
@@ -78,9 +78,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *temp = malloc(Np*K*sizeof(double));
 	dgemm(chn, chn, &np, &KI, &np, &one, invM, &np, rhs, &np, &zero, temp,
 		&np);
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(12)
-#endif
+
 	for (int k = 0; k < K; k++){
 		DotDivide(rhs + k*Np, temp + k*Np, J + k*Np, Np);
 	}
