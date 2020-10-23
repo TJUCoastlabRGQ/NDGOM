@@ -14,7 +14,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
     methods
         function obj = NdgHorizDiffSolver( physClass )
             obj = obj@AbstractDiffSolver( physClass );
-            obj.assembleMassMatrix( physClass.meshUnion(1) );
+%             obj.assembleMassMatrix( physClass.meshUnion(1) );
             if physClass.option.isKey('AdvDiffHorizontalDiffusionType')
                if physClass.option.isKey('AdvDiffConstantHorizontalDiffusionValue')
                    value = physClass.getOption('AdvDiffConstantHorizontalDiffusionValue');
@@ -134,7 +134,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
                 InnerEdgefm .* edge.nx, InnerEdgefp .* edge.nx , 0.5 * (InnerEdgefm + InnerEdgefp) .* edge.nx);
             obj.py(:,:,VarIndex) = obj.py(:,:,VarIndex) - edge.matEvaluateStrongFormEdgeRHS( ...
                 InnerEdgefm .* edge.ny, InnerEdgefp .* edge.ny , 0.5 * (InnerEdgefm + InnerEdgefp) .* edge.ny);
-            
+           
             edge = physClass.meshUnion(1).BoundaryEdge;
             %             [fM, fP] = obj.matEvaluateSurfValue(edge, fphys );
 %             [KappaM, ~] = obj.matEvaluateSurfValue(edge, Kappa );

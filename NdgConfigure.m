@@ -40,8 +40,9 @@ libfile = {};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgMesh\@NdgExtendMesh3d\private\';
-srcfile = {[path, 'mxGetMeshIntegralValue.c']};
-libfile = {};
+srcfile = {[path, 'mxGetMeshIntegralValue.c'],...
+    [path,'mxExtend2dField.c']};
+libfile = {'NdgMath/NdgMath.c'};
 FuncHandle(path, srcfile, libfile);
 % NdgEdge
 path = 'NdgEdge/@NdgInnerEdge/private/';
@@ -354,6 +355,14 @@ srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'Application/SWE/SWE3d/SWE3dVerticalVelocitySolver/private/';
+CFLAGS = [CFLAGS, ' -I', path, ' '];
+libfile = {'NdgMath\NdgMath.c',...
+'NdgMath\NdgSWE.c'};
+srcfile = { ...
+    [path, 'mxCalculateVerticalVelocity.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@AbstractDiffSolver\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
 libfile = {};
@@ -363,7 +372,7 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertDiffSolver\private\';
 CFLAGS = [CFLAGS, ' -I', path, ' '];
-libfile = {};
+libfile = {'NdgMath\NdgMath.c'};
 srcfile = { ...
     [path, 'mxUpdateImplicitRHS.c']};
 FuncHandle(path, srcfile, libfile);
@@ -375,7 +384,8 @@ srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEHorizDiffSolver\private\';
-libfile = {'NdgMath\NdgMath.c'};
+libfile = { 'NdgMath\NdgMath.c' ,...
+    [path,'HorizontalDiffusion.c']};
 srcfile = { ...
     [path, 'mxEvaluateHorizontalDiffRHS.c']};
 FuncHandle(path, srcfile, libfile);
@@ -445,7 +455,7 @@ mexFile = [path, name, ext];
 end% func
 
 function configureParallelSetting(parallelThreadNum)
-global CFLAGS LDFLAGS
+global CFLAGS  COMPFLAGS LDFLAGS
 switch computer('arch')
     case 'maci64'
         CFLAGS = [CFLAGS, '-qopenmp -DDG_THREADS=', ...
@@ -457,7 +467,7 @@ switch computer('arch')
 %             num2str(parallelThreadNum), ' '];
 %         LDFLAGS = [LDFLAGS, ' -fopenmp '];
 %% if intel compiler adopted, /openmp command is used
-        CFLAGS = [CFLAGS,' /openmp -DDG_THREADS=', ...
+        COMPFLAGS = [COMPFLAGS,' /openmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
         LDFLAGS = [LDFLAGS, ' /openmp '];
     case 'glnxa64'
@@ -465,9 +475,9 @@ end
 end
 
 function configureCompilerSetting()
-global CFLAGS LDFLAGS
+global COMPFLAGS LDFLAGS
 global COMPILER
-CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
+COMPFLAGS = 'COMPFLAGS=$COMPFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
 LDFLAGS = 'LDFLAGS=$LDFLAGS';
 COMPILER = [''];
 if ( strcmp(computer('arch'), 'maci64') )

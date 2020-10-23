@@ -1,25 +1,5 @@
-#include "mex.h"
+#include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "mxSWE2d.h"
-#include <math.h>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
-
-typedef enum {
-  NdgEdgeInner = 0,
-  NdgEdgeGaussEdge = 1,
-  NdgEdgeSlipWall = 2,
-  NdgEdgeNonSlipWall = 3,
-  NdgEdgeZeroGrad = 4,
-  NdgEdgeClamped = 5,
-  NdgEdgeClampedDepth = 6,
-  NdgEdgeClampedVel = 7,
-  NdgEdgeFlather = 8,
-  NdgEdgeNonLinearFlather = 9,
-  NdgEdgeNonLinearFlatherFlow = 10,
-  NdgEdgeNonReflectingFlux = 11
-} NdgEdgeType;
 
 void imposeBoundaryCondition(const double gra,  ///< gravity acceleration
                              NdgEdgeType type,  ///< boundary node type

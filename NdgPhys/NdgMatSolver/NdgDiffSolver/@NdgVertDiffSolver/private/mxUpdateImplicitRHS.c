@@ -2,15 +2,7 @@
 #define dgesv dgesv_
 #endif
 
-#include "mex.h"
-#include "lapack.h"
-#include <string.h>
-#include <blas.h>
-#include <stdlib.h>
-
-#ifdef _OPENMP
-#include <omp.h>
-#endif
+#include "..\..\..\..\..\NdgMath\NdgMath.h"
 
 #define NRHS 16
 #define NLHS 2
@@ -100,31 +92,7 @@ void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2
 		}
 	}
 }
-/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the column index, and has been checked*/
-void AssembleContributionIntoColumn(double *dest, double *source, double *column, int Np3d, int Np2d)
-{
-	for (int colI = 0; colI < Np2d; colI++){
-		for (int RowI = 0; RowI < Np3d; RowI++)
-			dest[((int)column[colI] - 1)*Np3d + RowI] += source[colI*Np3d + RowI];
-	}
-}
-/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index, and has been checked*/
-void AssembleContributionIntoRow(double *dest, double *source, double *Row, int Np3d, int Np2d)
-{
-	for (int colI = 0; colI < Np3d; colI++){
-		for (int RowI = 0; RowI < Np2d; RowI++)
-			dest[colI*Np3d + (int)Row[RowI] - 1] += source[colI*Np2d + RowI];
-	}
-}
-/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index and the column index, and has been checked*/
-void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *Row, double *column, int Np3d, int Np2d, int Flag)
-{
-	for (int colI = 0; colI < Np2d; colI++)
-	{
-		for (int RowI = 0; RowI < Np2d; RowI++)
-			dest[((int)column[colI] - 1)*Np3d + (int)Row[RowI] - 1] += Flag * source[colI*Np2d + RowI];
-	}
-}
+
 /*Note: This function is used to assemble the global stiff matrix*/
 void AssembleGlobalStiffMatrix(double *dest, double *invMass, double *OP, double *rows, double *columns, double alpha, int StiffRow, ptrdiff_t Np)
 {

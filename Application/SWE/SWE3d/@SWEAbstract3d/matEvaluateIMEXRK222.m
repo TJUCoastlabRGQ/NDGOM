@@ -1,5 +1,6 @@
 function matEvaluateIMEXRK222( obj )
 tic;
+profile on;
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 Stage = size(EXa,2);
 time = obj.getOption('startTime');
@@ -106,6 +107,8 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
+profile viewer;
+profile off;
 toc;
 % obj.outputFile.closeOutputFile();
 end

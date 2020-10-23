@@ -84,23 +84,7 @@ classdef SWEAbstract3d < NdgPhysMat
     end
     
     properties ( SetAccess = public )
-        InnerEdgefm
-        BoundaryEdgefm
-        InnerEdgefp
-        BoundaryEdgefp
-        
-        InnerEdgeFluxS
-        BoundaryEdgeFluxS
-        InnerEdgeFluxM
-        BoundaryEdgeFluxM
-        InnerEdgeFluxP
-        
-        InnerEdgeFluxS2d
-        BoundaryEdgeFluxS2d
-        InnerEdgeFluxM2d
-        BoundaryEdgeFluxM2d
-        InnerEdgeFluxP2d
-        
+        BoundaryEdgefp        
         ImplicitRHS
     end
     

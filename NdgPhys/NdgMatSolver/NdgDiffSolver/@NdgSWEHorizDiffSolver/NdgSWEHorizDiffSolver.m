@@ -9,6 +9,8 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
         BoundaryEdge
         
         mesh
+        
+        cell
     end
     
     methods
@@ -19,15 +21,28 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
             obj.InnerEdge = struct(physClass.meshUnion.InnerEdge);
             obj.BoundaryEdge = struct(physClass.meshUnion.BoundaryEdge);
             obj.mesh = struct(physClass.meshUnion);
+            obj.cell = struct(physClass.meshUnion.cell);
             warning('on');
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
-            physClass.frhs{1} = mxEvaluateHorizontalDiffRHS(physClass.hcrit, physClass.meshUnion.type,...
+%             [ VX, VY ] = HorizontalDiffusionTest(physClass.hcrit, int8(physClass.meshUnion.type),...
+%               obj.Prantl, obj.InnerEdge, obj.BoundaryEdge, obj.nv, physClass.frhs{1}, fphys,  physClass.varFieldIndex,...
+%               obj.cell, obj.mesh, physClass.BoundaryEdgefp{1});
+tic;
+            tempfrhs{1} = mxEvaluateHorizontalDiffRHS(physClass.hcrit, int8(physClass.meshUnion.type),...
               obj.Prantl, obj.InnerEdge, obj.BoundaryEdge, obj.nv, physClass.frhs{1}, fphys,  physClass.varFieldIndex,...
-              physClass.meshUnion.cell, obj.mesh, physClass.BoundaryEdgefp{1});
-            
-            
+              obj.cell, obj.mesh, physClass.BoundaryEdgefp{1});
+          t1 = toc;
+%             [tempfrhs{1}] = mxEvaluateHorizontalDiffRHS(physClass.hcrit, int8(physClass.meshUnion.type),...
+%               obj.Prantl, obj.InnerEdge.Ne, obj.InnerEdge.Nfp, obj.InnerEdge.M, obj.InnerEdge.Js, obj.InnerEdge.nx, ...
+%               obj.InnerEdge.ny, obj.InnerEdge.LAV, obj.InnerEdge.FToE, obj.InnerEdge.FToN1, obj.InnerEdge.FToN2, ...
+%               obj.BoundaryEdge.Ne, obj.BoundaryEdge.Nfp, obj.BoundaryEdge.M, obj.BoundaryEdge.Js, obj.BoundaryEdge.nx,...
+%               obj.BoundaryEdge.ny, obj.BoundaryEdge.LAV, obj.BoundaryEdge.FToE, obj.BoundaryEdge.FToN1, obj.nv, physClass.frhs{1},...
+%               fphys, physClass.varFieldIndex, physClass.meshUnion.cell.Dr, physClass.meshUnion.cell.Ds, physClass.meshUnion.cell.Nface,...
+%               physClass.meshUnion.cell.invM, physClass.meshUnion.rx, physClass.meshUnion.sx, physClass.meshUnion.ry, physClass.meshUnion.sy,...
+%               physClass.meshUnion.J, physClass.meshUnion.LAV, physClass.BoundaryEdgefp{1}, physClass.meshUnion.cell.N, physClass.meshUnion.cell.Nz);
+            tic;
             obj.matUpdateViscosity(physClass, fphys(:,:,1), fphys(:,:,2), fphys(:,:,4));
             obj.matUpdatePenaltyParameter( physClass, fphys(:,:,4) );
             %> $\Kappa = \nv * H$
@@ -38,7 +53,9 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
                     physClass.InnerEdgefp{1}(:,:,physClass.varFieldIndex(i))./physClass.InnerEdgefp{1}(:,:,4), ...
                     physClass.BoundaryEdgefm{1}(:,:,physClass.varFieldIndex(i))./physClass.BoundaryEdgefm{1}(:,:,4),...
                     physClass.BoundaryEdgefp{1}(:,:,physClass.varFieldIndex(i))./physClass.BoundaryEdgefp{1}(:,:,4));
+%                 disp(physClass.InnerEdgefp{1}(:,:,physClass.varFieldIndex(i))./physClass.InnerEdgefp{1}(:,:,4));
             end
+            
             for i = 3:physClass.Nvar
                 obj.matCalculateAuxialaryVariable( physClass, fphys(:,:,physClass.varFieldIndex(i))./fphys(:,:,4), Kappa./obj.Prantl, i, ...
                     physClass.InnerEdgefm{1}(:,:,physClass.varFieldIndex(i))./physClass.InnerEdgefm{1}(:,:,4),...
@@ -125,6 +142,8 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
                     physClass.BoundaryEdgefm{1}(:,:,physClass.varFiledIndex(i))./physClass.BoundaryEdgefm{1}(:,:,4),...
                     physClass.BoundaryEdgefp{1}(:,:,physClass.varFiledIndex(i))./physClass.BoundaryEdgefp{1}(:,:,4) );
             end
+            t2 = toc;
+            fprintf("The speed ratio is:%f\n",t2/t1);
         end
     end
     

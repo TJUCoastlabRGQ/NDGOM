@@ -44,6 +44,7 @@ classdef SWEAbstract2d < NdgPhysMat
     end
     
     properties ( SetAccess = public )
+        BoundaryEdgefp
         ExplicitRHS
         ImplicitRHS
     end

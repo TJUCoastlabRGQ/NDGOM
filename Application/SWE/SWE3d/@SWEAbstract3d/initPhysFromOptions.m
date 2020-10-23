@@ -17,22 +17,10 @@ for m = 1:obj.Nmesh
         Nfp = obj.meshUnion(m).BoundaryEdge.Nfp;
         Ne = obj.meshUnion(m).BoundaryEdge.Ne;
         obj.fext3d{m} = zeros( Nfp, Ne, obj.Nfield );
-        %> These public variable are used to avoid the calculation of these terms repeatly during computation
-        obj.BoundaryEdgeFluxS{m} = zeros( Nfp, Ne, obj.Nvar );
-        obj.BoundaryEdgeFluxM{m} = zeros( Nfp, Ne, obj.Nvar );
-        %> The following two variables are used when calculating the horizontal diffusion term
-        obj.BoundaryEdgefm{m} = zeros( Nfp, Ne, obj.Nvar );
+        %> The following variable are used when calculating the horizontal diffusion term
         obj.BoundaryEdgefp{m} = zeros( Nfp, Ne, obj.Nvar );
     end
     %> These public variable are used to avoid the calculation of these terms repeatly during computation
-    Nfp = obj.meshUnion(m).InnerEdge.Nfp;
-    Ne = obj.meshUnion(m).InnerEdge.Ne;
-    obj.InnerEdgeFluxS{m} = zeros( Nfp, Ne, obj.Nvar );
-    obj.InnerEdgeFluxM{m} = zeros( Nfp, Ne, obj.Nvar );
-    obj.InnerEdgeFluxP{m} = zeros( Nfp, Ne, obj.Nvar );
-    %> The following two variables are used when calculating the horizontal diffusion term
-    obj.InnerEdgefm{m} = zeros( Nfp, Ne, obj.Nfield );
-    obj.InnerEdgefp{m} = zeros( Nfp, Ne, obj.Nfield );
     
     Np = obj.mesh2d(m).cell.Np;
     K = obj.mesh2d(m).K;
@@ -41,14 +29,7 @@ for m = 1:obj.Nmesh
         Nfp = obj.mesh2d(m).BoundaryEdge.Nfp;
         Ne = obj.mesh2d(m).BoundaryEdge.Ne;
         obj.fext2d{m} = zeros( Nfp, Ne, obj.Nfield2d );
-        obj.BoundaryEdgeFluxM2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
-        obj.BoundaryEdgeFluxS2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
     end
-    Nfp = obj.mesh2d(m).InnerEdge.Nfp;
-    Ne = obj.mesh2d(m).InnerEdge.Ne;
-    obj.InnerEdgeFluxM2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
-    obj.InnerEdgeFluxP2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
-    obj.InnerEdgeFluxS2d{m} = zeros( Nfp, Ne, obj.Nvar2d );
 end
 
 % set option

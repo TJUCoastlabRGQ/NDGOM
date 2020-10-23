@@ -5,8 +5,8 @@ void FetchInnerEdgeFacialValue(double *fm, double *fp, double *source, \
 	int ind1 = ((int)FToE[0] - 1)*Np;
 	int ind2 = ((int)FToE[1] - 1)*Np;
 	for (int i = 0; i < Nfp; i++){
-		fm[i] = source[ind1 + (int)FToN1[i]];
-		fp[i] = source[ind2 + (int)FToN2[i]];
+		fm[i] = source[ind1 + (int)FToN1[i] - 1];
+		fp[i] = source[ind2 + (int)FToN2[i] - 1];
 	}
 }
 
@@ -14,7 +14,7 @@ void FetchBoundaryEdgeFacialValue(double *fm, double *source, \
 	double *FToE, double *FToN1, int Np, int Nfp){
 	int ind1 = ((int)FToE[0] - 1)*Np;
 	for (int i = 0; i < Nfp; i++){
-		fm[i] = source[ind1 + (int)FToN1[i]];
+		fm[i] = source[ind1 + (int)FToN1[i] - 1];
 	}
 }
 
@@ -115,4 +115,70 @@ void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, int Np, int Nfp, \
 		rhs[m1] += rhsM[n];
 	}
 	free(rhsM);
+}
+
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the column index, and has been checked*/
+void AssembleContributionIntoColumn(double *dest, double *source, double *column, int Np3d, int Np2d)
+{
+	for (int colI = 0; colI < Np2d; colI++){
+		for (int RowI = 0; RowI < Np3d; RowI++)
+			dest[((int)column[colI] - 1)*Np3d + RowI] += source[colI*Np3d + RowI];
+	}
+}
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index, and has been checked*/
+void AssembleContributionIntoRow(double *dest, double *source, double *Row, int Np3d, int Np2d)
+{
+	for (int colI = 0; colI < Np3d; colI++){
+		for (int RowI = 0; RowI < Np2d; RowI++)
+			dest[colI*Np3d + (int)Row[RowI] - 1] += source[colI*Np2d + RowI];
+	}
+}
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index and the column index, and has been checked*/
+void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *Row, double *column, int Np3d, int Np2d, int Flag)
+{
+	for (int colI = 0; colI < Np2d; colI++)
+	{
+		for (int RowI = 0; RowI < Np2d; RowI++)
+			dest[((int)column[colI] - 1)*Np3d + (int)Row[RowI] - 1] += Flag * source[colI*Np2d + RowI];
+	}
+}
+
+void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3d, int K3d, int NLayer, int Nz){
+	//直接把第一层循环中的k提出来，放置到调用层，利用openmp并行，传入的K2d替换成序号k
+	//for (int k = 0; k < K2d; k++){
+	for (int Layer = 0; Layer < NLayer; Layer++){
+		for (int N = 0; N < Nz + 1; N++){
+			for (int i = 0; i < Np2d; i++){
+					dest[Index*NLayer*Np3d + Layer*Np3d + N*Np2d + i] = \
+						source[Index*Np2d + i];
+			}
+		}
+	}
+}
+
+void GetVolumnIntegral2d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *alpha, \
+	double *Dr, double *Ds, ptrdiff_t *LDA, double *B, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *rx, double *sx){
+	/*$Dr*u(v,\theta)$*/
+	dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dr, LDA, B, LDB, Beta, dest, LDC);
+	/*$Ds*u(v,\theta)$*/
+	dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Ds, LDA, B, LDB, Beta, tempdest, LDC);
+	/*$rx\cdot Dr*u(v,\theta)$*/
+	DotProduct(dest, dest, rx, (int)(*LDC));
+	/*$sx\cdot Ds*u(v,\theta)$*/
+	DotProduct(tempdest, tempdest, sx, (int)(*LDC));
+	/*rx\cdot Dr*u(v,\theta) + sx\cdot Ds*u(v,\theta)*/
+	Add(dest, dest, tempdest, (int)(*LDC));
+}
+
+void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, double *ny, int Nfp){
+	for (int i = 0; i < Nfp; i++)
+		dest[i] = hu[i] * nx[i] + hv[i]*ny[i];
+}
+
+void MultiEdgeContributionByLiftOperator(double *SrcAndDest, double *TempSource, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *Alpha, \
+	double *A, ptrdiff_t *LDA, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *J, int Np){
+
+	dgemm("N", "N", RowOPA, ColOPB, ColOPA, Alpha, A, LDA, SrcAndDest, LDB, Beta, TempSource, \
+		LDC);
+	DotDivide(SrcAndDest, TempSource, J, Np);
 }
