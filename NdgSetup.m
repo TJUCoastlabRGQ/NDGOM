@@ -21,7 +21,7 @@ fprintf('GOTM source files compiled.\n');
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('%s:: Compile mex files.\n', mfilename);
-NdgConfigure(12)
+NdgConfigure(100)
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('%s:: Finish all the setup process.\n\n', mfilename);

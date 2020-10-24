@@ -15,6 +15,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < K2d; i++){
-		NdgExtend2dField(dest, source, Np2d, i, Np3d, K3d, NLayer, Nz);
+		NdgExtend2dField(dest, source, Np2d, i, Np3d, NLayer, Nz);
 	}
 }

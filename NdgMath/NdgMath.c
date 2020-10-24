@@ -143,7 +143,7 @@ void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *
 	}
 }
 
-void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3d, int K3d, int NLayer, int Nz){
+void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3d, int NLayer, int Nz){
 	//直接把第一层循环中的k提出来，放置到调用层，利用openmp并行，传入的K2d替换成序号k
 	//for (int k = 0; k < K2d; k++){
 	for (int Layer = 0; Layer < NLayer; Layer++){

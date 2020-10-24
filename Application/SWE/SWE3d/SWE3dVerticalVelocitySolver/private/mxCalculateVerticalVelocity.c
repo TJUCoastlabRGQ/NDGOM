@@ -246,10 +246,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int e = 0; e < BENe2d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype2d[e];  // boundary condition
-		FetchBoundaryEdgeFacialValue(BEhM2d + e*BENfp2d, fphys2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
-		FetchBoundaryEdgeFacialValue(BEhuM2d + e*BENfp2d, fphys2d + Np2d*K2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
-		FetchBoundaryEdgeFacialValue(BEhvM2d + e*BENfp2d, fphys2d + 2 * Np2d*K2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
-		FetchBoundaryEdgeFacialValue(BEzM2d + e*BENfp2d, fphys2d + 3*Np2d*K2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
+		FetchBoundaryEdgeFacialValue(BEhM2d + e*BENfp2d, h2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
+		FetchBoundaryEdgeFacialValue(BEhuM2d + e*BENfp2d, hu2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
+		FetchBoundaryEdgeFacialValue(BEhvM2d + e*BENfp2d, hv2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
+		FetchBoundaryEdgeFacialValue(BEzM2d + e*BENfp2d, z2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		for (int p = 0; p < IENfp2d; p++){
 			ImposeBoundaryCondition(&gra, type, BEnx2d + e*BENfp2d + p, BEny2d + e*BENfp2d + p, BEhM2d + e*BENfp2d + p,\
 				BEhuM2d + e*BENfp2d + p, BEhvM2d + e*BENfp2d + p, BEzM2d + e*BENfp2d + p, BEhE2d + e*BENfp2d + p, \
@@ -301,7 +301,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K2d; k++){
-		NdgExtend2dField(field2d, rhs2d, Np2d, k, Np3d, K3d, NLayer, Nz);
+		NdgExtend2dField(field2d, rhs2d, Np2d, k, Np3d, NLayer, Nz);
 	}
 
 	free(rhs2d);
@@ -349,17 +349,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	oneI = 1;
 	one = 1.0, zero = 0.0;
 
-	printf("The number of threads out of the for loop is: %d\n", omp_get_num_threads());
-	printf("The thread order out of the for loop is:%d\n", omp_get_thread_num());
-	printf("max threads = %d\n", omp_get_max_threads());
+//	printf("The number of threads out of the for loop is: %d\n", omp_get_num_threads());
+//	printf("The thread order out of the for loop is:%d\n", omp_get_thread_num());
+//	printf("max threads = %d\n", omp_get_max_threads());
 
 	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K3d; k++){
-		printf("The number of threads in the for loop is: %d\n", omp_get_num_threads());
-		printf("The current thread order is:%d\n", omp_get_thread_num());
+//		printf("The number of threads in the for loop is: %d\n", omp_get_num_threads());
+//		printf("The current thread order is:%d\n", omp_get_thread_num());
 		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
 		GetVolumnIntegral2d(VolumeIntegralX + k*Np3d, TempVolumeIntegralX + k*Np3d, &np, &oneI, &np, &one, \
 			Dr3d, Ds3d, &np, hu3d + k*Np3d, &np, &zero, &np, rx3d + k*Np3d, sx3d + k*Np3d);
@@ -399,10 +399,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int e = 0; e < BENe3d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype3d[e];  // boundary condition
-		FetchBoundaryEdgeFacialValue(BEhuM3d + e*BENfp3d, fphys3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
-		FetchBoundaryEdgeFacialValue(BEhvM3d + e*BENfp3d, fphys3d + Np3d*K3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
-		FetchBoundaryEdgeFacialValue(BEhM3d + e*BENfp3d, fphys3d + 3 * Np3d*K3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
-		FetchBoundaryEdgeFacialValue(BEzM3d + e*BENfp3d, fphys3d + 5 * Np3d*K3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
+		FetchBoundaryEdgeFacialValue(BEhuM3d + e*BENfp3d, hu3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
+		FetchBoundaryEdgeFacialValue(BEhvM3d + e*BENfp3d, hv3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
+		FetchBoundaryEdgeFacialValue(BEhM3d + e*BENfp3d, h3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
+		FetchBoundaryEdgeFacialValue(BEzM3d + e*BENfp3d, z3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
 		for (int p = 0; p < BENfp3d; p++){
 			ImposeBoundaryCondition(&gra, type, BEnx3d + e*BENfp3d + p, BEny3d + e*BENfp3d + p, BEhM3d + e*BENfp3d + p, \
 				BEhuM3d + e*BENfp3d + p, BEhvM3d + e*BENfp3d + p, BEzM3d + e*BENfp3d + p, BEhE3d + e*BENfp3d + p, \

@@ -46,7 +46,7 @@ void AssembleContributionIntoRow(double *, double *, double *, int, int);
 
 void AssembleContributionIntoRowAndColumn(double *, double *, double *, double *, int, int, int);
 
-void NdgExtend2dField(double *, double *, int, int, int, int, int, int);
+void NdgExtend2dField(double *, double *, int, int, int, int, int);
 
 void GetVolumnIntegral2d(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, double *, \
 	double *, ptrdiff_t *, double *, ptrdiff_t *, double *, ptrdiff_t *, double *, double *);
