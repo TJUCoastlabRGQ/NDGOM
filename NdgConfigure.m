@@ -1,5 +1,5 @@
 function NdgConfigure( varargin )
-global COMPILER CFLAGS
+global COMPILER COMPFLAGS
 % initialize CFLAGS & LDFLAGS
 configureCompilerSetting();
 
@@ -113,7 +113,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE1d
 path = 'Application\SWE\SWE1d\@SWEAbstract1d\private\';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
 srcfile = { ...
     [path, 'mxEvaluateSurfaceValue1d.c'], ...
@@ -188,7 +188,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE2d
 path = 'Application/SWE/SWE2d/@SWEAbstract2d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxImposeBoundaryCondition.c'], ...
@@ -251,7 +251,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE numerical flux
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver1d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver1d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -262,7 +262,7 @@ FuncHandle(path, srcfile, libfile);
 %
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver2d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -274,13 +274,13 @@ FuncHandle(path, srcfile, libfile);
 % FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver3d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWELFNumFluxSolver3d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver3d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver3d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -336,7 +336,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE2d
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
 srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
@@ -349,14 +349,14 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE3d
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
 srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE3d/SWE3dVerticalVelocitySolver/private/';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'NdgMath\NdgMath.c',...
 'NdgMath\NdgSWE.c'};
 srcfile = { ...
@@ -364,14 +364,14 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@AbstractDiffSolver\private\';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {};
 srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertDiffSolver\private\';
-CFLAGS = [CFLAGS, ' -I', path, ' '];
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'NdgMath\NdgMath.c'};
 srcfile = { ...
     [path, 'mxUpdateImplicitRHS.c']};
@@ -407,14 +407,14 @@ end
 end
 
 function CompileMexFile(outPath, srcfile, libfile)
-global CFLAGS LDFLAGS COMPILER
+global COMPFLAGS LDFLAGS COMPILER
 for n = 1:numel(srcfile)
     if( isNeedCompile(outPath, srcfile{n}, libfile) )
         fprintf('\n%s:: Compiling source file - \n%s to %s.\n', ...
             mfilename, srcfile{n}, outPath);
-        fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
+        fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex('-v',  '-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
+        mex('-v',  '-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
             file{:}, '-outdir', outPath);        
     end
 end

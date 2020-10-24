@@ -349,17 +349,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	oneI = 1;
 	one = 1.0, zero = 0.0;
 
-//	printf("The number of threads out of the for loop is: %d\n", omp_get_num_threads());
-//	printf("The thread order out of the for loop is:%d\n", omp_get_thread_num());
-//	printf("max threads = %d\n", omp_get_max_threads());
+	printf("The number of threads out of the for loop is: %d\n", omp_get_num_threads());
+	printf("The thread order out of the for loop is:%d\n", omp_get_thread_num());
+	printf("max threads = %d\n", omp_get_max_threads());
 
 	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K3d; k++){
-//		printf("The number of threads in the for loop is: %d\n", omp_get_num_threads());
-//		printf("The current thread order is:%d\n", omp_get_thread_num());
+		printf("The number of threads in the for loop is: %d\n", omp_get_num_threads());
+		printf("The current thread order is:%d\n", omp_get_thread_num());
 		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
 		GetVolumnIntegral2d(VolumeIntegralX + k*Np3d, TempVolumeIntegralX + k*Np3d, &np, &oneI, &np, &one, \
 			Dr3d, Ds3d, &np, hu3d + k*Np3d, &np, &zero, &np, rx3d + k*Np3d, sx3d + k*Np3d);

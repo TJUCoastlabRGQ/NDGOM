@@ -1,5 +1,6 @@
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "mxSWE2d.h"
+#include "..\..\..\..\..\NdgMath\NdgSWE.h"
 
 void imposeBoundaryCondition(const double gra,  ///< gravity acceleration
                              NdgEdgeType type,  ///< boundary node type
