@@ -1,6 +1,6 @@
 #include "NdgSWE.h"
 
-//This is used to impose the boundary condition for the pure hydrulic problem
+/*This function is used to impose the boundary condition for the pure hydrulic problem*/
 void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *ny, double *hM, double *huM, double *hvM, \
 	double *zM, double *hE, double *huE, double *hvE, double *hP, double *huP, double *hvP, double *zP){
 	// assign the local node values
@@ -125,5 +125,62 @@ void EvaluateFlowRateByDeptheThreshold(double hmin, double *h, double *hu, doubl
 	else {
 		*um = 0.0;
 		*vm = 0.0;
+	}
+}
+
+/*This function is used to calcualte the numerical flux in the primitive continuity equation(PCE) */
+void GetPCENumericalFluxTerm(double *dest, double *hM, double *huM, double *hvM, \
+	double *hP, double *huP, double *hvP, double *nx, double *ny, int Nfp, double hmin, double gra)
+{
+	double qnM, qnP, qvM, qvP;
+	double sM, sP, unM, unP;
+	for (int p = 0; p < Nfp; p++){
+		/** Rotate flux to outward normal and tangential direction **/
+		qnM = +huM[p] * nx[p] + hvM[p] * ny[p];
+		qvM = -huM[p] * ny[p] + hvM[p] * nx[p];
+		qnP = +huP[p] * nx[p] + hvP[p] * ny[p];
+		qvP = -huP[p] * ny[p] + hvP[p] * nx[p];
+		if ((hM[p] > hmin) & (hP[p] > hmin)) {
+			unM = qnM / hM[p];
+			unP = qnP / hP[p];
+			double us = (double)(0.5 * (unM + unP) + sqrt(gra * hM[p]) - sqrt(gra * hP[p]));
+			double cs =
+				(double)(0.5 * (sqrt(gra * hM[p]) + sqrt(gra * hP[p])) + 0.25 * (unM - unP));
+
+			sM = (double)min(unM - sqrt(gra * hM[p]), us - cs);
+			sP = (double)max(unP + sqrt(gra * hP[p]), us + cs);
+		}
+		else if ((hM[p] > hmin) & (hP[p] <= hmin)) {
+			unM = qnM / hM[p];
+			sM = (double)(unM - sqrt(gra * hM[p]));
+			sP = (double)(unM + 2 * sqrt(gra * hM[p]));
+		}
+		else if ((hM[p] <= hmin) & (hP[p] > hmin)) {
+			unP = qnP / hP[p];
+			sM = (double)(unP - 2 * sqrt(gra * hP[p]));
+			sP = (double)(unP + sqrt(gra * hP[p]));
+		}
+		else { /* both dry element */
+			sM = 0;
+			sP = 0;
+		}
+		/* HLL flux function */
+		if ((sM >= 0) & (sP > 0)) {
+			dest[p] = qnM;
+		}
+		else if ((sM < 0) & (sP > 0)) {
+			dest[p] = (sP * qnM - sM * qnP + sM * sP * (hP[p] - hM[p])) / (sP - sM);
+		}
+		else if ((sM < 0) & (sP <= 0)) {
+			dest[p] = qnP;
+		}
+		else if ((fabs(sM) < TOLERR) & (fabs(sP) < TOLERR)) {
+			dest[p] = qnM;
+		}
+		else {
+			printf("Matlab:%s:ErrWaveSpeed\n", __FILE__);
+			printf("The wave speed computation occurs an error.");
+			exit(0);
+		}
 	}
 }

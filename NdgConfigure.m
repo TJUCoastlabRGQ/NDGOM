@@ -390,6 +390,13 @@ srcfile = { ...
     [path, 'mxEvaluateHorizontalDiffRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'D:\PhdResearch\Application\SWE\SWE3d\@SWEQuadFreeStrongFormPCESolver2d\private\';
+libfile = { 'NdgMath\NdgMath.c' ,...
+    'NdgMath\NdgSWE.c'};
+srcfile = { ...
+    [path, 'mxEvaluatePCERHS.c']};
+FuncHandle(path, srcfile, libfile);
+
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);
 
 end

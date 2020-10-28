@@ -1,11 +1,6 @@
 
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "..\..\..\..\..\NdgMath\NdgSWE.h"
-#include <stdio.h>
-#include <omp.h>
-
-void GetNumericalFluxTerm(double *, double *, double *, double *, \
-	double *, double *, double *, double *, double *, int, double, double);
 
 void FetchBoundaryData(double *, double *, double *, double *, int);
 
@@ -228,7 +223,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchInnerEdgeFacialValue(IEhvM2d + e*IENfp2d, IEhvP2d + e*IENfp2d, hv2d, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
 		GetFacialFluxTerm2d(IEFluxM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
 		GetFacialFluxTerm2d(IEFluxP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, IEhvP2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
-		GetNumericalFluxTerm(IEFluxS2d + e*IENfp2d, IEhM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEhP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, \
+		GetPCENumericalFluxTerm(IEFluxS2d + e*IENfp2d, IEhM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEhP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, \
 			IEhvP2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d, Hcrit, gra);
 	}
 
@@ -259,7 +254,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				BEzM2d + e*BENfp2d + p, BEhP2d + e*BENfp2d + p, BEhuP2d + e*BENfp2d + p, BEhvP2d + e*BENfp2d + p, BEzP2d + e*BENfp2d + p);
 		}
 		GetFacialFluxTerm2d(BEFluxM2d + e*IENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d);
-		GetNumericalFluxTerm(BEFluxS2d + e*BENfp2d, BEhM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEhP2d + e*BENfp2d, BEhuP2d + e*BENfp2d, \
+		GetPCENumericalFluxTerm(BEFluxS2d + e*BENfp2d, BEhM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEhP2d + e*BENfp2d, BEhuP2d + e*BENfp2d, \
 			BEhvP2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d, Hcrit, gra);
 	}
 
@@ -380,7 +375,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchInnerEdgeFacialValue(IEhvM3d + e*IENfp3d, IEhvP3d + e*IENfp3d, hv3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
 		GetFacialFluxTerm2d(IEFluxM3d + e*IENfp3d, IEhuM3d + e*IENfp3d, IEhvM3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, IENfp3d);
 		GetFacialFluxTerm2d(IEFluxP3d + e*IENfp3d, IEhuP3d + e*IENfp3d, IEhvP3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, IENfp3d);
-		GetNumericalFluxTerm(IEFluxS3d + e*IENfp3d, IEhM3d + e*IENfp3d, IEhuM3d + e*IENfp3d, IEhvM3d + e*IENfp3d, IEhP3d + e*IENfp3d, IEhuP3d + e*IENfp3d, \
+		GetPCENumericalFluxTerm(IEFluxS3d + e*IENfp3d, IEhM3d + e*IENfp3d, IEhuM3d + e*IENfp3d, IEhvM3d + e*IENfp3d, IEhP3d + e*IENfp3d, IEhuP3d + e*IENfp3d, \
 			IEhvP3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, IENfp3d, Hcrit, gra);
 	}
 
@@ -412,7 +407,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				BEzM3d + e*BENfp3d + p, BEhP3d + e*BENfp3d + p, BEhuP3d + e*BENfp3d + p, BEhvP3d + e*BENfp3d + p, BEzP3d + e*BENfp3d + p);
 		}
 		GetFacialFluxTerm2d(BEFluxM3d + e*BENfp3d, BEhuM3d + e*BENfp3d, BEhvM3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, BENfp3d);
-		GetNumericalFluxTerm(BEFluxS3d + e*BENfp3d, BEhM3d + e*BENfp3d, BEhuM3d + e*BENfp3d, BEhvM3d + e*BENfp3d, BEhP3d + e*BENfp3d, BEhuP3d + e*BENfp3d, \
+		GetPCENumericalFluxTerm(BEFluxS3d + e*BENfp3d, BEhM3d + e*BENfp3d, BEhuM3d + e*BENfp3d, BEhvM3d + e*BENfp3d, BEhP3d + e*BENfp3d, BEhuP3d + e*BENfp3d, \
 			BEhvP3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, BENfp3d, Hcrit, gra);
 	}
 
@@ -493,64 +488,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(rhs3d);
 	free(TempVerticalVelocity);
 	free(BotVertVelocity);
-}
-
-
-
-void GetNumericalFluxTerm(double *dest, double *hM, double *huM, double *hvM, \
-	double *hP, double *huP, double *hvP, double *nx, double *ny, int Nfp, double hmin, double gra)
-{
-	double qnM, qnP, qvM, qvP;
-	double sM, sP, unM, unP;
-	for (int p = 0; p < Nfp; p++){
-		/** Rotate flux to outward normal and tangential direction **/
-		qnM = +huM[p] * nx[p] + hvM[p] * ny[p];
-		qvM = -huM[p] * ny[p] + hvM[p] * nx[p];
-		qnP = +huP[p] * nx[p] + hvP[p] * ny[p];
-		qvP = -huP[p] * ny[p] + hvP[p] * nx[p];
-		if ((hM[p] > hmin) & (hP[p] > hmin)) {
-			unM = qnM / hM[p];
-			unP = qnP / hP[p];
-			double us = (double)(0.5 * (unM + unP) + sqrt(gra * hM[p]) - sqrt(gra * hP[p]));
-			double cs =
-				(double)(0.5 * (sqrt(gra * hM[p]) + sqrt(gra * hP[p])) + 0.25 * (unM - unP));
-
-			sM = (double)min(unM - sqrt(gra * hM[p]), us - cs);
-			sP = (double)max(unP + sqrt(gra * hP[p]), us + cs);
-		}
-		else if ((hM[p] > hmin) & (hP[p] <= hmin)) {
-			unM = qnM / hM[p];
-			sM = (double)(unM - sqrt(gra * hM[p]));
-			sP = (double)(unM + 2 * sqrt(gra * hM[p]));
-		}
-		else if ((hM[p] <= hmin) & (hP[p] > hmin)) {
-			unP = qnP / hP[p];
-			sM = (double)(unP - 2 * sqrt(gra * hP[p]));
-			sP = (double)(unP + sqrt(gra * hP[p]));
-		}
-		else { /* both dry element */
-			sM = 0;
-			sP = 0;
-		}
-		/* HLL flux function */
-		if ((sM >= 0) & (sP > 0)) {
-			dest[p] = qnM;
-		}
-		else if ((sM < 0) & (sP > 0)) {
-			dest[p] = (sP * qnM - sM * qnP + sM * sP * (hP[p] - hM[p])) / (sP - sM);
-		}
-		else if ((sM < 0) & (sP <= 0)) {
-			dest[p] = qnP;
-		}
-		else if ((fabs(sM) < TOLERR) & (fabs(sP) < TOLERR)) {
-			dest[p] = qnM;
-		}
-		else {
-			printf("Matlab:%s:ErrWaveSpeed\n", __FILE__);
-			printf("The wave speed computation occurs an error.");
-			exit(0);
-		}
-	}
 }
 
 void FetchBoundaryData(double *dest, double *source, double *destIndex, double *sourceIndex, int size)

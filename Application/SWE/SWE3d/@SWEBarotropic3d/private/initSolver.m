@@ -7,7 +7,7 @@ if (integralType == enumDiscreteIntegral.QuadratureFree)
     adv = NdgQuadFreeStrongFormAdvSWE3dSolver3d( physMat );
     vis = NdgQuadFreeStrongCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);
     flux = SWEHLLNumFluxSolver3d;
-    PCESolver2d = SWEQuadFreeStrongFormPCESolver2d;
+    PCESolver2d = SWEQuadFreeStrongFormPCESolver2d( physMat.meshUnion );
 elseif (integralType == enumDiscreteIntegral.GaussQuadrature)
     adv = NdgGaussQuadWeakFormAdvSolver3d( physMat, physMat.meshUnion );
     vis = NdgGaussQuadWeakFormCentralVisSolver3d( physMat, physMat.varFieldIndex, 1:physMat.Nvar);

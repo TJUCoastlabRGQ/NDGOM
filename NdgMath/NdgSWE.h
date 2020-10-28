@@ -21,11 +21,15 @@ typedef enum {
 	NdgEdgeNonReflectingFlux = 11
 } NdgEdgeType;
 
-void ImposeBoundaryCondition(double *, NdgEdgeType , double *, double *, double *, double *, double *, \
-	double *, double *, double *, double *, double *, double *, double *, double *);
+void ImposeBoundaryCondition(double *, NdgEdgeType , double *, double *, double *, double *, double *, double *, double *,\
+	double *, double *, double *, double *, double *, double *);
 
-void EvaluateHydroStaticReconstructValue(double hmin, double *, double *, double *, double *, double *, double *, double *, double *);
+void EvaluateHydroStaticReconstructValue(double hmin, double *, double *, double *, double *, double *, double *, double *,\
+	double *);
 
 void EvaluateFlowRateByDeptheThreshold(double hmin, double *hM, double *huM, double *hvM, double *um, double *vm);
+
+void GetPCENumericalFluxTerm(double *, double *, double *, double *, double *, double *, double *, double *, double *, int, \
+	double, double);
 
 #endif
