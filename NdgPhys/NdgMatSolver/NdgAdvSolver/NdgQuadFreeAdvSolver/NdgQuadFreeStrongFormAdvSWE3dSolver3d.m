@@ -1,12 +1,34 @@
 classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3d
     
+    properties
+        mesh
+        cell
+        InnerEdge
+        BoundaryEdge
+        BottomEdge
+        BottomBoundaryEdge
+        SurfaceBoundaryEdge
+    end
+    
     methods
         function obj = NdgQuadFreeStrongFormAdvSWE3dSolver3d( phys )
             obj = obj@NdgQuadFreeStrongFormAdvSolver3d( phys );
+            warning('off');
+            obj.mesh = struct(phys.meshUnion);
+            obj.cell = struct(phys.meshUnion.cell);
+            obj.InnerEdge = struct(phys.meshUnion.InnerEdge);
+            obj.BoundaryEdge = struct(phys.meshUnion.BoundaryEdge);
+            obj.BottomEdge = struct(phys.meshUnion.BottomEdge);
+            obj.BottomBoundaryEdge = struct(phys.meshUnion.BottomBoundaryEdge);
+            obj.SurfaceBoundaryEdge = struct(phys.meshUnion.SurfaceBoundaryEdge);
+            warning('on');
         end
         %> Call the flux subroutine from the NdgPhys object.
         function evaluateAdvectionRHS( obj, physClass, fphys )            
             % evaluate inner edge
+%             physClass.frhs{1} = mxEvaluateQuadFreeStrongFormAdvSWE3dRHS( obj.mesh, obj.InnerEdge, obj.BoundaryEdge,...
+%                 obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, physClass.varFieldIndex, physClass.fext3d{1},...
+%                 fphys{1}, physClass.gra, physClass.hcrit);
             for m = 1:physClass.Nmesh
                 mesh3d = physClass.meshUnion(m);
                 
