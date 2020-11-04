@@ -335,12 +335,6 @@ libfile = { };
 FuncHandle(path, srcfile, libfile);
 
 % SWE2d
-path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
-libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
-srcfile = { ...
-    [path, 'mxUpdateTimeInterval3d.c']};
-FuncHandle(path, srcfile, libfile);
 
 path = 'Application\SWE\VolumeFluxSolver\SWENonhydroVolumeFluxSolver2d\private/';
 libfile = {'Application\SWE\SWE2d\@SWEAbstract2d\private\mxSWE2d.c'};
@@ -361,6 +355,20 @@ libfile = {'NdgMath\NdgMath.c',...
 'NdgMath\NdgSWE.c'};
 srcfile = { ...
     [path, 'mxCalculateVerticalVelocity.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'D:\PhdResearch\Application\SWE\SWE3d\@SWEQuadFreeStrongFormPCESolver2d\private\';
+libfile = { 'NdgMath\NdgMath.c' ,...
+    'NdgMath\NdgSWE.c'};
+srcfile = { ...
+    [path, 'mxEvaluatePCERHS.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
+srcfile = { ...
+    [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@AbstractDiffSolver\private\';
@@ -390,11 +398,13 @@ srcfile = { ...
     [path, 'mxEvaluateHorizontalDiffRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
-path = 'D:\PhdResearch\Application\SWE\SWE3d\@SWEQuadFreeStrongFormPCESolver2d\private\';
-libfile = { 'NdgMath\NdgMath.c' ,...
-    'NdgMath\NdgSWE.c'};
+path = 'NdgPhys\NdgMatSolver\NdgAdvSolver\NdgQuadFreeAdvSolver\private\';
+COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+libfile = {'NdgMath\NdgMath.c',...
+    'NdgMath\NdgSWE.c',...
+    'NdgMath\NdgSWE3D.c'};
 srcfile = { ...
-    [path, 'mxEvaluatePCERHS.c']};
+    [path, 'mxEvaluateQuadFreeStrongFormAdvSWE3dRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
 fprintf('\n%s:: Compiled all the mex files.\n', mfilename);

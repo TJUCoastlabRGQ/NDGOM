@@ -1,7 +1,7 @@
 #include "NdgSWE.h"
 
 /*This function is used to impose the boundary condition for the pure hydrulic problem*/
-void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *ny, double *fm, double *fp, \
+void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *ny, double *fm, double *fp, \
 	double *zM, double *zP, double *fext, int Nfp, int Nvar, int Ne){
 	/*All other fields except H, Hu, Hv are set to be the inner value at the boundaries unless they are prescribed out of the program */
 	// assign the local node values
@@ -18,7 +18,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = huM[i];
 			hvP[i] = hvM[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -28,7 +28,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = huM[i];
 			hvP[i] = hvM[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -38,7 +38,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hE[i];
 			huP[i] = huE[i];
 			hvP[i] = hvE[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fext[n*Nfp*Ne + i];
 			}
 		}
@@ -48,7 +48,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hE[i];
 			huP[i] = huM[i];
 			hvP[i] = hvM[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -58,7 +58,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = huE[i];
 			hvP[i] = hvE[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -73,7 +73,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = (-qnM) * nx[i] - qvM * ny[i];
 			hvP[i] = (-qnM) * ny[i] + qvM * nx[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -83,7 +83,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = -huM[i];
 			hvP[i] = -hvM[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -99,7 +99,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = hM[i];
 			huP[i] = (un * nx[i] - uv * ny[i]) * hM[i];
 			hvP[i] = (un * ny[i] + uv * nx[i]) * hM[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -114,7 +114,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			hP[i] = temp * temp / *gra;
 			huP[i] = huE[i];
 			hvP[i] = hvE[i];
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -138,7 +138,7 @@ void ImposeBoundaryCondition(double gra, NdgEdgeType type, double *nx, double *n
 			//     = -surf->huM / surf->hM * ny + surf->hvM / surf->hM * nx; surf->huP =
 			//     (un * nx - uvM * ny) * surf->hM; surf->hvP = (un * ny + uvM * nx) *
 			//     surf->hM;
-			for (n = 3; n < Nvar; n++){
+			for (int n = 3; n < Nvar; n++){
 				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
@@ -169,7 +169,7 @@ void EvaluateHydroStaticReconstructValue(double hmin, double *fm, double *fp, do
 		hvM[i] = hM[i] * vm;
 		huP[i] = hP[i] * up;
 		hvP[i] = hP[i] * vp;
-		for (n = 3; n < Nvar; n++){
+		for (int n = 3; n < Nvar; n++){
 			double variable;
 			/*Passive transport substances, such as temperature and salt are reconstructed following the same strategy for hu and hv*/
 			EvaluatePhysicalVariableByDepthThreshold(hmin, hM + i, fm + n*Nfp*Ne + i, &variable);
@@ -206,15 +206,14 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 	/*HU ranks first, HV second and H third*/
 	double HR, HL, UR, UL, VR, VL;
 	double SL, SSTAR, SR;
-	double *hum = fm, hvm = fm + Nfp*Ne, hm = fm + 2 * Nfp*Ne;
-	double *hup = fp, hvp = fp + Nfp*Ne, hp = fp + 2 * Nfp*Ne;
+	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
+	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
 
 	double *QL = malloc(3 * sizeof(double)), *QR = malloc(3 * sizeof(double));
 	double *VARIABLEL = malloc(3 * sizeof(double)), *VARIABLER = malloc(3 * sizeof(double));
 	double QSTARL, QSTARR;
 	double FL, FR;
 	double FSTARL, FSTARR;
-	double FLX;
 	for (int i = 0; i < Nfp; i++){
 		/*Rotate variable to normal and tangential direction*/
 		/*Here Q stands for H, HUn, and HUt*/
@@ -226,7 +225,6 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 		double HSTAR = 0, USTAR = 0;
 		double PQL = 0, PQR = 0;
 		double DENOM;
-		double SSTAR;
 		int SPY = 0;
 		double POND = 0;
 		/*Compute the original variable, u, v and theta, in normal direction*/
@@ -262,12 +260,12 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 			{
 				PQR = 1;
 			}
-			else if (HR>Hcirt){
+			else if (HR>Hcrit){
 				PQR = sqrt(0.5*(HSTAR + HR)*HSTAR / pow(HR, 2));
 			}
 		}
 
-		if (HL > Hcirt && HR > Hcrit){
+		if (HL > Hcrit && HR > Hcrit){
 			SL = UL - AL*PQL;
 			SR = UR + AR*PQR;
 		}
@@ -299,7 +297,7 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 		POND = 0;
 		if (abs(SR - SSTAR) > EPS){
 			/*POND is initialized as zero*/
-			POND = hR*(SR - uR) / (SR - SSTAR);
+			POND = HR*(SR - UR) / (SR - SSTAR);
 		}
 
 		QSTARR = POND;
@@ -327,7 +325,7 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 			SPY = 1;
 		}
 		else{
-			dest[i] = FR
+			dest[i] = FR;
 				SPY = 1;
 		}
 		if (SPY == 0){
@@ -345,4 +343,17 @@ void EvaluatePhysicalVariableByDepthThreshold(double hmin, double *h, double *va
 	else{
 		*outPut = 0;
 	}
+}
+
+/** Rotate flux to outward normal direction */
+void RotateFluxToNormal2d(double *hu, ///< flux at x component
+	double *hv, ///< flux at y component
+	double *nx, ///< outward normal vector
+	double *ny, ///< outward normal vector
+	double *qn,      ///< normal flux
+	double *qv       ///< tangent flux
+	) {
+	*qn = +*hu * *nx + *hv * *ny;
+	*qv = -*hu * *ny + *hv * *nx;
+	return;
 }

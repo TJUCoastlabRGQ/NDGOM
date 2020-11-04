@@ -170,6 +170,42 @@ void GetVolumnIntegral2d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrd
 	Add(dest, dest, tempdest, (int)(*LDC));
 }
 
+void GetVolumnIntegral3d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *alpha, \
+	double *Dr, double *Ds, double *Dt, double *E, double *G, double *H, ptrdiff_t *LDA, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, \
+	double *rx, double *sx, double *ry, double *sy, double *tz, int Nvar, int Np, int K)
+{
+	for (int n = 0; n < Nvar; n++){
+		/*$Dr*E$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dr, LDA, E + n*Np*K, LDB, Beta, dest + n*Np*K, LDC);
+		/*$Ds*E$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Ds, LDA, E + n*Np*K, LDB, Beta, tempdest, LDC);
+		/*$rx\cdot Dr*E$*/
+		DotProduct(dest + n*Np*K, dest + n*Np*K, rx, (int)(*LDC));
+		/*$sx\cdot Ds*E$*/
+		DotProduct(tempdest, tempdest, sx, (int)(*LDC));
+		/*rx\cdot Dr*E + sx\cdot Ds*E*/
+		Add(dest + n*Np*K, dest + n*Np*K, tempdest, (int)(*LDC));
+		/*$Dr*G$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dr, LDA, G + n*Np*K, LDB, Beta, tempdest, LDC);
+		/*$ry\cdot Dr*G$*/
+		DotProduct(tempdest, tempdest, ry, (int)(*LDC));
+		/*rx\cdot Dr*E + sx\cdot Ds*E + ry\cdot Dr*G*/
+		Add(dest + n*Np*K, dest + n*Np*K, tempdest, (int)(*LDC));
+		/*$Ds*G$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Ds, LDA, G + n*Np*K, LDB, Beta, tempdest, LDC);
+		/*$sy\cdot Ds*G$*/
+		DotProduct(tempdest, tempdest, sy, (int)(*LDC));
+		/*rx\cdot Dr*E + sx\cdot Ds*E + ry\cdot Dr*G + sy\cdot Ds*G */
+		Add(dest + n*Np*K, dest + n*Np*K, tempdest, (int)(*LDC));
+		/*$Dt*H$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dt, LDA, H + n*Np*K, LDB, Beta, tempdest, LDC);
+		/*$tz\cdot Dt*H$*/
+		DotProduct(tempdest, tempdest, tz, (int)(*LDC));
+		/*rx\cdot Dr*E + sx\cdot Ds*E + ry\cdot Dr*G + sy\cdot Ds*G + tz\cdot Dt*H*/
+		Add(dest + n*Np*K, dest + n*Np*K, tempdest, (int)(*LDC));
+	}
+}
+
 void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, double *ny, int Nfp){
 	for (int i = 0; i < Nfp; i++)
 		dest[i] = hu[i] * nx[i] + hv[i]*ny[i];

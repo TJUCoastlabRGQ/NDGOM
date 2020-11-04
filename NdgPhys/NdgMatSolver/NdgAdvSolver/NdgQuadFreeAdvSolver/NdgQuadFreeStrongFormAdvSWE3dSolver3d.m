@@ -26,9 +26,12 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
         %> Call the flux subroutine from the NdgPhys object.
         function evaluateAdvectionRHS( obj, physClass, fphys )            
             % evaluate inner edge
-%             physClass.frhs{1} = mxEvaluateQuadFreeStrongFormAdvSWE3dRHS( obj.mesh, obj.InnerEdge, obj.BoundaryEdge,...
-%                 obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, physClass.varFieldIndex, physClass.fext3d{1},...
-%                 fphys{1}, physClass.gra, physClass.hcrit);
+            tic;
+            tempfrhs{1} = mxEvaluateQuadFreeStrongFormAdvSWE3dRHS( obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge,...
+                obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, physClass.varFieldIndex, fphys{1}, ...
+                 physClass.fext3d{1}, physClass.gra, physClass.hcrit, int8(physClass.meshUnion.BoundaryEdge.ftype));
+            Cversion = toc;
+            tic;
             for m = 1:physClass.Nmesh
                 mesh3d = physClass.meshUnion(m);
                 
@@ -88,6 +91,8 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
                 end
              
             end
+            matVersion = toc;
+            fprintf("The speed up ratio is:%f\n",matVersion/Cversion);
         end
     end
     

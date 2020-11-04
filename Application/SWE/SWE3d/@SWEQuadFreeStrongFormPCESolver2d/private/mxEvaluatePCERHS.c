@@ -74,7 +74,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	/*The two-dimensional external value*/
 	double *fext2d = mxGetPr(prhs[6]);
-	double *BEhE2d = fext2d, *BEhuE2d = fext2d + BENe2d * BENfp2d, *BEhvE2d = fext2d + 2 * BENe2d * BENfp2d;
+//	double *BEhE2d = fext2d, *BEhuE2d = fext2d + BENe2d * BENfp2d, *BEhvE2d = fext2d + 2 * BENe2d * BENfp2d;
 
 	double gra = mxGetScalar(prhs[7]);
 	double Hcrit = (double)mxGetScalar(prhs[8]);
@@ -84,11 +84,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *RHS = mxGetPr(plhs[0]);
 
 	double *IEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
-	double *IEhM2d = IEfm2d, *IEhuM2d = IEfm2d + IENfp2d * IENe2d, \
-		*IEhvM2d = IEfm2d + 2 * IENfp2d*IENe2d;
+	double *IEhuM2d = IEfm2d, *IEhvM2d = IEfm2d + IENfp2d * IENe2d, \
+		*IEhM2d = IEfm2d + 2 * IENfp2d*IENe2d;
 	double *IEfp2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
-	double *IEhP2d = IEfp2d, *IEhuP2d = IEfp2d + IENfp2d * IENe2d, \
-		*IEhvP2d = IEfp2d + 2 * IENfp2d*IENe2d;
+	double *IEhuP2d = IEfp2d, *IEhvP2d = IEfp2d + IENfp2d * IENe2d, \
+		*IEhP2d = IEfp2d + 2 * IENfp2d*IENe2d;
 	double *IEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
@@ -129,18 +129,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchInnerEdgeFacialValue(IEhvM2d + e*IENfp2d, IEhvP2d + e*IENfp2d, hv2d, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
 		GetFacialFluxTerm2d(IEFluxM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
 		GetFacialFluxTerm2d(IEFluxP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, IEhvP2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
-		GetPCENumericalFluxTerm(IEFluxS2d + e*IENfp2d, IEhM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEhP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, \
-			IEhvP2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d, Hcrit, gra);
+		GetPCENumericalFluxTerm(IEFluxS2d + e*IENfp2d, IEfm2d + e*IENfp2d, IEfp2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, &gra, Hcrit, IENfp2d, IENe2d);
 	}
 
 	double *BEfm2d = malloc(BENe2d * BENfp2d * 4 * sizeof(double));
-	double *BEhM2d = BEfm2d, *BEhuM2d = BEfm2d + BENe2d * BENfp2d, \
-		*BEhvM2d = BEfm2d + 2 * BENe2d * BENfp2d, *BEzM2d = BEfm2d + 3 * BENe2d * BENfp2d;
+	double *BEhuM2d = BEfm2d, *BEhvM2d = BEfm2d + BENe2d * BENfp2d, \
+		*BEhM2d = BEfm2d + 2 * BENe2d * BENfp2d;
+	double *BEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
 	double *BEfp2d = malloc(BENe2d * BENfp2d * 4 * sizeof(double));
-	double *BEhP2d = BEfp2d, *BEhuP2d = BEfp2d + BENe2d * BENfp2d, \
-		*BEhvP2d = BEfp2d + 2 * BENe2d * BENfp2d, *BEzP2d = BEfp2d + 3 * BENe2d * BENfp2d;
+//	double *BEhuP2d = BEfp2d, *BEhvP2d = BEfp2d + BENe2d * BENfp2d, \
+		*BEhP2d = BEfp2d + 2 * BENe2d * BENfp2d;
+	double *BEzP2d = malloc(BENe2d * BENfp2d);
 	double *BEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
 	double *BEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	int Nfield = 2;
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -151,17 +153,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchBoundaryEdgeFacialValue(BEhuM2d + e*BENfp2d, hu2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		FetchBoundaryEdgeFacialValue(BEhvM2d + e*BENfp2d, hv2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		FetchBoundaryEdgeFacialValue(BEzM2d + e*BENfp2d, z2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
-		for (int p = 0; p < IENfp2d; p++){
-			ImposeBoundaryCondition(&gra, type, BEnx2d + e*BENfp2d + p, BEny2d + e*BENfp2d + p, BEhM2d + e*BENfp2d + p, \
-				BEhuM2d + e*BENfp2d + p, BEhvM2d + e*BENfp2d + p, BEzM2d + e*BENfp2d + p, BEhE2d + e*BENfp2d + p, \
-				BEhuE2d + e*BENfp2d + p, BEhvE2d + e*BENfp2d + p, BEhP2d + e*BENfp2d + p, BEhuP2d + e*BENfp2d + p, \
-				BEhvP2d + e*BENfp2d + p, BEzP2d + e*BENfp2d + p);
-			EvaluateHydroStaticReconstructValue(Hcrit, BEhM2d + e*BENfp2d + p, BEhuM2d + e*BENfp2d + p, BEhvM2d + e*BENfp2d + p, \
-				BEzM2d + e*BENfp2d + p, BEhP2d + e*BENfp2d + p, BEhuP2d + e*BENfp2d + p, BEhvP2d + e*BENfp2d + p, BEzP2d + e*BENfp2d + p);
-		}
-		GetFacialFluxTerm2d(BEFluxM2d + e*IENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d);
-		GetPCENumericalFluxTerm(BEFluxS2d + e*BENfp2d, BEhM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEhP2d + e*BENfp2d, BEhuP2d + e*BENfp2d, \
-			BEhvP2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d, Hcrit, gra);
+		ImposeBoundaryCondition(&gra, type, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BEfm2d + e*BENfp2d, BEfp2d + e*BENfp2d, \
+			BEzM2d + e*BENfp2d, BEzP2d + e*BENfp2d, fext2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
+		EvaluateHydroStaticReconstructValue(Hcrit, BEfm2d + e*BENfp2d, BEfp2d + e*BENfp2d, BEzM2d + e*BENfp2d, BEzP2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
+		GetFacialFluxTerm2d(BEFluxM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d);
+		GetPCENumericalFluxTerm(BEFluxS2d + e*BENfp2d, BEfm2d + e*BENfp2d, BEfp2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, &gra, Hcrit, BENfp2d, BENe2d);
 	}
 
 	for (int e = 0; e < IENe2d; e++){
@@ -199,6 +195,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(IEfp2d);
 	free(BEfm2d);
 	free(BEfp2d);
+	free(BEzM2d);
+	free(BEzP2d);
 	free(IEFluxM2d);
 	free(IEFluxP2d);
 	free(IEFluxS2d);

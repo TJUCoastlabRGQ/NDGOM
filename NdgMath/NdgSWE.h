@@ -6,6 +6,8 @@
 
 #define TOLERR 1e-6
 
+#define EPS 1e-6
+
 typedef enum {
 	NdgEdgeInner = 0,
 	NdgEdgeGaussEdge = 1,
@@ -21,7 +23,7 @@ typedef enum {
 	NdgEdgeNonReflectingFlux = 11
 } NdgEdgeType;
 
-void ImposeBoundaryCondition(double , NdgEdgeType , double *, double *, double *, double *, \
+void ImposeBoundaryCondition(double *, NdgEdgeType , double *, double *, double *, double *, \
 	double *, double *, double *, int , int , int );
 
 void EvaluateHydroStaticReconstructValue(double , double *, double *, double *, double *, int , int , int );
@@ -31,5 +33,8 @@ void EvaluateHydroStaticReconstructValue(double , double *, double *, double *, 
 void GetPCENumericalFluxTerm(double *, double *, double *, double *, double *, double *, double , int , int );
 
 void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, double *);
+
+/** Rotate flux to outward normal direction */
+void RotateFluxToNormal2d(double *, double *, double *, double *, double *, double *);
 
 #endif
