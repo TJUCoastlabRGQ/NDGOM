@@ -184,8 +184,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *IEhP2d = IEfp2d, *IEhuP2d = IEfp2d + IENfp2d * IENe2d, \
 		*IEhvP2d = IEfp2d + 2 * IENfp2d*IENe2d;
 	double *IEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxM2d, 0, IENfp2d*IENe2d*sizeof(double)); 
 	double *IEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxP2d, 0, IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxS2d, 0, IENfp2d*IENe2d*sizeof(double)); 
 	double *IERHS2d = malloc(Np2d*K2d*sizeof(double));
 	memset(IERHS2d, 0, Np2d*K2d*sizeof(double));
 	double *BERHS2d = malloc(Np2d*K2d*sizeof(double));
@@ -236,7 +239,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		*BEhP2d = BEfp2d + 2 * BENe2d * BENfp2d;
 	double *BEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
 	double *BEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	memset(BEFluxS2d, 0, BENe2d*BENfp2d*sizeof(double));
 	double *BEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	memset(BEFluxM2d, 0, BENe2d*BENfp2d*sizeof(double));
 	/*The number of variables is three, since we only consider hu, hv and h when adding the boundary condition*/
 	int Nfield = 3;
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
@@ -329,8 +334,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *IEhuP3d = IEfp3d, *IEhvP3d = IEfp3d + IENfp3d * IENe3d, \
 		*IEhP3d = IEfp3d + 2 * IENfp3d*IENe3d;
 	double *IEFluxM3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	memset(IEFluxM3d, 0, IENfp3d*IENe3d*sizeof(double));
 	double *IEFluxP3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	memset(IEFluxP3d, 0, IENfp3d*IENe3d*sizeof(double));
 	double *IEFluxS3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	memset(IEFluxS3d, 0, IENfp3d*IENe3d*sizeof(double));
 	double *IERHS3d = malloc(Np3d*K3d*sizeof(double));
 	memset(IERHS3d, 0, Np3d*K3d*sizeof(double));
 	double *BERHS3d = malloc(Np3d*K3d*sizeof(double));
@@ -388,7 +396,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		*BEhP3d = BEfp3d + 2 * BENe3d * BENfp3d;
 	double *BEzP3d = malloc(BENe3d * BENfp3d * sizeof(double));
 	double *BEFluxS3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	memset(BEFluxS3d, 0, BENe3d*BENfp3d*sizeof(double));
 	double *BEFluxM3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	memset(BEFluxM3d, 0, BENe3d*BENfp3d*sizeof(double));
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 	
 #ifdef _OPENMP

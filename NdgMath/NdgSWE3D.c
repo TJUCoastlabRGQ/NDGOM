@@ -7,8 +7,8 @@ void EvaluateVerticalFaceSurfFlux(double *dest, double *fm, double *nx, double *
 	for (int i = 0; i < Nfp; i++){
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hu + i, &u);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hv + i, &v);
-		dest[i] = (hu[i] * u + 1 / 2 * *gra*h[i] * h[i])*nx[i] + hu[i] * v*ny[i];
-		dest[i + Ne*Nfp] = hu[i] * v*nx[i] + (hv[i] * v + 1 / 2 * *gra*h[i] * h[i])*ny[i];
+		dest[i] = (hu[i] * u + 0.5 * (*gra)*pow(h[i],2))*nx[i] + hu[i] * v*ny[i];
+		dest[i + Ne*Nfp] = hu[i] * v*nx[i] + (hv[i] * v + 0.5 * (*gra) * pow(h[i], 2))*ny[i];
 		for (int field = 3; field < Nvar+1; field++){
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, fm + field*Ne*Nfp + i, &theta);
 			dest[i + (field-1)*Ne*Nfp] = hu[i] * theta * nx[i] + hv[i] * theta * ny[i];
@@ -234,15 +234,15 @@ void EvaluateHorizontalFaceNumFlux(double *FluxS, double *fm, double *fp, double
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, hvm + i, &vm);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hup + i, &up);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hvp + i, &vp);
-		*(FluxS + i) = (um*omegam[i] + up*omegap[i])/2 * nz[i];
-		*(FluxS + Ne*Nfp + i) = (vm*omegam[i] + vp*omegap[i]) / 2 * nz[i];
+		*(FluxS + i) = 0.5*(um*omegam[i] + up*omegap[i]) * nz[i];
+		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] + vp*omegap[i]) * nz[i];
 		for (int n = 2; n < Nvar; n++){
 			/*Here 2*Ne*Nfp stands for the memory occupied by h and omega*/
 			variablem = *(fm + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			variablep = *(fp + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, &variablem, &thetam);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, &variablep, &thetap);
-			*(FluxS + n*Ne*Nfp + i) = (thetam*omegam[i] + thetap*omegap[i]) / 2 * nz[i];
+			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] + thetap*omegap[i]) * nz[i];
 		}
 	}
 
@@ -258,11 +258,11 @@ void EvaluatePrebalanceVolumeTerm(double *Edest, double *Gdest, double *Hdest, d
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hu + i, &u);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hv + i, &v);
 		/*NOTE THAT: THE WET AND DRY NEED TO BE TACKLED HERE*/
-		Edest[i] = hu[i] * u + 1 / 2 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
+		Edest[i] = hu[i] * u + 0.5 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
 		Gdest[i] = hu[i] * v;
 		Hdest[i] = u*omega[i];
 		Edest[i + Np*K] = hu[i] * v;
-		Gdest[i + Np*K] = hv[i] * v + 1 / 2 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
+		Gdest[i + Np*K] = hv[i] * v + 0.5 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
 		Hdest[i + Np*K] = v*omega[i];
 		/*If temperature, salt, sediment or other passive transport material is included, the following part is used to calculate
 		the volume term corresponding to these terms*/

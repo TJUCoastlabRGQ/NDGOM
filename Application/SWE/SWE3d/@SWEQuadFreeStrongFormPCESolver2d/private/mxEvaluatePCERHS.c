@@ -90,8 +90,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *IEhuP2d = IEfp2d, *IEhvP2d = IEfp2d + IENfp2d * IENe2d, \
 		*IEhP2d = IEfp2d + 2 * IENfp2d*IENe2d;
 	double *IEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxM2d, 0, IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxP2d, 0, IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	memset(IEFluxS2d, 0, IENfp2d*IENe2d*sizeof(double));
 	double *IERHS2d = malloc(Np2d*K2d*sizeof(double));
 	memset(IERHS2d, 0, Np2d*K2d*sizeof(double));
 	double *BERHS2d = malloc(Np2d*K2d*sizeof(double));
@@ -132,16 +135,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetPCENumericalFluxTerm(IEFluxS2d + e*IENfp2d, IEfm2d + e*IENfp2d, IEfp2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, &gra, Hcrit, IENfp2d, IENe2d);
 	}
 
-	double *BEfm2d = malloc(BENe2d * BENfp2d * 4 * sizeof(double));
+	double *BEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
 	double *BEhuM2d = BEfm2d, *BEhvM2d = BEfm2d + BENe2d * BENfp2d, \
 		*BEhM2d = BEfm2d + 2 * BENe2d * BENfp2d;
 	double *BEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
-	double *BEfp2d = malloc(BENe2d * BENfp2d * 4 * sizeof(double));
+	double *BEfp2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
 //	double *BEhuP2d = BEfp2d, *BEhvP2d = BEfp2d + BENe2d * BENfp2d, \
 		*BEhP2d = BEfp2d + 2 * BENe2d * BENfp2d;
-	double *BEzP2d = malloc(BENe2d * BENfp2d);
+	double *BEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
 	double *BEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	memset(BEFluxS2d, 0, BENe2d*BENfp2d*sizeof(double));
 	double *BEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	memset(BEFluxM2d, 0, BENe2d*BENfp2d*sizeof(double));
 	int Nfield = 2;
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 #ifdef _OPENMP
