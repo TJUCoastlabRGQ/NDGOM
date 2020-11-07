@@ -20,7 +20,9 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             obj.ht = diff(obj.h,t);
             obj.u2d = int( obj.u, z, [-1,0] );
             obj.v2d = int( obj.v, z, [-1,0] );
-            obj.Omega = int( diff(obj.h * obj.u2d - obj.h * obj.u, x) + diff(obj.h * obj.v2d - obj.h * obj.v, y), z, [-1, z] );
+            obj.Omega = int(-obj.ht - diff(obj.h*obj.u, x) - diff(obj.h*obj.v, y), z, [-1,z]);
+            obj.Source2d = obj.ht + diff(obj.h*obj.u2d, x) + diff(obj.h*obj.v2d, y);
+
             obj.hut = diff( obj.h* obj.u, t);
             obj.mhux = diff( obj.h * obj.u * obj.u + 0.5 * obj.gra * ( obj.h * obj.h - obj.b * obj.b), x);
             obj.mhuy = diff( obj.h * obj.u * obj.v, y);
@@ -31,6 +33,10 @@ classdef UniformManufacturedSolution3d < ManufacturedSolution3d
             obj.mhvz = diff( obj.v * obj.Omega, z);
             obj.mh2dx = diff( obj.h * obj.u2d, x);
             obj.mh2dy = diff( obj.h * obj.v2d, y);
+            obj.mhuzz = diff( obj.miu/obj.h/obj.h * diff( obj.h*obj.u , z ), z );
+            obj.mhvzz = diff( obj.miu/obj.h/obj.h * diff( obj.h*obj.v , z ), z );
+            obj.hufz = diff( obj.h*obj.u , z );
+            obj.hvfz = diff( obj.h*obj.v , z );
         end
         
         function PostInit(obj)

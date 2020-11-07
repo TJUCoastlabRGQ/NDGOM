@@ -266,6 +266,11 @@ COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
+
+path = 'Application/SWE/NumFluxSolver/SWEHLLCNumFluxSolver2d/private/';
+srcfile = {[path, 'mxEvaluate.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'Application/SWE/NumFluxSolver/SWELFNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);

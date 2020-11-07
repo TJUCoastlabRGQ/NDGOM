@@ -154,7 +154,52 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mwSize dimOut[3] = { Np, K, Nvar };
 	plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
 	double *OutputRHS = mxGetPr(plhs[0]);
+	plhs[1] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputE = mxGetPr(plhs[1]);
+	plhs[2] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputG = mxGetPr(plhs[2]);
+	plhs[3] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputH = mxGetPr(plhs[3]);
+	plhs[4] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputVolumn = mxGetPr(plhs[4]);
 
+	mwSize IEdimOut[3] = { IENfp, IENe, Nvar };
+	plhs[5] = mxCreateNumericArray(NdimOut, IEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputIEFluxM = mxGetPr(plhs[5]);
+	plhs[6] = mxCreateNumericArray(NdimOut, IEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputIEFluxP = mxGetPr(plhs[6]);
+	plhs[7] = mxCreateNumericArray(NdimOut, IEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputIEFluxS = mxGetPr(plhs[7]);
+
+	mwSize BEdimOut[3] = { BENfp, BENe, Nvar };
+	plhs[8] = mxCreateNumericArray(NdimOut, BEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBEFluxM = mxGetPr(plhs[8]);
+	plhs[9] = mxCreateNumericArray(NdimOut, BEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBEFluxP = mxGetPr(plhs[9]);
+	plhs[10] = mxCreateNumericArray(NdimOut, BEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBEFluxS = mxGetPr(plhs[10]);
+
+	mwSize BotEdimOut[3] = { BotENfp, BotENe, Nvar };
+	plhs[11] = mxCreateNumericArray(NdimOut, BotEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBotEFluxM = mxGetPr(plhs[11]);
+	plhs[12] = mxCreateNumericArray(NdimOut, BotEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBotEFluxP = mxGetPr(plhs[12]);
+	plhs[13] = mxCreateNumericArray(NdimOut, BotEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBotEFluxS = mxGetPr(plhs[13]);
+
+	mwSize BotBEdimOut[3] = { BotBENfp, BotBENe, Nvar };
+	plhs[14] = mxCreateNumericArray(NdimOut, BotBEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBotBEFluxM = mxGetPr(plhs[14]);
+	plhs[15] = mxCreateNumericArray(NdimOut, BotBEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputBotBEFluxS = mxGetPr(plhs[15]);
+
+	mwSize SurfBEdimOut[3] = { SurfBENfp, SurfBENe, Nvar };
+	plhs[16] = mxCreateNumericArray(NdimOut, SurfBEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputSurfBEFluxM = mxGetPr(plhs[16]);
+	plhs[17] = mxCreateNumericArray(NdimOut, SurfBEdimOut, mxDOUBLE_CLASS, mxREAL);
+	double *OutputSurfBEFluxS = mxGetPr(plhs[17]);
+
+	
 	int Ne, Nfp;
 
 	double *FToN1, *FToN2, *FToE, *nx, *ny, *nz;
@@ -202,6 +247,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateVerticalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
+	memcpy(OutputIEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputIEFluxP, FluxP, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputIEFluxS, FluxS, Nfp*Ne*Nvar*sizeof(double));
+
 
 /*Allocate memory for contribution to RHS due to inner edge facial integral, and
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
@@ -275,11 +324,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		ImposeBoundaryCondition(&gra, type, nx + face*Nfp, ny + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			zM + face*Nfp, zP + face*Nfp, fext + face*Nfp, Nfp, Nvar + 1, Ne);
-		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
+//		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 		EvaluateVerticalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
+	memcpy(OutputBEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputBEFluxS, FluxS, Nfp*Ne*Nvar*sizeof(double));
+
 	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate 
 	contribution to RHS due to boundary edge facial integral in strong form manner*/
 	double *BERHS = malloc(Np*K*Nvar*sizeof(double));
@@ -354,8 +406,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateHorizontalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
-
-
+	memcpy(OutputBotEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputBotEFluxP, FluxP, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputBotEFluxS, FluxS, Nfp*Ne*Nvar*sizeof(double));
 	/*Allocate memory for contribution to RHS due to bottom edge facial integral, and
 	calculate contribution to RHS due to bottom edge facial integral in strong form manner*/
 	double *BotERHS = malloc(Np*K*Nvar*sizeof(double));
@@ -423,6 +476,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
+
+	memcpy(OutputBotBEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputBotBEFluxS, FluxS, Nfp*Ne*Nvar*sizeof(double));
 
 	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate
 	contribution to RHS due to boundary edge facial integral in strong form manner*/
@@ -492,6 +548,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
 
+	memcpy(OutputSurfBEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
+	memcpy(OutputSurfBEFluxS, FluxS, Nfp*Ne*Nvar*sizeof(double));
+
 	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate
 	contribution to RHS due to boundary edge facial integral in strong form manner*/
 	double *SurfBERHS = malloc(Np*K*Nvar*sizeof(double));
@@ -540,6 +599,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			Dr, Ds, Dt, E + k*Np, G + k*Np, H + k*Np, &np, &np, &zero, \
 			&np, rx + k*Np, sx + k*Np, ry + k*Np, sy + k*Np, tz + k*Np, Nvar, Np, K);
 	}
+
+	memcpy(OutputVolumn, OutputRHS, Np*K*Nvar*sizeof(double));
+
+	memcpy(OutputE, E, Np*K*Nvar*sizeof(double));
+	memcpy(OutputG, G, Np*K*Nvar*sizeof(double));
+	memcpy(OutputH, H, Np*K*Nvar*sizeof(double));
+
 	free(E);
 	free(G);
 	free(H);

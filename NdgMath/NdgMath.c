@@ -177,10 +177,10 @@ void GetVolumnIntegral3d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrd
 	for (int n = 0; n < Nvar; n++){
 		/*$Dr*E$*/
 		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dr, LDA, E + n*Np*K, LDB, Beta, dest + n*Np*K, LDC);
-		/*$Ds*E$*/
-		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Ds, LDA, E + n*Np*K, LDB, Beta, tempdest, LDC);
 		/*$rx\cdot Dr*E$*/
 		DotProduct(dest + n*Np*K, dest + n*Np*K, rx, (int)(*LDC));
+		/*$Ds*E$*/
+		dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Ds, LDA, E + n*Np*K, LDB, Beta, tempdest, LDC);
 		/*$sx\cdot Ds*E$*/
 		DotProduct(tempdest, tempdest, sx, (int)(*LDC));
 		/*rx\cdot Dr*E + sx\cdot Ds*E*/
