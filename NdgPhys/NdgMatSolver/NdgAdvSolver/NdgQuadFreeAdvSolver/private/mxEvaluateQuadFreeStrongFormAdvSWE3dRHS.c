@@ -324,7 +324,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		ImposeBoundaryCondition(&gra, type, nx + face*Nfp, ny + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			zM + face*Nfp, zP + face*Nfp, fext + face*Nfp, Nfp, Nvar + 1, Ne);
-//		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
+		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 		EvaluateVerticalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
