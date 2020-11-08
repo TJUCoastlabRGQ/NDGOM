@@ -205,28 +205,23 @@ void EvaluateFlowRateByDeptheThreshold(double hmin, double *h, double *hu, doubl
 void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
 	/*HU ranks first, HV second and H third*/
 	double HR, HL, UR, UL, VR, VL;
-	double SL, SSTAR, SR;
+	double SL, SM, SR;
+	double HSTAR, USTAR;
 	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
 	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
 
-	double *QL = malloc(3 * sizeof(double)), *QR = malloc(3 * sizeof(double));
-	double *VARIABLEL = malloc(3 * sizeof(double)), *VARIABLER = malloc(3 * sizeof(double));
-	double QSTARL, QSTARR;
-	double FL, FR;
-	double FSTARL, FSTARR;
+	double FL, FSTARL, FSTARR, FR;
+	double *QL = malloc(3*sizeof(double)), *QR = malloc(3*sizeof(double));
+	double *VARIABLEL = malloc(3*sizeof(double)), *VARIABLER = malloc(3*sizeof(double));
 	for (int i = 0; i < Nfp; i++){
 		/*Rotate variable to normal and tangential direction*/
-		/*Here Q stands for H, HUn, and HUt*/
+		/*Here Q stands for H, HUn, HUt*/
 		QL[0] = *(hm + i), QR[0] = *(hp + i);
 		RotateFluxToNormal2d(hum + i, hvm + i, nx + i, ny + i, QL + 1, QL + 2);
 		RotateFluxToNormal2d(hup + i, hvp + i, nx + i, ny + i, QR + 1, QR + 2);
 
-		double AR = 0, AL = 0;   //checked
-		double HSTAR = 0, USTAR = 0;
-		double PQL = 0, PQR = 0;
-		double DENOM;
+
 		int SPY = 0;
-		double POND = 0;
 		/*Compute the original variable, u, v and theta, in normal direction*/
 		/*Water depth h comes first*/
 		VARIABLEL[0] = QL[0];
@@ -242,98 +237,57 @@ void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, d
 
 		if (!(HL < Hcrit && HR < Hcrit))
 		{
-			/*CELERITIES*/
-			AL = sqrt(*gra*HL), AR = sqrt(*gra*HR);
-			/*STAR VARIABLES*/
-			HSTAR = 0.5*(HL + HR) - 0.25*(UR - UL)*(HL + HR) / (AL + AR);
-			USTAR = 0.5*(UL + UR) - (HR - HL)*(AL + AR) / (HL + HR);
-			/*IT WILL DEPEND IF WE ARE IN PRESENCE OF SHOCK OR RAREFACTION WAVE*/
-			if (HSTAR < HL)
-			{
-				PQL = 1;
+			USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
+			HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+			if (HL >= Hcrit){
+				SL = min(UL - sqrt(*gra*HL), USTAR - sqrt(*gra*HSTAR));
 			}
-			else if (HL>Hcrit){
-				PQL = sqrt(0.5*(HSTAR + HL)*HSTAR / pow(HL, 2));
+			else{
+				SL = UR - 2 * sqrt(*gra*HR);
+			}
+			if (HR >= Hcrit){
+				SR = max(UR + sqrt(*gra*HR), USTAR + sqrt(*gra*HSTAR));
+			}
+			else{
+				SR = UL + 2 * sqrt(*gra*HL);
 			}
 
-			if (HSTAR < HR)
-			{
-				PQR = 1;
-			}
-			else if (HR>Hcrit){
-				PQR = sqrt(0.5*(HSTAR + HR)*HSTAR / pow(HR, 2));
-			}
-		}
+			SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
 
-		if (HL > Hcrit && HR > Hcrit){
-			SL = UL - AL*PQL;
-			SR = UR + AR*PQR;
-		}
-		else if (HL > Hcrit && HR <= Hcrit){
-			SL = UL - AL;
-			SR = UL + 2 * AL;
-		}
-		else{
-			SL = UR - 2 * AR;
-			SR = UR + AR;
-		}
 
-		DENOM = HR*(UR - SR) - HL*(UL - SL);
+			/*Compute FL AND FR*/
+			FL = HL*UL;
 
-		if (abs(DENOM) < Hcrit){
-			SSTAR = USTAR;
-		}
-		else{
-			SSTAR = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / DENOM;
-		}
-		/*COMPUTE QSTARL AND QSTARR*/
-		if (abs(SL - SSTAR) > EPS){
-			/*POND is initialized as zero*/
-			POND = HL*(SL - UL) / (SL - SSTAR);
-		}
+			FR = HR*UR;
 
-		QSTARL = POND;
 
-		POND = 0;
-		if (abs(SR - SSTAR) > EPS){
-			/*POND is initialized as zero*/
-			POND = HR*(SR - UR) / (SR - SSTAR);
-		}
+			FSTARL = (SR*FL - SL*FR + SL*SR*(HR - HL)) / (SR - SL);
 
-		QSTARR = POND;
 
-		/*Compute FL AND FR*/
-		FL = HL*UL;
-
-		FR = HR*UR;
-		/*Compute FSTARL AND FSTARR*/
-		FSTARL = FL + SL*(QSTARL - HL);
-
-		FSTARR = FR + SR*(QSTARR - HR);
-
-		/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
-		if (0 < SL){
-			dest[i] = FL;
-			SPY = 1;
-		}
-		else if (0 < SSTAR && 0 > SL){
-			dest[i] = FSTARL;
-			SPY = 1;
-		}
-		else if (0 > SSTAR && 0 < SR){
-			dest[i] = FSTARR;
-			SPY = 1;
-		}
-		else{
-			dest[i] = FR;
+			/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
+			if (SL >= 0){
+				dest[i] = FL;
 				SPY = 1;
-		}
-		if (SPY == 0){
-			printf("Error occured when calculating the HLLC flux! check please!");
+			}
+			else if (SM >= 0 && SL <= 0){
+				dest[i] = FSTARL;
+				SPY = 1;
+			}
+			else if (SM <= 0 && SR >= 0){
+				dest[i] = FSTARR;
+				SPY = 1;
+			}
+			else if (0 >= SR){
+				dest[i] = FR;
+				SPY = 1;
+			}
+			if (SPY == 0){
+				printf("Error occured when calculating the HLLC flux! check please!");
+			}
 		}
 	}
-	free(QL), free(QR);
-	free(VARIABLEL), free(VARIABLER);
+		free(QL), free(QR);
+		free(VARIABLEL), free(VARIABLER);
 }
 
 void EvaluatePhysicalVariableByDepthThreshold(double hmin, double *h, double *variable, double *outPut){

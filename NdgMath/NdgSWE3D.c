@@ -36,15 +36,14 @@ void EvaluateHorizontalFaceSurfFlux(double *flux, double *fm, double *nz, double
 /*HLLC numerical flux is adopted in vertical face*/
 void EvaluateVerticalFaceNumFlux(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne){
 	double HR, HL, UR, UL, VR, VL;
-	double SL, SSTAR, SR;
+	double SL, SM, SR;
+	double HSTAR, USTAR;
 	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
 	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
 
 	double *QL = malloc((Nvar + 1)*sizeof(double)), *QR = malloc((Nvar + 1)*sizeof(double));
-	double *QSTARL = malloc((Nvar + 1)*sizeof(double)), *QSTARR = malloc((Nvar + 1)*sizeof(double));
 	double *FL = malloc((Nvar + 1)*sizeof(double)), *FR = malloc((Nvar + 1)*sizeof(double));
 	double *FSTARL = malloc((Nvar + 1)*sizeof(double)), *FSTARR = malloc((Nvar + 1)*sizeof(double));
-	double *FLX = malloc((Nvar + 1)*sizeof(double));
 	double *VARIABLEL = malloc((Nvar + 1)*sizeof(double)), *VARIABLER = malloc((Nvar + 1)*sizeof(double));
 	for (int i = 0; i < Nfp; i++){
 		/*Rotate variable to normal and tangential direction*/
@@ -58,19 +57,14 @@ void EvaluateVerticalFaceNumFlux(double *dest, double *fm, double *fp, double *n
 			QR[n] = *(fp + n*Nfp*Ne + i);
 		}
 
-		double AR = 0, AL = 0;   //checked
-		double HSTAR = 0, USTAR = 0;
-		double PQL = 0, PQR = 0;
-		double DENOM;
 		int SPY = 0;
-		double POND = 0;
 		/*Compute the original variable, u, v and theta, in normal direction*/
 		/*Water depth h comes first*/
 		VARIABLEL[0] = QL[0];
 		VARIABLER[0] = QR[0];
 		for (int n = 1; n < Nvar + 1; n++){
-			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL+n);
-			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER+n);
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL + n);
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER + n);
 		}
 		/*Assign water depth, u and v in both sides to HL(R), UL(R), VL(R)*/
 		HL = VARIABLEL[0], HR = VARIABLER[0];
@@ -79,149 +73,91 @@ void EvaluateVerticalFaceNumFlux(double *dest, double *fm, double *fp, double *n
 
 		if (!(HL < Hcrit && HR < Hcrit))
 		{
-			/*CELERITIES*/
-			AL = sqrt(*gra*HL), AR = sqrt(*gra*HR);
-			/*STAR VARIABLES*/
-			HSTAR = 0.5*(HL + HR) - 0.25*(UR - UL)*(HL + HR) / (AL + AR);
-			USTAR = 0.5*(UL + UR) - (HR - HL)*(AL + AR) / (HL + HR);
-			/*IT WILL DEPEND IF WE ARE IN PRESENCE OF SHOCK OR RAREFACTION WAVE*/
-			if (HSTAR < HL)
-			{
-				PQL = 1;
+			USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
+			HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+			if (HL >= Hcrit){
+				SL = min(UL - sqrt(*gra*HL), USTAR - sqrt(*gra*HSTAR));
 			}
-			else if (HL>Hcrit){
-				PQL = sqrt(0.5*(HSTAR + HL)*HSTAR / pow(HL, 2));
+			else{
+				SL = UR - 2 * sqrt(*gra*HR);
+			}
+			if (HR >= Hcrit){
+				SR = max(UR + sqrt(*gra*HR), USTAR + sqrt(*gra*HSTAR));
+			}
+			else{
+				SR = UL + 2 * sqrt(*gra*HL);
 			}
 
-			if (HSTAR < HR)
-			{
-				PQR = 1;
-			}
-			else if (HR>Hcrit){
-				PQR = sqrt(0.5*(HSTAR + HR)*HSTAR / pow(HR, 2));
-			}
-		}
+			SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
 
-		if (HL > Hcrit && HR > Hcrit){
-			SL = UL - AL*PQL;
-			SR = UR + AR*PQR;
-		}
-		else if (HL > Hcrit && HR <= Hcrit){
-			SL = UL - AL;
-			SR = UL + 2 * AL;
-		}
-		else{
-			SL = UR - 2 * AR;
-			SR = UR + AR;    
-		}
 
-		DENOM = HR*(UR - SR) - HL*(UL - SL);
-
-		if (abs(DENOM) < Hcrit){
-			SSTAR = USTAR;
-		}
-		else{
-			SSTAR = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / DENOM;
-		}
-		/*COMPUTE QSTARL AND QSTARR*/
-		if (abs(SL - SSTAR) > EPS){
-			/*POND is initialized as zero*/
-			POND = HL*(SL - UL) / (SL - SSTAR);
-		}
-
-		QSTARL[0] = POND;
-		QSTARL[1] = POND*SSTAR;
-		QSTARL[2] = POND*VL;
-		for (int n = 3; n < Nvar+1; n++)
-		{
-			QSTARL[n] = POND*VARIABLEL[n];
-		}
-
-		POND = 0;
-		if (abs(SR - SSTAR) > EPS){
-			/*POND is initialized as zero*/
-			POND = HR*(SR - UR) / (SR - SSTAR);
-		}
-
-		QSTARR[0] = POND;
-		QSTARR[1] = POND*SSTAR;
-		QSTARR[2] = POND*VR;
-		for (int n = 3; n < Nvar+1; n++)
-		{
-			QSTARR[n] = POND*VARIABLER[n];
-		}
-
-		/*Compute FL AND FR*/
-		FL[0] = HL*UL;
-		FL[1] = HL*pow(UL, 2) + 0.5*(*gra)*pow(HL, 2);
-		FL[2] = FL[0]*VL;
-		for (int n = 3; n < Nvar + 1; n++){
-			FL[n] = FL[0] * VARIABLEL[n];
-		}
-
-		FR[0] = HR*UR;
-		FR[1] = HR*pow(UR, 2) + 0.5*(*gra)*pow(HR, 2);
-		FR[2] = HR*UR*VR;
-		for (int n = 3; n < Nvar + 1; n++){
-			FR[n] = FR[0] * VARIABLER[n];
-		}
-		/*Compute FSTARL AND FSTARR*/
-		FSTARL[0] = FL[0] + SL*(QSTARL[0] - QL[0]);
-		FSTARL[1] = FL[1] + SL*(QSTARL[1] - QL[1]);
-		FSTARL[2] = FL[2] + SL*(QSTARL[2] - QL[2]);
-		for (int n = 3; n < Nvar + 1; n++){
-			FSTARL[n] = FL[n] + SL*(QSTARL[n] - QL[n]);
-		}
-
-		FSTARR[0] = FR[0] + SR*(QSTARR[0] - QR[0]);
-		FSTARR[1] = FR[1] + SR*(QSTARR[1] - QR[1]);
-		FSTARR[2] = FR[2] + SR*(QSTARR[2] - QR[2]);
-		for (int n = 3; n < Nvar + 1; n++){
-			FSTARR[n] = FR[n] + SR*(QSTARR[n] - QR[n]);
-		}
-		/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
-		if (0 < SL){
-			//*Fhn = FL[0];
-			dest[i] = (FL[1] * nx[i] - FL[2] * ny[i]);
-			dest[i + Nfp*Ne] = (FL[1] * ny[i] + FL[2] * nx[i]);
-			for (int n = 3; n < Nvar+1; n++){
-				dest[i + (n-1) * Nfp*Ne] = FL[n];
-			}
-			SPY = 1;
-		}
-		else if (0 < SSTAR && 0 > SL){
-			dest[i] = (FSTARL[1] * nx[i] - FSTARL[2] * ny[i]);
-			dest[i + Nfp*Ne] = (FSTARL[1] * ny[i] + FSTARL[2] * nx[i]);
-			for (int n = 3; n < Nvar+1; n++){
-				dest[i + (n - 1) * Nfp*Ne] = FSTARL[n];
-			}
-			SPY = 1;
-		}
-		else if (0 > SSTAR && 0 < SR){
-			dest[i] = (FSTARR[1] * nx[i] - FSTARR[2] * ny[i]);
-			dest[i + Nfp*Ne] = (FSTARR[1] * ny[i] + FSTARR[2] * nx[i]);
+			/*Compute FL AND FR*/
+			FL[0] = HL*UL;
+			FL[1] = HL*pow(UL, 2) + 0.5*(*gra)*pow(HL, 2);
+			FL[2] = FL[0] * VL;
 			for (int n = 3; n < Nvar + 1; n++){
-				dest[i + (n - 1) * Nfp*Ne] = FSTARR[n];
+				FL[n] = FL[0] * VARIABLEL[n];
 			}
-			SPY = 1;
-		}
-		else{
-			dest[i] = (FR[1] * nx[i] - FR[2] * ny[i]);
-			dest[i + Nfp*Ne] = (FR[1] * ny[i] + FR[2] * nx[i]);
+
+			FR[0] = HR*UR;
+			FR[1] = HR*pow(UR, 2) + 0.5*(*gra)*pow(HR, 2);
+			FR[2] = HR*UR*VR;
 			for (int n = 3; n < Nvar + 1; n++){
-				dest[i + (n - 1) * Nfp*Ne] = FR[n];
+				FR[n] = FR[0] * VARIABLER[n];
 			}
-			SPY = 1;
-		}
-		if (SPY == 0){
-			printf("Error occured when calculating the HLLC flux! check please!");
+
+			FSTARL[0] = (SR*FL[0] - SL*FR[0] + SL*SR*(HR - HL)) / (SR - SL);
+			FSTARL[1] = (SR*FL[1] - SL*FR[1] + SL*SR*(HR*UR - HL*UL)) / (SR - SL);
+			FSTARR[0] = FSTARL[0];
+			FSTARR[1] = FSTARL[1];
+
+			for (int n = 2; n < Nvar + 1; n++){
+				FSTARL[n] = FSTARL[0] * VARIABLEL[n];
+				FSTARR[n] = FSTARR[0] * VARIABLER[n];
+			}
+
+			/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
+			if (SL >= 0){
+				//*Fhn = FL[0];
+				dest[i] = (FL[1] * nx[i] - FL[2] * ny[i]);
+				dest[i + Nfp*Ne] = (FL[1] * ny[i] + FL[2] * nx[i]);
+				for (int n = 3; n < Nvar + 1; n++){
+					dest[i + (n - 1) * Nfp*Ne] = FL[n];
+				}
+				SPY = 1;
+			}
+			else if (SM >= 0 && SL <= 0){
+				dest[i] = (FSTARL[1] * nx[i] - FSTARL[2] * ny[i]);
+				dest[i + Nfp*Ne] = (FSTARL[1] * ny[i] + FSTARL[2] * nx[i]);
+				for (int n = 3; n < Nvar + 1; n++){
+					dest[i + (n - 1) * Nfp*Ne] = FSTARL[n];
+				}
+				SPY = 1;
+			}
+			else if (SM <= 0 && SR >= 0){
+				dest[i] = (FSTARR[1] * nx[i] - FSTARR[2] * ny[i]);
+				dest[i + Nfp*Ne] = (FSTARR[1] * ny[i] + FSTARR[2] * nx[i]);
+				for (int n = 3; n < Nvar + 1; n++){
+					dest[i + (n - 1) * Nfp*Ne] = FSTARR[n];
+				}
+				SPY = 1;
+			}
+			else if (0 >= SR){
+				dest[i] = (FR[1] * nx[i] - FR[2] * ny[i]);
+				dest[i + Nfp*Ne] = (FR[1] * ny[i] + FR[2] * nx[i]);
+				for (int n = 3; n < Nvar + 1; n++){
+					dest[i + (n - 1) * Nfp*Ne] = FR[n];
+				}
+				SPY = 1;
+			}
+			if (SPY == 0){
+				printf("Error occured when calculating the HLLC flux! check please!");
+			}
 		}
 	}
 	free(QL), free(QR);
-	free(QSTARL), free(QSTARR);
 	free(FL), free(FR);
 	free(FSTARL), free(FSTARR);
-	free(FLX);
 	free(VARIABLEL), free(VARIABLER);
 }
 
