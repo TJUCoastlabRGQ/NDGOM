@@ -33,8 +33,9 @@ void EvaluateHorizontalFaceSurfFlux(double *flux, double *fm, double *nz, double
 	}
 }
 
-/*HLLC numerical flux is adopted in vertical face*/
-void EvaluateVerticalFaceNumFlux(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne){
+/*HLLC numerical flux is adopted in vertical face, */
+void EvaluateVerticalFaceNumFlux_HLLC_LU(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne){
+	/*The HLLC numerical flux presented in LU(2020, Computer Methods in Applied Mechanics and Engineering) is adopted*/
 	double HR, HL, UR, UL, VR, VL;
 	double SL, SM, SR;
 	double HSTAR, USTAR;
@@ -94,7 +95,7 @@ void EvaluateVerticalFaceNumFlux(double *dest, double *fm, double *fp, double *n
 			/*Compute FL AND FR*/
 			FL[0] = HL*UL;
 			FL[1] = HL*pow(UL, 2) + 0.5*(*gra)*pow(HL, 2);
-			FL[2] = FL[0] * VL;
+			FL[2] = HL*UL*VL;
 			for (int n = 3; n < Nvar + 1; n++){
 				FL[n] = FL[0] * VARIABLEL[n];
 			}

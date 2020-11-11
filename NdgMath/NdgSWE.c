@@ -202,8 +202,9 @@ void EvaluateFlowRateByDeptheThreshold(double hmin, double *h, double *hu, doubl
 */
 
 /*This function is used to calcualte the numerical flux in the primitive continuity equation(PCE) */
-void GetPCENumericalFluxTerm(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
+void GetPCENumericalFluxTerm_HLLC_LU(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
 	/*HU ranks first, HV second and H third*/
+	/*The HLLC numerical flux presented in LU(2020, Computer Methods in Applied Mechanics and Engineering) is adopted*/
 	double HR, HL, UR, UL, VR, VL;
 	double SL, SM, SR;
 	double HSTAR, USTAR;

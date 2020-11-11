@@ -244,7 +244,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxP + face*Nfp, fp + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
+		EvaluateVerticalFaceNumFlux_HLLC_LU(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
 	memcpy(OutputIEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));
@@ -326,7 +326,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			zM + face*Nfp, zP + face*Nfp, fext + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
+		EvaluateVerticalFaceNumFlux_HLLC_LU(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
 	memcpy(OutputBEFluxM, FluxM, Nfp*Ne*Nvar*sizeof(double));

@@ -30,7 +30,7 @@ void EvaluateHydroStaticReconstructValue(double , double *, double *, double *, 
 
 //void EvaluateFlowRateByDeptheThreshold(double hmin, double *hM, double *huM, double *hvM, double *um, double *vm);
 
-void GetPCENumericalFluxTerm(double *, double *, double *, double *, double *, double *, double , int , int );
+void GetPCENumericalFluxTerm_HLLC_LU(double *, double *, double *, double *, double *, double *, double , int , int );
 
 void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, double *);
 
