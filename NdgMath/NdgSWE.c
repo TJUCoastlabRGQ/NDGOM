@@ -405,7 +405,7 @@ void GetPCENumericalFluxTerm_HLL(double *dest, double *fm, double *fp, double *n
 				SPY = 1;
 			}
 			if (SPY == 0){
-				printf("Error occured when calculating the HLLC flux! check please!");
+				printf("Error occured when calculating the HLL flux! check please!");
 			}
 		}
 	}
