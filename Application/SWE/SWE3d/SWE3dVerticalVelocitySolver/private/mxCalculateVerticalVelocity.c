@@ -172,7 +172,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	signed char *ftype2d = (signed char *)mxGetData(prhs[18]);
 	signed char *ftype3d = (signed char *)mxGetData(prhs[19]);
  
-    double *Tempfield2d = mxGetPr(prhs[20]);
+//    double *Tempfield2d = mxGetPr(prhs[20]);
     
 	plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 	double *VerticalVelocity = mxGetPr(plhs[0]);
@@ -304,14 +304,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int k = 0; k < K2d; k++){
 		NdgExtend2dField(field2d, rhs2d, Np2d, k, Np3d, NLayer, Nz);
 	}
-    
+/*    
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K3d; k++){
 		Minus(field2d + k*Np3d, field2d + k*Np3d, Tempfield2d + k*Np3d, Np3d);
 	}    
-
+*/
 	free(rhs2d);
 	free(IEfm2d);
 	free(IEfp2d);
