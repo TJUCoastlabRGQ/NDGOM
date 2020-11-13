@@ -230,12 +230,12 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             z = obj.mesh3d.BoundaryEdge.zb;
             obj.fext3d{1}( :, :, 1 ) = eval( obj.h ) .* eval( obj.u );
             obj.fext3d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.v );
-            obj.fext3d{1}( :, :, 4 ) = eval( obj.h );
+            obj.fext3d{1}( :, :, 3 ) = eval( obj.h );
             x = obj.mesh2d.BoundaryEdge.xb; y = obj.mesh2d.BoundaryEdge.yb;
             z = zeros(size(x));
-            obj.fext2d{1}( :, :, 1 ) = eval( obj.h );
-            obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.u2d );
-            obj.fext2d{1}( :, :, 3 ) = eval( obj.h ) .* eval( obj.v2d );
+            obj.fext2d{1}( :, :, 1 ) = eval( obj.h ) .* eval( obj.u2d );
+            obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.v2d );
+            obj.fext2d{1}( :, :, 3 ) = eval( obj.h );            
             x = obj.mesh2d.x;  y = obj.mesh2d.y; z = zeros(size(x));
             obj.SurfaceDate(:,:,1) = eval(obj.u) .* eval(obj.Omega);
             obj.SurfaceDate(:,:,2) = eval(obj.v) .* eval(obj.Omega);

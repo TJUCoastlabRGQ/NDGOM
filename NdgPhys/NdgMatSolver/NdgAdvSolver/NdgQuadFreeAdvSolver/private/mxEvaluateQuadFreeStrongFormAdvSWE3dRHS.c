@@ -466,9 +466,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
 	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
 	/*WE NOTE THAT, FOR THE CONVERGENCE TEST, THIS FLUX IS NOT TAKEN AS ZERO AND SHOULD BE TAKEN FORM THE INPUT*/
-//	double *SurfFluxS = mxGetPr(prhs[13]);
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	double *SurfFluxS = mxGetPr(prhs[13]);
+//	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
+//	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -500,7 +500,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int field = 0; field < Nvar; field++){
 		for (int face = 0; face < Ne; face++){
-			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, SurfBERHS + field*Np*K);
+			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, SurfFluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, SurfBERHS + field*Np*K);
 		}
 	}
 
@@ -515,7 +515,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	free(fm);
 	free(FluxM);
-	free(FluxS);
+//	free(FluxS);
 	free(TempFacialIntegral);
 	/**********************
 	/***************************************************************************************************************/
