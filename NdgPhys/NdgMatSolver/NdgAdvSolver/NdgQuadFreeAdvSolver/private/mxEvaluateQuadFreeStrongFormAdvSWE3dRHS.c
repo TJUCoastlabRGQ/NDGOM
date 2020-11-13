@@ -199,7 +199,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxP + face*Nfp, fp + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux_HLLC_LU(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
+		EvaluateVerticalFaceNumFlux_HLL(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
 
@@ -277,7 +277,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			zM + face*Nfp, zP + face*Nfp, fext + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
 		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux_HLLC_LU(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
+		EvaluateVerticalFaceNumFlux_HLL(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
 	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate 
@@ -466,8 +466,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
 	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
 	/*WE NOTE THAT, FOR THE CONVERGENCE TEST, THIS FLUX IS NOT TAKEN AS ZERO AND SHOULD BE TAKEN FORM THE INPUT*/
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	double *SurfFluxS = mxGetPr(prhs[13]);
+//	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
+//	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -499,7 +500,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int field = 0; field < Nvar; field++){
 		for (int face = 0; face < Ne; face++){
-			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, SurfBERHS + field*Np*K);
+			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, SurfFluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, SurfBERHS + field*Np*K);
 		}
 	}
 
@@ -514,7 +515,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 	free(fm);
 	free(FluxM);
-	free(FluxS);
+//	free(FluxS);
 	free(TempFacialIntegral);
 	/**********************
 	/***************************************************************************************************************/

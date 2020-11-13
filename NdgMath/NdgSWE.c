@@ -202,18 +202,142 @@ void EvaluateFlowRateByDeptheThreshold(double hmin, double *h, double *hu, doubl
 */
 
 /*This function is used to calcualte the numerical flux in the primitive continuity equation(PCE) */
-void GetPCENumericalFluxTerm_HLLC_LU(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
+void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
+	/*HU ranks first, HV second and H third*/
+	/*The HLLC numerical flux presented in LAI(2012, Modeling one- and two-dimensional shallow water flows with discontinuous Galerkin method) is adopted*/
+	double HR, HL, UR, UL;
+	double SL, SM, SR;
+	double USTAR, HSTAR;
+	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
+	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
+	/*H, HUN, HVT*/
+	double *QL = malloc(3*sizeof(double)), *QR = malloc(3*sizeof(double));
+	/*H, UN, VT*/
+	double *VARIABLEL = malloc(3 * sizeof(double)), *VARIABLER = malloc(3 * sizeof(double));
+	double FL , FR ;
+	double FSTARL, FSTARR ;
+
+	double QSTARL, QSTARR;
+	for (int i = 0; i < Nfp; i++){
+		/*Rotate variable to normal and tangential direction*/
+		/*Here Q stands for H, HUn, HUt, H theta*/
+		QL[0] = *(hm + i), QR[0] = *(hp + i);
+		RotateFluxToNormal2d(hum + i, hvm + i, nx + i, ny + i, QL + 1, QL + 2);
+		RotateFluxToNormal2d(hup + i, hvp + i, nx + i, ny + i, QR + 1, QR + 2);
+
+		int SPY = 0;
+		/*Compute the original variable, u, v and theta, in normal direction*/
+		/*Water depth h comes first*/
+		VARIABLEL[0] = QL[0];
+		VARIABLER[0] = QR[0];
+		for (int n = 1; n < 3; n++){
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL + n);
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER + n);
+		}
+		/*Assign water depth, u and v in both sides to HL(R), UL(R), VL(R)*/
+		HL = VARIABLEL[0], HR = VARIABLER[0];
+		UL = VARIABLEL[1], UR = VARIABLER[1];
+		/*Here, we use the critical value to categorize different condition, I wonder whether this value can be
+		directly set to zero, if this value is set to zero, then they calculation in the further part can be looked
+		to be very smooth*/
+		if (!(HL < Hcrit && HR < Hcrit))
+		{
+
+			/*Compute FL AND FR*/
+			FL = HL*UL;
+
+			FR = HR*UR;
+
+			if ((HL>Hcrit) & (HR > Hcrit)){
+				USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
+				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+				SL = min(UL - sqrt(*gra * HL), USTAR - sqrt(*gra*HSTAR));
+				SR = max(UR + sqrt(*gra * HR), USTAR + sqrt(*gra*HSTAR));
+				SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
+				/*Compute QSTARL AND QSTARR*/
+				QSTARL = HL*((SL - UL) / (SL - SM)) * 1;
+				QSTARR = HR*((SR - UR) / (SR - SM)) * 1;
+
+				FSTARL = FL + SL * (QSTARL - QL[0]);
+				FSTARR = FR + SR * (QSTARR - QR[0]);
+
+				/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
+				if (SL >= 0){
+					dest[i] = FL;
+					SPY = 1;
+				}
+				else if (SM >= 0 && SL < 0){
+					dest[i] = FSTARL;
+					SPY = 1;
+				}
+				else if (SM < 0 && SR > 0){
+					dest[i] = FSTARR;
+					SPY = 1;
+				}
+				else if (0 >= SR){
+					dest[i] = FR;
+					SPY = 1;
+				}
+
+			}
+			else if (HL>Hcrit && HR <= Hcrit){
+				SL = UL - sqrt(*gra*HL);
+				SR = UL + 2 * sqrt(*gra*HL);
+				//是否将SM的计算移到这里来
+				//				SM = SR;
+				if (SL >= 0){
+					dest[i] = FL;
+					SPY = 1;
+				}
+				else if (SL < 0 && 0 < SR){
+					dest[i] = (SR * FL - SL * FR + SL * SR * (HR - HL)) / (SR - SL);
+					SPY = 1;
+				}
+				else if (SR <= 0){
+					dest[i] = FR;
+					SPY = 1;
+				}
+			}
+			else if (HL <= Hcrit && HR > Hcrit){
+				SL = UR - 2 * sqrt(*gra*HR);
+				SR = UR + sqrt(*gra*HR);
+				//				SM = SL;
+				if (SL >= 0){
+					dest[i] = FL;
+					SPY = 1;
+				}
+				else if (SL < 0 && 0 < SR){
+					dest[i] = (SR * FL - SL * FR + SL * SR * (HR - HL)) / (SR - SL);
+					SPY = 1;
+				}
+				else if (SR <= 0){
+					dest[i] = FR;
+					SPY = 1;
+				}
+			}
+			//SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
+			if (SPY == 0){
+				printf("Error occured when calculating the HLLC flux! check please!");
+			}
+		}
+	}
+	free(QL), free(QR);
+	free(VARIABLEL), free(VARIABLER);
+}
+
+
+void GetPCENumericalFluxTerm_HLL(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
 	/*HU ranks first, HV second and H third*/
 	/*The HLLC numerical flux presented in LU(2020, Computer Methods in Applied Mechanics and Engineering) is adopted*/
 	double HR, HL, UR, UL, VR, VL;
-	double SL, SM, SR;
-	double HSTAR, USTAR;
+	double SL, SR;
+	//double HSTAR, USTAR;
 	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
 	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
 
-	double FL, FSTARL, FSTARR, FR;
-	double *QL = malloc(3*sizeof(double)), *QR = malloc(3*sizeof(double));
-	double *VARIABLEL = malloc(3*sizeof(double)), *VARIABLER = malloc(3*sizeof(double));
+	double FL, FR;
+	double *QL = malloc(3 * sizeof(double)), *QR = malloc(3 * sizeof(double));
+	double *VARIABLEL = malloc(3 * sizeof(double)), *VARIABLER = malloc(3 * sizeof(double));
 	for (int i = 0; i < Nfp; i++){
 		/*Rotate variable to normal and tangential direction*/
 		/*Here Q stands for H, HUn, HUt*/
@@ -238,22 +362,24 @@ void GetPCENumericalFluxTerm_HLLC_LU(double *dest, double *fm, double *fp, doubl
 
 		if (!(HL < Hcrit && HR < Hcrit))
 		{
-			USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
-			HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
-			if (HL >= Hcrit){
-				SL = min(UL - sqrt(*gra*HL), USTAR - sqrt(*gra*HSTAR));
+			if (HL > Hcrit && HR>Hcrit){
+				double USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
+				double CSTAR = 0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR);
+				SL = min(UL - sqrt(*gra*HL), USTAR - CSTAR);
+				SR = max(UR + sqrt(*gra*HL), USTAR + CSTAR);
 			}
-			else{
-				SL = UR - 2 * sqrt(*gra*HR);
-			}
-			if (HR >= Hcrit){
-				SR = max(UR + sqrt(*gra*HR), USTAR + sqrt(*gra*HSTAR));
-			}
-			else{
+			else if (HL>Hcrit && HR <= Hcrit){
+				SL = UL - sqrt(*gra*HL);
 				SR = UL + 2 * sqrt(*gra*HL);
 			}
-
-			SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
+			else if (HL <= Hcrit && HR > Hcrit){
+				SL = UR - 2 * sqrt(*gra*HR);
+				SR = UR + sqrt(*gra*HR);
+			}
+			else{
+				SL = 0.0;
+				SR = 0.0;
+			}
 
 
 			/*Compute FL AND FR*/
@@ -261,25 +387,21 @@ void GetPCENumericalFluxTerm_HLLC_LU(double *dest, double *fm, double *fp, doubl
 
 			FR = HR*UR;
 
-
-			FSTARL = (SR*FL - SL*FR + SL*SR*(HR - HL)) / (SR - SL);
-
-
 			/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
-			if (SL >= 0){
+			if (SL >= 0 && SR > 0){
 				dest[i] = FL;
 				SPY = 1;
 			}
-			else if (SM >= 0 && SL <= 0){
-				dest[i] = FSTARL;
+			else if (SL < 0 && SR > 0){
+				dest[i] = (SR * FL - SL * FR + SL * SR * (HR - HL)) / (SR - SL);
 				SPY = 1;
 			}
-			else if (SM <= 0 && SR >= 0){
-				dest[i] = FSTARR;
-				SPY = 1;
-			}
-			else if (0 >= SR){
+			else if (SL < 0 && SR <= 0){
 				dest[i] = FR;
+				SPY = 1;
+			}
+			else if ((fabs(SL) < EPS) & (fabs(SR) < EPS)){
+				dest[i] = FL;
 				SPY = 1;
 			}
 			if (SPY == 0){
@@ -287,9 +409,13 @@ void GetPCENumericalFluxTerm_HLLC_LU(double *dest, double *fm, double *fp, doubl
 			}
 		}
 	}
-		free(QL), free(QR);
-		free(VARIABLEL), free(VARIABLER);
+	free(QL), free(QR);
+	free(VARIABLEL), free(VARIABLER);
 }
+
+
+
+
 
 void EvaluatePhysicalVariableByDepthThreshold(double hmin, double *h, double *variable, double *outPut){
 	if (*h > hmin){

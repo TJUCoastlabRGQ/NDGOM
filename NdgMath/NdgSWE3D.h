@@ -7,7 +7,9 @@ void EvaluateHorizontalFaceSurfFlux(double *flux, double *fm, double *nz, double
 
 void EvaluatePhysicalVariableByDepthThreshold(double hmin, double *h, double *variable, double *outPut);
 
-void EvaluateVerticalFaceNumFlux_HLLC_LU(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne);
+void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne);
+
+void EvaluateVerticalFaceNumFlux_HLL(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne);
 
 void EvaluateHorizontalFaceNumFlux(double *FluxS, double *fm, double *fp, double *nz, double Hcrit, int Nfp, int Nvar, int Ne);
 

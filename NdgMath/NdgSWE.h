@@ -32,6 +32,9 @@ void EvaluateHydroStaticReconstructValue(double , double *, double *, double *, 
 
 void GetPCENumericalFluxTerm_HLLC_LU(double *, double *, double *, double *, double *, double *, double , int , int );
 
+void GetPCENumericalFluxTerm_HLL(double *, double *, double *, double *, double *, double *, double, int, int);
+
+
 void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, double *);
 
 /** Rotate flux to outward normal direction */
