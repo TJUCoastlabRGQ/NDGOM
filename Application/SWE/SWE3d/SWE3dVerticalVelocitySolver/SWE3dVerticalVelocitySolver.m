@@ -130,85 +130,82 @@ classdef SWE3dVerticalVelocitySolver < handle
 %                         end
         end
         
-        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys)%, time )
+        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys, time )
             BotEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end-1) ~= 0, end-1 );
             UpEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end) ~= 0, end );  
             % The C version from bottom to surface      
 % %             tic;
-%             t = time;
-%             x = physClass.meshUnion.x;
-%             y = physClass.meshUnion.y;
-%             z = physClass.meshUnion.z;
-%             Tempfield2d = eval(physClass.Source2d);
-            Tempfield2d = zeros(size(physClass.meshUnion.x));    
-            [ TempVerticalVelocity, IEFluxS3d, BEFluxS3d, IEFluxS2d, BEFluxS2d, ...
-                CInnerSurface_frhs3d, CBoundarySurface_frhs3d, CInnerSurface_frhs2d, ...
-                CBoundarySurface_frhs2d, Field2d, Field3d] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+            t = time;
+            x = physClass.meshUnion.x;
+            y = physClass.meshUnion.y;
+            z = physClass.meshUnion.z;
+            Tempfield2d = eval(physClass.Source2d);
+            [ VerticalVelocity ] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype), Tempfield2d);
 % %             t1 = toc;
 % %             tic;
-            edge = physClass.meshUnion.InnerEdge;
-            edge2d = physClass.mesh2d.InnerEdge;
-            [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-            [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-            %             [ FluxM2d ] = edge.VerticalColumnIntegralField(FluxM3d(:,:,1) );
-            [ FluxP3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
-            %             [ FluxP2d ] = edge.VerticalColumnIntegralField(FluxP3d(:,:,1) );
-            [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
-            %             [ FluxS2d ] = edge.VerticalColumnIntegralField(FluxS3d(:,:,1) );
-            [ InnerSurface_frhs3d ] = edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ;            
-            [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
-            [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
-            [ fluxP ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fp2d );
-            [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
-            InnerSurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
-            
-            %             [ InnerSurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ;
-            
-            edge = physClass.meshUnion.BoundaryEdge;
-            edge2d = physClass.mesh2d.BoundaryEdge;
-            [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
-            [ fm, fp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, physClass.fext3d{1} );
-            [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
-            %             [ FluxM2d ] = edge.VerticalColumnIntegralField( FluxM3d(:,:,1) );
-            [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
-            %             [ FluxS2d ] = edge.VerticalColumnIntegralField( FluxS3d(:,:,1) );
-            
-            [ BoundarySurface_frhs3d ] = edge.matEvaluateStrongFormEdgeRHS( FluxM3d(:,:,1), FluxS3d(:,:,1) ) ;
-%             [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
-            [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
-            [ fm2d, fp2d ] = physClass.PCESolver2d.matImposeBoundaryCondition( edge2d, edge2d.nx, edge2d.ny, fm2d, fp2d, physClass.fext2d{1});            
-            [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
-            [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
-            BoundarySurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
-            
-            field3d =...
-                ( - physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) - physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) + ...
-                InnerSurface_frhs3d + BoundarySurface_frhs3d  - ( physClass.meshUnion.ry .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,2)) - physClass.meshUnion.sy .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,2)) ) ;
-            % Term2d = ;
-            field2d = physClass.meshUnion.Extend2dField( - physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) - physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) + ...
-                InnerSurface_frhs2d + BoundarySurface_frhs2d - physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) - physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
-            
-            %             x = physClass.meshUnion.x;
-%             y = physClass.meshUnion.y;
-%             z = physClass.meshUnion.z;
-%             t = time;
-%             field2d = field2d  + eval( physClass.Source2d );  
-            
-            Nz = physClass.meshUnion.Nz;
-            VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
-            %% we calculate from bottom to surface
-            VerticalVelocity(:, Nz:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz:Nz:end), ...
-                permute( permute( field3d(:, Nz:Nz:end) - field2d(:, Nz:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-            
-            for Layer = 2 : Nz
-                BotVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
-                BotVertVelocity( BotEidM, : ) = VerticalVelocity( UpEidM, Nz - Layer + 2 : Nz : end);
-                VerticalVelocity(:, Nz - Layer + 1:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
-                    permute( permute( field3d(:, Nz - Layer + 1:Nz:end) - field2d(:, Nz - Layer + 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
-                    permute( permute( BotVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
-            end
+% %             edge = physClass.meshUnion.InnerEdge;
+% %             edge2d = physClass.mesh2d.InnerEdge;
+% %             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
+% %             [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+% %             %             [ FluxM2d ] = edge.VerticalColumnIntegralField(FluxM3d(:,:,1) );
+% %             [ FluxP3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fp );
+% %             %             [ FluxP2d ] = edge.VerticalColumnIntegralField(FluxP3d(:,:,1) );
+% %             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
+% %             %             [ FluxS2d ] = edge.VerticalColumnIntegralField(FluxS3d(:,:,1) );
+% %             [ InnerSurface_frhs3d ] = edge.matEvaluateStrongFromEdgeRHS( FluxM3d(:,:,1), FluxP3d(:,:,1), FluxS3d(:,:,1) ) ;            
+% %             [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
+% %             [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
+% %             [ fluxP ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fp2d );
+% %             [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
+% %             InnerSurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxP, fluxS(:,:,1) );
+% %             
+% %             %             [ InnerSurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxP2d(:,:,1), FluxS2d(:,:,1) ) ;
+% %             
+% %             edge = physClass.meshUnion.BoundaryEdge;
+% %             edge2d = physClass.mesh2d.BoundaryEdge;
+% %             [ fm, fp ] = edge.matEvaluateSurfValue( fphys );
+% %             [ fm, fp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, fm, fp, physClass.fext3d{1} );
+% %             [ FluxM3d ] = physClass.matEvaluateSurfFlux( edge, edge.nx, edge.ny, edge.nz, fm );
+% %             %             [ FluxM2d ] = edge.VerticalColumnIntegralField( FluxM3d(:,:,1) );
+% %             [ FluxS3d ] = physClass.matEvaluateSurfNumFlux( physClass.meshUnion, edge.nx, edge.ny, fm(:,:,[4, 1, 2]), fp(:,:,[4, 1, 2]), edge );
+% %             %             [ FluxS2d ] = edge.VerticalColumnIntegralField( FluxS3d(:,:,1) );
+% %             
+% %             [ BoundarySurface_frhs3d ] = edge.matEvaluateStrongFormEdgeRHS( FluxM3d(:,:,1), FluxS3d(:,:,1) ) ;
+% % %             [ BoundarySurface_frhs2d ] = edge2d.matEvaluateStrongFormEdgeRHS( FluxM2d(:,:,1), FluxS2d(:,:,1) );
+% %             [ fm2d, fp2d ] = edge2d.matEvaluateSurfValue( fphys2d );
+% %             [ fm2d, fp2d ] = physClass.PCESolver2d.matImposeBoundaryCondition( edge2d, edge2d.nx, edge2d.ny, fm2d, fp2d, physClass.fext2d{1});            
+% %             [ fluxM ] = physClass.PCESolver2d.matEvaluateSurfFlux( edge2d, edge2d.nx, edge2d.ny, fm2d );
+% %             [ fluxS ] = physClass.matEvaluateSurfNumFlux( physClass.mesh2d, edge2d.nx, edge2d.ny, fm2d, fp2d, edge2d);
+% %             BoundarySurface_frhs2d = edge2d.matEvaluateStrongFormEdgeRHS( fluxM, fluxS );
+% %             
+% %             field3d =...
+% %                 ( - physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,1)) - physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,1)) ) + ...
+% %                 InnerSurface_frhs3d + BoundarySurface_frhs3d  - ( physClass.meshUnion.ry .* (physClass.meshUnion.cell.Dr * fphys{1}(:,:,2)) - physClass.meshUnion.sy .* (physClass.meshUnion.cell.Ds * fphys{1}(:,:,2)) ) ;
+% %             % Term2d = ;
+% %             field2d = physClass.meshUnion.Extend2dField( - physClass.mesh2d.rx .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,2)) - physClass.mesh2d.sx .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,2) ) + ...
+% %                 InnerSurface_frhs2d + BoundarySurface_frhs2d - physClass.mesh2d.ry .* (physClass.mesh2d.cell.Dr * fphys2d{1}(:,:,3) ) - physClass.mesh2d.sy .* (physClass.mesh2d.cell.Ds * fphys2d{1}(:,:,3)) );
+% %             
+% %             %             x = physClass.meshUnion.x;
+% % %             y = physClass.meshUnion.y;
+% % %             z = physClass.meshUnion.z;
+% % %             t = time;
+% % %             field2d = field2d  + eval( physClass.Source2d );  
+% %             
+% %             Nz = physClass.meshUnion.Nz;
+% %             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
+% %             %% we calculate from bottom to surface
+% %             VerticalVelocity(:, Nz:Nz:end) =  permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz:Nz:end), ...
+% %                 permute( permute( field3d(:, Nz:Nz:end) - field2d(:, Nz:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+% %             
+% %             for Layer = 2 : Nz
+% %                 BotVertVelocity = zeros( physClass.meshUnion.cell.Np, physClass.mesh2d.K );
+% %                 BotVertVelocity( BotEidM, : ) = VerticalVelocity( UpEidM, Nz - Layer + 2 : Nz : end);
+% %                 VerticalVelocity(:, Nz - Layer + 1:Nz:end) = permute( sum( bsxfun(@times, obj.RHSCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
+% %                     permute( permute( field3d(:, Nz - Layer + 1:Nz:end) - field2d(:, Nz - Layer + 1:Nz:end), [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]) + permute( sum( bsxfun(@times, obj.VertCoeMatrix{1}(:,:,Nz - Layer + 1:Nz:end), ...
+% %                     permute( permute( BotVertVelocity, [1,3,2] ), [2,1,3] ) ), 2 ), [1,3,2]);
+% %             end
 % %             
 % %             t2 = toc;
 % %             fprintf("The speed up ratio is:%f\n", t2/t1);
