@@ -130,17 +130,20 @@ classdef SWE3dVerticalVelocitySolver < handle
 %                         end
         end
         
-        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys, time )
+        function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys)%, time )
             BotEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end-1) ~= 0, end-1 );
             UpEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end) ~= 0, end );  
             % The C version from bottom to surface      
 % %             tic;
-            t = time;
-            x = physClass.meshUnion.x;
-            y = physClass.meshUnion.y;
-            z = physClass.meshUnion.z;
-            Tempfield2d = eval(physClass.Source2d);
-            [ TempVerticalVelocity ] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%             t = time;
+%             x = physClass.meshUnion.x;
+%             y = physClass.meshUnion.y;
+%             z = physClass.meshUnion.z;
+%             Tempfield2d = eval(physClass.Source2d);
+            Tempfield2d = zeros(size(physClass.meshUnion.x));    
+            [ TempVerticalVelocity, IEFluxS3d, BEFluxS3d, IEFluxS2d, BEFluxS2d, ...
+                CInnerSurface_frhs3d, CBoundarySurface_frhs3d, CInnerSurface_frhs2d, ...
+                CBoundarySurface_frhs2d, Field2d, Field3d] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype), Tempfield2d);
 % %             t1 = toc;
@@ -191,7 +194,7 @@ classdef SWE3dVerticalVelocitySolver < handle
 %             y = physClass.meshUnion.y;
 %             z = physClass.meshUnion.z;
 %             t = time;
-            field2d = field2d  - eval( physClass.Source2d );  
+%             field2d = field2d  + eval( physClass.Source2d );  
             
             Nz = physClass.meshUnion.Nz;
             VerticalVelocity = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );

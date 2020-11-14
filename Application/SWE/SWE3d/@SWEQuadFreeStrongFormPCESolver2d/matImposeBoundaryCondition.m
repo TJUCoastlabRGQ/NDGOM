@@ -9,9 +9,9 @@ fp(:, ind, 2) = fext2d(:, ind, 2);
 fp(:, ind, 3) = fext2d(:, ind, 3);
 
 ind = ( edge.ftype == enumBoundaryCondition.Clamped );
-fp(:, ind, 1) = fext2d(:, ind, 1);
-fp(:, ind, 2) = fext2d(:, ind, 2);
-fp(:, ind, 3) = fext2d(:, ind, 3);
+fp(:, ind, 1) = fext2d(:, ind, 3);
+fp(:, ind, 2) = fext2d(:, ind, 1);
+fp(:, ind, 3) = fext2d(:, ind, 2);
 
 ind = ( edge.ftype == enumBoundaryCondition.SlipWall );
 Hun =  fm( :, ind, 2 ) .* nx(:, ind) + fm( :, ind, 3).* ny(:, ind);
