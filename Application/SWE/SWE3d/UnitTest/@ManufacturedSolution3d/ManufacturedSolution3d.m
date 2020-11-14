@@ -266,8 +266,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
             option('ConstantVerticalEddyViscosityValue') = obj.miu;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 100;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('ConstantHorizontalEddyViscosityValue') = 0.1;
         end
         
         

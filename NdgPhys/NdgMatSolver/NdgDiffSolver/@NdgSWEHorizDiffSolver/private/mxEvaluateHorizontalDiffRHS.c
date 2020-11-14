@@ -1,5 +1,6 @@
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "HorizontalDiffusion.h"
+#include "..\..\..\..\..\NdgMath\NdgSWE.h"
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	//Order of the input variable is 0 hcrit, 1 meshUnion.type, 2 prantl, 3 InnerEdge, 4 BoundaryEdge, 5 nv, 6 frhs, 7 fphys, 8 varIndex, 9 cell, 10 mesh, 11 BoundaryEdgefp
@@ -82,7 +83,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *J = mxGetPr(TempJ);
 	mxArray *TempLAV = mxGetField(prhs[10], 0, "LAV");
 	double *LAV = mxGetPr(TempLAV);
-	double *TempBEfp = mxGetPr(prhs[11]);
+	signed char *ftype = (signed char *)mxGetData(prhs[11]);
+	double gra = mxGetScalar(prhs[12]);
+	double *fext = mxGetPr(prhs[13]);
+
 
 	/*Set the output right hand side*/
 	const size_t NdimOut = 3;
@@ -92,10 +96,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	memcpy(OutputRHS, InputRHS, Np*K*Nvar*sizeof(double));
 	int Nfield;
 	mxArray *TempOrder;
-	double *variable = NULL, *BEfp = NULL;
+	double *variable = NULL, *TempBEfp = NULL, *BEfp = NULL, *TempBEfm = NULL;
 	double *nv = malloc(Np*K*sizeof(double));
 	int MeshType, Order;
-	/*Allocate memory and calcualte variable u, v, $\theta$*/
+	double *hu = NULL, *hv = NULL, *h = NULL, *z = NULL;
+	double *zM = NULL, *zP = NULL;
+	double *huM = NULL, *hvM = NULL, *hM = NULL;
+	/*Allocate memory and calcualte variable u, v, $\theta$. Then impose the boudary condition and calculate u, v, $\theta$ defined over the ghost edge*/
 	if (type == Two){
 		/*For 2d shallow water problem, no horizontal diffusion terms are included in the governing equation for water depth $H$*/
 		Nfield = Nvar - 1;
@@ -114,20 +121,59 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			/*set the diffusion coefficient $H\nv$*/
 			DotProduct(nv + k*Np, Tempnv + k*Np, fphys + (int)(varIndex[0] - 1)*Np*K + k*Np, Np);
 			for (int field = 0; field < Nvar - 1; field++){
+				/*For 2d shallow water problem, variable about height is organized as the first variable*/
 				DotCriticalDivide(variable + field*Np*K + k*Np, \
 					fphys + (int)(varIndex[field + 1] - 1)*Np*K + k*Np, Hcrit, \
-					fphys + (int)(varIndex[0] - 1)*Np*K + k*Np, Np);//For 2d shallow water problem, variable about height is organized as the first variable
+					fphys + (int)(varIndex[0] - 1)*Np*K + k*Np, Np);
 			}
 		}
 
+		zM = malloc(BENfp*BENe*sizeof(double));
+		zP = malloc(BENfp*BENe*sizeof(double));
+		/*Allocate memory for the local face value at boundary edge*/
+		TempBEfp = malloc(BENe*BENfp*(Nfield + 1)*sizeof(double));
+		TempBEfm = malloc(BENe*BENfp*(Nfield + 1)*sizeof(double));
+		huM = TempBEfm, hvM = TempBEfm + BENe*BENfp, hM = TempBEfm + 2 * BENe*BENfp;
+
+		h = fphys;
+		hu = fphys;
+		hv = fphys + 2 * Np*K;
+		z = fphys + 3 * Np*K;
+
+		/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-		for (int e = 0; e < BENe; e++){
-			for (int field = 0; field < Nvar - 1; field++){
-				DotCriticalDivide(BEfp + field*BENfp*BENe + e*BENfp, \
-					TempBEfp + (int)(varIndex[field + 1] - 1)*BENfp*BENe + e*BENfp, Hcrit, \
-					TempBEfp + (int)(varIndex[0] - 1)*BENfp*BENe + e*BENfp, BENfp);
+		for (int face = 0; face < BENe; face++){
+			NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
+			FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(zM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
+			here 1 stands for the memory occupied by water depth h*/
+			for (int field = 2; field < Nfield; field++){
+				/*Index for water depth field needs to be considered*/
+				FetchBoundaryEdgeFacialValue(TempBEfm + (field + 1)*BENe*BENfp + face*BENfp, \
+					fphys + ((int)varIndex[field + 1] - 1)*Np*K, \
+					BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
+			}
+			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
+			ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
+				zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
+			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
+			EvaluateHydroStaticReconstructValue(*Hcrit, TempBEfm + face*BENfp, TempBEfp + face*BENfp, zM + face*BENfp, zP + face*BENfp, BENfp, Nfield + 1, BENe);
+			/*We divide the variable by water depth to get the original variable*/
+			for (int field = 0; field < 2; field++){
+				DotCriticalDivide(BEfp + field*BENfp*BENe + face*BENfp, \
+					TempBEfp + field*BENfp*BENe + face*BENfp, Hcrit, \
+					TempBEfp + 2 * BENfp*BENe + face*BENfp, BENfp);
+			}
+
+			for (int field = 2; field < Nfield; field++){
+				DotCriticalDivide(BEfp + field*BENfp*BENe + face*BENfp, \
+					TempBEfp + (field + 1)*BENfp*BENe + face*BENfp, Hcrit, \
+					TempBEfp + 2 * BENfp*BENe + face*BENfp, BENfp);
 			}
 		}
 	}
@@ -135,8 +181,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		Nfield = Nvar;
 		/*Allocate memory for the original variable $u,v$ and $\theta$*/
 		variable = malloc(Np*K*Nfield*sizeof(double));
-		/*Allocate memory for the original variable over boundary edge*/
-		BEfp = malloc(BENfp*BENe*Nfield*sizeof(double));
 		MeshType = 3;
 		TempOrder = mxGetField(prhs[9], 0, "N");
 		Order = (int)mxGetScalar(TempOrder);
@@ -155,18 +199,61 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					fphys + 3*Np*K + k*Np, Np);//For 3d shallow water problem, variable about height is organized as the forth variable
 			}
 		}
-		
+
+		zM = malloc(BENfp*BENe*sizeof(double));
+		zP = malloc(BENfp*BENe*sizeof(double));
+		TempBEfp = malloc(BENe*BENfp*(Nfield + 1)*sizeof(double));
+		TempBEfm = malloc(BENe*BENfp*(Nfield + 1)*sizeof(double));
+		/*Allocate memory for the original variable over boundary edge*/
+		BEfp = malloc(BENfp*BENe*Nfield*sizeof(double));
+		huM = TempBEfm, hvM = TempBEfm + BENe*BENfp, hM = TempBEfm + 2 * BENe*BENfp;
+		hu = fphys;
+		hv = fphys + Np*K;
+		h = fphys + 3 * Np*K;
+		z = fphys + 5 * Np*K;
+		/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
+		Finally, calculate local flux term, adjacent flux term and numerical flux term*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-		for (int e = 0; e < BENe; e++){
-			for (int field = 0; field < Nvar; field++){
-				DotCriticalDivide(BEfp + field*BENfp*BENe + e*BENfp, \
-					TempBEfp + (int)(varIndex[field] - 1)*BENfp*BENe + e*BENfp, Hcrit, \
-					TempBEfp + 3 * BENfp*BENe + e*BENfp, BENfp);
+		for (int face = 0; face < BENe; face++){
+			NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
+			FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			FetchBoundaryEdgeFacialValue(zM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+			/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
+			here 1 stands for the memory occupied by water depth h*/
+			for (int field = 2; field < Nvar; field++){
+				FetchBoundaryEdgeFacialValue(TempBEfm + (field + 1)*BENe*BENfp + face*BENfp, \
+					fphys + ((int)varIndex[field] - 1)*Np*K, \
+					BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 			}
+			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
+			ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
+				zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
+			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
+			EvaluateHydroStaticReconstructValue(*Hcrit, TempBEfm + face*BENfp, TempBEfp + face*BENfp, zM + face*BENfp, zP + face*BENfp, BENfp, Nfield + 1, BENe);
+			/*We divide the variable by water depth to get the original variable*/
+			for (int field = 0; field < 2; field++){
+				DotCriticalDivide(BEfp + field*BENfp*BENe + face*BENfp, \
+					TempBEfp + field*BENfp*BENe + face*BENfp, Hcrit, \
+					TempBEfp + 2 * BENfp*BENe + face*BENfp, BENfp);
+			}
+
+			for (int field = 2; field < Nfield; field++){
+				DotCriticalDivide(BEfp + field*BENfp*BENe + face*BENfp, \
+					TempBEfp + (field + 1)*BENfp*BENe + face*BENfp, Hcrit, \
+					TempBEfp + 2 * BENfp*BENe + face*BENfp, BENfp);
+			}
+
 		}
 	}
+
+	free(TempBEfp);
+	free(TempBEfm);
+	free(zM);
+	free(zP);
 
 	/*Allocate memory for the following computation*/
 	/*Allocate memory for auxiallary variable $q_x=\frac{\partial u(v,\theta)}{\partial x}$*/
@@ -201,10 +288,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *IEFluxM = malloc(IENe*IENfp*Nfield*sizeof(double));
 	/*Allocate memory for the adjacent flux term at inner edge*/
 	double *IEFluxP = malloc(IENe*IENfp*Nfield*sizeof(double));
-	/*Allocate memory for the numerical flux term at inner edge*/
-	double *IEFluxS = malloc(IENe*IENfp*Nfield*sizeof(double));
 	/*Allocate memory for the local face value at boundary edge*/
 	double *BEfm = malloc(BENe*BENfp*Nfield*sizeof(double));
+	/*Allocate memory for the numerical flux term at inner edge*/
+	double *IEFluxS = malloc(IENe*IENfp*Nfield*sizeof(double));
 	/*Allocate memory for the local face value of the auxialary variable at boundary edge*/
 	double *AVBEfm = malloc(BENe*BENfp*Nfield*sizeof(double));
 	/*Allocate memory for the local flux term at boundary edge*/
