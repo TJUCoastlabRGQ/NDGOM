@@ -275,7 +275,7 @@ void EvaluateVerticalFaceNumFlux_HLL(double *dest, double *fm, double *fp, doubl
 				double USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
 				double CSTAR = 0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR);
 				SL = min(UL - sqrt(*gra*HL), USTAR - CSTAR);
-				SR = max(UR + sqrt(*gra*HL), USTAR + CSTAR);
+				SR = max(UR + sqrt(*gra*HR), USTAR + CSTAR);
 			}
 			else if(HL>Hcrit && HR<=Hcrit){
 				SL = UL - sqrt(*gra*HL);
