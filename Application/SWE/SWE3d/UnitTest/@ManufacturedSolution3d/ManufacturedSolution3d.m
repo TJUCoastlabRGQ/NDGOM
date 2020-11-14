@@ -44,6 +44,8 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         mhvzz
         hufz
         hvfz
+        diffmomentumx
+        diffmomentumy
     end
     
     properties ( Constant )
@@ -56,6 +58,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
         d = 0.1;
         hcrit = 0.001;
         miu = 0.01;
+        hormiu = 0.1;
     end
     
     methods
@@ -126,7 +129,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.eta = obj.e * ( sin(obj.w*(x+t)) + sin(obj.w*(y+t)) );
             obj.b = - ( 2 - 0.005*( x + y ));
             obj.h = obj.eta - obj.b;
-            distance = obj.h * ( z + 1 ); 
+            distance = obj.h * ( z + 1 );
             obj.u = distance^3 * obj.d * sin(obj.w*(x+t));
             obj.v = distance^3 * obj.d  * sin(obj.w*(y+t));
             obj.ht = diff(obj.h,t);
@@ -150,6 +153,10 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.mhvzz = diff( obj.miu/obj.h/obj.h * diff( obj.h*obj.v , z ), z );
             obj.hufz = diff( obj.h*obj.u , z );
             obj.hvfz = diff( obj.h*obj.v , z );
+            obj.diffmomentumx = diff(2*obj.hormiu*obj.h*diff(obj.u,x),x) + ...
+                diff(obj.hormiu*obj.h*(diff(obj.u,y)+diff(obj.v,x)),y);
+            obj.diffmomentumy = diff(obj.hormiu*obj.h*(diff(obj.u,y)+diff(obj.v,x)),x) + ...
+                diff(2*obj.hormiu*obj.h*diff(obj.v,y),y);
         end
         
         function matEvaluateError( obj, fphys, time)
@@ -217,12 +224,14 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             x = mesh.x; y = mesh.y; z = mesh.z;
             obj.frhs{1}(:,:,1) = obj.frhs{1}(:,:,1) + eval( obj.hut ) +...
                 eval( obj.mhux ) + eval( obj.mhuy )...
-                + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8) - eval( obj.mhuzz );
+                + eval( obj.mhuz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,8) - eval( obj.mhuzz ) - ...
+                 eval( obj.diffmomentumx );
             
             
             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + eval( obj.hvt ) +...
                 eval( obj.mhvx ) + eval( obj.mhvy )...
-                + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9) - eval( obj.mhvzz );
+                + eval( obj.mhvz ) + obj.gra .* eval( obj.eta ) .* fphys{1}(:,:,9) - eval( obj.mhvzz ) - ...
+                 eval( obj.diffmomentumy );
         end
         
         function matUpdateExternalField( obj, t, ~, ~ )
@@ -235,7 +244,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             z = zeros(size(x));
             obj.fext2d{1}( :, :, 1 ) = eval( obj.h ) .* eval( obj.u2d );
             obj.fext2d{1}( :, :, 2 ) = eval( obj.h ) .* eval( obj.v2d );
-            obj.fext2d{1}( :, :, 3 ) = eval( obj.h );            
+            obj.fext2d{1}( :, :, 3 ) = eval( obj.h );
             x = obj.mesh2d.x;  y = obj.mesh2d.y; z = zeros(size(x));
             obj.SurfaceDate(:,:,1) = eval(obj.u) .* eval(obj.Omega);
             obj.SurfaceDate(:,:,2) = eval(obj.v) .* eval(obj.Omega);
@@ -267,7 +276,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('outputType') = enumOutputFile.NetCDF;
             option('ConstantVerticalEddyViscosityValue') = obj.miu;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
-            option('ConstantHorizontalEddyViscosityValue') = 0.1;
+            option('ConstantHorizontalEddyViscosityValue') = obj.hormiu;
         end
         
         
