@@ -66,18 +66,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   irs = mxGetIr(plhs[0]);
   jcs = mxGetJc(plhs[0]);
 
-  int cmplx;
+//  int cmplx;
 
 
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(DG_THREADS)
+ #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif
 	  
   for (mwIndex i = 0; i < col; i++)
   {
-	  mxArray *tempdata = mxCreateDoubleMatrix(row, 1, mxREAL);
-	  double *temprhsu = mxGetPr(tempdata);
-
+//	  mxArray *tempdata = mxCreateDoubleMatrix(row, 1, mxREAL);
+	  double *temprhsu = malloc(row*1*sizeof(double));
+      memset(temprhsu,0,row*1*sizeof(double));
 	  for (mwIndex j = jcNp[i]; j<jcNp[i+1] && jcNp[i+1]-jcNp[i]>0; j++)
 	  {
 		  size_t rowIndex = irNp[j];
@@ -97,30 +97,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		  size_t rowIndex = irTempPNPX[j];
 		  temprhsu[rowIndex] = temprhsu[rowIndex] +  dt * height[rowIndex] * ( TempPNPX[j] * fhx[rowIndex] );
 	  }
-      
+/*      
 	    pi = mxGetPi(tempdata);
         cmplx = (pi==NULL ? 0 : 1);
 		if (cmplx)
 		{
 			mexPrintf("%Complex number detected, problematic!.\n" );
 		}
+ */
 		for (mwIndex rowflag = 0; rowflag<JcStiffMatrix[i + 1] - JcStiffMatrix[i]; rowflag++)
         {
 			mwIndex index = rowflag + JcStiffMatrix[i];
 			sr[index] = temprhsu[(mwIndex)JrStiffMatrix[index]];
 			
         }
-		mxDestroyArray(tempdata);
-		temprhsu = NULL;
+//		mxDestroyArray(tempdata);
+//		temprhsu = NULL;
+        free(temprhsu);
   }
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(DG_THREADS)
+ #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif  
   for (mwIndex i = 0; i < col + 1; i++)
 	  jcs[i] = JcStiffMatrix[i];
 
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(DG_THREADS)
+ #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif  
   for (mwIndex i = 0; i < (int)JcStiffMatrix[col]; i++)
 	  irs[i] = JrStiffMatrix[i];

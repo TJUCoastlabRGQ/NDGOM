@@ -176,14 +176,14 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 5;
+            ftime = 10;
             outputIntervalNum = 4500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
             option('outputFieldOrder') = [1 2 3 6 7];
             option('limiterType') = enumLimiter.None;
             option('outputType') = enumOutputFile.NetCDF;

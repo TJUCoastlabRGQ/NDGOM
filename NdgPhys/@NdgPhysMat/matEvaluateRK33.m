@@ -11,12 +11,13 @@ for n = 1:obj.Nmesh
 end
 fphys = obj.fphys;
 
-visual = makeVisualizationFromNdgPhys( obj );
+% visual = makeVisualizationFromNdgPhys( obj );
 % init limiter and output file
-hwait = waitbar(0,'Runing MatSolver....');
+% hwait = waitbar(0,'Runing MatSolver....');
+tic;
 while( time < ftime )
-    dt = obj.matUpdateTimeInterval( fphys )*0.6;
-    display(dt);
+    dt = obj.matUpdateTimeInterval( fphys );
+%     display(dt);
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -45,15 +46,16 @@ while( time < ftime )
 %     fprintf('processing %f...\n', time/ftime);
 %     obj.draw( fphys );
     
-    visual.drawResult( fphys{1}(:, :, 1) ); 
+%     visual.drawResult( fphys{1}(:, :, 1) ); 
     time = time + dt;
-    obj.matUpdateOutputResult( time, fphys );
-    timeRatio = time / ftime;
-    waitbar( timeRatio, hwait, ...
-        ['Runing MatSolver ', num2str( timeRatio ), '....']);
+%     obj.matUpdateOutputResult( time, fphys );
+%     timeRatio = time / ftime;
+%     waitbar( timeRatio, hwait, ...
+%         ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
-hwait.delete();
-obj.matUpdateFinalResult( time, fphys );
+toc;
+% hwait.delete();
+% obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
 end
 
