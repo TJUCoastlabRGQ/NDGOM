@@ -24,7 +24,8 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
         maxSigma %> maximum sponge strength
         SpongeCoefficient
         Ylim = [-10 16]
-        Xlim = [-10 10]
+%         Xlim = [-10 10]
+        Xlim = [0 0.2]
     end
     
     methods (Access = public)
@@ -35,7 +36,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
             obj.WaveCharacterEstimate;
-            obj.outputFieldOrder = [1, 2, 3, 6];
+            obj.outputFieldOrder2d = [1, 2, 3, 6];
                    
             bp = obj.Ylim(2) - obj.spgLength;
             ind = obj.meshUnion.yc > bp; % right part is sponge region
@@ -244,7 +245,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
             option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;

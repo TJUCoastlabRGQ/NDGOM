@@ -13,8 +13,8 @@ function StiffMatrix = matAssembleConservativeGlobalSparseStiffMatrix(obj, fphys
 % mesh = PhysClass.meshUnion(1);
 
 h = fphys{1}(:,:,1);
-
+tic;
 StiffMatrix = mxAssembleGlobalStiffMatrix(obj.dt, h, obj.TempSecondOrderTerm, obj.TempPNPX, obj.fhx, obj.TempPNPY, obj.fhy,...
     obj.NP, obj.H2Bx, obj.H2By, ( obj.HBx ).^2, ( obj.HBy ).^2,  obj.JcsGlobalStiffMatrix, obj.JrsGlobalStiffMatrix);
-
+toc;
 end
