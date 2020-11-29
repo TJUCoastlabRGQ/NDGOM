@@ -107,7 +107,7 @@ classdef NonhydrostaticStandingWave1d < SWEConventional1d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 500;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -129,4 +129,56 @@ function [ mesh ] = makeUniformMesh( N, M )
 xlim = [0, 20];
 bcType = [enumBoundaryCondition.SlipWall, enumBoundaryCondition.SlipWall];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
-end
+mesh.InnerEdge.Ne = mesh.InnerEdge.Ne + 1;
+mesh.BoundaryEdge.ftype = zeros(2,0);
+mesh.BoundaryEdge.Ne = 0;
+FToV = zeros(1, numel(mesh.InnerEdge.FToV) + 1 );
+FToV(1) = mesh.BoundaryEdge.FToV(1);
+% FToV(end) = mesh.BoundaryEdge.FToV(2);
+FToV(2:end) = mesh.InnerEdge.FToV;
+mesh.InnerEdge.FToV = FToV;
+mesh.BoundaryEdge.FToV = zeros(0,2);
+
+FToE = zeros(2, mesh.InnerEdge.Ne);
+FToE(1) = mesh.K; FToE(2) = 1;
+LAV = zeros(1, mesh.InnerEdge.Ne);
+LAV(1) = mesh.BoundaryEdge.LAV(1);
+LAV(2:end) = mesh.InnerEdge.LAV;
+FToE(3:end) = mesh.InnerEdge.FToE(:);
+mesh.InnerEdge.FToE = FToE;
+mesh.InnerEdge.LAV = LAV;
+mesh.BoundaryEdge.FToE = zeros(2,0);
+mesh.BoundaryEdge.LAV = zeros(2,0);
+
+FToF = zeros(2, mesh.InnerEdge.Ne);
+FToF(1) = 2; FToF(2) = 1;
+FToF(3:end) = mesh.InnerEdge.FToF(:);
+mesh.InnerEdge.FToF = FToF;
+mesh.BoundaryEdge.FToF = zeros(2,0);
+
+FToN1 = zeros(1,mesh.InnerEdge.Ne);
+FToN2 = zeros(1,mesh.InnerEdge.Ne);
+FToN1(1) = mesh.BoundaryEdge.FToN1(2);
+FToN1(2:end) = mesh.InnerEdge.FToN1;
+mesh.InnerEdge.FToN1 = FToN1;
+FToN2(1) = mesh.BoundaryEdge.FToN1(1);
+FToN2(2:end) = mesh.InnerEdge.FToN2;
+mesh.InnerEdge.FToN2 = FToN2;
+mesh.BoundaryEdge.FToN1 = zeros(2,0);
+mesh.BoundaryEdge.FToN2 = zeros(2,0);
+
+mesh.InnerEdge.nx = ones(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.nx = zeros(2,0);
+mesh.InnerEdge.ny = zeros(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.ny = zeros(0,2);
+mesh.InnerEdge.nz = zeros(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.nz = zeros(0,2);
+mesh.InnerEdge.Js = ones(1, mesh.InnerEdge.Ne);
+mesh.BoundaryEdge.Js = zeros(0,2);
+
+mesh.EToE(1) = mesh.K;
+mesh.EToE(end) = 1;
+
+mesh.EToF(1) = 2;
+mesh.EToF(end) = 1;
+end% func

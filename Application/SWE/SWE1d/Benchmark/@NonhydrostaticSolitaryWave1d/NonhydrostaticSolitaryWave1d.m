@@ -183,7 +183,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputFieldOrder') = [1 2 3 6 7];
             option('limiterType') = enumLimiter.None;
             option('outputType') = enumOutputFile.NetCDF;

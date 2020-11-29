@@ -1,6 +1,6 @@
 function matEvaluateSSPRK22( obj )
 
-tic; 
+% tic; 
 Nmesh = obj.Nmesh;
 
 time = obj.getOption('startTime');
@@ -13,10 +13,12 @@ end
 
 fphys = obj.fphys;
 % init limiter and output file
-visual = makeVisualizationFromNdgPhys( obj );
-hwait = waitbar(0,'Runing MatSolver....');
+% visual = makeVisualizationFromNdgPhys( obj );
+% hwait = waitbar(0,'Runing MatSolver....');
+
 while( time < ftime )
-    dt = obj.matUpdateTimeInterval( fphys ) * 0.3;
+    tic;
+    dt = 0.4 * obj.matUpdateTimeInterval( fphys );
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -48,16 +50,18 @@ while( time < ftime )
     %     obj.meshUnion(1).draw( fphys{1}(:,:,1) );
     %     drawnow;
 %     visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) );
-        visual.drawResult( fphys{1}(:, :, 1) );
+%         visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
-    obj.matUpdateOutputResult( time, fphys );
-    timeRatio = time / ftime;
-    waitbar( timeRatio, hwait, ...
-        ['Runing MatSolver ', num2str( timeRatio ), '....']);
+%     obj.matUpdateOutputResult( time, fphys );
+%     timeRatio = time / ftime;
+%     waitbar( timeRatio, hwait, ...
+%         ['Runing MatSolver ', num2str( timeRatio ), '....']);
+    toc;
 end
+
 % hwait.delete();
-obj.matUpdateFinalResult( time, fphys );
+% obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
-toc;
+% toc;
 end
 

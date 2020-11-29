@@ -114,7 +114,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		  /*Return the position of the studied NP element in the column of the output stiff matrix.
 		  Here rowIndex may not equal to Order, since the final output stiff matrix is decided by 
 		  several part.*/
-		  int Order = bin(rowIndex, 0, NumNp - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
 		  temprhsu[Order] = dt * NP[Index] * \
 			  (height[rowIndex] * (H2Bx[rowIndex] + H2By[rowIndex]) - \
 			  (HBxSquare[rowIndex] + HBySquare[rowIndex] + 4));
@@ -123,7 +123,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  int NumSecondOrderTerm = (int)jcTempSecondOrderTerm[i + 1] - (int)jcTempSecondOrderTerm[i];
 	  for (int j = 0; j < NumSecondOrderTerm; j++){
 		  int rowIndex = (int)irTempSecondOrderTerm[j + (int)jcTempSecondOrderTerm[i]];
-		  int Order = bin(rowIndex, 0, NumSecondOrderTerm - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
 		  int Index = (int)jcTempSecondOrderTerm[i] + j;
 		  temprhsu[Order] = temprhsu[Order] + dt * height[rowIndex] * (height[rowIndex] * TempSecondOrderTerm[Index]);
 	  }
@@ -131,7 +131,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  int NumPNPX = jcTempPNPX[i + 1] - jcTempPNPX[i];
 	  for (int j = 0; j < NumPNPX; j++){
 		  int rowIndex = (int)irTempPNPX[j + (int)jcTempPNPX[i]];
-		  int Order = bin(rowIndex, 0, NumPNPX - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
 		  int Index = (int)jcTempPNPX[i] + j;
 		  temprhsu[Order] = temprhsu[Order] + dt * height[rowIndex] * (TempPNPX[Index] * fhx[rowIndex]);
 	  }
@@ -139,7 +139,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  int NumPNPY = jcTempPNPY[i + 1] - jcTempPNPY[i];
 	  for (int j = 0; j < NumPNPY; j++){
 		  int rowIndex = (int)irTempPNPY[j + (int)jcTempPNPY[i]];
-		  int Order = bin(rowIndex, 0, NumPNPY - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
 		  int Index = (int)jcTempPNPY[i] + j;
 		  temprhsu[Order] = temprhsu[Order] + dt * height[rowIndex] * (TempPNPY[Index] * fhy[rowIndex]);
 	  }

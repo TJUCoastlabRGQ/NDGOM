@@ -1,5 +1,7 @@
 # include "mex.h"
 # include <math.h>
+# include <string.h>
+# include <stdlib.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -15,6 +17,19 @@
 #define IsZero(d) ((d)==0)
 #endif
 
+/*The following function is used to find the order of the input parameter aim in matrix a*/
+int bin(int aim, int low, int high, double *a)
+{
+	int mid;
+	while (low <= high)
+	{
+		mid = (low + high) / 2;
+		if ((int)a[mid] == aim)return mid;
+		else if ((int)a[mid]<aim)low = mid + 1;
+		else high = mid - 1;
+	}
+	return -1;//Not Find
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   /* check input & output */
@@ -50,81 +65,79 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   
   double *HBxSquare = mxGetPr(prhs[7]);
   
-  mwSize row,col;
+  int row,col;
   
-  row = mxGetM(prhs[5]);
-  col = mxGetN(prhs[5]);
+  row = (int)mxGetM(prhs[5]);
+  col = (int)mxGetN(prhs[5]);
   
-  double *pi,*sr;
+  double *sr;
   mwIndex *irs,*jcs;
 
   double *JcStiffMatrix = mxGetPr(prhs[8]);
   double *JrStiffMatrix = mxGetPr(prhs[9]);
 
-  plhs[0] = mxCreateSparse(row, col, JcStiffMatrix[col], 0);
+  plhs[0] = mxCreateSparse(row, col, JcStiffMatrix[col], mxREAL);
   sr = mxGetPr(plhs[0]);
   irs = mxGetIr(plhs[0]);
   jcs = mxGetJc(plhs[0]);
 
-//  int cmplx;
-
+  //printf("The total threads out of the parallel domain is:%d\n",omp_get_num_threads());
 
  #ifdef _OPENMP
  #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif
 	  
-  for (mwIndex i = 0; i < col; i++)
+  for (int i = 0; i < col; i++)
   {
-//	  mxArray *tempdata = mxCreateDoubleMatrix(row, 1, mxREAL);
-	  double *temprhsu = malloc(row*1*sizeof(double));
-      memset(temprhsu,0,row*1*sizeof(double));
-	  for (mwIndex j = jcNp[i]; j<jcNp[i+1] && jcNp[i+1]-jcNp[i]>0; j++)
-	  {
-		  size_t rowIndex = irNp[j];
-		  temprhsu[rowIndex] =  dt *NP[j]*\
-              ( height[rowIndex] * ( H2Bx[rowIndex] ) - \
-                   ( HBxSquare[rowIndex] + 4 ) ) ;
+//	  printf("The total threads inside the parallel domain is:%d\n",omp_get_num_threads());
+//	  printf("The current thread number is:%d\n",omp_get_thread_num());
+	  int Num = (int)JcStiffMatrix[i + 1] - (int)JcStiffMatrix[i];
+	  double *temprhsu = sr + (int)JcStiffMatrix[i];
+	  memset(temprhsu, 0, Num*sizeof(double));
+
+	  /*How many non-zero Np included in column i*/
+	  int NumNp = (int)jcNp[i + 1] - (int)jcNp[i];
+	  for (int j = 0; j < NumNp; j++){
+		  /*The position of the studied NP element in the input sparse matrix corresponding to non-hydrostatic pressure*/
+		  int Index = (int)jcNp[i] + j;
+		  /*Index of the row that contains the studied non-zero Np in the studied column*/
+		  int rowIndex = (int)irNp[Index];
+		  /*Return the position of the studied NP element in the column of the output stiff matrix.
+		  Here rowIndex may not equal to Order, since the final output stiff matrix is decided by
+		  several part.*/
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  temprhsu[Order] = dt * NP[Index] * \
+			  ( height[rowIndex] * ( H2Bx[rowIndex] ) - \
+			  ( HBxSquare[rowIndex] + 4));
 	  }
 
-	  for (mwIndex j = jcTempSecondOrderTerm[i]; j<jcTempSecondOrderTerm[i + 1] && jcTempSecondOrderTerm[i + 1] - jcTempSecondOrderTerm[i]>0; j++)
-	  {
-		  size_t rowIndex = irTempSecondOrderTerm[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] + dt * height[rowIndex] * ( height[rowIndex] * TempSecondOrderTerm[j] );
+	  int NumSecondOrderTerm = (int)jcTempSecondOrderTerm[i + 1] - (int)jcTempSecondOrderTerm[i];
+	  for (int j = 0; j < NumSecondOrderTerm; j++){
+		  int rowIndex = (int)irTempSecondOrderTerm[j + (int)jcTempSecondOrderTerm[i]];
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Index = (int)jcTempSecondOrderTerm[i] + j;
+		  temprhsu[Order] = temprhsu[Order] + dt * height[rowIndex] * (height[rowIndex] * TempSecondOrderTerm[Index]);
 	  }
 
-	  for (mwIndex j = jcTempPNPX[i]; j<jcTempPNPX[i + 1] && jcTempPNPX[i + 1]-jcTempPNPX[i]>0; j++)
-	  {
-		  size_t rowIndex = irTempPNPX[j];
-		  temprhsu[rowIndex] = temprhsu[rowIndex] +  dt * height[rowIndex] * ( TempPNPX[j] * fhx[rowIndex] );
+	  int NumPNPX = jcTempPNPX[i + 1] - jcTempPNPX[i];
+	  for (int j = 0; j < NumPNPX; j++){
+		  int rowIndex = (int)irTempPNPX[j + (int)jcTempPNPX[i]];
+		  int Order = bin(rowIndex, 0, Num - 1, JrStiffMatrix + (int)JcStiffMatrix[i]);
+		  int Index = (int)jcTempPNPX[i] + j;
+		  temprhsu[Order] = temprhsu[Order] + dt * height[rowIndex] * (TempPNPX[Index] * fhx[rowIndex]);
 	  }
-/*      
-	    pi = mxGetPi(tempdata);
-        cmplx = (pi==NULL ? 0 : 1);
-		if (cmplx)
-		{
-			mexPrintf("%Complex number detected, problematic!.\n" );
-		}
- */
-		for (mwIndex rowflag = 0; rowflag<JcStiffMatrix[i + 1] - JcStiffMatrix[i]; rowflag++)
-        {
-			mwIndex index = rowflag + JcStiffMatrix[i];
-			sr[index] = temprhsu[(mwIndex)JrStiffMatrix[index]];
-			
-        }
-//		mxDestroyArray(tempdata);
-//		temprhsu = NULL;
-        free(temprhsu);
+
   }
  #ifdef _OPENMP
  #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif  
-  for (mwIndex i = 0; i < col + 1; i++)
+  for (int i = 0; i < col + 1; i++)
 	  jcs[i] = JcStiffMatrix[i];
 
  #ifdef _OPENMP
  #pragma omp parallel for num_threads(omp_get_max_threads())
  #endif  
-  for (mwIndex i = 0; i < (int)JcStiffMatrix[col]; i++)
+  for (int i = 0; i < (int)JcStiffMatrix[col]; i++)
 	  irs[i] = JrStiffMatrix[i];
   return;
 }

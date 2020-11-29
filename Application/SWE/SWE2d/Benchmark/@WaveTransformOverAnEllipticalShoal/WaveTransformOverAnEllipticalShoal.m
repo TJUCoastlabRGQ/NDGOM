@@ -245,7 +245,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('outputNcfileNum') = 500;            
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
