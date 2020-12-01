@@ -43,6 +43,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int IENfp2d = (int)mxGetScalar(TempIENfp2d);
 	mxArray *TempIEFToE2d = mxGetField(prhs[2], 0, "FToE");
 	double *IEFToE2d = mxGetPr(TempIEFToE2d);
+	mxArray *TempIEFToF2d = mxGetField(prhs[2], 0, "FToF");
+	double *IEFToF2d = mxGetPr(TempIEFToF2d);    
 	mxArray *TempIEFToN12d = mxGetField(prhs[2], 0, "FToN1");
 	double *IEFToN12d = mxGetPr(TempIEFToN12d);
 	mxArray *TempIEFToN22d = mxGetField(prhs[2], 0, "FToN2");
@@ -63,6 +65,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int BENfp2d = (int)mxGetScalar(TempBENfp2d);
 	mxArray *TempBEFToE2d = mxGetField(prhs[3], 0, "FToE");
 	double *BEFToE2d = mxGetPr(TempBEFToE2d);
+	mxArray *TempBEFToF2d = mxGetField(prhs[3], 0, "FToF");
+	double *BEFToF2d = mxGetPr(TempBEFToF2d);    
 	mxArray *TempBEFToN12d = mxGetField(prhs[3], 0, "FToN1");
 	double *BEFToN12d = mxGetPr(TempBEFToN12d);
 	mxArray *TempBEnx2d = mxGetField(prhs[3], 0, "nx");
@@ -83,6 +87,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int IENfp3d = (int)mxGetScalar(TempIENfp3d);
 	mxArray *TempIEFToE3d = mxGetField(prhs[4], 0, "FToE");
 	double *IEFToE3d = mxGetPr(TempIEFToE3d);
+	mxArray *TempIEFToF3d = mxGetField(prhs[4], 0, "FToF");
+	double *IEFToF3d = mxGetPr(TempIEFToF3d);    
 	mxArray *TempIEFToN13d = mxGetField(prhs[4], 0, "FToN1");
 	double *IEFToN13d = mxGetPr(TempIEFToN13d);
 	mxArray *TempIEFToN23d = mxGetField(prhs[4], 0, "FToN2");
@@ -103,6 +109,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int BENfp3d = (int)mxGetScalar(TempBENfp3d);
 	mxArray *TempBEFToE3d = mxGetField(prhs[5], 0, "FToE");
 	double *BEFToE3d = mxGetPr(TempBEFToE3d);
+	mxArray *TempBEFToF3d = mxGetField(prhs[5], 0, "FToF");
+	double *BEFToF3d = mxGetPr(TempBEFToF3d);    
 	mxArray *TempBEFToN13d = mxGetField(prhs[5], 0, "FToN1");
 	double *BEFToN13d = mxGetPr(TempBEFToN13d);
 	mxArray *TempBEnx3d = mxGetField(prhs[5], 0, "nx");
@@ -136,6 +144,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *Dr2d = mxGetPr(TempDr2d);
 	mxArray *TempDs2d = mxGetField(prhs[9], 0, "Ds");
 	double *Ds2d = mxGetPr(TempDs2d);
+    mxArray *TempNface = mxGetField(prhs[9], 0, "Nface");
+	int Nface = mxGetScalar(TempNface);
 	mxArray *TempinvM2d = mxGetField(prhs[9], 0, "invM");
 	double *invM2d = mxGetPr(TempinvM2d);
 
@@ -190,10 +200,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(IEFluxP2d, 0, IENfp2d*IENe2d*sizeof(double));
 	double *IEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
 	memset(IEFluxS2d, 0, IENfp2d*IENe2d*sizeof(double)); 
-	double *IERHS2d = malloc(Np2d*K2d*sizeof(double));
-	memset(IERHS2d, 0, Np2d*K2d*sizeof(double));
-	double *BERHS2d = malloc(Np2d*K2d*sizeof(double));
-	memset(BERHS2d, 0, Np2d*K2d*sizeof(double));
+	double *ERHS2d = malloc(Np2d*K2d*Nface*sizeof(double));
+	memset(ERHS2d, 0, Np2d*K2d*Nface*sizeof(double));
 	double *VolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
 	double *TempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
 	double *VolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
@@ -228,7 +236,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetFacialFluxTerm2d(IEFluxM2d + e*IENfp2d, IEhuM2d + e*IENfp2d, IEhvM2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
 		GetFacialFluxTerm2d(IEFluxP2d + e*IENfp2d, IEhuP2d + e*IENfp2d, IEhvP2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
 		GetPCENumericalFluxTerm_HLLC_LAI(IEFluxS2d + e*IENfp2d, IEfm2d + e*IENfp2d, IEfp2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, &gra, Hcrit, IENfp2d, IENe2d);
-
 	}
 
 	double *BEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
@@ -262,25 +269,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetPCENumericalFluxTerm_HLLC_LAI(BEFluxS2d + e*BENfp2d, BEfm2d + e*BENfp2d, BEfp2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, &gra, Hcrit, BENfp2d, BENe2d);
 	}
 
-
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
 	for (int e = 0; e < IENe2d; e++){
-		StrongFormInnerEdgeRHS(e, IEFToE2d, Np2d, IENfp2d, IEFToN12d, IEFToN22d, IEFluxM2d, IEFluxP2d, IEFluxS2d, IEJs2d, IEMb2d, IERHS2d);
+		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, IEFluxM2d, IEFluxP2d, IEFluxS2d, IEJs2d, IEMb2d, ERHS2d);
 	}
-
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
 	for (int e = 0; e < BENe2d; e++){
-		StrongFormBoundaryEdgeRHS(e, BEFToE2d, Np2d, BENfp2d, BEFToN12d, BEFluxM2d, BEFluxS2d, BEJs2d, BEMb2d, BERHS2d);
+		StrongFormBoundaryEdgeRHS(e, BEFToE2d, BEFToF2d, Np2d, K2d, BENfp2d, BEFToN12d, BEFluxM2d, BEFluxS2d, BEJs2d, BEMb2d, ERHS2d);
 	}
 
-
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k < K2d; k++){
+            for(int face=1; face<Nface; face++){
+                Add( ERHS2d + k*Np2d, ERHS2d + k*Np2d, ERHS2d + face*Np2d*K2d + k*Np2d, Np2d);
+            }
+    }   
+    
 	double *TempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K2d; k++) {
-		MultiEdgeContributionByLiftOperator(IERHS2d + k*Np2d, TempFacialIntegral + k*Np2d, &np, &oneI, &np, \
-			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
-		MultiEdgeContributionByLiftOperator(BERHS2d + k*Np2d, TempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+		MultiEdgeContributionByLiftOperator(ERHS2d + k*Np2d, TempFacialIntegral + k*Np2d, &np, &oneI, &np, \
 			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
 	}
 
@@ -290,8 +308,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K2d; k++){
-		Minus(rhs2d + k*Np2d, IERHS2d + k*Np2d, rhs2d + k*Np2d, Np2d);
-		Add(rhs2d + k*Np2d, BERHS2d + k*Np2d, rhs2d + k*Np2d, Np2d);
+		Minus(rhs2d + k*Np2d, ERHS2d + k*Np2d, rhs2d + k*Np2d, Np2d);
 	}
 
 
@@ -316,8 +333,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(IEFluxS2d);
 	free(BEFluxS2d);
 	free(BEFluxM2d);
-	free(IERHS2d);
-	free(BERHS2d);
+	free(ERHS2d);
 	free(VolumeIntegralX);
 	free(VolumeIntegralY);
 	free(TempVolumeIntegralX);
@@ -341,10 +357,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(IEFluxP3d, 0, IENfp3d*IENe3d*sizeof(double));
 	double *IEFluxS3d = malloc(IENfp3d*IENe3d*sizeof(double));
 	memset(IEFluxS3d, 0, IENfp3d*IENe3d*sizeof(double));
-	double *IERHS3d = malloc(Np3d*K3d*sizeof(double));
-	memset(IERHS3d, 0, Np3d*K3d*sizeof(double));
-	double *BERHS3d = malloc(Np3d*K3d*sizeof(double));
-	memset(BERHS3d, 0, Np3d*K3d*sizeof(double));
+	double *ERHS3d = malloc(Np3d*K3d*Nface*sizeof(double));
+	memset(ERHS3d, 0, Np3d*K3d*Nface*sizeof(double));
 	VolumeIntegralX = malloc(Np3d*K3d*sizeof(double));
 	TempVolumeIntegralX = malloc(Np3d*K3d*sizeof(double));
 	VolumeIntegralY = malloc(Np3d*K3d*sizeof(double));
@@ -386,7 +400,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetFacialFluxTerm2d(IEFluxM3d + e*IENfp3d, IEhuM3d + e*IENfp3d, IEhvM3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, IENfp3d);
 		GetFacialFluxTerm2d(IEFluxP3d + e*IENfp3d, IEhuP3d + e*IENfp3d, IEhvP3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, IENfp3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(IEFluxS3d + e*IENfp3d, IEfm3d + e*IENfp3d, IEfp3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, &gra, Hcrit, IENfp3d, IENe3d);
-
 	}
 
 
@@ -418,15 +431,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetFacialFluxTerm2d(BEFluxM3d + e*BENfp3d, BEhuM3d + e*BENfp3d, BEhvM3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, BENfp3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(BEFluxS3d + e*BENfp3d, BEfm3d + e*BENfp3d, BEfp3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, &gra, Hcrit, BENfp3d, BENe3d);
 	}
-
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
 	for (int e = 0; e < IENe3d; e++){
-		StrongFormInnerEdgeRHS(e, IEFToE3d, Np3d, IENfp3d, IEFToN13d, IEFToN23d, IEFluxM3d, IEFluxP3d, IEFluxS3d, IEJs3d, IEMb3d, IERHS3d);
+		StrongFormInnerEdgeRHS(e, IEFToE3d, IEFToF3d, Np3d, K3d, IENfp3d, IEFToN13d, IEFToN23d, IEFluxM3d, IEFluxP3d, IEFluxS3d, IEJs3d, IEMb3d, ERHS3d);
 	}
-
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
 	for (int e = 0; e < BENe3d; e++){
-		StrongFormBoundaryEdgeRHS(e, BEFToE3d, Np3d, BENfp3d, BEFToN13d, BEFluxM3d, BEFluxS3d, BEJs3d, BEMb3d, BERHS3d);
+		StrongFormBoundaryEdgeRHS(e, BEFToE3d, BEFToF3d, Np3d, K3d, BENfp3d, BEFToN13d, BEFluxM3d, BEFluxS3d, BEJs3d, BEMb3d, ERHS3d);
 	}
-
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k < K3d; k++){
+        for(int face=1;face<Nface;face++){
+            Add( ERHS3d + k*Np3d, ERHS3d + k*Np3d, ERHS3d + face*Np3d*K3d + k3d*Np3d, Np3d);
+        }        
+    }
 
 	TempFacialIntegral = malloc(Np3d*K3d*sizeof(double));
 	
@@ -434,9 +460,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K3d; k++) {
-		MultiEdgeContributionByLiftOperator(IERHS3d + k*Np3d, TempFacialIntegral + k*Np3d, &np, &oneI, &np, \
-			&one, invM3d, &np, &np, &zero, &np, J3d + k*Np3d, Np3d);
-		MultiEdgeContributionByLiftOperator(BERHS3d + k*Np3d, TempFacialIntegral + k*Np3d, &np, &oneI, &np, \
+		MultiEdgeContributionByLiftOperator(ERHS3d + k*Np3d, TempFacialIntegral + k*Np3d, &np, &oneI, &np, \
 			&one, invM3d, &np, &np, &zero, &np, J3d + k*Np3d, Np3d);
 	}
 
@@ -445,8 +469,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K3d; k++){
-		Minus(rhs3d + k*Np3d, IERHS3d + k*Np3d, rhs3d + k*Np3d, Np3d);
-		Add(rhs3d + k*Np3d, BERHS3d + k*Np3d, rhs3d + k*Np3d, Np3d);
+		Minus(rhs3d + k*Np3d, ERHS3d + k*Np3d, rhs3d + k*Np3d, Np3d);
 		/*Substract the field2d from rhs3d to assemble the final right hand side*/
 		Minus(rhs3d + k*Np3d, rhs3d + k*Np3d, field2d + k*Np3d, Np3d);
 	}
@@ -462,8 +485,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(IEFluxS3d);
 	free(BEFluxM3d);
 	free(BEFluxS3d);
-	free(IERHS3d);
-	free(BERHS3d);
+	free(ERHS3d);
 	free(VolumeIntegralX);
 	free(VolumeIntegralY);
 	free(TempVolumeIntegralX);

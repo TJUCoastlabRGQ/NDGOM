@@ -25,6 +25,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *IELAV = mxGetPr(TempIELAV);
 	mxArray *TempIEFToE = mxGetField(prhs[3], 0, "FToE");
 	double *IEFToE = mxGetPr(TempIEFToE);
+	mxArray *TempIEFToF = mxGetField(prhs[3], 0, "FToF");
+	double *IEFToF = mxGetPr(TempIEFToF);    
 	mxArray *TempIEFToN1 = mxGetField(prhs[3], 0, "FToN1");
 	double *IEFToN1 = mxGetPr(TempIEFToN1);
 	mxArray *TempIEFToN2 = mxGetField(prhs[3], 0, "FToN2");
@@ -46,6 +48,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *BELAV = mxGetPr(TempBELAV);
 	mxArray *TempBEFToE = mxGetField(prhs[4], 0, "FToE");
 	double *BEFToE = mxGetPr(TempBEFToE);
+	mxArray *TempBEFToF = mxGetField(prhs[4], 0, "FToF");
+	double *BEFToF = mxGetPr(TempBEFToF);    
 	mxArray *TempBEFToN1 = mxGetField(prhs[4], 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
 
@@ -66,7 +70,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mxArray *TempDs = mxGetField(prhs[9], 0, "Ds");
 	double *Ds = mxGetPr(TempDs);
 	mxArray *TempNface = mxGetField(prhs[9], 0, "Nface");
-	int Nface = mxGetScalar(TempNface);
+	int TempNface = mxGetScalar(TempNface);
+    int Nface;
 
 	mxArray *TempInvM = mxGetField(prhs[9], 0, "invM");
 	double *invM = mxGetPr(TempInvM);
@@ -106,6 +111,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	if (type == Two){
 		/*For 2d shallow water problem, no horizontal diffusion terms are included in the governing equation for water depth $H$*/
 		Nfield = Nvar - 1;
+        /*For 2d shallow water problem, the face number is equal to TempNface, since there is no surface edge and bottom edge*/
+        Nface = TempNface;
 		/*Allocate memory for the original variable $u,v$ and $\theta$*/
 		variable = malloc(Np*K*Nfield*sizeof(double));
 		/*Allocate memory for the original variable over boundary edge*/
@@ -113,6 +120,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		MeshType = 2;
 		TempOrder = mxGetField(prhs[9], 0, "N");
 		Order = mxGetScalar(TempOrder);
+        
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -145,7 +153,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 		for (int face = 0; face < BENe; face++){
-			NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
+			NdgEdgeType facetype = (NdgEdgeType)ftype[face];  // boundary condition
 			FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 			FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 			FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
@@ -159,7 +167,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 			}
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
-			ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
+			ImposeBoundaryCondition(&gra, facetype, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
 				zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			EvaluateHydroStaticReconstructValue(*Hcrit, TempBEfm + face*BENfp, TempBEfp + face*BENfp, zM + face*BENfp, zP + face*BENfp, BENfp, Nfield + 1, BENe);
@@ -179,6 +187,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	else if (type == Three){
 		Nfield = Nvar;
+        /*For 3d shallow water problem, the face number is equal to TempNface - 2, since there 
+         * is surface edge and bottom edge is not considered for horizontal diffusion term*/
+        Nface = TempNface - 2;        
 		/*Allocate memory for the original variable $u,v$ and $\theta$*/
 		variable = malloc(Np*K*Nfield*sizeof(double));
 		MeshType = 3;
@@ -217,7 +228,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 		for (int face = 0; face < BENe; face++){
-			NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
+			NdgEdgeType facetype = (NdgEdgeType)ftype[face];  // boundary condition
 			FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 			FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 			FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
@@ -230,7 +241,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 			}
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
-			ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
+			ImposeBoundaryCondition(&gra, facetype, BEnx + face*BENfp, BEny + face*BENfp, TempBEfm + face*BENfp, TempBEfp + face*BENfp, \
 				zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			EvaluateHydroStaticReconstructValue(*Hcrit, TempBEfm + face*BENfp, TempBEfp + face*BENfp, zM + face*BENfp, zP + face*BENfp, BENfp, Nfield + 1, BENe);
@@ -240,7 +251,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					TempBEfp + field*BENfp*BENe + face*BENfp, Hcrit, \
 					TempBEfp + 2 * BENfp*BENe + face*BENfp, BENfp);
 			}
-
+           /*Water depth is stored as the third variable*/
 			for (int field = 2; field < Nfield; field++){
 				DotCriticalDivide(BEfp + field*BENfp*BENe + face*BENfp, \
 					TempBEfp + (field + 1)*BENfp*BENe + face*BENfp, Hcrit, \
@@ -299,18 +310,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Allocate memory for the numerical flux term at boundary edge*/
 	double *BEFluxS = malloc(BENe*BENfp*Nfield*sizeof(double));
 	/*Allocate memory for interior edge contribution to right hand side in x direction*/
-	double *IERHSX = malloc(Np*K*Nfield*sizeof(double));
-	memset(IERHSX, 0, Np*K*Nfield*sizeof(double));
+	double *ERHSX = malloc(Np*K*Nfield*Nface*sizeof(double));
+	memset(ERHSX, 0, Np*K*Nfield*Nface*sizeof(double));
 	/*Allocate memory for interior edge contribution to right hand side in y direction*/
-	double *IERHSY = malloc(Np*K*Nfield*sizeof(double));
-	memset(IERHSY, 0, Np*K*Nfield*sizeof(double));
-	/*Allocate memory for boundary edge contribution to right hand side in x direction*/
-	double *BERHSX = malloc(Np*K*Nfield*sizeof(double));
-	memset(BERHSX, 0, Np*K*Nfield*sizeof(double));
-	/*Allocate memory for boundary edge contribution to right hand side in y direction*/
-	double *BERHSY = malloc(Np*K*Nfield*sizeof(double));
-	memset(BERHSY, 0, Np*K*Nfield*sizeof(double));
-
+	double *ERHSY = malloc(Np*K*Nfield*Nface*sizeof(double));
+	memset(ERHSY, 0, Np*K*Nfield*Nface*sizeof(double));
+   
 	ptrdiff_t np = Np;
 	ptrdiff_t oneI = 1;
 	double one = 1.0, zero = 0.0;
@@ -357,14 +362,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nfield; field++){
-		for (int face = 0; face < IENe; face++){
+    for (int face = 0; face < IENe; face++){
+        for (int field = 0; field < Nfield; field++){
 			FetchInnerEdgeFacialValue(IEfm + field*IENe*IENfp + face*IENfp, IEfp + field*IENe*IENfp + face*IENfp, variable + field*Np*K, IEFToE + 2 * face, \
 				IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
 			/*Inner edge contribution to RHSX of $\frac{\partial u(v,\theta)}{\partial x}$*/
-			GetIEContributionToAuxialaryVariable(IERHSX + field*Np*K, face, IENe, IENfp, field, IEfm, IEfp, IEFToE, IEFToN1, IEFToN2, Np, IEFluxM, IEFluxP, IEFluxS, IEnx, IEMb, IEJs);
+			GetIEContributionToAuxialaryVariable(ERHSX + field*Np*K*Nface, face, IENe, IENfp, field, IEfm, IEfp, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IEFluxM, IEFluxP, IEFluxS, IEnx, IEMb, IEJs);
 			/*Inner edge contribution to RHSY of $\frac{\partial u(v,\theta)}{\partial y}$*/
-			GetIEContributionToAuxialaryVariable(IERHSY + field*Np*K, face, IENe, IENfp, field, IEfm, IEfp, IEFToE, IEFToN1, IEFToN2, Np, IEFluxM, IEFluxP, IEFluxS, IEny, IEMb, IEJs);
+			GetIEContributionToAuxialaryVariable(ERHSY + field*Np*K*Nface, face, IENe, IENfp, field, IEfm, IEfp, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IEFluxM, IEFluxP, IEFluxS, IEny, IEMb, IEJs);
 		}
 	}
 	/*Boundary edge facial integral part*/
@@ -372,18 +377,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nfield; field++){
-		for (int face = 0; face < BENe; face++){
+    for (int face = 0; face < BENe; face++){
+        for (int field = 0; field < Nfield; field++){
 			FetchBoundaryEdgeFacialValue(BEfm + field*BENe*BENfp + face*BENfp, variable + field*Np*K, BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 			/*Boundary edge contribution to RHSX of $\frac{\partial u(v,\theta)}{\partial x}$, we note that the numerical flux at the boundary is set directly to the outer value*/
-			GetBEContributionToAuxialaryVariable(BERHSX + field*Np*K, face, BENe, BENfp, field, BEfm, BEfp, BEFToE, BEFToN1, Np, BEFluxM, BEFluxS, BEnx, BEMb, BEJs);
-
+			GetBEContributionToAuxialaryVariable(ERHSX + field*Np*K*Nface, face, BENe, BENfp, field, BEfm, BEfp, BEFToE, BEFToF, BEFToN1, Np, K, BEFluxM, BEFluxS, BEnx, BEMb, BEJs);
 			/*Boundary edge contribution to RHSX of $\frac{\partial u(v,\theta)}{\partial y}$, we note that the numerical flux at the boundary is set directly to the outer value*/
-			GetBEContributionToAuxialaryVariable(BERHSY + field*Np*K, face, BENe, BENfp, field, BEfm, BEfp, BEFToE, BEFToN1, Np, BEFluxM, BEFluxS, BEny, BEMb, BEJs);
+			GetBEContributionToAuxialaryVariable(ERHSY + field*Np*K*Nface, face, BENe, BENfp, field, BEfm, BEfp, BEFToE, BEFToF, BEFToN1, Np, K, BEFluxM, BEFluxS, BEny, BEMb, BEJs);
 		}
 	}
 
-
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k<K; k++){
+        for(int field=0;field<Nfield;field++){
+            for(int face=1;face<Nface;face++){
+                Add( ERHSX + field*Np*K*Nface+k*Np, ERHSX + field*Np*K*Nface + k*Np, ERHSX + field*Np*K*Nface + face*Np*K + k*Np, Np);
+                Add( ERHSY + field*Np*K*Nface+k*Np, ERHSY + field*Np*K*Nface + k*Np, ERHSY + field*Np*K*Nface + face*Np*K + k*Np, Np);
+            }
+        }
+    }
 	double *TempFacialIntegralX = malloc(Np*K*Nfield*sizeof(double));
 	double *TempFacialIntegralY = malloc(Np*K*Nfield*sizeof(double));
 	
@@ -393,30 +407,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nfield; field++){
 
-			MultiEdgeContributionByLiftOperator(IERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSX + field*Np*K*Nface + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J+k*Np, Np);
 
-			MultiEdgeContributionByLiftOperator(IERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSY + field*Np*K*Nface + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
-	
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nfield; field++){
-
-			MultiEdgeContributionByLiftOperator(BERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-
-			MultiEdgeContributionByLiftOperator(BERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-		}
-	}
-
-
-
 	/*Next, sum contribution from volume integral, inner edge contribution and boundary edge contribution into AVx and Avy*/
 	
 #ifdef _OPENMP
@@ -425,13 +422,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
 			Minus(AVx + field*Np*K + k*Np, \
-				Vx + field*Np*K + k*Np, IERHSX + field*Np*K + k*Np, Np);
-			Minus(AVx + field*Np*K + k*Np, \
-				AVx + field*Np*K + k*Np, BERHSX + field*Np*K + k*Np, Np);
+				Vx + field*Np*K + k*Np, ERHSX + field*Np*K + k*Np, Np);
 			Minus(AVy + field*Np*K + k*Np, \
-				Vy + field*Np*K + k*Np, IERHSY + field*Np*K + k*Np, Np);
-			Minus(AVy + field*Np*K + k*Np, \
-				AVy + field*Np*K + k*Np, BERHSY + field*Np*K + k*Np, Np);
+				Vy + field*Np*K + k*Np, ERHSY + field*Np*K + k*Np, Np);
 		}
 	}
 	/*Finally, multiply each component of AVx and AVy by its diffusion coefficient to get the final auxialary variable,
@@ -527,10 +520,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					Vy + field*Np*K + k*Np, Np);
 			}
 		}
+    }
 /************************************************************************************************************************************/
 		/*If Mellor and Blumberg's method in "Modeling vertical and horizontal diffusivities with the sigma coordinate system" is
 		adopted, the next part should be ignored*/
 /************************************************************************************************************************************/
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+	for (int k = 0; k < K; k++){
 		int field = 0;
 		/*$\bold{r_x}\cdot (Dr*Q_x)+\bold{s_x}\cdot (Ds*Q_x)$, with $*Q_x=\nv H\frac{\partial u}{\partial x}*$*/
 		GetVolumnIntegral2d(Vx + field*Np*K + k*Np, TempVx + field*Np*K + k*Np, &np, &oneI, &np, &one, \
@@ -568,24 +566,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 /***********************************************************************************************************************************************/
-	/*Reset all the data contained in IERHSX and IERHSY to zero, becaused these space contains the data left when calculating the auxialary variable*/
-	memset(IERHSX, 0, Np*K*Nfield*sizeof(double));
-	memset(IERHSY, 0, Np*K*Nfield*sizeof(double));
+	/*Reset all the data contained in ERHSX and ERHSY to zero, becaused these space contains the data left when calculating the auxialary variable*/
+	memset(ERHSX, 0, Np*K*Nfield*Nface*sizeof(double));
+	memset(ERHSY, 0, Np*K*Nfield*Nface*sizeof(double));
 	/*Surface integral of the second order operator*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < 2; field++){
-		for (int face = 0; face < IENe; face++){
+    for (int face = 0; face < IENe; face++){
+        for (int field = 0; field < 2; field++){
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial (u,v)}{\partial x}$*/
-			GetIEContributionToRHS(IERHSX + field*Np*K, LPDTIEfm, LPDTIEfp, \
-				face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+			GetIEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+				face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 				IEnx, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEnx, InnerEdgeTau, 1.0, \
 				AVIEfm, AVIEfp, AVx + field*Np*K, IEFluxM, \
 				IEFluxP, IEJs, IEMb);
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_x=\nv H\frac{\partial (u,v)}{\partial y}$*/
-			GetIEContributionToRHS(IERHSY + field*Np*K, LPDTIEfm, LPDTIEfp, \
-				face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+			GetIEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+				face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 				IEny, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEny, InnerEdgeTau, 1.0, \
 				AVIEfm, AVIEfp, AVy + field*Np*K, IEFluxM, \
 				IEFluxP, IEJs, IEMb);
@@ -595,64 +593,72 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 2; field < Nfield; field++){
-		for (int face = 0; face < IENe; face++){
+    for (int face = 0; face < IENe; face++){
+        for (int field = 2; field < Nfield; field++){
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial x}$*/
-			GetIEContributionToRHS(IERHSX + field*Np*K, LPDTIEfm, LPDTIEfp, \
-				face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+			GetIEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+				face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 				IEnx, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEnx, InnerEdgeTau, Prantl, \
 				AVIEfm, AVIEfp, AVx + field*Np*K, IEFluxM, \
 				IEFluxP, IEJs, IEMb);
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial y}$*/
-			GetIEContributionToRHS(IERHSY + field*Np*K, LPDTIEfm, LPDTIEfp, \
-				face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+			GetIEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+				face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 				IEny, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEny, InnerEdgeTau, Prantl, \
 				AVIEfm, AVIEfp, AVy + field*Np*K, IEFluxM, \
 				IEFluxP, IEJs, IEMb);
 
 		}
 	}
-	memset(BERHSX, 0, Np*K*Nfield*sizeof(double));
-	memset(BERHSY, 0, Np*K*Nfield*sizeof(double));
 	/*Boundary edge facial integral part*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < 2; field++){
-		for (int face = 0; face < BENe; face++){
+    for (int face = 0; face < BENe; face++){
+        for (int field = 0; field < 2; field++){
 			/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial (u,v)}{\partial x}$*/
-			GetBEContributionToRHS(BERHSX + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
-				BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
+			GetBEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
+				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
 				BEfp + field*BENe*BENfp, BEnx, BoundaryEdgeTau, 1.0, AVBEfm, AVx + field*Np*K, \
 				BEFluxM, BEJs, BEMb);
 			/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial (u,v)}{\partial y}$*/
-			GetBEContributionToRHS(BERHSY + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
-				BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
+			GetBEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
+				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
 				BEfp + field*BENe*BENfp, BEny, BoundaryEdgeTau, 1.0, AVBEfm, AVy + field*Np*K, \
 				BEFluxM, BEJs, BEMb);
-
 		}
 	}
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 2; field < Nfield; field++){
-		for (int face = 0; face < BENe; face++){
+    for (int face = 0; face < BENe; face++){
+        for (int field = 2; field < Nfield; field++){
 			/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial x}$,
 			we note that the numerical flux at the boundary is set directly to the outer value*/
-			GetBEContributionToRHS(BERHSX + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
-				BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
+			GetBEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
+				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
 				BEfp + field*BENe*BENfp, BEnx, BoundaryEdgeTau, Prantl, AVBEfm, AVx + field*Np*K, \
 				BEFluxM, BEJs, BEMb);
 			/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial y}$,
 			we note that the numerical flux at the boundary is set directly to the outer value*/
-			GetBEContributionToRHS(BERHSY + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
-				BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
+			GetBEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
+				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
 				BEfp + field*BENe*BENfp, BEny, BoundaryEdgeTau, Prantl, AVBEfm, AVy + field*Np*K, \
 				BEFluxM, BEJs, BEMb);
 		}
 	}
-
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k<K; k++){
+        for(int field=0;field<Nfield;field++){
+            for(int face=1;face<Nface;face++){
+                Add( ERHSX + field*Np*K*Nface+k*Np, ERHSX + field*Np*K*Nface + k*Np, ERHSX + field*Np*K*Nface + face*Np*K + k*Np, Np);
+                Add( ERHSY + field*Np*K*Nface+k*Np, ERHSY + field*Np*K*Nface + k*Np, ERHSY + field*Np*K*Nface + face*Np*K + k*Np, Np);
+            }
+        }
+    }
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -660,23 +666,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nfield; field++){
 
-			MultiEdgeContributionByLiftOperator(IERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSX + field*Np*K*Nface + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 
-			MultiEdgeContributionByLiftOperator(IERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-		}
-	}
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nfield; field++){
-
-			MultiEdgeContributionByLiftOperator(BERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-
-			MultiEdgeContributionByLiftOperator(BERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSY + field*Np*K*Nface + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
@@ -688,74 +681,76 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
 			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, IERHSX + field*Np*K + k*Np, Np);
+				OutputRHS + field*Np*K + k*Np, ERHSX + field*Np*K*Nface + k*Np, Np);
 			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, BERHSX + field*Np*K + k*Np, Np);
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, IERHSY + field*Np*K + k*Np, Np);
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, BERHSY + field*Np*K + k*Np, Np);
+				OutputRHS + field*Np*K + k*Np, ERHSY + field*Np*K*Nface + k*Np, Np);
 		}
 	}
 	/****************************************************************************************************************************/
 	/*If Mellor and Blumberg's method in "Modeling vertical and horizontal diffusivities with the sigma coordinate system" is
 	adopted, the following part about the facial integral should be ignored*/
-	memset(IERHSX, 0, Np*K * 2 * sizeof(double));
-	memset(IERHSY, 0, Np*K * 2 * sizeof(double));
+	memset(ERHSX, 0, Np * K * 2 * Nface * sizeof(double));
+	memset(ERHSY, 0, Np * K * 2 * Nface * sizeof(double));
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif    
 	for (int face = 0; face < IENe; face++){
 		int field = 0;
 		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$*/
-		GetIEContributionToRHS(IERHSX + field*Np*K, LPDTIEfm, LPDTIEfp, \
-			face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+		GetIEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+			face, LocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 			IEnx, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEnx, InnerEdgeTau, 1.0, \
 			AVIEfm, AVIEfp, AVx + field*Np*K, IEFluxM, \
 			IEFluxP, IEJs, IEMb);
 		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$*/
-		GetIEContributionToRHS(IERHSY + field*Np*K, LPDTIEfm, LPDTIEfp, \
-			face, LocalPrimitiveDiffTermX + (field + 1)*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+		GetIEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+			face, LocalPrimitiveDiffTermX + (field + 1)*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 			IEny, IEfm + (field + 1)*IENe*IENfp, IEfp + (field + 1)*IENe*IENfp, IEnx, InnerEdgeTau, 1.0, \
 			AVIEfm, AVIEfp, AVx + (field + 1)*Np*K, IEFluxM, \
 			IEFluxP, IEJs, IEMb);
 
 		field = 1;
 		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$*/
-		GetIEContributionToRHS(IERHSX + field*Np*K, LPDTIEfm, LPDTIEfp, \
-			face, LocalPrimitiveDiffTermY + (field - 1)*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+		GetIEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+			face, LocalPrimitiveDiffTermY + (field - 1)*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 			IEnx, IEfm + (field - 1)*IENe*IENfp, IEfp + (field - 1)*IENe*IENfp, IEny, InnerEdgeTau, 1.0, \
 			AVIEfm, AVIEfp, AVy + (field - 1)*Np*K, IEFluxM, \
 			IEFluxP, IEJs, IEMb);
 		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$*/
-		GetIEContributionToRHS(IERHSY + field*Np*K, LPDTIEfm, LPDTIEfp, \
-			face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToN1, IEFToN2, Np, IENe, IENfp, field, IEFluxS, \
+		GetIEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTIEfm, LPDTIEfp, \
+			face, LocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, IEFluxS, \
 			IEny, IEfm + field*IENe*IENfp, IEfp + field*IENe*IENfp, IEny, InnerEdgeTau, 1.0, \
 			AVIEfm, AVIEfp, AVy + field*Np*K, IEFluxM, \
 			IEFluxP, IEJs, IEMb);
 
 	}
-	memset(BERHSX, 0, Np*K * 2 * sizeof(double));
-	memset(BERHSY, 0, Np*K * 2 * sizeof(double));
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif    
 	for (int face = 0; face < BENe; face++){
 		int field = 0;
 		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$*/
-		GetBEContributionToRHS(BERHSX + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
-			BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
+		GetBEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermX + field*Np*K, \
+			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEnx, BEfm + field*BENe*BENfp, \
 			BEfp + field*BENe*BENfp, BEnx, BoundaryEdgeTau, 1.0, AVBEfm, AVx + field*Np*K, \
 			BEFluxM, BEJs, BEMb);
 		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$*/
-		GetBEContributionToRHS(BERHSY + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermX + (field + 1)*Np*K, \
-			BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEny, BEfm + (field + 1)*BENe*BENfp, \
+		GetBEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermX + (field + 1)*Np*K, \
+			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEny, BEfm + (field + 1)*BENe*BENfp, \
 			BEfp + (field + 1)*BENe*BENfp, BEnx, BoundaryEdgeTau, 1.0, AVBEfm, AVx + (field + 1)*Np*K, \
 			BEFluxM, BEJs, BEMb);
 
 		field = 1;
 		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$*/
-		GetBEContributionToRHS(BERHSX + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermY + (field - 1)*Np*K, \
-			BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEnx, BEfm + (field - 1)*BENe*BENfp, \
+		GetBEContributionToRHS(ERHSX + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermY + (field - 1)*Np*K, \
+			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEnx, BEfm + (field - 1)*BENe*BENfp, \
 			BEfp + (field - 1)*BENe*BENfp, BEny, BoundaryEdgeTau, 1.0, AVBEfm, AVy + (field - 1)*Np*K, \
 			BEFluxM, BEJs, BEMb);
 		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$*/
-		GetBEContributionToRHS(BERHSY + field*Np*K, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
-			BEFToE, BEFToN1, Np, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
+		GetBEContributionToRHS(ERHSY + field*Np*K*Nface, LPDTBEfm, face, LocalPrimitiveDiffTermY + field*Np*K, \
+			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, BEFluxS, BEny, BEfm + field*BENe*BENfp, \
 			BEfp + field*BENe*BENfp, BEny, BoundaryEdgeTau, 1.0, AVBEfm, AVy + field*Np*K, \
 			BEFluxM, BEJs, BEMb);
 	}
@@ -765,23 +760,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < 2; field++){
 
-			MultiEdgeContributionByLiftOperator(IERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSX + field*Np*K*Nface + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 
-			MultiEdgeContributionByLiftOperator(IERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-		}
-	}
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < 2; field++){
-
-			MultiEdgeContributionByLiftOperator(BERHSX + field*Np*K + k*Np, TempFacialIntegralX + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-
-			MultiEdgeContributionByLiftOperator(BERHSY + field*Np*K + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHSY + field*Np*K*Nface + k*Np, TempFacialIntegralY + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
@@ -792,13 +774,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
 			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, IERHSX + field*Np*K + k*Np, Np);
+				OutputRHS + field*Np*K + k*Np, ERHSX + field*Np*K*Nface + k*Np, Np);
 			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, BERHSX + field*Np*K + k*Np, Np);
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, IERHSY + field*Np*K + k*Np, Np);
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, BERHSY + field*Np*K + k*Np, Np);
+				OutputRHS + field*Np*K + k*Np, ERHSY + field*Np*K*Nface + k*Np, Np);
 		}
 	}
 
@@ -822,10 +800,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	free(AVBEfm);
 	free(BEFluxM);
 	free(BEFluxS);
-	free(IERHSX);
-	free(IERHSY);
-	free(BERHSX);
-	free(BERHSY);
+	free(ERHSX);
+	free(ERHSY);
 	free(LocalPrimitiveDiffTermX);
 	free(LocalPrimitiveDiffTermY);
 	free(LPDTIEfm);

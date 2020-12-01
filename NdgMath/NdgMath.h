@@ -30,9 +30,9 @@ void DotDivideByConstant(double *, double *, double , int);
 
 void DotCriticalDivide(double *, double *, double *, double *, int);
 
-void StrongFormInnerEdgeRHS(int, double *, int, int, double *, double *, double *, double *, double *, double *, double *, double *);
+void StrongFormInnerEdgeRHS(int , double *, double *, int , int ,int , double *, double *, double *, double *,double *, double *, double *, double *);
 
-void StrongFormBoundaryEdgeRHS(int , double *, int , int ,double *, double *, double *, double *, double *, double *);
+void StrongFormBoundaryEdgeRHS(int , double *, double *, int , int ,  int , double *, double *, double *, double *, double *, double *);
 
 void FetchInnerEdgeFacialValue(double *, double *, double *, double *, double *, double *, int , int );
 

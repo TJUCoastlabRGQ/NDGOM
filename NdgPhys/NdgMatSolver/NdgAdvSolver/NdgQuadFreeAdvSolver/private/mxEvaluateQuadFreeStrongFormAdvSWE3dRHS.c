@@ -35,6 +35,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *Ds = mxGetPr(TempDs);
 	mxArray *TempDt = mxGetField(prhs[1], 0, "Dt");
 	double *Dt = mxGetPr(TempDt);
+	mxArray *TempNface = mxGetField(prhs[1], 0, "Nface");
+	int Nface = mxGetScalar(TempNface);    
 	mxArray *TempinvM = mxGetField(prhs[1], 0, "invM");
 	double *invM = mxGetPr(TempinvM);
 	/*For inner edge object*/
@@ -54,6 +56,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //	double *IEnz = mxGetPr(TempIEnz);
 	mxArray *TempIEFToE = mxGetField(prhs[2], 0, "FToE");
 	double *IEFToE = mxGetPr(TempIEFToE);
+	mxArray *TempIEFToF = mxGetField(prhs[2], 0, "FToF");
+	double *IEFToF = mxGetPr(TempIEFToF);    
 	mxArray *TempIEFToN1 = mxGetField(prhs[2], 0, "FToN1");
 	double *IEFToN1 = mxGetPr(TempIEFToN1);
 	mxArray *TempIEFToN2 = mxGetField(prhs[2], 0, "FToN2");
@@ -75,6 +79,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //	double *BEnz = mxGetPr(TempBEnz);
 	mxArray *TempBEFToE = mxGetField(prhs[3], 0, "FToE");
 	double *BEFToE = mxGetPr(TempBEFToE);
+	mxArray *TempBEFToF = mxGetField(prhs[3], 0, "FToF");
+	double *BEFToF = mxGetPr(TempBEFToF);    
 	mxArray *TempBEFToN1 = mxGetField(prhs[3], 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
 	/*For bottom edge object*/
@@ -94,6 +100,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BotEnz = mxGetPr(TempBotEnz);
 	mxArray *TempBotEFToE = mxGetField(prhs[4], 0, "FToE");
 	double *BotEFToE = mxGetPr(TempBotEFToE);
+    mxArray *TempBotEFToF = mxGetField(prhs[4], 0, "FToF");
+	double *BotEFToF = mxGetPr(TempBotEFToF);
 	mxArray *TempBotEFToN1 = mxGetField(prhs[4], 0, "FToN1");
 	double *BotEFToN1 = mxGetPr(TempBotEFToN1);
 	mxArray *TempBotEFToN2 = mxGetField(prhs[4], 0, "FToN2");
@@ -115,6 +123,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BotBEnz = mxGetPr(TempBotBEnz);
 	mxArray *TempBotBEFToE = mxGetField(prhs[5], 0, "FToE");
 	double *BotBEFToE = mxGetPr(TempBotBEFToE);
+	mxArray *TempBotBEFToF = mxGetField(prhs[5], 0, "FToF");
+	double *BotBEFToF = mxGetPr(TempBotBEFToF);    
 	mxArray *TempBotBEFToN1 = mxGetField(prhs[5], 0, "FToN1");
 	double *BotBEFToN1 = mxGetPr(TempBotBEFToN1);
     /*For surface boundary edge object*/
@@ -134,6 +144,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *SurfBEnz = mxGetPr(TempSurfBEnz);
 	mxArray *TempSurfBEFToE = mxGetField(prhs[6], 0, "FToE");
 	double *SurfBEFToE = mxGetPr(TempSurfBEFToE);
+    mxArray *TempSurfBEFToF = mxGetField(prhs[6], 0, "FToF");
+	double *SurfBEFToF = mxGetPr(TempSurfBEFToF);
 	mxArray *TempSurfBEFToN1 = mxGetField(prhs[6], 0, "FToN1");
 	double *SurfBEFToN1 = mxGetPr(TempSurfBEFToN1);
 
@@ -149,7 +161,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	signed char *ftype = (signed char *)mxGetData(prhs[12]);
 
-
+	ptrdiff_t np = Np;
+	ptrdiff_t oneI = 1;
+	double one = 1.0, zero = 0.0;
+	double *TempFacialIntegral = malloc(Np*K*Nvar*sizeof(double));
+    
     size_t NdimOut = 3;
 	mwSize dimOut[3] = { Np, K, Nvar };
 	plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
@@ -157,7 +173,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	
 	int Ne, Nfp;
 
-	double *FToN1, *FToN2, *FToE, *nx, *ny, *nz;
+	double *FToN1, *FToN2, *FToE, *FToF, *nx, *ny, *nz;
 
 	double *fm, *fp, *FluxM, *FluxP, *FluxS;
 
@@ -167,7 +183,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	            /********************************************************************/
 	/*Allocate memory for fm and fp defined over inner edges. Here, variables correspond to hu, hv, hT, hS, sediment and other passive transport material, vertical velocity omega is not included*/
 	Ne = IENe, Nfp = IENfp;
-	FToN1 = IEFToN1, FToN2 = IEFToN2, FToE = IEFToE, nx = IEnx, ny = IEny;
+	FToN1 = IEFToN1, FToN2 = IEFToN2, FToE = IEFToE, FToF = IEFToF, nx = IEnx, ny = IEny;
 	fm = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
 	double *huM = fm, *hvM = fm + Nfp*Ne, *hM = fm + 2 * Nfp*Ne;
 	fp = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
@@ -205,29 +221,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 /*Allocate memory for contribution to RHS due to inner edge facial integral, and
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
-	double *IERHS = malloc(Np*K*Nvar*sizeof(double));
-	memset(IERHS, 0, Np*K*Nvar*sizeof(double));
+	double *ERHS = malloc(Np*K*Nvar*Nface*sizeof(double));
+	memset(ERHS, 0, Np*K*Nvar*Nface*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nvar; field++){
-		for (int face = 0; face < Ne; face++){
-			StrongFormInnerEdgeRHS(face, FToE, Np, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp,\
-				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, IEJs, IEMb, IERHS + field*Np*K);
-		}
-	}
-/*Multiply the contribution to RHS due to inner edge facial integral by the inverse mass matrix*/
-	ptrdiff_t np = Np;
-	ptrdiff_t oneI = 1;
-	double one = 1.0, zero = 0.0;
-	double *TempFacialIntegral = malloc(Np*K*Nvar*sizeof(double));
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nvar; field++){
-			MultiEdgeContributionByLiftOperator(IERHS + field*Np*K + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
+    for (int face = 0; face < Ne; face++){
+        for (int field = 0; field < Nvar; field++){
+			StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp,\
+				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, IEJs, IEMb, ERHS + field*Np*K*Nface);
 		}
 	}
 	free(fm);
@@ -243,7 +245,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Allocate memory for fm and fp defined over boundary edges. Here, variables correspond to hu, hv, h, hT, hS, 
 	sediment and other passive transport material, vertical velocity omega is not included for boundary edges*/
 	Ne = BENe, Nfp = BENfp;
-	FToN1 = BEFToN1, FToE = BEFToE, nx = BEnx, ny = BEny;
+	FToN1 = BEFToN1, FToE = BEFToE, FToF = BEFToF, nx = BEnx, ny = BEny;
 	fm = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
 	huM = fm, hvM = fm + Nfp*Ne, hM = fm + 2 * Nfp*Ne;
 	fp = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
@@ -280,27 +282,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateVerticalFaceNumFlux_HLLC_LAI(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
 	}
-	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate 
-	contribution to RHS due to boundary edge facial integral in strong form manner*/
-	double *BERHS = malloc(Np*K*Nvar*sizeof(double));
-	memset(BERHS, 0, Np*K*Nvar*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int field = 0; field < Nvar; field++){
 		for (int face = 0; face < Ne; face++){
-			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BEJs, BEMb, BERHS + field*Np*K);
-		}
-	}
-	/*Multiply the contribution to RHS due to boundary edge facial integral by the inverse mass matrix*/
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nvar; field++){
-			MultiEdgeContributionByLiftOperator(BERHS + field*Np*K + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
+			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BEJs, BEMb, ERHS + field*Np*K*Nface);
 		}
 	}
 	free(fm);
@@ -315,7 +303,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	           /**************************************Bottom Edge Part*******************************************************/
 	                              /********************************************************************/
 	Ne = BotENe, Nfp = BotENfp;
-	FToN1 = BotEFToN1, FToN2 = BotEFToN2, FToE = BotEFToE, nz = BotEnz;
+	FToN1 = BotEFToN1, FToN2 = BotEFToN2, FToE = BotEFToE, FToF = BotEFToF, nz = BotEnz;
 	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
 	double *omegaM = fm + 2 * Nfp*Ne;
 	huM = fm, hvM = fm + Nfp*Ne, hM = fm + 3 * Nfp*Ne;
@@ -354,27 +342,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateHorizontalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
 			nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
-	/*Allocate memory for contribution to RHS due to bottom edge facial integral, and
-	calculate contribution to RHS due to bottom edge facial integral in strong form manner*/
-	double *BotERHS = malloc(Np*K*Nvar*sizeof(double));
-	memset(BotERHS, 0, Np*K*Nvar*sizeof(double));
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int field = 0; field < Nvar; field++){
-		for (int face = 0; face < Ne; face++){
-			StrongFormInnerEdgeRHS(face, FToE, Np, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp, \
-				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotEJs, BotEMb, BotERHS + field*Np*K);
-		}
-	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nvar; field++){
-			MultiEdgeContributionByLiftOperator(BotERHS + field*Np*K + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
+    for (int face = 0; face < Ne; face++){
+        for (int field = 0; field < Nvar; field++){
+			StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp, \
+				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotEJs, BotEMb, ERHS + field*Np*K*Nface );
 		}
 	}
 
@@ -389,7 +364,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	             /**************************************Bottom Boundary Edge Part*******************************************************/
 	                            /********************************************************************/
 	Ne = BotBENe, Nfp = BotBENfp;
-	FToN1 = BotBEFToN1, FToE = BotBEFToE, nz = BotBEnz;
+	FToN1 = BotBEFToN1, FToE = BotBEFToE, FToF = BotBEFToF, nz = BotBEnz;
 	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
 	huM = fm;
 	hvM = fm + Nfp*Ne;
@@ -421,29 +396,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
-	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate
-	contribution to RHS due to boundary edge facial integral in strong form manner*/
-	double *BotBERHS = malloc(Np*K*Nvar*sizeof(double));
-	memset(BotBERHS, 0, Np*K*Nvar*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int field = 0; field < Nvar; field++){
 		for (int face = 0; face < Ne; face++){
-			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotBEJs, BotBEMb, BotBERHS + field*Np*K);
+			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotBEJs, BotBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
 
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nvar; field++){
-			MultiEdgeContributionByLiftOperator(BotBERHS + field*Np*K + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-		}
-	}
 	free(fm);
 	free(FluxM);
 	free(FluxS);
@@ -454,7 +416,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	                               /********************************************************************/
 
 	Ne = SurfBENe, Nfp = SurfBENfp;
-	FToN1 = SurfBEFToN1, FToE = SurfBEFToE, nz = SurfBEnz;
+	FToN1 = SurfBEFToN1, FToE = SurfBEFToE, FToF = SurfBEFToF, nz = SurfBEnz;
 
 	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
 	huM = fm;
@@ -490,26 +452,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
 	}
 
-	/*Allocate memory for contribution to RHS due to boundary edge facial integral, and calculate
-	contribution to RHS due to boundary edge facial integral in strong form manner*/
-	double *SurfBERHS = malloc(Np*K*Nvar*sizeof(double));
-	memset(SurfBERHS, 0, Np*K*Nvar*sizeof(double));
-
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nvar; field++){
-		for (int face = 0; face < Ne; face++){
-			StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, SurfBERHS + field*Np*K);
+    for (int face = 0; face < Ne; face++){
+        for (int field = 0; field < Nvar; field++){
+			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
+    
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k < K; k++){
+        for(int field=0;field<Nvar;field++){
+            for(int face=1;face<Nface;face++){
+                Add( ERHS + field*Np*K*Nface+k*Np, ERHS + field*Np*K*Nface + k*Np, ERHS + field*Np*K*Nface + face*Np*K + k*Np, Np);
+            }
+        }
+    }    
+    
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nvar; field++){
-			MultiEdgeContributionByLiftOperator(SurfBERHS + field*Np*K + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(ERHS + field*Np*K*Nface + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
@@ -550,22 +519,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int k = 0; k < K; k++){
 		for (int n = 0; n < Nvar; n++){
 			Minus(OutputRHS + n*Np*K + k*Np, \
-				IERHS + n*Np*K + k*Np, OutputRHS + n*Np*K + k*Np, Np);
-			Add(OutputRHS + n*Np*K + k*Np, \
-				BERHS + n*Np*K + k*Np, OutputRHS + n*Np*K + k*Np, Np);
-			Add(OutputRHS + n*Np*K + k*Np, \
-				BotERHS + n*Np*K + k*Np, OutputRHS + n*Np*K + k*Np, Np);
-			Add(OutputRHS + n*Np*K + k*Np, \
-				BotBERHS + n*Np*K + k*Np, OutputRHS + n*Np*K + k*Np, Np);
-			Add(OutputRHS + n*Np*K + k*Np, \
-				SurfBERHS + n*Np*K + k*Np, OutputRHS + n*Np*K + k*Np, Np);
+				ERHS + n*Np*K*Nface + k*Np, OutputRHS + n*Np*K + k*Np, Np);
 		}
 	}
 
-	free(IERHS);
-	free(BERHS);
-	free(BotERHS);
-	free(BotBERHS);
-	free(SurfBERHS);
+	free(ERHS);
 
 }

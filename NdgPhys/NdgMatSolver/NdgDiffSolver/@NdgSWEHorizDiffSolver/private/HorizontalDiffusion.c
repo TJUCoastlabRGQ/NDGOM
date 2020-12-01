@@ -42,13 +42,13 @@ void GetIPBoundaryNumFlux(double *dest, double *fm, double *n, double *vfm, \
 * Output:
 * 		double[Np x 1] 	dest the contribution due to the face integral on the studied inner face
 */
-void GetIEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nfp, int field, double *fm, double *fp, double *IEFToE, \
-	double *IEFToN1, double *IEFToN2, int Np, double *FluxM, double *FluxP, double *FluxS, double *n, double *Mb, double *Js){
+void GetIEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nfp, int field, double *fm, double *fp, double *IEFToE, double *IEFToF,\
+	double *IEFToN1, double *IEFToN2, int Np, int K, double *FluxM, double *FluxP, double *FluxS, double *n, double *Mb, double *Js){
 	/*This */
 	GetFacialFluxTerm(FluxM + field*Ne*Nfp + face*Nfp, fm + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
 	GetFacialFluxTerm(FluxP + field*Ne*Nfp + face*Nfp, fp + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
 	GetCentralNumFlux(FluxS + field*Ne*Nfp + face*Nfp, fm + field*Ne*Nfp + face*Nfp, fp + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
-	StrongFormInnerEdgeRHS(face, IEFToE, Np, Nfp, IEFToN1, IEFToN2, FluxM + field*Ne*Nfp, FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, Mb, dest);
+	StrongFormInnerEdgeRHS(face, IEFToE, IEFToF, Np, K, Nfp, IEFToN1, IEFToN2, FluxM + field*Ne*Nfp, FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, Mb, dest);
 }
 /*
 * Purpose: This function is used to calculate the boundary edge contribution to the auxialary variable
@@ -70,11 +70,11 @@ void GetIEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nf
 * Output:
 * 		double[Np x 1] 	dest the contribution due to the face integral on the studied inner face
 */
-void GetBEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nfp, int field, double *fm, double *fp, double *BEFToE, \
-	double *BEFToN1, int Np, double *FluxM, double *FluxS, double *n, double *Mb, double *Js){
+void GetBEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nfp, int field, double *fm, double *fp, double *BEFToE, double *BEFToF, \
+	double *BEFToN1, int Np, int K, double *FluxM, double *FluxS, double *n, double *Mb, double *Js){
 	GetFacialFluxTerm(FluxM + field*Ne*Nfp + face*Nfp, fm + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
 	GetFacialFluxTerm(FluxS + field*Ne*Nfp + face*Nfp, fp + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
-	StrongFormBoundaryEdgeRHS(face, BEFToE, Np, Nfp, BEFToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, Mb, dest);
+	StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, Nfp, BEFToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, Mb, dest);
 }
 
 /*
@@ -107,8 +107,8 @@ void GetBEContributionToAuxialaryVariable(double *dest, int face, int Ne, int Nf
 * Output:
 * 		double[Np x 1] 	dest the contribution due to the face integral on the studied inner face
 */
-void GetIEContributionToRHS(double *dest, double *LPDTfm, double *LPDTfp, int face, double *LPDiffTerm, double *FToE, double *FToN1, \
-	double *FToN2, int Np, int Ne, int Nfp, int field, double *FluxS, double *n, double *fm, double *fp, double *Jumpn, double *Tau, double Coefficient, \
+void GetIEContributionToRHS(double *dest, double *LPDTfm, double *LPDTfp, int face, double *LPDiffTerm, double *FToE, double *FToF, double *FToN1, \
+	double *FToN2, int Np, int K, int Ne, int Nfp, int field, double *FluxS, double *n, double *fm, double *fp, double *Jumpn, double *Tau, double Coefficient, \
 	double *AVfm, double *AVfp, double *AV, double *FluxM, double *FluxP, double *Js, double *M){
 	/*FToE is the start stress of the property FToE contained in inner edge*/
 	FetchInnerEdgeFacialValue(LPDTfm + Ne*Nfp*field + face*Nfp, LPDTfp + Ne*Nfp*field + face*Nfp, LPDiffTerm, FToE + 2 * face, FToN1 + face*Nfp, FToN2 + face*Nfp, Np, Nfp);
@@ -116,7 +116,7 @@ void GetIEContributionToRHS(double *dest, double *LPDTfm, double *LPDTfp, int fa
 	FetchInnerEdgeFacialValue(AVfm + field*Ne*Nfp + face*Nfp, AVfp + field*Ne*Nfp + face*Nfp, AV, FToE + 2 * face, FToN1 + face*Nfp, FToN2 + face*Nfp, Np, Nfp);
 	GetFacialFluxTerm(FluxM + field*Ne*Nfp + face*Nfp, AVfm + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
 	GetFacialFluxTerm(FluxP + field*Ne*Nfp + face*Nfp, AVfp + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
-	StrongFormInnerEdgeRHS(face, FToE, Np, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp, FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, M, dest);
+	StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp, FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, M, dest);
 }
 
 /*
@@ -146,13 +146,13 @@ void GetIEContributionToRHS(double *dest, double *LPDTfm, double *LPDTfp, int fa
 * 		double[Np x 1] 	dest the contribution due to the face integral on the studied inner face
 */
 
-void GetBEContributionToRHS(double *dest, double *LPDTfm, int face, double *LPDiffTerm, double *FToE, double *FToN1, \
-	int Np, int Ne, int Nfp, int field, double *FluxS, double *n, double *fm, double *fp, double *Jumpn, double *Tau, double Coefficient, \
+void GetBEContributionToRHS(double *dest, double *LPDTfm, int face, double *LPDiffTerm, double *FToE, double *FToF, double *FToN1, \
+	int Np, int K, int Ne,  int Nfp, int field, double *FluxS, double *n, double *fm, double *fp, double *Jumpn, double *Tau, double Coefficient, \
 	double *AVfm, double *AV, double *FluxM, double *Js, double *M){
 	/*FToE is the start adress of the property FToE contained in inner edge*/
 	FetchBoundaryEdgeFacialValue(LPDTfm + field*Ne*Nfp + face*Nfp, LPDiffTerm, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
 	GetIPBoundaryNumFlux(FluxS + field*Ne*Nfp + face*Nfp, LPDTfm + field*Ne*Nfp + face*Nfp, n + face*Nfp, fm + face*Nfp, fp + face*Nfp, Jumpn + face*Nfp, Nfp, Tau + face*Nfp, Coefficient);
 	FetchBoundaryEdgeFacialValue(AVfm + field*Ne*Nfp + face*Nfp, AV, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
 	GetFacialFluxTerm(FluxM + field*Ne*Nfp + face*Nfp, AVfm + field*Ne*Nfp + face*Nfp, n + face*Nfp, Nfp);
-	StrongFormBoundaryEdgeRHS(face, FToE, Np, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, M, dest);
+	StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, Js, M, dest);
 }

@@ -59,13 +59,15 @@ void Minus(double *dest, double *sourcea, double *sourceb, int size){
 }
 
 
-void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, int Np,\
+void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K,\
 	int Nfp, double *FToN1, double *FToN2, double *fluxM_, double *fluxP_,\
 	                  double *fluxS_, double *Js, double *Mb, double *rhs){
 	const int e1 = (int)FToE[2 * edgeIndex] - 1;
 	const int e2 = (int)FToE[2 * edgeIndex + 1] - 1;
-	const int ind1 = e1 * Np - 1;
-	const int ind2 = e2 * Np - 1;
+    const int f1 = (int)FToF[2 * edgeIndex] - 1;
+    const int f2 = (int)FToF[2 * edgeIndex + 1] - 1;
+	const int ind1 = e1 * Np - 1 + f1 * Np * K;
+	const int ind2 = e2 * Np - 1 + f2 * Np * K;
 	const int ind = edgeIndex * Nfp;
 	double *rhsM = malloc(Nfp*sizeof(double));
 	double *rhsP = malloc(Nfp*sizeof(double));
@@ -93,10 +95,11 @@ void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, int Np,\
 	free(rhsP);
 }
 
-void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, int Np, int Nfp, \
-	double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){
+void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \
+   int Nfp, double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){
 	const int e1 = (int)FToE[2 * edgeIndex] - 1;
-	const int ind1 = e1 * Np - 1;
+    const int f1 = (int)FToF[2 * edgeIndex] - 1;
+	const int ind1 = e1 * Np - 1 + f1 * Np * K;
 	const int ind = edgeIndex * Nfp;
 	double *rhsM = malloc(Nfp*sizeof(double));
 	memset(rhsM, 0, Nfp*sizeof(double));
