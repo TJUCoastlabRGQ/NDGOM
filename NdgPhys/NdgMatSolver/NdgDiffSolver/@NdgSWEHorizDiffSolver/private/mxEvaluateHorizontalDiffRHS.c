@@ -70,7 +70,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mxArray *TempDs = mxGetField(prhs[9], 0, "Ds");
 	double *Ds = mxGetPr(TempDs);
 	mxArray *TempNface = mxGetField(prhs[9], 0, "Nface");
-	int TempNface = mxGetScalar(TempNface);
+	int tempNface = (int)mxGetScalar(TempNface);
     int Nface;
 
 	mxArray *TempInvM = mxGetField(prhs[9], 0, "invM");
@@ -112,7 +112,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		/*For 2d shallow water problem, no horizontal diffusion terms are included in the governing equation for water depth $H$*/
 		Nfield = Nvar - 1;
         /*For 2d shallow water problem, the face number is equal to TempNface, since there is no surface edge and bottom edge*/
-        Nface = TempNface;
+        Nface = tempNface;
 		/*Allocate memory for the original variable $u,v$ and $\theta$*/
 		variable = malloc(Np*K*Nfield*sizeof(double));
 		/*Allocate memory for the original variable over boundary edge*/
@@ -189,7 +189,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		Nfield = Nvar;
         /*For 3d shallow water problem, the face number is equal to TempNface - 2, since there 
          * is surface edge and bottom edge is not considered for horizontal diffusion term*/
-        Nface = TempNface - 2;        
+        Nface = tempNface - 2;        
 		/*Allocate memory for the original variable $u,v$ and $\theta$*/
 		variable = malloc(Np*K*Nfield*sizeof(double));
 		MeshType = 3;

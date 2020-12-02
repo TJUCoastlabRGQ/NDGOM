@@ -65,7 +65,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempDs2d = mxGetField(prhs[3], 0, "Ds");
 	double *Ds2d = mxGetPr(TempDs2d);
     mxArray *TempNface = mxGetField(prhs[3], 0, "Nface");
-	double *Nface = mxGetPr(TempNface);
+	int Nface = (int)mxGetScalar(TempNface);
 	mxArray *TempinvM2d = mxGetField(prhs[3], 0, "invM");
 	double *invM2d = mxGetPr(TempinvM2d);
 
@@ -186,9 +186,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-    for (int k=0; k < K; k++){
+    for (int k=0; k < K2d; k++){
             for(int face=1;face<Nface;face++){
-                Add( ERHS2d + k*Np, ERHS2d + k*Np, ERHS2d + face*Np*K + k*Np, Np);
+                Add( ERHS2d + k*Np2d, ERHS2d + k*Np2d, ERHS2d + face*Np2d*K2d + k*Np2d, Np2d);
             }
     }   
     

@@ -34,18 +34,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   double *invM = mxGetPr(prhs[0]);
   double *Mb = mxGetPr(prhs[1]);
   double *FToE = mxGetPr(prhs[2]);
-  double *FToN1 = mxGetPr(prhs[3]);
-  double *FToN2 = mxGetPr(prhs[4]);
-  double *Js = mxGetPr(prhs[5]);
-  double *J = mxGetPr(prhs[6]);
-  double *fluxM = mxGetPr(prhs[7]);
-  double *fluxP = mxGetPr(prhs[8]);
-  double *fluxS = mxGetPr(prhs[9]);
+  double *FToF = mxGetPr(prhs[3]);
+  double *FToN1 = mxGetPr(prhs[4]);
+  double *FToN2 = mxGetPr(prhs[5]);
+  double *Js = mxGetPr(prhs[6]);
+  double *J = mxGetPr(prhs[7]);
+  double *fluxM = mxGetPr(prhs[8]);
+  double *fluxP = mxGetPr(prhs[9]);
+  double *fluxS = mxGetPr(prhs[10]);
+  int Nface = (int)mxGetScalar(prhs[11]);
 
   // dims = mxGetDimensions(prhs[6]);
-  const int Np = mxGetM(prhs[6]);  // num of interp nodes
-  const int K = mxGetN(prhs[6]);   // num of elements
-  const mwSize *dims = mxGetDimensions(prhs[7]);
+  const int Np = mxGetM(prhs[7]);  // num of interp nodes
+  const int K = mxGetN(prhs[7]);   // num of elements
+  const mwSize *dims = mxGetDimensions(prhs[8]);
   const int Nfp = dims[0];
   const int Ne = dims[1];  // num of edges
   int Nfield;
@@ -67,27 +69,46 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
   ptrdiff_t oneI = 1;
   ptrdiff_t KI = K;
   ptrdiff_t np = Np;
+  
+double *ERHS = malloc(Np*K*Nfield*Nface*sizeof(double));
+memset(ERHS, 0, Np*K*Nfield*Nface*sizeof(double));
+double *TempFacialIntegral = malloc(Np*K*Nfield*sizeof(double));
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(12)
+#pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-  for (int fld = 0; fld < Nfield; fld++) {
-	  double *rhs = frhs + Np * K * fld;
-	  double *fluxM_ = fluxM + Nfp * Ne * fld;
-	  double *fluxP_ = fluxP + Nfp * Ne * fld;
-	  double *fluxS_ = fluxS + Nfp * Ne * fld;
+    for (int face = 0; face < Ne; face++){
+        for (int field = 0; field < Nfield; field++){
+			StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, fluxM + field*Ne*Nfp,\
+				fluxP + field*Ne*Nfp, fluxS + field*Ne*Nfp, Js, Mb, ERHS + field*Np*K*Nface);
+		}
+	}
 
-	  for (int k = 0; k < Ne; k++){
-		  StrongFormInnerEdgeRHS(k, FToE, Np, Nfp, FToN1, FToN2, fluxM_, fluxP_, fluxS_, Js, Mb, rhs);
-	  }
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+    for (int k=0; k < K; k++){
+        for(int field=0;field<Nfield;field++){
+            for(int face=1;face<Nface;face++){
+                Add( ERHS + field*Np*K*Nface+k*Np, ERHS + field*Np*K*Nface + k*Np, ERHS + field*Np*K*Nface + face*Np*K + k*Np, Np);
+            }
+        }
+    }
 
-	  double *temp = malloc(Np*K*sizeof(double));
-	  dgemm(chn, chn, &np, &KI, &np, &one, invM, &np, rhs, &np, &zero, temp,
-		  &np);
-	  for (int k = 0; k < K; k++){
-		  DotDivide(rhs + k*Np, temp + k*Np, J + k*Np, Np);
-	  }
-	  free(temp);
-  }
-  return;
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+	for (int k = 0; k < K; k++) {
+		for (int field = 0; field < Nfield; field++){
+			MultiEdgeContributionByLiftOperator(ERHS + field*Np*K*Nface + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
+				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
+            for(int n=0; n<Np;n++){
+               frhs[field*Np*K+k*Np+n] = ERHS[field*Np*K*Nface + k*Np + n]; 
+            }
+            
+		}
+	}
+
+free(ERHS);
+free(TempFacialIntegral);
 }

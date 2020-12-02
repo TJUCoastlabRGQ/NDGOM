@@ -450,7 +450,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
     for (int k=0; k < K3d; k++){
         for(int face=1;face<Nface;face++){
-            Add( ERHS3d + k*Np3d, ERHS3d + k*Np3d, ERHS3d + face*Np3d*K3d + k3d*Np3d, Np3d);
+            Add( ERHS3d + k*Np3d, ERHS3d + k*Np3d, ERHS3d + face*Np3d*K3d + K3d*Np3d, Np3d);
         }        
     }
 
