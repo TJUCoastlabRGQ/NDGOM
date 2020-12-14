@@ -53,8 +53,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mxArray *TempBEFToN1 = mxGetField(prhs[4], 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
 
-
-
 	double *Tempnv = mxGetPr(prhs[5]);
 	int Np, K, Nvar;
 	const size_t *PRHS;
@@ -92,7 +90,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double gra = mxGetScalar(prhs[12]);
 	double *fext = mxGetPr(prhs[13]);
 
-
 	/*Set the output right hand side*/
 	const size_t NdimOut = 3;
 	const mwSize dimOut[3] = { Np, K, Nvar };
@@ -119,8 +116,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		BEfp = malloc(BENfp*BENe*Nfield*sizeof(double));
 		MeshType = 2;
 		TempOrder = mxGetField(prhs[9], 0, "N");
-		Order = mxGetScalar(TempOrder);
-        
+		Order = mxGetScalar(TempOrder);  
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -196,8 +192,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		TempOrder = mxGetField(prhs[9], 0, "N");
 		Order = (int)mxGetScalar(TempOrder);
 		TempOrder = mxGetField(prhs[9], 0, "Nz");
-		Order = max(Order, (int)mxGetScalar(TempOrder));
-		
+		Order = max(Order, (int)mxGetScalar(TempOrder));	
 		
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -422,9 +417,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
 			Minus(AVx + field*Np*K + k*Np, \
-				Vx + field*Np*K + k*Np, ERHSX + field*Np*K + k*Np, Np);
+				Vx + field*Np*K + k*Np, ERHSX + field*Np*K*Nface + k*Np, Np);
 			Minus(AVy + field*Np*K + k*Np, \
-				Vy + field*Np*K + k*Np, ERHSY + field*Np*K + k*Np, Np);
+				Vy + field*Np*K + k*Np, ERHSY + field*Np*K*Nface + k*Np, Np);
 		}
 	}
 	/*Finally, multiply each component of AVx and AVy by its diffusion coefficient to get the final auxialary variable,
@@ -569,7 +564,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Reset all the data contained in ERHSX and ERHSY to zero, becaused these space contains the data left when calculating the auxialary variable*/
 	memset(ERHSX, 0, Np*K*Nfield*Nface*sizeof(double));
 	memset(ERHSY, 0, Np*K*Nfield*Nface*sizeof(double));
-	/*Surface integral of the second order operator*/
+	/*Surface integral of the second order operator, this part is calculated seperately for field with index less than 2 and field with index larger than 2 since prantl number should be considered*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
@@ -754,6 +749,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			BEfp + field*BENe*BENfp, BEny, BoundaryEdgeTau, 1.0, AVBEfm, AVy + field*Np*K, \
 			BEFluxM, BEJs, BEMb);
 	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(omp_get_max_threads())
+#endif
+	for (int k = 0; k<K; k++){
+		for (int field = 0; field<2; field++){
+			for (int face = 1; face<Nface; face++){
+				Add(ERHSX + field*Np*K*Nface + k*Np, ERHSX + field*Np*K*Nface + k*Np, ERHSX + field*Np*K*Nface + face*Np*K + k*Np, Np);
+				Add(ERHSY + field*Np*K*Nface + k*Np, ERHSY + field*Np*K*Nface + k*Np, ERHSY + field*Np*K*Nface + face*Np*K + k*Np, Np);
+			}
+		}
+	}
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
