@@ -286,8 +286,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nvar; field++){
-		for (int face = 0; face < Ne; face++){
+	for (int face = 0; face < Ne; face++){
+		for (int field = 0; field < Nvar; field++){
 			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BEJs, BEMb, ERHS + field*Np*K*Nface);
 		}
 	}
@@ -400,8 +400,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int field = 0; field < Nvar; field++){
-		for (int face = 0; face < Ne; face++){
+	for (int face = 0; face < Ne; face++){
+		for (int field = 0; field < Nvar; field++){
 			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotBEJs, BotBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
