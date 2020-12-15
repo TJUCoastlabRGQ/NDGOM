@@ -55,6 +55,15 @@ classdef NdgExtendMesh3d < handle
         figure_handle
     end
     
+    properties ( SetAccess = protected )
+        %> central coordinate
+        xc, yc, zc
+        %> normal vector of each facial point
+        %nx, ny, nz
+        %> determination of facial integral at each face points
+        %Js
+    end
+    
     methods (Access = public)
         %> construction function
         %> \param[in] cell reference element
@@ -91,6 +100,10 @@ classdef NdgExtendMesh3d < handle
             [ obj.rx, obj.ry, obj.rz, obj.sx, obj.sy, obj.sz, obj.tx, obj.ty,...
                 obj.tz, obj.J, obj.Jz ] = cell.assembleJacobianMatrix( obj.x, obj.y, obj.z);
             obj = GetCellSize( obj );
+            
+            [ obj.xc ] =  obj.GetMeshAverageValue( obj.x );
+            [ obj.yc ] =  obj.GetMeshAverageValue( obj.y );
+            [ obj.zc ] =  obj.GetMeshAverageValue( obj.z );            
             
         end% func
         

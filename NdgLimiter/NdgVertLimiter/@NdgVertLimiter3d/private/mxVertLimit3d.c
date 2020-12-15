@@ -15,16 +15,16 @@
 
 /*
  * Purpose: This function is used to limit the physical value to satisfy the maxmium principle
- * This function is programmed according to ( Philippe Delandmeter, 2017 ), with the improvement that we have extend the origin version to higher order case.
+ * This function is programmed according to ( Philippe Delandmeter, 2017 ).
  *
  * Input:
- *       double[Np x K] fphys the physical field to be limited.
+ *      double[Np x K] fphys the physical field to be limited.
  * 		double[1 x K]  avar the average value of each cell for the physical field
  * 		double[Nface x K]  EToE the topological relation of the studied mesh
  * 		double[Npz x Npz]  V1d the inversed one-dimensional Vandmonde matrix, used to calculate the average value in vertical direction for each line
- *       int[1] Npz number of interpolation points in vertical direction
+ *      int[1] Npz number of interpolation points in vertical direction
  * 		int[1] Nph number of interpolation points in horizontal direction
- *       double[Npz x Npz]  OV1d the one-dimensional Vandmonde matrix, the first value of this matrix is used to calculate the average value
+ *      double[Npz x Npz]  OV1d the one-dimensional Vandmonde matrix, the first value of this matrix is used to calculate the average value
  * Output:
  * 		double[Np x K] limfphys the limited physical field.
  */
@@ -75,6 +75,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         /*This part is used to determine the maxmum and minimum allowable value of the studied cell with index k */
         double amax = -1*pow(10,10), amin = pow(10,10);
         for (int f = 0; f < Nface; f++){
+            /*Only the adjacent cell is considered, and the average value of the studied cell is not included*/
             if ((int)EToE[k*Nface + f]-1 != k){
                 amax = max(amax, avar[(mwIndex)EToE[k*Nface + f]-1]);
                 amin = min(amin, avar[(mwIndex)EToE[k*Nface + f]-1]);
@@ -104,6 +105,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     //Fetch the original value in each line and store them in tempValue
                     *(tempValue+j) = fphys[k*Np + Nph*(Npz - 1) + i - j*Nph];
                 }
+                // Calculate the corresponding mode coefficients for each vertical line
                 dgemm(tran, tran, &Nq_ptrdiff, &one_ptrdiff, &Np_ptrdiff, &one, V1d,
                         &Nq_ptrdiff, tempValue, &Np_ptrdiff, &zero, fmod, &Nq_ptrdiff);
                 // the final average data for each vertical line

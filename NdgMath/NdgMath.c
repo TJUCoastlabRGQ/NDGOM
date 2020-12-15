@@ -221,3 +221,28 @@ void MultiEdgeContributionByLiftOperator(double *SrcAndDest, double *TempSource,
 		LDC);
 	DotDivide(SrcAndDest, TempSource, J, Np);
 }
+
+void GetMeshIntegralValue(double *dest, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
+	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
+
+	double Jq[(int)(*LDC)], fq[(int)(*LDC)];
+
+	// map the node values fvar to quadrature nodes by
+	// \f$ fq = Vq * fvar \f$
+	dgemm(tranA, tranB, ROPA, COPB, COPA, Alpha, A,
+		LDA, fphys, LDB, Beta, fq, LDC);
+	dgemm(tranA, tranB, ROPA, COPB, COPA, Alpha, A,
+		LDA, Jacobian, LDB, Beta, Jq, LDC);
+
+	for (int n = 0; n < (int)(*LDC); n++) {
+		*(dest) += wq[n] * Jq[n] * fq[n];
+	}
+}
+
+void GetMeshAverageValue(double *dest, double *LAV, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
+	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
+	
+	GetMeshIntegralValue(dest, transA, transB, ROPA, COPB, COPA, Alpha, A, LDA, fphys, Jacobian, LDB, Beta, LDC, wq);
+
+	*(dest) = *(dest) / (*LAV);
+}

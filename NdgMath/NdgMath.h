@@ -60,4 +60,10 @@ void GetFacialFluxTerm2d(double *, double *, double *, double *, double *, int);
 void MultiEdgeContributionByLiftOperator(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, \
 	double *, ptrdiff_t *, ptrdiff_t *, double *, ptrdiff_t *, double *, int);
 
+void GetMeshIntegralValue(double *, char *, char *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, double *, \
+	ptrdiff_t *, double *, double *, ptrdiff_t *, double *, ptrdiff_t *, double *);
+
+void GetMeshAverageValue(double *, double *, char *, char *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, double *, \
+	ptrdiff_t *, double *, double *, ptrdiff_t *, double *, ptrdiff_t *, double *);
+
 #endif
