@@ -23,6 +23,7 @@
 #include "mex.h"
 #include <math.h>
 #include "blas.h"
+#include "../../../NdgMath/NdgMath.h"
 
 #if !defined(_WIN32)
 #define dgemm dgemm_
@@ -68,17 +69,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
     
     for (int k = 0; k < K; k++) {
-        double Jq[Nq], fq[Nq];
-        
-        // map the node values fvar to quadrature nodes by
-        // \f$ fq = Vq * fvar \f$
-        dgemm(tran, tran, &Nq_ptrdiff, &one_ptrdiff, &Np_ptrdiff, &one, Vq,
-              &Nq_ptrdiff, fvar + k * Np, &Np_ptrdiff, &zero, fq, &Nq_ptrdiff);
-        dgemm(tran, tran, &Nq_ptrdiff, &one_ptrdiff, &Np_ptrdiff, &one, Vq,
-              &Nq_ptrdiff, J + k * Np, &Np_ptrdiff, &zero, Jq, &Nq_ptrdiff);
-        
-        for (int n = 0; n < Nq; n++) {
-            fint[k] += wq[n] * Jq[n] * fq[n];
-        }
+		GetMeshIntegralValue(fint + k, tran, tran, &Nq_ptrdiff, &one_ptrdiff, &Np_ptrdiff, &one, Vq, \
+			&Nq_ptrdiff, fvar + k*Np, J + k*Np, &Np_ptrdiff, &zero, &Nq_ptrdiff, wq);
     }
 }

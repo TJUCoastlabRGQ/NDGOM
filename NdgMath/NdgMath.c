@@ -229,13 +229,13 @@ void GetMeshIntegralValue(double *dest, char *transA, char *transB, ptrdiff_t *R
 
 	// map the node values fvar to quadrature nodes by
 	// \f$ fq = Vq * fvar \f$
-	dgemm(tranA, tranB, ROPA, COPB, COPA, Alpha, A,
+	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
 		LDA, fphys, LDB, Beta, fq, LDC);
-	dgemm(tranA, tranB, ROPA, COPB, COPA, Alpha, A,
+	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
 		LDA, Jacobian, LDB, Beta, Jq, LDC);
 
 	for (int n = 0; n < (int)(*LDC); n++) {
-		*(dest) += wq[n] * Jq[n] * fq[n];
+		(*dest) += wq[n] * Jq[n] * fq[n];
 	}
 }
 
@@ -244,5 +244,5 @@ void GetMeshAverageValue(double *dest, double *LAV, char *transA, char *transB, 
 	
 	GetMeshIntegralValue(dest, transA, transB, ROPA, COPB, COPA, Alpha, A, LDA, fphys, Jacobian, LDB, Beta, LDC, wq);
 
-	*(dest) = *(dest) / (*LAV);
+	(*dest) = (*dest) / (*LAV);
 }
