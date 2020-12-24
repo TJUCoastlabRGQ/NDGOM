@@ -109,7 +109,8 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgLimiter/NdgVertLimiter/@NdgVertLimiter3d/private/';
 srcfile = {[path,'mxVertLimit3dNew.c']};
-libfile = {'NdgMath\NdgMath.c'};
+libfile = {'NdgMath\NdgMath.c',...
+    'NdgMath\NdgSWE.c'};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgFilter/@NdgAbstractFilter/private/';

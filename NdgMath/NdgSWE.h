@@ -40,4 +40,7 @@ void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, doubl
 /** Rotate flux to outward normal direction */
 void RotateFluxToNormal2d(double *, double *, double *, double *, double *, double *);
 
+void EvaluateVerticalFaceRiemannProblem(double *, double *, double *, double *, double *, \
+	double *, double, int, int, int, int, int);
+
 #endif

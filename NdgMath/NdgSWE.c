@@ -412,9 +412,224 @@ void GetPCENumericalFluxTerm_HLL(double *dest, double *fm, double *fp, double *n
 	free(QL), free(QR);
 	free(VARIABLEL), free(VARIABLER);
 }
+/*
+* Purpose: This function is used to evaluate the local Riemann problem at the element surface to impose the boundary condition for slope limiter
+*
+* Input:
+*      double[Nfp x Ne x (Nvar+1)] fm value at the local surface, water depth is included in this variable
+* 	   double[Nfp x Ne x (Nvar+1)] fp value at the adjacent surface, water depth is included in this variable
+*      double[Nfp x Ne]  nx the direction vector in x direction
+* 	   double[Nfp x Ne]  ny the direction vector in y direction
+* 	   double  gra the accelaration due to gravity
+*      double  Hcrit the critical water depth used to identify whether the studied point should be treated as a wet or dry point
+*      double[2 x Ne] BEFToE the topological relation at the boundary
+*      int Ne number of the boundary face
+*      int Nfp number of nodes on the face
+*      int Nvar number of variable
+*      int Nh approximation order in horizontal direction
+*      int Nz approximation order in vertical direction
+* Output:
+* 		double[4 x Ne x Nvar] dest the Riemann variable value at the interface, it contains momentum components in normal direction and 
+*                             tangential direction and contains concentrantion (multiplied by water depth) of passive tranport substance.
+*                             The returned value is of size 4 in the first dimension, because only 4 vertex are included i
+*/
 
+void EvaluateVerticalFaceRiemannProblem(double *dest, double *Tempfm, double *Tempfp, double *Tempnx, double *Tempny, \
+	double *gra, double Hcrit, int Ne, int Nfp, int Nvar, int Nh, int Nz){
+	/*The HLLC numerical flux presented in LAI(2012, Modeling one- and two-dimensional shallow water flows with discontinuous Galerkin method) is adopted*/
+	double HR, HL, UR, UL, VR, VL;
+	double SL, SM, SR;
+	double USTAR, HSTAR;
+	/*This part is used to extract the vertex value*/
+	double *fm = malloc(4 * (Nvar + 1)*sizeof(double)), *fp = malloc(4 * (Nvar + 1)*sizeof(double));
+	double *hum = fm, *hvm = fm + 4, *hup = fp, *hvp = fp + 4, *hm = fm + 2 * 4, *hp = fp + 2 * 4;
+	double *nx = malloc(4 * sizeof(double)), *ny = malloc(4 * sizeof(double));
+	for (int i = 0; i < 2; i++){
+		nx[i] = Tempnx[i*Nh], nx[i + 2] = Tempnx[Nz*(Nh + 1) + i*Nh];
+		ny[i] = Tempny[i*Nh], ny[i + 2] = Tempny[Nz*(Nh + 1) + i*Nh];
+		for (int n = 0; n < Nvar + 1; n++){
+			fm[n * 4 + i] = Tempfm[n*Nfp*Ne + i*Nh];
+			fp[n * 4 + i] = Tempfp[n*Nfp*Ne + i*Nh];
+			fm[n * 4 + i + 2] = Tempfm[n*Nfp*Ne + Nz*(Nh + 1) + i*Nh];
+			fp[n * 4 + i + 2] = Tempfp[n*Nfp*Ne + Nz*(Nh + 1) + i*Nh];
+		}
+	}
+	double *QL = malloc((Nvar + 1)*sizeof(double)), *QR = malloc((Nvar + 1)*sizeof(double));
+	double *VARIABLEL = malloc((Nvar + 1)*sizeof(double)), *VARIABLER = malloc((Nvar + 1)*sizeof(double));
+	double *QSTARL = malloc((Nvar + 1)*sizeof(double)), *QSTARR = malloc((Nvar + 1)*sizeof(double));
+	for (int i = 0; i < 4; i++){
+		/*Rotate variable to normal and tangential direction*/
+		/*Here Q stands for H, HUn, HUt, H theta*/
+		QL[0] = *(hm + i), QR[0] = *(hp + i);
+		RotateFluxToNormal2d(hum + i, hvm + i, nx + i, ny + i, QL + 1, QL + 2);
+		RotateFluxToNormal2d(hup + i, hvp + i, nx + i, ny + i, QR + 1, QR + 2);
+		for (int n = 3; n < Nvar + 1; n++)
+		{
+			QL[n] = *(fm + 4*n + i);
+			QR[n] = *(fp + 4*n + i);
+		}
 
+		int SPY = 0;
+		/*Compute the original variable, u, v and theta, in normal direction*/
+		/*Water depth h comes first*/
+		VARIABLEL[0] = QL[0];
+		VARIABLER[0] = QR[0];
+		for (int n = 1; n < Nvar + 1; n++){
+			/*In this part, we calculate the original variable. If the water depth is smaller than the critical value,
+			we directly set the value of the original variable to be zero, and the original value is further used to calculate
+			the flux term in left and right side. The question here is whether the water depth should be set to zero if it is
+			smaller than the critical value, since it is used when calcualte the flux term. In the current version, we leave them
+			unchanged*/
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL + n);
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER + n);
+		}
+		/*Assign water depth, u and v in both sides to HL(R), UL(R), VL(R)*/
+		HL = VARIABLEL[0], HR = VARIABLER[0];
+		UL = VARIABLEL[1], UR = VARIABLER[1];
+		VL = VARIABLEL[2], VR = VARIABLER[2];
+		/*Here, we use the critical value to categorize different condition, I wonder whether this value can be
+		directly set to zero, if this value is set to zero, then they calculation in the further part can be looked
+		to be very smooth*/
+		if (!(HL < Hcrit && HR < Hcrit))
+		{
+			if ((HL>Hcrit) & (HR > Hcrit)){
+				USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
+				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+				SL = min(UL - sqrt(*gra * HL), USTAR - sqrt(*gra*HSTAR));
+				SR = max(UR + sqrt(*gra * HR), USTAR + sqrt(*gra*HSTAR));
+				SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
+				/*Compute QSTARL AND QSTARR*/
+				QSTARL[0] = HL*((SL - UL) / (SL - SM)) * 1;
+				QSTARL[1] = HL*((SL - UL) / (SL - SM)) * SM;
+				QSTARR[0] = HR*((SR - UR) / (SR - SM)) * 1;
+				QSTARR[1] = HR*((SR - UR) / (SR - SM)) * SM;
+				for (int i = 2; i<Nvar + 1; i++){
+					QSTARL[i] = HL*((SL - UL) / (SL - SM)) * VARIABLEL[i];
+					QSTARR[i] = HR*((SR - UR) / (SR - SM)) * VARIABLER[i];
+				}
+				/*AND FINALLY THE HLLC FLUX (AFTER ROTATION)*/
+				if (SL >= 0){
+					//*Fhn = FL[0];
+					dest[i] = (QL[1] * nx[i] - QL[2] * ny[i]);
+					dest[i + 4*Ne] = (QL[1] * ny[i] + QL[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QL[n];
+					}
+					SPY = 1;
+				}
+				else if (SM >= 0 && SL < 0){
+					dest[i] = (QSTARL[1] * nx[i] - QSTARL[2] * ny[i]);
+					dest[i + 4*Ne] = (QSTARL[1] * ny[i] + QSTARL[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QSTARL[n];
+					}
+					SPY = 1;
+				}
+				else if (SM < 0 && SR > 0){
+					dest[i] = (QSTARR[1] * nx[i] - QSTARR[2] * ny[i]);
+					dest[i + 4*Ne] = (QSTARR[1] * ny[i] + QSTARR[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QSTARR[n];
+					}
+					SPY = 1;
+				}
+				else if (0 >= SR){
+					dest[i] = (QR[1] * nx[i] - QR[2] * ny[i]);
+					dest[i + 4*Ne] = (QR[1] * ny[i] + QR[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QR[n];
+					}
+					SPY = 1;
+				}
 
+			}
+			else if (HL>Hcrit && HR <= Hcrit){
+				/*For this situation, the three wave structure has degenerated to the two wave structure.
+				*For this special case, i.e. HR <= Hcrit, SM = SR.
+				*/
+				SL = UL - sqrt(*gra*HL);
+				SR = UL + 2 * sqrt(*gra*HL);
+				if (SL >= 0){
+					dest[i] = (QL[1] * nx[i] - QL[2] * ny[i]);
+					dest[i + 4*Ne] = (QL[1] * ny[i] + QL[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QL[n];
+					}
+					SPY = 1;
+				}
+				else if (SL < 0 && 0 < SR){
+					QSTARL[0] = HL *(SL - UL) / (SL - SR);
+					QSTARL[1] = HL *(SL - UL) / (SL - SR)*SR;
+					QSTARL[2] = HL *(SL - UL) / (SL - SR)*VL;
+					for (int i = 3; i<Nvar + 1; i++){
+						QSTARL[i] = HL*((SL - UL) / (SL - SR)) * VARIABLEL[i];
+					}
+					dest[i] = QSTARL[1] * nx[i] - QSTARL[2] * ny[i];
+					dest[i + 4*Ne] = QSTARL[1] * ny[i] + QSTARL[2] * nx[i];
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QSTARL[n];
+					}
+					SPY = 1;
+				}
+				else if (SR <= 0){
+					/*Actually, I wonder whether this situation would occur*/
+					dest[i] = (QR[1] * nx[i] - QR[2] * ny[i]);
+					dest[i + 4*Ne] = (QR[1] * ny[i] + QR[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QR[n];
+					}
+					SPY = 1;
+				}
+			}
+			else if (HL <= Hcrit && HR > Hcrit){
+				/*
+				 * For this special case, i.e. HL <= Hcrit, SM = SL.
+				 */
+				SL = UR - 2 * sqrt(*gra*HR);
+				SR = UR + sqrt(*gra*HR);
+				if (SL >= 0){
+					dest[i] = (QL[1] * nx[i] - QL[2] * ny[i]);
+					dest[i + 4*Ne] = (QL[1] * ny[i] + QL[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4*Ne] = QL[n];
+					}
+					SPY = 1;
+				}
+				else if (SL < 0 && 0 < SR){
+					QSTARR[0] = HR *(SR - UR) / (SR - SL);
+					QSTARR[1] = HR *(SR - UR) / (SR - SL)*SL;
+					QSTARR[2] = HR *(SR - UR) / (SR - SL)*VR;
+					for (int i = 3; i<Nvar + 1; i++){
+						QSTARR[i] = HR*((SR - UR) / (SR - SL)) * VARIABLER[i];
+					}
+					dest[i] = (QSTARR[1] * nx[i] - QSTARR[2] * ny[i]);
+					dest[i + 4 * Ne] = (QSTARR[1] * ny[i] + QSTARR[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QSTARR[n];
+					}
+					SPY = 1;
+				}
+				else if (SR <= 0){
+					dest[i] = (QR[1] * nx[i] - QR[2] * ny[i]);
+					dest[i + 4*Ne] = (QR[1] * ny[i] + QR[2] * nx[i]);
+					for (int n = 3; n < Nvar + 1; n++){
+						dest[i + (n - 1) * 4 * Ne] = QR[n];
+					}
+					SPY = 1;
+				}
+			}
+			//SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
+			if (SPY == 0){
+				printf("Error occured when calculating the HLLC Riemann problem! check please!");
+			}
+		}
+	}
+	free(QL), free(QR);
+	free(QSTARL), free(QSTARR);
+	free(VARIABLEL), free(VARIABLER);
+	free(fm), free(fp);
+	free(nx), free(ny);
+}
 
 
 void EvaluatePhysicalVariableByDepthThreshold(double hmin, double *h, double *variable, double *outPut){
