@@ -8,7 +8,7 @@
 
 void GetMinimumSlope(double *, double *, double *, int);
 void GetBCInvolvedLimitScope(double *, double *, double *, int , double *, double *);
-void GetSBEInvolvedLimitScope(double *, double *, double *, double *, int , int , int , int , double *);
+void GetSBEInvolvedLimitScope(double *, double *, double *, double *, int, int, int, int, double *, int , double *, int );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *fphys = mxGetPr(prhs[0]);
@@ -90,6 +90,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *EToV = mxGetPr(prhs[23]);
 	/*Number of vertex of the studied 3d cell*/
 	int Nv3d = (int)mxGetM(prhs[23]);
+
+	int NLayer = (int)mxGetScalar(prhs[24]);
+	int MNv2d = (int)mxGetScalar(prhs[25]);
+	double *MNvc2d = mxGetPr(prhs[26]);
 
 	size_t NdimOut = 3;
 	mwSize dimOut[3] = { Np, K, Nvar };
@@ -222,7 +226,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int n = 0; n < Nvar; n++){
-		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, SurfBEFToV, Surffm, SurfBENe, Np2d, Nfp2d, Nv2d, Fmask2d);
+		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, SurfBEFToV, Surffm, SurfBENe, Np2d, Nfp2d, Nv2d, Fmask2d, MNv2d, MNvc2d, 0);
 	}
 
 	free(Surffm);
@@ -243,12 +247,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				BotBEFToE + 2 * face, BotBEFToN1 + BotBENfp*face, Np, BotBENfp);
 		}
 	}
-
+	//int Nv, double *Nvc2d, int NvB
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int n = 0; n < Nvar; n++){
-		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, BotBEFToV, BotBEfm, BotBENe, Np2d, Nfp2d, Nv2d, Fmask2d);
+		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, BotBEFToV, BotBEfm, BotBENe, Np2d, Nfp2d, Nv2d, Fmask2d, MNv2d, MNvc2d, NLayer*MNv2d);
 	}
 
 	free(BotBEfm);
@@ -405,42 +409,53 @@ void GetBCInvolvedLimitScope(double *fmax, double *fmin, double *FToF, int Ne, d
 *       double[Nv x Ne] fmin the minimum value defined at the vertex with boundary condition considered
 */
 
-void GetSBEInvolvedLimitScope(double *fmax, double *fmin, double *BEFToV, double *fm, int BENe, int Np2d, int Nfp2d, int Nv2d, double *Fmask2d){
+void GetSBEInvolvedLimitScope(double *fmax, double *fmin, double *BEFToV, double *fm, int BENe, int Np2d, int Nfp2d, int Nv2d, double *Fmask2d, int MNv2d, double *Nvc2d, int NvB){
 	int v, Index;
 	double Data;
+	double *Ave = malloc(MNv2d*sizeof(double));
+	memset(Ave, 0, MNv2d*sizeof(double));
 	//How to calculate the average value
 	if (Nv2d == 4){
 		for (int i = 0; i < BENe; i++){
 			for (int j = 0; j < 2; j++){
-				v = (int)BEFToV[i*Nv2d + j] - 1;
+				v = (int)BEFToV[i*Nv2d + j] - 1 - NvB;
 				Index = (int)Fmask2d[j * Nfp2d] - 1;
 				Data = fm[i*Np2d + Index];
-				fmax[v] = max(fmax[v], Data);
-				fmin[v] = min(fmin[v], Data);
+				Ave[v] += Data;
 			}
 			/*The left two vertex, because their order in FToV and Fmask is not the same*/
-			v = (int)BEFToV[i*Nv2d + 2] - 1;
+			v = (int)BEFToV[i*Nv2d + 2] - 1 - NvB;
 			Index = (int)Fmask2d[3 * Nfp2d] - 1;
 			Data = fm[i*Np2d + Index];
-			fmax[v] = max(fmax[v], Data);
-			fmin[v] = min(fmin[v], Data);
+			Ave[v] += Data;
 
-			v = (int)BEFToV[i*Nv2d + 3] - 1;
+			v = (int)BEFToV[i*Nv2d + 3] - 1 - NvB;
 			Index = (int)Fmask2d[2 * Nfp2d] - 1;
 			Data = fm[i*Np2d + Index];
-			fmax[v] = max(fmax[v], Data);
-			fmin[v] = min(fmin[v], Data);
+			Ave[v] += Data;
 		}
 	}
 	else if (Nv2d == 3){
 		for (int i = 0; i < BENe; i++){
 			for (int j = 0; j < Nv2d; j++){
-				v = (int)BEFToV[i*Nv2d + j] - 1;
+				v = (int)BEFToV[i*Nv2d + j] - 1 - NvB;
 				Index = (int)Fmask2d[j * Nfp2d] - 1;
 				Data = fm[i*Np2d + Index];
-				fmax[v] = max(fmax[v], Data);
-				fmin[v] = min(fmin[v], Data);
+				Ave[v] += Data;
 			}
 		}
 	}
+
+	for (int i = 0; i < MNv2d; i++){
+		Ave[i] = Ave[i] / Nvc2d[i];
+	}
+
+	for (int i = 0; i < BENe; i++){
+		for (int j = 0; j < Nv2d; j++){
+			v = (int)BEFToV[i*Nv2d + j] - 1;
+			fmax[v] = max(fmax[v], Ave[v - NvB]);
+			fmin[v] = min(fmin[v], Ave[v - NvB]);
+		}
+	}
+	free(Ave);
 }
