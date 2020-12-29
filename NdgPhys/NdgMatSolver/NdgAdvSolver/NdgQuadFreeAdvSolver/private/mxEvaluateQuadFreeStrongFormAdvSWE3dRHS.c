@@ -457,7 +457,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
     for (int face = 0; face < Ne; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
+			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, SurfFluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
     
