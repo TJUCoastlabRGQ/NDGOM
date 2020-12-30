@@ -12,4 +12,17 @@ void HorizDiffMemoryAllocation(NdgMeshType , int , int , int , int , int , int ,
 
 void HorizDiffMemoryDeAllocation();
 
+void AdvMemoryAllocation(int, int, int, int, int, int, int, int, int, int, int, int, int, int);
+
+void AdvMemoryDeAllocation();
+
+void PCEMemoryAllocation(int ,int ,int ,int ,int ,int ,int );
+
+void PCEMemoryDeAllocation();
+
+void VertVelocitySolverMemoryAllocation(int, int, int, int, int, int, int, int, \
+	int, int, int, int, int);
+
+void VertVelocitySolverMemoryDeAllocation();
+
 #endif

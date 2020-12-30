@@ -1,8 +1,26 @@
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "..\..\..\..\..\NdgMath\NdgSWE.h"
+#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+
+extern double *IEfm2d, *IEfp2d, *IEFluxM2d, *IEFluxP2d, *IEFluxS2d, \
+*ERHS2d, *PCEVolumeIntegralX, *PCETempVolumeIntegralX, *PCEVolumeIntegralY, \
+*PCETempVolumeIntegralY, *BEfm2d, *BEzM2d, *BEfp2d, *BEzP2d, \
+*BEFluxS2d, *BEFluxM2d, *PCETempFacialIntegral;
+
+extern signed char *PCEInitialized;
+
+void MyExit()
+{
+	if (!strcmp("True", PCEInitialized)){
+		PCEMemoryDeAllocation();
+		PCEInitialized = "False";
+	}
+	return;
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
+	mexAtExit(&MyExit);
 	/*Properties contained in mesh2d*/
 	mxArray *Temprx2d = mxGetField(prhs[0], 0, "rx");
 	double *rx2d = mxGetPr(Temprx2d);
@@ -89,24 +107,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	plhs[0] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
 	double *RHS = mxGetPr(plhs[0]);
 
-	double *IEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	if (!strcmp("False", PCEInitialized)){
+
+		PCEMemoryAllocation( IENfp2d, IENe2d, Np2d, K2d, Nface, BENe2d, BENfp2d);
+
+	}
+
+
 	double *IEhuM2d = IEfm2d, *IEhvM2d = IEfm2d + IENfp2d * IENe2d, \
 		*IEhM2d = IEfm2d + 2 * IENfp2d*IENe2d;
-	double *IEfp2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	
 	double *IEhuP2d = IEfp2d, *IEhvP2d = IEfp2d + IENfp2d * IENe2d, \
 		*IEhP2d = IEfp2d + 2 * IENfp2d*IENe2d;
-	double *IEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	
 	memset(IEFluxM2d, 0, IENfp2d*IENe2d*sizeof(double));
-	double *IEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	
 	memset(IEFluxP2d, 0, IENfp2d*IENe2d*sizeof(double));
-	double *IEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	
 	memset(IEFluxS2d, 0, IENfp2d*IENe2d*sizeof(double));
-	double *ERHS2d = malloc(Np2d*K2d*Nface*sizeof(double));
+	
 	memset(ERHS2d, 0, Np2d*K2d*Nface*sizeof(double));
-	double *VolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
-	double *TempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
-	double *VolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
-	double *TempVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+
 
 	ptrdiff_t np = Np2d;
 	ptrdiff_t oneI = 1;
@@ -117,13 +138,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K2d; k++){
 		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
-		GetVolumnIntegral2d(VolumeIntegralX + k*Np2d, TempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
+		GetVolumnIntegral2d(PCEVolumeIntegralX + k*Np2d, PCETempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hu2d + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
 		/*$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$*/
-		GetVolumnIntegral2d(VolumeIntegralY + k*Np2d, TempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
+		GetVolumnIntegral2d(PCEVolumeIntegralY + k*Np2d, PCETempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hv2d + k*Np2d, &np, &zero, &np, ry2d + k*Np2d, sy2d + k*Np2d);
 
-		Add(RHS + k*Np2d, VolumeIntegralX + k*Np2d, VolumeIntegralY + k*Np2d, Np2d);
+		Add(RHS + k*Np2d, PCEVolumeIntegralX + k*Np2d, PCEVolumeIntegralY + k*Np2d, Np2d);
 	}
 	/*Two dimensional inner edge flux part*/
 
@@ -139,17 +160,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetPCENumericalFluxTerm_HLLC_LAI(IEFluxS2d + e*IENfp2d, IEfm2d + e*IENfp2d, IEfp2d + e*IENfp2d, IEnx2d + e*IENfp2d, IEny2d + e*IENfp2d, &gra, Hcrit, IENfp2d, IENe2d);
 	}
 
-	double *BEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	
 	double *BEhuM2d = BEfm2d, *BEhvM2d = BEfm2d + BENe2d * BENfp2d, \
 		*BEhM2d = BEfm2d + 2 * BENe2d * BENfp2d;
-	double *BEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
-	double *BEfp2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
-//	double *BEhuP2d = BEfp2d, *BEhvP2d = BEfp2d + BENe2d * BENfp2d, \
-		*BEhP2d = BEfp2d + 2 * BENe2d * BENfp2d;
-	double *BEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
-	double *BEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+
 	memset(BEFluxS2d, 0, BENe2d*BENfp2d*sizeof(double));
-	double *BEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	
 	memset(BEFluxM2d, 0, BENe2d*BENfp2d*sizeof(double));
 	int Nfield = 2;
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
@@ -192,13 +208,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
     }   
     
-	double *TempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
 	for (int k = 0; k < K2d; k++) {
-		MultiEdgeContributionByLiftOperator(ERHS2d + k*Np2d, TempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+		MultiEdgeContributionByLiftOperator(ERHS2d + k*Np2d, PCETempFacialIntegral + k*Np2d, &np, &oneI, &np, \
 			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
 	}
 
@@ -210,22 +225,4 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int k = 0; k < K2d; k++){
 		Minus(RHS + k*Np2d, ERHS2d + k*Np2d, RHS + k*Np2d, Np2d);
 	}
-
-	free(IEfm2d);
-	free(IEfp2d);
-	free(BEfm2d);
-	free(BEfp2d);
-	free(BEzM2d);
-	free(BEzP2d);
-	free(IEFluxM2d);
-	free(IEFluxP2d);
-	free(IEFluxS2d);
-	free(BEFluxS2d);
-	free(BEFluxM2d);
-	free(ERHS2d);
-	free(VolumeIntegralX);
-	free(VolumeIntegralY);
-	free(TempVolumeIntegralX);
-	free(TempVolumeIntegralY);
-	free(TempFacialIntegral);
 }

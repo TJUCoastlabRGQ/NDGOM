@@ -1,27 +1,38 @@
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 #include "..\..\..\..\..\NdgMath\NdgSWE.h"
 #include "..\..\..\..\..\NdgMath\NdgSWE3D.h"
+#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+
+extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
+*IEFluxS, *ERHS, *BEfm, *BEfp, *AdvzM, *AdvzP, *BEFluxM, \
+*BEFluxS, *BotEfm, *BotEfp, *BotEFluxM, *BotEFluxP, *BotEFluxS, \
+*BotBEfm, *BotBEFluxM, *BotBEFluxS, *SurfBEfm, *SurfBEFluxM, \
+*SurfBEFluxS, *E, *G, *H, *TempVolumeIntegral;
+
+extern char *AdvInitialized;
+
+void MyExit()
+{
+	if (!strcmp("True", AdvInitialized)){
+		AdvMemoryDeAllocation();
+		AdvInitialized = "False";
+	}
+	return;
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
+	mexAtExit(&MyExit);
 	/*Parameter reading part*/
 	/*For mesh object*/
 	mxArray *Temprx = mxGetField(prhs[0], 0, "rx");
 	double *rx = mxGetPr(Temprx);
 	mxArray *Tempsx = mxGetField(prhs[0], 0, "sx");
 	double *sx = mxGetPr(Tempsx);
-//	mxArray *Temptx = mxGetField(prhs[0], 0, "tx");
-//	double *tx = mxGetPr(Temptx);
 	mxArray *Tempry = mxGetField(prhs[0], 0, "ry");
 	double *ry = mxGetPr(Tempry);
 	mxArray *Tempsy = mxGetField(prhs[0], 0, "sy");
 	double *sy = mxGetPr(Tempsy);
-//	mxArray *Tempty = mxGetField(prhs[0], 0, "ty");
-//	double *ty = mxGetPr(Tempty);
-//	mxArray *Temprz = mxGetField(prhs[0], 0, "rz");
-//	double *rz = mxGetPr(Temprz);
-//	mxArray *Tempsz = mxGetField(prhs[0], 0, "sz");
-//	double *sz = mxGetPr(Tempsz);
 	mxArray *Temptz = mxGetField(prhs[0], 0, "tz");
 	double *tz = mxGetPr(Temptz);
 	mxArray *TempJ = mxGetField(prhs[0], 0, "J");
@@ -52,8 +63,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *IEnx = mxGetPr(TempIEnx);
 	mxArray *TempIEny = mxGetField(prhs[2], 0, "ny");
 	double *IEny = mxGetPr(TempIEny);
-//	mxArray *TempIEnz = mxGetField(prhs[2], 0, "nz");
-//	double *IEnz = mxGetPr(TempIEnz);
 	mxArray *TempIEFToE = mxGetField(prhs[2], 0, "FToE");
 	double *IEFToE = mxGetPr(TempIEFToE);
 	mxArray *TempIEFToF = mxGetField(prhs[2], 0, "FToF");
@@ -75,8 +84,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BEnx = mxGetPr(TempBEnx);
 	mxArray *TempBEny = mxGetField(prhs[3], 0, "ny");
 	double *BEny = mxGetPr(TempBEny);
-//	mxArray *TempBEnz = mxGetField(prhs[3], 0, "nz");
-//	double *BEnz = mxGetPr(TempBEnz);
 	mxArray *TempBEFToE = mxGetField(prhs[3], 0, "FToE");
 	double *BEFToE = mxGetPr(TempBEFToE);
 	mxArray *TempBEFToF = mxGetField(prhs[3], 0, "FToF");
@@ -92,10 +99,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BotEMb = mxGetPr(TempBotEMb);
 	mxArray *TempBotEJs = mxGetField(prhs[4], 0, "Js");
 	double *BotEJs = mxGetPr(TempBotEJs);
-//	mxArray *TempBotEnx = mxGetField(prhs[4], 0, "nx");
-//	double *BotEnx = mxGetPr(TempBotEnx);
-//	mxArray *TempBotEny = mxGetField(prhs[4], 0, "ny");
-//	double *BotEny = mxGetPr(TempBotEny);
 	mxArray *TempBotEnz = mxGetField(prhs[4], 0, "nz");
 	double *BotEnz = mxGetPr(TempBotEnz);
 	mxArray *TempBotEFToE = mxGetField(prhs[4], 0, "FToE");
@@ -115,10 +118,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BotBEMb = mxGetPr(TempBotBEMb);
 	mxArray *TempBotBEJs = mxGetField(prhs[5], 0, "Js");
 	double *BotBEJs = mxGetPr(TempBotBEJs);
-//	mxArray *TempBotBEnx = mxGetField(prhs[5], 0, "nx");
-//	double *BotBEnx = mxGetPr(TempBotBEnx);
-//	mxArray *TempBotBEny = mxGetField(prhs[5], 0, "ny");
-//	double *BotBEny = mxGetPr(TempBotBEny);
 	mxArray *TempBotBEnz = mxGetField(prhs[5], 0, "nz");
 	double *BotBEnz = mxGetPr(TempBotBEnz);
 	mxArray *TempBotBEFToE = mxGetField(prhs[5], 0, "FToE");
@@ -136,10 +135,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *SurfBEMb = mxGetPr(TempSurfBEMb);
 	mxArray *TempSurfBEJs = mxGetField(prhs[6], 0, "Js");
 	double *SurfBEJs = mxGetPr(TempSurfBEJs);
-//	mxArray *TempSurfBEnx = mxGetField(prhs[6], 0, "nx");
-//	double *SurfBEnx = mxGetPr(TempSurfBEnx);
-//	mxArray *TempSurfBEny = mxGetField(prhs[6], 0, "ny");
-//	double *SurfBEny = mxGetPr(TempSurfBEny);
 	mxArray *TempSurfBEnz = mxGetField(prhs[6], 0, "nz");
 	double *SurfBEnz = mxGetPr(TempSurfBEnz);
 	mxArray *TempSurfBEFToE = mxGetField(prhs[6], 0, "FToE");
@@ -164,79 +159,64 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	ptrdiff_t np = Np;
 	ptrdiff_t oneI = 1;
 	double one = 1.0, zero = 0.0;
-	double *TempFacialIntegral = malloc(Np*K*Nvar*sizeof(double));
     
     size_t NdimOut = 3;
 	mwSize dimOut[3] = { Np, K, Nvar };
 	plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
 	double *OutputRHS = mxGetPr(plhs[0]);
-	
-	int Ne, Nfp;
 
-	double *FToN1, *FToN2, *FToE, *FToF, *nx, *ny, *nz;
-
-	double *fm, *fp, *FluxM, *FluxP, *FluxS;
-
+	if (!strcmp("False", AdvInitialized)){
+		AdvMemoryAllocation(Np, K, Nvar, IENfp, IENe, Nface, BENfp, BENe, BotENfp, \
+		  BotENe, BotBENfp, BotBENe, SurfBENfp, SurfBENe);
+	}
 	                                                                               /************************  Face Integral Part  ****************************/
 /*************************************************************************************************************************************/
 	/**************************************Inner Edge Part*******************************************************/
 	            /********************************************************************/
 	/*Allocate memory for fm and fp defined over inner edges. Here, variables correspond to hu, hv, hT, hS, sediment and other passive transport material, vertical velocity omega is not included*/
-	Ne = IENe, Nfp = IENfp;
-	FToN1 = IEFToN1, FToN2 = IEFToN2, FToE = IEFToE, FToF = IEFToF, nx = IEnx, ny = IEny;
-	fm = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
-	double *huM = fm, *hvM = fm + Nfp*Ne, *hM = fm + 2 * Nfp*Ne;
-	fp = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
-	double *huP = fp, *hvP = fp + Nfp*Ne, *hP = fp + 2 * Nfp*Ne;
-	/*Allocate memory for fluxM, fluxP and fluxS, and calculate these flux term*/
-	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxP = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxP, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	
+	double *huM = IEfm, *hvM = IEfm + IENfp*IENe, *hM = IEfm + 2 * IENfp*IENe;
+	double *huP = IEfp, *hvP = IEfp + IENfp*IENe, *hP = IEfp + 2 * IENfp*IENe;
+	/*Allocate memory for IEFluxM, IEFluxP and IEFluxS, and calculate these flux term*/
+	memset(IEFluxM, 0, IENfp*IENe*Nvar*sizeof(double));
+	memset(IEFluxP, 0, IENfp*IENe*Nvar*sizeof(double));
+	memset(IEFluxS, 0, IENfp*IENe*Nvar*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
-		/*Fetch variable fm and fp first*/
-		FetchInnerEdgeFacialValue(hM + face*Nfp, hP + face*Nfp, h, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
-		FetchInnerEdgeFacialValue(huM + face*Nfp, huP + face*Nfp, hu, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
-		FetchInnerEdgeFacialValue(hvM + face*Nfp, hvP + face*Nfp, hv, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
+	for (int face = 0; face < IENe; face++){
+		/*Fetch variable IEfm and IEfp first*/
+		FetchInnerEdgeFacialValue(hM + face*IENfp, hP + face*IENfp, h, IEFToE + 2 * face, \
+			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
+		FetchInnerEdgeFacialValue(huM + face*IENfp, huP + face*IENfp, hu, IEFToE + 2 * face, \
+			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
+		FetchInnerEdgeFacialValue(hvM + face*IENfp, hvP + face*IENfp, hv, IEFToE + 2 * face, \
+			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		here 1 stands for the space occupied by water depth h.*/
 		for (int field = 2; field < Nvar; field++){
-			FetchInnerEdgeFacialValue(fm + (field + 1)*Ne*Nfp + face*Nfp, \
-				fp + (field + 1)*Ne*Nfp + face*Nfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
-				FToE + 2 * face, FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
+			FetchInnerEdgeFacialValue(IEfm + (field + 1)*IENe*IENfp + face*IENfp, \
+				IEfp + (field + 1)*IENe*IENfp + face*IENfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
+				IEFToE + 2 * face, IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
 		}
-		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceSurfFlux(FluxP + face*Nfp, fp + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux_HLLC_LAI(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
-			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
+		EvaluateVerticalFaceSurfFlux(IEFluxM + face*IENfp, IEfm + face*IENfp, IEnx + face*IENfp, IEny + face*IENfp, &gra, Hcrit, IENfp, Nvar, IENe);
+		EvaluateVerticalFaceSurfFlux(IEFluxP + face*IENfp, IEfp + face*IENfp, IEnx + face*IENfp, IEny + face*IENfp, &gra, Hcrit, IENfp, Nvar, IENe);
+		EvaluateVerticalFaceNumFlux_HLLC_LAI(IEFluxS + face*IENfp, IEfm + face*IENfp, IEfp + face*IENfp, \
+			IEnx + face*IENfp, IEny + face*IENfp, &gra, Hcrit, IENfp, Nvar, IENe);
 	}
 
 /*Allocate memory for contribution to RHS due to inner edge facial integral, and
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
-	double *ERHS = malloc(Np*K*Nvar*Nface*sizeof(double));
 	memset(ERHS, 0, Np*K*Nvar*Nface*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-    for (int face = 0; face < Ne; face++){
+    for (int face = 0; face < IENe; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp,\
-				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, IEJs, IEMb, ERHS + field*Np*K*Nface);
+			StrongFormInnerEdgeRHS(face, IEFToE, IEFToF, Np, K, IENfp, IEFToN1, IEFToN2, IEFluxM + field*IENe*IENfp,\
+				IEFluxP + field*IENe*IENfp, IEFluxS + field*IENe*IENfp, IEJs, IEMb, ERHS + field*Np*K*Nface);
 		}
 	}
-	free(fm);
-	free(fp);
-	free(FluxM);
-	free(FluxP);
-	free(FluxS);
 	/*************************************************************************************************************************************/
 
 	/*************************************************************************************************************************************/
@@ -244,220 +224,177 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	                           /********************************************************************/
 	/*Allocate memory for fm and fp defined over boundary edges. Here, variables correspond to hu, hv, h, hT, hS, 
 	sediment and other passive transport material, vertical velocity omega is not included for boundary edges*/
-	Ne = BENe, Nfp = BENfp;
-	FToN1 = BEFToN1, FToE = BEFToE, FToF = BEFToF, nx = BEnx, ny = BEny;
-	fm = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
-	huM = fm, hvM = fm + Nfp*Ne, hM = fm + 2 * Nfp*Ne;
-	fp = malloc(Nfp*Ne*(Nvar + 1)*sizeof(double));
-	huP = fp, hvP = fp + Nfp*Ne, hP = fp + 2 * Nfp*Ne;
-	double *zM = malloc(Nfp*Ne*sizeof(double));
-	double *zP = malloc(Nfp*Ne*sizeof(double));
-	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	huM = BEfm, hvM = BEfm + BENfp*BENe, hM = BEfm + 2 * BENfp*BENe;
+	huP = BEfp, hvP = BEfp + BENfp*BENe, hP = BEfp + 2 * BENfp*BENe;
+	memset(BEFluxM, 0, BENfp*BENe*Nvar*sizeof(double));
+	memset(BEFluxS, 0, BENfp*BENe*Nvar*sizeof(double));
 
-	/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
+	/*Fetch variable BEfm and BEfp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate local flux term, adjacent flux term and numerical flux term*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
+	for (int face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
-		FetchBoundaryEdgeFacialValue(huM + face*Nfp, hu, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hvM + face*Nfp, hv, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hM + face*Nfp, h, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(zM + face*Nfp, z, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
+		FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(AdvzM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		here 1 stands for the memory occupied by water depth h*/
 		for (int field = 2; field < Nvar; field++){
-			FetchBoundaryEdgeFacialValue(fm + (field + 1)*Ne*Nfp + face*Nfp, \
+			FetchBoundaryEdgeFacialValue(BEfm + (field + 1)*BENe*BENfp + face*BENfp, \
 				 fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
-				FToE + 2 * face, FToN1 + Nfp*face, Np, Nfp);
+				BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 		}
-		ImposeBoundaryCondition(&gra, type, nx + face*Nfp, ny + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
-			zM + face*Nfp, zP + face*Nfp, fext + face*Nfp, Nfp, Nvar + 1, Ne);
-		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*Nfp, fp + face*Nfp, zM + face*Nfp, zP + face*Nfp, Nfp, Nvar + 1, Ne);
-		EvaluateVerticalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
-		EvaluateVerticalFaceNumFlux_HLLC_LAI(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
-			nx + face*Nfp, ny + face*Nfp, &gra, Hcrit, Nfp, Nvar, Ne);
+		ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, BEfm + face*BENfp, BEfp + face*BENfp, \
+			AdvzM + face*BENfp, AdvzP + face*BENfp, fext + face*BENfp, BENfp, Nvar + 1, BENe);
+		EvaluateHydroStaticReconstructValue(Hcrit, BEfm + face*BENfp, BEfp + face*BENfp, AdvzM + face*BENfp, AdvzP + face*BENfp, BENfp, Nvar + 1, BENe);
+		EvaluateVerticalFaceSurfFlux(BEFluxM + face*BENfp, BEfm + face*BENfp, BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENfp, Nvar, BENe);
+		EvaluateVerticalFaceNumFlux_HLLC_LAI(BEFluxS + face*BENfp, BEfm + face*BENfp, BEfp + face*BENfp, \
+			BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENfp, Nvar, BENe);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
+	for (int face = 0; face < BENe; face++){
 		for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BEJs, BEMb, ERHS + field*Np*K*Nface);
+			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, BEFluxM + field*BENe*BENfp, BEFluxS + field*BENe*BENfp, BEJs, BEMb, ERHS + field*Np*K*Nface);
 		}
 	}
-	free(fm);
-	free(fp);
-	free(FluxM);
-	free(FluxS);
-	free(zM);
-	free(zP);
 	/*************************************************************************************************************************************/
 
 	/*************************************************************************************************************************************/
 	           /**************************************Bottom Edge Part*******************************************************/
 	                              /********************************************************************/
-	Ne = BotENe, Nfp = BotENfp;
-	FToN1 = BotEFToN1, FToN2 = BotEFToN2, FToE = BotEFToE, FToF = BotEFToF, nz = BotEnz;
-	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
-	double *omegaM = fm + 2 * Nfp*Ne;
-	huM = fm, hvM = fm + Nfp*Ne, hM = fm + 3 * Nfp*Ne;
-	fp = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
-	double *omegaP = fp + 2 * Nfp*Ne;
-	huP = fp, hvP = fp + Nfp*Ne, hP = fp + 3 * Nfp*Ne;
-	/*Allocate memory for fluxM, fluxP and fluxS, and calculate these flux term*/
-	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxP = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxP, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	double *omegaM = BotEfm + 2 * BotENfp*BotENe;
+	huM = BotEfm, hvM = BotEfm + BotENfp*BotENe, hM = BotEfm + 3 * BotENfp*BotENe;
+	double *omegaP = BotEfp + 2 * BotENfp*BotENe;
+	huP = BotEfp, hvP = BotEfp + BotENfp*BotENe, hP = BotEfp + 3 * BotENfp*BotENe;
+	/*Allocate memory for BotEFluxM, BotEFluxP and BotEFluxS, and calculate these flux term*/
+	memset(BotEFluxM, 0, BotENfp*BotENe*Nvar*sizeof(double));
+	memset(BotEFluxP, 0, BotENfp*BotENe*Nvar*sizeof(double));
+	memset(BotEFluxS, 0, BotENfp*BotENe*Nvar*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
-		/*Fetch variable fm and fp first*/
-		FetchInnerEdgeFacialValue(hM + face*Nfp, hP + face*Nfp, h, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
-		FetchInnerEdgeFacialValue(huM + face*Nfp, huP + face*Nfp, hu, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
-		FetchInnerEdgeFacialValue(hvM + face*Nfp, hvP + face*Nfp, hv, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
-		FetchInnerEdgeFacialValue(omegaM + face*Nfp, omegaP + face*Nfp, omega, FToE + 2 * face, \
-			FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
+	for (int face = 0; face < BotENe; face++){
+		/*Fetch variable BotEfm and BotEfp first*/
+		FetchInnerEdgeFacialValue(hM + face*BotENfp, hP + face*BotENfp, h, BotEFToE + 2 * face, \
+			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
+		FetchInnerEdgeFacialValue(huM + face*BotENfp, huP + face*BotENfp, hu, BotEFToE + 2 * face, \
+			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
+		FetchInnerEdgeFacialValue(hvM + face*BotENfp, hvP + face*BotENfp, hv, BotEFToE + 2 * face, \
+			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
+		FetchInnerEdgeFacialValue(omegaM + face*BotENfp, omegaP + face*BotENfp, omega, BotEFToE + 2 * face, \
+			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		here 2 stands for the memory occupied by water depth h and omega*/
 		for (int field = 2; field < Nvar; field++){
-			FetchInnerEdgeFacialValue(fm + (field + 2)*Ne*Nfp + face*Nfp, \
-				fp + (field + 2)*Ne*Nfp + face*Nfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
-				FToE + 2 * face, FToN1 + Nfp*face, FToN2 + Nfp*face, Np, Nfp);
+			FetchInnerEdgeFacialValue(BotEfm + (field + 2)*BotENe*BotENfp + face*BotENfp, \
+				BotEfp + (field + 2)*BotENe*BotENfp + face*BotENfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
+				BotEFToE + 2 * face, BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
 		}
-		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
-		EvaluateHorizontalFaceSurfFlux(FluxP + face*Nfp, fp + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
-		EvaluateHorizontalFaceNumFlux(FluxS + face*Nfp, fm + face*Nfp, fp + face*Nfp, \
-			nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
+		EvaluateHorizontalFaceSurfFlux(BotEFluxM + face*BotENfp, BotEfm + face*BotENfp, BotEnz + face*BotENfp, Hcrit, BotENfp, Nvar, BotENe);
+		EvaluateHorizontalFaceSurfFlux(BotEFluxP + face*BotENfp, BotEfp + face*BotENfp, BotEnz + face*BotENfp, Hcrit, BotENfp, Nvar, BotENe);
+		EvaluateHorizontalFaceNumFlux(BotEFluxS + face*BotENfp, BotEfm + face*BotENfp, BotEfp + face*BotENfp, \
+			BotEnz + face*BotENfp, Hcrit, BotENfp, Nvar, BotENe);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-    for (int face = 0; face < Ne; face++){
+    for (int face = 0; face < BotENe; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormInnerEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FToN2, FluxM + field*Ne*Nfp, \
-				FluxP + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotEJs, BotEMb, ERHS + field*Np*K*Nface );
+			StrongFormInnerEdgeRHS(face, BotEFToE, BotEFToF, Np, K, BotENfp, BotEFToN1, BotEFToN2, BotEFluxM + field*BotENe*BotENfp, \
+				BotEFluxP + field*BotENe*BotENfp, BotEFluxS + field*BotENe*BotENfp, BotEJs, BotEMb, ERHS + field*Np*K*Nface );
 		}
 	}
-
-	free(fm);
-	free(fp);
-	free(FluxM);
-	free(FluxP);
-	free(FluxS);
 	/*************************************************************************************************************************************/
 
 	/*************************************************************************************************************************************/
 	             /**************************************Bottom Boundary Edge Part*******************************************************/
 	                            /********************************************************************/
-	Ne = BotBENe, Nfp = BotBENfp;
-	FToN1 = BotBEFToN1, FToE = BotBEFToE, FToF = BotBEFToF, nz = BotBEnz;
-	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
-	huM = fm;
-	hvM = fm + Nfp*Ne;
-	omegaM = fm + 2 * Nfp*Ne;
-	hM = fm + 3 * Nfp*Ne;
+	huM = BotBEfm;
+	hvM = BotBEfm + BotBENfp*BotBENe;
+	omegaM = BotBEfm + 2 * BotBENfp*BotBENe;
+	hM = BotBEfm + 3 * BotBENfp*BotBENe;
 
-	/*Allocate memory for fluxM, fluxP and fluxS, and calculate these flux term*/
-	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
-	FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	/*Allocate memory for BotBEFluxM, fluxP and BotBEFluxS, and calculate these flux term*/
+	memset(BotBEFluxM, 0, BotBENfp*BotBENe*Nvar*sizeof(double));
+	memset(BotBEFluxS, 0, BotBENfp*BotBENe*Nvar*sizeof(double));
 	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
-		FetchBoundaryEdgeFacialValue(huM + face*Nfp, hu, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hvM + face*Nfp, hv, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(omegaM + face*Nfp, omega, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hM + face*Nfp, h, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
+	for (int face = 0; face < BotBENe; face++){
+		FetchBoundaryEdgeFacialValue(huM + face*BotBENfp, hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		FetchBoundaryEdgeFacialValue(hvM + face*BotBENfp, hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		FetchBoundaryEdgeFacialValue(omegaM + face*BotBENfp, omega, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		FetchBoundaryEdgeFacialValue(hM + face*BotBENfp, h, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included
 		2 stands for the memory occupied by water depth h and omega*/
 		for (int field = 2; field < Nvar; field++){
-			FetchBoundaryEdgeFacialValue(fm + (field + 2)*Ne*Nfp + face*Nfp, \
+			FetchBoundaryEdgeFacialValue(BotBEfm + (field + 2)*BotBENe*BotBENfp + face*BotBENfp, \
 				fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
-				FToE + 2 * face, FToN1 + Nfp*face, Np, Nfp);
+				BotBEFToE + 2 * face, BotBEFToN1 + BotBENfp*face, Np, BotBENfp);
 		}
 
-		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
+		EvaluateHorizontalFaceSurfFlux(BotBEFluxM + face*BotBENfp, BotBEfm + face*BotBENfp, BotBEnz + face*BotBENfp, Hcrit, BotBENfp, Nvar, BotBENe);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
+	for (int face = 0; face < BotBENe; face++){
 		for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, FluxS + field*Ne*Nfp, BotBEJs, BotBEMb, ERHS + field*Np*K*Nface);
+			StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, BotBEFluxM + field*BotBENe*BotBENfp, BotBEFluxS + field*BotBENe*BotBENfp, BotBEJs, BotBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
-
-	free(fm);
-	free(FluxM);
-	free(FluxS);
 	/*************************************************************************************************************************************/
 
 	/*************************************************************************************************************************************/
 	         /**************************************Surface Boundary Edge Part*******************************************************/
 	                               /********************************************************************/
+	huM = SurfBEfm;
+	hvM = SurfBEfm + SurfBENfp*SurfBENe;
+	omegaM = SurfBEfm + 2 * SurfBENfp*SurfBENe;
+	hM = SurfBEfm + 3 * SurfBENfp*SurfBENe;
 
-	Ne = SurfBENe, Nfp = SurfBENfp;
-	FToN1 = SurfBEFToN1, FToE = SurfBEFToE, FToF = SurfBEFToF, nz = SurfBEnz;
-
-	fm = malloc(Nfp*Ne*(Nvar + 2)*sizeof(double));
-	huM = fm;
-	hvM = fm + Nfp*Ne;
-	omegaM = fm + 2 * Nfp*Ne;
-	hM = fm + 3 * Nfp*Ne;
-
-	/*Allocate memory for fluxM, fluxP and fluxS, and calculate these flux term*/
-	FluxM = malloc(Nfp*Ne*Nvar*sizeof(double));
-	memset(FluxM, 0, Nfp*Ne*Nvar*sizeof(double));
+	/*Allocate memory for SurfBEFluxM, fluxP and SurfBEFluxS, and calculate these flux term*/
+	memset(SurfBEFluxM, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 	/*WE NOTE THAT, FOR THE CONVERGENCE TEST, THIS FLUX IS NOT TAKEN AS ZERO AND SHOULD BE TAKEN FORM THE INPUT*/
 	double *SurfFluxS = mxGetPr(prhs[13]);
-	//FluxS = malloc(Nfp*Ne*Nvar*sizeof(double));
-	//memset(FluxS, 0, Nfp*Ne*Nvar*sizeof(double));
+	memset(SurfBEFluxS, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-	for (int face = 0; face < Ne; face++){
-		FetchBoundaryEdgeFacialValue(huM + face*Nfp, hu, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hvM + face*Nfp, hv, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(omegaM + face*Nfp, omega, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
-		FetchBoundaryEdgeFacialValue(hM + face*Nfp, h, FToE + 2 * face, FToN1 + face*Nfp, Np, Nfp);
+	for (int face = 0; face < SurfBENe; face++){
+		FetchBoundaryEdgeFacialValue(huM + face*SurfBENfp, hu, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
+		FetchBoundaryEdgeFacialValue(hvM + face*SurfBENfp, hv, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
+		FetchBoundaryEdgeFacialValue(omegaM + face*SurfBENfp, omega, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
+		FetchBoundaryEdgeFacialValue(hM + face*SurfBENfp, h, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
 
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included
 		2 stands for the memory occupied by water depth h and omega*/
 		for (int field = 2; field < Nvar; field++){
-			FetchBoundaryEdgeFacialValue(fm + (field + 2)*Ne*Nfp + face*Nfp, \
+			FetchBoundaryEdgeFacialValue(SurfBEfm + (field + 2)*SurfBENe*SurfBENfp + face*SurfBENfp, \
 				fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
-				FToE + 2 * face, FToN1 + Nfp*face, Np, Nfp);
+				SurfBEFToE + 2 * face, SurfBEFToN1 + SurfBENfp*face, Np, SurfBENfp);
 		}
 
-		EvaluateHorizontalFaceSurfFlux(FluxM + face*Nfp, fm + face*Nfp, nz + face*Nfp, Hcrit, Nfp, Nvar, Ne);
+		EvaluateHorizontalFaceSurfFlux(SurfBEFluxM + face*SurfBENfp, SurfBEfm + face*SurfBENfp, SurfBEnz + face*SurfBENfp, Hcrit, SurfBENfp, Nvar, SurfBENe);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
-    for (int face = 0; face < Ne; face++){
+    for (int face = 0; face < SurfBENe; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, FToE, FToF, Np, K, Nfp, FToN1, FluxM + field*Ne*Nfp, SurfFluxS + field*Ne*Nfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
+			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
     
@@ -482,20 +419,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
-	free(fm);
-	free(FluxM);
-	//free(FluxS);
-	free(TempFacialIntegral);
-	/**********************
+
 	/***************************************************************************************************************/
 
 
 	                                                                                    /************************  Volume Integral Part  ****************************/
-	/*Allocate memory for E, G and H, and calculate these volume flux term*/
-	double *E = malloc(Np*K*Nvar*sizeof(double));
-	double *G = malloc(Np*K*Nvar*sizeof(double));
-	double *H = malloc(Np*K*Nvar*sizeof(double));
-	double *TempVolumeIntegral = malloc(Np*K*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
 #endif
@@ -508,10 +436,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			&np, rx + k*Np, sx + k*Np, ry + k*Np, sy + k*Np, tz + k*Np, Nvar, Np, K);
 	}
 
-	free(E);
-	free(G);
-	free(H);
-	free(TempVolumeIntegral);
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(omp_get_max_threads())
@@ -522,7 +446,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				ERHS + n*Np*K*Nface + k*Np, OutputRHS + n*Np*K + k*Np, Np);
 		}
 	}
-
-	free(ERHS);
 
 }

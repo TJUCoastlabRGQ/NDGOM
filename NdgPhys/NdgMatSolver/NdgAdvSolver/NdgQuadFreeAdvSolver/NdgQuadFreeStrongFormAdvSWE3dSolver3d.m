@@ -22,6 +22,7 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
             obj.BottomBoundaryEdge = struct(phys.meshUnion.BottomBoundaryEdge);
             obj.SurfaceBoundaryEdge = struct(phys.meshUnion.SurfaceBoundaryEdge);
             warning('on');
+            obj.matClearSWEAdvGlobalMemory( );
         end
         %> Call the flux subroutine from the NdgPhys object.
         function evaluateAdvectionRHS( obj, physClass, fphys )            
@@ -119,6 +120,10 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
 
 % %             matVersion = toc;
 % %             fprintf("The speed up ratio is:%f\n",matVersion/Cversion);
+        end
+        
+        function matClearSWEAdvGlobalMemory( obj )
+            clear mxEvaluateQuadFreeStrongFormAdvSWE3dRHS;
         end
     end
     

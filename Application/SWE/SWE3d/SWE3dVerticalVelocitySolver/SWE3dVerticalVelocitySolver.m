@@ -40,6 +40,8 @@ classdef SWE3dVerticalVelocitySolver < handle
             obj.cell3d = struct(mesh3d.cell);
             warning('on');
             
+            obj.matClearVerticalVelocityGlobalMemory( );
+            
             obj.RHSCoeMatrix = cell(1);
             obj.RHSCoeMatrix{1} = zeros( mesh3d.cell.Np, mesh3d.cell.Np, mesh3d.K );
             obj.VertCoeMatrix = obj.RHSCoeMatrix;
@@ -228,6 +230,10 @@ classdef SWE3dVerticalVelocitySolver < handle
             %                 tempdata = field3d(:, (i-1)*Nz+1:i*Nz) - field2d(:, (i-1)*Nz+1:i*Nz);
             %                 VerticalVelocity((i-1)*Nz*physClass.meshUnion.cell.Np+1:i*Nz*physClass.meshUnion.cell.Np) = obj.StiffMatrix{1}(:,:,i)\tempdata(:);
             %             end
+        end
+        
+        function matClearVerticalVelocityGlobalMemory(obj)
+            clear mxCalculateVerticalVelocity;
         end
     end
     

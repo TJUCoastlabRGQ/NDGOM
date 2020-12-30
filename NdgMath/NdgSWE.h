@@ -34,6 +34,7 @@ void GetPCENumericalFluxTerm_HLLC_LU(double *, double *, double *, double *, dou
 
 void GetPCENumericalFluxTerm_HLL(double *, double *, double *, double *, double *, double *, double, int, int);
 
+void GetPCENumericalFluxTerm_HLLC_LAI(double *, double *, double *, double *, double *, double *, double, int, int);
 
 void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, double *);
 
