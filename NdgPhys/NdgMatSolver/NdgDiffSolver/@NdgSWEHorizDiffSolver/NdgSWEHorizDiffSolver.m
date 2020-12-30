@@ -23,6 +23,7 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
             obj.mesh = struct(physClass.meshUnion);
             obj.cell = struct(physClass.meshUnion.cell);
             warning('on');
+            clear mxEvaluateHorizontalDiffRHS;
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)

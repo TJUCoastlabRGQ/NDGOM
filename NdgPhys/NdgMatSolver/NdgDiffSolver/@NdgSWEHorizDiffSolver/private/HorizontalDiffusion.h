@@ -1,12 +1,5 @@
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
 
-typedef enum {
-	One = 1,
-	Two = 2,
-	Three = 3
-} NdgMeshType;
-
-
 void GetFacialFluxTerm(double *, double *, double *, int);
 
 void GetCentralNumFlux(double *, double *, double *, double *, int);
