@@ -23,7 +23,7 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
             obj.mesh = struct(physClass.meshUnion);
             obj.cell = struct(physClass.meshUnion.cell);
             warning('on');
-            clear mxEvaluateHorizontalDiffRHS;
+            obj.matClearSWEHorizDiffGlobalMemory( );
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
@@ -145,6 +145,10 @@ classdef NdgSWEHorizDiffSolver < NdgHorizDiffSolver
 % %             end
 % %             t2 = toc;
 % %             fprintf("The speed ratio is:%f\n",t2/t1);
+        end
+        
+        function matClearSWEHorizDiffGlobalMemory(obj)
+            clear mxEvaluateHorizontalDiffRHS;
         end
     end
     

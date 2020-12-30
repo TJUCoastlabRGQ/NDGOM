@@ -411,6 +411,11 @@ srcfile = { ...
     [path, 'mxEvaluateHorizontalDiffRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEHorizDiffSolver\private\';
+libfile = { 'NdgMath\NdgMemory.c'};
+srcfile = {[path, 'mxClearHorizontalDiffGlobalMemory.c']};
+FuncHandle(path, srcfile, libfile);
+
 path = 'NdgPhys\NdgMatSolver\NdgAdvSolver\NdgQuadFreeAdvSolver\private\';
 COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
 libfile = {'NdgMath\NdgMath.c',...

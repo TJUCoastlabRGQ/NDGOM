@@ -1,5 +1,4 @@
 # include "NdgMemory.h"
-#include <stdlib.h>
 
 /*This is for horizontal diffusion memory part*/
 double *HorDiffnv = NULL, *HorDiffvariable = NULL, *HorDiffBEfp = NULL, *HorDiffzM = NULL, \
@@ -19,6 +18,7 @@ void HorizDiffMemoryAllocation(NdgMeshType type, int Np, int K, int Nvar, int te
 	int Nface;
 	HorDiffzM = malloc(BENfp*BENe*sizeof(double));
 	HorDiffzP = malloc(BENfp*BENe*sizeof(double));
+	HorDiffnv = malloc(Np*K*sizeof(double));
 	if (type == Two){
 		/*For 2d shallow water problem, no horizontal diffusion terms are included in the governing equation for water depth $H$*/
 		Nfield = Nvar - 1;
@@ -116,44 +116,44 @@ void HorizDiffMemoryAllocation(NdgMeshType type, int Np, int K, int Nvar, int te
 
 void HorizDiffMemoryDeAllocation()
 {
-	free(HorDiffnv);
-	free(HorDiffvariable);
-	free(HorDiffBEfp); 
-	free(HorDiffzM);
-	free(HorDiffzP);
-	free(HorDiffTempBEfp);
-	free(HorDiffTempBEfm);
-	free(HorDiffAVx);
-	free(HorDiffAVy);
-	free(HorDiffVx);
-	free(HorDiffTempVx);
-	free(HorDiffVy);
-	free(HorDiffTempVy);
-	free(HorDiffIEfm);
-	free(HorDiffAVIEfm);
-	free(HorDiffIEfp);
-	free(HorDiffAVIEfp);
-	free(HorDiffIEFluxM);
-	free(HorDiffIEFluxP);
-	free(HorDiffBEfm);
-	free(HorDiffIEFluxS);
-	free(HorDiffAVBEfm);
-	free(HorDiffBEFluxM);
-	free(HorDiffBEFluxS);
-	free(HorDiffERHSX);
-	free(HorDiffERHSY);
-	free(HorDiffLocalPrimitiveDiffTermX);
-	free(HorDiffLocalPrimitiveDiffTermY);
-	free(HorDiffLPDTIEfm);
-	free(HorDiffLPDTIEfp);
-	free(HorDiffLPDTBEfm);
-	free(HorDiffTempFacialIntegralX);
-	free(HorDiffTempFacialIntegralY);
-	free(HorDiffInnerEdgeTau);
-	free(HorDiffBoundaryEdgeTau);
-	free(HorDiffIEnvfm);
-	free(HorDiffIEnvfp);
-	free(HorDiffBEnvfm);
+	free(HorDiffnv), HorDiffnv = NULL;
+	free(HorDiffvariable), HorDiffvariable = NULL;
+	free(HorDiffBEfp), HorDiffBEfp = NULL;
+	free(HorDiffzM), HorDiffzM = NULL;
+	free(HorDiffzP), HorDiffzP = NULL;
+	free(HorDiffTempBEfp), HorDiffTempBEfp = NULL;
+	free(HorDiffTempBEfm), HorDiffTempBEfm = NULL;
+	free(HorDiffAVx), HorDiffAVx = NULL;
+	free(HorDiffAVy), HorDiffAVy = NULL;
+	free(HorDiffVx), HorDiffVx = NULL;
+	free(HorDiffTempVx), HorDiffVx = NULL;
+	free(HorDiffVy), HorDiffVy = NULL;
+	free(HorDiffTempVy), HorDiffTempVy = NULL;
+	free(HorDiffIEfm), HorDiffIEfm = NULL;
+	free(HorDiffAVIEfm), HorDiffAVIEfm = NULL;
+	free(HorDiffIEfp), HorDiffIEfp = NULL;
+	free(HorDiffAVIEfp), HorDiffAVIEfp = NULL;
+	free(HorDiffIEFluxM), HorDiffIEFluxM = NULL;
+	free(HorDiffIEFluxP), HorDiffIEFluxP = NULL;
+	free(HorDiffBEfm), HorDiffBEfm = NULL;
+	free(HorDiffIEFluxS), HorDiffIEFluxS = NULL;
+	free(HorDiffAVBEfm), HorDiffAVBEfm = NULL;
+	free(HorDiffBEFluxM), HorDiffBEFluxM = NULL;
+	free(HorDiffBEFluxS), HorDiffBEFluxS = NULL;
+	free(HorDiffERHSX), HorDiffERHSX = NULL;
+	free(HorDiffERHSY), HorDiffERHSY = NULL;
+	free(HorDiffLocalPrimitiveDiffTermX), HorDiffLocalPrimitiveDiffTermX = NULL;
+	free(HorDiffLocalPrimitiveDiffTermY), HorDiffLocalPrimitiveDiffTermY = NULL;
+	free(HorDiffLPDTIEfm), HorDiffLPDTIEfm = NULL;
+	free(HorDiffLPDTIEfp), HorDiffLPDTIEfp = NULL;
+	free(HorDiffLPDTBEfm), HorDiffLPDTBEfm = NULL;
+	free(HorDiffTempFacialIntegralX), HorDiffTempFacialIntegralX = NULL;
+	free(HorDiffTempFacialIntegralY), HorDiffTempFacialIntegralY = NULL;
+	free(HorDiffInnerEdgeTau), HorDiffInnerEdgeTau = NULL;
+	free(HorDiffBoundaryEdgeTau), HorDiffBoundaryEdgeTau = NULL;
+	free(HorDiffIEnvfm), HorDiffIEnvfm = NULL;
+	free(HorDiffIEnvfp), HorDiffIEnvfp = NULL;
+	free(HorDiffBEnvfm), HorDiffBEnvfm = NULL;
 
-	HorDiffInitialized = "True";
+	HorDiffInitialized = "False";
 }
