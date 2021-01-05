@@ -40,7 +40,7 @@ classdef SWE3dVerticalVelocitySolver < handle
             obj.cell3d = struct(mesh3d.cell);
             warning('on');
             
-            obj.matClearVerticalVelocityGlobalMemory( );
+            obj.matClearGlobalMemory( );
             
             obj.RHSCoeMatrix = cell(1);
             obj.RHSCoeMatrix{1} = zeros( mesh3d.cell.Np, mesh3d.cell.Np, mesh3d.K );
@@ -232,7 +232,7 @@ classdef SWE3dVerticalVelocitySolver < handle
             %             end
         end
         
-        function matClearVerticalVelocityGlobalMemory(obj)
+        function matClearGlobalMemory(obj)
             clear mxCalculateVerticalVelocity;
         end
     end

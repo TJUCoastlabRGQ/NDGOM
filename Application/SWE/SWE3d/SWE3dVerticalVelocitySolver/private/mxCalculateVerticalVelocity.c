@@ -207,6 +207,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	signed char *ftype3d = (signed char *)mxGetData(prhs[19]);
     
      double *Tempfield2d = mxGetPr(prhs[20]);
+
+	 if (!strcmp("False", VertVelocityInitialized)){
+
+		 VertVelocitySolverMemoryAllocation( Np2d, K2d, IENfp2d, IENe2d, Nface, BENe2d, BENfp2d, Np3d, \
+			  K3d, IENfp3d, IENe3d, BENe3d, BENfp3d);
+
+	 }
      
 	plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 	double *VerticalVelocity = mxGetPr(plhs[0]);

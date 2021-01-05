@@ -108,6 +108,7 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
+obj.matClearGlobalMemory();
 profile viewer;
 profile off;
 toc;

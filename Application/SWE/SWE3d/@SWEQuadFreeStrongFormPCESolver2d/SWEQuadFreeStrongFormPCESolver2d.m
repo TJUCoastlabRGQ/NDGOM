@@ -18,7 +18,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
             obj.BoundaryEdge = struct(mesh.mesh2d.BoundaryEdge);
             obj.cell = struct(mesh.mesh2d.cell);
             warning('on');
-            obj.matClearPCESolverGlobalMemory( );
+            obj.matClearGlobalMemory( );
         end
         function evaluateAdvectionRHS( obj, physClass, fphys2d )
 % %             tic;
@@ -77,7 +77,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
 % %             fprintf("The speed up ratio is:%f\n",t2/t1);
         end
         
-        function matClearPCESolverGlobalMemory( obj )
+        function matClearGlobalMemory( obj )
             clear mxEvaluatePCERHS;
         end
         

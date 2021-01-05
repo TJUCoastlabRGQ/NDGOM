@@ -156,6 +156,8 @@ classdef SWEAbstract3d < NdgPhysMat
         
         matCalculateExplicitRHSTerm( obj, fphys2d, fphys, Stage, RKIndex);
         
+        matClearGlobalMemory(obj);
+        
     end
     
     methods ( Sealed, Access = protected )
