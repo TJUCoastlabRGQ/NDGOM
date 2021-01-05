@@ -75,6 +75,8 @@ classdef SWEAbstract3d < NdgPhysMat
         VerticalEddyViscositySolver
         %>
         HorizontalEddyViscositySolver
+        
+        VerticalVelocitySolver
     end
     
     properties

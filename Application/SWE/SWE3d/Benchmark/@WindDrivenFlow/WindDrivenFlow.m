@@ -16,37 +16,17 @@ classdef WindDrivenFlow < SWEBarotropic3d
         hcrit = 0.001;
     end
     
-    properties
-        dt
-        
-        VertSolver
-        
-        Limiter
-        
-        Filter
-    end
-    
     methods
         function obj = WindDrivenFlow( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.VertSolver = SWE3dVerticalVelocitySolver( obj.mesh2d, obj.mesh3d );
-            obj.Limiter =  NdgVertLimiter3d( obj.mesh3d );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            %> time interval
-            %             obj.dt = 0.02;
             obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
-%             obj.SurfBoundNewmannDate(:,:,1) = ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1            
-            %             Index =( all( obj.mesh2d.x - obj.ChLength/2  + 2*M > -1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             Index =( all(obj.mesh2d.x + obj.ChLength/2 - 2*M < 1e-5 ));
-            %             obj.WindTaux{1}(:,Index) = 0;
-            %             obj.Cf{1} = 0.0025/1000;
         end
         
         matExplicitRK222(obj);
@@ -106,6 +86,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
+            option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;

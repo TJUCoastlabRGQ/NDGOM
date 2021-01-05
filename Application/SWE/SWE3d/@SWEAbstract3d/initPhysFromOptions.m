@@ -84,4 +84,31 @@ obj.matInitEddyViscositySolver( );
 % initOutput( obj, mesh2d, mesh3d );
 obj.outputFile3d = obj.matInitOutput(mesh3d, obj.fieldName3d);
 obj.outputFile2d = obj.matInitOutput(mesh2d, obj.fieldName2d);
+
+[ obj.limiter ] = initSlopeLimiter( obj );
+
+obj.VerticalVelocitySolver = SWE3dVerticalVelocitySolver( mesh2d, mesh3d );
+
+
+end
+
+function [ limiter ] = initSlopeLimiter( physMat )
+%INITSLOPELIMITER Summary of this function goes here
+%   Detailed explanation goes here
+
+if physMat.option.isKey('limiterType')
+    type = physMat.getOption('limiterType');
+    [ limiter ] = initSlopeLimiter3d( physMat.meshUnion, type );
+else % default non limiter
+    limiter = NdgNonLimiter( physMat.meshUnion );
+end
+
+end
+
+function [ limiter ] = initSlopeLimiter3d( mesh, type )
+if ( type == enumLimiter.None )
+    limiter = NdgNonLimiter( mesh );
+else
+    limiter = NdgVertLimiter3d( mesh );
+end
 end

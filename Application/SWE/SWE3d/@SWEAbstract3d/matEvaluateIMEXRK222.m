@@ -45,8 +45,7 @@ while( time < ftime )
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
-          [ fphys ] = obj.Limiter.matLimitNew( obj, fphys );
-%         [ fphys ] = obj.matFilterSolution( fphys ); 
+          [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -55,7 +54,7 @@ while( time < ftime )
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
         %> update the vertical velocity
-        fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+        fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
 
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
@@ -80,10 +79,8 @@ while( time < ftime )
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
-    [ fphys ] = obj.Limiter.matLimitNew( obj, fphys );
-%    [ fphys ] = obj.matImposeLimiter( fphys );   
-%     [ fphys ] = obj.matFilterSolution( fphys ); 
-    
+    [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
+%    [ fphys ] = obj.matImposeLimiter( fphys );       
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
@@ -96,7 +93,7 @@ while( time < ftime )
     time = time + dt;
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
-    fphys{1}(:,:,3) = obj.VertSolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+    fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
     %> Update the diffusion coefficient
 %     display(time);

@@ -37,7 +37,7 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
            
            [ physClass.frhs{1} ]= mxEvaluateQuadFreeStrongFormAdvSWE3dRHS( obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge,...
                 obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, physClass.varFieldIndex, fphys{1}, ...
-                 physClass.fext3d{1}, physClass.gra, physClass.hcrit, int8(physClass.meshUnion.BoundaryEdge.ftype), physClass.SurfaceDate);
+                 physClass.fext3d{1}, physClass.gra, physClass.hcrit, int8(physClass.meshUnion.BoundaryEdge.ftype) );
 
 
 % %             Cversion = toc;

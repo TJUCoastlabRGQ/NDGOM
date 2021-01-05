@@ -21,12 +21,8 @@ end
 function [ limiter ] = initSlopeLimiter3d( mesh, type )
 if ( type == enumLimiter.None )
     limiter = NdgNonLimiter( mesh );
-elseif( type == enumLimiter.Vert )
+else
     limiter = NdgVertLimiter3d( mesh );
-elseif( type == enumLimiter.TVB )
-    limiter = NdgTVB3d( mesh );
-elseif( type == enumLimiter.BJ )
-    limiter = NdgBJ3d( mesh );
 end
 end
 

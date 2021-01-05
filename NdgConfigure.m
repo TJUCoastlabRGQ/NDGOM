@@ -113,10 +113,6 @@ libfile = {'NdgMath\NdgMath.c',...
     'NdgMath\NdgSWE.c'};
 FuncHandle(path, srcfile, libfile);
 
-path = 'NdgFilter/@NdgAbstractFilter/private/';
-srcfile = {[path,'mxFilterSolution.c']};
-FuncHandle(path, srcfile, libfile);
-
 % SWE1d
 path = 'Application\SWE\SWE1d\@SWEAbstract1d\private\';
 COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];

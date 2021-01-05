@@ -366,7 +366,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Allocate memory for SurfBEFluxM, fluxP and SurfBEFluxS, and calculate these flux term*/
 	memset(SurfBEFluxM, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 	/*WE NOTE THAT, FOR THE CONVERGENCE TEST, THIS FLUX IS NOT TAKEN AS ZERO AND SHOULD BE TAKEN FORM THE INPUT*/
-	double *SurfFluxS = mxGetPr(prhs[13]);
+	//double *SurfFluxS = mxGetPr(prhs[13]);
 	memset(SurfBEFluxS, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 
 #ifdef _OPENMP
@@ -394,7 +394,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
     for (int face = 0; face < SurfBENe; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
+			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
     
