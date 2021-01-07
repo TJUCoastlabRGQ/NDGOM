@@ -45,7 +45,7 @@ while( time < ftime )
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
-          [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
+%           [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -79,12 +79,12 @@ while( time < ftime )
     
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
         dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
-    [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
+%     [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
 %    [ fphys ] = obj.matImposeLimiter( fphys );       
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
     obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,Stage);

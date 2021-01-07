@@ -15,6 +15,10 @@ classdef NdgNoneHorizDiffSolver
             %Doing nothing
         end
         
+        function matClearGlobalMemory(obj)
+            %Doing nothing
+        end
+        
     end
     
 end

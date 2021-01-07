@@ -25,9 +25,9 @@ classdef SimpleChannelFlowDelft2d < SWEPreBlanaced2d
             for m = 1 : obj.Nmesh
                 fphys{m} = zeros( obj.meshUnion.cell.Np, obj.meshUnion.K, obj.Nfield );
                 % bottom elevation
-                fphys{m}(:, :, 4) =  0.0001 * obj.meshUnion.x;
+                fphys{m}(:, :, 4) =  -0.0001 * obj.meshUnion.x;
                 %water depth
-                fphys{m}(:,:,1) = 2.89677 + 0.0001 * (10000-obj.meshUnion.x);
+                fphys{m}(:,:,1) = 3.89677 - 0.0001 * (10000-obj.meshUnion.x);
                 %                  fphys2d{m}(:,:,1) = 2.89677;
             end
         end
@@ -39,7 +39,7 @@ classdef SimpleChannelFlowDelft2d < SWEPreBlanaced2d
             hu2d(:,Index) = 5;
             obj.fext{1}(:,:,2) = hu2d;
             Index = ( obj.meshUnion.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h2d(:,Index) = 2.89677;
+            h2d(:,Index) = 3.89677;
             obj.fext{1}(:,:,1) = h2d;
         end
         
@@ -64,16 +64,17 @@ classdef SimpleChannelFlowDelft2d < SWEPreBlanaced2d
         end% func
         
         function [ option ] = setOption( obj, option )
-            ftime = 72000;
-            outputIntervalNum = 2500;
+            ftime = 86400;
+            outputIntervalNum = 3000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
+            option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
             option('outputNcfileNum') = 500;
             option('limiterType') = enumLimiter.Vert;
+            option('outputType') = enumOutputFile.VTK;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
         end

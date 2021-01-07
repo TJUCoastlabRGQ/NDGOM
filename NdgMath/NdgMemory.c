@@ -1,5 +1,57 @@
 # include "NdgMemory.h"
 
+/*This is for GOTM part*/
+double *VCV = NULL, *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
+*numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL,\
+*huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL,\
+*BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL,\
+*SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL;
+
+signed char *GOTMInitialized = "False";
+
+void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K2d, int K3d){
+	tkeGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
+	epsGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
+	LGOTM = malloc(sizeof(double)*(Num2d*Interface));
+	nuhGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
+	numGOTM = malloc(sizeof(double)*(Num2d*Interface));
+	layerHeight = malloc(sizeof(double)*(Num2d*Interface));
+	huCentralDate = malloc(sizeof(double)*(Np2d*K3d));
+	hvCentralDate = malloc(sizeof(double)*(Np2d*K3d));
+	huVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
+	hvVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
+	shearFrequencyDate = malloc(sizeof(double)*(Num2d*Interface));
+	buoyanceFrequencyDate = malloc(sizeof(double)*(Num2d*Interface));
+	BottomFrictionLength = malloc(sizeof(double)*Num2d);
+	BottomFrictionVelocity = malloc(sizeof(double)*Num2d);
+	SurfaceFrictionLength = malloc(sizeof(double)*Num2d);
+	SurfaceFrictionVelocity = malloc(sizeof(double)*Num2d);
+	eddyViscosityDate = malloc(sizeof(double)*(Num2d * Interface));
+	GOTMInitialized = "True";
+}
+
+void GotmSolverMemoryDeAllocation(){
+	free(nuhGOTM); nuhGOTM = NULL;
+	free(numGOTM); numGOTM = NULL;
+	free(tkeGOTM); tkeGOTM = NULL;
+	free(epsGOTM); epsGOTM = NULL;
+	free(LGOTM); LGOTM = NULL;
+	free(layerHeight); layerHeight = NULL;
+	free(huCentralDate); huCentralDate = NULL;
+	free(hvCentralDate); hvCentralDate = NULL;
+	free(huVerticalLine); huVerticalLine = NULL;
+	free(hvVerticalLine); hvVerticalLine = NULL;
+	free(shearFrequencyDate); shearFrequencyDate = NULL;
+	free(buoyanceFrequencyDate); buoyanceFrequencyDate = NULL;
+	free(BottomFrictionLength); BottomFrictionLength = NULL;
+	free(BottomFrictionVelocity); BottomFrictionVelocity = NULL;
+	free(SurfaceFrictionLength); SurfaceFrictionLength = NULL;
+	free(SurfaceFrictionVelocity); SurfaceFrictionVelocity = NULL;
+	free(eddyViscosityDate); eddyViscosityDate = NULL;
+	GOTMInitialized = "False";
+}
+
+
 /*This is for vertical velocity solver part*/
 double *VSrhs2d = NULL, *VSIEfm2d = NULL, *VSIEfp2d = NULL, *VSIEFluxM2d = NULL, \
 *VSIEFluxP2d = NULL, *VSIEFluxS2d = NULL, *VSERHS2d = NULL, *VSVolumeIntegralX = NULL, \

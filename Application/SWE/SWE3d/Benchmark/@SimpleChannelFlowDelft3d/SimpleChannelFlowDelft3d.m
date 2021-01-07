@@ -20,11 +20,11 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
-            obj.outputFieldOrder = [ 1 2 3 4 10];
+            obj.outputFieldOrder3d = [ 1 2 3 4 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             
-            obj.Cf{1} = zeros(size(obj.Cf{1}));
+            obj.Cf{1} = 0.01 * ones(size(obj.Cf{1}));
         end        
     end
     
@@ -40,24 +40,26 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) =  0.0001 * mesh2d.x;
+                fphys2d{m}(:, :, 4) =  -0.0001 * mesh2d.x;
                 %water depth
-                fphys2d{m}(:,:,1) = 2.89677 + 0.0001 * (10000-mesh2d.x);
+                fphys2d{m}(:,:,1) = 2.89677 - 0.0001 * (10000-mesh2d.x);
 %                  fphys2d{m}(:,:,1) = 2.89677;
             end
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
+            % For 3d external field, the variable is organized as hu hv and
+            % h.
 % %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+% %            VCV = obj.meshUnion(1).cell.VCV;
+% %            Nz = obj.meshUnion(1).Nz;
+% %            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+% %            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+% %            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+% %            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+% %                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+% %            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+% %                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
            
            hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
            hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
@@ -67,19 +69,19 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
            hu3d(:,Index) = 5;
            obj.fext3d{1}(:,:,1) = hu3d;
            Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h3d(:,Index) = 2.89677;
-           obj.fext3d{1}(:,:,4) = h3d;
+           h3d(:,Index) = 3.89677;
+           obj.fext3d{1}(:,:,3) = h3d;
            
            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
            hu2d(:,Index) = 5;
-           obj.fext2d{1}(:,:,2) = hu2d;
+           obj.fext2d{1}(:,:,1) = hu2d;
            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h2d(:,Index) = 2.89677;
-           obj.fext2d{1}(:,:,1) = h2d;
+           h2d(:,Index) = 3.89677;
+           obj.fext2d{1}(:,:,3) = h2d;
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 7200;
+            ftime = 86400;
             outputIntervalNum = 3000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -88,14 +90,14 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantVerticalEddyViscosityValue') = 0.03;
-            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
-            option('ConstantHorizontalEddyViscosityValue') = 100;
+            option('ConstantVerticalEddyViscosityValue')  = 0.01;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
+            option('ConstantHorizontalEddyViscosityValue') = 0;
         end
         
     end    

@@ -13,6 +13,10 @@ classdef NdgSWEHorizNoneDiffSolver
         function  matEvaluateDiffRHS(obj, ~, ~)
             %doing nothing
         end
+        
+        function matClearGlobalMemory(obj)
+            %Doing nothing
+        end
     end
     
 end
