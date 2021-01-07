@@ -396,7 +396,8 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgSWEVertGOTMDiffSolver\private\';
 libfile = {['.\lib\GOTM\','*.obj'],...
-    [path,'mxGOTM.c']};
+    [path,'mxGOTM.c'],...
+    'NdgMath/NdgMemory.c'};
 srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
 

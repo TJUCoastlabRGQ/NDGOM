@@ -8,6 +8,10 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
+void GotmSolverMemoryAllocation(int, int, int, int);
+
+void GotmSolverMemoryDeAllocation();
+
 void HorizDiffMemoryAllocation(NdgMeshType , int , int , int , int , int , int , int , int );
 
 void HorizDiffMemoryDeAllocation();

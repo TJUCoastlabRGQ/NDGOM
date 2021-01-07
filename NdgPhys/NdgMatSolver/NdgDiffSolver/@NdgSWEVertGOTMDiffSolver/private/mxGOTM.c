@@ -8,10 +8,8 @@ double kappa = 0.4;
 double z0s_min = 0.02;
 /*this value is used for computing bottom roughness*/
 double avmolu = 1.3e-6;
-/*The iteration times to calculate the friction velocity, this is set to be 2 by default*/
-int NMaxItration = 3;
 
-void getGotmDate(int index){
+void getGotmDate(int index, long long int nlev){
 	for (int i = 0; i < nlev + 1; i++){
 		tkeGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_TKE[i];
 		epsGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_EPS[i];
@@ -21,7 +19,7 @@ void getGotmDate(int index){
 	}
 }
 
-void setGotmDate(int index){
+void setGotmDate(int index, long long int nlev){
 	TURBULENCE_mp_TKE = tkeGOTM + index*(nlev + 1);
 	TURBULENCE_mp_EPS = epsGOTM + index*(nlev + 1);
 	TURBULENCE_mp_L = LGOTM + index*(nlev + 1);
@@ -30,15 +28,15 @@ void setGotmDate(int index){
 }
 
 
-void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen){
+void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, long long int nlev, int Np2d, int K2d){
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);
 	for (int i = 0; i < Np2d*K2d; i++){
-		getGotmDate(i);
+		getGotmDate(i, nlev);
 	}
 }
 
-void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d, ptrdiff_t *Np3d){
+void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d, ptrdiff_t *Np3d, double *VCV){
 	char *chn = "N";
 	double alpha = 1;
 	double beta = 0;
@@ -47,7 +45,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 	dgemm(chn, chn, Np2d, K3d, Np3d, &alpha, VCV, Np2d, fphys, Np3d, &beta, dest, Np2d);
 }
 
-void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate){
+void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, long long int nlev, int Np2d){
 	//This has been verified by tests
 	for (int k = 0; k < K2d; k++){
 		for (int L = 1; L < nlev + 1; L++){
@@ -59,7 +57,7 @@ void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLine
 	}
 }
 
-void CalculateWaterDepth(double *H2d){
+void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev){
    /*if the water depth is larger than the threshold value, the layer height is calculated by the ratio of water depth to number of lyers.
    *For the current version, we only consider the equalspace division in vertical. When the water depth is less than the threshold, the water 
    *depth is set to be zero
@@ -75,7 +73,7 @@ void CalculateWaterDepth(double *H2d){
 }
 
 
-void CalculateShearFrequencyDate(double *H2d){
+void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 	for (int p = 0; p < Np2d*K2d; p++){
 		if (H2d[p] >= hcrit){
@@ -91,7 +89,7 @@ void CalculateShearFrequencyDate(double *H2d){
 
 }
 
-void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, double *Taux, double *Tauy){
+void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *DragCoefficient, double *Taux, double *Tauy, int Np2d, int K2d, int NMaxItration, double h0b, long long int nlev){
 	/*for surface friction length, another way is the charnock method*/
 	for (int p = 0; p < Np2d * K2d; p++){
 		SurfaceFrictionLength[p] = z0s_min;
@@ -117,14 +115,14 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, 
 	}
 }
 
- void DGDoTurbulence(double *TimeStep, double *H2d, double *Grass){
+ void DGDoTurbulence(double *TimeStep, double *H2d, double hcrit, double *Grass, int Np2d, int K2d, long long int nlev){
 	 //For the current version, grass is not considered
 	 for (int p = 0; p < Np2d * K2d; p++){
 		 if (H2d[p] >= hcrit){
-			 setGotmDate(p);
+			 setGotmDate(p, nlev);
 			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, H2d + p, SurfaceFrictionVelocity + p, BottomFrictionVelocity + p, SurfaceFrictionLength + p, \
-				 BottomFrictionLength + p, layerHeight + p*(nlev + 1), buoyanceFrequencyDate + p*(nlev + 1), shearFrequencyDate + p*(nlev + 1), NULL);
-			 getGotmDate(p);
+				 BottomFrictionLength + p, layerHeight + p*(nlev + 1), buoyanceFrequencyDate + p*(nlev + 1), shearFrequencyDate + p*(nlev + 1), Grass);
+			 getGotmDate(p, nlev);
 			 for (int L = 0; L < nlev + 1; L++){
 				 eddyViscosityDate[p*(nlev + 1) + L] = TURBULENCE_mp_NUM[L];
 			 }
@@ -133,7 +131,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, 
 
 }
 
- void mapVedgeDateToDof(double *SourceDate, double *DestinationDate){
+ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev){
 	 for (int k = 0; k < K2d; k++){
 		 for (int p = 0; p < Np2d; p++){
 			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1)];//the down face of the bottommost cell for each column
@@ -146,7 +144,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double *DragCoefficient, 
 	 }
  }
 
- void CalculateBuoyanceFrequencyDate(){
+ void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, long long int nlev){
 	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++)
 		 buoyanceFrequencyDate[i] = 0;
  }

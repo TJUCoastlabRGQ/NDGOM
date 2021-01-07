@@ -15,6 +15,10 @@ classdef AbstractDiffSolver < handle
         function   obj = AbstractDiffSolver( physClass )
             obj.nv = zeros(size(physClass.meshUnion(1).x));
         end
+        
+        function matClearGlobalMemory(obj)
+            %doing nothing
+        end
     end
     
     

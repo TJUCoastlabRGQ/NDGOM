@@ -1,6 +1,7 @@
 #include "mxGOTM.h"
 #include<string.h>
 #include<math.h>
+#include "../../../../../NdgMath/NdgMemory.h"
 //#include <blas.h>
 
 //#define NLHS 1
@@ -19,42 +20,43 @@
 * Output:
 *      double[Np3d x K3d], nu, the updated eddy viscosity
 */
-long long int nlev;
-double hcrit, finalTime, h0b;
+
+void MyExit()
+{
+	if (!strcmp("True", GOTMInitialized)){
+		GotmSolverMemoryDeAllocation();
+		GOTMInitialized = "False";
+	}
+	return;
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	double time = mxGetScalar(prhs[13]);
+	mexAtExit(&MyExit);
 	int Np2d = (int)mxGetScalar(prhs[0]);
 	int K2d = (int)mxGetScalar(prhs[1]);
 	int Np3d = (int)mxGetScalar(prhs[2]);
 	int K3d = (int)mxGetScalar(prhs[3]);
 	long long int nlev = (long long int)mxGetScalar(prhs[4]);
 	double hcrit = mxGetScalar(prhs[5]);
-	double finalTime = mxGetScalar(prhs[6]);
 	double h0b = mxGetScalar(prhs[14]);
 	double *VCV = mxGetPr(prhs[7]);
 	int Num2d = Np2d*K2d;
 	int Interface = (int)nlev + 1;
+	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){
-		GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K2d, int K3d);
+		GotmSolverMemoryAllocation(Num2d, Interface, Np2d, K3d);
 		/* Get number of characters in the input string.  Allocate enough
 		memory to hold the converted string. */
-		buflen = (long long int)mxGetN(prhs[11]) + 1;
-		buf = mxMalloc(buflen);
+		long long int buflen = (long long int)mxGetN(prhs[11]) + 1;
+		char *buf = malloc(buflen);
 		/* Copy the string data into buf. */
-		status = mxGetString(prhs[11], buf, (mwSize)buflen);
+		mxGetString(prhs[11], buf, (mwSize)buflen);
 		long long int _nNamelist = 2;
-		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1);
+		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1, nlev, Np2d, K2d);
+		free(buf);
 	}
-		/*Memory allocation part*/
-
-		char *buf;
-		long long int buflen;
-		int status;
-
-	/*Simulation is continuing*/
 		double* h = mxGetPr(prhs[8]);
 		double* hu = mxGetPr(prhs[9]);
 		double* hv = mxGetPr(prhs[10]);
@@ -72,25 +74,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempNp3d = (ptrdiff_t)Np3d;
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
-		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
-		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d);
+		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
+		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
 		//Tc to be continued
 		//Sc to be continued
-		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine);
-		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine);
+		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, nlev, Np2d);
+		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, nlev, Np2d);
 		//Tvl to be continued
 		//Svl to be continued
-		CalculateWaterDepth(h);
+		CalculateWaterDepth(h, Np2d, K2d, hcrit, nlev);
 
-		CalculateShearFrequencyDate(h);
+		CalculateShearFrequencyDate(h, Np2d, K2d, hcrit, nlev);
 
-		CalculateBuoyanceFrequencyDate();// At present, all are set to zero
+		CalculateBuoyanceFrequencyDate(Np2d, K2d, nlev);// At present, all are set to zero
 
-		CalculateLengthScaleAndShearVelocity(h, PteOutDragCoefficient, WindTaux, WindTauy);
+		CalculateLengthScaleAndShearVelocity(h, hcrit, PteOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, NMaxItration, h0b, nlev);
 
-		DGDoTurbulence(&dt, h, NULL);
+		DGDoTurbulence(&dt, h, hcrit, NULL, Np2d, K2d, nlev);
 
-		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity);
-
+		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity, Np2d, K2d, Np3d, nlev);
 
 }

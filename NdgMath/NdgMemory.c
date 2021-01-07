@@ -1,7 +1,7 @@
 # include "NdgMemory.h"
 
 /*This is for GOTM part*/
-double *VCV = NULL, *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
+double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
 *numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL,\
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL,\
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL,\
@@ -9,7 +9,7 @@ double *VCV = NULL, *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = 
 
 signed char *GOTMInitialized = "False";
 
-void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K2d, int K3d){
+void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K3d){
 	tkeGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
 	epsGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
 	LGOTM = malloc(sizeof(double)*(Num2d*Interface));

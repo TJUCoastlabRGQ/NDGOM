@@ -10,4 +10,6 @@ obj.PCESolver2d.matClearGlobalMemory();
 
 obj.VerticalVelocitySolver.matClearGlobalMemory();
 
+obj.VerticalEddyViscositySolver.matClearGlobalMemory();
+
 end

@@ -50,16 +50,16 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
         function matUpdateExternalField( obj, time, fphys2d, fphys )
             % For 3d external field, the variable is organized as hu hv and
             % h.
-% %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-% %            VCV = obj.meshUnion(1).cell.VCV;
-% %            Nz = obj.meshUnion(1).Nz;
-% %            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-% %            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-% %            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-% %            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-% %                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-% %            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-% %                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+%             obj.BotBoundNewmannDate(:,:,1)  = obj. 
+           VCV = obj.meshUnion(1).cell.VCV;
+           Nz = obj.meshUnion(1).Nz;
+           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hv./H ) * (-1);
            
            hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
            hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
@@ -90,7 +90,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

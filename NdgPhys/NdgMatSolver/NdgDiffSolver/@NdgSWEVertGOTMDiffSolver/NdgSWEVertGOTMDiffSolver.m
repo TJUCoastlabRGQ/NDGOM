@@ -29,13 +29,18 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             %Viscosity for GOTM turbulence model is initially set to be
             %zero
           obj.nv = zeros(size(physClass.meshUnion(1).x));
-          obj.Prantl = physClass.Prantl;            
+          obj.Prantl = physClass.Prantl;
+          obj.matClearGlobalMemory;
         end
         
         function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
             obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, dt, time);
             obj.matUpdatePenaltyParameter( physClass, obj.nv .* Height );
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv .* Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage);
+        end
+        
+        function matClearGlobalMemory(obj)
+            clear mxUpdateEddyViscosity;
         end
     end
     
