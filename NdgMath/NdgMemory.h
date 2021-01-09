@@ -1,12 +1,16 @@
 #ifndef _NdgMemory_H
 #define _NdgMemory_H
 #include <stdlib.h>
-
+#include <string.h>
 typedef enum {
 	One = 1,
 	Two = 2,
 	Three = 3
 } NdgMeshType;
+
+void VertDiffMemoryAllocation(const int, int, const int);
+
+void VertDiffMemoryDeAllocation();
 
 void GotmSolverMemoryAllocation(int, int, int, int);
 

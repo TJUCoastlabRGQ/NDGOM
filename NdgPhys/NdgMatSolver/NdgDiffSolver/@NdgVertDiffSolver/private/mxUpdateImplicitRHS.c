@@ -3,9 +3,41 @@
 #endif
 
 #include "..\..\..\..\..\NdgMath\NdgMath.h"
+#include "..\..\..\..\..\NdgMath\NdgMemory.h"
 
 #define NRHS 16
 #define NLHS 2
+
+extern double *Tau;
+extern signed char *VertDiffInitialized;
+
+void FetchBoundaryData(double *dest, double *source, const int Np2d, double *Eid)
+{
+	for (int i = 0; i < Np2d; i++){
+		dest[i] = source[(int)(Eid[i]) - 1];
+	}
+}
+
+void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, double *UpEidM, double *BotEidM, double *nv, \
+	int Nz, int P, int Nface)
+{
+	double nvM[Np2d], nvP[Np2d];
+	//Note: the penalty parameter for the topmost face of each column is not needed, so we leave them undefined 
+	for (int Layer = 1; Layer < Nz; Layer++)
+	{
+		FetchBoundaryData(nvM, nv + (Layer-1)*Np3d, Np2d, BotEidM);
+		FetchBoundaryData(nvP, nv + Layer*Np3d, Np2d, UpEidM);
+		for (int p = 0; p < Np2d; p++)
+		{
+			dest[Layer*Np2d + p] = ((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*Nz*max(nvM[p], nvP[p]);
+		}
+	}
+	FetchBoundaryData(nvM, nv + (Nz - 1)*Np3d, Np2d, BotEidM);
+	for (int p = 0; p < Np2d; p++)
+	{
+		dest[Nz*Np2d + p] = ((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*Nz*nvM[p];
+	}
+}
 
 /*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
 void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
@@ -47,7 +79,7 @@ void MatrixInverse(double *dest, ptrdiff_t Np)
 	free(WORK);
 }
 /*This function is used to impose the Newmann boundary at the surface and bottom boundary*/
-void ImposeNewmannBoundary(double *Eid, double *mass2d, double *mass3d, double* InvMassMatrix3d, double dt, double Imparam, \
+void ImposeNewmannBoundary(double *Eid, double *mass2d, double* InvMassMatrix3d, double dt, double Imparam, \
 	const double* BoundNewmannData, ptrdiff_t Np2d, int K2d, double *SystemRHS, ptrdiff_t Np3d, int K3d, double *StiffMatrix, int Nvar)
 {
 	double *tempRHS = malloc(Np3d*sizeof(double));
@@ -124,7 +156,7 @@ void EquationSolve(double *dest, ptrdiff_t m, ptrdiff_t n, double *CoeMatrix, do
 	free(TempCoeMatrix);
 }
 /*Note: This function is used to calculate the local boundary contribution to the local stiff operator OP11*/
-void LocalBoundaryIntegral(double *eid, double *DiffMatrix, double *mass2d, const double *Tau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, double epsilon)
+void LocalBoundaryIntegral(double *eid, double *DiffMatrix, double *mass2d, double *TempTau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, double epsilon)
 {
 	double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
 	AssembleFacialDiffMatrix(FDiffMatrix, DiffMatrix, eid, (int)Np2d, (int)Np3d);
@@ -136,20 +168,20 @@ void LocalBoundaryIntegral(double *eid, double *DiffMatrix, double *mass2d, cons
 	dgemm("n", "n", &Np2d, &Np3d, &Np2d, &Alpha, mass2d, &Np2d, FDiffMatrix, &Np2d, &Beta, EdgeContribution, &Np2d);
 	AssembleContributionIntoRow(OP11, EdgeContribution, eid, (int)Np3d, (int)Np2d);
 	double *DoubleJump = malloc(Np2d*Np2d*sizeof(double));
-	DiagMultiply(DoubleJump, mass2d, Tau, (int)Np2d);
+	DiagMultiply(DoubleJump, mass2d, TempTau, (int)Np2d);
 	AssembleContributionIntoRowAndColumn(OP11, DoubleJump, eid, eid, (int)Np3d, (int)Np2d, -1);
 	free(FDiffMatrix);
 	free(EdgeContribution);
 	free(DoubleJump);
 }
 /*Note: This function is used to impose the homogeneous Dirichlet boundary condition at the bottom boundary*/
-void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, const double *Tau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, const double epsilon)
+void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, double *TempTau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, const double epsilon)
 {
-/*	double *TempTau = malloc(Np2d*sizeof(double));
+/*	double *Tau = malloc(Np2d*sizeof(double));
 	for (int i = 0; i < Np2d; i++)
-		TempTau[i] = 2 * Tau[i];
+		Tau[i] = 2 * TempTau[i];
 		*/
-	//LocalBoundaryIntegral(eid, DiffMatrix, mass2d, TempTau, OP11, Np3d, Np2d, Flag, epsilon);
+	//LocalBoundaryIntegral(eid, DiffMatrix, mass2d, Tau, OP11, Np3d, Np2d, Flag, epsilon);
 	double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
 	AssembleFacialDiffMatrix(FDiffMatrix, DiffMatrix, eid, (int)Np2d, (int)Np3d);
 	double Alpha = -1 * epsilon*Flag*0.5*2, Beta = 0.0;
@@ -160,16 +192,16 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, co
 	dgemm("n", "n", &Np2d, &Np3d, &Np2d, &Alpha, mass2d, &Np2d, FDiffMatrix, &Np2d, &Beta, EdgeContribution, &Np2d);
 	AssembleContributionIntoRow(OP11, EdgeContribution, eid, (int)Np3d, (int)Np2d);
 	double *DoubleJump = malloc(Np2d*Np2d*sizeof(double));
-	//DiagMultiply(DoubleJump, mass2d, TempTau, (int)Np2d);
-	DiagMultiply(DoubleJump, mass2d, Tau, (int)Np2d);
+	//DiagMultiply(DoubleJump, mass2d, Tau, (int)Np2d);
+	DiagMultiply(DoubleJump, mass2d, TempTau, (int)Np2d);
 	AssembleContributionIntoRowAndColumn(OP11, DoubleJump, eid, eid, (int)Np3d, (int)Np2d, -1);
 	free(FDiffMatrix);
 	free(EdgeContribution);
 	free(DoubleJump);
-//	free(TempTau);
+//	free(Tau);
 }
 /*Note: This function is used to calculate the adjacent boundary contribution to the adjacent stiff operator OP12, here adjacent means the test function is defined over the adjacent cell and not the local one*/
-void AdjacentBoundaryIntegral(double *eidM, double *eidP, double *LocalDiff, double *AdjacentDiff, double *mass2d, const double *Tau, double *OP12, ptrdiff_t Np3d, \
+void AdjacentBoundaryIntegral(double *eidM, double *eidP, double *LocalDiff, double *AdjacentDiff, double *mass2d, double *TempTau, double *OP12, ptrdiff_t Np3d, \
 	ptrdiff_t Np2d, int Flag, const double epsilon)
 {
 	double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
@@ -184,7 +216,7 @@ void AdjacentBoundaryIntegral(double *eidM, double *eidP, double *LocalDiff, dou
 	dgemm("n", "n", &Np2d, &Np3d, &Np2d, &Alpha, mass2d, &Np2d, FDiffMatrix, &Np2d, &Beta, EdgeContribution, &Np2d);
 	AssembleContributionIntoRow(OP12, EdgeContribution, eidP, (int)Np3d, (int)Np2d);
 	double *DoubleJump = malloc(Np2d*Np2d*sizeof(double));
-	DiagMultiply(DoubleJump, mass2d, Tau, (int)Np2d);
+	DiagMultiply(DoubleJump, mass2d, TempTau, (int)Np2d);
 	AssembleContributionIntoRowAndColumn(OP12, DoubleJump, eidP, eidM, (int)Np3d, (int)Np2d, 1);
 	free(FDiffMatrix);
 	free(EdgeContribution);
@@ -199,41 +231,40 @@ void AssembleBoundaryContribution(double *dest, double *source, int Np, int K3d,
 	}
 }
 
+void MyExit()
+{
+	if (!strcmp("True", VertDiffInitialized)){
+		VertDiffMemoryDeAllocation();
+ 	}
+	return;
+}
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	/* check input & output */
-	if (nrhs != NRHS) {
-		mexPrintf("Matlab:%s:InvalidNumberInput,\n", __FILE__);
-		mexPrintf("%d inputs required.\n", NRHS);
-	}
-
-	if (nlhs != NLHS) {
-		mexPrintf("Matlab:%s:InvalidNumberOutput,\n", __FILE__);
-		mexPrintf("%d inputs required.\n", NLHS);
-	}
-
+	mexAtExit(&MyExit);
 	const double *J2d = mxGetPr(prhs[0]);
 	const double *J3d = mxGetPr(prhs[1]);
 	const double *M2d = mxGetPr(prhs[2]);
 	const double *M3d = mxGetPr(prhs[3]);
 	const double *tz = mxGetPr(prhs[4]);
 	const double *Dt = mxGetPr(prhs[5]);
-	const double *Diff = mxGetPr(prhs[6]);
+	double *Diff = mxGetPr(prhs[6]);
 	const double *surf = mxGetPr(prhs[7]);
 	const double *bot = mxGetPr(prhs[8]);
 	const double dt = mxGetScalar(prhs[9]);
 	const double ImplicitParam = mxGetScalar(prhs[10]);
 	const double *RHS = mxGetPr(prhs[11]);
-	const double *Tau = mxGetPr(prhs[12]);
-	const double Prantl = mxGetScalar(prhs[13]);
+	const double Prantl = mxGetScalar(prhs[12]);
 	const int K2d = (int)mxGetN(prhs[0]);
 	const int K3d = (int)mxGetN(prhs[1]);
 	const int Nz = K3d / K2d;
 	const int Np = (int)mxGetM(prhs[3]);
 	const int Np2d = (int)mxGetM(prhs[2]);
-	double *UpEidM = mxGetPr(prhs[14]);
-	double *BotEidM = mxGetPr(prhs[15]);
+	double *UpEidM = mxGetPr(prhs[13]);
+	double *BotEidM = mxGetPr(prhs[14]);
+	const int P = (int)mxGetScalar(prhs[15]);
+	const int Nface = (int)mxGetScalar(prhs[16]);
 	mwSize DimOfRHS = mxGetNumberOfDimensions(prhs[11]);
     int Nvar;
     const size_t *PRHS;
@@ -255,7 +286,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *ImplicitRHS = mxGetPr(plhs[1]);
     /*Here, epsilon is set to be -1, and this correspoinding to the SIPG. This value can be set to 1(IIPG or NIPG) or 0(IIPG or NIPG)*/
 	const double epsilon = -1;
-	int rank, size;
+
+	/*If not initialized, initialize first*/
+	if (!strcmp("False", VertDiffInitialized))
+	{
+		VertDiffMemoryAllocation(Np2d, K2d, Nz);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int i = 0; i < K2d; i++){
+		CalculatePenaltyParameter(Tau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
+	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -283,7 +326,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		VolumnIntegral(OP11, Dz, EleMass3d, LocalPhysicalDiffMatrix, Np);
 		double *SurfBoundStiffTerm = malloc(Np*Nvar*sizeof(double));
 		double *BotBoundStiffTerm = malloc(Np*Nvar*sizeof(double));
-		ImposeNewmannBoundary(UpEidM, EleMass2d, EleMass3d, InvEleMass3d, dt, ImplicitParam, surf + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz, (ptrdiff_t)Np, K3d, SurfBoundStiffTerm, Nvar);
+		ImposeNewmannBoundary(UpEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, surf + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz, (ptrdiff_t)Np, K3d, SurfBoundStiffTerm, Nvar);
 		if (Nz != 1){
 			/*When vertical layers greater than one, we calculate the bottom boundary integral part */
 			double *BottomAdjacentRows = malloc(Np*sizeof(double));
@@ -347,9 +390,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			for (int var = 2; var < Nvar; var++){
 				AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, Prantl, Np*Nz, Np);
 			}
-			ImposeNewmannBoundary(BotEidM, EleMass2d, EleMass3d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
+			ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
 			/*The following is used to add homogeneous dirichlet boundary for hu and hv, if not use, just delete this part*/
-			ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
+			//ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
 			memset(OP12, 0, Np*Np*sizeof(double));
 			AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1, epsilon);
 			for (int var = 0; var < 2 && var < Nvar; var++){
@@ -369,9 +412,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			for (int var = 2; var < Nvar; var++){
 				AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, Prantl, Np*Nz, Np);
 			}
-			ImposeNewmannBoundary(BotEidM, EleMass2d, EleMass3d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
+			ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
 			/* The following is used to add homogeneous dirichlet boundary for hu and hv, if not use, just delete this part*/
-			ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
+			//ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
 			for (int var = 0; var < 2 && var < Nvar; var++){
 				AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1, Np*Nz, Np);
 			}

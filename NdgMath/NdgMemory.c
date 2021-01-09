@@ -1,5 +1,21 @@
 # include "NdgMemory.h"
 
+/*This is for vertical diffusion part*/
+double *Tau = NULL;
+signed char *VertDiffInitialized = "False";
+
+void VertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz){
+	Tau = malloc(sizeof(double)*(Np2d*K2d*(Nz+1)));
+	memset(Tau, 0, Np2d*K2d*(Nz + 1)*sizeof(double));
+	VertDiffInitialized = "True";
+}
+
+void VertDiffMemoryDeAllocation(){
+	free(Tau);
+	Tau = NULL;
+	VertDiffInitialized = "False";
+}
+
 /*This is for GOTM part*/
 double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
 *numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL,\

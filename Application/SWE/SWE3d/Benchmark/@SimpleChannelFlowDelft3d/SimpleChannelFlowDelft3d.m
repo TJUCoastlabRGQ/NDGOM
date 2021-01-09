@@ -20,7 +20,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
-            obj.outputFieldOrder3d = [ 1 2 3 4 10];
+            obj.outputFieldOrder3d = [ 1 2 3 4 5 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             

@@ -1,8 +1,6 @@
 #include "mxGOTM.h"
 #include "blas.h"
 #include <math.h>
-#include <omp.h>
-#include "../../../../../NdgMath/NdgMemory.h"
 
 /*the Von kamma constant*/
 double kappa = 0.4;
@@ -22,22 +20,17 @@ void getGotmDate(int index, long long int nlev){
 }
 
 void setGotmDate(int index, long long int nlev){
-	for (int i = 0; i < nlev + 1; i++){
-		TURBULENCE_mp_TKE[i] = tkeGOTM[i + index*(nlev + 1)];
-		TURBULENCE_mp_EPS[i] = epsGOTM[i + index*(nlev + 1)];
-		TURBULENCE_mp_L[i] = LGOTM[i + index*(nlev + 1)];
-		TURBULENCE_mp_NUH[i] = nuhGOTM[i + index*(nlev + 1)];
-		TURBULENCE_mp_NUM[i] = numGOTM[i + index*(nlev + 1)];
-	}
+	TURBULENCE_mp_TKE = tkeGOTM + index*(nlev + 1);
+	TURBULENCE_mp_EPS = epsGOTM + index*(nlev + 1);
+	TURBULENCE_mp_L = LGOTM + index*(nlev + 1);
+	TURBULENCE_mp_NUH = nuhGOTM + index*(nlev + 1);
+	TURBULENCE_mp_NUM = numGOTM + index*(nlev + 1);
 }
 
 
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, long long int nlev, int Np2d, int K2d){
-
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
-
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);
-
 	for (int i = 0; i < Np2d*K2d; i++){
 		getGotmDate(i, nlev);
 	}
@@ -47,21 +40,13 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 	char *chn = "N";
 	double alpha = 1;
 	double beta = 0;
-	ptrdiff_t Col = 1;
     //ptrdiff_t TempNp2d = (ptrdiff_t)Np2d, TempK3d = (ptrdiff_t)K3d, TempNp3d = (ptrdiff_t)Np3d;
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
-	for (int i = 0; i < (int)(*K3d); i++){
-		dgemm(chn, chn, Np2d, &Col, Np3d, &alpha, VCV, Np2d, fphys + i*(int)(*Np3d), Np3d, &beta, dest + i*(int)(*Np2d), Np2d);
-	}
+    
+	dgemm(chn, chn, Np2d, K3d, Np3d, &alpha, VCV, Np2d, fphys, Np3d, &beta, dest, Np2d);
 }
 
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, long long int nlev, int Np2d){
 	//This has been verified by tests
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	for (int k = 0; k < K2d; k++){
 		for (int L = 1; L < nlev + 1; L++){
 			for (int p = 0; p < Np2d; p++){
@@ -77,9 +62,6 @@ void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long
    *For the current version, we only consider the equalspace division in vertical. When the water depth is less than the threshold, the water 
    *depth is set to be zero
    */
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	for (int p = 0; p < Np2d * K2d; p++){
 		if (H2d[p] >= hcrit){
 			for (int L = 1; L < nlev + 1; L++){
@@ -93,9 +75,6 @@ void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long
 
 void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	for (int p = 0; p < Np2d*K2d; p++){
 		if (H2d[p] >= hcrit){
 			for (int L = 1; L < nlev; L++){
@@ -112,9 +91,6 @@ void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, l
 
 void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *DragCoefficient, double *Taux, double *Tauy, int Np2d, int K2d, int NMaxItration, double h0b, long long int nlev){
 	/*for surface friction length, another way is the charnock method*/
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	for (int p = 0; p < Np2d * K2d; p++){
 		SurfaceFrictionLength[p] = z0s_min;
 		SurfaceFrictionVelocity[p] = 0;
@@ -156,9 +132,6 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 }
 
  void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev){
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	 for (int k = 0; k < K2d; k++){
 		 for (int p = 0; p < Np2d; p++){
 			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev+1)];//the down face of the bottommost cell for each column
@@ -172,10 +145,6 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
  }
 
  void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, long long int nlev){
-
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
-#endif
 	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++)
 		 buoyanceFrequencyDate[i] = 0;
  }

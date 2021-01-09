@@ -389,7 +389,8 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys\NdgMatSolver\NdgDiffSolver\@NdgVertDiffSolver\private\';
 COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
-libfile = {'NdgMath\NdgMath.c'};
+libfile = {'NdgMath\NdgMath.c',...
+    'NdgMath\NdgMemory.c'};
 srcfile = { ...
     [path, 'mxUpdateImplicitRHS.c']};
 FuncHandle(path, srcfile, libfile);

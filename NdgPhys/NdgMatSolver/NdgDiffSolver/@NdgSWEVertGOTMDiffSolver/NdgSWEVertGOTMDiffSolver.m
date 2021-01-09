@@ -34,8 +34,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         end
         
         function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
-            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, dt, time);
-            obj.matUpdatePenaltyParameter( physClass, obj.nv .* Height );
+            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, time);
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv .* Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage);
         end
         

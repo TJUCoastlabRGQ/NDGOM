@@ -25,8 +25,9 @@ void MyExit()
 {
 	if (!strcmp("True", GOTMInitialized)){
 		GotmSolverMemoryDeAllocation();
-		TURBULENCE_mp_CLEAN_TURBULENCE();
+		GOTMInitialized = "False";
 		MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
+		TURBULENCE_mp_CLEAN_TURBULENCE();
 	}
 	return;
 }
@@ -55,22 +56,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/* Copy the string data into buf. */
 		mxGetString(prhs[11], buf, (mwSize)buflen);
 		long long int _nNamelist = 2;
-		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, Np2d, K2d);
-//		TURBULENCE_mp_CLEAN_TURBULENCE();
-//		TURBULENCE_mp_INIT_TURBULENCE(&_nNamelist, buf, &nlev, buflen);
+		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen - 1, nlev, Np2d, K2d);
 		free(buf);
 	}
-	
 		double* h = mxGetPr(prhs[8]);
 		double* hu = mxGetPr(prhs[9]);
 		double* hv = mxGetPr(prhs[10]);
 		double dt = (double)mxGetScalar(prhs[12]);
         double* WindTaux = mxGetPr(prhs[15]);
         double* WindTauy = mxGetPr(prhs[16]);
-		
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
         plhs[1] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-		
 		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
         double *PteOutDragCoefficient = mxGetPr(plhs[1]);
 		// TDiffusionParameter to be continued
@@ -81,7 +77,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
 		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-
 		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
 		//Tc to be continued
 		//Sc to be continued
