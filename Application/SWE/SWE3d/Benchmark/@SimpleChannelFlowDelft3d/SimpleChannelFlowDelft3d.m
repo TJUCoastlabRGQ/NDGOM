@@ -51,15 +51,15 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             % For 3d external field, the variable is organized as hu hv and
             % h.
 %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+%            VCV = obj.meshUnion(1).cell.VCV;
+%            Nz = obj.meshUnion(1).Nz;
+%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
            
            hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
            hu2d = zeros(size(obj.fext2d{1}(:,:,1)));

@@ -26,7 +26,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3];
-            obj.outputFieldOrder = [ 1 2 3 4 5];
+            obj.outputFieldOrder3d = [ 1 2 3 4 5];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
@@ -83,20 +83,21 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 1;
+            option('outputNcfileNum') = 20;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             %             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             %             option('GOTMSetupFile') = obj.GotmFile;
             %             option('equationType') = enumDiscreteEquation.Strong;
             %             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             %             option('outputType') = enumOutputFile.VTK;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.GOTM;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
+            option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
-            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
         end
         
@@ -112,7 +113,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], 0.1*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.1*ceil(obj.ChLength/M), bctype);
+    [ -obj.ChLength/2, obj.ChLength/2 ], 0.02*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.02*ceil(obj.ChLength/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

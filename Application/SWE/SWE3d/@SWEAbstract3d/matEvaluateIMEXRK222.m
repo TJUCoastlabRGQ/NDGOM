@@ -35,18 +35,19 @@ while( time < ftime )
         
         SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:), dt);
         
-        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1) * obj.ExplicitRHS2d(:,:,1) +...
-            dt * EXa(intRK+1,2) * obj.ExplicitRHS2d(:,:,2) + dt * EXa(intRK+1,3) * obj.ExplicitRHS2d(:,:,3);   
+%         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXa(intRK+1,1) * obj.ExplicitRHS2d(:,:,1) +...
+%             dt * EXa(intRK+1,2) * obj.ExplicitRHS2d(:,:,2) + dt * EXa(intRK+1,3) * obj.ExplicitRHS2d(:,:,3);   
+         fphys2d{1}(:,:,1) = -obj.meshUnion(1).mesh2d.x *10^(-5)  + 15;
         
         %dt here is problematic
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
-            Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
+            Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
         
         fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
-%           [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
+        [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -78,14 +79,15 @@ while( time < ftime )
         %         end
     end
     
-    fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
-        dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
-%     [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
+%     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * EXb(1) * obj.ExplicitRHS2d(:,:,1) + dt * EXb(2) * obj.ExplicitRHS2d(:,:,2)+...
+%         dt * EXb(3) * obj.ExplicitRHS2d(:,:,3);
+    fphys2d{1}(:,:,1) = -obj.meshUnion(1).mesh2d.x *10^(-5)  + 15;
+    [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
 %    [ fphys ] = obj.matImposeLimiter( fphys );       
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
+%     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
     obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,Stage);

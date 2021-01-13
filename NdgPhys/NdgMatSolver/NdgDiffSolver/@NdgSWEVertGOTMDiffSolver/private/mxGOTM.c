@@ -5,9 +5,10 @@
 #include "../../../../../NdgMath/NdgMemory.h"
 
 /*the Von kamma constant*/
-double kappa = 0.4;
-/*the limit value for the bottom roughness*/
+double kappa = 0.41;
+/*the limit value for the surface roughness*/
 double z0s_min = 0.02;
+//double z0s_min = 0;
 /*this value is used for computing bottom roughness*/
 double avmolu = 1.3e-6;
 
@@ -99,8 +100,8 @@ void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, l
 	for (int p = 0; p < Np2d*K2d; p++){
 		if (H2d[p] >= hcrit){
 			for (int L = 1; L < nlev; L++){
-				shearFrequencyDate[p*(nlev + 1) + L] = pow((huVerticalLine[p*(nlev + 1) + L + 1] - huVerticalLine[p*(nlev + 1) + L]) / H2d[p] / (0.5*(layerHeight[p*(nlev + 1) + L + 1] + layerHeight[p*(nlev + 1) + L])), 2) \
-					+ pow((hvVerticalLine[p*(nlev + 1) + L + 1] - hvVerticalLine[p*(nlev + 1) + L]) / H2d[p] / (0.5*(layerHeight[p*(nlev + 1) + L + 1] + layerHeight[p*(nlev + 1) + L])), 2);
+				shearFrequencyDate[p*(nlev + 1) + L] = sqrt(pow((huVerticalLine[p*(nlev + 1) + L + 1] - huVerticalLine[p*(nlev + 1) + L]) / H2d[p] / (0.5*(layerHeight[p*(nlev + 1) + L + 1] + layerHeight[p*(nlev + 1) + L])), 2) \
+					+ pow((hvVerticalLine[p*(nlev + 1) + L + 1] - hvVerticalLine[p*(nlev + 1) + L]) / H2d[p] / (0.5*(layerHeight[p*(nlev + 1) + L + 1] + layerHeight[p*(nlev + 1) + L])), 2));
 			}
 			//For each vertical segment, we have SS(0) = SS(1), SS(nlev) = SS(nlev - 1)
 			shearFrequencyDate[p*(nlev + 1)] = shearFrequencyDate[p*(nlev + 1) + 1];
@@ -124,6 +125,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 		if (H2d[p] >= hcrit){
 			for (int itera = 0; itera < NMaxItration; itera++){
 				Tempz0b = 0.1*avmolu / max(avmolu, BottomFrictionVelocity[p]) + 0.03*h0b;
+				Tempz0b = 0.0015;
 				/*$rr=\frac{\kappa}{log(\frac{z0b+\frac{h(1)}{2}}{z0b})$, where z0b is the bottom roughness length and h(1) is the height of the first layer of cell,
 				*detail of this part can refer to the friction.F90 file in GOTM
 				*/
