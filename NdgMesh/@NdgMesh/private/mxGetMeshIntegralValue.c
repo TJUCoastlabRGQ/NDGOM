@@ -63,6 +63,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     ptrdiff_t Np_ptrdiff = Np;
     ptrdiff_t Nq_ptrdiff = Nq;
     char *tran = "N";
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
