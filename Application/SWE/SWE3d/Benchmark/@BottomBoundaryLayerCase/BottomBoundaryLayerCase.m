@@ -65,15 +65,16 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+           
+           h3d = zeros(size(obj.fext3d{1}(:,:,1)));
+           h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+           Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+           h3d(:,Index) = -obj.meshUnion(1).BoundaryEdge.xb(:,Index) *10^(-5)  + 15;
+           obj.fext3d{1}(:,:,3) = h3d;
+           
+           Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+           h2d(:,Index) = -obj.meshUnion(1).mesh2d.BoundaryEdge.xb(:,Index) *10^(-5)  + 15;
+           obj.fext2d{1}(:,:,3) = h2d;
         end        
         
         function [ option ] = setOption( obj, option )
@@ -107,10 +108,10 @@ end
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
 bctype = [ ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedDepth, ...
+    enumBoundaryCondition.ClampedDepth, ...
+    enumBoundaryCondition.ClampedDepth, ...
+    enumBoundaryCondition.ClampedDepth ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], 0.02*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.02*ceil(obj.ChLength/M), bctype);

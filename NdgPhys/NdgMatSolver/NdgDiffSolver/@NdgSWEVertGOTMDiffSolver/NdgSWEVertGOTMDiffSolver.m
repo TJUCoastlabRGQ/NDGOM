@@ -36,7 +36,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
             obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, time);
             obj.matUpdataNewmannBoundaryCondition( physClass, fphys);
-            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv .* Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage);
+            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage);
         end
         
         function matClearGlobalMemory(obj)
