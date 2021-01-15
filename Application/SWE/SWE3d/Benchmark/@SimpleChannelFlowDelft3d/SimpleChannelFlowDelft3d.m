@@ -12,7 +12,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
         finalTime = 7200;
         hcrit = 0.001;
         % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@SimpleChannelFlowDelft3d','\gotmturb.nml');        
+        GotmFile = fullfile([pwd,'\Application\SWE\SWE3d\Benchmark\@SimpleChannelFlowDelft3d'],'\gotmturb.nml');        
     end
     
     methods
@@ -42,7 +42,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) =  -0.0001 * mesh2d.x;
                 %water depth
-                fphys2d{m}(:,:,1) = 2.89677 - 0.0001 * (10000-mesh2d.x);
+                fphys2d{m}(:,:,1) = 3.89677 + 0.025 - 0.0001 * (10000-mesh2d.x);
 %                  fphys2d{m}(:,:,1) = 2.89677;
             end
         end
@@ -69,14 +69,14 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
            hu3d(:,Index) = 5;
            obj.fext3d{1}(:,:,1) = hu3d;
            Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h3d(:,Index) = 3.89677;
+           h3d(:,Index) = 3.89677 + 0.025;
            obj.fext3d{1}(:,:,3) = h3d;
            
            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
            hu2d(:,Index) = 5;
            obj.fext2d{1}(:,:,1) = hu2d;
            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h2d(:,Index) = 3.89677;
+           h2d(:,Index) = 3.89677 + 0.025;
            obj.fext2d{1}(:,:,3) = h2d;
         end
         
@@ -90,12 +90,12 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.GOTM;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
-            option('ConstantVerticalEddyViscosityValue')  = 0.01;
+            option('ConstantVerticalEddyViscosityValue')  = 0;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
         end

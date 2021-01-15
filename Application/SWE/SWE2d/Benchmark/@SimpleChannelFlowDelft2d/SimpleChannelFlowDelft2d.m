@@ -27,7 +27,7 @@ classdef SimpleChannelFlowDelft2d < SWEPreBlanaced2d
                 % bottom elevation
                 fphys{m}(:, :, 4) =  -0.0001 * obj.meshUnion.x;
                 %water depth
-                fphys{m}(:,:,1) = 3.89677 - 0.0001 * (10000-obj.meshUnion.x);
+                fphys{m}(:,:,1) = 3.89677 + 0.025 - 0.0001 * (10000-obj.meshUnion.x);
                 %                  fphys2d{m}(:,:,1) = 2.89677;
             end
         end
@@ -39,7 +39,7 @@ classdef SimpleChannelFlowDelft2d < SWEPreBlanaced2d
             hu2d(:,Index) = 5;
             obj.fext{1}(:,:,2) = hu2d;
             Index = ( obj.meshUnion.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h2d(:,Index) = 3.89677;
+            h2d(:,Index) = 3.89677 + 0.025;
             obj.fext{1}(:,:,1) = h2d;
         end
         

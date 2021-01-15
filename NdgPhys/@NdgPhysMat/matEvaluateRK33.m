@@ -46,7 +46,8 @@ while( time < ftime )
 %     fprintf('processing %f...\n', time/ftime);
 %     obj.draw( fphys );
 %     toc;
-    visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) ); 
+%     visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) ); 
+    visual.drawResult( fphys{1}(:, :, 1) ); 
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys );
     timeRatio = time / ftime;
