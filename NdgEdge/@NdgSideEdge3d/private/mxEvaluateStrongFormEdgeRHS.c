@@ -5,7 +5,7 @@
 #include "mex.h"
 #include "blas.h"
 #include <stdlib.h>
-#include "..\..\..\NdgMath\NdgMath.h"
+#include "../../../NdgMath/NdgMath.h"
 
 #if !defined(_WIN32)
 #define dgemm dgemm_

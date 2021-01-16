@@ -3,6 +3,19 @@
 
 #include "mex.h"
 
+#if !defined(_WIN32)
+#define TURBULENCE_mp_INIT_TURBULENCE __turbulence_MOD_init_turbulence
+#define TURBULENCE_mp_DO_TURBULENCE __turbulence_MOD_do_turbulence
+#define TURBULENCE_mp_CLEAN_TURBULENCE __turbulence_MOD_clean_turbulence
+#define MTRIDIAGONAL_mp_INIT_TRIDIAGONAL __mtridiagonal_MOD_init_tridiagonal
+#define MTRIDIAGONAL_mp_clean_TRIDIAGONAL __mtridiagonal_MOD_clean_tridiagonal
+#define TURBULENCE_mp_TKE __turbulence_MOD_tke
+#define TURBULENCE_mp_EPS __turbulence_MOD_eps
+#define TURBULENCE_mp_NUM __turbulence_MOD_num
+#define TURBULENCE_mp_NUH __turbulence_MOD_nuh
+#define TURBULENCE_mp_L __turbulence_MOD_l
+#endif
+
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate;

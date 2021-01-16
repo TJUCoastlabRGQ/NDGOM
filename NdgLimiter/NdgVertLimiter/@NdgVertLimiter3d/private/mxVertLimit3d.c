@@ -10,8 +10,8 @@
 #define NRHS 7
 #define NLHS 1
 
-//#define max(a, b) ((a > b) ? a : b)
-//#define min(a, b) ((a < b) ? a : b)
+#define max(a, b) ((a > b) ? a : b)
+#define min(a, b) ((a < b) ? a : b)
 
 /*
  * Purpose: This function is used to limit the physical value to satisfy the maxmium principle

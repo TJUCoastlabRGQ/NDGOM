@@ -18,6 +18,11 @@
 #define dgemm dgemm_
 #endif
 
+#if !defined(_WIN32)
+#define max(a, b) ((a > b) ? a : b)
+#define min(a, b) ((a < b) ? a : b)
+#endif
+
 void Add(double *, double *, double *, int );
 
 void Minus(double *, double *, double *, int);
