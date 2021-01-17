@@ -397,9 +397,18 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEVertGOTMDiffSolver/private/';
-libfile = {['./lib/GOTM/','*.obj'],...
-    [path,'mxGOTM.c'],...
-    'NdgMath/NdgMemory.c'};
+
+Opath = [pwd,'/lib/GOTM/*.o'];
+file = dir(Opath);
+%libfile = {[path,'mxGOTM.c'],...
+ %   'NdgMath/NdgMemory.c'};
+ libfile = [];
+for i = 1:numel(file)
+    libfile{i} = ...
+        [pwd,'/lib/GOTM/',file(i).name];
+end
+libfile{numel(file)+1} = [path,'mxGOTM.c'];
+libfile{numel(file)+2} = 'NdgMath/NdgMemory.c';
 srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
 
@@ -410,11 +419,6 @@ libfile = { 'NdgMath/NdgSWE.c',...
     [path,'HorizontalDiffusion.c']};
 srcfile = { ...
     [path, 'mxEvaluateHorizontalDiffRHS.c']};
-FuncHandle(path, srcfile, libfile);
-
-path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEHorizDiffSolver/private/';
-libfile = { 'NdgMath/NdgMemory.c'};
-srcfile = {[path, 'mxClearHorizontalDiffGlobalMemory.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgAdvSolver/NdgQuadFreeAdvSolver/private/';
@@ -451,7 +455,7 @@ for n = 1:numel(srcfile)
             mfilename, srcfile{n}, outPath);
         fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex('-v',  '-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+        mex('-v', '-g', '-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
             file{:}, '-outdir', outPath);        
     end
 end
@@ -509,7 +513,7 @@ switch computer('arch')
         LDFLAGS = [LDFLAGS, ' /openmp '];
     case 'glnxa64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
-            num2str(parallelThreadNum), ' '];
+            num2str(parallelThreadNum), '-L/usr/include/X11/lib -lxview -lolgx -lX11 -lm -lf2c -lgfortran'];
         LDFLAGS = [LDFLAGS, ' -fopenmp '];     
         
         

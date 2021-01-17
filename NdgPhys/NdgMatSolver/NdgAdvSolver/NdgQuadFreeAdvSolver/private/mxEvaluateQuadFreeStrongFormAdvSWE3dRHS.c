@@ -1,7 +1,7 @@
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
-#include "..\..\..\..\..\NdgMath\NdgSWE.h"
-#include "..\..\..\..\..\NdgMath\NdgSWE3D.h"
-#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
+#include "../../../../../NdgMath/NdgSWE.h"
+#include "../../../../../NdgMath/NdgSWE3D.h"
+#include "../../../../../NdgMath/NdgMemory.h"
 
 extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
 *IEFluxS, *ERHS, *BEfm, *BEfp, *AdvzM, *AdvzP, *BEFluxM, \

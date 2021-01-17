@@ -14,7 +14,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         finalTime = 86400;
         hcrit = 0.001;
         % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@BottomBoundaryLayerCase','\gotmturb.nml');
+        GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@BottomBoundaryLayerCase/gotmturb.nml']);
     end
     
     properties
