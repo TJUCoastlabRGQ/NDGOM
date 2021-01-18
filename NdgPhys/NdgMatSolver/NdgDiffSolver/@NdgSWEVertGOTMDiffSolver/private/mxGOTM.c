@@ -4,11 +4,6 @@
 #include <omp.h>
 #include "../../../../../NdgMath/NdgMemory.h"
 
-#if !defined(_WIN32)
-#define max(a, b) ((a > b) ? a : b)
-#define min(a, b) ((a < b) ? a : b)
-#endif
-
 /*the Von kamma constant*/
 double kappa = 0.41;
 /*the limit value for the surface roughness*/
@@ -19,30 +14,30 @@ double avmolu = 1.3e-6;
 
 void getGotmDate(int index, long long int nlev){
 	for (int i = 0; i < nlev + 1; i++){
-		tkeGOTM[index*(nlev + 1) + i] = __turbulence_MOD_tke[i];
-		epsGOTM[index*(nlev + 1) + i] = __turbulence_MOD_eps[i];
-		LGOTM[index*(nlev + 1) + i] = __turbulence_MOD_l[i];
-		nuhGOTM[index*(nlev + 1) + i] = __turbulence_MOD_nuh[i];
-		numGOTM[index*(nlev + 1) + i] = __turbulence_MOD_num[i];
+		tkeGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_TKE[i];
+		epsGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_EPS[i];
+		LGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_L[i];
+		nuhGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_NUH[i];
+		numGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_NUM[i];
 	}
 }
 
 void setGotmDate(int index, long long int nlev){
 	for (int i = 0; i < nlev + 1; i++){
-		__turbulence_MOD_tke[i] = tkeGOTM[i + index*(nlev + 1)];
-		__turbulence_MOD_eps[i] = epsGOTM[i + index*(nlev + 1)];
-		__turbulence_MOD_l[i] = LGOTM[i + index*(nlev + 1)];
-		__turbulence_MOD_nuh[i] = nuhGOTM[i + index*(nlev + 1)];
-		__turbulence_MOD_num[i] = numGOTM[i + index*(nlev + 1)];
+		TURBULENCE_mp_TKE[i] = tkeGOTM[i + index*(nlev + 1)];
+		TURBULENCE_mp_EPS[i] = epsGOTM[i + index*(nlev + 1)];
+		TURBULENCE_mp_L[i] = LGOTM[i + index*(nlev + 1)];
+		TURBULENCE_mp_NUH[i] = nuhGOTM[i + index*(nlev + 1)];
+		TURBULENCE_mp_NUM[i] = numGOTM[i + index*(nlev + 1)];
 	}
 }
 
 
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, long long int nlev, int Np2d, int K2d){
 
-	__turbulence_MOD_init_turbulence(NameList, buf, &nlev, buflen);
+	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
 
-	__mtridiagonal_MOD_init_tridiagonal(&nlev);
+	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);
 
 	for (int i = 0; i < Np2d*K2d; i++){
 		getGotmDate(i, nlev);
@@ -151,11 +146,11 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 	 for (int p = 0; p < Np2d * K2d; p++){
 		 if (H2d[p] >= hcrit){
 			 setGotmDate(p, nlev);
-			 __turbulence_MOD_do_turbulence(&nlev, TimeStep, H2d + p, SurfaceFrictionVelocity + p, BottomFrictionVelocity + p, SurfaceFrictionLength + p, \
+			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, H2d + p, SurfaceFrictionVelocity + p, BottomFrictionVelocity + p, SurfaceFrictionLength + p, \
 				 BottomFrictionLength + p, layerHeight + p*(nlev + 1), buoyanceFrequencyDate + p*(nlev + 1), shearFrequencyDate + p*(nlev + 1), Grass);
 			 getGotmDate(p, nlev);
 			 for (int L = 0; L < nlev + 1; L++){
-				 eddyViscosityDate[p*(nlev + 1) + L] = __turbulence_MOD_num[L];
+				 eddyViscosityDate[p*(nlev + 1) + L] = TURBULENCE_mp_NUM[L];
 			 }
 		 }
 	 }

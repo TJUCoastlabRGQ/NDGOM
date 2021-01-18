@@ -25,8 +25,8 @@ void MyExit()
 {
 	if (!strcmp("True", GOTMInitialized)){
 		GotmSolverMemoryDeAllocation();
-		__turbulence_MOD_clean_turbulence();
-		__mtridiagonal_MOD_clean_tridiagonal();
+		TURBULENCE_mp_CLEAN_TURBULENCE();
+		MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 	}
 	return;
 }
@@ -56,7 +56,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		mxGetString(prhs[11], buf, (mwSize)buflen);
 		long long int _nNamelist = 2;
 		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, Np2d, K2d);
-//		__turbulence_MOD_clean_turbulence();
+//		TURBULENCE_mp_CLEAN_TURBULENCE();
 //		TURBULENCE_mp_INIT_TURBULENCE(&_nNamelist, buf, &nlev, buflen);
 		free(buf);
 	}
