@@ -81,7 +81,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 86400;
+            ftime = 14400;
             outputIntervalNum = 3000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
