@@ -3,12 +3,14 @@ classdef AbstractDiffSolver < handle
     %   此处显示详细说明
     
     properties(Access = protected)
-        %> the diffusion coefficient
-        nv
         %> the penalty parameter for IP form
         tau
         %> the Prantal number for heat and sault diffusion
         Prantl
+    end
+    
+    properties
+        nv
     end
     
     methods( Access = protected, Abstract)

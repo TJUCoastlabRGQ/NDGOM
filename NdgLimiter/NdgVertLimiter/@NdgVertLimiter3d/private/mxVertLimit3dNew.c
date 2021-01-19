@@ -6,6 +6,11 @@
 #endif
 #define INF 10.0e9
 
+
+#define max(a, b) ((a > b) ? a : b)
+#define min(a, b) ((a < b) ? a : b)
+
+
 void GetMinimumSlope(double *, double *, double *, int);
 void GetBCInvolvedLimitScope(double *, double *, double *, int , double *, double *);
 void GetSBEInvolvedLimitScope(double *, double *, double *, double *, int, int, int, int, double *, int , double *, int );

@@ -12,7 +12,7 @@ classdef SimpleChannelFlowDelft3d < SWEBarotropic3d
         finalTime = 7200;
         hcrit = 0.001;
         % to be corrected
-        GotmFile = fullfile([pwd,'\Application\SWE\SWE3d\Benchmark\@SimpleChannelFlowDelft3d'],'\gotmturb.nml');        
+        GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@SimpleChannelFlowDelft3d'],'/gotmturb.nml');        
     end
     
     methods

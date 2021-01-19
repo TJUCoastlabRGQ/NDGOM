@@ -1,4 +1,4 @@
-#include "..\..\..\NdgMath\NdgMath.h"
+#include "../../../NdgMath/NdgMath.h"
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {

@@ -1,6 +1,6 @@
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
-#include "..\..\..\..\..\NdgMath\NdgSWE.h"
-#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
+#include "../../../../../NdgMath/NdgSWE.h"
+#include "../../../../../NdgMath/NdgMemory.h"
 
 extern double *IEfm2d, *IEfp2d, *IEFluxM2d, *IEFluxP2d, *IEFluxS2d, \
 *ERHS2d, *PCEVolumeIntegralX, *PCETempVolumeIntegralX, *PCEVolumeIntegralY, \

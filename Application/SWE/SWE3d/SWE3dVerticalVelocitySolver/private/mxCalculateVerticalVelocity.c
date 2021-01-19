@@ -1,7 +1,7 @@
 
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
-#include "..\..\..\..\..\NdgMath\NdgSWE.h"
-#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
+#include "../../../../../NdgMath/NdgSWE.h"
+#include "../../../../../NdgMath/NdgMemory.h"
 
 extern double *VSrhs2d, *VSIEfm2d, *VSIEfp2d, *VSIEFluxM2d, \
 *VSIEFluxP2d, *VSIEFluxS2d, *VSERHS2d, *VSVolumeIntegralX, \

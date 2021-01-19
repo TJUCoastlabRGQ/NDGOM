@@ -2,8 +2,8 @@
 #define dgesv dgesv_
 #endif
 
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
-#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
+#include "../../../../../NdgMath/NdgMemory.h"
 
 #define NRHS 16
 #define NLHS 2

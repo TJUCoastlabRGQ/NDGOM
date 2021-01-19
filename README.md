@@ -3,7 +3,7 @@
 ## Introduction
 
 This software uses Nodal Discontinuous Galerkin Finite Element Methods (NDG-FEM) to solve advection, advection-diffusion and various hydraulic problems in one, two and three dimension. 
-The software is written in Matlab and C languages and uses OpenMP for parallelizing.
+The software is written in Matlab and C languages and uses OpenMP for parallelization.
 The simulation results can be exported in the nc format and vtk format, while the visualization is also supported by Matlab.
 
 ## Install

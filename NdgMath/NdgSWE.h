@@ -8,6 +8,9 @@
 
 #define EPS 1e-6
 
+#define max(a, b) ((a > b) ? a : b)
+#define min(a, b) ((a < b) ? a : b)
+
 typedef enum {
 	NdgEdgeInner = 0,
 	NdgEdgeGaussEdge = 1,

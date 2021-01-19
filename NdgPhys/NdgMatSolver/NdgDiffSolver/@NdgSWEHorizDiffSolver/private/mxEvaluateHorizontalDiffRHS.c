@@ -1,7 +1,7 @@
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
+#include "../../../../../NdgMath/NdgMath.h"
 #include "HorizontalDiffusion.h"
-#include "..\..\..\..\..\NdgMath\NdgSWE.h"
-#include "..\..\..\..\..\NdgMath\NdgMemory.h"
+#include "../../../../../NdgMath/NdgSWE.h"
+#include "../../../../../NdgMath/NdgMemory.h"
 
 extern double *HorDiffnv, *HorDiffvariable, *HorDiffBEfp, *HorDiffzM, \
 *HorDiffzP, *HorDiffTempBEfp, *HorDiffTempBEfm, *HorDiffAVx, \

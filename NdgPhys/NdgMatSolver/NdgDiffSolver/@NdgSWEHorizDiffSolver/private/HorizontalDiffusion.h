@@ -1,4 +1,4 @@
-#include "..\..\..\..\..\NdgMath\NdgMath.h"
+#include "../../../../../NdgMath/NdgMath.h"
 
 void GetFacialFluxTerm(double *, double *, double *, int);
 
