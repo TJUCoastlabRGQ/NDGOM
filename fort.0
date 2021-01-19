@@ -1,1 +1,35 @@
     init_turbulence
+        reading turbulence namelists..
+        done.
+        allocation memory..
+        allocation memory..
+        allocation memory..
+        done.
+         
+        --------------------------------------------------------
+        You are using the k-epsilon model
+        with the following properties:
+         
+            ce1                                  =   1.4399999999999999     
+            ce2                                  =   1.9199999999999999     
+            ce3minus                             = -0.62091212624900116     
+            ce3plus                              =   1.0000000000000000     
+            sig_k                                =   1.0000000000000000     
+            sig_e                                =   1.3000000000000000     
+         
+            Value of the stability function
+            in the log-law,                   cm0 =  0.52646471083532442     
+            in shear-free turbulence,        cmsf =  0.73100601349000971     
+         
+            von Karman constant,           kappa =  0.41587379967373655     
+            homogeneous decay rate,            d =  -1.0869565217391306     
+            spatial decay rate (no shear), alpha =  -4.9744964669883514     
+            length-scale slope (no shear),     L =   7.3332867480978059E-002
+            steady-state Richardson-number, Ri_st=  0.25000000000000000     
+        --------------------------------------------------------
+         
+    init_tridiagonal
+    clean_turbulence
+        de-allocating turbulence memory ...
+        done.
+    clean_tridiagonal

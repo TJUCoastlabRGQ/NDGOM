@@ -94,7 +94,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 //printf("The total threads out of the parallel domain is:%d\n",omp_get_num_threads());
 
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(omp_get_max_threads())
+ #pragma omp parallel for num_threads(DG_THREADS)
  #endif
 	  
   for (int i = 0; i < col; i++)
@@ -145,13 +145,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	  }
   }
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(omp_get_max_threads())
+ #pragma omp parallel for num_threads(DG_THREADS)
  #endif  
   for (int i = 0; i < col + 1; i++)
 	  jcs[i] = JcStiffMatrix[i];
 
  #ifdef _OPENMP
- #pragma omp parallel for num_threads(omp_get_max_threads())
+ #pragma omp parallel for num_threads(DG_THREADS)
  #endif  
   for (int i = 0; i < (int)JcStiffMatrix[col]; i++)
 	  irs[i] = JrStiffMatrix[i];

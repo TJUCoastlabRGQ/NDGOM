@@ -9,7 +9,7 @@
 #define NLHS 2
 
 extern double *Tau;
-extern signed char *VertDiffInitialized;
+extern char *VertDiffInitialized;
 
 void FetchBoundaryData(double *dest, double *source, const int Np2d, double *Eid)
 {
@@ -303,7 +303,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-
+    
 	for (int i = 0; i < K2d; i++){
 		double *StiffMatrix = malloc(Np*Nz*Np*Nz*Nvar*sizeof(double));
 		memset(StiffMatrix, 0, Np*Nz*Np*Nz*Nvar*sizeof(double));

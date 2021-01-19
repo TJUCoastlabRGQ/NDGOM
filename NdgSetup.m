@@ -1,3 +1,13 @@
+function NdgSetup( varargin )
+if (nargin == 1 && ( isa(varargin{1}, 'double')))
+    DG_Threads = varargin{1};
+elseif (nargin == 0)
+    DG_Threads = 1;
+else
+    msgID = 'NdgConfigure:Unknown input.';
+    msgtext = 'Unknown computer architecture.';
+    throw( MException(msgID, msgtext) );
+end
 fprintf('\n----------------------------------------------------------\n')
 fprintf('%s:: Setup environment path.\n', mfilename);
 addpath( genpath( 'lib' ) );
@@ -21,7 +31,10 @@ fprintf('GOTM source files compiled.\n');
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('%s:: Compile mex files.\n', mfilename);
-NdgConfigure(100)
+% If compiler is pointed, NdgConfigure is called as NdgConfigure(DG_Threads, Compiler);
+NdgConfigure(DG_Threads);
+
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('%s:: Finish all the setup process.\n\n', mfilename);
+end

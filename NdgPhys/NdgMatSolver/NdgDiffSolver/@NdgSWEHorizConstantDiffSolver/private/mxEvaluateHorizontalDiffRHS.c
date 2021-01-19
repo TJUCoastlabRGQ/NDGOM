@@ -142,7 +142,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		Order = mxGetScalar(TempOrder);  
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int k = 0; k < K; k++){
 			/*set the diffusion coefficient $H\nv$*/
@@ -163,7 +163,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 		/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int face = 0; face < BENe; face++){
 			NdgEdgeType facetype = (NdgEdgeType)ftype[face];  // boundary condition
@@ -210,7 +210,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		Order = max(Order, (int)mxGetScalar(TempOrder));	
 		
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int k = 0; k < K; k++){
 			DotProduct(HorDiffnv + k*Np, Tempnv + k*Np, fphys + 3 * Np*K + k*Np, Np);
@@ -228,7 +228,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
 		Finally, calculate local flux term, adjacent flux term and numerical flux term*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int face = 0; face < BENe; face++){
 			NdgEdgeType facetype = (NdgEdgeType)ftype[face];  // boundary condition
@@ -273,7 +273,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Volume integral part*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
@@ -287,7 +287,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
@@ -304,7 +304,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 /*Inner edge facial integral part*/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < IENe; face++){
         for (int field = 0; field < Nfield; field++){
@@ -319,7 +319,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Boundary edge facial integral part*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < BENe; face++){
         for (int field = 0; field < Nfield; field++){
@@ -332,7 +332,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int k=0; k<K; k++){
         for(int field=0;field<Nfield;field++){
@@ -345,7 +345,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nfield; field++){
@@ -360,7 +360,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Next, sum contribution from volume integral, inner edge contribution and boundary edge contribution into HorDiffAVx and HorDiffAVy*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
@@ -375,7 +375,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	we note that in this projection precedure, aliasing error is introduced.*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
@@ -393,7 +393,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Inner edge first*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < IENe; face++){
 		FetchInnerEdgeFacialValue(HorDiffIEnvfm + face*IENfp, HorDiffIEnvfp + face*IENfp, HorDiffnv, \
@@ -408,7 +408,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Boundary edge next*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BENe; face++){
 		FetchBoundaryEdgeFacialValue(HorDiffBEnvfm + face*BENfp, HorDiffnv, BEFToE + face * 2, BEFToN1 + face*BENfp, Np, BENfp);
@@ -421,7 +421,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Volume integral of the second order operator*/
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		/*Prantl number is not considered here, since we have considered this parameter when calculating the auxialary variable,
@@ -457,7 +457,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		adopted, the next part should be ignored*/
 /************************************************************************************************************************************/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		int field = 0;
@@ -502,7 +502,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	memset(HorDiffERHSY, 0, Np*K*Nfield*Nface*sizeof(double));
 	/*Surface integral of the second order operator, this part is calculated seperately for field with index less than 2 and field with index larger than 2 since prantl number should be considered*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < IENe; face++){
         for (int field = 0; field < 2; field++){
@@ -522,7 +522,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < IENe; face++){
         for (int field = 2; field < Nfield; field++){
@@ -543,7 +543,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	/*Boundary edge facial integral part*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < BENe; face++){
         for (int field = 0; field < 2; field++){
@@ -560,7 +560,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < BENe; face++){
         for (int field = 2; field < Nfield; field++){
@@ -580,7 +580,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int k=0; k<K; k++){
         for(int field=0;field<Nfield;field++){
@@ -592,7 +592,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     }
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nfield; field++){
@@ -607,7 +607,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
@@ -624,7 +624,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	memset(HorDiffERHSY, 0, Np * K * 2 * Nface * sizeof(double));
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif    
 	for (int face = 0; face < IENe; face++){
 		int field = 0;
@@ -658,7 +658,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif    
 	for (int face = 0; face < BENe; face++){
 		int field = 0;
@@ -687,7 +687,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k<K; k++){
 		for (int field = 0; field<2; field++){
@@ -699,7 +699,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < 2; field++){
@@ -713,7 +713,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 /******************************************************************************************************************************/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){

@@ -25,7 +25,7 @@ extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huC
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate;
 
-extern signed char *GOTMInitialized;
+extern char *GOTMInitialized;
 
 /*This function is used to interpolate the physical value from interpolation point to central point in vertical direction*/
 void InterpolationToCentralPoint(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *);

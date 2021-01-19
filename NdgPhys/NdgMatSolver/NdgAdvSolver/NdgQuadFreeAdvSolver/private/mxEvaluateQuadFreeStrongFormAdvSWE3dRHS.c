@@ -2,6 +2,7 @@
 #include "../../../../../NdgMath/NdgSWE.h"
 #include "../../../../../NdgMath/NdgSWE3D.h"
 #include "../../../../../NdgMath/NdgMemory.h"
+#include <omp.h>
 
 extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
 *IEFluxS, *ERHS, *BEfm, *BEfp, *AdvzM, *AdvzP, *BEFluxM, \
@@ -181,10 +182,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(IEFluxM, 0, IENfp*IENe*Nvar*sizeof(double));
 	memset(IEFluxP, 0, IENfp*IENe*Nvar*sizeof(double));
 	memset(IEFluxS, 0, IENfp*IENe*Nvar*sizeof(double));
+    
+    //printf("Number of threads is:%d\n",omp_get_max_threads());
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < IENe; face++){
+        //printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe
 		/*Fetch variable IEfm and IEfp first*/
 		FetchInnerEdgeFacialValue(hM + face*IENfp, hP + face*IENfp, h, IEFToE + 2 * face, \
 			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
@@ -209,7 +213,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
 	memset(ERHS, 0, Np*K*Nvar*Nface*sizeof(double));
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < IENe; face++){
         for (int field = 0; field < Nvar; field++){
@@ -232,7 +236,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Fetch variable BEfm and BEfp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate local flux term, adjacent flux term and numerical flux term*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
@@ -256,7 +260,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BENe; face++){
 		for (int field = 0; field < Nvar; field++){
@@ -277,7 +281,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(BotEFluxP, 0, BotENfp*BotENe*Nvar*sizeof(double));
 	memset(BotEFluxS, 0, BotENfp*BotENe*Nvar*sizeof(double));
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotENe; face++){
 		/*Fetch variable BotEfm and BotEfp first*/
@@ -303,7 +307,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < BotENe; face++){
         for (int field = 0; field < Nvar; field++){
@@ -326,7 +330,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(BotBEFluxS, 0, BotBENfp*BotBENe*Nvar*sizeof(double));
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*BotBENfp, hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
@@ -346,7 +350,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
 		for (int field = 0; field < Nvar; field++){
@@ -370,7 +374,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(SurfBEFluxS, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < SurfBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*SurfBENfp, hu, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
@@ -390,7 +394,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int face = 0; face < SurfBENe; face++){
         for (int field = 0; field < Nvar; field++){
@@ -399,7 +403,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int k=0; k < K; k++){
         for(int field=0;field<Nvar;field++){
@@ -411,7 +415,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < Nvar; field++){
@@ -425,7 +429,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	                                                                                    /************************  Volume Integral Part  ****************************/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		EvaluatePrebalanceVolumeTerm(E + k*Np, G + k*Np, H + k*Np, fphys + k*Np, \
@@ -438,7 +442,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int n = 0; n < Nvar; n++){

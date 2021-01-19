@@ -7,7 +7,7 @@ extern double *IEfm2d, *IEfp2d, *IEFluxM2d, *IEFluxP2d, *IEFluxS2d, \
 *PCETempVolumeIntegralY, *BEfm2d, *BEzM2d, *BEfp2d, *BEzP2d, \
 *BEFluxS2d, *BEFluxM2d, *PCETempFacialIntegral;
 
-extern signed char *PCEInitialized;
+extern char *PCEInitialized;
 
 void MyExit()
 {

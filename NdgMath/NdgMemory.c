@@ -2,7 +2,7 @@
 
 /*This is for vertical diffusion part*/
 double *Tau = NULL;
-signed char *VertDiffInitialized = "False";
+char *VertDiffInitialized = "False";
 
 void VertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz){
 	Tau = malloc(sizeof(double)*(Np2d*K2d*(Nz+1)));
@@ -23,7 +23,7 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL,\
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL;
 
-signed char *GOTMInitialized = "False";
+char *GOTMInitialized = "False";
 
 void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K3d){
 	tkeGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
@@ -80,7 +80,7 @@ double *VSrhs2d = NULL, *VSIEfm2d = NULL, *VSIEfp2d = NULL, *VSIEFluxM2d = NULL,
 *VSBEzM3d = NULL, *VSBEfp3d = NULL, *VSBEzP3d = NULL, *VSBEFluxS3d = NULL, *VSBEFluxM3d = NULL, \
 *VSTempFacialIntegral3d = NULL, *VSTempVerticalVelocity = NULL, *VSBotVertVelocity = NULL;
 
-signed char *VertVelocityInitialized = "False";
+char *VertVelocityInitialized = "False";
 
 void VertVelocitySolverMemoryAllocation(int Np2d, int K2d, int IENfp2d, int IENe2d, int Nface, int BENe2d, int BENfp2d, int Np3d,\
 	int K3d, int IENfp3d, int IENe3d, int BENe3d, int BENfp3d){
@@ -173,7 +173,7 @@ double *IEfm2d = NULL, *IEfp2d = NULL, *IEFluxM2d = NULL, *IEFluxP2d = NULL, *IE
 *PCETempVolumeIntegralY = NULL, *BEfm2d = NULL, *BEzM2d = NULL, *BEfp2d = NULL, *BEzP2d = NULL, \
 *BEFluxS2d = NULL, *BEFluxM2d = NULL, *PCETempFacialIntegral = NULL;
 
-signed char *PCEInitialized = "False";
+char *PCEInitialized = "False";
 
 void PCEMemoryAllocation(int IENfp2d, int IENe2d, int Np2d, int K2d, int Nface, int BENe2d, int BENfp2d){
 	IEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
@@ -225,7 +225,7 @@ double *TempFacialIntegral = NULL, *IEfm = NULL, *IEfp = NULL, *IEFluxM = NULL, 
 *BotBEfm = NULL, *BotBEFluxM = NULL, *BotBEFluxS = NULL, *SurfBEfm = NULL, *SurfBEFluxM = NULL, \
 *SurfBEFluxS = NULL, *E = NULL, *G = NULL, *H = NULL, *TempVolumeIntegral = NULL;
 
-signed char *AdvInitialized = "False";
+char *AdvInitialized = "False";
 
 void AdvMemoryAllocation(int Np, int K, int Nvar, int IENfp, int IENe, int Nface, int BENfp, int BENe, int BotENfp,\
                         int BotENe, int BotBENfp, int BotBENe, int SurfBENfp, int SurfBENe){

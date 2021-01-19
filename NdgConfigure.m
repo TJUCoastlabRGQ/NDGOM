@@ -1,5 +1,5 @@
 function NdgConfigure( varargin )
-global COMPILER COMPFLAGS
+global COMPILER CFLAGS COMPFLAGS
 % initialize CFLAGS & LDFLAGS
 configureCompilerSetting();
 
@@ -116,7 +116,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE1d
 path = 'Application/SWE/SWE1d/@SWEAbstract1d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'Application/SWE/SWE1d/@SWEAbstract1d/private/mxSWE1d.c'};
 srcfile = { ...
     [path, 'mxEvaluateSurfaceValue1d.c'], ...
@@ -191,7 +191,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE2d
 path = 'Application/SWE/SWE2d/@SWEAbstract2d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path)
 libfile = {'Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.c'};
 srcfile = { ...
     [path, 'mxImposeBoundaryCondition.c'], ...
@@ -254,7 +254,7 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE numerical flux
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver1d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path)
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver1d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -265,7 +265,7 @@ FuncHandle(path, srcfile, libfile);
 %
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver2d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -282,13 +282,13 @@ FuncHandle(path, srcfile, libfile);
 % FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver3d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 path = 'Application/SWE/NumFluxSolver/SWELFNumFluxSolver3d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/NumFluxSolver/SWEAbstractNumFluxSolver3d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 path = 'Application/SWE/NumFluxSolver/SWEHLLNumFluxSolver3d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
@@ -351,14 +351,14 @@ FuncHandle(path, srcfile, libfile);
 
 % SWE3d
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
 srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE3d/SWE3dVerticalVelocitySolver/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
 'NdgMath/NdgSWE.c',...
 'NdgMath/NdgMemory.c'};
@@ -375,21 +375,21 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
 srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@AbstractDiffSolver/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {};
 srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
     'NdgMath/NdgMemory.c'};
 srcfile = { ...
@@ -400,8 +400,6 @@ path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEVertGOTMDiffSolver/private/';
 
 Opath = [pwd,'/lib/GOTM/*.o'];
 file = dir(Opath);
-%libfile = {[path,'mxGOTM.c'],...
- %   'NdgMath/NdgMemory.c'};
  libfile = [];
 for i = 1:numel(file)
     libfile{i} = ...
@@ -422,7 +420,7 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgAdvSolver/NdgQuadFreeAdvSolver/private/';
-COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
+AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
     'NdgMath/NdgSWE.c',...
     'NdgMath/NdgSWE3D.c',...
@@ -448,14 +446,14 @@ end
 end
 
 function CompileMexFile(outPath, srcfile, libfile)
-global COMPFLAGS LDFLAGS COMPILER
+global CFLAGS LDFLAGS COMPILER
 for n = 1:numel(srcfile)
     if( isNeedCompile(outPath, srcfile{n}, libfile) )
         fprintf('\n%s:: Compiling source file - \n%s to %s.\n', ...
             mfilename, srcfile{n}, outPath);
-        fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
+        fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
         file = [srcfile(n), libfile{:}];
-        mex('-v', '-g', '-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+        mex('-v','-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
             file{:}, '-outdir', outPath);        
     end
 end
@@ -513,20 +511,30 @@ switch computer('arch')
         LDFLAGS = [LDFLAGS, ' /openmp '];
     case 'glnxa64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
-            num2str(parallelThreadNum), '-L/usr/include/X11/lib -lxview -lolgx -lX11 -lm -lf2c -lgfortran'];
-        LDFLAGS = [LDFLAGS, ' -fopenmp '];     
-        
-        
+            num2str(parallelThreadNum)];
+        LDFLAGS = [LDFLAGS, ' -fopenmp '];       
 end
 end
 
 function configureCompilerSetting()
-global COMPFLAGS LDFLAGS
+global CFLAGS LDFLAGS
 global COMPILER
-COMPFLAGS = 'COMPFLAGS=$COMPFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
+CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
 LDFLAGS = 'LDFLAGS=$LDFLAGS';
 COMPILER = [''];
 if ( strcmp(computer('arch'), 'maci64') )
     COMPILER = 'CC=/opt/intel/composer_xe_2015.5.222/bin/intel64/icc';
+end
+end
+
+function AddIncludePath(path)
+global CFLAGS  COMPFLAGS
+switch computer('arch')
+    case 'maci64'
+          CFLAGS = [CFLAGS, ' -I', path, ' '];
+    case 'win64'
+          COMPFLAGS = [COMPFLAGS, ' -I', path,  ' '];
+    case 'glnxa64'
+          CFLAGS = [CFLAGS, ' -I', path, ' '];      
 end
 end

@@ -171,7 +171,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate the local Riemann problem to get variable at the interface*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
@@ -199,7 +199,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	*/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int n = 0; n < Nvar; n++){
 		GetBCInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, BEFToF, BENe, BEFToV, fRiemann + 4 * BENe * n);
@@ -215,7 +215,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	hvM = Surffm + SurfBENfp*SurfBENe;
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < SurfBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*SurfBENfp, hu, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
@@ -228,7 +228,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int n = 0; n < Nvar; n++){
 		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, SurfBEFToV, Surffm, SurfBENe, Np2d, Nfp2d, Nv2d, Fmask2d, MNv2d, MNvc2d, 0);
@@ -241,7 +241,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	hvM = BotBEfm + BotBENfp*BotBENe;
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*BotBENfp, hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
@@ -254,7 +254,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	//int Nv, double *Nvc2d, int NvB
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int n = 0; n < Nvar; n++){
 		GetSBEInvolvedLimitScope(fmax + n*Nv, fmin + n*Nv, BotBEFToV, BotBEfm, BotBENe, Np2d, Nfp2d, Nv2d, Fmask2d, MNv2d, MNvc2d, NLayer*MNv2d);

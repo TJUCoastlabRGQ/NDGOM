@@ -51,7 +51,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 	ptrdiff_t Col = 1;
     //ptrdiff_t TempNp2d = (ptrdiff_t)Np2d, TempK3d = (ptrdiff_t)K3d, TempNp3d = (ptrdiff_t)Np3d;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < (int)(*K3d); i++){
 		dgemm(chn, chn, Np2d, &Col, Np3d, &alpha, VCV, Np2d, fphys + i*(int)(*Np3d), Np3d, &beta, dest + i*(int)(*Np2d), Np2d);
@@ -61,7 +61,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, long long int nlev, int Np2d){
 	//This has been verified by tests
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
 		for (int L = 1; L < nlev + 1; L++){
@@ -79,7 +79,7 @@ void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long
    *depth is set to be zero
    */
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int p = 0; p < Np2d * K2d; p++){
 		if (H2d[p] >= hcrit){
@@ -95,7 +95,7 @@ void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long
 void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int p = 0; p < Np2d*K2d; p++){
 		if (H2d[p] >= hcrit){
@@ -114,7 +114,7 @@ void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, l
 void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *DragCoefficient, double *Taux, double *Tauy, int Np2d, int K2d, int NMaxItration, double h0b, long long int nlev){
 	/*for surface friction length, another way is the charnock method*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int p = 0; p < Np2d * K2d; p++){
 		SurfaceFrictionLength[p] = z0s_min;
@@ -159,7 +159,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 
  void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev){
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	 for (int k = 0; k < K2d; k++){
 		 for (int p = 0; p < Np2d; p++){
@@ -176,7 +176,7 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
  void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, long long int nlev){
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(omp_get_max_threads())
+#pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++)
 		 buoyanceFrequencyDate[i] = 0;

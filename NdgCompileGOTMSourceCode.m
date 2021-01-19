@@ -20,9 +20,7 @@ else
     CompileF90File(Files,IncludePath, Outpath);
     Files = dir('./lib/GOTM/*.F90');
     FilesName = cell(1,numel(Files));
-    disp(numel(Files));
     for i = 1:numel(Files)
-        disp(i);
         FilesName{1,i} = strcat('./lib/GOTM/',Files(i).name);
     end
     CompileF90File(FilesName,IncludePath, Outpath);
@@ -39,6 +37,6 @@ end
 
 function CompileF90File(file, Ipath, Outpath)
 for i = 1:numel(file)
-    mex('-c','-v','-g','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
+    mex('-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
 end
 end

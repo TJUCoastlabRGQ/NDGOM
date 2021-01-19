@@ -14,7 +14,7 @@ extern double *VSrhs2d, *VSIEfm2d, *VSIEfp2d, *VSIEFluxM2d, \
 *VSBEzM3d, *VSBEfp3d, *VSBEzP3d, *VSBEFluxS3d, *VSBEFluxM3d, \
 *VSTempFacialIntegral3d, *VSTempVerticalVelocity, *VSBotVertVelocity ;
 
-extern signed char *VertVelocityInitialized;
+extern char *VertVelocityInitialized;
 
 void MyExit()
 {
