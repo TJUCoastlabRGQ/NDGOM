@@ -22,6 +22,17 @@ classdef AbstractDiffSolver < handle
         
     end
     
+    methods
+        
+        function obj = AbstractDiffSolver( physClass )
+            obj.nv = zeros(size(physClass.meshUnion(1).x));
+        end
+        
+        function matClearGlobalMemory(obj)
+            %doing nothing...
+        end
+    end
+    
     methods( Access = protected )
         function [fM, fP] = matEvaluateSurfValue( obj, edge, fphys )
             [fM, fP] = mxEvaluateSurfValue(edge.FToE, edge.FToN1, edge.FToN2, fphys);
