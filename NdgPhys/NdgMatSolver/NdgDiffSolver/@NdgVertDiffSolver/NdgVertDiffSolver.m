@@ -8,6 +8,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     methods
         
          function obj = NdgVertDiffSolver( physClass )
+            obj = obj@AbstractDiffSolver( physClass ); 
             if physClass.option.isKey('AdvDiffVerticalDiffusionType')
                if physClass.option.isKey('AdvDiffConstantVerticalDiffusionValue')
                    value = physClass.getOption('AdvDiffConstantVerticalDiffusionValue');

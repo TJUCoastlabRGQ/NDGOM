@@ -360,8 +360,8 @@ FuncHandle(path, srcfile, libfile);
 path = 'Application/SWE/SWE3d/SWE3dVerticalVelocitySolver/private/';
 AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
-'NdgMath/NdgSWE.c',...
-'NdgMath/NdgMemory.c'};
+    'NdgMath/NdgSWE.c',...
+    'NdgMath/NdgMemory.c'};
 srcfile = { ...
     [path, 'mxCalculateVerticalVelocity.c']};
 FuncHandle(path, srcfile, libfile);
@@ -398,9 +398,14 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEVertGOTMDiffSolver/private/';
 
-Opath = [pwd,'/lib/GOTM/*.o'];
+switch computer('arch')
+    case 'win64'
+        Opath = [pwd,'/lib/GOTM/*.obj'];
+    otherwise
+        Opath = [pwd,'/lib/GOTM/*.o'];
+end
 file = dir(Opath);
- libfile = [];
+libfile = [];
 for i = 1:numel(file)
     libfile{i} = ...
         [pwd,'/lib/GOTM/',file(i).name];
@@ -446,16 +451,30 @@ end
 end
 
 function CompileMexFile(outPath, srcfile, libfile)
-global CFLAGS LDFLAGS COMPILER
-for n = 1:numel(srcfile)
-    if( isNeedCompile(outPath, srcfile{n}, libfile) )
-        fprintf('\n%s:: Compiling source file - \n%s to %s.\n', ...
-            mfilename, srcfile{n}, outPath);
-        fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
-        file = [srcfile(n), libfile{:}];
-        mex('-v','-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
-            file{:}, '-outdir', outPath);        
-    end
+global COMPFLAGS CFLAGS LDFLAGS COMPILER
+switch computer('arch')
+    case 'win64'
+        for n = 1:numel(srcfile)
+            if( isNeedCompile(outPath, srcfile{n}, libfile) )
+                fprintf('\n%s:: Compiling source file - \n%s to %s.\n', ...
+                    mfilename, srcfile{n}, outPath);
+                fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
+                file = [srcfile(n), libfile{:}];
+                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                    file{:}, '-outdir', outPath);
+            end
+        end
+    otherwise
+        for n = 1:numel(srcfile)
+            if( isNeedCompile(outPath, srcfile{n}, libfile) )
+                fprintf('\n%s:: Compiling source file - \n%s to %s.\n', ...
+                    mfilename, srcfile{n}, outPath);
+                fprintf('%s\nCFLAGS=%s\nLDFLAGS=%s\n', COMPILER, CFLAGS, LDFLAGS);
+                file = [srcfile(n), libfile{:}];
+                mex('-v','-largeArrayDims', COMPILER, CFLAGS, '-O', LDFLAGS, ...
+                    file{:}, '-outdir', outPath);
+            end
+        end
 end
 end
 
@@ -501,18 +520,18 @@ switch computer('arch')
             num2str(parallelThreadNum), ' '];
         LDFLAGS = [LDFLAGS, ' -lmwblas -liomp5 '];
     case 'win64'
-%% if gcc compiler adopted, -fopenmp command is used
-%         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
-%             num2str(parallelThreadNum), ' '];
-%         LDFLAGS = [LDFLAGS, ' -fopenmp '];
-%% if intel compiler adopted, /openmp command is used
+        %% if gcc compiler adopted, -fopenmp command is used
+        %         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
+        %             num2str(parallelThreadNum), ' '];
+        %         LDFLAGS = [LDFLAGS, ' -fopenmp '];
+        %% if intel compiler adopted, /openmp command is used
         COMPFLAGS = [COMPFLAGS,' /openmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
         LDFLAGS = [LDFLAGS, ' /openmp '];
     case 'glnxa64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
             num2str(parallelThreadNum)];
-        LDFLAGS = [LDFLAGS, ' -fopenmp '];       
+        LDFLAGS = [LDFLAGS, ' -fopenmp '];
 end
 end
 
@@ -531,10 +550,10 @@ function AddIncludePath(path)
 global CFLAGS  COMPFLAGS
 switch computer('arch')
     case 'maci64'
-          CFLAGS = [CFLAGS, ' -I', path, ' '];
+        CFLAGS = [CFLAGS, ' -I', path, ' '];
     case 'win64'
-          COMPFLAGS = [COMPFLAGS, ' -I', path,  ' '];
+        COMPFLAGS = [COMPFLAGS, ' -I', path,  ' '];
     case 'glnxa64'
-          CFLAGS = [CFLAGS, ' -I', path, ' '];      
+        CFLAGS = [CFLAGS, ' -I', path, ' '];
 end
 end
