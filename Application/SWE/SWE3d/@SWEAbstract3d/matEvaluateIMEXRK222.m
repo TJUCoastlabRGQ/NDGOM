@@ -44,7 +44,7 @@ while( time < ftime )
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
         
-%         fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
+        fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
 %         [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
