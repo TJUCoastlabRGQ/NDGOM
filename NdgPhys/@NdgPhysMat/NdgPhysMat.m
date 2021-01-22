@@ -91,7 +91,7 @@ classdef NdgPhysMat < NdgPhys
         %> @details
         %> This function is called when we time step the advection
         %> diffusion type equation with the IMEXRK method        
-        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, SystemRHS, EXa, IMa, dt)
+        SystemRHS = matAssembleSystemRHS( obj, Tempfphys, EXa, IMa, dt)
         %> @brief A functions used to assemble the right hand side corresponding to the non-stiff part
         %> @details
         %> This function is called when we time step the advection

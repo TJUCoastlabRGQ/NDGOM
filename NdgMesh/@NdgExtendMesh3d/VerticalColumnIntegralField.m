@@ -2,21 +2,24 @@ function [ field2d ] = VerticalColumnIntegralField( obj, field3d )
 %VERTICALINTEGRALFIELD Summary of this function goes here
 %   Detailed explanation goes here
 
-Np2 = obj.mesh2d.cell.Np;
-K2d = obj.mesh2d.K;
+% Np2 = obj.mesh2d.cell.Np;
+% K2d = obj.mesh2d.K;
+% 
+% fmod = obj.cell.V \ (obj.Jz .* field3d);
+% 
+% field2d = zeros( Np2, K2d );
+% 
+% sk = ( (1:K2d) - 1 ) * obj.Nz + 1;
+% for n = 1:obj.Nz
+%     field2d = field2d + fmod( 1:Np2, sk );
+%     sk = sk + 1;
+% end
+% 
+% % the mon coefficient need to devide the \varphi_{z,0}
+% % field2d = obj.mesh2d.cell.V * ( field2d ./ obj.mesh2d.cell.V(:, 1) );
+% % field2d = obj.mesh2d.cell.V * bsxfun(@rdivide, field2d, obj.mesh2d.cell.V(:, 1) );
+% field2d = obj.mesh2d.cell.V * field2d / (sqrt(2)/2);
 
-fmod = obj.cell.V \ (obj.Jz .* field3d);
+field2d = mxVerticalColumnIntegralField(obj.mesh2d.cell.Np, obj.mesh2d.K, obj.mesh2d.cell.V, obj.cell.V, obj.Jz, field3d, obj.Nz, obj.cell.Np, obj.K);
 
-field2d = zeros( Np2, K2d );
-
-sk = ( (1:K2d) - 1 ) * obj.Nz + 1;
-for n = 1:obj.Nz
-    field2d = field2d + fmod( 1:Np2, sk );
-    sk = sk + 1;
-end
-
-% the mon coefficient need to devide the \varphi_{z,0}
-% field2d = obj.mesh2d.cell.V * ( field2d ./ obj.mesh2d.cell.V(:, 1) );
-% field2d = obj.mesh2d.cell.V * bsxfun(@rdivide, field2d, obj.mesh2d.cell.V(:, 1) );
-field2d = obj.mesh2d.cell.V * field2d / (sqrt(2)/2);
 end

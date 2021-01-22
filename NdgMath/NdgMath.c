@@ -47,6 +47,11 @@ void DotDivideByConstant(double *dest, double *Source, double Coefficient, int N
 		dest[i] = Source[i] / Coefficient;
 }
 
+void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np){
+	for (int i = 0; i < Np; i++)
+		dest[i] = Source[i] * Coefficient;
+}
+
 
 void Add(double *dest, double *sourcea, double *sourceb, int size){
 	for (int i = 0; i < size; i++)
@@ -56,6 +61,19 @@ void Add(double *dest, double *sourcea, double *sourceb, int size){
 void Minus(double *dest, double *sourcea, double *sourceb, int size){
 	for (int i = 0; i < size; i++)
 		dest[i] = sourcea[i] - sourceb[i];
+}
+
+/*This function is used to get the inverse matrix of the given matrix, and has been verified*/
+void MatrixInverse(double *dest, ptrdiff_t Np)
+{
+	ptrdiff_t info;
+	ptrdiff_t *IPIV = malloc(Np*sizeof(ptrdiff_t));
+	ptrdiff_t LWORK = Np * Np;
+	double *WORK = malloc(LWORK*sizeof(double));
+	dgetrf(&Np, &Np, dest, &Np, IPIV, &info);
+	dgetri(&Np, dest, &Np, IPIV, WORK, &LWORK, &info);
+	free(IPIV);
+	free(WORK);
 }
 
 

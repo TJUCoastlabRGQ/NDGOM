@@ -27,11 +27,15 @@ void Add(double *, double *, double *, int );
 
 void Minus(double *, double *, double *, int);
 
+void MatrixInverse(double *, ptrdiff_t );
+
 void DotProduct(double *, double *, double *, int );
 
 void DotDivide(double *, double *, double *, int );
 
 void DotDivideByConstant(double *, double *, double , int);
+
+void MultiplyByConstant(double *, double *, double, int);
 
 void DotCriticalDivide(double *, double *, double *, double *, int);
 

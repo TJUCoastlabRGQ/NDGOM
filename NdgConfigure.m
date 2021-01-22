@@ -41,7 +41,8 @@ FuncHandle(path, srcfile, libfile);
 
 path = 'NdgMesh/@NdgExtendMesh3d/private/';
 srcfile = {[path, 'mxGetMeshIntegralValue.c'],...
-    [path,'mxExtend2dField.c']};
+    [path,'mxExtend2dField.c'],...
+    [path,'mxVerticalColumnIntegralField.c']};
 libfile = {'NdgMath/NdgMath.c'};
 FuncHandle(path, srcfile, libfile);
 % NdgEdge
@@ -379,6 +380,13 @@ AddIncludePath(path);
 libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
 srcfile = { ...
     [path, 'mxUpdateTimeInterval3d.c']};
+FuncHandle(path, srcfile, libfile);
+
+path = 'NdgPhys/@NdgPhysMat/private/';
+AddIncludePath(path);
+libfile = {'NdgMath/NdgMath.c'};
+srcfile = { ...
+    [path, 'mxAssembleSystemRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@AbstractDiffSolver/private/';

@@ -66,18 +66,7 @@ void VolumnIntegral(double *dest, double *Dz, double *Mass3d, double *diff, ptrd
 	dgemm("n", "n", &Np, &Np, &Np, &Alpha2, Tempdest, &Np, diff, &Np, &zero, dest, &Np);
 	free(Tempdest);
 }
-/*This function is used to get the inverse matrix of the given matrix, and has been verified*/
-void MatrixInverse(double *dest, ptrdiff_t Np)
-{
-	ptrdiff_t info;
-	ptrdiff_t *IPIV = malloc(Np*sizeof(ptrdiff_t));
-	ptrdiff_t LWORK = Np * Np;
-	double *WORK = malloc(LWORK*sizeof(double));
-	dgetrf(&Np, &Np, dest, &Np, IPIV, &info);
-	dgetri(&Np, dest, &Np, IPIV, WORK, &LWORK, &info);
-	free(IPIV);
-	free(WORK);
-}
+
 /*This function is used to impose the Newmann boundary at the surface and bottom boundary*/
 void ImposeNewmannBoundary(double *Eid, double *mass2d, double* InvMassMatrix3d, double dt, double Imparam, \
 	const double* BoundNewmannData, ptrdiff_t Np2d, int K2d, double *SystemRHS, ptrdiff_t Np3d, int K3d, double *StiffMatrix, int Nvar)
