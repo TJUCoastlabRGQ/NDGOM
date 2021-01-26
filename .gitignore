@@ -10,6 +10,7 @@ my_version
 *.mexmaci64
 *.mexw64
 *.mexw32
+*.mexa64
 *.asv
 *.mat
 *.zip
