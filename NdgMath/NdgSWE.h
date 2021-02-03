@@ -39,6 +39,10 @@ void GetPCENumericalFluxTerm_HLL(double *, double *, double *, double *, double 
 
 void GetPCENumericalFluxTerm_HLLC_LAI(double *, double *, double *, double *, double *, double *, double, int, int);
 
+void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne);
+
+void EvaluateVerticalFaceNumFlux_HLL(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne);
+
 void EvaluatePhysicalVariableByDepthThreshold(double , double *, double *, double *);
 
 /** Rotate flux to outward normal direction */

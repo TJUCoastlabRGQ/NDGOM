@@ -36,7 +36,7 @@ while( time < ftime )
                 = fphys{n}(:,:, obj.varFieldIndex) + rk4b(intRK) * resQ{n};
         end 
         
-%         fphys = obj.matEvaluateLimiter( fphys );
+        fphys = obj.matEvaluateLimiter( fphys );
 
         fphys = obj.matEvaluatePostFunc( fphys ); 
         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, rk4b(intRK) * dt);

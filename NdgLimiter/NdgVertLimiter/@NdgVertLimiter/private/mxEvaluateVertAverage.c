@@ -3,7 +3,7 @@
 //  matEvaluateVertAverage
 //
 //  Created by li12242 on 17/11/1.
-//  Copyright (c) 2017å¹´ li12242. All rights reserved.
+//  Copyright (c) 2017å¹?li12242. All rights reserved.
 //
 
 #include "mex.h"
@@ -57,15 +57,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
         fvmax[n] = -INF;
         fvmin[n] = INF;
         for (int k=0; k<Nk; k++) {
-            int meshId = (int) VToM[n*maxNk + k] - 1;
+    //        int meshId = (int) VToM[n*maxNk + k] - 1;
             int cellId = (int) VToK[n*maxNk + k] - 1;
             double w = VToW[n*maxNk + k];
-            mxArray *mcvar = mxGetCell(prhs[0], meshId);
-            if (mcvar == NULL) {
-                mexErrMsgIdAndTxt("Matlab:mxEvaluateVertAverage:AccessToMeshField",
-                                  "Access to the mesh field failed.");
-            }
-            double *cvar = mxGetPr(mcvar);
+   //         mxArray *mcvar = mxGetCell(prhs[0], meshId);
+   //         if (mcvar == NULL) {
+    //            mexErrMsgIdAndTxt("Matlab:mxEvaluateVertAverage:AccessToMeshField",
+   //                               "Access to the mesh field failed.");
+   //         }
+            double *cvar = mxGetPr(prhs[0]);
             double temp = cvar[cellId];
             fvert[n] += w*temp;
             fvmax[n] = max(fvmax[n], temp);

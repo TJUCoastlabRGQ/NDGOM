@@ -25,12 +25,12 @@ classdef NdgVertLimiter < NdgAbstractLimiter
     end
     
     methods( Abstract )
-        fphys = matLimit( obj, fphys, fieldId );
+        fphys = matLimit( obj, phys, fphys, fieldId );
     end
     
     methods( Hidden)%, Access = protected )
         %> Calculate the averaged, maximum and minimum vertex value
-        [ fvert, fvmin, fvmax, cvar ] = matEvaluateVertAverage( obj, fphys, fieldId );
+        [ fvert, fvmin, fvmax, cvar ] = matEvaluateVertAverage( obj, phys, fphys, fieldId );
         %> Find the cell
         [ Nvcmax, Nvc, VToK, VToM, VToW ] = assembleVertexCellConnect( obj )
     end

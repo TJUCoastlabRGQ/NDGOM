@@ -1,15 +1,15 @@
-function [ fext ] = getExactFunction( obj, time )
+function [ fext ] = getExactFunction( obj, Np, Ne, x, y, time )
 theta = obj.theta;
 fext = cell( obj.Nmesh, 1 );
 
 for m = 1:obj.Nmesh
-    fext{m} = zeros(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield);
+    fext{m} = zeros(Np, Ne, obj.Nfield);
     xc = obj.damPosition;
     yc = 0;
-    dx = obj.meshUnion(m).x - xc;
-    dy = obj.meshUnion(m).y - yc;
+    dx = x - xc;
+    dy = y - yc;
     x1d = xc + ( cos(-theta) * dx - sin(-theta) * dy );
-    [ h, u ] = getExactDamBreak1d(obj, obj.meshUnion(m), x1d, time);
+    [ h, u ] = getExactDamBreak1d(obj, Np, Ne, x1d, time);
     hu = h.*u;
     fext{m}(:,:,1) = h;
     fext{m}(:,:,2) = cos(obj.theta) * hu;
@@ -32,7 +32,7 @@ end
 %> This function is part of the NDGOM software. 
 %> @author li12242, Tianjin University, li12242@tju.edu.cn
 %======================================================================
-function [ h, u ] = getExactDamBreak1d(obj, mesh, x, time)
+function [ h, u ] = getExactDamBreak1d(obj, Np, Ne, x, time)
 hr  = obj.h1;
 hl  = obj.h0;
 xc    = obj.damPosition;
@@ -45,8 +45,8 @@ hm    = WaterHeightMiddle( g,hr,s );
 um    = VelocityMiddle( g,hr,s );
 sghm  = um - sqrt(g*hm);
 
-h     = ones(mesh.cell.Np, mesh.K)*hr;
-u     = zeros(mesh.cell.Np, mesh.K);
+h     = ones(Np, Ne)*hr;
+u     = zeros(Np, Ne);
 % wet part
 ind    = theta < -sghl;
 h(ind) = hl;

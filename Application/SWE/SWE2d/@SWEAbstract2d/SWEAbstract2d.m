@@ -111,8 +111,17 @@ classdef SWEAbstract2d < NdgPhysMat
         
         %> evaluate boundary numerical flux
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp, edge )
-            [ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp, mesh, edge );
+            [ fluxS ] = obj.numfluxSolver.evaluate( obj.hmin, obj.gra, nx, ny, fm, fp, obj.Nvar, mesh, edge );
         end% func
+        
+        function [ fvmax, fvmin ] = matEvaluateBoundaryVertScope( obj, fphys, fvmax, fvmin )
+            [ fvmax{1}, fvmin{1} ] = mxEvaluateBoundaryVertScope(fphys{1}, obj.meshUnion.cell.Nfp(1), ...
+                obj.meshUnion.BoundaryEdge.Ne, obj.Nvar, obj.meshUnion.BoundaryEdge.FToE,...
+                obj.meshUnion.BoundaryEdge.FToN1, obj.meshUnion.BoundaryEdge.nx, ...
+                obj.meshUnion.BoundaryEdge.ny, obj.varFieldIndex, int8(obj.meshUnion.BoundaryEdge.ftype),...
+                obj.fext{1}, fvmax{1}, fvmin{1}, obj.hmin, obj.gra, obj.meshUnion.cell.N, ...
+                obj.meshUnion.Nv, obj.meshUnion.BoundaryEdge.FToF, obj.meshUnion.BoundaryEdge.FToV);
+        end
     end
     
     methods( Access = protected )

@@ -127,15 +127,15 @@ end
 
 function [ mesh ] = makeUniformMesh(N, deltax, type)
 bctype = [...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.Inner, ...
+    enumBoundaryCondition.Inner, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 30], [0, 3*deltax], 30/deltax, 3, bctype);
+    mesh = makeUniformTriMesh(N, [0, 20], [0, 10*deltax], 20/deltax, 10, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 30], [0, 3*deltax], 30/deltax, 3, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 10*deltax], 20/deltax, 10, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

@@ -1,5 +1,5 @@
 function NdgConfigure( varargin )
-global COMPILER CFLAGS COMPFLAGS
+global COMPILER
 % initialize CFLAGS & LDFLAGS
 configureCompilerSetting();
 
@@ -193,11 +193,14 @@ FuncHandle(path, srcfile, libfile);
 % SWE2d
 path = 'Application/SWE/SWE2d/@SWEAbstract2d/private/';
 AddIncludePath(path)
-libfile = {'Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.c'};
+libfile = {'Application/SWE/SWE2d/@SWEAbstract2d/private/mxSWE2d.c',...
+    'NdgMath/NdgSWE.c',...
+    'NdgMath/NdgMath.c'};
 srcfile = { ...
     [path, 'mxImposeBoundaryCondition.c'], ...
     [path, 'mxHydrostaticReconstruction.c'], ...
-    [path, 'mxUpdateTimeInterval2d.c']};
+    [path, 'mxUpdateTimeInterval2d.c'], ...
+    [path, 'mxEvaluateBoundaryVertScope.c']};
 FuncHandle(path, srcfile, libfile);
 
 % Surface flux for SWE2d
@@ -275,9 +278,17 @@ path = 'Application/SWE/NumFluxSolver/SWEHLLCNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
 
+
 path = 'Application/SWE/NumFluxSolver/SWELFNumFluxSolver2d/private/';
 srcfile = {[path, 'mxEvaluate.c']};
 FuncHandle(path, srcfile, libfile);
+
+path = 'Application/SWE/NumFluxSolver/SWEHLLCNumFluxSolver2d/private/';
+srcfile = {[path, 'mxEvaluateNew.c']};
+libfile = { 'NdgMath/NdgMath.c' ,...
+    'NdgMath/NdgSWE.c'};
+FuncHandle(path, srcfile, libfile);
+
 % path = 'Application/SWE/NumFluxSolver/SWERoeNumFluxSolver2d/private/';
 % srcfile = {[path, 'mxEvaluate.c']};
 % FuncHandle(path, srcfile, libfile);
@@ -468,7 +479,7 @@ switch computer('arch')
                     mfilename, srcfile{n}, outPath);
                 fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
                 file = [srcfile(n), libfile{:}];
-                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                mex('-g', '-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
             end
         end

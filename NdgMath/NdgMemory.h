@@ -8,6 +8,8 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
+void MemoryAllocationCheck(double *, int );
+
 void VertDiffMemoryAllocation(const int, int, const int);
 
 void VertDiffMemoryDeAllocation();

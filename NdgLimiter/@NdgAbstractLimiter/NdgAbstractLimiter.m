@@ -23,7 +23,7 @@ classdef NdgAbstractLimiter < handle
     
     methods( Abstract )
         %> employ the limiter function to reconstruct the result
-        fphys = matLimit( obj, fphys, fieldId );
+        fphys = matLimit( obj, phys, fphys, fieldId );
     end
     
 end
