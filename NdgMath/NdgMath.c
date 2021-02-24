@@ -1,141 +1,14 @@
 #include "NdgMath.h"
 //#include <omp.h>
-void FetchInnerEdgeFacialValue(double *fm, double *fp, double *source, \
-	double *FToE, double *FToN1, double *FToN2, int Np, int Nfp){
-	int ind1 = ((int)FToE[0] - 1)*Np;
-	int ind2 = ((int)FToE[1] - 1)*Np;
-	for (int i = 0; i < Nfp; i++){
-		fm[i] = source[ind1 + (int)FToN1[i] - 1];
-		fp[i] = source[ind2 + (int)FToN2[i] - 1];
-	}
-}
-
-void FetchBoundaryEdgeFacialValue(double *fm, double *source, \
-	double *FToE, double *FToN1, int Np, int Nfp){
-	int ind1 = ((int)FToE[0] - 1)*Np;
-	for (int i = 0; i < Nfp; i++){
-		fm[i] = source[ind1 + (int)FToN1[i] - 1];
-	}
-}
-
-void RepmatValue(double *dest, double *source, int Layer){
-	for (int i = 0; i < Layer; i++)
-		dest[i] = *source;
-}
-
-void DotProduct(double *dest, double *sourcea, double *sourceb, int size){
-	for (int i = 0; i < size; i++)
-		dest[i] = sourcea[i] * sourceb[i];
-}
-
-void DotDivide(double *dest, double *source, double *Coefficient, int size){
-	for (int i = 0; i < size; i++)
-		dest[i] = source[i] / Coefficient[i];
-}
-
-void DotCriticalDivide(double *dest, double *source, double *criticalValue, double *Depth, int size){
-	for (int i = 0; i < size; i++){
-		if (Depth[i] >= *criticalValue)
-			dest[i] = source[i] / Depth[i];
-		else
-			dest[i] = 0;
-	}
-}
-
-void DotDivideByConstant(double *dest, double *Source, double Coefficient, int Np){
-	for (int i = 0; i < Np; i++)
-		dest[i] = Source[i] / Coefficient;
-}
-
-void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np){
-	for (int i = 0; i < Np; i++)
-		dest[i] = Source[i] * Coefficient;
-}
-
 
 void Add(double *dest, double *sourcea, double *sourceb, int size){
 	for (int i = 0; i < size; i++)
 		dest[i] = sourcea[i] + sourceb[i];
 }
 
-void Minus(double *dest, double *sourcea, double *sourceb, int size){
+void AddByConstant(double *dest, double *sourcea, double ConstData, int size){
 	for (int i = 0; i < size; i++)
-		dest[i] = sourcea[i] - sourceb[i];
-}
-
-/*This function is used to get the inverse matrix of the given matrix, and has been verified*/
-void MatrixInverse(double *dest, ptrdiff_t Np)
-{
-	ptrdiff_t info;
-	ptrdiff_t *IPIV = malloc(Np*sizeof(ptrdiff_t));
-	ptrdiff_t LWORK = Np * Np;
-	double *WORK = malloc(LWORK*sizeof(double));
-	dgetrf(&Np, &Np, dest, &Np, IPIV, &info);
-	dgetri(&Np, dest, &Np, IPIV, WORK, &LWORK, &info);
-	free(IPIV);
-	free(WORK);
-}
-
-
-void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K,\
-	int Nfp, double *FToN1, double *FToN2, double *fluxM_, double *fluxP_,\
-	                  double *fluxS_, double *Js, double *Mb, double *rhs){
-	const int e1 = (int)FToE[2 * edgeIndex] - 1;
-	const int e2 = (int)FToE[2 * edgeIndex + 1] - 1;
-    const int f1 = (int)FToF[2 * edgeIndex] - 1;
-    const int f2 = (int)FToF[2 * edgeIndex + 1] - 1;
-	const int ind1 = e1 * Np - 1 + f1 * Np * K;
-	const int ind2 = e2 * Np - 1 + f2 * Np * K;
-	const int ind = edgeIndex * Nfp;
-	double *rhsM = malloc(Nfp*sizeof(double));
-	double *rhsP = malloc(Nfp*sizeof(double));
-	memset(rhsM, 0, Nfp*sizeof(double));
-	memset(rhsP, 0, Nfp*sizeof(double));
-	for (int n = 0; n < Nfp; n++) {
-		const int sk = n + ind;
-		double dfM = fluxM_[sk] - fluxS_[sk];
-		double dfP = fluxP_[sk] - fluxS_[sk];
-		double j = Js[sk];
-		double *mb = Mb + n * Nfp;
-		for (int m = 0; m < Nfp; m++) {
-			rhsM[m] += mb[m] * j * dfM;
-			rhsP[m] -= mb[m] * j * dfP;
-		}
-	}
-	for (int n = 0; n < Nfp; n++) {
-	const int sk = n + ind;
-	const int m1 = (int)FToN1[sk] + ind1;
-	const int m2 = (int)FToN2[sk] + ind2;
-	rhs[m1] += rhsM[n];
-	rhs[m2] += rhsP[n];
-	}
-	free(rhsM);
-	free(rhsP);
-}
-
-void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \
-   int Nfp, double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){
-	const int e1 = (int)FToE[2 * edgeIndex] - 1;
-    const int f1 = (int)FToF[2 * edgeIndex] - 1;
-	const int ind1 = e1 * Np - 1 + f1 * Np * K;
-	const int ind = edgeIndex * Nfp;
-	double *rhsM = malloc(Nfp*sizeof(double));
-	memset(rhsM, 0, Nfp*sizeof(double));
-	for (int n = 0; n < Nfp; n++) {
-		const int sk = n + ind;
-		double dfM = fluxM_[sk] - fluxS_[sk];
-		double j = Js[sk];
-		double *mb = Mb + n * Nfp;
-		for (int m = 0; m < Nfp; m++) {
-			rhsM[m] += mb[m] * j * dfM;
-		}
-	}
-	for (int n = 0; n < Nfp; n++) {
-		const int sk = n + ind;
-		const int m1 = (int)FToN1[sk] + ind1;
-		rhs[m1] += rhsM[n];
-	}
-	free(rhsM);
+		dest[i] = sourcea[i] + ConstData;
 }
 
 /*Note: This function is used to assemble the facial integral term into the local stiff operator according to the column index, and has been checked*/
@@ -164,17 +37,97 @@ void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *
 	}
 }
 
-void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3d, int NLayer, int Nz){
-	//直接把第一层循环中的k提出来，放置到调用层，利用openmp并行，传入的K2d替换成序号k
-	//for (int k = 0; k < K2d; k++){
-	for (int Layer = 0; Layer < NLayer; Layer++){
-		for (int N = 0; N < Nz + 1; N++){
-			for (int i = 0; i < Np2d; i++){
-					dest[Index*NLayer*Np3d + Layer*Np3d + N*Np2d + i] = \
-						source[Index*Np2d + i];
-			}
-		}
+/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
+void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
+{
+	for (int colI = 0; colI < Np; colI++){
+		for (int RowI = 0; RowI < Np; RowI++)
+			dest[colI*Np + RowI] = coe[RowI] * source[colI*Np + RowI];
 	}
+}
+
+void DotCriticalDivide(double *dest, double *source, double *criticalValue, double *Depth, int size){
+	for (int i = 0; i < size; i++){
+		if (Depth[i] >= *criticalValue)
+			dest[i] = source[i] / Depth[i];
+		else
+			dest[i] = 0;
+	}
+}
+
+void DotDivide(double *dest, double *source, double *Coefficient, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = source[i] / Coefficient[i];
+}
+
+void DotDivideByConstant(double *dest, double *Source, double Coefficient, int Np){
+	for (int i = 0; i < Np; i++)
+		dest[i] = Source[i] / Coefficient;
+}
+
+void DotProduct(double *dest, double *sourcea, double *sourceb, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = sourcea[i] * sourceb[i];
+}
+
+
+void FetchInnerEdgeFacialValue(double *fm, double *fp, double *source, \
+	double *FToE, double *FToN1, double *FToN2, int Np, int Nfp){
+	int ind1 = ((int)FToE[0] - 1)*Np;
+	int ind2 = ((int)FToE[1] - 1)*Np;
+	for (int i = 0; i < Nfp; i++){
+		fm[i] = source[ind1 + (int)FToN1[i] - 1];
+		fp[i] = source[ind2 + (int)FToN2[i] - 1];
+	}
+}
+
+void FetchBoundaryEdgeFacialValue(double *fm, double *source, \
+	double *FToE, double *FToN1, int Np, int Nfp){
+	int ind1 = ((int)FToE[0] - 1)*Np;
+	for (int i = 0; i < Nfp; i++){
+		fm[i] = source[ind1 + (int)FToN1[i] - 1];
+	}
+}
+
+
+void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, double *ny, int Nfp){
+	for (int i = 0; i < Nfp; i++)
+		dest[i] = hu[i] * nx[i] + hv[i] * ny[i];
+}
+
+void GetMeshAverageValue(double *dest, double *LAV, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
+	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
+
+	GetMeshIntegralValue(dest, transA, transB, ROPA, COPB, COPA, Alpha, A, LDA, fphys, Jacobian, LDB, Beta, LDC, wq);
+
+	(*dest) = (*dest) / (*LAV);
+}
+
+void GetMeshIntegralValue(double *dest, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
+	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
+
+	double Jq[(int)(*LDC)], fq[(int)(*LDC)];
+
+	// map the node values fvar to quadrature nodes by
+	// \f$ fq = Vq * fvar \f$
+	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
+		LDA, fphys, LDB, Beta, fq, LDC);
+	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
+		LDA, Jacobian, LDB, Beta, Jq, LDC);
+
+	for (int n = 0; n < (int)(*LDC); n++) {
+		(*dest) += wq[n] * Jq[n] * fq[n];
+	}
+}
+
+void GetVolumnIntegral1d(double *dest, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *alpha, \
+	double *Dt, ptrdiff_t *LDA, double *B, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *tz){
+
+	dgemm("N", "N", RowOPA, ColOPB, ColOPA, alpha, Dt, LDA, B, LDB, Beta, dest, LDC);
+
+	DotProduct(dest, dest, tz, (int)(*LDC));
+
+
 }
 
 void GetVolumnIntegral2d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *alpha, \
@@ -227,9 +180,30 @@ void GetVolumnIntegral3d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrd
 	}
 }
 
-void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, double *ny, int Nfp){
-	for (int i = 0; i < Nfp; i++)
-		dest[i] = hu[i] * nx[i] + hv[i]*ny[i];
+/*This function is used to get the inverse matrix of the given matrix, and has been verified*/
+void MatrixInverse(double *dest, ptrdiff_t Np)
+{
+	ptrdiff_t info;
+	ptrdiff_t *IPIV = malloc(Np*sizeof(ptrdiff_t));
+	ptrdiff_t LWORK = Np * Np;
+	double *WORK = malloc(LWORK*sizeof(double));
+	dgetrf(&Np, &Np, dest, &Np, IPIV, &info);
+	dgetri(&Np, dest, &Np, IPIV, WORK, &LWORK, &info);
+	free(IPIV);
+	free(WORK);
+}
+
+/* This function invokes dgemm implemented by blas to calculate C = alpha*A*B + beta*C */
+void MatrixMultiply(char* TRANSA, char* TRANSB, ptrdiff_t M, ptrdiff_t N, ptrdiff_t K, double ALPHA, double *A,
+	ptrdiff_t LDA, double *B, ptrdiff_t LDB, double BETA, double *C, ptrdiff_t LDC)	{
+
+	dgemm(TRANSA, TRANSB, &M, &N, &K, &ALPHA, A, &LDA, B, &LDB, &BETA, C, &LDC);
+
+}
+
+void Minus(double *dest, double *sourcea, double *sourceb, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = sourcea[i] - sourceb[i];
 }
 
 void MultiEdgeContributionByLiftOperator(double *SrcAndDest, double *TempSource, ptrdiff_t *RowOPA, ptrdiff_t *ColOPB, ptrdiff_t *ColOPA, double *Alpha, \
@@ -240,27 +214,86 @@ void MultiEdgeContributionByLiftOperator(double *SrcAndDest, double *TempSource,
 	DotDivide(SrcAndDest, TempSource, J, Np);
 }
 
-void GetMeshIntegralValue(double *dest, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
-	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
+void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np){
+	for (int i = 0; i < Np; i++)
+		dest[i] = Source[i] * Coefficient;
+}
 
-	double Jq[(int)(*LDC)], fq[(int)(*LDC)];
-
-	// map the node values fvar to quadrature nodes by
-	// \f$ fq = Vq * fvar \f$
-	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
-		LDA, fphys, LDB, Beta, fq, LDC);
-	dgemm(transA, transB, ROPA, COPB, COPA, Alpha, A,
-		LDA, Jacobian, LDB, Beta, Jq, LDC);
-
-	for (int n = 0; n < (int)(*LDC); n++) {
-		(*dest) += wq[n] * Jq[n] * fq[n];
+void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3d, int NLayer, int Nz){
+	//直接把第一层循环中的k提出来，放置到调用层，利用openmp并行，传入的K2d替换成序号k
+	//for (int k = 0; k < K2d; k++){
+	for (int Layer = 0; Layer < NLayer; Layer++){
+		for (int N = 0; N < Nz + 1; N++){
+			for (int i = 0; i < Np2d; i++){
+				dest[Index*NLayer*Np3d + Layer*Np3d + N*Np2d + i] = \
+					source[Index*Np2d + i];
+			}
+		}
 	}
 }
 
-void GetMeshAverageValue(double *dest, double *LAV, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
-	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
-	
-	GetMeshIntegralValue(dest, transA, transB, ROPA, COPB, COPA, Alpha, A, LDA, fphys, Jacobian, LDB, Beta, LDC, wq);
+void RepmatValue(double *dest, double *source, int Layer){
+	for (int i = 0; i < Layer; i++)
+		dest[i] = *source;
+}
 
-	(*dest) = (*dest) / (*LAV);
+void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \
+	int Nfp, double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){
+	const int e1 = (int)FToE[2 * edgeIndex] - 1;
+	const int f1 = (int)FToF[2 * edgeIndex] - 1;
+	const int ind1 = e1 * Np - 1 + f1 * Np * K;
+	const int ind = edgeIndex * Nfp;
+	double *rhsM = malloc(Nfp*sizeof(double));
+	memset(rhsM, 0, Nfp*sizeof(double));
+	for (int n = 0; n < Nfp; n++) {
+		const int sk = n + ind;
+		double dfM = fluxM_[sk] - fluxS_[sk];
+		double j = Js[sk];
+		double *mb = Mb + n * Nfp;
+		for (int m = 0; m < Nfp; m++) {
+			rhsM[m] += mb[m] * j * dfM;
+		}
+	}
+	for (int n = 0; n < Nfp; n++) {
+		const int sk = n + ind;
+		const int m1 = (int)FToN1[sk] + ind1;
+		rhs[m1] += rhsM[n];
+	}
+	free(rhsM);
+}
+
+void StrongFormInnerEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K,\
+	int Nfp, double *FToN1, double *FToN2, double *fluxM_, double *fluxP_,\
+	                  double *fluxS_, double *Js, double *Mb, double *rhs){
+	const int e1 = (int)FToE[2 * edgeIndex] - 1;
+	const int e2 = (int)FToE[2 * edgeIndex + 1] - 1;
+    const int f1 = (int)FToF[2 * edgeIndex] - 1;
+    const int f2 = (int)FToF[2 * edgeIndex + 1] - 1;
+	const int ind1 = e1 * Np - 1 + f1 * Np * K;
+	const int ind2 = e2 * Np - 1 + f2 * Np * K;
+	const int ind = edgeIndex * Nfp;
+	double *rhsM = malloc(Nfp*sizeof(double));
+	double *rhsP = malloc(Nfp*sizeof(double));
+	memset(rhsM, 0, Nfp*sizeof(double));
+	memset(rhsP, 0, Nfp*sizeof(double));
+	for (int n = 0; n < Nfp; n++) {
+		const int sk = n + ind;
+		double dfM = fluxM_[sk] - fluxS_[sk];
+		double dfP = fluxP_[sk] - fluxS_[sk];
+		double j = Js[sk];
+		double *mb = Mb + n * Nfp;
+		for (int m = 0; m < Nfp; m++) {
+			rhsM[m] += mb[m] * j * dfM;
+			rhsP[m] -= mb[m] * j * dfP;
+		}
+	}
+	for (int n = 0; n < Nfp; n++) {
+	const int sk = n + ind;
+	const int m1 = (int)FToN1[sk] + ind1;
+	const int m2 = (int)FToN2[sk] + ind2;
+	rhs[m1] += rhsM[n];
+	rhs[m2] += rhsP[n];
+	}
+	free(rhsM);
+	free(rhsP);
 }

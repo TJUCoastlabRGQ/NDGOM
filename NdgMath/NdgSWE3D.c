@@ -1,5 +1,6 @@
 #include "NdgSWE3D.h"
 #include "NdgSWE.h"
+#include "NdgMath.h"
 
 void EvaluateVerticalFaceSurfFlux(double *dest, double *fm, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne){
 	double u, v, theta;
@@ -82,6 +83,47 @@ void EvaluatePrebalanceVolumeTerm(double *Edest, double *Gdest, double *Hdest, d
 			Hdest[i + n*Np*K] = omega[i] * theta;
 		}
 	}
+}
+
+
+void GetModCoefficient(double *dest, double *source, double *InvV, int Np, int NLayer){
+	ptrdiff_t RowOPA = (ptrdiff_t)Np;
+	ptrdiff_t ColOPB = (ptrdiff_t)NLayer;
+	ptrdiff_t ColOPA = (ptrdiff_t)Np;
+	double alpha = 1.0;
+	ptrdiff_t LDA = (ptrdiff_t)Np;
+	ptrdiff_t LDB = (ptrdiff_t)Np;
+	double Beta = 0.0;
+	ptrdiff_t LDC = (ptrdiff_t)Np;
+	double *B = source;
+	dgemm("N", "N", &RowOPA, &ColOPB, &ColOPA, &alpha, InvV, &LDA, B, &LDB, &Beta, dest, &LDC);
+}
+
+void GetIntegralValue(double *dest, int Np2d, double *V, double *source){
+	ptrdiff_t RowOPA = (ptrdiff_t)Np2d;
+	ptrdiff_t ColOPA = (ptrdiff_t)Np2d;
+	ptrdiff_t ColOPB = 1;
+	double alpha = 1.0;
+	ptrdiff_t LDA = (ptrdiff_t)Np2d;
+	double *B = source;
+	ptrdiff_t LDB = (ptrdiff_t)Np2d;
+	double Beta = 0.0;
+	ptrdiff_t LDC = (ptrdiff_t)Np2d;
+	dgemm("N", "N", &RowOPA, &ColOPB, &ColOPA, &alpha, V, &LDA, B, &LDB, &Beta, dest, &LDC);
+	MultiplyByConstant(dest, dest, sqrt(2), Np2d);
+}
+
+
+void VerticalColumnIntegralField3d(double *dest, int Np2d, double *V2d, double *Tempdest, \
+	double *Tempfield3d, double *field3d, double * Jz, \
+	double *fmod, double *InvV3d, int Np3d, int NLayer){
+
+	DotProduct(Tempfield3d, field3d, Jz, Np3d*NLayer);
+	GetModCoefficient(fmod, Tempfield3d, InvV3d, Np3d, NLayer);
+	for (int L = 0; L < NLayer; L++){
+		Add(Tempdest, Tempdest, fmod + L*Np3d, Np2d);
+	}
+	GetIntegralValue(dest, Np2d, V2d, Tempdest);
 }
 
 /** Evaluate flux term in surface integration */

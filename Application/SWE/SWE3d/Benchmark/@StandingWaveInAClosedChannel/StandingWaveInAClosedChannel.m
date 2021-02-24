@@ -32,6 +32,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % setup mesh domain
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, mesh3d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( mesh2d, mesh3d );
             %> time interval
@@ -79,12 +80,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
 %             option('integralType') = enumDiscreteIntegral.GaussQuadrature;
 %             option('outputType') = enumOutputFile.VTK;
 %             option('ConstantEddyViscosityValue') = 0;
-            option('VerticalEddyViscosityType') = enumVerticalEddyViscosity.Constant;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('ConstantVerticalEddyViscosityValue') = 0.03;
-            option('HorizontalEddyViscosityType') = enumHorizontalEddyViscosity.Smagorinsky;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 1; 
             
         end
@@ -111,8 +112,8 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 
 end
 

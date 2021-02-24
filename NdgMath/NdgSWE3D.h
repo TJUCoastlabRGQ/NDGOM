@@ -16,4 +16,10 @@ void EvaluateFluxTerm2d(double hmin, double *gra, double *h, double *hu, double 
 
 void EvaluatePrebalanceVolumeTerm(double *, double *, double *, double *, double *, int , double *, int , int , double );
 
+void GetModCoefficient(double *, double *, double *, int , int );
+
+void GetIntegralValue(double *, int, double *, double *);
+
+void VerticalColumnIntegralField3d(double *, int, double *, double *, double *, double *, double *, double *, double *, int, int);
+
 #endif

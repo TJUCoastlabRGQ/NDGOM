@@ -8,6 +8,11 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
+void SWENonhydro3dMemoryAllocation(int , int , int , int , int , int , int , int , int , int , \
+	int , int , int , int , int , int , int , int , int , int );
+
+void SWENonhydro3dMemoryDeAllocation();
+
 void MemoryAllocationCheck(double *, int );
 
 void VertDiffMemoryAllocation(const int, int, const int);

@@ -23,9 +23,17 @@
 #define min(a, b) ((a < b) ? a : b)
 #endif
 
+/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
+void DiagMultiply(double *, const double *, const double *, int );
+
 void Add(double *, double *, double *, int );
 
+void AddByConstant(double *, double *, double, int);
+
 void Minus(double *, double *, double *, int);
+
+void MatrixMultiply(char*, char*, ptrdiff_t, ptrdiff_t, ptrdiff_t, double, double *, ptrdiff_t, \
+	double *, ptrdiff_t, double, double *, ptrdiff_t);
 
 void MatrixInverse(double *, ptrdiff_t );
 
@@ -39,9 +47,11 @@ void MultiplyByConstant(double *, double *, double, int);
 
 void DotCriticalDivide(double *, double *, double *, double *, int);
 
-void StrongFormInnerEdgeRHS(int , double *, double *, int , int ,int , double *, double *, double *, double *,double *, double *, double *, double *);
+void StrongFormInnerEdgeRHS(int , double *, double *, int , int ,int , double *, double *, double *, \
+	double *,double *, double *, double *, double *);
 
-void StrongFormBoundaryEdgeRHS(int , double *, double *, int , int ,  int , double *, double *, double *, double *, double *, double *);
+void StrongFormBoundaryEdgeRHS(int , double *, double *, int , int ,  int , double *, double *, double *, \
+	double *, double *, double *);
 
 void FetchInnerEdgeFacialValue(double *, double *, double *, double *, double *, double *, int , int );
 
@@ -56,6 +66,9 @@ void AssembleContributionIntoRow(double *, double *, double *, int, int);
 void AssembleContributionIntoRowAndColumn(double *, double *, double *, double *, int, int, int);
 
 void NdgExtend2dField(double *, double *, int, int, int, int, int);
+
+void GetVolumnIntegral1d(double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, \
+	double *, ptrdiff_t *, double *, ptrdiff_t *, double *, ptrdiff_t *, double *);
 
 void GetVolumnIntegral2d(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, double *, \
 	double *, ptrdiff_t *, double *, ptrdiff_t *, double *, ptrdiff_t *, double *, double *);

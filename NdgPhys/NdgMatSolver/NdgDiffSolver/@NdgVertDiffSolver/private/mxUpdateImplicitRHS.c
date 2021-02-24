@@ -39,14 +39,6 @@ void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, dou
 	}
 }
 
-/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
-void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
-{
-	for (int colI = 0; colI < Np; colI++){
-		for (int RowI = 0; RowI < Np; RowI++)
-			dest[colI*Np + RowI] = coe[RowI] * source[colI*Np + RowI];
-	}
-}
 /*Note: This function is used to assemble the local columns index and local rows index of the studied cell, and has been verified*/
 void GetLocalRowsAndColumns(double *LocalRows, double *LocalColumns, int Index, int Np)
 {

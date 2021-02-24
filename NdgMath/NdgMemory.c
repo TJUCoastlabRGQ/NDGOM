@@ -6,6 +6,275 @@ void MemoryAllocationCheck(double *dest, int size){
     }
 }
 
+/*This is for three-dimensional non-hydrostatic model*/
+
+char *SWENonhydro3dInitialized = "False";
+
+double *NonhydroHU2d = NULL, *NonhydroHV2d = NULL, \
+*TempNonhydroHU2d = NULL, *TempNonhydroHV2d = NULL, *TempNonhydrofield3d = NULL, *Nonhydrofmod = NULL, \
+*NonhydroVariable = NULL, *PUPX = NULL, *PVPY = NULL, *PHPX = NULL, *PHPY = NULL, *PSPX = NULL, \
+*PSPY = NULL, *TempPSPX = NULL, *TempPSPY = NULL, *NonhydroIEfm = NULL, *NonhydroIEfp = NULL, \
+*NonhydroIEFluxM = NULL, *NonhydroIEFluxP = NULL, *NonhydroIEFluxS = NULL, *NonhydroERHS = NULL, \
+*NonhydroBEfm = NULL, *NonhydroBEfp = NULL, *NonhydroBEFluxM = NULL, *NonhydroBEFluxS = NULL, \
+*NonhydroTempFacialIntegral = NULL, *NonhydroTempVolumeIntegral = NULL, *NonhydrozM = NULL, *NonhydrozP = NULL, \
+*CoePS = NULL, *NonhydroBotEfm = NULL, *NonhydroBotEfp = NULL, \
+*NonhydroBotEFluxM = NULL, *NonhydroBotEFluxP = NULL, *NonhydroBotEFluxS = NULL, \
+*NonhydroBotBEfm = NULL, *NonhydroBotBEFluxM = NULL, *NonhydroBotBEFluxS = NULL, *NonhydroSurfBEfm = NULL, \
+*NonhydroSurfBEFluxM = NULL, *NonhydroSurfBEFluxS = NULL, *NonhydroRHS2d = NULL, \
+*Weta = NULL, *Wbot = NULL, *ueta = NULL, *ubot = NULL, *veta = NULL, *vbot = NULL, \
+*etax = NULL, *etay = NULL, *TempZx2d = NULL, *TempZy2d = NULL, *NonhydroIEfm2d = NULL, \
+*NonhydroIEfp2d = NULL, *NonhydroIEFluxM2d = NULL, *NonhydroIEFluxP2d = NULL, \
+*NonhydroIEFluxS2d = NULL, *NonhydroERHS2d = NULL, *NonhydroPCEVolumeIntegralX = NULL, \
+*NonhydroPCETempVolumeIntegralX = NULL, *NonhydroPCEVolumeIntegralY = NULL, \
+*NonhydroPCETempVolumeIntegralY = NULL, *NonhydroBEfm2d = NULL, *NonhydroBEzM2d = NULL, \
+*NonhydroBEfp2d = NULL, *NonhydroBEzP2d = NULL, *NonhydroBEFluxS2d = NULL, \
+*NonhydroBEFluxM2d = NULL, *NonhydroPCETempFacialIntegral = NULL, *InvSquaHeight = NULL, \
+*InvSHeight = NULL;//(Here, InvSquaHeight is used in mxAssembleGlobalStiffMatrix, InvSHeight is used in mxAssembleNonhydroRHS)
+
+void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int Nface3d,\
+	int BENfp, int BENe, int BotENfp, int BotENe, int BotBENfp, int BotBENe, int SurfBENfp,\
+	int SurfBENe, int Np2d, int K2d, int IENfp2d, int IENe2d, int Nface2d, int BENfp2d,\
+	int BENe2d ){
+	/*Water depth $H$ is not included*/
+	/*In the main function*/
+	NonhydroVariable = malloc(Np3d*K3d*3*sizeof(double));
+	MemoryAllocationCheck(NonhydroVariable, Np3d*K3d * 3 * sizeof(double));
+	PUPX = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PUPX, Np3d*K3d*sizeof(double));
+	PVPY = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PVPY, Np3d*K3d*sizeof(double));
+	PHPX = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PHPX, Np3d*K3d*sizeof(double));
+	PHPY = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PHPY, Np3d*K3d*sizeof(double));
+	PSPX = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PSPX, Np3d*K3d*sizeof(double));
+	PSPY = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(PSPY, Np3d*K3d*sizeof(double));
+	TempPSPX = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(TempPSPX, Np3d*K3d*sizeof(double));
+	TempPSPY = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(TempPSPY, Np3d*K3d*sizeof(double));
+
+    /*For depth averaged velocity part*/
+	NonhydroHU2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroHU2d, Np2d*K2d*sizeof(double));
+	NonhydroHV2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroHV2d, Np2d*K2d*sizeof(double));
+	TempNonhydroHU2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(TempNonhydroHU2d, Np2d*K2d*sizeof(double));
+	TempNonhydroHV2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(TempNonhydroHV2d, Np2d*K2d*sizeof(double));
+	TempNonhydrofield3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(TempNonhydrofield3d, Np3d*K3d*sizeof(double));
+	Nonhydrofmod = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(Nonhydrofmod, Np3d*K3d*sizeof(double));
+
+	/*GetSecondOrderPartialDerivativeInHorizontalDirection*/
+	NonhydroIEfm = malloc(IENe*IENfp * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEfm, IENe*IENfp * 3 * sizeof(double));
+    NonhydroIEfp = malloc(IENe*IENfp * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEfp, IENe*IENfp * 3 * sizeof(double));
+	NonhydroIEFluxM = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxM, IENe*IENfp * 4 * sizeof(double));
+	NonhydroIEFluxP = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxP, IENe*IENfp * 4 * sizeof(double));
+	NonhydroIEFluxS = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxS, IENe*IENfp * 4 * sizeof(double));
+	NonhydroERHS = malloc(4 * Np3d*K3d*Nface3d*sizeof(double));
+	MemoryAllocationCheck(NonhydroERHS, 4 * Np3d*K3d*Nface3d*sizeof(double));
+
+	NonhydroBEfm = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfm, BENe*BENfp * 4 * sizeof(double));
+	NonhydroBEfp = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfp, BENe*BENfp * 4 * sizeof(double));
+	NonhydroBEFluxM = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxM, BENe*BENfp * 4 * sizeof(double));
+	NonhydroBEFluxS = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxS, BENe*BENfp * 4 * sizeof(double));
+	NonhydroTempFacialIntegral = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(NonhydroTempFacialIntegral, Np3d*K3d*sizeof(double));
+	NonhydroTempVolumeIntegral = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(NonhydroTempVolumeIntegral, Np3d*K3d*sizeof(double));
+
+	/*GetFirstOrderPartialDerivativeInHorizontalDirection*/
+	NonhydrozM = malloc(BENfp*BENe * sizeof(double));
+	MemoryAllocationCheck(NonhydrozM, BENfp*BENe * sizeof(double));
+	NonhydrozP = malloc(BENfp*BENe * sizeof(double));
+	MemoryAllocationCheck(NonhydrozP, BENfp*BENe * sizeof(double));
+	CoePS = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(CoePS, Np3d*K3d*sizeof(double));
+
+	/*GetFirstOrderPartialDerivativeInVerticalDirection*/
+	NonhydroBotEfm = malloc(BotENfp*BotENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotEfm, BotENfp*BotENe * 3 * sizeof(double));
+	NonhydroBotEfp = malloc(BotENfp*BotENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotEfp, BotENfp*BotENe * 3 * sizeof(double));
+	NonhydroBotEFluxM = malloc(BotENfp*BotENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotEFluxM, BotENfp*BotENe * 3 * sizeof(double));
+	NonhydroBotEFluxP = malloc(BotENfp*BotENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotEFluxP, BotENfp*BotENe * 3 * sizeof(double));
+	NonhydroBotEFluxS = malloc(BotENfp*BotENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotEFluxS, BotENfp*BotENe * 3 * sizeof(double));
+	NonhydroBotBEfm = malloc(BotBENfp*BotBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotBEfm, BotBENfp*BotBENe * 3 * sizeof(double));
+	NonhydroBotBEFluxM = malloc(BotBENfp*BotBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotBEFluxM, BotBENfp*BotBENe * 3 * sizeof(double));
+	NonhydroBotBEFluxS = malloc(BotBENfp*BotBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBotBEFluxS, BotBENfp*BotBENe * 3 * sizeof(double));
+	NonhydroSurfBEfm = malloc(SurfBENfp*SurfBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroSurfBEfm, SurfBENfp*SurfBENe * 3 * sizeof(double));
+	NonhydroSurfBEFluxM = malloc(SurfBENfp*SurfBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroSurfBEFluxM, SurfBENfp*SurfBENe * 3 * sizeof(double));
+	NonhydroSurfBEFluxS = malloc(SurfBENfp*SurfBENe * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroSurfBEFluxS, SurfBENfp*SurfBENe * 3 * sizeof(double));
+
+	
+	/*For surface vertical velocity and bottom vertical velocity part*/
+	NonhydroRHS2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroRHS2d, Np2d*K2d*sizeof(double));
+	Weta = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(Weta, Np2d*K2d*sizeof(double));
+	Wbot = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(Wbot, Np2d*K2d*sizeof(double));
+	ueta = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ueta, Np2d*K2d*sizeof(double));
+	ubot = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ubot, Np2d*K2d*sizeof(double));
+	veta = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(veta, Np2d*K2d*sizeof(double));
+	vbot = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(vbot, Np2d*K2d*sizeof(double));
+	etax = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(etax, Np2d*K2d*sizeof(double));
+	etay = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(etay, Np2d*K2d*sizeof(double));
+	TempZx2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(TempZx2d, Np2d*K2d*sizeof(double));
+	TempZy2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(TempZy2d, Np2d*K2d*sizeof(double));
+	
+	NonhydroIEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEfm2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	NonhydroIEfp2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEfp2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	NonhydroIEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxM2d, IENfp2d*IENe2d*sizeof(double));
+	NonhydroIEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxP2d, IENfp2d*IENe2d*sizeof(double));
+	NonhydroIEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxS2d, IENfp2d*IENe2d*sizeof(double));
+	NonhydroERHS2d = malloc(Np2d*K2d*Nface2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroERHS2d, Np2d*K2d*Nface2d*sizeof(double));
+	NonhydroPCEVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroPCEVolumeIntegralX, Np2d*K2d*sizeof(double));
+	NonhydroPCETempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroPCETempVolumeIntegralX, Np2d*K2d*sizeof(double));
+	NonhydroPCEVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroPCEVolumeIntegralY, Np2d*K2d*sizeof(double));
+	NonhydroPCETempVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroPCETempVolumeIntegralY, Np2d*K2d*sizeof(double));
+	NonhydroBEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfm2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	NonhydroBEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroBEzM2d, BENe2d * BENfp2d*sizeof(double));
+	NonhydroBEfp2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfp2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	NonhydroBEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroBEzP2d, BENe2d * BENfp2d*sizeof(double));
+	NonhydroBEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxS2d, BENe2d*BENfp2d*sizeof(double));
+	NonhydroBEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxM2d, BENe2d*BENfp2d*sizeof(double));
+	NonhydroPCETempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(NonhydroPCETempFacialIntegral, Np2d*K2d*sizeof(double));
+
+	InvSquaHeight = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(InvSquaHeight, Np3d*K3d*sizeof(double));
+
+	InvSHeight = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(InvSHeight, Np3d*K3d*sizeof(double));
+
+	SWENonhydro3dInitialized = "True";
+}
+
+void SWENonhydro3dMemoryDeAllocation(){
+	free(NonhydroVariable), NonhydroVariable = NULL;
+	free(NonhydroERHS), NonhydroERHS = NULL;
+	free(NonhydroHU2d), NonhydroHU2d = NULL;
+	free(NonhydroHV2d), NonhydroHV2d = NULL; 
+	free(TempNonhydroHU2d), TempNonhydroHU2d = NULL;
+	free(TempNonhydroHV2d), TempNonhydroHV2d = NULL;
+	free(TempNonhydrofield3d), TempNonhydrofield3d = NULL;
+	free(Nonhydrofmod), Nonhydrofmod = NULL; 
+	free(NonhydroVariable), NonhydroVariable = NULL;
+	free(PUPX), PUPX = NULL;
+	free(PVPY), PVPY = NULL;
+	free(PHPX), PHPX = NULL;
+	free(PHPY), PHPY = NULL;
+	free(PSPX), PSPX = NULL; 
+	free(PSPY), PSPY = NULL;
+	free(TempPSPX), TempPSPX = NULL;
+	free(TempPSPY), TempPSPY = NULL;
+	free(NonhydroIEfm), NonhydroIEfm = NULL;
+	free(NonhydroIEfp), NonhydroIEfp = NULL; 
+	free(NonhydroIEFluxM), NonhydroIEFluxM = NULL;
+	free(NonhydroIEFluxP), NonhydroIEFluxP = NULL;
+	free(NonhydroIEFluxS), NonhydroIEFluxS = NULL;
+	free(NonhydroERHS), NonhydroERHS = NULL; 
+	free(NonhydroBEfm), NonhydroBEfm = NULL;
+	free(NonhydroBEfp), NonhydroBEfp = NULL;
+	free(NonhydroBEFluxM), NonhydroBEFluxM = NULL;
+	free(NonhydroBEFluxS), NonhydroBEFluxS = NULL; 
+	free(NonhydroTempFacialIntegral), NonhydroTempFacialIntegral = NULL;
+	free(NonhydroTempVolumeIntegral), NonhydroTempVolumeIntegral = NULL;
+	free(NonhydrozM), NonhydrozM = NULL;
+	free(NonhydrozP), NonhydrozP = NULL; 
+	free(TempPSPX), TempPSPX = NULL;
+	free(TempPSPY), TempPSPY = NULL;
+	free(CoePS), CoePS = NULL;
+	free(NonhydroBotEfm), NonhydroBotEfm = NULL;
+	free(NonhydroBotEfp), NonhydroBotEfp = NULL; 
+	free(NonhydroBotEFluxM), NonhydroBotEFluxM = NULL;
+	free(NonhydroBotEFluxP), NonhydroBotEFluxP = NULL;
+	free(NonhydroBotEFluxS), NonhydroBotEFluxS = NULL; 
+	free(NonhydroBotBEFluxM), NonhydroBotBEFluxM = NULL;
+	free(NonhydroBotBEFluxS), NonhydroBotBEFluxS = NULL;
+	free(NonhydroSurfBEfm), NonhydroSurfBEfm = NULL; 
+	free(NonhydroSurfBEFluxM), NonhydroSurfBEFluxM = NULL;
+	free(NonhydroSurfBEFluxS), NonhydroSurfBEFluxS = NULL;
+	free(NonhydroRHS2d), NonhydroRHS2d = NULL; 
+	free(Weta), Weta = NULL;
+	free(Wbot), Wbot = NULL;
+	free(ueta), ueta = NULL;
+	free(ubot), ubot = NULL;
+	free(veta), veta = NULL;
+	free(vbot), vbot = NULL; 
+	free(etax), etax = NULL;
+	free(etay), etay = NULL;
+	free(TempZx2d), TempZx2d = NULL;
+	free(TempZy2d), TempZy2d = NULL;
+	free(NonhydroIEfm2d), NonhydroIEfm2d = NULL; 
+	free(NonhydroIEfp2d), NonhydroIEfp2d = NULL;
+	free(NonhydroIEFluxM2d), NonhydroIEFluxM2d = NULL;
+	free(NonhydroIEFluxP2d), NonhydroIEFluxP2d = NULL; 
+	free(NonhydroIEFluxS2d), NonhydroIEFluxS2d = NULL;
+	free(NonhydroERHS2d), NonhydroERHS2d = NULL;
+	free(NonhydroPCEVolumeIntegralX), NonhydroPCEVolumeIntegralX = NULL; 
+	free(NonhydroPCETempVolumeIntegralX), NonhydroPCETempVolumeIntegralX = NULL;
+	free(NonhydroPCEVolumeIntegralY), NonhydroPCEVolumeIntegralY = NULL; 
+	free(NonhydroPCETempVolumeIntegralY), NonhydroPCETempVolumeIntegralY = NULL;
+	free(NonhydroBEfm2d), NonhydroBEfm2d = NULL;
+	free(NonhydroBEzM2d), NonhydroBEzM2d = NULL; 
+	free(NonhydroBEfp2d), NonhydroBEfp2d = NULL;
+	free(NonhydroBEzP2d), NonhydroBEzP2d = NULL;
+	free(NonhydroBEFluxS2d), NonhydroBEFluxS2d = NULL; 
+	free(NonhydroBEFluxM2d), NonhydroBEFluxM2d = NULL;
+	free(NonhydroPCETempFacialIntegral), NonhydroPCETempFacialIntegral = NULL;
+
+	SWENonhydro3dInitialized = "False";
+}
+
 /*This is for vertical diffusion part*/
 double *Tau = NULL;
 char *VertDiffInitialized = "False";
@@ -511,7 +780,7 @@ void HorizDiffMemoryAllocation(NdgMeshType type, int Np, int K, int Nvar, int te
 	HorDiffERHSY = malloc(Np*K*Nfield*Nface*sizeof(double));
     MemoryAllocationCheck(HorDiffERHSY,Np*K*Nfield*Nface*sizeof(double));
 
-	/*Allocate memory for local primitive diffusion term in both x and y direction, $\nv\Nabla u(v,\theta)$*/
+	/*Allocate memory for local primitive diffusion term in both x and y direction, $\nu\nabla u(v,\theta)$*/
 	/*This part is used because we need to extract the trace of the local derivative operator to compute the numerical flux*/
 	HorDiffLocalPrimitiveDiffTermX = malloc(Np*K*Nfield*sizeof(double));
     MemoryAllocationCheck(HorDiffLocalPrimitiveDiffTermX,Np*K*Nfield*sizeof(double));
