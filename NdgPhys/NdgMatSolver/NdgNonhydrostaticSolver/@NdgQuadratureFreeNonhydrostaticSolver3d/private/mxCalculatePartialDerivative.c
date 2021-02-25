@@ -90,27 +90,27 @@ $\frac{\partial \sigma}{\partial x}$, $\frac{\partial \sigma}{\partial y}$,
 $\left (\frac{\partial \sigma}{\partial x}\right )^2$, $\left (\frac{\partial \sigma}{\partial y}\right )^2$
 $\frac{\partial^2 \sigma}{\partial x^2}$, $\frac{\partial^2 \sigma}{\partial y^2}$
 The input variables are as follows:
-hcirt: 0
-mesh:1
-cell:2
-InnerEdge:3
-BoundaryEdge:4
-BottomEdge:5
-BottomBoundaryEdge:6
-SurfaceBoundaryEdge:7
-fphys:8
-varIndex:9
-ftype3d:10
-gra:11
-fext3d:12
-h2d:13
-z2d:14
-fext2d:15
-mesh2d:16
-InnerEdge2d:17
-BoundaryEdge2d:18
-cell2d:19
-ftype2d:20
+hcirt: the critical water depth, the input order is 0.
+mesh: the three-dimensional mesh object, the input order is 1.
+cell: the three-dimensional master cell, the input order is 2.
+InnerEdge: the three-dimensional inner edge object, the input order is 3.
+BoundaryEdge: the three-dimensional boundary edge object, the input order is 4.
+BottomEdge: the three-dimensional bottom edge object, the input order is 5.
+BottomBoundaryEdge: the three-dimensional bottom boundary edge object, the input order is 6.
+SurfaceBoundaryEdge: the three-dimensional surface boundary edge object, the input order is 7.
+fphys: the three-dimensional physical field, the input order is 8.
+varIndex: the variable index, the input order is 9.
+ftype3d: the three-dimensional boundary edge type, the input order is 10.
+gra: the accelaration term due to gravity, the input order is 11.
+fext3d: the three-dimensional exterior data at the boundary edge, the input order is 12.
+h2d: the two-dimensional water depth field, the input order is 13.
+z2d: the two-dimensional bottom elevation field, the input order is 14.
+fext2d: the two-dimensional exterior data at the boundary edge, the input order is 15.
+mesh2d: the two-dimensional mesh object, the input order is 16.
+InnerEdge2d: the two-dimensional inner edge object, the input order is 17.
+BoundaryEdge2d: the two-dimensional boundary edge object, the input order is 18.
+cell2d: the two-dimensional master cell, the input order is 19.
+ftype2d: the two-dimensional boundary edge type, the input order is 20.
 */
 
 

@@ -70,7 +70,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
     end
     
     methods
-        function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )  
+        function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )
             obj.matSetInitializeCharacteristicMatrix( mesh );
             warning('off');
             obj.InnerEdge = struct(mesh.InnerEdge);
@@ -129,7 +129,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
              fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                  obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge, obj.BottomBoundaryEdge, ...
                  obj.SurfaceBoundaryEdge);
-        end   
+        end  
+        
+        function matClearGlobalMemory( obj )
+            clear mxCalculatePartialDerivative;
+        end
         
     end
     

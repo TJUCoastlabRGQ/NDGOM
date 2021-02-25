@@ -1,6 +1,4 @@
 #include "SWENonhydrostatic3d.h"
-#include "../../../../../NdgMath/NdgMemory.h"
-#include "../../../../../NdgMath/NdgSWE.h"
 
 void ImposeNonhydroBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, double *, \
 	mwIndex *, mwIndex *, const mxArray *, const mxArray *, \
@@ -265,7 +263,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, DownEle);
 
 						TempJs = Js + GlobalFace * Nfp;
-
+						/*Consider the impact of local element have on the element downside*/
 						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, DownEle, PNPS, irPNS, jcPNS, \
 							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
 							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
@@ -279,7 +277,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, UpEle);
 
 						TempJs = Js + GlobalFace * Nfp;
-
+						/*Consider the impact of local element have on the element upside*/
 						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, UpEle, PNPS, irPNS, jcPNS, \
 							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
 							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
@@ -291,7 +289,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, UpEle);
 
 						TempJs = Js + GlobalFace * Nfp;
-
+						/*Consider the impact of local element have on the element upside*/
 						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, UpEle, PNPS, irPNS, jcPNS, \
 							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
 							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
@@ -302,7 +300,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, DownEle);
 
 						TempJs = Js + GlobalFace * Nfp;
-
+						/*Consider the impact of local element have on the element downside*/
 						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, DownEle, PNPS, irPNS, jcPNS, \
 							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
 							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
@@ -322,9 +320,9 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	double *TempPsPy = malloc(Nfp*sizeof(double));
 	double *TempPsP  = malloc(Nfp*sizeof(double));
 	/*$\frac{\partial \sigma}{\partial x}$*/
-	FetchFacialData(TempPsPx, PsPx + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp);   //DownEle
+	FetchFacialData(TempPsPx, PsPx + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp);  
 	/*$\frac{\partial \sigma}{\partial y}$*/
-	FetchFacialData(TempPsPy, PsPy + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp);  //DownEle
+	FetchFacialData(TempPsPy, PsPy + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp); 
 	/*$\frac{\partial \sigma}{\partial x}n_x$*/
 	DotProduct(TempPsPx, TempPsPx, nx, Nfp);
 	/*$\frac{\partial \sigma}{\partial y}n_y$*/
@@ -366,7 +364,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
 
 	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == AdjOrLocalEle)//DownEle
+		if ((int)TempEToE[j] == AdjOrLocalEle)
 			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
 	}
 	double *ContributionPerPoint = malloc(Np*sizeof(double));

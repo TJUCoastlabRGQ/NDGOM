@@ -12,4 +12,6 @@ obj.VerticalVelocitySolver.matClearGlobalMemory();
 
 obj.VerticalEddyViscositySolver.matClearGlobalMemory();
 
+obj.NonhydrostaticSolver.matClearGlobalMemory();
+
 end

@@ -129,6 +129,23 @@ void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, int *Loca
 
 }
 
+void FindFaceAndDirectionVectorAtBoundary(double *FacialVector, int *GlobalFace, int *LocalFace, \
+	int Nfp, int LocalEle, double *FToE, double *FToF, int face, double *Vector, int BENe){
+
+	for (int f = 0; f < BENe; f++){
+		int TempLocalEle = (int)FToE[2 * f];
+		int TempLocalFace = (int)FToF[2 * f];
+		if (LocalEle == TempLocalEle && TempLocalFace == face){
+			(*GlobalFace) = f;
+			for (int p = 0; p < Nfp; p++){
+				FacialVector[p] = Vector[f*Nfp + p];
+				(*LocalFace) = (int)FToF[2 * f];
+			}
+			break;
+		}
+	}
+}
+
 void GetSparsePatternInVerticalDirection(mwIndex *TempIr, mwIndex *TempJc, int Np, int Nlayer, int Ele2d){
 	int *SingleColumn = malloc(Np*Nlayer*sizeof(int));
 	int *SingleRow;
@@ -190,7 +207,7 @@ void GetSparsePatternInVerticalDirection(mwIndex *TempIr, mwIndex *TempJc, int N
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < Ele2d; i++){
-		//memcpy(TempIr + i*SingleNonzero*sizeof(mwIndex), SingleRow, SingleNonzero*sizeof(mwIndex));
+
 		for (int j = 0; j < SingleNonzero; j++){
 			TempIr[i*SingleNonzero + j] = SingleRow[j] + i*Nlayer*Np;
 		}

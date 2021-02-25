@@ -88,7 +88,7 @@ TempEToE: A pointer to the sorted arry for the topological relation of the studi
 FToE: A pointer to the start of the topological relation for face to element relation of the inner edge
 FToF: A pointer to the start of the topological relation for face to face relation of the inner edge
 Fmask: A pointer to the start of the facial interpolation point index
-maxNfp: Number of the maximum facial interpolation point
+maxNfp: Maximum number of the  facial interpolation point
 Nfp: Number of facial interpolation point for lateral face
 Ne: Number of edges for inner edge
 Np: Number of interpolation point for the master cell
@@ -115,8 +115,8 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 				AdjEidM[p] = Fmask[(AdjFace - 1)*maxNfp + p];
 			}
 
-			double *AdjDiff = malloc(Np*Np*sizeof(double));
-			DiagMultiply(AdjDiff, Dt, tz + (int)(EToE[i] - 1)*Np, Np);
+			double *LocalDiff = malloc(Np*Np*sizeof(double));
+			DiagMultiply(LocalDiff, Dt, tz + (int)(LocalEle - 1)*Np, Np);
 
 			double *AdjMass3d = malloc(Np*Np*sizeof(double));
 			DiagMultiply(AdjMass3d, mass3d, J + Np*(int)(EToE[i] - 1), Np);
@@ -133,7 +133,7 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 			double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 
 			double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
-			AssembleFacialDiffMatrix(FacialDiffMatrix, AdjDiff, AdjEidM, Nfp, Np);
+			AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
 			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
 			MultiplyByConstant(Mass2d, Mass2d, -0.5, Nfp*Nfp);
 			MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, Mass2d,
@@ -156,7 +156,7 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 			free(FacialVector);
 			free(LocalEidM);
 			free(AdjEidM);
-			free(AdjDiff);
+			free(LocalDiff);
 			free(AdjMass3d);
 			free(InvAdjMass3d);
 			free(Mass2d);
@@ -169,7 +169,7 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_{bv}}^{top}q_hvn_{\sigma}d\boldsymbol{x}$$
+$$\int_{\epsilon_{bv}}^{top}q_h\nabla_h vn_{\sigma}d\boldsymbol{x}$$
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Startpoint: Number of nonzeros before the current studied element in the sparse matrix, here it's the point to write the data
@@ -184,7 +184,8 @@ Eid: A pointer to the start of the interpolation point index on the top of the m
 */
 
 void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int Np2d, \
-	int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *Eid){
+	int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *Eid, double *Dr, \
+	double *Ds, double *rd, double *sd){
 
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -193,12 +194,27 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
 	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+	double *DiffMatrixBuff = malloc(Np*Np*sizeof(double));
+	DiagMultiply(DiffMatrixBuff, Dr, rd, Np);
+	double *DiffMatrix = malloc(Np*Np*sizeof(double));
+	DiagMultiply(DiffMatrix, Ds, sd, Np);
+	Add(DiffMatrix, DiffMatrix, DiffMatrixBuff, Np*Np);
+
 
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 
-	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, 1);
+	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
+
+	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
+	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, Eid, Np2d, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoColumn(TempContribution, EdgeContribution, Eid, Np, Np2d);
+
 	/*Multiply the contribution by inverse matrix*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -208,9 +224,113 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 	free(Mass3d);
 	free(InvMass3d);
 	free(Mass2d);
+	free(DiffMatrixBuff);
+	free(DiffMatrix);
 	free(TempContribution);
 	free(Contribution);
+	free(FacialDiffMatrix);
+	free(EdgeContribution);
+}
 
+/*The following part is used to assemble term corresponding to:
+$$\int_{\epsilon_{ih}}\nabla_vq_h[v]d\boldsymbol{x}$$
+The input parameter are as follows:
+dest: A pointer to the start of the sparse matrix
+LocalEle: The studied local element
+Nface2d: Number of faces for 2d element
+Nface: Number of faces for 3d element
+EToE: A pointer to an array that contains the topological relation of local element
+mass2d: A pointer to the mass matrix of the 2d latetal master face
+mass3d: A pointer to the mass matrix of the master element
+Dt: A pointer to the differential matrix in vertical direction of the master element
+tz: A pointer to the start of the transformation Jacobian in vertical direction of the local element
+Js: A pointer to the facial Jacobian of the lateral face
+J: A pointer to the Jacobian of the studied mesh
+TempEToE: A pointer to the sorted arry for the topological relation of the studied element
+FToE: A pointer to the start of the topological relation for face to element relation of the inner edge
+FToF: A pointer to the start of the topological relation for face to face relation of the inner edge
+Fmask: A pointer to the start of the facial interpolation point index
+maxNfp: Maximum number of the  facial interpolation point
+Nfp: Number of facial interpolation point for lateral face
+Ne: Number of edges for inner edge
+Np: Number of interpolation point for the master cell
+Vector: A pointer to the start of the facial direction vector of the inner edge
+Jcs: A pointer to the array that contains the number of nonzero element in each column
+*/
+
+void ImposeBoundaryConditionInHorizontalDirection(double *dest, int LocalEle, int Nface2d, int Nface, \
+	double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, double *TempEToE, \
+	double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector, mwIndex *Jcs){
+
+	for (int i = 0; i < Nface2d; i++){
+		if (LocalEle == (int)EToE[i]){
+			int GlobalFace = 0, LocalFace  = 0;
+			double *FacialVector = malloc(Nfp * sizeof(double));
+
+			FindFaceAndDirectionVectorAtBoundary(FacialVector, &GlobalFace, &LocalFace, Nfp, LocalEle, FToE, FToF, i + 1, \
+				Vector, Ne);
+
+			double *LocalEidM = malloc(Nfp*sizeof(double));
+
+			for (int p = 0; p < Nfp; p++){
+				LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
+			}
+
+			double *LocalDiff = malloc(Np*Np*sizeof(double));
+
+			DiagMultiply(LocalDiff, Dt, tz + (int)(LocalEle - 1)*Np, Np);
+
+			double *LocalMass3d = malloc(Np*Np*sizeof(double));
+			DiagMultiply(LocalMass3d, mass3d, J + Np*(int)(EToE[i] - 1), Np);
+			double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
+			memcpy(InvLocalMass3d, LocalMass3d, Np*Np*sizeof(double));
+			MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
+			double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
+			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
+
+			double *TempContribution = malloc(Np*Np*sizeof(double));
+			memset(TempContribution, 0, Np*Np*sizeof(double));
+			double *Contribution = malloc(Np*Np*sizeof(double));
+
+			double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
+
+			double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
+			AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
+			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
+
+			MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, Mass2d,
+				(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+			AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+
+			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
+				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+			for (int j = 0; j < Nface + 1; j++){
+				if (EToE[i] == TempEToE[j]){
+					int StartPoint = Jcs[(LocalEle - 1)*Np] + j*Np;
+					int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
+					AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+					break;
+				}
+			}
+
+			free(FacialVector);
+			free(LocalEidM);
+			free(LocalDiff);
+			free(LocalMass3d);
+			free(InvLocalMass3d);
+			free(Mass2d);
+			free(TempContribution);
+			free(Contribution);
+			free(FacialDiffMatrix);
+			free(EdgeContribution);
+
+		}
+		else{
+			continue;
+		}
+	}
 }
 
 /*The following part is used to assemble term corresponding to:
@@ -270,9 +390,10 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, double *E
 			break;
 		}
 	}
-	free(Mass2d);
+	
 	free(Mass3d);
 	free(InvDownMass3d);
+	free(Mass2d);
 	free(DiffMatrixBuff);
 	free(DiffMatrix);
 	free(TempContribution);
@@ -320,9 +441,10 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, double *ETo
 			break;
 		}
 	}
-	free(Mass2d);
+	
 	free(Mass3d);
 	free(InvUpMass3d);
+	free(Mass2d);
 	free(DiffMatrixBuff);
 	free(DiffMatrix);
 	free(TempContribution);
@@ -380,6 +502,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *Ds = mxGetPr(prhs[24]);
 	double *Dt = mxGetPr(prhs[25]);
 
+	double *BEFToF = mxGetPr(prhs[26]);
+	double *BEFToE = mxGetPr(prhs[27]);
+	double *BEVector = mxGetPr(prhs[28]);
+
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
 	mwIndex *irs = mxGetIr(plhs[0]);
@@ -421,17 +547,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			GetLocalToAdjacentElementContributionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
 				EToE + (LocalEle-1)*Nface, LM2d, M3d, Dt, tz, Js, J, TempEToE, FToE, FToF, Fmask, maxNfp, HorNfp, IENe, Np, Vector, jcs);
 
+			ImposeBoundaryConditionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
+				EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, Js, J, TempEToE, \
+				BEFToE, BEFToF, Fmask, maxNfp, HorNfp, BENe, Np, BEVector, jcs);
+
 			if (UpEle == DownEle){//Only one layer in the vertical direction, impose the Dirichlet boundary condition
 				StartPoint = jcs[(LocalEle - 1)*Np];
+
 				ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-					jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM);
+					jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM,\
+					Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np);
+
 			}
 			else{//two or more layers included in vertical direction
 				if (LocalEle == UpEle){//This is the top most cell, and L=0
 					StartPoint = jcs[(LocalEle - 1)*Np + L*Np];
 
 					ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM);
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
+						Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np);
 
 					GetLocalToDownElementContributionForSecondOrderTerm(sr, EToE + Nface*(LocalEle - 1), TempEToE, Nface, LocalEle, Np, VertNfp, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + ele * Nlayer * Np + L*Np + Np, J2d + ele*VertNfp, \
@@ -456,8 +590,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			free(TempEToE);
 		}
 	}
-	free(UpEidM);
-	free(BotEidM);
 	free(TempIr);
 	free(TempJc);
+	free(UpEidM);
+	free(BotEidM);
 }

@@ -53,6 +53,10 @@ classdef NdgAbstractNonhydrostaticSolver < handle
             fphys = obj.matNdgConservativeNonhydrostaticUpdata( PhysClass, fphys );   
         end
         
+        function matClearGlobalMemory(obj)
+            %doing nothing
+        end
+        
     end
     
     methods(Abstract, Access = protected)
