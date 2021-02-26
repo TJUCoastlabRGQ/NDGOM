@@ -127,8 +127,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
              NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
              
              fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
-                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge, obj.BottomBoundaryEdge, ...
-                 obj.SurfaceBoundaryEdge);
+                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
+                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge);
         end  
         
         function matClearGlobalMemory( obj )

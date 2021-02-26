@@ -84,10 +84,10 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 	NonhydroERHS = malloc(4 * Np3d*K3d*Nface3d*sizeof(double));
 	MemoryAllocationCheck(NonhydroERHS, 4 * Np3d*K3d*Nface3d*sizeof(double));
 
-	NonhydroBEfm = malloc(BENe*BENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroBEfm, BENe*BENfp * 4 * sizeof(double));
-	NonhydroBEfp = malloc(BENe*BENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroBEfp, BENe*BENfp * 4 * sizeof(double));
+	NonhydroBEfm = malloc(BENe*BENfp * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfm, BENe*BENfp * 3 * sizeof(double));
+	NonhydroBEfp = malloc(BENe*BENfp * 3 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfp, BENe*BENfp * 3 * sizeof(double));
 	NonhydroBEFluxM = malloc(BENe*BENfp * 4 * sizeof(double));
 	MemoryAllocationCheck(NonhydroBEFluxM, BENe*BENfp * 4 * sizeof(double));
 	NonhydroBEFluxS = malloc(BENe*BENfp * 4 * sizeof(double));

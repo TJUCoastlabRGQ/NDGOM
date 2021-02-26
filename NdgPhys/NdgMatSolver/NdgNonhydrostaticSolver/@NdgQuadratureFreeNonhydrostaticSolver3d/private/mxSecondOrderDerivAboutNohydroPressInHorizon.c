@@ -9,13 +9,14 @@ $$-\int_{\Omega}\nabla_h s\cdot \nabla_h p_hd\boldsymbol{x}+\int_{\epsilon_i}[p_
 [s]d\boldsymbol{x}-\int_{\partial\Omega^D}s\boldsymbol{n}\cdot\nabla_hp_hd\boldsymbol{x}+\int_{\partial \Omega^D}
 \tau^ksp_hd\boldsymbol{x} -\int_{\partial \Omega^D}\tau^ksp_Dd\boldsymbol{x} -
 \int_{\partial \Omega^N}sp_Nd\boldsymbol{x}$$
-************************We note that at present we don't consider the boundary condition.******************************************
+We note that at present we don't consider the boundary condition. Boundary condition about this part is imposed when we 
+assemble the global stiff matrix.
 Detail about this form can be found through any markdown editor.
 */
 
 
 
-/*This following funciton is used to assemble term corresponds to
+/*This following function is used to assemble term corresponds to
 $$-\int_{\Omega}\nabla_h s\cdot \nabla_h p_hd\boldsymbol{x}$$
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
@@ -71,7 +72,7 @@ void GetLocalVolumuIntegralTermForSecondOrderTerm(double *dest, int StartPoint, 
 }
 
 
-/*The following funciton is used to assemble terms corresponding to
+/*The following function is used to assemble terms corresponding to
 $$\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x} +
 \int_{\epsilon_i}(\left\{\nabla_hp_h\right\}-\tau^k[p_h])[s]d\boldsymbol{x}$$
 Explanation of most variables can be found in function GetLocalVolumuIntegralTermForSecondOrderTerm.
@@ -153,6 +154,33 @@ void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int S
 	free(TempMass2d);
 }
 
+/*The input parameters are organized as follows:
+Np: Number of interpolation points, indexed as 0.
+Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
+Nlayer: Number of layers in vertical direction, indexed as 2.
+Ele2d: Number of elements in two-dimensional mesh object, indexed as 3.
+Nface: Number of face numbers for the three-dimensional master cell, indexed as 4.
+EToE: Element to element topological relation of the 3d mesh, indexed as 5.
+FToE: Face to element topological relation of the inner edge, indexed as 6.
+FToF: Face to face topological relation of the inner edge, indexed as 7.
+LAV: Volume of the three-dimensional mesh object, indexed as 8.
+J: Jacobian coefficient of the three-dimensional mesh object, indexed as 9.
+Js: Jacobian coefficient of the inner edge, indexed as 10.
+M3d: Mass matrix of the 3d master cell, indexed as 11.
+M: Mass matrix of the 2d master cell of the inner edge, indexed as 12.
+BENe: Number of boundary edge, indexed as 13.
+IENe: Number of inner edge, indexed as 14.
+IELAV: Area of the inner edge object, indexed as 15.
+Fmask: Index of the interpolation point on each face of the master cell, indexed as 16.
+Nfp: Number of interpolation point on each face of the master cell, indexed as 17.
+P: Approximation order of the master cell, indexed as 18.
+vector: The direction vector of the inner edge object, indexed as 19.
+rd: Differential coefficient of the 3d mesh object in direction r, indexed as 20.
+sd: Differential coefficient of the 3d mesh object in direction s, indexed as 21.
+Dr: Differential matrix of the 3d master cell in direction r, indexed as 22.
+Ds: Differential matrix of the 3d master cell in direction s, indexed as 23.
+*/
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int Np = (int)mxGetScalar(prhs[0]);
 	int Ele3d = (int)mxGetScalar(prhs[1]);
@@ -180,7 +208,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *Fmask = mxGetPr(prhs[16]);
 	int maxNfp = mxGetM(prhs[16]);
 	double *Nfp = mxGetPr(prhs[17]);
-	int IENfp = Nfp[0];
+	int IENfp = (int)Nfp[0];
 	int P = (int)mxGetScalar(prhs[18]);
 	double *Vector = mxGetPr(prhs[19]);
 	double *rd = mxGetPr(prhs[20]);
@@ -240,10 +268,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
 					AdjEidM[p] = Fmask[(AdjFace - 1)*maxNfp + p];
 				}
-
+				/*The element index is smaller than the local element index, the insert 
+				 position lies before the position corresponding to the local element
+				*/
 				if (ele + 1>TempEToE[i]){
 					StartPoint = jcs[ele*Np] + i*Np;
 				}
+				/*The element index is greater than the local element index, the insert
+				position lies behind the position corresponding to the local element
+				*/
 				else{
 					StartPoint = jcs[ele*Np] + i*Np + Np;
 				}

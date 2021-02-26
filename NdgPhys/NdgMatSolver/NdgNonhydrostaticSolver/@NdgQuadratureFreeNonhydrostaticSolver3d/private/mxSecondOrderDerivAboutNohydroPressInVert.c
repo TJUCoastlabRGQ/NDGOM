@@ -1,14 +1,13 @@
-#include "mex.h"
 #include "SWENonhydrostatic3d.h"
 
 /*This function is called at the initialization stage to calcualte the second order derivative
 about nonhydrostatic pressure in vertical direction, i.e. $\frac{\partial^2 p}{\partial \sigma^2}$.
 For this term, the primal form is given as:
-$$-\int_{\Omega}\nabla_h s\cdot \nabla_h p_hd\boldsymbol{x}+\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}-
-\int_{\partial \Omega^D}(p_D-p_h)\nabla_hs\cdot \boldsymbol{n}d\boldsymbol{x} = -\int_{\epsilon_i}(\left\{\nabla_hp_h\right\}-\tau^k[p_h])
+$$\begin {split}-\int_{\Omega}\nabla_h s\cdot \nabla_h p_hd\boldsymbol{x}+\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}-
+\int_{\partial \Omega^D}(p_D-p_h)\nabla_hs\cdot \boldsymbol{n}d\boldsymbol{x} =\\-\int_{\epsilon_i}(\left\{\nabla_hp_h\right\}-\tau^k[p_h])
 [s]d\boldsymbol{x}-\int_{\partial\Omega^D}s\boldsymbol{n}\cdot\nabla_hp_hd\boldsymbol{x}+\int_{\partial \Omega^D}
 \tau^ksp_hd\boldsymbol{x} -\int_{\partial \Omega^D}\tau^ksp_Dd\boldsymbol{x} -
-\int_{\partial \Omega^N}sp_Nd\boldsymbol{x}$$
+\int_{\partial \Omega^N}sp_Nd\boldsymbol{x}\end {split}$$
 Detail about this form can be found through any markdown editor.
 */
 
@@ -128,6 +127,7 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 	free(Mass3d);
 	free(InvMass3d);
 	free(Mass2d);
+	free(DiffSigma);
 	free(FacialDiffMatrix);
 	free(TempContribution);
 	free(Contribution);
@@ -174,7 +174,7 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, int StartPo
 	AssembleFacialDiffMatrix(FacialDiffMatrix, UpDiffSigma, UpEid, Np2d, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np2d*Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, UpEid, Np, Np2d);
 
 
@@ -182,7 +182,7 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, int StartPo
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, Mass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np2d);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np2d*Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, UpEid, Np, Np2d);
 
 
@@ -244,14 +244,14 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, int Start
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DownDiffSigma, BotEid, Np2d, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np2d*Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np*Np2d);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, BotEid, Np, Np2d);
 
 	/*The follow part is for term $\int_{\epsilon_i}\left\{\nabla_hp_h\right\}[s]d\boldsymbol{x}$*/
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, Mass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np2d);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np2d*Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, BotEid, Np, Np2d);
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
@@ -276,11 +276,10 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, int Start
 }
 
 
-void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, double *UpEidM, double *BotEidM,\
-	int Nz, int P, int Nface)
+void CalculatePenaltyParameter(double *dest, const int Np2d, int Nz, int P, int Nface)
 {
 	//Note: the penalty parameter for the bottom most face of each column is not needed, so we leave them undefined 
-	for (int Layer = 0; Layer < Nz-1; Layer++)
+	for (int Layer = 0; Layer < Nz; Layer++)
 	{
 		for (int p = 0; p < Np2d; p++)
 		{
@@ -288,6 +287,24 @@ void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, dou
 		}
 	}
 }
+
+/*The input parameters are organized as follows:
+Np: Number of interpolation points, indexed as 0.
+Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
+Nlayer: Number of layers in vertical direction, indexed as 2.
+Ele2d: Number of elements in two-dimensional mesh object, indexed as 3.
+Nface: Number of face numbers for the three-dimensional master cell, indexed as 4.
+EToE: Element to element topological relation of the 3d mesh, indexed as 5.
+tz: Jacobian coefficient in vertical direction, indexed as 6.
+Dt: Differential matrix of the 3d master cell in direction t, indexed as 7.
+J: Jacobian coefficient of the three-dimensional mesh object, indexed as 8.
+J2d: Jacobian coefficient of the 2d mesh, indexed as 9.
+M2d: Mass matrix of the 2d master cell of the 2d mesh, indexed as 10.
+M3d: Mass matrix of the 3d master cell, indexed as 11.
+Fmask: Index of the interpolation point on each face of the master cell, indexed as 12.
+Nfp: Number of interpolation point on each face of the master cell, indexed as 13.
+P: Approximation order of the master cell, indexed as 14.
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
@@ -334,7 +351,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < Ele2d; i++){
-		CalculatePenaltyParameter(Tau + i*Np2d*(Nlayer + 1), Np2d, Np, UpEidM, BotEidM, Nlayer, P, Nface);
+		CalculatePenaltyParameter(Tau + i*Np2d*(Nlayer + 1), Np2d, Nlayer + 1, P, Nface);
 	}
 
 #ifdef _OPENMP
@@ -344,11 +361,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		int StartPoint;
 
 		for (int L = 0; L < Nlayer; L++){
-			//Index of the studied element
+			/* Index of the studied element */
 			int LocalEle = e*Nlayer + L + 1;
-			//Index of the element that located upside of the studied element 
+			/* Index of the element that located upside of the studied element */ 
 			int UpEle = (int)EToE[e*Nlayer*Nface + L*Nface + Nface - 1];
-			//Index of the element that located downside of the studied element
+			/* Index of the element that located downside of the studied element */
 			int DownEle = (int)EToE[e*Nlayer*Nface + L*Nface + Nface - 2];
 
 			StartPoint = (int)jcs[e*Nlayer*Np + L*Np];
@@ -357,11 +374,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				Np, jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], M3d, \
 				Dt, tz + e*Nlayer*Np + L*Np, J + e*Nlayer*Np + L*Np, L);
 
-			if (UpEle == DownEle){ // we have only one layer in vertical direction, and L=0
+			if (UpEle == DownEle){ 
+				/* we have only one layer in vertical direction, and L=0 */
 				StartPoint = jcs[e*Nlayer*Np + L*Np];
 
 				ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, \
-					Np2d, jcs[e * Nlayer * Np + 1] - jcs[e * Nlayer * Np], M3d, M2d, J + e * Nlayer * Np, \
+					Np2d, jcs[e * Nlayer * Np + 1] - jcs[e * Nlayer * Np], M3d, M2d, J + e * Nlayer * Np + L*Np, \
 					J2d + e*Np2d, UpEidM, Tau + e*(Nlayer + 1)*Np2d, Dt, tz + e * Nlayer * Np + L * Np);
 
 			}
@@ -371,7 +389,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 					ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, \
 						Np2d, jcs[e * Nlayer * Np + 1] - jcs[e * Nlayer * Np], M3d, M2d, J + e * Nlayer * Np + L*Np, \
-						J2d + e*Np2d, UpEidM, Tau + e*(Nlayer + 1)*Np2d, Dt, tz + e * Nlayer * Np);
+						J2d + e*Np2d, UpEidM, Tau + e*(Nlayer + 1)*Np2d, Dt, tz + e * Nlayer * Np + L * Np);
 
 					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + Np;
 
@@ -379,8 +397,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						M3d, M2d, J + e * Nlayer * Np + L*Np + Np, J2d + e*Np2d, BotEidM, UpEidM, Dt, tz + e * Nlayer * Np + L*Np + Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d + Np2d);
 				}
-				else if (LocalEle == DownEle){// This is the bottom most cell.
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] - Np;
+				else if (LocalEle == DownEle){
+					/* 
+					This is the bottom most cell, jcs[e*Nlayer*Np + L*Np + 1] means the total nozero contained in the sparse matrix before the current point, including the 
+					 first point of the studied element, (int)jcs[e*Nlayer*Np + L*Np + 1] - Np means the start of the studied local element, while (int)jcs[e*Nlayer*Np + L*Np + 1] - 2*Np
+					the start of the element located upside of the studied local element
+					*/
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np + 1] - 2*Np;
 
 					GetLocalToUpElementContributionForSecondOrderTerm(sr, StartPoint, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
 						M3d, M2d, J + e * Nlayer * Np + L*Np - Np, J2d + e*Np2d, UpEidM, BotEidM, Dt, tz + e * Nlayer * Np + L*Np - Np, \
@@ -390,13 +413,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 				}
 				else{
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] - Np;
+					/*
+						Element locates in the middle of the studied column, and there are elements located both upside and downside
+					*/
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np];
 
 					GetLocalToUpElementContributionForSecondOrderTerm(sr, StartPoint, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
 						M3d, M2d, J + e * Nlayer * Np + L*Np - Np, J2d + e*Np2d, UpEidM, BotEidM, Dt, tz + e * Nlayer * Np + L*Np - Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d);
 
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + Np;
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + 2*Np;
 
 					GetLocalToDownElementContributionForSecondOrderTerm(sr, StartPoint, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
 						M3d, M2d, J + e * Nlayer * Np + L*Np + Np, J2d + e*Np2d, BotEidM, UpEidM, Dt, tz + e * Nlayer * Np + L*Np + Np, \
@@ -406,4 +432,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 		}
 	}
+
+	free(TempIr);
+	free(TempJc);
+	free(UpEidM);
+	free(BotEidM);
+	free(Tau);
 }

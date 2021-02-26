@@ -7,7 +7,6 @@ For this term, the primal form is given as:
 $$-\int_{\Omega_e}\nabla_hv\nabla_{\sigma}q_hd\boldsymbol{x}+\int_{\epsilon_{iv}}[q_h]\left\{\nabla_hv\right\}
 d\boldsymbol{x}=-\int_{\epsilon_{ih}}\hat Q_h[v]d\boldsymbol{x}-\int_{\epsilon_{bh}}\hat Q_hn_hvd\boldsymbol{x}
 \\=-\int_{\epsilon_{ih}}\left\{\nabla_hq_h\right\}[v]d\boldsymbol{x} - \int_{\epsilon_{bh}}\hat Q_hn_hvd\boldsymbol{x}$$
-At present, the last term in the primal form is neglected, i.e. the numerical flux $\hat Q_hn_h$is set to zero at the lateral boundary.
 */
 
 
@@ -453,6 +452,38 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, double *ETo
 	free(EdgeContribution);
 }
 
+/*The input parameters are organized as follows:
+Np: Number of interpolation points, indexed as 0.
+Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
+Nlayer: Number of layers in vertical direction, indexed as 2.
+Ele2d: Number of elements in two-dimensional mesh object, indexed as 3.
+Nface: Number of face numbers for the three-dimensional master cell, indexed as 4.
+EToE: Element to element topological relation of the 3d mesh, indexed as 5.
+FToE: Face to element topological relation of the inner edge, indexed as 6.
+FToF: Face to face topological relation of the inner edge, indexed as 7.
+J: Jacobian coefficient of the three-dimensional mesh object, indexed as 8.
+J2d: Jacobian coefficient of the two-dimensional mesh object, indexed as 9.
+Js: Jacobian coefficient of the inner edge, indexed as 10.
+M3d: Mass matrix of the 3d master cell, indexed as 11.
+LM2d: Mass matrix of the 2d master cell of the inner edge, indexed as 12.
+M2d: Mass matrix of the 2d master cell, indexed as 13.
+BENe: Number of boundary edge, indexed as 14.
+IENe: Number of inner edge, indexed as 15.
+Fmask: Index of the interpolation point on each face of the master cell, indexed as 16.
+Nfp: Number of interpolation point on each face of the master cell, indexed as 17.
+P: Approximation order of the master cell, indexed as 18.
+vector: The direction vector of the inner edge object, indexed as 19.
+rd: Differential coefficient of the 3d mesh object in direction r, indexed as 20.
+sd: Differential coefficient of the 3d mesh object in direction s, indexed as 21.
+tz: Jacobian coefficient in vertical direction, indexed as 22.
+Dr: Differential matrix of the 3d master cell in direction r, indexed as 23.
+Ds: Differential matrix of the 3d master cell in direction s, indexed as 24.
+Dt: Differential matrix of the 3d master cell in direction t, indexed as 25.
+BEFToF: Face to face topological relation of the boundary edge, indexed as 26.
+BEFToE: Face to element topological relation of the inner edge, indexed as 27.
+BEVector: The direction vector of the boundary edge object, indexed as 28.
+*/
+
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
@@ -484,8 +515,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *Fmask = mxGetPr(prhs[16]);
 	int maxNfp = mxGetM(prhs[16]);
 	double *Nfp = mxGetPr(prhs[17]);
-	int HorNfp = Nfp[0];
-	int VertNfp = Nfp[Nface - 1];
+	int HorNfp = (int)Nfp[0];
+	int VertNfp = (int)Nfp[Nface - 1];
 	double *UpEidM = malloc(VertNfp*sizeof(double));
 	double *BotEidM = malloc(VertNfp*sizeof(double));
 	for (int i = 0; i < VertNfp; i++){

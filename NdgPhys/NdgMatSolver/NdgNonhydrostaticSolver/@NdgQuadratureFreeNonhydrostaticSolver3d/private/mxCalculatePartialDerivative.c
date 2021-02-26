@@ -102,7 +102,7 @@ fphys: the three-dimensional physical field, the input order is 8.
 varIndex: the variable index, the input order is 9.
 ftype3d: the three-dimensional boundary edge type, the input order is 10.
 gra: the accelaration term due to gravity, the input order is 11.
-fext3d: the three-dimensional exterior data at the boundary edge, the input order is 12.
+fext: the three-dimensional exterior data at the boundary edge, the input order is 12.
 h2d: the two-dimensional water depth field, the input order is 13.
 z2d: the two-dimensional bottom elevation field, the input order is 14.
 fext2d: the two-dimensional exterior data at the boundary edge, the input order is 15.
@@ -112,7 +112,6 @@ BoundaryEdge2d: the two-dimensional boundary edge object, the input order is 18.
 cell2d: the two-dimensional master cell, the input order is 19.
 ftype2d: the two-dimensional boundary edge type, the input order is 20.
 */
-
 
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
@@ -169,8 +168,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int Nface2d = (int)mxGetScalar(TempNface2d);
 
 	if (!strcmp("False", SWENonhydro3dInitialized)){
-	   mxArray *TempIENface = mxGetField(prhs[2], 0, "Nface");
-	   int Nface3d = (int)mxGetScalar(TempIENface);
+	   mxArray *TempNface = mxGetField(prhs[2], 0, "Nface");
+	   int Nface3d = (int)mxGetScalar(TempNface);
        mxArray *TempIENfp = mxGetField(prhs[3], 0, "Nfp");
 	   int IENfp = (int)mxGetScalar(TempIENfp);
 	   mxArray *TempIENe = mxGetField(prhs[3], 0, "Ne");
@@ -281,6 +280,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		VerticalColumnIntegralField3d(NonhydroHU2d + i*Np2d, Np2d, V2d, TempNonhydroHU2d + i*Np2d, \
 			TempNonhydrofield3d + i*Np*NLayer, hu + i*Np*NLayer, Jz + i*Np*NLayer, \
 			Nonhydrofmod + i*Np*NLayer, InvV3d, Np, NLayer);
+
 		VerticalColumnIntegralField3d(NonhydroHV2d + i*Np2d, Np2d, V2d, TempNonhydroHV2d + i*Np2d, \
 			TempNonhydrofield3d + i*Np*NLayer, hv + i*Np*NLayer, Jz + i*Np*NLayer, \
 			Nonhydrofmod + i*Np*NLayer, InvV3d, Np, NLayer);
@@ -507,7 +507,6 @@ void GetSecondOrderPartialDerivativeInHorizontalDirection(double *SPSPX, double 
 void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double *PvpsDest, double *PwpsDest, const mxArray *mesh, const mxArray *cell, \
 	const mxArray *BottomEdge, const mxArray *BottomBoundaryEdge, const mxArray *SurfaceBoundaryEdge, double *u, double *v, double *w, double *ws, \
 	double *wb){
-
 	mxArray *Temprx = mxGetField(mesh, 0, "rx");
 	double *rx = mxGetPr(Temprx);
 	mxArray *Tempsx = mxGetField(mesh, 0, "sx");
@@ -696,11 +695,11 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 		DotProduct(NonhydroSurfBEFluxS + face*SurfBENfp, uM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroSurfBEFluxM + SurfBENe*SurfBENfp + face*SurfBENfp, vM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
-		DotProduct(NonhydroSurfBEFluxS + BotBENe*SurfBENfp + face*SurfBENfp, vM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		DotProduct(NonhydroSurfBEFluxS + SurfBENe*SurfBENfp + face*SurfBENfp, vM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroSurfBEFluxM + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		DotProduct(NonhydroSurfBEFluxS + 2 * BotBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 	}
 
@@ -773,6 +772,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 	const mxArray *BottomBoundaryEdge, const mxArray *mesh2d, const mxArray *InnerEdge2d, const mxArray *BoundaryEdge2d, \
 	const mxArray *cell2d, signed char *ftype2d, double *PHPX, double *PHPY, double *hu2d, double *hv2d, double *z2d,\
 	double *h2d, double *fext2d, double gra, double Hcrit, double *zx3d, double *zy3d, double *u, double *v){
+
 	mxArray *Temprx2d = mxGetField(mesh2d, 0, "rx");
 	double *rx2d = mxGetPr(Temprx2d);
 	int Np2d = (int)mxGetM(Temprx2d);
@@ -982,7 +982,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 		FetchBoundaryEdgeFacialValue(etax + face*SurfBENfp, PHPX, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
 		/*$Tempz_x=\frac{\partial z}{\partial x}$*/
 		FetchBoundaryEdgeFacialValue(TempZx2d + face*SurfBENfp, zx3d, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
-		/*$\eta_x=\eta_x + Tempz_x$, since $\eta = H+z$*/
+		/*$\eta_x=\H_x + Tempz_x$, since $\eta = H+z$*/
 		Add(etax + face*SurfBENfp, etax + face*SurfBENfp, TempZx2d + face*SurfBENfp, SurfBENfp);
 		/*$u_{\eta}\eta_x$, at present, the data is stored in \eta_x*/
 		DotProduct(etax + face*SurfBENfp, ueta + face*SurfBENfp, etax + face*SurfBENfp, SurfBENfp);
@@ -1045,7 +1045,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double *Dt = mxGetPr(TempDt);
 	mxArray *TempNface = mxGetField(cell, 0, "Nface");
-	int Nface = (int)mxGetScalar(TempNface);// Substract the bottom face and surface face from the total face
+	int Nface = (int)mxGetScalar(TempNface);
 	mxArray *TempInvM = mxGetField(cell, 0, "invM");
 	double *invM = mxGetPr(TempInvM);
 	mxArray *TempNp = mxGetField(cell, 0, "Np");
@@ -1184,10 +1184,10 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 3, BENe);
 
-		DotDivide(uM + face*BENfp, uM + face*BENfp, hM + face*BENfp, BENfp);
-		DotDivide(uP + face*BENfp, uP + face*BENfp, hP + face*BENfp, BENfp);
-		DotDivide(vM + face*BENfp, vM + face*BENfp, hM + face*BENfp, BENfp);
-		DotDivide(vP + face*BENfp, vP + face*BENfp, hP + face*BENfp, BENfp);
+		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, Hcrit, hM + face*BENfp, BENfp);
+		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, Hcrit, hP + face*BENfp, BENfp);
+		DotCriticalDivide(vM + face*BENfp, vM + face*BENfp, Hcrit, hM + face*BENfp, BENfp);
+		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, Hcrit, hP + face*BENfp, BENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxM + face*BENfp, uM + face*BENfp, BEnx + face*BENfp, BENfp);
 

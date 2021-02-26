@@ -11,7 +11,7 @@ Detail about this form can be found through any markdown editor.
 */
 
 
-/*This following funciton is used to assemble term corresponds to 
+/*This following function is used to assemble term corresponds to 
 $\int_{\Omega}\boldsymbol{v}\cdot \nabla_h p_h d\boldsymbol{x}$.
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
@@ -95,7 +95,7 @@ void ImposeFirstOrderNonhydroDirichletBoundaryCondition(double *dest, int StartP
 	free(Contribution);
 }
 
-/*The following funciton is used to assemble terms corresponding to
+/*The following function is used to assemble terms corresponding to
 $- \int_{{\epsilon}_i} [p_h] \cdot \boldsymbol{\left\{v\right\}}d\boldsymbol{x}$
 Explanation of most variables can be found in function GetLocalVolumuIntegralTermForFirstOrderTerm
 and ImposeNonhydroDirichletBoundaryCondition.
@@ -163,6 +163,22 @@ void GetLocalToDownElementContributionForFirstOrderTerm(double *dest, int StartP
 	free(TempMass2d);
 }
 
+/*The input parameters are organized as follows:
+Np: Number of interpolation points, indexed as 0.
+Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
+Nlayer: Number of layers in vertical direction, indexed as 2.
+Ele2d: Number of elements in two-dimensional mesh object, indexed as 3.
+Nface: Number of face numbers for the three-dimensional master cell, indexed as 4.
+EToE: Element to element topological relation of the 3d mesh, indexed as 5.
+tz: Jacobian coefficient in vertical direction, indexed as 6.
+Dt: Differential matrix of the 3d master cell in direction t, indexed as 7.
+J: Jacobian coefficient of the three-dimensional mesh object, indexed as 8.
+J2d: Jacobian coefficient of the 2d mesh, indexed as 9.
+M2d: Mass matrix of the 2d master cell of the 2d mesh, indexed as 10.
+M3d: Mass matrix of the 3d master cell, indexed as 11.
+Fmask: Index of the interpolation point on each face of the master cell, indexed as 12.
+Nfp: Number of interpolation point on each face of the master cell, indexed as 13.
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
@@ -242,7 +258,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					/*For this situation, this is the bottom most cell, since Newmann boundary
 					condition is added, for the first order derivative about non-hydrostatic
 					pressure, we do nothing here*/
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + Np;
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np + 1] - 2 * Np;
 
 					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint - Np, Np, Np2d, \
 						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
@@ -250,14 +266,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 				}
 				else{
-					/*Consider the influence of local element have on the adjacent cell upside*/
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + Np;
+					/*
+					Element locates in the middle of the studied column, and there are elements located both upside and downside
+					*/
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np];
 
-					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint - Np, Np, Np2d, \
+					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
 						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
 						M3d, M2d, J + (e*Nlayer + L - 1)*Np, J2d + e*Np2d, UpEidM, BotEidM);
 
-					GetLocalToDownElementContributionForFirstOrderTerm(sr, StartPoint + Np, Np, Np2d, \
+					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + 2 * Np;
+
+					GetLocalToDownElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
 						jcs[e * Nlayer * Np + 1] - jcs[e * Nlayer * Np], \
 						M3d, M2d, J + e * Nlayer * Np + Np, J2d + e*Np2d, BotEidM, UpEidM);
 				}
