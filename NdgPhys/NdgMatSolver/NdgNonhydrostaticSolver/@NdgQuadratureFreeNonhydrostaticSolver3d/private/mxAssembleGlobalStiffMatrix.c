@@ -1,13 +1,12 @@
 #include "SWENonhydrostatic3d.h"
 
-void ImposeNonhydroBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, double *, \
-	mwIndex *, mwIndex *, const mxArray *, const mxArray *, \
-	const mxArray *, const mxArray *);
+void ImposeNonhydroBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, \
+	const mxArray *, const mxArray *, const mxArray *, const mxArray *);
 
 
-void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int, int, double *, mwIndex *, \
-	mwIndex *, double *, double *, int, int, double *, double *, double *, double *, \
-	double *, int, double *, double *, double *);
+void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int , \
+	double *, double *, int , int , double *, double *, double *, double *, \
+	double *, int , double *, double *, double *, const mxArray *, const mxArray *);
 
 void SumInColumn(double *, double *, int);
 
@@ -176,16 +175,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 
-	ImposeNonhydroBoundaryCondition(sr, irs, jcs, PSPX, PSPY, PNPS, irPNPS, jcPNPS, \
-	     prhs[14], prhs[15], prhs[16], prhs[17]);
+	ImposeNonhydroBoundaryCondition(sr, irs, jcs, PSPX, PSPY, prhs[14], prhs[15], prhs[16], prhs[17]);
 
 	free(InvSquaHeight);
 }
 
 
-void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *PSPX, double *PSPY, double *PNPS, \
-	mwIndex *irPNS, mwIndex *jcPNS,  const mxArray *BoundaryEdge2d, const mxArray *mesh, \
-	const mxArray *cell, const mxArray *BoundaryEdge){
+void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *PSPX, double *PSPY, \
+	const mxArray *BoundaryEdge2d, const mxArray *mesh, const mxArray *cell, const mxArray *BoundaryEdge){
 
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
@@ -216,7 +213,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 	mxArray *TempFToE2d = mxGetField(BoundaryEdge2d, 0, "FToE");
 	double *FToE2d = mxGetPr(TempFToE2d);
 	mxArray *Tempftype2d = mxGetField(BoundaryEdge2d, 0, "ftype");
-	signed char *ftype2d = mxGetPr(Tempftype2d);
+	signed char *ftype2d = (signed char *)mxGetData(Tempftype2d);
 	mxArray *TempBENe2d = mxGetField(BoundaryEdge2d, 0, "Ne");
 	double *BENe2d = mxGetPr(TempBENe2d);
 
@@ -238,6 +235,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 		int face2d = 0;
 		int ele2d = 0;
 		int Nface2d = Nface - 2;
+
 		double *FpIndex = malloc(Nfp*sizeof(double));
 
 		GetFaceTypeAndFaceOrder(&Flag, &face2d, &ele2d, FToF2d, FToE2d, ftype2d, edge);
@@ -250,15 +248,11 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 
 			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
 
-			int GlobalFace;
+			int GlobalFace, LocalEle;
 
 			for (int L = 0; L < Nlayer; L++){
-				//Index of the studied element
-				int LocalEle = (ele2d - 1)*Nlayer + L + 1;
-				//Index of the element that located upside of the studied element 
-				int UpEle = (int)EToE[(ele2d - 1)*Nlayer*Nface + L*Nface + Nface - 1];
-				//Index of the element that located downside of the studied element
-				int DownEle = (int)EToE[(ele2d - 1)*Nlayer*Nface + L*Nface + Nface - 2];
+
+				LocalEle = (ele2d - 1)*Nlayer + L + 1;
 
 				TempEToE = EToE + (ele2d - 1)*Nlayer*Nface + L*Nface;
 
@@ -268,81 +262,27 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 
 				TempJs = Js + GlobalFace * Nfp;
 
-				ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, LocalEle, PNPS, irPNS, jcPNS, \
+				ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, \
 					PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
-					TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
-
-				if (UpEle == DownEle){ // we have only one layer in vertical direction, since L=0
-					// Doing nothing
-				}
-				else{//two or more layers included in vertical direction
-					if (LocalEle == UpEle){//This is the top most cell, and L=0
-
-						TempJ = J + (ele2d - 1)*Nlayer*Np + (L+1)*Np;
-
-						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, DownEle);
-
-						TempJs = Js + GlobalFace * Nfp;
-						/*Consider the impact of local element have on the element downside*/
-						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, DownEle, PNPS, irPNS, jcPNS, \
-							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
-							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
-					}
-					else if (LocalEle == DownEle){// This is the bottom most cell.
-						/*For this situation, this is the bottom most cell, since Newmann boundary
-						condition is added, for the first order derivative about non-hydrostatic
-						pressure, we do nothing here*/
-						TempJ = J + (ele2d - 1)*Nlayer*Np + (L - 1)*Np;
-
-						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, UpEle);
-
-						TempJs = Js + GlobalFace * Nfp;
-						/*Consider the impact of local element have on the element upside*/
-						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, UpEle, PNPS, irPNS, jcPNS, \
-							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
-							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
-					}
-					else{
-						/*Consider the influence of local element have on the adjacent cell upside*/
-						TempJ = J + (ele2d - 1)*Nlayer*Np + (L - 1)*Np;
-
-						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, UpEle);
-
-						TempJs = Js + GlobalFace * Nfp;
-						/*Consider the impact of local element have on the element upside*/
-						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, UpEle, PNPS, irPNS, jcPNS, \
-							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
-							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
-
-						/*Consider the influence of local element have on the adjacent cell downside*/
-						TempJ = J + (ele2d - 1)*Nlayer*Np + (L + 1)*Np;
-
-						GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, DownEle);
-
-						TempJs = Js + GlobalFace * Nfp;
-						/*Consider the impact of local element have on the element downside*/
-						ImposeNewmannBoundaryCondition(dest, irs, jcs, LocalEle, DownEle, PNPS, irPNS, jcPNS, \
-							PSPX, PSPY, Np, Nfp, Mass3d, TempJ, TempJs, LMass2d, \
-							TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp);
-					}
-				}
+					TempEToE, Nface, FpIndex, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp, \
+					mesh, cell);
 			}		
 		}
 		free(FpIndex);
 	}
 }
 
-void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, int AdjOrLocalEle, double *PsSource, mwIndex *irPNS, \
-	mwIndex *jcPNS, double *PsPx, double *PsPy, int Np, int Nfp, double *M3d, double *J, double *Js, double *M2d, \
-	double *EToE, int Nface, double *FpIndex, double *nx, double *ny){
+void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle,\
+	double *PsPx, double *PsPy, int Np, int Nfp, double *M3d, double *J, double *Js, double *M2d, \
+	double *EToE, int Nface, double *FpIndex, double *nx, double *ny, const mxArray *mesh, const mxArray *cell){
 
 	double *TempPsPx = malloc(Nfp*sizeof(double));
 	double *TempPsPy = malloc(Nfp*sizeof(double));
 	double *TempPsP  = malloc(Nfp*sizeof(double));
 	/*$\frac{\partial \sigma}{\partial x}$*/
-	FetchFacialData(TempPsPx, PsPx + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp);  
+	FetchFacialData(TempPsPx, PsPx + (LocalEle - 1)*Np, FpIndex, Nfp);
 	/*$\frac{\partial \sigma}{\partial y}$*/
-	FetchFacialData(TempPsPy, PsPy + (AdjOrLocalEle - 1)*Np, FpIndex, Nfp); 
+	FetchFacialData(TempPsPy, PsPy + (LocalEle - 1)*Np, FpIndex, Nfp);
 	/*$\frac{\partial \sigma}{\partial x}n_x$*/
 	DotProduct(TempPsPx, TempPsPx, nx, Nfp);
 	/*$\frac{\partial \sigma}{\partial y}n_y$*/
@@ -352,39 +292,34 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	/*$-\frac{\partial \sigma}{\partial y}n_y$*/
 	DotDivideByConstant(TempPsPy, TempPsPy, -1.0, Nfp);
 
-	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
-	double *TempPNPS = malloc(Np*Np*sizeof(double));
-	double *TempEToEInVert = malloc(3 * sizeof(double));
-	int UniNum = 0;
-	int StartPoint;
-	double *EToEInVert = malloc(2 * sizeof(double));
-	EToEInVert[0] = EToE[Nface - 2];
-	EToEInVert[1] = EToE[Nface - 1];
-	FindUniqueElementAndSortOrder(TempEToEInVert, EToEInVert, &UniNum, 2, LocalEle);
-	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToEInVert[j] == AdjOrLocalEle)//DownEle
-			StartPoint = (int)jcPNS[(LocalEle - 1)*Np] + j*Np;
-	}
-	int NonzeroPerColumn = jcPNS[(LocalEle - 1)*Np + 1] - jcPNS[(LocalEle - 1)*Np];
-	FetchDataInSparseMatrix(TempPNPS, PsSource + StartPoint, NonzeroPerColumn, Np);
-	
+	mxArray *TempDt = mxGetField(cell, 0, "Dt");
+	double *Dt = mxGetPr(TempDt);
+	mxArray *TempTz = mxGetField(mesh, 0, "tz");
+	double  *tz = mxGetPr(TempTz);
 
+	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
+	double *Dz = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Dz, Dt, tz + (LocalEle - 1)*Np, Np);
 	double *TempFacialData = malloc(Nfp*sizeof(double));
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-	DiagMultiply(InvEleMass3d, M3d, J, Np);//J down
+	DiagMultiply(InvEleMass3d, M3d, J, Np);
 	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-	DiagMultiply(EleMass2d, M2d, Js, Nfp); //Js down
+	DiagMultiply(EleMass2d, M2d, Js, Nfp);
+
+	int UniNum = 0, StartPoint;
 	
 	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
 	double *TempEToE = malloc((Nface + 1)*sizeof(double));
+
 	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
-	NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
+
+	int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
 
 	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == AdjOrLocalEle)
+		if ((int)TempEToE[j] == LocalEle)
 			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
 	}
 	double *ContributionPerPoint = malloc(Np*sizeof(double));
@@ -396,7 +331,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	for (int j = 0; j < Np; j++){
 		memset(ContributionPerPoint, 0, Np*sizeof(double));
 		
-		FetchFacialData(TempFacialData, TempPNPS + j*Np, FpIndex, Nfp);
+		FetchFacialData(TempFacialData, Dz + j*Np, FpIndex, Nfp);
 		/*$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}$*/
 		DotProduct(TempPsPx, TempPsPx, TempFacialData, Nfp);
 		/*$-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$*/
@@ -420,9 +355,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	free(TempPsPx);
 	free(TempPsPy);
 	free(TempPsP);
-	free(TempPNPS);
-	free(TempEToEInVert);
-	free(EToEInVert);
+	free(Dz);
 	free(TempFacialData);
 	free(EleMass2d);
 	free(TempContribution);
@@ -430,7 +363,6 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	free(InvEleMass3d);
 	free(TempEToE);
 	free(ContributionPerPoint);
-
 }
 
 void SumInColumn(double *dest, double *Source, int Np){
