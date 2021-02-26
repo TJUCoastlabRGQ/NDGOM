@@ -1184,10 +1184,10 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 3, BENe);
 
-		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, Hcrit, hM + face*BENfp, BENfp);
-		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, Hcrit, hP + face*BENfp, BENfp);
-		DotCriticalDivide(vM + face*BENfp, vM + face*BENfp, Hcrit, hM + face*BENfp, BENfp);
-		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, Hcrit, hP + face*BENfp, BENfp);
+		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
+		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
+		DotCriticalDivide(vM + face*BENfp, vM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
+		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxM + face*BENfp, uM + face*BENfp, BEnx + face*BENfp, BENfp);
 

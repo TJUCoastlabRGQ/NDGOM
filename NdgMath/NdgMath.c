@@ -37,7 +37,9 @@ void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *
 	}
 }
 
-/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
+/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified.
+Left multiply the matrix source with a diagonal matrix composed of element contained in coe. 
+*/
 void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
 {
 	for (int colI = 0; colI < Np; colI++){

@@ -18,6 +18,27 @@ void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed cha
 void GetInverseSquareHeight(double *, double *, double, int);
 
 int bin(int, int, int, mwIndex *);
+/*This function is used to assemble the global stiff matrix used in the 
+three-dimensional non-hydrostatic solver, the input parameters are organized as follows:
+PNPS: $\frac{\partial q}{\partial \sigma}$, indexed as 0;
+SPNPX: $\frac{\partial^2 q}{\partial x^2}$, indexed as 1;
+SPNPY: $\frac{\partial^2 q}{\partial y^2}$, indexed as 2;
+SPNPS: $\frac{\partial^2 q}{\partial \sigma^2}$, indexed as 3;
+MSPNPX: $\frac{\partial}{\partial x}\left (\frac{\partial q}{\partial \sigma}\right )$, indexed as 4;
+MSPNPY: $\frac{\partial}{\partial y}\left (\frac{\partial q}{\partial \sigma}\right )$, indexed as 5;
+PSPX: $\frac{\partial \sigma}{\partial x}$, indexed as 6;
+PSPY: $\frac{\partial \sigma}{\partial y}$, indexed as 7;
+SPSPX: $\frac{\partial^2 \sigma}{\partial x^2}$, indexed as 8;
+SPSPY: $\frac{\partial^2 \sigma}{\partial y^2}$, indexed as 9;
+SQPSPX: $\left (\frac{\partial \sigma}{\partial x}\right )^2$, indexed as 10;
+SQPSPY: $\left (\frac{\partial \sigma}{\partial y}\right )^2$, indexed as 11;
+Height: The water depth, indexed as 12;
+Hcrit: The critical water depth, indexed as 13;
+BoundaryEdge2d: The two-dimensional boundary edge, indexed as 14;
+mesh: The three-dimensional mesh object, indexed as 15;
+cell: The three-dimensional master cell, indexed as 16;
+BoundaryEdge: The three-dimensional mesh object, indexed as 17;
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -156,7 +177,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 
 	ImposeNonhydroBoundaryCondition(sr, irs, jcs, PSPX, PSPY, PNPS, irPNPS, jcPNPS, \
-	     prhs[16], prhs[17], prhs[18], prhs[19]);
+	     prhs[14], prhs[15], prhs[16], prhs[17]);
 
 	free(InvSquaHeight);
 }
@@ -228,7 +249,6 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 		if(Flag ==1 ){ //Impose Newmann boundary condition here.
 
 			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
-
 
 			int GlobalFace;
 
@@ -388,7 +408,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 
 		SumInColumn(ContributionPerPoint, EleMass2d, Nfp);
 
-		AssembleContributionIntoColumn(TempContribution + j*Np, EleMass2d, &column, Np, 1);
+		AssembleContributionIntoColumn(TempContribution + j*Np, ContributionPerPoint, &column, Np, 1);
 
 	}
 
@@ -416,7 +436,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 void SumInColumn(double *dest, double *Source, int Np){
 	for (int col = 0; col < Np; col++){
 		for (int Row = 0; Row < Np; Row++){
-			dest[col] = dest[col*Np + Row];
+			dest[col] += Source[col*Np + Row];
 		}
 	}
 }
@@ -428,6 +448,7 @@ int GetGlobalFace(int face, int Ne, double *FToE, double *FToF, int LocalElement
 			break;
 		}
 	}
+	return -1; //failed
 }
 
 void GetFaceTypeAndFaceOrder(int *flag, int *face, int *ele, double *FToF, double *FToE, signed char *ftype, int edge){

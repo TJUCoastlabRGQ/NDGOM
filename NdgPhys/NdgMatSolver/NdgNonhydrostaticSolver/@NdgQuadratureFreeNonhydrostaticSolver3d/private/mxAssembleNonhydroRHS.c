@@ -5,6 +5,20 @@
 
 void GetInverseHeight(double *, double *, double, int);
 
+/*The input variables are organized as follows:
+PUPX: $\frac{\partial u}{\partial x}$, indexed as 0.
+PUPS: $\frac{\partial u}{\partial \sigma}$, indexed as 1.
+PVPY: $\frac{\partial v}{\partial y}$, indexed as 2.
+PVPS: $\frac{\partial v}{\partial \sigma}$, indexed as 3.
+PWPS: $\frac{\partial w}{\partial \sigma}$, indexed as 4.
+PSPX: $\frac{\partial \sigma}{\partial x}$, indexed as 5.
+PSPY: $\frac{\partial \sigma}{\partial y}$, indexed as 6.
+   h: The three dimensional water depth, indexed as 7.
+  dt: The time step, indexed as 8.
+ rho: The water density, indexed as 9.
+Hcrit: The critical water depth, indexed as 10.
+*/
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	double *PUPX = mxGetPr(prhs[0]);

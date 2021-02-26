@@ -1,5 +1,25 @@
 #include "SWENonhydrostatic3d.h"
-#include "../../../../../NdgMath/NdgSWE.h"
+
+/*This function is used to update the final velocity following:
+$\left (hu\right )^{n+1}=\left (hu\right )^*-\frac{h\Delta t}{\rho_0}\left(\frac{\partial q}{\partial x}+\frac{\partial \sigma}{\partial x}\frac{\partial q}{\partial \sigma}\right)$
+$\left (hv\right )^{n+1}=\left (hv\right )^*-\frac{h\Delta t}{\rho_0}\left(\frac{\partial q}{\partial y}+\frac{\partial \sigma}{\partial y}\frac{\partial q}{\partial \sigma}\right)$
+$\left (hw\right )^{n+1}=\left (hw\right )^*-\frac{\Delta t}{\rho_0}\frac{\partial q}{\partial \sigma}$
+The input parameters are organized as follows:
+NonhydroPressure: The nonhydrostatic pressure, indexed as 0;
+fphys: The three-dimensional physical field, indexed as 1;
+varIndex: The variable index, indexed as 2;
+rho: The water density, indexed as 3;
+dt: The time step, indexed as 4;
+PSPX: $\frac{\partial \sigma}{\partial x}$, indexed as 5;
+PSPY: $\frac{\partial \sigma}{\partial y}$, indexed as 6;
+mesh: The three-dimensional mesh object, indexed as 7;
+cell: The three-dimensional master cell, indexed as 8;
+InnerEdge: The three-dimensional inner edge object, indexed as 9;
+BoundaryEdge: The three-dimensional boundary edge object, indexed as 10;
+BottomEdge: The three-dimensional bottom edge object, indexed as 11;
+BottomBoundaryEdge: The three-dimensional bottom boundary edge object, indexed as 12;
+SurfaceBoundaryEdge: The three-dimensional surface boundary edge object, indexed as 13;
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -279,7 +299,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		Minus(PNPX + k*Np, PNPX + k*Np, NonhydroERHS + k*Np, Np);
 
-		Minus(PNPY + k*Np, PNPY + k*Np, NonhydroERHS + Np*K*(Nface-2) + k*Np, Np);
+		Minus(PNPY + k*Np, PNPY + k*Np, NonhydroERHS + Np*K*Nface + k*Np, Np);
 
 	}
 
@@ -345,7 +365,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int face = 0; face < SurfBENe; face++){
 		FetchBoundaryEdgeFacialValue(qSurfBEM + face*SurfBENfp, NonhydroPressure, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
 		EvaluateNonhydroVerticalFaceSurfFlux(QSurfBEfluxM + face*SurfBENfp, qSurfBEM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
-		DotProduct(QSurfBEfluxS + face*SurfBENfp, qSurfBEM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		/*At dirichelet boundary, the numerical flux is given as the Dirichlet boundary*/
+		for (int p = 0; p < SurfBENfp; p++){
+			QSurfBEfluxS[face*SurfBENfp + p] = 0;
+		}
+//		DotProduct(QSurfBEfluxS + face*SurfBENfp, qSurfBEM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 	}
 
 #ifdef _OPENMP
@@ -401,7 +425,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		for (int p = 0; p < Np; p++){
 			hu[k*Np + p] = hu[k*Np + p] - h[k*Np + p] * dt / rho*(PNPX[k*Np + p] + PSPX[k*Np + p] * PNPS[k*Np + p]);
 			hv[k*Np + p] = hv[k*Np + p] - h[k*Np + p] * dt / rho*(PNPY[k*Np + p] + PSPY[k*Np + p] * PNPS[k*Np + p]);
-			hw[k*Np + p] = hw[k*Np + p] - 1 / rho*PNPS[k*Np + p];
+			hw[k*Np + p] = hw[k*Np + p] - dt / rho*PNPS[k*Np + p];
 		}
 	}
 

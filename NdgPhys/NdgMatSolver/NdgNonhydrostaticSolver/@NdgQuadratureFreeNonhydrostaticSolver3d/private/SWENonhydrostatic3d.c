@@ -38,7 +38,7 @@ void EvaluateNonhydroVerticalFaceNumFlux_Central(double *dest, double *fm, doubl
 void FetchDataInSparseMatrix(double *dest, double *src, int NonzeroNum, int Np){
 	double *Tempdest = dest;
 	for (int col = 0; col < Np; col++){
-		Tempdest = src + col*Np;
+		Tempdest = dest + col*Np;
 		for (int row = 0; row < Np; row++){
 			Tempdest[row] = src[col*NonzeroNum + row];
 		}
@@ -49,7 +49,7 @@ void FetchDataInSparseMatrix(double *dest, double *src, int NonzeroNum, int Np){
 void FetchFacialData(double *dest, double *src, double *FpIndex, int Nfp){
 
 	for (int i = 0; i < Nfp; i++){
-		dest[i] = src[(int)FpIndex[i]];
+		dest[i] = src[(int)FpIndex[i] - 1 ];
 	}
 
 }
