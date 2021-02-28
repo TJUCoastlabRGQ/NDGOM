@@ -268,19 +268,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
 					AdjEidM[p] = Fmask[(AdjFace - 1)*maxNfp + p];
 				}
+				/*
 				/*The element index is smaller than the local element index, the insert 
 				 position lies before the position corresponding to the local element
 				*/
-				if (ele + 1>TempEToE[i]){
-					StartPoint = jcs[ele*Np] + i*Np;
-				}
+	//			if (ele + 1>TempEToE[i]){
+	//				StartPoint = jcs[ele*Np] + i*Np;
+	//			}
 				/*The element index is greater than the local element index, the insert
 				position lies behind the position corresponding to the local element
 				*/
-				else{
-					StartPoint = jcs[ele*Np] + i*Np + Np;
-				}
+	//			else{
+	//				StartPoint = jcs[ele*Np] + i*Np + Np;
+	//			}
 
+				StartPoint = jcs[ele*Np] + i*Np;
+				
 				GetLocalToAdjacentElementContributionForSecondOrderTerm(sr, StartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
 					M3d, M, J + (int)(TempEToE[i] - 1)*Np, Js + GlobalFace*IENfp, LocalEidM, AdjEidM, Dr, Ds, rd + ele*Np, rd + (int)(TempEToE[i] - 1)*Np, \
 					sd + ele*Np, sd + (int)(TempEToE[i] - 1)*Np, Tau + GlobalFace * IENfp, FacialVector);

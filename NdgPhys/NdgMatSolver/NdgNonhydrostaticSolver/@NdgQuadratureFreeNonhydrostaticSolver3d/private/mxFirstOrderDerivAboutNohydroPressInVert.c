@@ -260,7 +260,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					pressure, we do nothing here*/
 					StartPoint = (int)jcs[e*Nlayer*Np + L*Np + 1] - 2 * Np;
 
-					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint - Np, Np, Np2d, \
+					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
 						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
 						M3d, M2d, J + (e*Nlayer + L - 1)*Np, J2d + e*Np2d, UpEidM, BotEidM);
 

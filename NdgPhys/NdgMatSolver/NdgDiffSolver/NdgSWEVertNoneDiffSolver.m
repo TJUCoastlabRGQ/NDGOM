@@ -13,7 +13,11 @@ classdef NdgSWEVertNoneDiffSolver
         function fphys = matUpdateImplicitVerticalDiffusion( ~, ~, ~, ~, SystemRHS, ~, ~, ~, ~, ~, ~, ~, ~ )
 %             ( physClass, SystemRHS, IMa(intRK,intRK), dt, intRK, Stage );
               fphys = SystemRHS;
-        end        
+        end  
+        
+        function matClearGlobalMemory(obj)
+            %doing nothing
+        end
     end
     
 end

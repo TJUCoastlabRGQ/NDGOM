@@ -6,11 +6,11 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel length
         hcrit = 0.01;
 %         ChLength = 100;
-        ChLength = 100;
+        ChLength = 20;
         %> channel width
-        ChWidth = 6;
+        ChWidth = 1.2;
         %> channel depth
-        H0 = 7.612;
+        H0 = 10;
         %> x range
         %> start time
         startTime = 0;
@@ -32,6 +32,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             % setup mesh domain
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.outputFieldOrder3d = [1 2 3 11];
+            obj.Nfield = 11;
+            obj.Nvar = 3;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, mesh3d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( mesh2d, mesh3d );
@@ -65,7 +68,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

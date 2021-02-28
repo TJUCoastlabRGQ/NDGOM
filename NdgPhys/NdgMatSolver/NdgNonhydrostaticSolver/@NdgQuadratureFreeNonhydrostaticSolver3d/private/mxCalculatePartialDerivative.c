@@ -659,10 +659,10 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + face*BotBENfp, uM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		DotProduct(NonhydroBotBEFluxS + face*BotBENfp, uM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 
-		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + BotBENe*BotBENfp + face*BotBENfp, vM + face*BotBENfp, BotEnz + face*BotBENfp, BotBENfp);
+		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + BotBENe*BotBENfp + face*BotBENfp, vM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		DotProduct(NonhydroBotBEFluxS + BotBENe*BotBENfp + face*BotBENfp, vM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 
-		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + 2*BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotEnz + face*BotBENfp, BotBENfp);
+		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + 2*BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
 		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 
@@ -700,6 +700,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroSurfBEFluxM + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
 		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		//DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 	}
 
@@ -1180,9 +1181,9 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 		FetchBoundaryEdgeFacialValue(NonhydrozM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 
 		ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, \
-			NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, fext + face*BENfp, BENfp, 3, BENe);
+			NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, fext + face*BENfp, BENfp, 2, BENe);
 
-		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 3, BENe);
+		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
 
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);

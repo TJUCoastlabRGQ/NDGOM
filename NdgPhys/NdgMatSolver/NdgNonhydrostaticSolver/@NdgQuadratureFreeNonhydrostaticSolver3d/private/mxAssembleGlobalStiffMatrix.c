@@ -1,7 +1,7 @@
 #include "SWENonhydrostatic3d.h"
 
 void ImposeNonhydroBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, \
-	const mxArray *, const mxArray *, const mxArray *, const mxArray *);
+	const mxArray *, const mxArray *, const mxArray *, const mxArray *, const mxArray *);
 
 
 void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int , \
@@ -37,6 +37,7 @@ BoundaryEdge2d: The two-dimensional boundary edge, indexed as 14;
 mesh: The three-dimensional mesh object, indexed as 15;
 cell: The three-dimensional master cell, indexed as 16;
 BoundaryEdge: The three-dimensional mesh object, indexed as 17;
+ftype2d: The two-dimensional boundary edge type, indexed as 18;
 */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
@@ -175,14 +176,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 
-	ImposeNonhydroBoundaryCondition(sr, irs, jcs, PSPX, PSPY, prhs[14], prhs[15], prhs[16], prhs[17]);
+	ImposeNonhydroBoundaryCondition(sr, irs, jcs, PSPX, PSPY, prhs[14], prhs[15], prhs[16], prhs[17], prhs[18]);
 
 	free(InvSquaHeight);
 }
 
 
 void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *PSPX, double *PSPY, \
-	const mxArray *BoundaryEdge2d, const mxArray *mesh, const mxArray *cell, const mxArray *BoundaryEdge){
+	const mxArray *BoundaryEdge2d, const mxArray *mesh, const mxArray *cell, const mxArray *BoundaryEdge, const mxArray *Arrayftype2d){
 
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
@@ -212,16 +213,19 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 	double *FToF2d = mxGetPr(TempFToF2d);
 	mxArray *TempFToE2d = mxGetField(BoundaryEdge2d, 0, "FToE");
 	double *FToE2d = mxGetPr(TempFToE2d);
-	mxArray *Tempftype2d = mxGetField(BoundaryEdge2d, 0, "ftype");
-	signed char *ftype2d = (signed char *)mxGetData(Tempftype2d);
+	/*
+	mxArray *Tempftype2d = mxGetField(BoundaryEdge2d, 0, "ftype");	
+    signed char *ftype2d = (signed char *)mxGetData(Tempftype2d);
+	*/
+	signed char *ftype2d = (signed char *)mxGetData(Arrayftype2d);
 	mxArray *TempBENe2d = mxGetField(BoundaryEdge2d, 0, "Ne");
-	double *BENe2d = mxGetPr(TempBENe2d);
+	int BENe2d = (int)mxGetScalar(TempBENe2d);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
 	int maxNfp = (int)mxGetM(TempFmask);
 	mxArray *TempNface = mxGetField(cell, 0, "Nface");
-	int Nface = (int)mxGetM(TempNface);
+	int Nface = (int)mxGetScalar(TempNface);
 	mxArray *TempNp = mxGetField(cell, 0, "Np");
 	int Np = (int)mxGetScalar(TempNp);
 	mxArray *TempMass3d = mxGetField(cell, 0, "M");
@@ -230,7 +234,7 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif  
-	for (int edge = 0; edge < (int)BENe2d; edge++){
+	for (int edge = 0; edge < BENe2d; edge++){
 		int Flag = 0;
 		int face2d = 0;
 		int ele2d = 0;

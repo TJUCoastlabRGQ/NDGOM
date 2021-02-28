@@ -19,13 +19,12 @@ BoundaryEdge: The three-dimensional boundary edge object, indexed as 10;
 BottomEdge: The three-dimensional bottom edge object, indexed as 11;
 BottomBoundaryEdge: The three-dimensional bottom boundary edge object, indexed as 12;
 SurfaceBoundaryEdge: The three-dimensional surface boundary edge object, indexed as 13;
+ftype: The three-dimensional boundary edge type, indexed as 14;
 */
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	double *NonhydroPressure = mxGetPr(prhs[0]);
-	int Np = (int)mxGetM(prhs[0]);
-	int K = (int)mxGetN(prhs[0]);
 
 	double *fphys = mxGetPr(prhs[1]);
 	double *varIndex = mxGetPr(prhs[2]);
@@ -34,6 +33,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	double *PSPX = mxGetPr(prhs[5]);
 	double *PSPY = mxGetPr(prhs[6]);
+	int Np = (int)mxGetM(prhs[6]);
+	int K = (int)mxGetN(prhs[6]);
 
 	double *hu = fphys + ((int)varIndex[0] - 1)*Np*K;
 	double *hv = fphys + ((int)varIndex[1] - 1)*Np*K;
@@ -47,6 +48,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memcpy(OutVariable, hu, Np*K*sizeof(double));
 	memcpy(OutVariable + Np*K, hv, Np*K*sizeof(double));
 	memcpy(OutVariable + 2*Np*K, hw, Np*K*sizeof(double));
+	double *Updatedhu = OutVariable;
+	double *Updatedhv = OutVariable + Np*K;
+	double *Updatedhw = OutVariable + 2*Np*K;
 
 	mxArray *Temprx = mxGetField(prhs[7], 0, "rx");
 	double *rx = mxGetPr(Temprx);
@@ -115,8 +119,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BEFToF = mxGetPr(TempBEFToF);
 	mxArray *TempBEFToN1 = mxGetField(prhs[10], 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
+
+	/*
 	mxArray *Tempftype = mxGetField(prhs[10], 0, "ftype");
 	signed char *ftype = (signed char *)mxGetData(TempBEFToN1);
+	*/
+	signed char *ftype = (signed char *)mxGetData(prhs[14]);
 
 	/*For bottom edge object*/
 	mxArray *TempBotENe = mxGetField(prhs[11], 0, "Ne");
@@ -249,7 +257,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int face = 0; face < SurfBENe; face++){
+	for (int face = 0; face < BENe; face++){
 		StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, QBEfluxMx, QBEfluxSx, BEJs, BEMb, NonhydroERHS);
 		StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, QBEfluxMy, QBEfluxSy, BEJs, BEMb, NonhydroERHS + Np*K*Nface);
 	}
@@ -330,7 +338,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int face = 0; face < IENe; face++){
+	for (int face = 0; face < BotENe; face++){
 		StrongFormInnerEdgeRHS(face, BotEFToE, BotEFToF, Np, K, BotENfp, BotEFToN1, BotEFToN2, QBotEfluxM, \
 			QBotEfluxP, QBotEfluxS, BotEJs, BotEMb, NonhydroERHS);
 	}
@@ -423,9 +431,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K; k++){
 		for (int p = 0; p < Np; p++){
-			hu[k*Np + p] = hu[k*Np + p] - h[k*Np + p] * dt / rho*(PNPX[k*Np + p] + PSPX[k*Np + p] * PNPS[k*Np + p]);
-			hv[k*Np + p] = hv[k*Np + p] - h[k*Np + p] * dt / rho*(PNPY[k*Np + p] + PSPY[k*Np + p] * PNPS[k*Np + p]);
-			hw[k*Np + p] = hw[k*Np + p] - dt / rho*PNPS[k*Np + p];
+			Updatedhu[k*Np + p] = hu[k*Np + p] - h[k*Np + p] * dt / rho*(PNPX[k*Np + p] + PSPX[k*Np + p] * PNPS[k*Np + p]);
+			Updatedhv[k*Np + p] = hv[k*Np + p] - h[k*Np + p] * dt / rho*(PNPY[k*Np + p] + PSPY[k*Np + p] * PNPS[k*Np + p]);
+			Updatedhw[k*Np + p] = hw[k*Np + p] - dt / rho*PNPS[k*Np + p];
 		}
 	}
 

@@ -8,11 +8,11 @@ classdef SWEBarotropic3d < SWEAbstract3d
         %> num of 3d physical field
         Nfield = 10 % [ Hu, Hv, w, H, miu, Z, eta, Zx, Zy ]
         
-        fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w'};
+        fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw'};
         %> number of variable field
         Nvar = 2
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2 ]
+        varFieldIndex = [ 1, 2, 11 ]
         %> number of variable field
         Nvar2d = 1
         %> index of variable in physical field

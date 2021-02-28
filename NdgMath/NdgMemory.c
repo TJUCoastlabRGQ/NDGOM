@@ -28,8 +28,7 @@ double *NonhydroHU2d = NULL, *NonhydroHV2d = NULL, \
 *NonhydroPCETempVolumeIntegralX = NULL, *NonhydroPCEVolumeIntegralY = NULL, \
 *NonhydroPCETempVolumeIntegralY = NULL, *NonhydroBEfm2d = NULL, *NonhydroBEzM2d = NULL, \
 *NonhydroBEfp2d = NULL, *NonhydroBEzP2d = NULL, *NonhydroBEFluxS2d = NULL, \
-*NonhydroBEFluxM2d = NULL, *NonhydroPCETempFacialIntegral = NULL, *InvSquaHeight = NULL, \
-*InvSHeight = NULL;//(Here, InvSquaHeight is used in mxAssembleGlobalStiffMatrix, InvSHeight is used in mxAssembleNonhydroRHS)
+*NonhydroBEFluxM2d = NULL, *NonhydroPCETempFacialIntegral = NULL;
 
 void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int Nface3d,\
 	int BENfp, int BENe, int BotENfp, int BotENe, int BotBENfp, int BotBENe, int SurfBENfp,\
@@ -188,12 +187,6 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 	MemoryAllocationCheck(NonhydroBEFluxM2d, BENe2d*BENfp2d*sizeof(double));
 	NonhydroPCETempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
 	MemoryAllocationCheck(NonhydroPCETempFacialIntegral, Np2d*K2d*sizeof(double));
-
-	InvSquaHeight = malloc(Np3d*K3d*sizeof(double));
-	MemoryAllocationCheck(InvSquaHeight, Np3d*K3d*sizeof(double));
-
-	InvSHeight = malloc(Np3d*K3d*sizeof(double));
-	MemoryAllocationCheck(InvSHeight, Np3d*K3d*sizeof(double));
 
 	SWENonhydro3dInitialized = "True";
 }
