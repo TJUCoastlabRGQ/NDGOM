@@ -136,6 +136,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			int rowIndex = (int)irSPNPS[j + (int)jcSPNPS[i]];
 			int Order = bin(rowIndex, 0, Num - 1, irMSPNPY + (int)jcMSPNPY[i]);
 			int Index = (int)jcSPNPS[i] + j;
+			temprhsu[Order] = temprhsu[Order] + InvSquaHeight[rowIndex]*SPNPS[Index];
 			temprhsu[Order] = temprhsu[Order] + (pow(SQPSPX[rowIndex], 2) + pow(SQPSPY[rowIndex], 2) + \
 				InvSquaHeight[rowIndex])*SPNPS[Index]; 
 		}
@@ -327,6 +328,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
 	}
 	double *ContributionPerPoint = malloc(Np*sizeof(double));
+	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 
 	double column = 1.0;
 
@@ -343,9 +345,9 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 		/*$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$*/
 		Add(TempPsP, TempPsPx, TempPsPy, Nfp);
 
-		DiagMultiply(EleMass2d, EleMass2d, TempPsP, Nfp);
+		DiagMultiply(TempMass2d, EleMass2d, TempPsP, Nfp);
 
-		SumInColumn(ContributionPerPoint, EleMass2d, Nfp);
+		SumInColumn(ContributionPerPoint, TempMass2d, Nfp);
 
 		AssembleContributionIntoColumn(TempContribution + j*Np, ContributionPerPoint, &column, Np, 1);
 
@@ -362,6 +364,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	free(Dz);
 	free(TempFacialData);
 	free(EleMass2d);
+	free(TempMass2d);
 	free(TempContribution);
 	free(Contribution);
 	free(InvEleMass3d);
@@ -416,7 +419,7 @@ int bin(int aim, int low, int high, mwIndex *a)
 void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){
 	for (int i = 0; i < Np; i++){
 		if (source[i] >= Hcrit){
-			dest[i] = 1 / source[i] / source[i];
+			dest[i] = 1.0 / source[i] / source[i];
 		}
 		else{
 			dest[i] = 0;

@@ -87,7 +87,7 @@ OP12 = AdjacentRightBoundaryIntegral(RightEidM, LeftEidM, LocalPhysicalDiffMatri
 % %> Boundary part, not considered here
 [ SystemRHS(:,1), SurfhuStiffMatrix ] = ImposeSurfaceNewmannBoundaryCondition(obj, LeftEidM, time,...
     ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, SystemRHS(:,1));
-%     [ SystemRHS(:,1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM,...
+% [ SystemRHS(:,1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM,...
 %         LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, Tau(1), OP11, SystemRHS(:,1), time);
 
 %> Assemble into the StiffMatrix, it's noted that, the diagonal part has been included by eye(Np)
@@ -129,10 +129,10 @@ OP11 = -Dz1d' * ElementalMassMatrix * LocalPhysicalDiffMatrix;
 %> Local Up Integral part
 OP11 = LocalLeftBoundaryIntegral(LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(1), OP11);
 %> Impose bottom Dirichlet boundary condition
-[ SystemRHS(:,Nz), BothuStiffMatirx, OP11 ] = ImposeBottomDirichletBoundaryCondition(obj, RightEidM,...
-    LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, Tau(1), OP11, SystemRHS(:,Nz), time);
-%         [ SystemRHS(:,Nz), BothuStiffMatirx ] = ImposeBottomNewmannBoundaryCondition(obj, RightEidM, time,...
-%         ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, SystemRHS(:,Nz));
+% [ SystemRHS(:,Nz), BothuStiffMatirx, OP11 ] = ImposeBottomDirichletBoundaryCondition(obj, RightEidM,...
+%     LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, Tau(1), OP11, SystemRHS(:,Nz), time);
+[ SystemRHS(:,Nz), BothuStiffMatirx ] = ImposeBottomNewmannBoundaryCondition(obj, RightEidM, time,...
+        ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, SystemRHS(:,Nz));
 %> Assemble the local integral part into the StiffMatrix
 StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix\OP11;
 %> The upper adjacent cell part

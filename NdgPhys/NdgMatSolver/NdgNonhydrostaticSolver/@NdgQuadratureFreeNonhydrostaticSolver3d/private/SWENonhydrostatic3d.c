@@ -1,5 +1,6 @@
 #include "SWENonhydrostatic3d.h"
 
+/*Function checked*/
 void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2d, int Np3d)
 {
 	int Index = 0;
@@ -12,6 +13,7 @@ void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2
 	}
 }
 
+/*Function checked*/
 void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np){
 	double *Tempdest = dest;
 	for (int col = 0; col < Np; col++){
@@ -34,6 +36,8 @@ void EvaluateNonhydroVerticalFaceNumFlux_Central(double *dest, double *fm, doubl
 		dest[i] = (fm[i] + fp[i]) * n[i] * 0.5;
 	}
 }
+
+/*Function checked*/
 
 void FetchDataInSparseMatrix(double *dest, double *src, int NonzeroNum, int Np){
 	double *Tempdest = dest;

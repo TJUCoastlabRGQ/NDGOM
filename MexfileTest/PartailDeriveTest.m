@@ -1,4 +1,4 @@
-classdef StandingWaveInAClosedChannel < SWEBarotropic3d
+classdef PartailDeriveTest < SWEBarotropic3d
     %STANDINGWAVEINACLOSECHANNEL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -8,7 +8,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
 %         ChLength = 100;
         ChLength = 20;
         %> channel width
-        ChWidth = 1.2;
+        ChWidth = 20;
         %> channel depth
         H0 = 10;
         %> x range
@@ -16,8 +16,6 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         startTime = 0;
 %         %> final time
         finalTime = 10;
-        % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
     end
     
     properties
@@ -28,9 +26,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     end
     
     methods
-        function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+        function obj = PartailDeriveTest
             % setup mesh domain
-            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, 1, 1, 100, 50 );
+           [ mesh2d, mesh3d ] = makeChannelMesh( obj, 2, 1, 100, 10 );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
             obj.Nfield = 11;
@@ -38,10 +37,6 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, mesh3d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( mesh2d, mesh3d );
-            %> time interval
-            obj.dt = 0.005;
-%             obj.Cf{1} = 0.0025/1000;
-            obj.Cf{1} = 0*ones(size(mesh2d.x));
         end
         
         EntropyAndEnergyCalculation(obj);
@@ -54,7 +49,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     methods ( Access = protected )
         
         %> set initial function
-        function [fphys2d, fphys] = setInitialField( obj )
+        function [fphys2d, fphys] = setInitialField( obj )           
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
@@ -63,7 +58,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;                
                 %water depth
-                fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
+                fphys2d{m}(:,:,1) =  obj.mesh2d(m).x.*(20-obj.mesh2d(m).x).*obj.mesh2d(m).y.*(20-obj.mesh2d(m).y) - fphys2d{m}(:, :, 4);
+%                 fphys2d{m}(:,:,1) =  sin(pi*obj.mesh2d(m).x/10).*sin(pi*obj.mesh2d(m).y/10) - fphys2d{m}(:, :, 4);
             end
         end
         
@@ -99,10 +95,10 @@ end
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
 bctype = [ ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ZeroGrad, ...
+    enumBoundaryCondition.ZeroGrad, ...
+    enumBoundaryCondition.ZeroGrad, ...
+    enumBoundaryCondition.ZeroGrad ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
@@ -115,8 +111,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

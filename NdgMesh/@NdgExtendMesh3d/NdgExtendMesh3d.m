@@ -32,14 +32,17 @@ classdef NdgExtendMesh3d < handle
         ind
     end
     
+    properties
+        %> index of adjacent elements and faces
+        EToE, EToF        
+    end
+    
     % elemental volume infomation
     properties ( SetAccess=protected )
         %> element index in each layer
         EToL
         %> index of adjecent mesh
         EToM
-        %> index of adjacent elements and faces
-        EToE, EToF
         %> coordinate of interp points
         x, y, z
         %> determination of Jacobian matrix at each interp points

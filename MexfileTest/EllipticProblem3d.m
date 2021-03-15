@@ -1,4 +1,4 @@
-classdef StandingWaveInAClosedChannel < SWEBarotropic3d
+classdef EllipticProblem3d < SWEBarotropic3d
     %STANDINGWAVEINACLOSECHANNEL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -6,9 +6,9 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel length
         hcrit = 0.01;
 %         ChLength = 100;
-        ChLength = 20;
+        ChLength = 2;
         %> channel width
-        ChWidth = 1.2;
+        ChWidth = 2;
         %> channel depth
         H0 = 10;
         %> x range
@@ -16,8 +16,6 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         startTime = 0;
 %         %> final time
         finalTime = 10;
-        % to be corrected
-        GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
     end
     
     properties
@@ -28,7 +26,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     end
     
     methods
-        function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+        function obj = EllipticProblem3d( N, Nz, M, Mz )
             % setup mesh domain
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
@@ -43,11 +41,6 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
 %             obj.Cf{1} = 0.0025/1000;
             obj.Cf{1} = 0*ones(size(mesh2d.x));
         end
-        
-        EntropyAndEnergyCalculation(obj);
-        
-        AnalysisResult2d( obj );
-        AnalysisResult3d( obj );
         
     end
     
@@ -115,8 +108,5 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-
 end
 

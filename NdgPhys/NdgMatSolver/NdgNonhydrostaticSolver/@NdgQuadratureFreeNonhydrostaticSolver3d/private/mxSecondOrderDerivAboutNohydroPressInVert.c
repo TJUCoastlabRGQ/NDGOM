@@ -175,7 +175,7 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, int StartPo
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np*Np2d);
-	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, UpEid, Np, Np2d);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
 
 
 	/*The follow part is for term $\int_{\epsilon_i}\left\{\nabla_hp_h\right\}[s]d\boldsymbol{x}$*/
@@ -245,7 +245,7 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, int Start
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np*Np2d);
-	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, BotEid, Np, Np2d);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
 
 	/*The follow part is for term $\int_{\epsilon_i}\left\{\nabla_hp_h\right\}[s]d\boldsymbol{x}$*/
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
@@ -269,6 +269,132 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, int Start
 	free(TempContribution);
 	free(Contribution);
 	free(DownDiffSigma);
+	free(LocalDiffSigma);
+	free(FacialDiffMatrix);
+	free(InnerEdgeContribution);
+	free(TempMass2d);
+}
+
+/*The following funciton is used to assemble terms corresponding to
+$$\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}
++\int_{\epsilon_i}(\left\{\nabla_hp_h\right\}-\tau^k[p_h])[s]d\boldsymbol{x}$$
+Explanation of most variables can be found in function GetLocalVolumuIntegralTermForSecondOrderTerm
+and ImposeSecondOrderNonhydroDirichletBoundaryCondition.
+The rest are as follows:
+LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
+Localtz: A pointer to the start of the transformation Jacobian of the element of the studied cell
+Tau: A pointer to the penalty parameter of the common face shared by local element and downside element
+*/
+
+void GetLocalDownContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *Dt, double *Localtz,\
+	double *Tau){
+	double *LocalMass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(LocalMass3d, mass3d, J, Np);
+	double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvLocalMass3d, LocalMass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	double *LocalDiffSigma = malloc(Np*Np*sizeof(double));
+	DiagMultiply(LocalDiffSigma, Dt, Localtz, Np);
+	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
+
+	/*The follow part is for term $\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}$*/
+	double *InnerEdgeContribution = malloc(Np*Np2d*sizeof(double));
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np*Np2d);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
+
+	/*The follow part is for term $\int_{\epsilon_i}\left\{\nabla_hp_h\right\}[s]d\boldsymbol{x}$*/
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, Mass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5, Np*Np2d);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
+
+	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
+	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	free(LocalMass3d);
+	free(InvLocalMass3d);
+	free(Mass2d);
+	free(TempContribution);
+	free(Contribution);
+	free(LocalDiffSigma);
+	free(FacialDiffMatrix);
+	free(InnerEdgeContribution);
+	free(TempMass2d);
+}
+
+/*The following funciton is used to assemble terms corresponding to
+$$\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}
++\int_{\epsilon_i}(\left\{\nabla_hp_h\right\}-\tau^k[p_h])[s]d\boldsymbol{x}$$
+Explanation of most variables can be found in function GetLocalVolumuIntegralTermForSecondOrderTerm
+and ImposeSecondOrderNonhydroDirichletBoundaryCondition.
+The rest are as follows:
+LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
+Localtz: A pointer to the start of the transformation Jacobian of the element of the studied cell
+Tau: A pointer to the penalty parameter of the common face shared by local element and upside element
+*/
+
+void GetLocalUpContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *Dt, double *Localtz, \
+	double *Tau){
+	double *LocalMass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(LocalMass3d, mass3d, J, Np);
+	double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvLocalMass3d, LocalMass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	double *LocalDiffSigma = malloc(Np*Np*sizeof(double));
+	DiagMultiply(LocalDiffSigma, Dt, Localtz, Np);
+	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
+
+	/*The follow part is for term $\int_{\epsilon_i}[p_h]\cdot\left\{\nabla_h s\right\}d\boldsymbol{x}$*/
+	double *InnerEdgeContribution = malloc(Np*Np2d*sizeof(double));
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np*Np2d);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
+
+	/*The follow part is for term $\int_{\epsilon_i}\left\{\nabla_hp_h\right\}[s]d\boldsymbol{x}$*/
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiffSigma, LocalEid, Np2d, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, Mass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, InnerEdgeContribution, (ptrdiff_t)Np2d);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5, Np*Np2d);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
+
+	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
+	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	free(LocalMass3d);
+	free(InvLocalMass3d);
+	free(Mass2d);
+	free(TempContribution);
+	free(Contribution);
 	free(LocalDiffSigma);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
@@ -373,7 +499,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			GetLocalVolumuIntegralTermForSecondOrderTerm(sr, StartPoint, \
 				Np, jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], M3d, \
 				Dt, tz + e*Nlayer*Np + L*Np, J + e*Nlayer*Np + L*Np, L);
-
+			
 			if (UpEle == DownEle){ 
 				/* we have only one layer in vertical direction, and L=0 */
 				StartPoint = jcs[e*Nlayer*Np + L*Np];
@@ -391,11 +517,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						Np2d, jcs[e * Nlayer * Np + 1] - jcs[e * Nlayer * Np], M3d, M2d, J + e * Nlayer * Np + L*Np, \
 						J2d + e*Np2d, UpEidM, Tau + e*(Nlayer + 1)*Np2d, Dt, tz + e * Nlayer * Np + L * Np);
 
+
 					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + Np;
 
 					GetLocalToDownElementContributionForSecondOrderTerm(sr, StartPoint, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
 						M3d, M2d, J + e * Nlayer * Np + L*Np + Np, J2d + e*Np2d, BotEidM, UpEidM, Dt, tz + e * Nlayer * Np + L*Np + Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d + Np2d);
+
+					GetLocalDownContributionForSecondOrderTerm(sr, StartPoint - Np, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
+						M3d, M2d, J + e * Nlayer * Np + L*Np, J2d + e*Np2d, BotEidM, Dt, tz + e * Nlayer * Np + L*Np, \
+						Tau + e*(Nlayer + 1)*Np2d + L*Np2d + Np2d);
 				}
 				else if (LocalEle == DownEle){
 					/* 
@@ -409,6 +540,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						M3d, M2d, J + e * Nlayer * Np + L*Np - Np, J2d + e*Np2d, UpEidM, BotEidM, Dt, tz + e * Nlayer * Np + L*Np - Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d);
 
+					GetLocalUpContributionForSecondOrderTerm(sr, StartPoint + Np, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
+						M3d, M2d, J + e * Nlayer * Np + L*Np, J2d + e*Np2d, UpEidM, Dt, tz + e * Nlayer * Np + L*Np, \
+						Tau + e*(Nlayer + 1)*Np2d + L*Np2d);
 					/**********************************************Newmann Boundary is not considered here***********************************************************/
 
 				}
@@ -422,11 +556,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						M3d, M2d, J + e * Nlayer * Np + L*Np - Np, J2d + e*Np2d, UpEidM, BotEidM, Dt, tz + e * Nlayer * Np + L*Np - Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d);
 
+					GetLocalUpContributionForSecondOrderTerm(sr, StartPoint + Np, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
+						M3d, M2d, J + e * Nlayer * Np + L*Np, J2d + e*Np2d, UpEidM, Dt, tz + e * Nlayer * Np + L*Np, \
+						Tau + e*(Nlayer + 1)*Np2d + L*Np2d);
+
 					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + 2*Np;
 
 					GetLocalToDownElementContributionForSecondOrderTerm(sr, StartPoint, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
 						M3d, M2d, J + e * Nlayer * Np + L*Np + Np, J2d + e*Np2d, BotEidM, UpEidM, Dt, tz + e * Nlayer * Np + L*Np + Np, \
 						tz + e * Nlayer * Np + L*Np, Tau + e*(Nlayer + 1)*Np2d + L*Np2d + Np2d);
+
+					GetLocalDownContributionForSecondOrderTerm(sr, StartPoint - Np, Np, Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
+						M3d, M2d, J + e * Nlayer * Np + L*Np, J2d + e*Np2d, BotEidM, Dt, tz + e * Nlayer * Np + L*Np, \
+						Tau + e*(Nlayer + 1)*Np2d + L*Np2d + Np2d);
 
 				}
 			}

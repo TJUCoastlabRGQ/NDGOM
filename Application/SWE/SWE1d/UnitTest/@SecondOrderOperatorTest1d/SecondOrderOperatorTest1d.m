@@ -15,7 +15,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     end
     
     properties
-        miu = 0.00001
+        miu = 1
         
         Cexact
         
@@ -40,7 +40,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);
             obj.matGetFinalSolution;
-            obj.dt = 0.5;
+            obj.dt = 0.1;
         end        
         
         function drawComparison( obj )
@@ -48,9 +48,16 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             t = obj.getOption('finalTime');
             x = obj.meshUnion.x;
             ed = eval(obj.Cexact).*ones(size(obj.meshUnion.x));
-            plot(x,ed,'ro','markersize',5);
-            str =['$\mu=$', num2str(obj.miu)];
-            title(str,'Interpreter','Latex','fontsize',15)
+            plot(x(1:20:end),ed(1:20:end),'ro','LineWidth',1.5);
+%             str =['$\mu=$', num2str(obj.miu)];
+            str = '$\frac{1}{\sqrt{(4t+1)}}e^{\frac{-(x-0.5)^2}{4t+1}}$';
+            title(str,'Interpreter','Latex','fontsize',15);
+            plot(x, obj.fphys{1}(:,:,1),'k','LineWidth',1.5);
+            legend({'Exact','Simulation'});
+            legend('boxoff');
+%          title('$u=x(1-x)$','interpreter','Latex');
+            box on;
+            set(gca, 'Linewidth',1.5, 'Fontsize',12);            
         end
         
         matTimeStepping343(obj);
@@ -89,26 +96,22 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             syms x t;
             x0 = 0.5;
             obj.Cexact = 1/sqrt(4*t+1)*exp(-(x-x0)^2/obj.miu/(4*t+1));
-            obj.DiffCexact = diff(obj.Cexact, x);
-%                         obj.Cexact = 0*t+0.*x;
-%             obj.Cexact =-1* sin(2*pi*x + 0 * t);
-            %             obj.DiffCexact = diff(obj.Cexact, x);
-            
+            obj.DiffCexact = diff(obj.Cexact, x);   
         end
         
         function matUpdateExternalField( obj, time )
             t = time;
-            x = 0;
+            x = obj.meshUnion.x(1);
             obj.DirichExact(1) = eval(obj.Cexact);
             obj.NewmannExact(1) = obj.miu * eval(obj.DiffCexact);
 %                         obj.NewmannExact(1) = obj.miu*1;
-            x = 1;
+            x = obj.meshUnion.x(end);
             obj.DirichExact(2) = eval(obj.Cexact);
             obj.NewmannExact(2) = obj.miu * eval(obj.DiffCexact);
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 40;
+            ftime = 50;
             outputIntervalNum = 5000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
