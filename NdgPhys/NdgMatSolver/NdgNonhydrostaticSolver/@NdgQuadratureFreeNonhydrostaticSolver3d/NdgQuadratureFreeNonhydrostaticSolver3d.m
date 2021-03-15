@@ -136,6 +136,19 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             clear mxCalculatePartialDerivative;
         end
         
+        function TestPartialDerivativeCalculation(obj, physClass, fphys, fphys2d, ~)
+            
+             [ obj.PSPX, obj.PSPY, obj.SPSPX, obj.SPSPY, obj.SQPSPX, obj.SQPSPY, obj.PUPX, ...
+                obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS ] = mxCalculatePartialDerivative( physClass.hcrit,...
+                  obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge, obj.BottomBoundaryEdge, ...
+                  obj.SurfaceBoundaryEdge, fphys{1}, obj.varIndex, int8(physClass.meshUnion.BoundaryEdge.ftype), ...
+                  physClass.gra, physClass.fext3d{ 1 }, fphys2d{1}(:,:,1),  fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, ...
+                 obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
+                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));  
+             
+        end
+        
+        
     end
     
 end
