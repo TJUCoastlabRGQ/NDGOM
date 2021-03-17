@@ -1,11 +1,12 @@
-classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
+classdef MixedEllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
-    %> $\frac{\partial^2p}{\partial \x^2} + \frac{\partial^2p}{\partial \y^2}$, the analytical
-    %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used 
+    %> $\frac{\partial }{\partial x}\left (\frac{\partial p}{\partial \sigma}\right )$, and 
+    %> operator $\frac{\partial }{\partial y}\left (\frac{\partial p}{\partial \sigma}\right )$. The analytical
+    %> solution $p= sin\left (\frac{\pi}{2}\sigma\right )sin\left (\pi x\right )$ is used 
     properties
-        ChLength = 20
-        ChWidth = 0.6
+        ChLength = 2
+        ChWidth = 0.01
     end
     
     properties
@@ -40,7 +41,7 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     end
     
     methods
-        function obj = EllipticProblemInHorizontalDirectionTest3d(N, Nz, M, Mz)
+        function obj = MixedEllipticProblemInVerticalDirectionTest3d(N, Nz, M, Mz)
             [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.meshUnion = obj.mesh3d;
             obj.Nmesh = 1;
@@ -52,10 +53,11 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
             obj.ExactRHS = obj.StiffMatrix*obj.ExactSolution(:);
-            disp(obj.SimulatedSolution);
+%             disp(obj.SimulatedSolution);
 %             disp(obj.ExactRHS - obj.RHS);
         end
         
@@ -74,9 +76,9 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         rhs = matAssembleRightHandSide(obj);
         
         function matGetFunction(obj)
-            syms x y;
-            obj.Cexact = pi^5*sin(-pi/10*x) + pi * sin(-pi/10*y) + 30;
-            obj.SecondDiffCexact = diff(diff(obj.Cexact, x), x) + diff(diff(obj.Cexact, y),y);
+            syms x z;
+            obj.Cexact = sin(pi/2*z)*sin(pi*x);
+            obj.SecondDiffCexact = diff(diff(obj.Cexact, z), x);
         end
         
     end

@@ -803,7 +803,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double localRatio = IELAV[face] / LAV[(int)FToE[face * 2] - 1];
 		double adjacentRatio = IELAV[face] / LAV[(int)FToE[face * 2 + 1] - 1];
 		for (int p = 0; p < HorNfp; p++){
-			Tau[face*HorNfp + p] =  max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+			Tau[face*HorNfp + p] = 0;
+			//Tau[face*HorNfp + p] =  max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
 		}
 	}

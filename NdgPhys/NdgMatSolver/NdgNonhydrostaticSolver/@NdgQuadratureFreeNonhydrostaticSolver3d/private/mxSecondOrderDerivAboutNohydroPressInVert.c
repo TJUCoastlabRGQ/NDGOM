@@ -51,7 +51,7 @@ void GetLocalVolumuIntegralTermForSecondOrderTerm(double *dest, int Startpoint, 
 		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
 		(ptrdiff_t)Np, DiffSigma, (ptrdiff_t)Np, 0.0, TempContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(TempContribution, TempContribution, -1, Np*Np);
+	MultiplyByConstant(TempContribution, TempContribution, -1.0, Np*Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -384,7 +384,7 @@ void GetLocalUpContributionForSecondOrderTerm(double *dest, int StartPoint, int 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
-	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1);
+	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -410,6 +410,7 @@ void CalculatePenaltyParameter(double *dest, const int Np2d, int Nz, int P, int 
 		for (int p = 0; p < Np2d; p++)
 		{
 			dest[Layer*Np2d + p] = ((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*Nz;
+			//dest[Layer*Np2d + p] = ((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*5;
 		}
 	}
 }
@@ -459,8 +460,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *UpEidM = malloc(Np2d*sizeof(double));
 	double *BotEidM = malloc(Np2d*sizeof(double));
 	for (int i = 0; i < Np2d; i++){
-		UpEidM[i] = Fmask[(Nface - 1)*maxNfp + i];
+     	UpEidM[i] = Fmask[(Nface - 1)*maxNfp + i];
 		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
+//		UpEidM[i] = Fmask[3*maxNfp + i];
+//		BotEidM[i] = Fmask[maxNfp + i];
 	}
 
 	GetSparsePatternInVerticalDirection(TempIr, TempJc, Np, Nlayer, Ele2d);
@@ -493,6 +496,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			int UpEle = (int)EToE[e*Nlayer*Nface + L*Nface + Nface - 1];
 			/* Index of the element that located downside of the studied element */
 			int DownEle = (int)EToE[e*Nlayer*Nface + L*Nface + Nface - 2];
+
+			/* Index of the element that located upside of the studied element */
+//			int UpEle = (int)EToE[e*Nlayer*Nface + L*Nface + 3];
+			/* Index of the element that located downside of the studied element */
+//			int DownEle = (int)EToE[e*Nlayer*Nface + L*Nface + 1];
+
 
 			StartPoint = (int)jcs[e*Nlayer*Np + L*Np];
 

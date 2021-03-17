@@ -107,19 +107,19 @@ void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, int *Loca
 			if (AdjacentEle == TempLocalEle || AdjacentEle == TempAdjEle){
 				if (AdjacentEle == TempAdjEle && LocalEle == TempLocalEle){
 					(*GlobalFace) = f;
+					(*LocalFace) = (int)FToF[2 * f];
+					(*AdjacentFace) = (int)FToF[2 * f + 1];
 					for (int p = 0; p < Nfp; p++){
 						FacialVector[p] = Vector[f*Nfp + p];
-						(*LocalFace) = (int)FToF[2 * f];
-						(*AdjacentFace) = (int)FToF[2 * f+1];
 					}
 					break;
 				}
 				else if (AdjacentEle == TempLocalEle && LocalEle == TempAdjEle){
 					(*GlobalFace) = f;
+					(*LocalFace) = (int)FToF[2 * f + 1];
+					(*AdjacentFace) = (int)FToF[2 * f];
 					for (int p = 0; p < Nfp; p++){
 						FacialVector[p] = -1 * Vector[f*Nfp + p];
-						(*LocalFace) = (int)FToF[2 * f + 1];
-						(*AdjacentFace) = (int)FToF[2 * f];
 					}
 					break;
 				}
