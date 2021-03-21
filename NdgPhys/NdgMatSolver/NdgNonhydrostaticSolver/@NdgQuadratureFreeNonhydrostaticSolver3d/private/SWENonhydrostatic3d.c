@@ -141,9 +141,9 @@ void FindFaceAndDirectionVectorAtBoundary(double *FacialVector, int *GlobalFace,
 		int TempLocalFace = (int)FToF[2 * f];
 		if (LocalEle == TempLocalEle && TempLocalFace == face){
 			(*GlobalFace) = f;
+			(*LocalFace) = (int)FToF[2 * f];
 			for (int p = 0; p < Nfp; p++){
 				FacialVector[p] = Vector[f*Nfp + p];
-				(*LocalFace) = (int)FToF[2 * f];
 			}
 			break;
 		}

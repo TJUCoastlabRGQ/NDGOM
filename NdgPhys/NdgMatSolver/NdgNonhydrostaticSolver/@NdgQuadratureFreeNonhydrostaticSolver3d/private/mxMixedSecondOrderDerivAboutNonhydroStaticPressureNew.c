@@ -93,7 +93,6 @@ Np: Number of interpolation point for the master cell
 Vector: A pointer to the start of the facial direction vector of the inner edge
 Jcs: A pointer to the array that contains the number of nonzero element in each column
 */
-
 void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, int LocalEle, int Nface2d, int Nface, \
 	double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, double *TempEToE, \
 	double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector, double *Tau, mwIndex *Jcs){
@@ -144,7 +143,7 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
 			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
 			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
-			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1);
+			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
 
 			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
 				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -252,7 +251,7 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoin
 			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
 			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
 			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
-			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1);
+			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
 
 			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -412,7 +411,7 @@ void ImposeBoundaryConditionInHorizontalDirection(double *dest, int LocalEle, in
 				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
 			for (int j = 0; j < Nface + 1; j++){
-				if (LocalEle == (int)TempEToE[j]){
+				if (LocalEle == (int)TempEToE[j] && (j+1) == LocalFace){
 					int StartPoint = Jcs[(LocalEle - 1)*Np] + j*Np;
 					int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
 					AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
@@ -803,8 +802,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double localRatio = IELAV[face] / LAV[(int)FToE[face * 2] - 1];
 		double adjacentRatio = IELAV[face] / LAV[(int)FToE[face * 2 + 1] - 1];
 		for (int p = 0; p < HorNfp; p++){
-			Tau[face*HorNfp + p] = 0;
-			//Tau[face*HorNfp + p] =  max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+			//Tau[face*HorNfp + p] = 0;
+			Tau[face*HorNfp + p] =  max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
 		}
 	}
@@ -848,7 +847,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				Nface2d, Nface, EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, Js, J, \
 				TempEToE, FToE, FToF, Fmask, maxNfp, HorNfp, IENe, Np, Vector, Tau, jcs);
 
-			ImposeBoundaryConditionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
+//			ImposeBoundaryConditionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
 				EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, BEJs, J, TempEToE, \
 				BEFToE, BEFToF, Fmask, maxNfp, HorNfp, BENe, Np, BEVector, jcs);
 
