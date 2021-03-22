@@ -1,5 +1,8 @@
 #include "SWENonhydrostatic3d.h"
 
+/*Compared with the previous version, penalty parameter $\tau$ is included in this version*/
+
+
 /*This function is called at the initialization stage to calculate the mixed second order derivative
 about nonhydrostatic pressure in horizontal direction, i.e. $\frac{\partial}{\partial x}(\frac{\partial q}{\partial \sigma})$
 and $\frac{\partial}{\partial y}(\frac{\partial q}{\partial \sigma})$.
@@ -52,7 +55,7 @@ void GetLocalVolumuIntegralTermForMixedSecondOrderTerm(double *dest, int StartPo
 		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
 		(ptrdiff_t)Np, VerticalDiffMatrix, (ptrdiff_t)Np, 0.0, TempContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(TempContribution, TempContribution, -1, Np*Np);
+	MultiplyByConstant(TempContribution, TempContribution, -1.0, Np*Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
