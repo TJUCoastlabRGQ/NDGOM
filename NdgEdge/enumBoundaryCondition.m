@@ -22,5 +22,7 @@ classdef enumBoundaryCondition < int8
         NonReflectFlux          (11)
         BottomBoundary          (12)
         UpperSurfaceBoundary    (13)
+        Newmann                 (14)
+        Dirichlet               (15)
     end
 end

@@ -1,4 +1,4 @@
-function runConstAdvectionDiffusion2d
+function runMixedPartialDerivativeTerm2d
 % M = [ 10 20 40 60 80];
 M = [ 10 20 40 60];
 Order =[ 1 2 ];
@@ -27,13 +27,13 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ConstAdvectionDiffusion2d(Order(n), M(m));
+        Solver = MixedPartialDerivativeTerm2d(Order(n), M(m));
         tic;
         Solver.matSolve;
         time(m,n) = toc;
         len(m, n) = 2/Solver.M;
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('ConstAdvectionDiffusion2d/2d','/','ConstAdvectionDiffusion2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('MixedPartialDerivativeTerm2d/2d','/','MixedPartialDerivativeTerm2d'));
         fext = cell(1);
         fext{1}(:,:,1) = Solver.ExactValue{1};
         fphys = cell(1);

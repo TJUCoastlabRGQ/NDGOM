@@ -35,7 +35,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             [ mesh ] = makeUniformMesh( N, M );        
             obj.matGetFunction;
             obj.fieldName = {'C'};
-            obj.outputFieldOrder1d = [1];
+            obj.outputFieldOrder1d = 1;
             obj.initPhysFromOptions( mesh );
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);

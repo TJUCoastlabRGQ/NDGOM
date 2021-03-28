@@ -16,6 +16,10 @@ mesh2d.InnerEdge.Ne = mesh2d.InnerEdge.Ne + numel(LOrder2d);
 
 %ftype part, this is the same for the west-east and the south-north boundary
 mesh2d.BoundaryEdge.ftype([LOrder2d,ROrder2d])=[];
+ftype = zeros(mesh2d.InnerEdge.Ne,1);
+ftype(1:numel(LOrder2d)) = enumBoundaryCondition.Inner;
+ftype(1+numel(LOrder2d):end) = mesh2d.InnerEdge.ftype;
+mesh2d.InnerEdge.ftype = enumBoundaryCondition(ftype);
 
 %FToE part and FToF part, this part is not the same
 InnerEdgeFToE2d = zeros(2, mesh2d.InnerEdge.Ne);

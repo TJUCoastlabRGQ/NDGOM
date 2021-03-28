@@ -1,12 +1,11 @@
 classdef MixedEllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
-    %> $\frac{\partial }{\partial x}\left (\frac{\partial p}{\partial \sigma}\right )$, and 
-    %> operator $\frac{\partial }{\partial y}\left (\frac{\partial p}{\partial \sigma}\right )$. The analytical
-    %> solution $p= sin\left (\frac{\pi}{2}\sigma\right )sin\left (\pi x\right )$ is used 
+    %> $\frac{\partial^2 p}{\partial \sigma^2}$. The analytical
+    %> solution $p= sin\left (\frac{\pi}{2}\sigma\right )$ is used 
     properties
         ChLength = 2
-        ChWidth = 0.01
+        ChWidth = 2
     end
     
     properties
@@ -56,9 +55,6 @@ classdef MixedEllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            obj.ExactRHS = obj.StiffMatrix*obj.ExactSolution(:);
-%             disp(obj.SimulatedSolution);
-%             disp(obj.ExactRHS - obj.RHS);
         end
         
     end
@@ -77,8 +73,8 @@ classdef MixedEllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
         
         function matGetFunction(obj)
             syms x z;
-            obj.Cexact = sin(pi/2*z)*sin(pi*x);
-            obj.SecondDiffCexact = diff(diff(obj.Cexact, z), x);
+            obj.Cexact = sin(pi/2*z);
+            obj.SecondDiffCexact = diff(diff(obj.Cexact, z), z);
         end
         
     end

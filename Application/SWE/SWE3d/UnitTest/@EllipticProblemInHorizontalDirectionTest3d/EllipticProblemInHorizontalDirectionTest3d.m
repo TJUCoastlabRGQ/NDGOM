@@ -5,7 +5,7 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used 
     properties
         ChLength = 20
-        ChWidth = 0.6
+        ChWidth = 0.02
     end
     
     properties
@@ -34,10 +34,6 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         hcrit = 1
     end
     
-    properties
-%         outputFieldOrder2d = []
-%         outputFieldOrder3d =  1
-    end
     
     methods
         function obj = EllipticProblemInHorizontalDirectionTest3d(N, Nz, M, Mz)
@@ -54,9 +50,10 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
             y = obj.meshUnion.y;
             obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            obj.ExactRHS = obj.StiffMatrix*obj.ExactSolution(:);
-            disp(obj.SimulatedSolution);
-%             disp(obj.ExactRHS - obj.RHS);
+            disp("The maximum difference is:");
+            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp("The minimum difference is:");
+            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
         end
         
     end

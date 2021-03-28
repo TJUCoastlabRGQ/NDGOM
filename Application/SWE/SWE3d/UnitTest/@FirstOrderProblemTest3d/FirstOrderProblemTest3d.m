@@ -1,11 +1,12 @@
-classdef FirstOrderProblemTest3d < SWEAbstract3d
+classdef FirstOrderProblemTest3d < SWEBarotropic3d
+    
+    %> Note: This solver is used for test purpose of operator
+    %> $\frac{\partial p}{\partial \sigma }$, the analytical
+    %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used   
     
     properties
         ChLength = 2
         ChWidth = 2
-        Nfield2d = 1
-        Nvar2d = 1
-        varFieldIndex2d = 1
     end
     
     properties
@@ -13,6 +14,8 @@ classdef FirstOrderProblemTest3d < SWEAbstract3d
         StiffMatrix
         
         RHS
+        
+        ExactSolution
         
         SimulatedSolution
         
@@ -28,14 +31,6 @@ classdef FirstOrderProblemTest3d < SWEAbstract3d
         hcrit = 1
     end
     
-    properties
-        outputFieldOrder2d = []
-        outputFieldOrder3d =  1
-        Nfield = 1
-        Nvar = 1
-        varFieldIndex = 1
-    end
-    
     methods
         function obj = FirstOrderProblemTest3d(N, Nz, M, Mz)
             [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
@@ -44,14 +39,22 @@ classdef FirstOrderProblemTest3d < SWEAbstract3d
             obj.matGetFunction;
             z = zeros(obj.mesh2d.cell.Np,1);
             obj.DirichExact = eval(obj.Cexact);
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
             [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
             obj.RHS = obj.matAssembleRightHandSide;
             % The direction vector is considered in the initialization stage
             obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
         end
         function EllipticProblemSolve(obj)
+            x = obj.meshUnion.x;
+            y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
+            obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            disp(obj.SimulatedSolution);
+            disp("The maximum difference is:");
+            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp("The minimum difference is:");
+            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
         end
         
     end

@@ -1,66 +1,71 @@
 function [ StiffMatrix, LBRHS ] = matAssembleGlobalStiffMatrix(obj)
-meshUnion = obj.meshUnion;
-BottomEidM      = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
-UpEidM          = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
-%> Calculation of the penalty parameter
-Nz = meshUnion.Nz;
-Np = meshUnion.cell.Np;
-StiffMatrix     = zeros(Np*Nz);
-ElementalMassMatrix3d = diag(meshUnion.J(:,1))*meshUnion.cell.M;
-ElementalMassMatrix2d = diag(meshUnion.mesh2d(1).J(:,1))*meshUnion.mesh2d(1).cell.M;  
-Dz3d = diag(meshUnion.rz(:,1))*meshUnion.cell.Dr + diag(meshUnion.sz(:,1))*meshUnion.cell.Ds+...
-        diag(meshUnion.tz(:,1))*meshUnion.cell.Dt;
-LocalRows    = (1:Np)';
-AdjacentRows = (Np+1:2*Np)';
-LocalColumns = 1:Np;
 
-OP11 = ElementalMassMatrix3d * Dz3d;
+StiffMatrix = obj.NonhydrostaticSolver.PNPS;
 
-OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
+LBRHS = zeros(obj.mesh3d.cell.Np, 1);
 
-[ OP11, LBRHS ] = ImposeSurfaceDirichletBoundaryCondition(obj, UpEidM, ElementalMassMatrix3d, ElementalMassMatrix2d, OP11);
-
-OP12 = zeros(meshUnion.cell.Np);
-OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, ElementalMassMatrix2d, OP12);
-
-StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
-StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
-for j = 2:Nz-1
-        UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
-        LocalRows    = ((j-1)*Np+1:j*Np)';
-        BottomAdjacentRows = (j*Np+1:(j+1)*Np)';
-        LocalColumns = (j-1)*Np+1:j*Np;
- %> Volume Integral Part
-        OP11 = ElementalMassMatrix3d * Dz3d;
-        %> Local Bottom Integral part
-        OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
-        %> Local Up Integral part
-        OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
-        %> Assemble the local integral part into the StiffMatrix
-        StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
-        %> The upper adjacent cell part
-        OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, ElementalMassMatrix2d, OP12);
-        StiffMatrix(UpAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
-        %> The lower adjacent cell part
-        OP12 = zeros(meshUnion.cell.Np);
-        OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, ElementalMassMatrix2d, OP12);
-        StiffMatrix(BottomAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;        
-end
- %> for the bottom most cell
-    AdjacentRows = ((meshUnion.Nz-2)*Np+1:(meshUnion.Nz-1)*Np)';
-    LocalRows    = ((meshUnion.Nz-1)*Np+1:meshUnion.Nz*Np)';
-    LocalColumns = (meshUnion.Nz-1)*Np+1:meshUnion.Nz*Np;
-    %> Volume Integral Part
-    OP11 = ElementalMassMatrix3d * Dz3d;
-    %> Local Up Integral part
-    OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
-    %> Assemble the local integral part into the StiffMatrix
-    StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
-    %> The upper adjacent cell part
-    OP12 = zeros(meshUnion.cell.Np);
-    OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, ElementalMassMatrix2d, OP12);
-    StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+% meshUnion = obj.meshUnion;
+% BottomEidM      = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end-1)~=0,end-1);
+% UpEidM          = meshUnion.cell.Fmask(meshUnion.cell.Fmask(:,end)~=0,end);
+% %> Calculation of the penalty parameter
+% Nz = meshUnion.Nz;
+% Np = meshUnion.cell.Np;
+% StiffMatrix     = zeros(Np*Nz);
+% ElementalMassMatrix3d = diag(meshUnion.J(:,1))*meshUnion.cell.M;
+% ElementalMassMatrix2d = diag(meshUnion.mesh2d(1).J(:,1))*meshUnion.mesh2d(1).cell.M;  
+% Dz3d = diag(meshUnion.rz(:,1))*meshUnion.cell.Dr + diag(meshUnion.sz(:,1))*meshUnion.cell.Ds+...
+%         diag(meshUnion.tz(:,1))*meshUnion.cell.Dt;
+% LocalRows    = (1:Np)';
+% AdjacentRows = (Np+1:2*Np)';
+% LocalColumns = 1:Np;
+% 
+% OP11 = ElementalMassMatrix3d * Dz3d;
+% 
+% OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
+% 
+% [ OP11, LBRHS ] = ImposeSurfaceDirichletBoundaryCondition(obj, UpEidM, ElementalMassMatrix3d, ElementalMassMatrix2d, OP11);
+% 
+% OP12 = zeros(meshUnion.cell.Np);
+% OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, ElementalMassMatrix2d, OP12);
+% 
+% StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
+% StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+% for j = 2:Nz-1
+%         UpAdjacentRows = ((j-2)*Np+1:(j-1)*Np)';
+%         LocalRows    = ((j-1)*Np+1:j*Np)';
+%         BottomAdjacentRows = (j*Np+1:(j+1)*Np)';
+%         LocalColumns = (j-1)*Np+1:j*Np;
+%  %> Volume Integral Part
+%         OP11 = ElementalMassMatrix3d * Dz3d;
+%         %> Local Bottom Integral part
+%         OP11 = LocalDownBoundaryIntegral(BottomEidM, ElementalMassMatrix2d, OP11);
+%         %> Local Up Integral part
+%         OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
+%         %> Assemble the local integral part into the StiffMatrix
+%         StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
+%         %> The upper adjacent cell part
+%         OP12 = zeros(meshUnion.cell.Np);
+%         OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, ElementalMassMatrix2d, OP12);
+%         StiffMatrix(UpAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
+%         %> The lower adjacent cell part
+%         OP12 = zeros(meshUnion.cell.Np);
+%         OP12 = AdjacentDownBoundaryIntegral(BottomEidM, UpEidM, ElementalMassMatrix2d, OP12);
+%         StiffMatrix(BottomAdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;        
+% end
+%  %> for the bottom most cell
+%     AdjacentRows = ((meshUnion.Nz-2)*Np+1:(meshUnion.Nz-1)*Np)';
+%     LocalRows    = ((meshUnion.Nz-1)*Np+1:meshUnion.Nz*Np)';
+%     LocalColumns = (meshUnion.Nz-1)*Np+1:meshUnion.Nz*Np;
+%     %> Volume Integral Part
+%     OP11 = ElementalMassMatrix3d * Dz3d;
+%     %> Local Up Integral part
+%     OP11 = LocalUpBoundaryIntegral(UpEidM, ElementalMassMatrix2d, OP11);
+%     %> Assemble the local integral part into the StiffMatrix
+%     StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP11;
+%     %> The upper adjacent cell part
+%     OP12 = zeros(meshUnion.cell.Np);
+%     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, ElementalMassMatrix2d, OP12);
+%     StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix3d\OP12;
 end
 
 function Tau = matCalculatePenaltyParameter(mesh3d, mesh2d, DiffusionCoefficient, BotEidM, UpEidM, Tau)

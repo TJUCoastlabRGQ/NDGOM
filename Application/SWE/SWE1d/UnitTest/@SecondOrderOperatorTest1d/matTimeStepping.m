@@ -1,4 +1,4 @@
-function matTimeStepping343(obj)
+function matTimeStepping(obj)
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');

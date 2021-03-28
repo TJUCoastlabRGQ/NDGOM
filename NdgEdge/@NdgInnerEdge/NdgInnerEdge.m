@@ -7,6 +7,9 @@
 % ======================================================================
 classdef NdgInnerEdge < handle
     
+    properties
+        ftype
+    end
     properties %( SetAccess = protected )
         %> std cell of the inner edge
         cell
@@ -59,6 +62,10 @@ classdef NdgInnerEdge < handle
             obj = obj.assembleEdgeConnect( meshUnion );
             % connect node
             obj = obj.assembleNodeProject( meshUnion );
+            
+            ftype = double( enumBoundaryCondition.Inner ) .* ones(obj.Ne,1);
+            
+            obj.ftype = enumBoundaryCondition(ftype);
         end
         
         %> evaluate R.H.S. for surface integral term

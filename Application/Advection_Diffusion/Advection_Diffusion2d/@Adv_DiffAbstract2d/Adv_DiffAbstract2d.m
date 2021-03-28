@@ -41,9 +41,9 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
     end
     
     methods ( Access = protected )
-                        
+        
         matEvaluateSourceTerm( obj, fphys );
-                
+        
     end
     
     methods ( Hidden )
@@ -57,10 +57,22 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
         end
         
         function [ fluxS ] = matEvaluateSurfNumFlux( obj, mesh, nx, ny, fm, fp, edge )
-            [ uNorm ] = fm(:,:,2) .* nx + fm(:,:,3) .* ny;
+%             [ uNorm ] = fm(:,:,2) .* nx + fm(:,:,3) .* ny;
+%             sign_um = sign( uNorm );
+%             fluxS = ( fm(:,:,1) .* ( sign_um + 1 ) ...
+%                 + fp(:,:,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
+            fluxS = zeros(edge.Nfp, edge.Ne);
+            ind = ( edge.ftype == enumBoundaryCondition.Inner );
+            [ uNorm ] = fm(:,ind,2) .* nx(:,ind) + fm(:,ind,3) .* ny(:,ind);
             sign_um = sign( uNorm );
-            fluxS = ( fm(:,:,1) .* ( sign_um + 1 ) ...
-                + fp(:,:,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
+            fluxS(:,ind) = ( fm(:,ind,1) .* ( sign_um + 1 ) ...
+                + fp(:,ind,1) .* ( 1 - sign_um  ) ) .* uNorm .* 0.5;
+            ind = ( edge.ftype == enumBoundaryCondition.Dirichlet );
+            [ uNorm ] = fp(:,ind,2) .* nx(:,ind) + fp(:,ind,3) .* ny(:,ind);
+            fluxS(:,ind) = fp(:,ind,1) .* uNorm;
+            ind = ( edge.ftype == enumBoundaryCondition.Newmann );
+            [ uNorm ] = fm(:,ind,2) .* nx(:,ind) + fm(:,ind,3) .* ny(:,ind);
+            fluxS(:,ind) = fm(:,ind,1) .* uNorm;
         end
         
         function [ flux ] = matEvaluateSurfFlux( obj, mesh, nx, ny, fm, edge )
@@ -70,10 +82,14 @@ classdef Adv_DiffAbstract2d< Adv_DiffAbstract
         end
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext )
-                ind = ( edge.ftype == enumBoundaryCondition.Clamped );
-                fp(:, ind, 1) = fext(:, ind, 1);
-                fp(:, ind, 2) = fext(:, ind, 2); 
-                fp(:, ind, 3) = fext(:, ind, 3); 
+            ind = ( edge.ftype == enumBoundaryCondition.Newmann );
+            fp(:, ind, 1) = fm(:, ind, 1);
+            fp(:, ind, 2) = fm(:, ind, 2);
+            fp(:, ind, 3) = fm(:, ind, 3);
+            ind = ( edge.ftype == enumBoundaryCondition.Dirichlet );
+            fp(:, ind, 1) = fext(:, ind, 1);
+            fp(:, ind, 2) = fext(:, ind, 2);
+            fp(:, ind, 3) = fext(:, ind, 3);
         end
     end
     

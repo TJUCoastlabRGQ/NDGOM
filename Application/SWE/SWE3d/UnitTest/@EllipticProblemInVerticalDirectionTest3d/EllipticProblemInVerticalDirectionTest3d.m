@@ -18,6 +18,8 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEAbstract3d
         
         RHS
         
+        ExactSolution
+        
         SimulatedSolution
         
         Cexact
@@ -59,8 +61,15 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEAbstract3d
             obj.RHS(:,end) = obj.RHS(:,end) + RRHS;            
         end
         function EllipticProblemSolve(obj)
+            x = obj.meshUnion.x;
+            y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
+            obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            disp(obj.SimulatedSolution);
+            disp("The maximum difference is:");
+            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp("The minimum difference is:");
+            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));            
         end
         
     end

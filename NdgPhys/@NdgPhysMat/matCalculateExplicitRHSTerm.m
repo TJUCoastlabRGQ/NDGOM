@@ -5,7 +5,7 @@ function matCalculateExplicitRHSTerm( obj, fphys, time, Stage, RKindex )
 %> @param[in] fphys The three-dimensional physical field
 %> @param[in] time The local time of the current calculation
 obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
-obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS(obj, fphys{1});
+obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS(obj, fphys);
 obj.matEvaluateSourceTerm( time );
 obj.ExplicitRHS(:,:,RKindex:Stage:end) = obj.frhs{1}(:,:,:);
 end

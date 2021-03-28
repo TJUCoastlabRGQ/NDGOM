@@ -10,7 +10,7 @@ obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.
 obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
 SystemRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 hwait = waitbar(0,'Runing MatSolver....');
-% visual = Visual2d( obj.mesh2d );
+visual = Visual2d( obj.mesh2d );
 % try
 while( time < ftime )
     %     dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
@@ -29,7 +29,7 @@ while( time < ftime )
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys );
         
-        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:), dt);
+        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, EXa(intRK+1,:), IMa(intRK,:), dt);
         %da gai
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
@@ -53,7 +53,7 @@ while( time < ftime )
     time = time + dt;
     %     fphys{1}(:,:,1) = obj.matGetExtFunc( time );
     %> Update the diffusion coefficient
-%     visual.drawResult( fphys{1}(:,:,1) );
+    visual.drawResult( fphys{1}(:,:,1) );
 %     display(time);
     obj.matUpdateOutputResult( time,  fphys );
     timeRatio = time / ftime;
