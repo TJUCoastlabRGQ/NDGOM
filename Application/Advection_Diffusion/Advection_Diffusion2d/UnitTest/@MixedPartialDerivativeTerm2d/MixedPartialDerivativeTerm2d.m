@@ -36,7 +36,8 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
             obj.Difft = diff(obj.ExactFunc, t);
             obj.Advx = obj.u0 * diff(obj.ExactFunc, x);
             obj.Advy = obj.v0 * diff(obj.ExactFunc, y);
-            obj.MixedSecondDiffTerm = diff(obj.miu*diff(obj.ExactFunc, y),x);
+            obj.MixedSecondDiffTerm = diff(obj.miu*diff(obj.ExactFunc, y),x) + diff(obj.miu*diff(obj.ExactFunc, x),y)...
+                 + diff(obj.miu*diff(obj.ExactFunc, x),x) + diff(obj.miu*diff(obj.ExactFunc, y),y);
             obj.GradInX = obj.miu*diff(obj.ExactFunc,x);
             obj.GradInY = obj.miu*diff(obj.ExactFunc,y);
         end
@@ -84,7 +85,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 1.75;
+            ftime = 10;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -119,9 +120,9 @@ bctype = [ ...
     enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ -1, 1 ], [ -1, 1 ], M, M, bctype);
 
-% [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
-% [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );
+[ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
+[ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );
 end

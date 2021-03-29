@@ -40,6 +40,8 @@ classdef NdgNonhydrostaticSolver2d < NdgAbstractNonhydrostaticSolver
             
             obj = obj@NdgAbstractNonhydrostaticSolver(PhysClass);
             
+            obj.Tau = (PhysClass.meshUnion(1).cell.N + 1)*(PhysClass.meshUnion(1).cell.N + 2)/2* PhysClass.meshUnion(1).InnerEdge.LAV(1)/PhysClass.meshUnion(1).LAV(1)*PhysClass.meshUnion(1).cell.Nface/2;
+            
             obj.matSetInitializeCharacteristicMatrix( PhysClass.meshUnion(1) );
             
         end

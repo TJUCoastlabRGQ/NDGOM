@@ -5,7 +5,7 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used 
     properties
         ChLength = 20
-        ChWidth = 0.02
+        ChWidth = 0.4
     end
     
     properties

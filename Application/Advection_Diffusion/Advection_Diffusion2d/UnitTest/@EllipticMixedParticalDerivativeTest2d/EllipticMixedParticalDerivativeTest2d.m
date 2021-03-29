@@ -41,12 +41,19 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
         
         function matGetExtFunc(obj)
             syms x y;
-            obj.ExactFunc = sin(2*pi*x)*sin(pi/2*y);
-            obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x);
+%             obj.ExactFunc = sin(2*pi*x)*sin(pi/2*y);
+%             obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x);
+%             DiffFunc = diff(obj.ExactFunc,y);
+%             x = obj.meshUnion.BoundaryEdge.xb;
+%             y = obj.meshUnion.BoundaryEdge.yb;
+%             obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* obj.meshUnion.BoundaryEdge.nx .* eval(DiffFunc);
+%             obj.DirichletData = eval(obj.ExactFunc);
+            obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
+            obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, x),x) + diff(diff(obj.ExactFunc, y),y);
             DiffFunc = diff(obj.ExactFunc,y);
             x = obj.meshUnion.BoundaryEdge.xb;
             y = obj.meshUnion.BoundaryEdge.yb;
-            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* obj.meshUnion.BoundaryEdge.nx .* eval(DiffFunc);
+            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* obj.meshUnion.BoundaryEdge.nx .* eval(DiffFunc) + obj.meshUnion.BoundaryEdge.ny .* obj.meshUnion.BoundaryEdge.ny .* eval(DiffFunc);
             obj.DirichletData = eval(obj.ExactFunc);
         end
         
@@ -115,13 +122,13 @@ end
 function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann ];
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet ];
 
-mesh2d = makeUniformTriMesh( N, ...
-    [ -1, 1 ], [ -1, 0 ], M, M, bctype);
+mesh2d = makeUniformQuadMesh( N, ...
+    [ -1, 1 ], [ -1, 1 ], M, M, bctype);
 
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );

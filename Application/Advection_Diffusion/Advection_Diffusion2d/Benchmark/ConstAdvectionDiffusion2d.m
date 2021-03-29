@@ -88,7 +88,7 @@ classdef ConstAdvectionDiffusion2d < Adv_DiffAbstract2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 1;
+            ftime = 1.75;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -119,13 +119,13 @@ function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
     enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Newmann, ...
     enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Newmann ];
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ -1, 1 ], [ -1, 1 ], M, M, bctype);
 
-[ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
-[ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );
+% [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
+% [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );
 end
