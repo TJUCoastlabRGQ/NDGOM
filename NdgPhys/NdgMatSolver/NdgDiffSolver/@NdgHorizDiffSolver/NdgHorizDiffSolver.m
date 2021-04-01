@@ -274,7 +274,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.nx;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
-            [ fluxS ] = edge.nx .* LocalVariableM;%  - edge.nx .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.ny - BoundaryEdgefp .* edge.ny);
+            [ fluxS ] = edge.nx .* LocalVariableM - edge.nx .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.nx - BoundaryEdgefp .* edge.nx);
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
         end
         
@@ -317,7 +317,7 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             [pfieldM, ~] = obj.matEvaluateSurfValue(edge, pfield);
             [ fluxM ] = pfieldM .* edge.ny;
             [ LocalVariableM, ~ ] = obj.matEvaluateSurfValue(edge, LocalVariable );
-            [ fluxS ] = edge.ny .* LocalVariableM;%  - edge.ny .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.nx - BoundaryEdgefp .* edge.nx);
+            [ fluxS ] = edge.ny .* LocalVariableM  - edge.ny .* obj.BoundaryEdgeTau./Prantl .* ( BoundaryEdgefm .* edge.ny - BoundaryEdgefp .* edge.ny);
             frhs = frhs - edge.matEvaluateStrongFormEdgeRHS( fluxM, fluxS);
         end
         

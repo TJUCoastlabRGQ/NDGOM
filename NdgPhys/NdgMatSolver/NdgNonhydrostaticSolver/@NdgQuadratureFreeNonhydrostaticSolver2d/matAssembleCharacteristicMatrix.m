@@ -35,7 +35,6 @@ ElementMassMatrix = diag(mesh.J(:,ele))*mesh.cell.M;
 %> $(\nabla_h s, \nabla_h p_h)_{\Omega}$, this corresponds to the first
 %> term in the governing equation, we omit the minus here, and add it at the final part 
 OP11 = Dx' * ElementMassMatrix * Dx + Dy' * ElementMassMatrix * Dy;
-
 QX11 = Dx;
 QY11 = Dy;
 
@@ -57,7 +56,7 @@ for face = 1:numel(edgeType)
     
     EdgeMassMatrix = zeros(Np);
     switch(edgeType(face))
-        case 1%2    %For Dirichlet edge boundary
+        case 2    %For Dirichlet edge boundary
             %> $(\tau^k p_h,s)_{\partial \Omega^D}$, this corresponds to the sixth term in the governning equation, and we omit the minus here
             OP11(eidM, eidM) = OP11(eidM, eidM) +  obj.Tau * Js * mesh.BoundaryEdge.M;
             %> $(s, n\cdot \Nabla p_h)_{\partial \Omega^D}$, this corresponds to the fifth term in the governning equation, and we omit the minus here
@@ -68,8 +67,8 @@ for face = 1:numel(edgeType)
             EdgeMassMatrix(eidM, eidM) = Js * mesh.BoundaryEdge.M;
             QX11 = QX11 - ElementMassMatrix\( nx * EdgeMassMatrix );
             QY11 = QY11 - ElementMassMatrix\( ny * EdgeMassMatrix );
-        case 2%1   %For Newmann edge boundary
-            
+        case 1   %For Newmann edge boundary
+%             
         otherwise
             %> $(\tau^k [p_h],[s])_{\epsilon_i}$, this corresponds to the last part in the third term in the governning equation, and we omit the minus here
             OP11(eidM, eidM) = OP11(eidM, eidM) +  obj.Tau* Js * mesh.InnerEdge.M;

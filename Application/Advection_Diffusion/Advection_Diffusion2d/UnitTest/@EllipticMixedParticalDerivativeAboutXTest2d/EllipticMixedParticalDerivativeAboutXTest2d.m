@@ -1,6 +1,5 @@
-classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
-    %ELLIPTICMIXEDPARTICALDERIVATIVETEST2D 此处显示有关此类的摘要
-    %   此处显示详细说明
+classdef EllipticMixedParticalDerivativeAboutXTest2d < Adv_DiffAbstract2d
+%> For term $\frac{\partial }{\partial x}\left ( \frac{\partial p}{\partial y}\right )\right ) = f$
     
     properties
         StiffMatrix
@@ -19,11 +18,11 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
     
     methods
         
-        function obj = EllipticMixedParticalDerivativeTest2d(N, M)
+        function obj = EllipticMixedParticalDerivativeAboutXTest2d(N, M)
             % setup mesh domain
             [ obj.mesh2d  ] = makeChannelMesh( obj, N, M );
             obj.initPhysFromOptions( obj.mesh2d );
-            obj.HorizontalEddyViscositySolver = MixedHorzDiffSolver(obj);
+            obj.HorizontalEddyViscositySolver = MixedHorzDiffInXSolver(obj);
             obj.matGetExtFunc;
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
@@ -42,14 +41,11 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
         function matGetExtFunc(obj)
             syms x y;
             obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
-            obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x) + diff(diff(obj.ExactFunc, x),y);
+            obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x);
             DiffFuncy = diff(obj.ExactFunc,y);
-            DiffFuncx = diff(obj.ExactFunc,x);
             x = obj.meshUnion.BoundaryEdge.xb;
             y = obj.meshUnion.BoundaryEdge.yb;
-            %To be verified
-            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(DiffFuncy) + ...
-                obj.meshUnion.BoundaryEdge.ny .* eval(DiffFuncx);
+            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(DiffFuncy);
             obj.DirichletData = eval(obj.ExactFunc);
         end
         
@@ -68,7 +64,7 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
             for i = 1:obj.meshUnion.K*obj.meshUnion.cell.Np
                 fphys{1} = zeros(obj.meshUnion.cell.Np , obj.meshUnion.K);
                 fphys{1}(i) = 1;
-                obj.PtProducedStiffMatrix((i-1)*K*Np+1:i*K*Np) = obj.HorizontalEddyViscositySolver.matEvaluateStiffMatrixInPointForm( obj, fphys);
+%                 obj.PtProducedStiffMatrix((i-1)*K*Np+1:i*K*Np) = obj.HorizontalEddyViscositySolver.matEvaluateStiffMatrixInPointForm( obj, fphys);
             end
         end
         
@@ -119,9 +115,9 @@ function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
     enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann ];
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ -1, 1 ], [ -1, 1 ], M, M, bctype);

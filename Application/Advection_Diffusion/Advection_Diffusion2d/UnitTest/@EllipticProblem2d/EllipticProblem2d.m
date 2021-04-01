@@ -1,5 +1,5 @@
-classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
-    %ELLIPTICMIXEDPARTICALDERIVATIVETEST2D 此处显示有关此类的摘要
+classdef EllipticProblem2d < Adv_DiffAbstract2d
+    %ELLIPTICPROBLEM2D 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties
@@ -8,26 +8,38 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
     end
     
     properties
+        D11
+        D12
+        D21
+        D22
+    end
+    
+    
+    properties
         ExactFunc
         RHS
         DirichletData
         NewmannData
         ExactSolution
         SimulatedSolution
-        MixedSecondDiffTerm
+        SecondDiffTerm
     end
     
     methods
         
-        function obj = EllipticMixedParticalDerivativeTest2d(N, M)
+        function obj = EllipticMixedParticalDerivativeAboutXTest2d(N, M, DiffCoe)
             % setup mesh domain
             [ obj.mesh2d  ] = makeChannelMesh( obj, N, M );
             obj.initPhysFromOptions( obj.mesh2d );
-            obj.HorizontalEddyViscositySolver = MixedHorzDiffSolver(obj);
+            obj.D11 = DiffCoe(1);
+            obj.D12 = DiffCoe(2);
+            obj.D21 = DiffCoe(3);
+            obj.D22 = DiffCoe(4);
+            obj.HorizontalEddyViscositySolver = MixedHorzDiffInXSolver(obj);
             obj.matGetExtFunc;
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
-            obj.RHS = eval(obj.MixedSecondDiffTerm);
+            obj.RHS = eval(obj.SecondDiffTerm);
             obj.ExactSolution = eval(obj.ExactFunc);
             obj.AssembleGlobalStiffMatrix;
             obj.matGetStiffMatrixInPointForm;
@@ -42,14 +54,12 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
         function matGetExtFunc(obj)
             syms x y;
             obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
-            obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x) + diff(diff(obj.ExactFunc, x),y);
-            DiffFuncy = diff(obj.ExactFunc,y);
-            DiffFuncx = diff(obj.ExactFunc,x);
+            obj.SecondDiffTerm = diff(obj.D11 * diff(obj.ExactFunc, x),x) + diff(obj.D12 * diff(obj.ExactFunc, y),x) + ...
+                diff(obj.D21 * diff(obj.ExactFunc, x),y) + diff(obj.D22 * diff(obj.ExactFunc, y),y);
             x = obj.meshUnion.BoundaryEdge.xb;
             y = obj.meshUnion.BoundaryEdge.yb;
-            %To be verified
-            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(DiffFuncy) + ...
-                obj.meshUnion.BoundaryEdge.ny .* eval(DiffFuncx);
+            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(obj.D11 * diff(obj.ExactFunc, x) + obj.D12 * diff(obj.ExactFunc, y) ) + ...
+                obj.meshUnion.BoundaryEdge.ny .* eval(obj.D21 * diff(obj.ExactFunc, x) + obj.D22 * diff(obj.ExactFunc, y) );
             obj.DirichletData = eval(obj.ExactFunc);
         end
         
@@ -111,7 +121,7 @@ classdef EllipticMixedParticalDerivativeTest2d < Adv_DiffAbstract2d
             ind = ( edge.ftype == enumBoundaryCondition.Dirichlet );
             fp(:, ind, 1) = 0;
         end
-    end    
+    end
     
 end
 
@@ -119,9 +129,9 @@ function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
     enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann, ...
-    enumBoundaryCondition.Newmann ];
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Dirichlet ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ -1, 1 ], [ -1, 1 ], M, M, bctype);
@@ -129,3 +139,4 @@ mesh2d = makeUniformQuadMesh( N, ...
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );
 end
+

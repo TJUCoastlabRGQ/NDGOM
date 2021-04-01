@@ -1,4 +1,4 @@
-classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
+classdef ParabolicTest2d < Adv_DiffAbstract2d
     properties
         M
         N
@@ -7,7 +7,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
     properties
         ExactFunc
         Difft
-        MixedSecondDiffTerm
+        SecondDiffTerm
         Advx
         Advy
         %         GradTerm
@@ -16,18 +16,18 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
     end
     
     methods
-        function obj = MixedPartialDerivativeTerm2d( N,  M )
+        function obj = ParabolicTest2d( N,  M )
             % setup mesh domain
             [ obj.mesh2d  ] = makeChannelMesh( obj, N, M );
             obj.M = M;
             obj.N = N;
-            obj.miu = 1;
+            obj.miu = 0.01;
             obj.u0 = 0;
             obj.v0 = 0;
             % allocate boundary field with mesh obj
             obj.matGetExtFunc;
             obj.initPhysFromOptions( obj.mesh2d );
-            obj.HorizontalEddyViscositySolver = MixedHorzDiffSolver(obj);
+            obj.HorizontalEddyViscositySolver = ParabolicHorzDiffSolver(obj);
         end
         
         function matGetExtFunc(obj)
@@ -36,7 +36,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
             obj.Difft = diff(obj.ExactFunc, t);
             obj.Advx = obj.u0 * diff(obj.ExactFunc, x);
             obj.Advy = obj.v0 * diff(obj.ExactFunc, y);
-            obj.MixedSecondDiffTerm = diff(obj.miu*diff(obj.ExactFunc, y),x) + diff(obj.miu*diff(obj.ExactFunc, x),y);
+            obj.SecondDiffTerm = diff(obj.miu*diff(obj.ExactFunc, y),y) + diff(obj.miu*diff(obj.ExactFunc, x),x);
             obj.GradInX = obj.miu*diff(obj.ExactFunc,x);
             obj.GradInY = obj.miu*diff(obj.ExactFunc,y);
         end
@@ -76,7 +76,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
                 eval(obj.Difft) + ...
                 eval(obj.Advx) + ...
                 eval(obj.Advy) - ...
-                eval(obj.MixedSecondDiffTerm);
+                eval(obj.SecondDiffTerm);
         end
         
         function f_ext = getExtFunc( obj, mesh, time )
@@ -84,7 +84,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 1.5;
             outputIntervalNum = 500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -99,7 +99,7 @@ classdef MixedPartialDerivativeTerm2d < Adv_DiffAbstract2d
             dthv = min( 1/(2*obj.N+1) *  dx/obj.v0, 1/(2*obj.N+1) * dx^2/obj.miu);
             %             dthu = min(  1/(2*obj.N+1) * dx^2/obj.miu);
             %             dthv = min(  1/(2*obj.N+1) * dx^2/obj.miu);
-            option('timeInterval') = 0.02 * min(dthu, dthv);
+            option('timeInterval') = 0.05 * min(dthu, dthv);
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
