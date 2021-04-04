@@ -3,8 +3,8 @@ classdef WaterDrop2d < SWEPreBlanaced2d
     %   Detailed explanation goes here
     
     properties(Constant)
-        gra = 9.81;
-        hmin = 1e-4;
+%         gra = 9.81;
+%         hmin = 1e-4;
     end
     
     methods
@@ -32,7 +32,7 @@ classdef WaterDrop2d < SWEPreBlanaced2d
             outputIntervalNum = 10;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
-            option('temporalDiscreteType') = NdgTemporalIntervalType.Constant;
+            option('temporalDiscreteType') = enumTemproalInterval.Constant;
             option('obcType') = NdgBCType.None;
             option('outputIntervalType') = NdgIOIntervalType.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;

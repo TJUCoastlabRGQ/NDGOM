@@ -103,7 +103,7 @@ classdef DamBreakWetUniformMesh2d < SWEConventional2d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 80;
+            ftime = 40;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

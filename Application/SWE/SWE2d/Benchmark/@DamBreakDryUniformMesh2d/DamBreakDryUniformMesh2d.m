@@ -6,9 +6,9 @@ classdef DamBreakDryUniformMesh2d < SWEWDPreBlanaced2d
     
     properties(Constant)
         %> wet/dry depth threshold
-        hmin = 1e-4
-        %> gravity acceleration
-        gra = 9.8
+%         hmin = 1e-4
+%         %> gravity acceleration
+%         gra = 9.8
         %> Dam position
         damPosition = 500
         %> initial water depth

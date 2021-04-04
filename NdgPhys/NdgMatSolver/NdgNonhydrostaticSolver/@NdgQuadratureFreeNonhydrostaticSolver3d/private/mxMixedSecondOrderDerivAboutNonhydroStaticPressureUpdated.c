@@ -9,6 +9,28 @@ $$-\left (\nabla_{\sigma}q,\nabla_h v\right )_{\Omega}+\left (\left \{\nabla_{\s
 \left (\nabla_{\sigma}v,qn\right)_{\epsilon_D}-\tau\left ( [q], [v]\right)_{\epsilon_i}-\tau\left ( nq, nv\right)_{\epsilon_D}$$
 */
 
+void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, double *FToF, int LocalEle, int AdjacentEle, int Ne){
+	for (int f = 0; f < Ne; f++){
+		int TempLocalEle = (int)FToE[2 * f];
+		int TempAdjEle = (int)FToE[2 * f + 1];
+		if (LocalEle == TempLocalEle || LocalEle == TempAdjEle){
+			if (AdjacentEle == TempLocalEle || AdjacentEle == TempAdjEle){
+				if (AdjacentEle == TempAdjEle && LocalEle == TempLocalEle){
+					(*GlobalFace) = f;
+					break;
+				}
+				else if (AdjacentEle == TempLocalEle && LocalEle == TempAdjEle){
+					(*GlobalFace) = f;
+					break;
+				}
+				else{
+					printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model, check again!\n");
+					exit(0);
+				}
+			}
+		}
+	}
+}
 
 /*This following funciton is used to assemble term corresponds to
 $$-\int_{\Omega}\nabla_h v \nabla_{\sigma} q_hd\boldsymbol{x}$$
@@ -155,8 +177,8 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 			//$$\int_{\epsilon_{ih}}\left(-\tau [q_h][v]\right )d\boldsymbol{x}$$
 			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
 			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
-			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
-			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
+//			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
+//			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
 			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
 
 			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
@@ -273,8 +295,8 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoin
 			//$$\int_{\epsilon_{ih}}\left(-\tau [q_h][v]\right )d\boldsymbol{x}$$
 			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
 			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
-			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
-			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
+//			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
+//			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
 			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
 
 			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
@@ -481,9 +503,11 @@ rd: A pointer to the start of the transformation Jacobian of the studied element
 sd: A pointer to the start of the transformation Jacobian of the studied element in direction s, here d can be x or y
 */
 
-void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, int Nface, int LocalEle, int Np, int Np2d,\
-	int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *BotEid, double *Dr, double *Ds, double *rd, \
-	double *sd, mwIndex *Jcs){
+//加了FToE、FToF、Tau以及Ne。 
+
+void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, double *FToE, double *FToF, int Nface, int LocalEle, \
+	int Np, int Np2d, int Ne, int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *BotEid, double *Dr,\
+	double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -509,6 +533,13 @@ void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, doub
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface-2], Ne);
+	DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
+	//Local to adjacent, positive, while local to local, minus.
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, BotEid, LocalEidM, Np, Nfp, 1.0);
+
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvDownMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -550,9 +581,9 @@ rd: A pointer to the start of the transformation Jacobian of the studied element
 sd: A pointer to the start of the transformation Jacobian of the studied element in direction s, here d can be x or y
 */
 
-void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, int StartPoint, int NonzeroPerColumn,\
-	int Np, int Np2d, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, \
-	double *Dr, double *Ds, double *rd, double *sd, mwIndex *Jcs){
+void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, double *FToE, double *FToF, int LocalEle, \
+	int StartPoint, int NonzeroPerColumn, int Np, int Np2d, int Ne, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, \
+	double *Dr, double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -578,6 +609,13 @@ void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, int Sta
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 2], Ne);
+	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
+	//Local to adjacent, positive, while local to local, minus.
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Np2d, -1.0);
+
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -613,9 +651,9 @@ rd: A pointer to the start of the transformation Jacobian of the studied element
 sd: A pointer to the start of the transformation Jacobian of the studied element in direction s, here d can be x or y
 */
 
-void GetLocalToUpElementContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, int Nface, int LocalEle, int Np, int Np2d, \
-	int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *UpEid, double *Dr, double *Ds, double *rd, \
-	double *sd, mwIndex *Jcs){
+void GetLocalToUpElementContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, double *FToE, double *FToF, int Nface, int LocalEle, \
+int Np, int Np2d, int Ne, int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *UpEid, double *Dr, \
+double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -643,6 +681,12 @@ void GetLocalToUpElementContributionForMixedSecondOrderTerm(double *dest, double
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 1], Ne);
+	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
+	//Local to adjacent, positive, while local to local, minus.
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Np2d, 1.0);
 
 	for (int i = 0; i < (Nface + 1); i++){
 		if (EToE[Nface - 1] == TempEToE[i]){
@@ -680,9 +724,10 @@ Ds: A pointer to the start of the differential matrix for the master cell in dir
 rd: A pointer to the start of the transformation Jacobian of the studied element in direction r, here d can be x or y
 sd: A pointer to the start of the transformation Jacobian of the studied element in direction s, here d can be x or y
 */
-void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, int StartPoint, int NonzeroPerColumn, \
-	int Np, int Np2d, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, \
-	double *Dr, double *Ds, double *rd, double *sd, mwIndex *Jcs){
+
+void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, double *EToE, double *TempEToE, double *FToE, double *FToF, int LocalEle, int StartPoint, int NonzeroPerColumn, \
+	int Np, int Np2d, int Ne, double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, \
+	double *Dr, double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -708,6 +753,13 @@ void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, int Start
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 1], Ne);
+	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
+	//Local to adjacent, positive, while local to local, minus.
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Np2d, -1.0);
+
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -833,6 +885,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 
+	double *BotETau = malloc(BotENe*HorNfp*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < BotENe; face++){
+		double localRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2] - 1];
+		double adjacentRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2 + 1] - 1];
+		for (int p = 0; p < HorNfp; p++){
+			Tau[face*HorNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
+		}
+	}
+
+	double *SurfETau = malloc(SurfENe*HorNfp*sizeof(double));
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < SurfENe; face++){
+		double localRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2] - 1];
+		double adjacentRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2 + 1] - 1];
+		for (int p = 0; p < HorNfp; p++){
+			Tau[face*HorNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
+		}
+	}
+
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -864,13 +943,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					break;
 				}
 			}
+
 			GetLocalToAdjacentElementContributionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
 				EToE + (LocalEle-1)*Nface, LM2d, M3d, Dt, tz, Js, J, TempEToE, FToE, FToF, Fmask, \
 				maxNfp, HorNfp, IENe, Np, Vector, Tau, jcs);
+//			GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, int LocalEle, int Nface2d, int Nface, \
+				double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, double *TempEToE, \
+				double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector, double *Tau, mwIndex *Jcs);
 
 			GetLocalFacialContributionInHorizontalDirection(sr, LocalStartPoint, jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], LocalEle, \
 				Nface2d, Nface, EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, Js, J, \
 				TempEToE, FToE, FToF, Fmask, maxNfp, HorNfp, IENe, Np, Vector, Tau, jcs);
+
+			//GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoint, int NonzeroPerColumn, int LocalEle, \
+				int Nface2d, int Nface, double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, \
+				double *TempEToE, double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector, \
+				double *Tau, mwIndex *Jcs)
 
 //			ImposeBoundaryConditionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
 				EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, BEJs, J, TempEToE, \
@@ -892,9 +980,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
 						Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np);
 
-//					GetLocalToDownElementContributionForMixedSecondOrderTerm(sr, EToE + Nface*(LocalEle - 1), TempEToE, Nface, LocalEle, Np, VertNfp, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + ele * Nlayer * Np + L*Np + Np, J2d + ele*VertNfp, \
-						BotEidM, UpEidM, Dr, Ds, rd + ele * Nlayer * Np + L*Np + Np, sd + ele * Nlayer * Np + L*Np + Np, jcs);
+					GetLocalToDownElementContributionForMixedSecondOrderTerm(sr, EToE + Nface*(LocalEle - 1), TempEToE, BotEFToE, BotEFToF,  Nface,\
+						LocalEle, Np, VertNfp, BotENe, jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + ele * Nlayer * Np + L*Np + Np,\
+						J2d + ele*VertNfp, BotEidM, UpEidM, Dr, Ds, rd + ele * Nlayer * Np + L*Np + Np, sd + ele * Nlayer * Np + L*Np + Np, BotETau, jcs);
 
 //					GetLocalDownFacialContributionForMixedSecondOrderTerm(sr, LocalStartPoint, jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], \
 						Np, VertNfp, M3d, M2d, J + ele * Nlayer * Np + L*Np, J2d + ele*VertNfp, BotEidM, \
