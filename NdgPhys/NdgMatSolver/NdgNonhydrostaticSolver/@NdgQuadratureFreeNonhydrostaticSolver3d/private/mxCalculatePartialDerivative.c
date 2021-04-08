@@ -292,7 +292,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			Nonhydrofmod + i*Np*NLayer, InvV3d, Np, NLayer);
 	}
 
-	GetVerticalVelocityAtSurfaceAndBottom(Weta, Wbot, prhs[2], prhs[7], prhs[6], prhs[16], prhs[17], prhs[18], \
+//	GetVerticalVelocityAtSurfaceAndBottom(Weta, Wbot, prhs[2], prhs[7], prhs[6], prhs[16], prhs[17], prhs[18], \
 		prhs[19], ftype2d, PHPX, PHPY, NonhydroHU2d, NonhydroHV2d, z2d, h2d, fext2d, gra, *Hcrit, zx, zy, u, v);
 
 	GetFirstOrderPartialDerivativeInVerticalDirection(PUPS, PVPS, PWPS, prhs[1], prhs[2], prhs[5], prhs[6], prhs[7], u, v, w, Weta, Wbot);
@@ -908,8 +908,8 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + 2*BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
-
+		//DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
+		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 	}
 
 #ifdef _OPENMP
@@ -943,8 +943,8 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroSurfBEFluxM + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
-		//DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		//DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 	}
 

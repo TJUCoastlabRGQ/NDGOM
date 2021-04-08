@@ -2,7 +2,7 @@
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
-void GetPenaltyParameter(double *, double , double , int, int, int);
+void GetPenaltyParameter(double *, double , double , double, int, int);
 
 void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int , \
 	int , int , double *, double *, double *, double *, double *, double *, double *, \
@@ -61,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempDs = mxGetField(cell, 0, "Ds");
 	double  *Ds = mxGetPr(TempDs);
 	mxArray *TempP = mxGetField(cell, 0, "N");
-	int P = (int)mxGetScalar(TempP);
+	double P = mxGetScalar(TempP);
 
 
 	mxArray *TempBENe2d = mxGetField(BoundaryEdge2d, 0, "Ne");
@@ -93,6 +93,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *FToF = mxGetPr(TempFToF);
 	mxArray *TempFToE = mxGetField(BoundaryEdge, 0, "FToE");
 	double *FToE = mxGetPr(TempFToE);
+	mxArray *TempFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
+	double *FToN1 = mxGetPr(TempFToN1);
 	mxArray *Tempnx = mxGetField(BoundaryEdge, 0, "nx");
 	double *nx = mxGetPr(Tempnx);
 	mxArray *Tempny = mxGetField(BoundaryEdge, 0, "ny");
@@ -113,7 +115,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	*/
 //#ifdef _OPENMP
 //#pragma omp parallel for num_threads(DG_THREADS)
-//#endif  
+//#endif
+	for (int edge = 0; edge < BENe; edge++){
+
+		double *FpIndex = malloc(Nfp*sizeof(double));
+
+		for (int p = 0; p < Nfp; p++){
+			FpIndex[p] = FToN1[Nfp*edge + p];
+		}
+		
+		int LocalEle;
+		LocalEle = (int)FToE[2 * edge];
+		double *Tau = malloc(Nfp*sizeof(double));
+		GetPenaltyParameter(Tau, LAV[LocalEle - 1], FLAV[edge], P, Nface, Nfp);
+		
+		double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
+		TempEToE = EToE + (LocalEle - 1)*Nface;
+		TempJ = J + (LocalEle - 1)*Np;
+		TempJs = Js + edge * Nfp;
+
+		ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
+			Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
+			sy + (LocalEle - 1)*Np, Dr, Ds, Tau, nx + edge * Nfp, ny + edge * Nfp, \
+			Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp);
+
+		free(FpIndex);
+		free(Tau);
+	}
+
+
+	/*
 	for (int edge = 0; edge < BENe2d; edge++){
 		int Flag = 0;
 		int face2d = 0;
@@ -123,10 +154,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		double *FpIndex = malloc(Nfp*sizeof(double));
 
 		GetFaceTypeAndFaceOrder(&Flag, &face2d, &ele2d, FToF2d, FToE2d, ftype2d, edge);
-
-		for (int p = 0; p < Nfp; p++){
-			FpIndex[p] = Fmask[maxNfp*(face2d - 1) + p];
-		}
 
 		double *Tau = malloc(Nfp*sizeof(double));
 
@@ -145,6 +172,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 				GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, LocalEle);
 
+				for (int p = 0; p < Nfp; p++){
+					FpIndex[p] = FToN1[Nfp*GlobalFace + p];
+				}
+
 				TempJs = Js + GlobalFace * Nfp;
 
 				GetPenaltyParameter(Tau, LAV[LocalEle - 1], FLAV[GlobalFace], P, Nface, Nfp);
@@ -159,6 +190,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(FpIndex);
 		free(Tau);
 	}
+	*/
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
@@ -332,9 +364,9 @@ void SumInRow(double *dest, double *Source, int Np, int ColNum){
 	}
 }
 
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
+void GetPenaltyParameter(double *dest, double LAV, double FLAV, double P, int Nface, int Nfp){
 	for (int i = 0; i < Nfp; i++){
-		dest[i] = (P + 1)*(P + 3) / 3 * Nface / 2 * FLAV / LAV;
+		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
 	}
 }
 

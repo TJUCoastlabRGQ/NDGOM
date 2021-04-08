@@ -33,24 +33,26 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
     
     methods
         function obj = FirstOrderProblemTest3d(N, Nz, M, Mz)
-            [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
-            obj.meshUnion = obj.mesh3d;
-            obj.Nmesh = 1;
+            [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
+            obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.matGetFunction;
             z = zeros(obj.mesh2d.cell.Np,1);
             obj.DirichExact = eval(obj.Cexact);
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
-            [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+%             [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
             obj.RHS = obj.matAssembleRightHandSide;
             % The direction vector is considered in the initialization stage
-            obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
+%             obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
-            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+%             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+            obj.SimulatedSolution = obj.NonhydrostaticSolver.PNPS\obj.RHS(:);
+             disp("The condition number is:")
+            disp(condest(obj.NonhydrostaticSolver.PNPS));
             disp("The maximum difference is:");
             disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
             disp("The minimum difference is:");
@@ -76,6 +78,34 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
             obj.Cexact = sin(-pi/2*z);
             obj.DiffCexact = diff(obj.Cexact, z);
         end
+        
+        %> set initial function
+        function [fphys2d, fphys] = setInitialField( obj )
+            fphys2d = cell( obj.Nmesh, 1 );
+            fphys = cell( obj.Nmesh, 1 );
+            for m = 1 : obj.Nmesh
+                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
+                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
+            end
+        end        
+        
+        function [ option ] = setOption( obj, option )
+            ftime = 1.75;
+            outputIntervalNum = 500;
+            option('startTime') = 0.0;
+            option('finalTime') = ftime;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
+            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputCaseName') = mfilename;
+            option('outputNcfileNum') = 5;
+            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.NetCDF;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffConstantHorizontalDiffusionValue') = 1;
+        end        
         
     end
     

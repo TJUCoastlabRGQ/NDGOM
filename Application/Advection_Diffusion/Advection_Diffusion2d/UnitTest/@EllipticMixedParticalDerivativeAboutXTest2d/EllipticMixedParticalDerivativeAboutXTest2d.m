@@ -29,7 +29,7 @@ classdef EllipticMixedParticalDerivativeAboutXTest2d < Adv_DiffAbstract2d
             obj.RHS = eval(obj.MixedSecondDiffTerm);
             obj.ExactSolution = eval(obj.ExactFunc);
             obj.AssembleGlobalStiffMatrix;
-            obj.matGetStiffMatrixInPointForm;
+%             obj.matGetStiffMatrixInPointForm;
         end
         
         function EllipticProblemSolve(obj)
@@ -40,7 +40,8 @@ classdef EllipticMixedParticalDerivativeAboutXTest2d < Adv_DiffAbstract2d
         
         function matGetExtFunc(obj)
             syms x y;
-            obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
+%             obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
+            obj.ExactFunc = sin(pi*x)*sin(pi/2*y);
             obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x);
             DiffFuncy = diff(obj.ExactFunc,y);
             x = obj.meshUnion.BoundaryEdge.xb;
@@ -120,7 +121,7 @@ bctype = [ ...
     enumBoundaryCondition.Dirichlet ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -1, 1 ], [ -1, 1 ], M, M, bctype);
+    [ -1, 1 ], [ -1, 0 ], M, M, bctype);
 
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );

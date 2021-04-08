@@ -84,8 +84,9 @@ for face = 1:BoundaryEdge.Ne
     switch(BoundaryEdge.ftype(face))
         case enumBoundaryCondition.Newmann
             TempData = zeros(Np,1);
-            TempData(eidM) = diag(nx.^2) * FacialMass2d * obj.NewmannData(:,face);
+            TempData(eidM) = FacialMass2d * obj.NewmannData(:,face);
             obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) - ( ElementMassMatrix \ TempData )';
+                   
         case enumBoundaryCondition.Dirichlet
             %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
             TempData = sum( Dx(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) , 2);
@@ -108,4 +109,5 @@ for face = 1:BoundaryEdge.Ne
             obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) - ( ElementMassMatrix \ TempData )';
     end
 end
+obj.StiffMatrix = sparse(obj.StiffMatrix);
 end

@@ -4,7 +4,6 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
     
     properties
         StiffMatrix
-        PtProducedStiffMatrix
     end
     
     properties
@@ -27,7 +26,7 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
     
     methods
         
-        function obj = EllipticMixedParticalDerivativeAboutXTest2d(N, M, DiffCoe)
+        function obj = EllipticProblem2d(N, M, DiffCoe)
             % setup mesh domain
             [ obj.mesh2d  ] = makeChannelMesh( obj, N, M );
             obj.initPhysFromOptions( obj.mesh2d );
@@ -35,17 +34,17 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
             obj.D12 = DiffCoe(2);
             obj.D21 = DiffCoe(3);
             obj.D22 = DiffCoe(4);
-            obj.HorizontalEddyViscositySolver = MixedHorzDiffInXSolver(obj);
+%             obj.HorizontalEddyViscositySolver = MixedHorzDiffInXSolver(obj);
             obj.matGetExtFunc;
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             obj.RHS = eval(obj.SecondDiffTerm);
             obj.ExactSolution = eval(obj.ExactFunc);
             obj.AssembleGlobalStiffMatrix;
-            obj.matGetStiffMatrixInPointForm;
         end
         
         function EllipticProblemSolve(obj)
+            disp(condest(obj.StiffMatrix));
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
@@ -53,13 +52,16 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
         
         function matGetExtFunc(obj)
             syms x y;
-            obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
+%             obj.ExactFunc = sin(pi*x)*sin(pi/2*y);
+            obj.ExactFunc = sin(-pi/10*x) * sin(-pi/10*y);
             obj.SecondDiffTerm = diff(obj.D11 * diff(obj.ExactFunc, x),x) + diff(obj.D12 * diff(obj.ExactFunc, y),x) + ...
                 diff(obj.D21 * diff(obj.ExactFunc, x),y) + diff(obj.D22 * diff(obj.ExactFunc, y),y);
+            DiffFuncX = diff(obj.ExactFunc, x);
+            DiffFuncY = diff(obj.ExactFunc, y);
             x = obj.meshUnion.BoundaryEdge.xb;
             y = obj.meshUnion.BoundaryEdge.yb;
-            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(obj.D11 * diff(obj.ExactFunc, x) + obj.D12 * diff(obj.ExactFunc, y) ) + ...
-                obj.meshUnion.BoundaryEdge.ny .* eval(obj.D21 * diff(obj.ExactFunc, x) + obj.D22 * diff(obj.ExactFunc, y) );
+            obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(obj.D11 * DiffFuncX + obj.D12 * DiffFuncY ) + ...
+                obj.meshUnion.BoundaryEdge.ny .* eval(obj.D21 * DiffFuncX + obj.D22 * DiffFuncY );
             obj.DirichletData = eval(obj.ExactFunc);
         end
         
@@ -67,20 +69,6 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
     end
     
     methods ( Access = protected )
-        
-        function matGetStiffMatrixInPointForm( obj )
-            K = obj.meshUnion.K;
-            Np = obj.meshUnion.cell.Np;
-            obj.PtProducedStiffMatrix = zeros(K*Np);
-            fphys = cell(1);
-            obj.fext = cell(1);
-            obj.GradExt = zeros(obj.meshUnion.BoundaryEdge.Nfp , obj.meshUnion.BoundaryEdge.Ne);
-            for i = 1:obj.meshUnion.K*obj.meshUnion.cell.Np
-                fphys{1} = zeros(obj.meshUnion.cell.Np , obj.meshUnion.K);
-                fphys{1}(i) = 1;
-                obj.PtProducedStiffMatrix((i-1)*K*Np+1:i*K*Np) = obj.HorizontalEddyViscositySolver.matEvaluateStiffMatrixInPointForm( obj, fphys);
-            end
-        end
         
         %> set initial function
         function [ fphys ] = setInitialField( obj )
@@ -134,7 +122,7 @@ bctype = [ ...
     enumBoundaryCondition.Dirichlet ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -1, 1 ], [ -1, 1 ], M, M, bctype);
+    [ -10, 10 ], [ -10, 10 ], M, M, bctype);
 
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );

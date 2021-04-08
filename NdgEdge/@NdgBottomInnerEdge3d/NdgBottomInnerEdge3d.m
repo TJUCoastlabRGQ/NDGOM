@@ -40,11 +40,12 @@ classdef NdgBottomInnerEdge3d < handle
     methods (Access = public)
         function obj = NdgBottomInnerEdge3d( meshUnion3d, meshId )
             mesh = meshUnion3d( meshId );
-
+            obj.cell = mesh.mesh2d.cell;
             obj.mesh = mesh;
             obj = assembleMassMatrix( obj, mesh.cell.N, mesh.cell.Nz );
             obj = assembleEdgeConnect( obj, mesh, mesh.mesh2d );
             obj = assembleNodeProject( obj, mesh );
+            obj.GetCellSize( mesh );
         end
 
         %> access boundary values at edges

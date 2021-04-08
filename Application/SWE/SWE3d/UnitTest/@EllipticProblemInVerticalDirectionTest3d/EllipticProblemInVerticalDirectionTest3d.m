@@ -1,15 +1,12 @@
-classdef EllipticProblemInVerticalDirectionTest3d < SWEAbstract3d
+classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
     %> $\frac{\partial^2p}{\partial \sigma^2}$, the analytical
-    %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used 
+    %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used
     
     properties
         ChLength = 2
         ChWidth = 2
-        Nfield2d = 1
-        Nvar2d = 1
-        varFieldIndex2d = 1
     end
     
     properties
@@ -37,39 +34,35 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEAbstract3d
         hcrit = 1
     end
     
-    properties
-        outputFieldOrder2d = []
-        outputFieldOrder3d =  1
-        Nfield = 1
-        Nvar = 1
-        varFieldIndex = 1
-    end
     
     methods
         function obj = EllipticProblemInVerticalDirectionTest3d(N, Nz, M, Mz)
-            [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
-            obj.meshUnion = obj.mesh3d;
-            obj.Nmesh = 1;
+            [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
+            obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.matGetFunction;
             obj.DirichExact = zeros(obj.mesh2d.cell.Np,1);
             obj.NewmannExact = zeros(obj.mesh2d.cell.Np,1);
-            [ obj.StiffMatrix, LRHS, RRHS ] = obj.matAssembleGlobalStiffMatrix;
+%             [ obj.StiffMatrix, LRHS, RRHS ] = obj.matAssembleGlobalStiffMatrix;
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             obj.RHS = obj.matAssembleRightHandSide;
-            % The direction vector is considered in the initialization stage
-            obj.RHS(:,1) = obj.RHS(:,1) - LRHS;
-            % Minus or plus is considered when assemble RRHS
-            obj.RHS(:,end) = obj.RHS(:,end) + RRHS;            
+%             % The direction vector is considered in the initialization stage
+%             obj.RHS(:,1) = obj.RHS(:,1) - LRHS;
+%             % Minus or plus is considered when assemble RRHS
+%             obj.RHS(:,end) = obj.RHS(:,end) + RRHS;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
-            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+            
+            obj.SimulatedSolution = obj.NonhydrostaticSolver.SPNPS\obj.RHS(:);
+            disp("The condition number is:")
+            disp(condest(obj.NonhydrostaticSolver.SPNPS));
             disp("The maximum difference is:");
             disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
             disp("The minimum difference is:");
-            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));            
+            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
         end
         
     end
@@ -86,11 +79,39 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEAbstract3d
         
         rhs = matAssembleRightHandSide(obj);
         
+        %> set initial function
+        function [fphys2d, fphys] = setInitialField( obj )
+            fphys2d = cell( obj.Nmesh, 1 );
+            fphys = cell( obj.Nmesh, 1 );
+            for m = 1 : obj.Nmesh
+                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
+                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
+            end
+        end
+        
         function matGetFunction(obj)
             syms z;
             obj.Cexact = sin(-pi/2*z);
             obj.DiffCexact = diff(obj.Cexact, z);
             obj.SecondDiffCexact = diff(obj.DiffCexact, z);
+        end
+        
+        function [ option ] = setOption( obj, option )
+            ftime = 1.75;
+            outputIntervalNum = 500;
+            option('startTime') = 0.0;
+            option('finalTime') = ftime;
+            option('outputIntervalType') = enumOutputInterval.DeltaTime;
+            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputCaseName') = mfilename;
+            option('outputNcfileNum') = 5;
+            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
+            option('equationType') = enumDiscreteEquation.Strong;
+            option('integralType') = enumDiscreteIntegral.QuadratureFree;
+            option('outputType') = enumOutputFile.NetCDF;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffConstantHorizontalDiffusionValue') = 1;
         end
         
     end

@@ -5,7 +5,7 @@ classdef MixedEllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
     %> solution $p= sin\left (\frac{\pi}{2}\sigma\right )$ is used 
     properties
         ChLength = 2
-        ChWidth = 2
+        ChWidth = 0.02
     end
     
     properties
