@@ -40,12 +40,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memcpy(irs, Tempirs, Tempjcs[col] * sizeof(mwIndex));
 	memcpy(jcs, Tempjcs, (col + 1)*sizeof(mwIndex));
 
-	const mxArray *BoundaryEdge2d = prhs[3];
-	const mxArray *BoundaryEdge = prhs[4];
-	const mxArray *cell = prhs[5];
-	const mxArray *mesh = prhs[6];
-
-	signed char *ftype2d = (signed char *)mxGetData(prhs[7]);
+	const mxArray *BoundaryEdge = prhs[3];
+	const mxArray *cell = prhs[4];
+	const mxArray *mesh = prhs[5];
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -62,10 +59,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double  *Ds = mxGetPr(TempDs);
 	mxArray *TempP = mxGetField(cell, 0, "N");
 	double P = mxGetScalar(TempP);
-
-
-	mxArray *TempBENe2d = mxGetField(BoundaryEdge2d, 0, "Ne");
-	int BENe2d = (int)mxGetScalar(TempBENe2d);
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
@@ -104,11 +97,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempFLAV = mxGetField(BoundaryEdge, 0, "LAV");
 	double *FLAV = mxGetPr(TempFLAV);
 
-	mxArray *TempFToF2d = mxGetField(BoundaryEdge2d, 0, "FToF");
-	double *FToF2d = mxGetPr(TempFToF2d);
-	mxArray *TempFToE2d = mxGetField(BoundaryEdge2d, 0, "FToE");
-	double *FToE2d = mxGetPr(TempFToE2d);
-
 	/*
 	  This part can not parallized with OpemMP, since we may alter the the result at the same time
 	  through different threads.
@@ -142,55 +130,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(FpIndex);
 		free(Tau);
 	}
-
-
-	/*
-	for (int edge = 0; edge < BENe2d; edge++){
-		int Flag = 0;
-		int face2d = 0;
-		int ele2d = 0;
-		int Nface2d = Nface - 2;
-
-		double *FpIndex = malloc(Nfp*sizeof(double));
-
-		GetFaceTypeAndFaceOrder(&Flag, &face2d, &ele2d, FToF2d, FToE2d, ftype2d, edge);
-
-		double *Tau = malloc(Nfp*sizeof(double));
-
-		if (Flag == 1){//here 1 stand for Dirichlet boundary condition
-			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
-
-			int GlobalFace, LocalEle;
-
-			for (int L = 0; L < Nlayer; L++){
-
-				LocalEle = (ele2d - 1)*Nlayer + L + 1;
-
-				TempEToE = EToE + (ele2d - 1)*Nlayer*Nface + L*Nface;
-
-				TempJ = J + (ele2d - 1)*Nlayer*Np + L*Np;
-
-				GlobalFace = GetGlobalFace(face2d, BENe, FToE, FToF, LocalEle);
-
-				for (int p = 0; p < Nfp; p++){
-					FpIndex[p] = FToN1[Nfp*GlobalFace + p];
-				}
-
-				TempJs = Js + GlobalFace * Nfp;
-
-				GetPenaltyParameter(Tau, LAV[LocalEle - 1], FLAV[GlobalFace], P, Nface, Nfp);
-
-				ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
-					Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np,\
-					sy + (LocalEle - 1)*Np, Dr, Ds, Tau, nx + GlobalFace * Nfp, ny + GlobalFace * Nfp,\
-					Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + GlobalFace * Nfp);
-
-			}
-		}
-		free(FpIndex);
-		free(Tau);
-	}
-	*/
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
@@ -303,7 +242,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	int NonzeroPerColumn = jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np];
 	for (int j = 0; j < UniNum; j++){
 		if ((int)TempEToE[j] == LocalEle){
-			StartPoint = (int)jcs[(LocalEle - 1)*Np] + j*Np;
+			StartPoint = jcs[(LocalEle - 1)*Np] + j*Np;
 			break;
 		}	
 	}
@@ -330,16 +269,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(DirichEdgeBuff);
 	free(TempEToE);
 	free(TempMass2d);
-}
-
-int GetGlobalFace(int face, int Ne, double *FToE, double *FToF, int LocalElement){
-	for (int i = 0; i < Ne; i++){
-		if ((int)FToF[2 * i] == face && (int)FToE[2 * i] == LocalElement){
-			return i;
-			break;
-		}
-	}
-	return -1; //failed
 }
 
 void AssembleDataIntoPoint(double *dest, double *source, double *Index, int Nfp){
@@ -369,6 +298,7 @@ void GetPenaltyParameter(double *dest, double LAV, double FLAV, double P, int Nf
 		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
 	}
 }
+
 
 void GetFaceTypeAndFaceOrder(int *flag, int *face, int *ele, double *FToF, double *FToE, signed char *ftype, int edge){
 	(*ele) = (int)FToE[2 * edge];

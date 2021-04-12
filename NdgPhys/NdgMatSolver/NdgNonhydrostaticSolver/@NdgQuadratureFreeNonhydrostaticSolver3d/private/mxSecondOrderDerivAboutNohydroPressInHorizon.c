@@ -295,7 +295,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	memcpy(irs, TempIr, TotalNonzero*sizeof(mwIndex));
 	mwIndex *jcs = mxGetJc(plhs[0]);
 	memcpy(jcs, TempJc, (Np*Ele3d + 1)*sizeof(mwIndex));
-
+	
 	double *Tau = malloc(IENe*IENfp*sizeof(double));
 
 #ifdef _OPENMP
@@ -361,5 +361,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 		}
 		free(TempEToE);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int i = 0; i < TotalNonzero; i++){
+		sr[i] = sr[i] + pow(10,-16.0);
 	}
 }

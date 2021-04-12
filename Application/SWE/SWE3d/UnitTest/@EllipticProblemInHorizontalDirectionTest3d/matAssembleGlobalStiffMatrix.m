@@ -1,22 +1,21 @@
 function matAssembleGlobalStiffMatrix(obj)
 
-% [ TempRHS, TempStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY, ...
-%    obj.RHS, obj.DirichletData, obj.NonhydrostaticSolver.BoundaryEdge2d, obj.NonhydrostaticSolver.BoundaryEdge,...
-%    obj.NonhydrostaticSolver.cell, obj.NonhydrostaticSolver.mesh, int8(obj.meshUnion.mesh2d.BoundaryEdge.ftype) );
+[ TempRHS, TempStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY, ...
+   obj.RHS, obj.DirichletData, obj.NonhydrostaticSolver.BoundaryEdge, obj.NonhydrostaticSolver.cell, obj.NonhydrostaticSolver.mesh );
 
 AssembleMixedOrderTermGlobalStiffMatrix(obj);
 
-TempStiffMatrix = obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY;
+% TempStiffMatrix = obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY;
 disp("=========================For Stiff Matrix=========================")
 disp("The maximum difference is:");
 disp(max(max(obj.StiffMatrix-TempStiffMatrix)));
 disp("The minimum difference is:");
 disp(min(min(obj.StiffMatrix-TempStiffMatrix)));
-% disp("=========================For Right hand side=========================")
-% disp("The maximum difference is:");
-% disp(max(max(obj.RHS(:)-TempRHS)));
-% disp("The minimum difference is:");
-% disp(min(min(obj.RHS(:)-TempRHS)));
+disp("=========================For Right hand side=========================")
+disp("The maximum difference is:");
+disp(max(max(obj.RHS(:)-TempRHS)));
+disp("The minimum difference is:");
+disp(min(min(obj.RHS(:)-TempRHS)));
 end
 
 function AssembleMixedOrderTermGlobalStiffMatrix(obj)
@@ -87,38 +86,38 @@ Tau = bsxfun(@times, (fm(:) )',...
     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 
-% for face = 1:BoundaryEdge.Ne
-%     OP11 = zeros(Np);
-%     ele = BoundaryEdge.FToE(2*(face-1)+1);
-%     eidM = BoundaryEdge.FToN1(:,face);
-%     nx = BoundaryEdge.nx(:,face);
-%     ny = BoundaryEdge.ny(:,face);
-%     Js = BoundaryEdge.Js(:,face);
-%     FacialMass2d = diag(Js)*BoundaryEdge.M;
-%     switch(BoundaryEdge.ftype(face))
-%         case enumBoundaryCondition.Newmann
-%             TempData = zeros(Np,1);
-%             TempData(eidM) = FacialMass2d * obj.NewmannData(:,face);
-%             obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) - ( ElementMassMatrix \ TempData )';
-%         case enumBoundaryCondition.SlipWall
-%             %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
-%             TempData = sum( obj.D11 * Dx(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-%                 obj.D22 * Dy(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2);
-%             obj.RHS(:,ele) = obj.RHS(:,ele) + ( ElementMassMatrix \ TempData );
-%             %> For term $q_h\nabla_x vn_yd\boldsymbol{x}$
-%             OP11(:,eidM) = OP11(:,eidM) + obj.D11 * ( Dx(eidM,:) )' * ( FacialMass2d ) * diag(nx) + obj.D22 * ( Dy(eidM,:) )' * ( FacialMass2d ) * diag(ny);
-%             %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
-%             OP11(eidM,:) = OP11(eidM,:) + obj.D11 * FacialMass2d * diag(nx) * Dx(eidM,:) + obj.D22 * FacialMass2d * diag(ny) * Dy(eidM,:);
-%             %> For term $-\tau n_x^2q_h v$
-%             OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
-%             obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
-%                 ElementMassMatrix\OP11;
-%             %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
-%             TempData = zeros(Np,1);
-%             TempData(eidM) = sum( Tau(face) * FacialMass2d *...
-%                 diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-%             obj.RHS(:,ele) = obj.RHS(:,ele) - ( ElementMassMatrix \ TempData );
-%     end
-% end
+for face = 1:BoundaryEdge.Ne
+    OP11 = zeros(Np);
+    ele = BoundaryEdge.FToE(2*(face-1)+1);
+    eidM = BoundaryEdge.FToN1(:,face);
+    nx = BoundaryEdge.nx(:,face);
+    ny = BoundaryEdge.ny(:,face);
+    Js = BoundaryEdge.Js(:,face);
+    FacialMass2d = diag(Js)*BoundaryEdge.M;
+    switch(BoundaryEdge.ftype(face))
+        case enumBoundaryCondition.Newmann
+            TempData = zeros(Np,1);
+            TempData(eidM) = FacialMass2d * obj.NewmannData(:,face);
+            obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) - ( ElementMassMatrix \ TempData )';
+        case enumBoundaryCondition.SlipWall
+            %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
+            TempData = sum( obj.D11 * Dx(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+                obj.D22 * Dy(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2);
+            obj.RHS(:,ele) = obj.RHS(:,ele) + ( ElementMassMatrix \ TempData );
+            %> For term $q_h\nabla_x vn_yd\boldsymbol{x}$
+            OP11(:,eidM) = OP11(:,eidM) + obj.D11 * ( Dx(eidM,:) )' * ( FacialMass2d ) * diag(nx) + obj.D22 * ( Dy(eidM,:) )' * ( FacialMass2d ) * diag(ny);
+            %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
+            OP11(eidM,:) = OP11(eidM,:) + obj.D11 * FacialMass2d * diag(nx) * Dx(eidM,:) + obj.D22 * FacialMass2d * diag(ny) * Dy(eidM,:);
+            %> For term $-\tau n_x^2q_h v$
+            OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
+            obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
+                ElementMassMatrix\OP11;
+            %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
+            TempData = zeros(Np,1);
+            TempData(eidM) = sum( Tau(face) * FacialMass2d *...
+                diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+            obj.RHS(:,ele) = obj.RHS(:,ele) - ( ElementMassMatrix \ TempData );
+    end
+end
 % obj.StiffMatrix = sparse(obj.StiffMatrix);
 end

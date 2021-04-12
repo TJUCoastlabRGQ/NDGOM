@@ -243,6 +243,7 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 	* this part can't be parallised since the number of nonzeros of a studied
 	* column is influenced by that of the columns come before the studied one.
 	*/
+	
 	for (int i = 0; i < Ele3d; i++){
 		int NumRow = *(UniNum + i)*Np;
 		for (int j = 0; j < Np; j++){

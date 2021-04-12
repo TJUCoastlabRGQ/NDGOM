@@ -4,7 +4,7 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     %> $\frac{\partial^2p}{\partial \x^2} + \frac{\partial^2p}{\partial \y^2}$, the analytical
     %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used
     properties
-        ChLength = 20
+        ChLength = 4
         ChWidth = 4
     end
     
@@ -62,12 +62,12 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-%             disp("The condition number is:");
-%             disp(condest(obj.StiffMatrix));
-%             disp("The maximum difference is:");
-%             disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
-%             disp("The minimum difference is:");
-%             disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp("The condition number is:");
+            disp(condest(obj.StiffMatrix));
+            disp("The maximum difference is:");
+            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp("The minimum difference is:");
+            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
         end
         
     end
@@ -141,5 +141,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
