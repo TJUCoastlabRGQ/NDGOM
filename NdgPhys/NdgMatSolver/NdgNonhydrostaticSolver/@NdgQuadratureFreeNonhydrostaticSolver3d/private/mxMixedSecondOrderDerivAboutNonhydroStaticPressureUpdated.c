@@ -117,93 +117,91 @@ Np: Number of interpolation point for the master cell
 Vector: A pointer to the start of the facial direction vector of the inner edge
 Jcs: A pointer to the array that contains the number of nonzero element in each column
 */
-void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, int LocalEle, int Nface2d, int Nface, \
-	double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, double *TempEToE, \
-	double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector, double *Tau, mwIndex *Jcs){
-	
-	for (int i = 0; i < Nface2d; i++){
-		if (LocalEle == (int)EToE[i]) continue;
-		else{
-			int GlobalFace = 0, LocalFace = 0, AdjFace = 0;
-			double *FacialVector = malloc(Nfp * sizeof(double));
-			FindFaceAndDirectionVector(FacialVector, &GlobalFace, &LocalFace, &AdjFace, \
-				Nfp, LocalEle, EToE[i], FToE, FToF, Vector, Ne);
-			double *LocalEidM = malloc(Nfp*sizeof(double));
-			double *AdjEidM = malloc(Nfp*sizeof(double));
 
+void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, int LocalEle, int *AdjEle, double *FacialVector, int *GlobalFace,\
+	int InternalFace, int Nface, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, double *TempEToE, \
+	int *Flag, double *FToN1, double *FToN2, int Np, int Nfp, double *Tau, mwIndex *Jcs){
+
+	double *LocalEidM = malloc(Nfp*sizeof(double));
+	double *AdjEidM = malloc(Nfp*sizeof(double));
+	for (int i = 0; i < InternalFace; i++){
+		if (Flag[i] == 0){
 			for (int p = 0; p < Nfp; p++){
-				LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
-				AdjEidM[p] = Fmask[(AdjFace - 1)*maxNfp + p];
+				LocalEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
+				AdjEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
 			}
-
-			double *LocalDiff = malloc(Np*Np*sizeof(double));
-			DiagMultiply(LocalDiff, Dt, tz + (int)(LocalEle - 1)*Np, Np);
-
-			double *AdjMass3d = malloc(Np*Np*sizeof(double));
-			DiagMultiply(AdjMass3d, mass3d, J + Np*(int)(EToE[i] - 1), Np);
-			double *InvAdjMass3d = malloc(Np*Np*sizeof(double));
-			memcpy(InvAdjMass3d, AdjMass3d, Np*Np*sizeof(double));
-			MatrixInverse(InvAdjMass3d, (ptrdiff_t)Np);
-			double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
-
-
-			double *TempContribution = malloc(Np*Np*sizeof(double));
-			memset(TempContribution, 0, Np*Np*sizeof(double));
-			double *Contribution = malloc(Np*Np*sizeof(double));
-
-			double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-			// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
-			double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
-			AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
-			DiagMultiply(EleMass2d, Mass2d, FacialVector, Nfp);
-			MultiplyByConstant(EleMass2d, EleMass2d, -0.5, Nfp*Nfp);
-			MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d,
-				(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-			AssembleContributionIntoRow(TempContribution, EdgeContribution, AdjEidM, Np, Nfp);
-
-            // $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			DiagMultiply(EleMass2d, Mass2d, FacialVector, Nfp);
-			MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
-			MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-				(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-			AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
-
-
-			//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
-			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
-
-			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
-				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-
-			for (int j = 0; j < Nface + 1; j++){
-				if (EToE[i] == TempEToE[j]){
-					int StartPoint = Jcs[(LocalEle-1)*Np] + j*Np;
-					int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
-					AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
-					break;
-				}
-			}
-
-			free(FacialVector);
-			free(LocalEidM);
-			free(AdjEidM);
-			free(LocalDiff);
-			free(AdjMass3d);
-			free(InvAdjMass3d);
-			free(Mass2d);
-			free(EleMass2d);
-			free(TempContribution);
-			free(Contribution);
-			free(FacialDiffMatrix);
-			free(EdgeContribution);
 		}
+		else{
+			for (int p = 0; p < Nfp; p++){
+				AdjEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
+				LocalEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
+			}
+		}
+
+		double *LocalDiff = malloc(Np*Np*sizeof(double));
+		DiagMultiply(LocalDiff, Dt, tz + (LocalEle - 1)*Np, Np);
+
+		double *AdjMass3d = malloc(Np*Np*sizeof(double));
+		DiagMultiply(AdjMass3d, mass3d, J + Np*(AdjEle[i] - 1), Np);
+		double *InvAdjMass3d = malloc(Np*Np*sizeof(double));
+		memcpy(InvAdjMass3d, AdjMass3d, Np*Np*sizeof(double));
+		MatrixInverse(InvAdjMass3d, (ptrdiff_t)Np);
+		double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
+
+		double *TempContribution = malloc(Np*Np*sizeof(double));
+		memset(TempContribution, 0, Np*Np*sizeof(double));
+		double *Contribution = malloc(Np*Np*sizeof(double));
+
+		double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
+		// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
+		double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
+		AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
+		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+		MultiplyByConstant(EleMass2d, EleMass2d, -0.5, Nfp*Nfp);
+		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d,
+			(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+		AssembleContributionIntoRow(TempContribution, EdgeContribution, AdjEidM, Np, Nfp);
+
+		// $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
+//		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+//		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+//		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
+//		MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,\
+			(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+//		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+
+
+		//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace[i], Nfp);
+		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
+
+		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
+			(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+		for (int j = 0; j < Nface + 1; j++){
+			if (AdjEle[i] == TempEToE[j]){
+				int StartPoint = Jcs[(LocalEle - 1)*Np] + j*Np;
+				int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
+				AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+				break;
+			}
+		}
+		free(LocalDiff);
+		free(AdjMass3d);
+		free(InvAdjMass3d);
+		free(Mass2d);
+		free(EleMass2d);
+		free(TempContribution);
+		free(Contribution);
+		free(FacialDiffMatrix);
+		free(EdgeContribution);
 	}
+	free(LocalEidM);
+	free(AdjEidM);
 }
 
 
@@ -235,85 +233,80 @@ Vector: A pointer to the start of the facial direction vector of the inner edge
 Jcs: A pointer to the array that contains the number of nonzero element in each column
 */
 
-void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoint, int NonzeroPerColumn, int LocalEle,\
-	int Nface2d, int Nface, double *EToE, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J,\
-	double *TempEToE, double *FToE, double *FToF, double *Fmask, int maxNfp, int Nfp, int Ne, int Np, double *Vector,\
-	double *Tau, mwIndex *Jcs){
+void GetLocalFacialContributionInHorizontalDirection(double *dest, int LocalEle, int StartPoint, double *Vector, int *GlobalFace, \
+	int InternalFace, double *mass2d, double *mass3d, double *Dt, double *tz, double *Js, double *J, int *Flag, double *FToN1, \
+	double *FToN2, int Np, int Nfp, double *Tau, mwIndex *Jcs){
 
-	for (int i = 0; i < Nface2d; i++){
-		if (LocalEle == (int)EToE[i]){
-			continue;
+	double *LocalEidM = malloc(Nfp*sizeof(double));
+	for (int i = 0; i < InternalFace; i++){
+		if (Flag[i] == 0){
+			for (int p = 0; p < Nfp; p++){
+				LocalEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
+			}
 		}
 		else{
-			int GlobalFace = 0, LocalFace = 0, AdjFace = 0;
-			double *FacialVector = malloc(Nfp * sizeof(double));
-			FindFaceAndDirectionVector(FacialVector, &GlobalFace, &LocalFace, &AdjFace, \
-				Nfp, LocalEle, EToE[i], FToE, FToF, Vector, Ne);
-			double *LocalEidM = malloc(Nfp*sizeof(double));
-
 			for (int p = 0; p < Nfp; p++){
-				LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
+				LocalEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
 			}
-
-			double *LocalDiff = malloc(Np*Np*sizeof(double));
-			DiagMultiply(LocalDiff, Dt, tz + (int)(LocalEle - 1)*Np, Np);
-
-			double *LocalMass3d = malloc(Np*Np*sizeof(double));
-			DiagMultiply(LocalMass3d, mass3d, J + Np*(LocalEle - 1), Np);
-			double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
-			memcpy(InvLocalMass3d, LocalMass3d, Np*Np*sizeof(double));
-			MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
-			double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
-
-			double *TempContribution = malloc(Np*Np*sizeof(double));
-			memset(TempContribution, 0, Np*Np*sizeof(double));
-			double *Contribution = malloc(Np*Np*sizeof(double));
-
-			double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-			// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
-			double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
-			AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
-			DiagMultiply(Mass2d, Mass2d, FacialVector, Nfp);
-			MultiplyByConstant(Mass2d, Mass2d, 0.5, Nfp*Nfp);
-
-			MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, Mass2d,
-				(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-			AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
-
-			// $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			DiagMultiply(EleMass2d, Mass2d, FacialVector, Nfp);
-			MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
-			MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-				(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-			AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
-
-			//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
-			DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace, Nfp);
-			DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace, Nfp);
-			AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
-
-			MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
-				(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
-
-			free(FacialVector);
-			free(LocalEidM);
-			free(LocalDiff);
-			free(LocalMass3d);
-			free(InvLocalMass3d);
-			free(Mass2d);
-			free(EleMass2d);
-			free(TempContribution);
-			free(Contribution);
-			free(FacialDiffMatrix);
-			free(EdgeContribution);
 		}
+
+		double *LocalDiff = malloc(Np*Np*sizeof(double));
+		DiagMultiply(LocalDiff, Dt, tz + (int)(LocalEle - 1)*Np, Np);
+
+		double *LocalMass3d = malloc(Np*Np*sizeof(double));
+		DiagMultiply(LocalMass3d, mass3d, J + Np*(LocalEle - 1), Np);
+		double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
+		memcpy(InvLocalMass3d, LocalMass3d, Np*Np*sizeof(double));
+		MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
+		double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
+
+		double *TempContribution = malloc(Np*Np*sizeof(double));
+		memset(TempContribution, 0, Np*Np*sizeof(double));
+		double *Contribution = malloc(Np*Np*sizeof(double));
+
+		double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
+		// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
+		double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
+		AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
+		DiagMultiply(Mass2d, Mass2d, Vector + i*Nfp, Nfp);
+		MultiplyByConstant(Mass2d, Mass2d, 0.5, Nfp*Nfp);
+
+		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, Mass2d,
+			(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+		AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+
+		// $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
+//		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+//		DiagMultiply(EleMass2d, Mass2d, Vector + i*Nfp, Nfp);
+//		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
+//		MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,\
+			(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+//		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+
+		//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace[i], Nfp);
+		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
+
+		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
+			(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+		AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, Jcs[(LocalEle-1)*Np + 1] - Jcs[(LocalEle-1)*Np], Np);
+
+		free(LocalDiff);
+		free(LocalMass3d);
+		free(InvLocalMass3d);
+		free(Mass2d);
+		free(EleMass2d);
+		free(TempContribution);
+		free(Contribution);
+		free(FacialDiffMatrix);
+		free(EdgeContribution);
 	}
+	free(LocalEidM);
 }
 
 /*The following part is used to assemble term corresponding to:
@@ -680,14 +673,15 @@ double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
-		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
 	int GlobalFace = 0;
 	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 1], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, UpEid, LocalEid, Np, Np2d, 1.0);
+
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
 	for (int i = 0; i < (Nface + 1); i++){
 		if (EToE[Nface - 1] == TempEToE[i]){
@@ -822,25 +816,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *EToE = mxGetPr(prhs[5]);
 	double *FToE = mxGetPr(prhs[6]);
 	double *FToF = mxGetPr(prhs[7]);
-	double *LAV = mxGetPr(prhs[8]);
-	double *J = mxGetPr(prhs[9]);
-	double *J2d = mxGetPr(prhs[10]);
-	double *Js = mxGetPr(prhs[11]);
-	double *M3d = mxGetPr(prhs[12]);
-	double *LM2d = mxGetPr(prhs[13]);
-	double *M2d = mxGetPr(prhs[14]);
-	int BENe = mxGetScalar(prhs[15]);
-	int IENe = mxGetScalar(prhs[16]);
+	double *FToN1 = mxGetPr(prhs[8]);
+	double *FToN2 = mxGetPr(prhs[9]);
+
+	double *LAV = mxGetPr(prhs[10]);
+	double *J = mxGetPr(prhs[11]);
+	double *J2d = mxGetPr(prhs[12]);
+	double *Js = mxGetPr(prhs[13]);
+	double *M3d = mxGetPr(prhs[14]);
+	double *LM2d = mxGetPr(prhs[15]);
+	double *M2d = mxGetPr(prhs[16]);
+	int BENe = mxGetScalar(prhs[17]);
+	int IENe = mxGetScalar(prhs[18]);
 	int TotalNonzero = Ele3d * (Nface + 1) * Np*Np - BENe * Np*Np - 2 * Ele2d*Np*Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
 	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface, Nface, Ele3d, Np);
 
-	double *IELAV = mxGetPr(prhs[17]);
-	double *Fmask = mxGetPr(prhs[18]);
-	int maxNfp = mxGetM(prhs[18]);
-	double *Nfp = mxGetPr(prhs[19]);
+	double *IELAV = mxGetPr(prhs[19]);
+	double *Fmask = mxGetPr(prhs[20]);
+	int maxNfp = mxGetM(prhs[20]);
+	double *Nfp = mxGetPr(prhs[21]);
 	int HorNfp = (int)Nfp[0];
 	int VertNfp = (int)Nfp[Nface - 1];
 	double *UpEidM = malloc(VertNfp*sizeof(double));
@@ -850,28 +847,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
 	}
 
-	int P = (int)mxGetScalar(prhs[20]);
-	double *Vector = mxGetPr(prhs[21]);
-	double *rd = mxGetPr(prhs[22]);
-	double *sd = mxGetPr(prhs[23]);
-	double *tz = mxGetPr(prhs[24]);
-	double *Dr = mxGetPr(prhs[25]);
-	double *Ds = mxGetPr(prhs[26]);
-	double *Dt = mxGetPr(prhs[27]);
+	int P = (int)mxGetScalar(prhs[22]);
+	double *Vector = mxGetPr(prhs[23]);
+	double *rd = mxGetPr(prhs[24]);
+	double *sd = mxGetPr(prhs[25]);
+	double *tz = mxGetPr(prhs[26]);
+	double *Dr = mxGetPr(prhs[27]);
+	double *Ds = mxGetPr(prhs[28]);
+	double *Dt = mxGetPr(prhs[29]);
 
-	double *BEFToF = mxGetPr(prhs[28]);
-	double *BEFToE = mxGetPr(prhs[29]);
-	double *BEVector = mxGetPr(prhs[30]);
-	double *BEJs = mxGetPr(prhs[31]);
+	double *BEFToF = mxGetPr(prhs[30]);
+	double *BEFToE = mxGetPr(prhs[31]);
+	double *BEVector = mxGetPr(prhs[32]);
+	double *BEJs = mxGetPr(prhs[33]);
 
-	double *BotELAV = mxGetPr(prhs[32]);
-	int BotENe = (int)mxGetScalar(prhs[33]);
-	double *BotEFToE = mxGetPr(prhs[34]);
-	double *BotEFToF = mxGetPr(prhs[35]);
+	double *BotELAV = mxGetPr(prhs[34]);
+	int BotENe = (int)mxGetScalar(prhs[35]);
+	double *BotEFToE = mxGetPr(prhs[36]);
+	double *BotEFToF = mxGetPr(prhs[37]);
 
-	double *SurfELAV = mxGetPr(prhs[36]);
-	int SurfENe = (int)mxGetScalar(prhs[37]);
-	double *SurfEFToE = mxGetPr(prhs[38]);
+	double *SurfELAV = mxGetPr(prhs[38]);
+	int SurfENe = (int)mxGetScalar(prhs[39]);
+	double *SurfEFToE = mxGetPr(prhs[40]);
 	
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
@@ -902,8 +899,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int face = 0; face < BotENe; face++){
 		double localRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2] - 1];
 		double adjacentRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2 + 1] - 1];
-		for (int p = 0; p < HorNfp; p++){
-			BotETau[face*HorNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+		for (int p = 0; p < VertNfp; p++){
+			BotETau[face*VertNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
 		}
 	}
@@ -915,8 +912,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (int face = 0; face < SurfENe; face++){
 		double localRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2] - 1];
 		double adjacentRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2 + 1] - 1];
-		for (int p = 0; p < HorNfp; p++){
-			SurfETau[face*HorNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+		for (int p = 0; p < VertNfp; p++){
+			SurfETau[face*VertNfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
 		}
 	}
@@ -953,32 +950,46 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
 
-			GetLocalToAdjacentElementContributionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
-				EToE + (LocalEle-1)*Nface, LM2d, M3d, Dt, tz, Js, J, TempEToE, FToE, FToF, Fmask, \
-				maxNfp, HorNfp, IENe, Np, Vector, Tau, jcs);
+			double *FacialVector = malloc(Nface2d*HorNfp*sizeof(double));
+			int *GlobalFace = malloc(Nface2d*sizeof(int));
+			int *AdjEle = malloc(Nface2d*sizeof(int));
+			int *ReverseFlag = malloc(Nface2d*sizeof(int));
+			int InternalFace = 0;
+			
+			FindFaceAndDirectionVector(FacialVector, GlobalFace, AdjEle, \
+				&InternalFace, ReverseFlag, HorNfp, LocalEle, FToE, FToF, Vector, IENe, Nface2d);
 
-			GetLocalFacialContributionInHorizontalDirection(sr, LocalStartPoint, jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], LocalEle, \
-				Nface2d, Nface, EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, Js, J, \
-				TempEToE, FToE, FToF, Fmask, maxNfp, HorNfp, IENe, Np, Vector, Tau, jcs);
+			GetLocalToAdjacentElementContributionInHorizontalDirection(sr, LocalEle, AdjEle, FacialVector, GlobalFace, InternalFace, \
+				Nface, LM2d, M3d, Dt, tz, Js, J, TempEToE, ReverseFlag,  FToN1, FToN2, Np, HorNfp, Tau, jcs);
 
+			GetLocalFacialContributionInHorizontalDirection(sr, LocalEle, LocalStartPoint, FacialVector, GlobalFace, InternalFace, \
+				LM2d, M3d, Dt, tz, Js, J, ReverseFlag, FToN1, FToN2, Np, HorNfp, Tau, jcs);
+			
 //			ImposeBoundaryConditionInHorizontalDirection(sr, LocalEle, Nface2d, Nface, \
 				EToE + (LocalEle - 1)*Nface, LM2d, M3d, Dt, tz, BEJs, J, TempEToE, \
 				BEFToE, BEFToF, Fmask, maxNfp, HorNfp, BENe, Np, BEVector, jcs);
 
 			if (UpEle == DownEle){//Only one layer in the vertical direction, impose the Dirichlet boundary condition
-				StartPoint = jcs[(LocalEle - 1)*Np];
-
-				ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-					jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM,\
-					Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np, SurfETau + ele*VertNfp);
+				for (int i = 0; i < EleNumber; i++){
+					if (LocalEle == TempEToE[i]){
+						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+						ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
+							Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np, SurfETau + ele*VertNfp);
+					}
+				}
 			}
 			else{//two or more layers included in vertical direction
 				if (LocalEle == UpEle){//This is the top most cell, and L=0
-					StartPoint = jcs[(LocalEle - 1)*Np + L*Np];
 
-					ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
-						Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np, SurfETau + ele*VertNfp);
+					for (int i = 0; i < EleNumber; i++){
+						if (LocalEle == TempEToE[i]){
+							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+							ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
+								Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np, SurfETau + ele*VertNfp);
+						}
+					}
 
 					GetLocalToDownElementContributionForMixedSecondOrderTerm(sr, EToE + Nface*(LocalEle - 1), TempEToE, BotEFToE, BotEFToF, Nface,\
 						LocalEle, Np, VertNfp, BotENe, jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + ele * Nlayer * Np + L*Np + Np,\
@@ -1019,6 +1030,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
 			free(TempEToE);
+			free(FacialVector);
+			free(GlobalFace);
+			free(AdjEle);
+			free(ReverseFlag);
 		}
 	}
 	free(TempIr);

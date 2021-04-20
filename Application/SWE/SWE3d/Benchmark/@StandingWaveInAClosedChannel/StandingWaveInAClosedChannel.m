@@ -5,16 +5,16 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     properties ( Constant )
         %> channel length
         hcrit = 0.01;
-%         ChLength = 100;
+        %         ChLength = 100;
         ChLength = 20;
         %> channel width
-        ChWidth = 1.2;
+        ChWidth = 0.4;
         %> channel depth
         H0 = 10;
         %> x range
         %> start time
         startTime = 0;
-%         %> final time
+        %         %> final time
         finalTime = 10;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
@@ -40,14 +40,54 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             obj.initPhysFromOptions( mesh2d, mesh3d );
             %> time interval
             obj.dt = 0.005;
-%             obj.Cf{1} = 0.0025/1000;
+            %             obj.Cf{1} = 0.0025/1000;
             obj.Cf{1} = 0*ones(size(mesh2d.x));
         end
+        
+        matTimeSteppingNew( obj );
         
         EntropyAndEnergyCalculation(obj);
         
         AnalysisResult2d( obj );
         AnalysisResult3d( obj );
+        
+        function NonhydroPostprocess(obj)
+            PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat(mfilename,'/2d/',mfilename));
+            Ntime = PostProcess.Nt;
+            outputTime = ncread( PostProcess.outputFile{1}, 'time' );
+            Eta = zeros( Ntime,1 );
+            exactEta = zeros( Ntime,1 );
+            x0 = 17.5;
+            h = obj.H0;
+            a = obj.A;
+            c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
+            T = obj.Lambda / c;
+            for t = 1:Ntime
+                %                 exactEta(t) = -obj.A * cos(2*pi*x0/obj.Lambda + 2*pi*outputTime(t) /obj.T);
+                exactEta(t) = obj.A * cos(2*pi/obj.Lambda*x0)*cos(2*pi/T*outputTime(t));
+                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
+                Eta(t) = tempdata(1);
+            end
+            figure;
+            set(gcf,'position',[50,50,1050,400]);
+            plot(outputTime,Eta,'k','LineWidth',1.5);
+            hold on;
+            set(gca,'YLIM',[-1.3*a, 1.3*a],'Fontsize',15);
+            xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
+            ylabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex');
+            
+            %             str = strcat('Hydro',num2str(obj.d),'.fig');
+            %             h = openfig(str,'reuse'); % open figure
+            %             D1=get(gca,'Children'); %get the handle of the line object
+            %             XData1=get(D1,'XData'); %get the x data
+            %             YData1=get(D1,'YData'); %get the y data
+            %             close(h);
+            %             plot(XData1, YData1,'k--','LineWidth',1.5);
+            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5);
+            h = legend('SWE','Theory');
+            set(h,'fontsize',15);
+            legend('boxoff');
+        end
         
     end
     
@@ -61,7 +101,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
                 fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
                 fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
                 % bottom elevation
-                fphys2d{m}(:, :, 4) = -obj.H0;                
+                fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
                 fphys2d{m}(:,:,1) =  obj.A * cos(2*pi*obj.mesh2d(m).x/obj.Lambda) - fphys2d{m}(:, :, 4);
             end
@@ -75,21 +115,21 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 20;                  
+            option('outputNcfileNum') = 20;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
-%             option('EddyViscosityType') = enumEddyViscosity.Constant;
-%             option('GOTMSetupFile') = obj.GotmFile;
-%             option('equationType') = enumDiscreteEquation.Strong;
-%             option('integralType') = enumDiscreteIntegral.GaussQuadrature;
-%             option('outputType') = enumOutputFile.VTK;
-%             option('ConstantEddyViscosityValue') = 0;
+            %             option('EddyViscosityType') = enumEddyViscosity.Constant;
+            %             option('GOTMSetupFile') = obj.GotmFile;
+            %             option('equationType') = enumDiscreteEquation.Strong;
+            %             option('integralType') = enumDiscreteIntegral.GaussQuadrature;
+            %             option('outputType') = enumOutputFile.VTK;
+            %             option('ConstantEddyViscosityValue') = 0;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('outputType') = enumOutputFile.VTK;
+            option('outputType') = enumOutputFile.NetCDF;
             option('ConstantVerticalEddyViscosityValue') = 0.03;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 1; 
+            option('ConstantHorizontalEddyViscosityValue') = 1;
             
         end
         

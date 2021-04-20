@@ -264,30 +264,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *EToE = mxGetPr(prhs[5]);
 	double *FToE = mxGetPr(prhs[6]);
 	double *FToF = mxGetPr(prhs[7]);
-	double *LAV = mxGetPr(prhs[8]);
-	double *J = mxGetPr(prhs[9]);
-	double *Js = mxGetPr(prhs[10]);
-	double *M3d = mxGetPr(prhs[11]);
-	double *M = mxGetPr(prhs[12]);
-	int BENe = mxGetScalar(prhs[13]);
-	int IENe = mxGetScalar(prhs[14]);
-	double *IELAV = mxGetPr(prhs[15]);
+	double *FToN1 = mxGetPr(prhs[8]);
+	double *FToN2 = mxGetPr(prhs[9]);
+
+	double *LAV = mxGetPr(prhs[10]);
+	double *J = mxGetPr(prhs[11]);
+	double *Js = mxGetPr(prhs[12]);
+	double *M3d = mxGetPr(prhs[13]);
+	double *M = mxGetPr(prhs[14]);
+	int BENe = mxGetScalar(prhs[15]);
+	int IENe = mxGetScalar(prhs[16]);
+	double *IELAV = mxGetPr(prhs[17]);
 
 	int TotalNonzero = Ele3d * (Nface - 2 + 1) * Np*Np - BENe * Np*Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
 
-	double *Fmask = mxGetPr(prhs[16]);
-	int maxNfp = mxGetM(prhs[16]);
-	double *Nfp = mxGetPr(prhs[17]);
+	double *Fmask = mxGetPr(prhs[18]);
+	int maxNfp = mxGetM(prhs[18]);
+	double *Nfp = mxGetPr(prhs[19]);
 	int IENfp = (int)Nfp[0];
-	int P = (int)mxGetScalar(prhs[18]);
-	double *Vector = mxGetPr(prhs[19]);
-	double *rd = mxGetPr(prhs[20]);
-	double *sd = mxGetPr(prhs[21]);
-	double *Dr = mxGetPr(prhs[22]);
-	double *Ds = mxGetPr(prhs[23]);
+	int P = (int)mxGetScalar(prhs[20]);
+	double *Vector = mxGetPr(prhs[21]);
+	double *rd = mxGetPr(prhs[22]);
+	double *sd = mxGetPr(prhs[23]);
+	double *Dr = mxGetPr(prhs[24]);
+	double *Ds = mxGetPr(prhs[25]);
 	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface2d, Nface, Ele3d, Np);
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
@@ -331,36 +334,53 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 		}
 
-		for (int i = 0; i < EleNumber; i++){
-			int GlobalFace = 0, LocalFace = 0, AdjFace = 0;
-			if (ele + 1 != (int)TempEToE[i]){   //This element is not located along the boundary.
-				double *FacialVector = malloc(IENfp * sizeof(double));
-				FindFaceAndDirectionVector(FacialVector, &GlobalFace, &LocalFace, &AdjFace, \
-					IENfp, ele + 1, TempEToE[i], FToE, FToF, Vector, IENe);
-				double *LocalEidM = malloc(IENfp*sizeof(double));
-				double *AdjEidM = malloc(IENfp*sizeof(double));
+		double *FacialVector = malloc(Nface2d*IENfp*sizeof(double));
+		int *GlobalFace = malloc(Nface2d*sizeof(int));
+		int *AdjEle = malloc(Nface2d*sizeof(int));
+		int *ReverseFlag = malloc(Nface2d*sizeof(int));
+		int InternalFace = 0;
 
+		FindFaceAndDirectionVector(FacialVector, GlobalFace, AdjEle, \
+			&InternalFace, ReverseFlag, IENfp, ele + 1, FToE, FToF, Vector, IENe, Nface2d);
+
+		double *LocalEidM = malloc(IENfp*sizeof(double));
+
+		double *AdjEidM = malloc(IENfp*sizeof(double));
+
+		for (int i = 0; i < InternalFace; i++){
+			if (ReverseFlag[i] == 0){
 				for (int p = 0; p < IENfp; p++){
-					LocalEidM[p] = Fmask[(LocalFace - 1)*maxNfp + p];
-					AdjEidM[p] = Fmask[(AdjFace - 1)*maxNfp + p];
+					LocalEidM[p] = FToN1[GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = FToN2[GlobalFace[i] * IENfp + p];
 				}
+			}
+			else{
+				for (int p = 0; p < IENfp; p++){
+					LocalEidM[p] = FToN2[GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = FToN1[GlobalFace[i] * IENfp + p];
+				}
+			}
 
-				StartPoint = jcs[ele*Np] + i*Np;
-				
-				GetLocalToAdjacentElementContributionForSecondOrderTerm(sr, StartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
-					M3d, M, J + (int)(TempEToE[i] - 1)*Np, Js + GlobalFace*IENfp, LocalEidM, AdjEidM, Dr, Ds, rd + ele*Np, rd + (int)(TempEToE[i] - 1)*Np, \
-					sd + ele*Np, sd + (int)(TempEToE[i] - 1)*Np, Tau + GlobalFace * IENfp, FacialVector);
+			GetLocalFacialContributionForSecondOrderTerm(sr, LocalStartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
+				M3d, M, J + ele*Np, Js + GlobalFace[i] * IENfp, LocalEidM, Dr, Ds, \
+				rd + ele*Np, sd + ele*Np, Tau + GlobalFace[i] * IENfp, FacialVector + i * IENfp);
 
-				GetLocalFacialContributionForSecondOrderTerm(sr, LocalStartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
-					M3d, M, J + ele*Np, Js + GlobalFace*IENfp, LocalEidM, Dr, Ds, \
-					rd + ele*Np, sd + ele*Np, Tau + GlobalFace * IENfp, FacialVector);
-
-				free(FacialVector);
-				free(LocalEidM);
-				free(AdjEidM);
+			for (int j = 0; j < EleNumber; j++){
+				if ((int)TempEToE[j] == AdjEle[i]){
+					StartPoint = jcs[ele*Np] + j*Np;
+					GetLocalToAdjacentElementContributionForSecondOrderTerm(sr, StartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
+						M3d, M, J + (int)(TempEToE[j] - 1)*Np, Js + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dr, Ds, \
+						rd + ele*Np, rd + (int)(TempEToE[j] - 1)*Np, sd + ele*Np, sd + (int)(TempEToE[j] - 1)*Np, \
+						Tau + GlobalFace[i] * IENfp, FacialVector + i*IENfp);
+				}
 			}
 		}
+
 		free(TempEToE);
+		free(FacialVector);
+		free(GlobalFace);
+		free(AdjEle);
+		free(ReverseFlag);
 	}
 
 #ifdef _OPENMP

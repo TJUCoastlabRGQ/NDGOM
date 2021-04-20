@@ -1,6 +1,6 @@
-function runEllipticProblem2d
-M = [ 10 20 40 80 ];
-% M = [ 2 1 0.5 0.25];
+function runEllipticMixedParticalDerivativeAboutXTest2d
+
+M = [10 20 40 60];
 Order = [1 2];
 
 Nmesh = numel(M);
@@ -21,17 +21,19 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-%         Solver = EllipticProblem2d(Order(n), M(m), [0.04,0.04,0.04,0.04]);
-%         Solver = EllipticProblem2d(Order(n), M(m), [0,1,0,0]);
-%         Solver = EllipticMixedParticalDerivativeAboutXTest2d(Order(n),M(m));
+        Solver = EllipticMixedParticalDerivativeAboutXTest2d(Order(n), M(m));
         Solver.EllipticProblemSolve;
         len(m, n) = 2/M(m);
-        dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('EllipticProblem2d/2d','/','EllipticProblem2d'));
+        dofs(m,n) = numel(Solver.meshUnion(1).x);
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('EllipticMixedParticalDerivativeAboutXTest2d/2d','/','EllipticMixedParticalDerivativeAboutXTest2d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);
         fphys{1}(:,:,1) = reshape(Solver.SimulatedSolution, Solver.meshUnion.cell.Np, Solver.meshUnion.K);
+        for i = 2:PostProcess.Nvar
+            fphys{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
+            ExactValue{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
+        end
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         ErrInf( m, n ) = err(1);
         
@@ -80,7 +82,7 @@ for n = 1:3
     
     lendstr = {'p1','p2'};
     legend(lendstr,'Interpreter','Latex');
-%     columnlegend(2,lendstr, 12);
+    %     columnlegend(2,lendstr, 12);
     
     xlabel('$DOFs$', 'Interpreter', 'Latex', 'FontSize', fontsize);
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);

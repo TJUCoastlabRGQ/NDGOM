@@ -90,7 +90,7 @@ for face = 1:BoundaryEdge.Ne
         case enumBoundaryCondition.Dirichlet
             %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
             TempData = sum( Dx(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) , 2);
-            obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) + ( ElementMassMatrix \ TempData )';
+            obj.RHS(:, ele) = obj.RHS(:, ele) + ( ElementMassMatrix \ TempData );
             %> For term $q_h\nabla_x vn_yd\boldsymbol{x}$
             OP11(:,eidM) = OP11(:,eidM) + Dx(eidM,:)'*diag(ny)*FacialMass2d;
             %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
@@ -106,7 +106,7 @@ for face = 1:BoundaryEdge.Ne
 %                 diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
             TempData(eidM) = sum( Tau(face) * FacialMass2d*...
                 diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-            obj.RHS((ele-1)*Np+1:ele*Np) = obj.RHS((ele-1)*Np+1:ele*Np) - ( ElementMassMatrix \ TempData )';
+            obj.RHS(:,ele) = obj.RHS(:, ele) - ( ElementMassMatrix \ TempData );
     end
 end
 obj.StiffMatrix = sparse(obj.StiffMatrix);

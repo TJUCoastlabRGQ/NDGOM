@@ -10,7 +10,7 @@ classdef NdgQuadFreeStrongCentralVisSolver3d < NdgAbstractVisSolver
     methods
         function obj = NdgQuadFreeStrongCentralVisSolver3d( phys, varId, rhsId )
             obj = obj@NdgAbstractVisSolver( phys, varId, rhsId );
-            obj.assembleMassMatrix( phys.meshUnion(1) );
+%             obj.assembleMassMatrix( phys.meshUnion(1) );
         end
         
         function matEvaluateRHS( obj, fphys )

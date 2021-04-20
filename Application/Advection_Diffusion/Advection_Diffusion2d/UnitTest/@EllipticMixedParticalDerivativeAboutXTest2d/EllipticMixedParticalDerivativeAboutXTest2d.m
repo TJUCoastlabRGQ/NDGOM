@@ -36,6 +36,12 @@ classdef EllipticMixedParticalDerivativeAboutXTest2d < Adv_DiffAbstract2d
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+            disp("The condition number is:");
+            disp(condest(obj.StiffMatrix));
+            disp("The maximum difference is:");
+            disp(max(max(obj.SimulatedSolution - obj.ExactSolution(:))));
+            disp("The minimum difference is:");
+            disp(min(min(obj.SimulatedSolution - obj.ExactSolution(:))));
         end
         
         function matGetExtFunc(obj)
@@ -115,7 +121,7 @@ end
 function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
-    enumBoundaryCondition.Dirichlet, ...
+    enumBoundaryCondition.Newmann, ...
     enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet ];

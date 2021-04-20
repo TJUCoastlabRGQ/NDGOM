@@ -136,9 +136,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			int rowIndex = (int)irSPNPS[j + (int)jcSPNPS[i]];
 			int Order = bin(rowIndex, 0, Num - 1, irMSPNPY + (int)jcMSPNPY[i]);
 			int Index = (int)jcSPNPS[i] + j;
-			temprhsu[Order] = temprhsu[Order] + InvSquaHeight[rowIndex]*SPNPS[Index];
-			temprhsu[Order] = temprhsu[Order] + (pow(SQPSPX[rowIndex], 2) + pow(SQPSPY[rowIndex], 2) + \
-				InvSquaHeight[rowIndex])*SPNPS[Index]; 
+//			temprhsu[Order] = temprhsu[Order] + InvSquaHeight[rowIndex]*SPNPS[Index];
+			temprhsu[Order] = temprhsu[Order] + ( SQPSPX[rowIndex] + SQPSPY[rowIndex] + \
+				InvSquaHeight[rowIndex] )*SPNPS[Index]; 
 		}
 
 		int NumMSPNPY = (int)jcMSPNPY[i + 1] - (int)jcMSPNPY[i];

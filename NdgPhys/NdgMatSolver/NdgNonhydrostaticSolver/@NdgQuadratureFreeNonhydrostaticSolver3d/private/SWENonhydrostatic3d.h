@@ -39,7 +39,7 @@ void FetchDataInSparseMatrix(double *, double *, int , int );
 
 void FindUniqueElementAndSortOrder(double *, double *, int *, int, int );
 
-void FindFaceAndDirectionVector(double *, int *, int *, int *, int, int, int, double *, double *, double *, int);
+void FindFaceAndDirectionVector(double *, int *, int *, int *, int *, int , int , double *, double *, double *, int , int );
 
 void FindFaceAndDirectionVectorAtBoundary(double *, int *, int *, int, int, double *, double *, int, double *, int);
 

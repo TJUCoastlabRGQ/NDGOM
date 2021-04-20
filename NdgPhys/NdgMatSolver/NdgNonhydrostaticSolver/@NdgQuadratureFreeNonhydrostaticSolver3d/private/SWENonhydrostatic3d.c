@@ -97,40 +97,32 @@ void FindUniqueElementAndSortOrder(double *dest, double *Src, int *OutNum, int I
 	}
 }
 
-void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, int *LocalFace, int *AdjacentFace, \
-	int Nfp, int LocalEle, int AdjacentEle, double *FToE, double *FToF, double *Vector, int IENe){
-
-	for (int f = 0; f < IENe; f++){
-		int TempLocalEle = (int)FToE[2 * f];
-		int TempAdjEle = (int)FToE[2 * f + 1];
-		if (LocalEle == TempLocalEle || LocalEle == TempAdjEle){
-			if (AdjacentEle == TempLocalEle || AdjacentEle == TempAdjEle){
-				if (AdjacentEle == TempAdjEle && LocalEle == TempLocalEle){
-					(*GlobalFace) = f;
-					(*LocalFace) = (int)FToF[2 * f];
-					(*AdjacentFace) = (int)FToF[2 * f + 1];
-					for (int p = 0; p < Nfp; p++){
-						FacialVector[p] = Vector[f*Nfp + p];
-					}
-					break;
-				}
-				else if (AdjacentEle == TempLocalEle && LocalEle == TempAdjEle){
-					(*GlobalFace) = f;
-					(*LocalFace) = (int)FToF[2 * f + 1];
-					(*AdjacentFace) = (int)FToF[2 * f];
-					for (int p = 0; p < Nfp; p++){
-						FacialVector[p] = -1 * Vector[f*Nfp + p];
-					}
-					break;
-				}
-				else{
-					printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model, check again!\n");
-					exit(0);
-				}
+void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, \
+	int *AdjEle, int *InternalFace, int *Flag, int Nfp, int LocalEle, double *FToE, \
+	double *FToF, double *Vector, int IENe, int Nface2d){
+	*InternalFace = 0;
+	for (int i = 0; i < IENe; i++){
+		if ((int)FToE[2 * i] == LocalEle){
+			AdjEle[*InternalFace] = (int)FToE[2 * i + 1];
+			for (int p = 0; p < Nfp; p++){
+				FacialVector[(*InternalFace)*Nfp + p] = Vector[i*Nfp + p];
 			}
+			GlobalFace[*InternalFace] = i;
+			Flag[*InternalFace] = 0;
+			(*InternalFace)++;
 		}
+		if ((int)FToE[2 * i + 1] == LocalEle){
+			AdjEle[*InternalFace] = (int)FToE[2 * i];
+			for (int p = 0; p < Nfp; p++){
+				FacialVector[(*InternalFace)*Nfp + p] = -1 * Vector[i*Nfp + p];
+			}
+			GlobalFace[*InternalFace] = i;
+			Flag[*InternalFace] = 1;
+			(*InternalFace)++;
+		}
+		/*If internal face number equals to Nface2d, we have find all the internal face, just skip the loop*/
+		if ((*InternalFace) == Nface2d) break;
 	}
-
 }
 
 void FindFaceAndDirectionVectorAtBoundary(double *FacialVector, int *GlobalFace, int *LocalFace, \

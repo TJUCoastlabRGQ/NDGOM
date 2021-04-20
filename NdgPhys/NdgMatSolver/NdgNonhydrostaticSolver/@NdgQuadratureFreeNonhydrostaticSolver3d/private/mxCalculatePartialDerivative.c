@@ -122,20 +122,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mexAtExit(&MyExit);
 	double *Hcrit = mxGetPr(prhs[0]);
 
+	const mxArray *mesh = prhs[1];
+	const mxArray *cell = prhs[2];
+	const mxArray *InnerEdge = prhs[3];
+	const mxArray *BoundaryEdge = prhs[4];
+	const mxArray *BottomEdge = prhs[5];
+	const mxArray *BottomBoundaryEdge = prhs[6];
+	const mxArray *SurfaceBoundaryEdge = prhs[7];
+
 	double *fphys = mxGetPr(prhs[8]);
 	const size_t *PRHS;
 	PRHS = mxGetDimensions(prhs[8]);
 	int Np = (int)PRHS[0];
 	int K = (int)PRHS[1];
 
-	mxArray *Tempz = mxGetField(prhs[1], 0, "z");
+	mxArray *Tempz = mxGetField(mesh, 0, "z");
 	double *z = mxGetPr(Tempz);
-	mxArray *TempNLayer = mxGetField(prhs[1], 0, "Nz");
+	mxArray *TempNLayer = mxGetField(mesh, 0, "Nz");
 	int NLayer = (int)mxGetScalar(TempNLayer);
-	mxArray *TempJz = mxGetField(prhs[1], 0, "J");
+	mxArray *TempJz = mxGetField(mesh, 0, "J");
 	double *Jz = mxGetPr(TempJz);
 
-	mxArray *TempV3d = mxGetField(prhs[2], 0, "V");
+	mxArray *TempV3d = mxGetField(cell, 0, "V");
 	double *V3d = mxGetPr(TempV3d);
 	double *InvV3d = malloc(Np*Np*sizeof(double));
 	memcpy(InvV3d, V3d, Np*Np*sizeof(double));
@@ -143,7 +151,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	//Nvar = (int)PRHS[2];
 	double *varIndex = mxGetPr(prhs[9]);
-	int var = mxGetNumberOfElements(prhs[9]);
+	int var = (int)mxGetNumberOfElements(prhs[9]);
 	double *hu = fphys + ((int)varIndex[0] - 1)*Np*K;
 	double *hv = fphys + ((int)varIndex[1] - 1)*Np*K;
 	double *hw = fphys + ((int)varIndex[2] - 1)*Np*K;
@@ -160,52 +168,57 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *fext2d = mxGetPr(prhs[15]);
 	signed char *ftype2d = (signed char *)mxGetData(prhs[20]);
 
-	mxArray *TempK2d = mxGetField(prhs[16], 0, "K");
+	const mxArray *mesh2d = prhs[16];
+	mxArray *TempK2d = mxGetField(mesh2d, 0, "K");
 	int K2d = (int)mxGetScalar(TempK2d);
 
-	mxArray *TempNp2d = mxGetField(prhs[19], 0, "Np");
+	const mxArray *cell2d = prhs[19];
+	mxArray *TempNp2d = mxGetField(cell2d, 0, "Np");
 	int Np2d = (int)mxGetScalar(TempNp2d);
-	mxArray *TempV2d = mxGetField(prhs[19], 0, "V");
+	mxArray *TempV2d = mxGetField(cell2d, 0, "V");
 	double *V2d = mxGetPr(TempV2d);
-	mxArray *TempNface2d = mxGetField(prhs[19], 0, "Nface");
+	mxArray *TempNface2d = mxGetField(cell2d, 0, "Nface");
 	int Nface2d = (int)mxGetScalar(TempNface2d);
 
+	const mxArray *InnerEdge2d = prhs[17];
+	const mxArray *BoundaryEdge2d = prhs[18];
+
 	if (!strcmp("False", SWENonhydro3dInitialized)){
-	   mxArray *TempNface = mxGetField(prhs[2], 0, "Nface");
+	   mxArray *TempNface = mxGetField(cell, 0, "Nface");
 	   int Nface3d = (int)mxGetScalar(TempNface);
-       mxArray *TempIENfp = mxGetField(prhs[3], 0, "Nfp");
+	   mxArray *TempIENfp = mxGetField(InnerEdge, 0, "Nfp");
 	   int IENfp = (int)mxGetScalar(TempIENfp);
-	   mxArray *TempIENe = mxGetField(prhs[3], 0, "Ne");
+	   mxArray *TempIENe = mxGetField(InnerEdge, 0, "Ne");
 	   int IENe = (int)mxGetScalar(TempIENe);
 
-	   mxArray *TempBENfp = mxGetField(prhs[4], 0, "Nfp");
+	   mxArray *TempBENfp = mxGetField(BoundaryEdge, 0, "Nfp");
 	   int BENfp = (int)mxGetScalar(TempBENfp);
-	   mxArray *TempBENe = mxGetField(prhs[4], 0, "Ne");
+	   mxArray *TempBENe = mxGetField(BoundaryEdge, 0, "Ne");
 	   int BENe = (int)mxGetScalar(TempBENe);
 
-	   mxArray *TempBotENfp = mxGetField(prhs[5], 0, "Nfp");
+	   mxArray *TempBotENfp = mxGetField(BottomEdge, 0, "Nfp");
 	   int BotENfp = (int)mxGetScalar(TempBotENfp);
-	   mxArray *TempBotENe = mxGetField(prhs[5], 0, "Ne");
+	   mxArray *TempBotENe = mxGetField(BottomEdge, 0, "Ne");
 	   int BotENe = (int)mxGetScalar(TempBotENe);
 
-	   mxArray *TempBotBENfp = mxGetField(prhs[6], 0, "Nfp");
+	   mxArray *TempBotBENfp = mxGetField(BottomBoundaryEdge, 0, "Nfp");
 	   int BotBENfp = (int)mxGetScalar(TempBotBENfp);
-	   mxArray *TempBotBENe = mxGetField(prhs[6], 0, "Ne");
+	   mxArray *TempBotBENe = mxGetField(BottomBoundaryEdge, 0, "Ne");
 	   int BotBENe = (int)mxGetScalar(TempBotBENe);
 
-	   mxArray *TempSurfBENfp = mxGetField(prhs[7], 0, "Nfp");
+	   mxArray *TempSurfBENfp = mxGetField(SurfaceBoundaryEdge, 0, "Nfp");
 	   int SurfBENfp = (int)mxGetScalar(TempSurfBENfp);
-	   mxArray *TempSurfBENe = mxGetField(prhs[7], 0, "Ne");
+	   mxArray *TempSurfBENe = mxGetField(SurfaceBoundaryEdge, 0, "Ne");
 	   int SurfBENe = (int)mxGetScalar(TempSurfBENe);
 
-	   mxArray *TempIENfp2d = mxGetField(prhs[17], 0, "Nfp");
+	   mxArray *TempIENfp2d = mxGetField(InnerEdge2d, 0, "Nfp");
 	   int IENfp2d = (int)mxGetScalar(TempIENfp2d);
-	   mxArray *TempIENe2d = mxGetField(prhs[17], 0, "Ne");
+	   mxArray *TempIENe2d = mxGetField(InnerEdge2d, 0, "Ne");
 	   int IENe2d = (int)mxGetScalar(TempIENe2d);
 
-	   mxArray *TempBENfp2d = mxGetField(prhs[18], 0, "Nfp");
+	   mxArray *TempBENfp2d = mxGetField(BoundaryEdge2d, 0, "Nfp");
 	   int BENfp2d = (int)mxGetScalar(TempBENfp2d);
-	   mxArray *TempBENe2d = mxGetField(prhs[18], 0, "Ne");
+	   mxArray *TempBENe2d = mxGetField(BoundaryEdge2d, 0, "Ne");
 	   int BENe2d = (int)mxGetScalar(TempBENe2d);
 
 		SWENonhydro3dMemoryAllocation(Np, K, IENfp, IENe, Nface3d, \
@@ -256,7 +269,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *w = NonhydroVariable + 2*Np*K;
 
 
-	GetFirstOrderPartialDerivativeInHorizontalDirection(PHPX, PHPY, PUPX, PVPY, prhs[1], prhs[2], prhs[3], prhs[4], h, \
+	GetFirstOrderPartialDerivativeInHorizontalDirection(PHPX, PHPY, PUPX, PVPY, mesh, cell, InnerEdge, BoundaryEdge, h, \
 		u, v, hu, hv, zbot, gra, fext, *Hcrit, ftype);
 
 #ifdef _OPENMP
@@ -270,9 +283,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		AssembleFirstOrderPartialDerivativeInSigma(PSPY + k*Np, TempPSPY + k*Np, PHPY + k*Np, Hcrit, zy + k*Np, \
 			h + k*Np, Np, CoePS + k*Np, z + k*Np);
 
-		AssembleSecondOrderPartialDerivativeInSigma(SQPSPX + k*Np, PSPX, Np);
+		AssembleSecondOrderPartialDerivativeInSigma(SQPSPX + k*Np, PSPX + k*Np, Np);
 
-		AssembleSecondOrderPartialDerivativeInSigma(SQPSPY + k*Np, PSPY, Np);
+		AssembleSecondOrderPartialDerivativeInSigma(SQPSPY + k*Np, PSPY + k*Np, Np);
 
 	}
 
@@ -292,15 +305,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			Nonhydrofmod + i*Np*NLayer, InvV3d, Np, NLayer);
 	}
 
-//	GetVerticalVelocityAtSurfaceAndBottom(Weta, Wbot, prhs[2], prhs[7], prhs[6], prhs[16], prhs[17], prhs[18], \
-		prhs[19], ftype2d, PHPX, PHPY, NonhydroHU2d, NonhydroHV2d, z2d, h2d, fext2d, gra, *Hcrit, zx, zy, u, v);
+	GetVerticalVelocityAtSurfaceAndBottom(Weta, Wbot, cell, SurfaceBoundaryEdge, BottomBoundaryEdge, mesh2d, InnerEdge2d, BoundaryEdge2d, \
+		cell2d, ftype2d, PHPX, PHPY, NonhydroHU2d, NonhydroHV2d, z2d, h2d, fext2d, gra, *Hcrit, zx, zy, u, v);
 
-	GetFirstOrderPartialDerivativeInVerticalDirection(PUPS, PVPS, PWPS, prhs[1], prhs[2], prhs[5], prhs[6], prhs[7], u, v, w, Weta, Wbot);
+	GetFirstOrderPartialDerivativeInVerticalDirection(PUPS, PVPS, PWPS, mesh, cell, BottomEdge, BottomBoundaryEdge, SurfaceBoundaryEdge, u, v, w, Weta, Wbot);
 
-	//GetSecondOrderPartialDerivativeInHorizontalDirection(SPSPX, SPSPY, prhs[1], prhs[2], prhs[3], prhs[4], PSPX, PSPY);
+	GetSecondOrderPartialDerivativeInHorizontalDirection(SPSPX, SPSPY, mesh, cell, InnerEdge, BoundaryEdge, PSPX, PSPY);
 
-	GetSecondOrderPartialDerivativeInHorizontalDirectionNew(SPSPX, SPSPY, prhs[1], prhs[2], \
-		prhs[3], prhs[4], PHPX, PHPY, h);
+	//GetSecondOrderPartialDerivativeInHorizontalDirectionNew(SPSPX, SPSPY, mesh, cell, \
+		InnerEdge, BoundaryEdge, PHPX, PHPY, h);
 
 	free(InvV3d);
 
@@ -908,8 +921,8 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + 2*BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		//DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
-		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
+		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
+//		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 	}
 
 #ifdef _OPENMP
@@ -943,7 +956,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroSurfBEFluxM + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		//DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
+//		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, ws + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		DotProduct(NonhydroSurfBEFluxS + 2 * SurfBENe*SurfBENfp + face*SurfBENfp, wM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 
 	}
@@ -1261,7 +1274,6 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 		Add(Wbotdest + face*SurfBENfp, TempZx2d + face*BotBENfp, TempZy2d + face*BotBENfp, BotBENfp);
 	}
 }
-
 
 void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *PHPY, double *PUPX, \
 	double *PVPY, const mxArray *mesh, const mxArray *cell, const mxArray *InnerEdge, \

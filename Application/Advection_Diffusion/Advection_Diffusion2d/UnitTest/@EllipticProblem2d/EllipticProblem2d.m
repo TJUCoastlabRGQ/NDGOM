@@ -38,7 +38,8 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
             obj.matGetExtFunc;
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
-            obj.RHS = eval(obj.SecondDiffTerm);
+%             obj.RHS = eval(obj.SecondDiffTerm);
+            obj.RHS = zeros(size(obj.meshUnion.x));
             obj.ExactSolution = eval(obj.ExactFunc);
             obj.AssembleGlobalStiffMatrix;
         end

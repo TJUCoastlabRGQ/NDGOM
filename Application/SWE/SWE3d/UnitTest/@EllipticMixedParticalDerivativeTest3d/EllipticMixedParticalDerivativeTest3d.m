@@ -1,11 +1,9 @@
-classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
+classdef EllipticMixedParticalDerivativeTest3d < SWEBarotropic3d
+    %> For term $\frac{\partial }{\partial x}\left ( \frac{\partial p}{\partial y}\right )\right ) = f$
     
-    %> Note: This solver is used for test purpose of operator
-    %> $\frac{\partial^2p}{\partial \x^2} + \frac{\partial^2p}{\partial \y^2}$, the analytical
-    %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used
     properties
-        ChLength = 20
-        ChWidth = 6
+        ChLength = 2
+        ChWidth = 1
     end
     
     properties
@@ -23,37 +21,53 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         
         DiffCexact
         
-        SecondDiffCexact
+        MixedSecondDiffCexact
         
         DirichExact
         
         NewmannExact
+                
+        SurfaceDirichletData
         
-        DirichletData
+        BottomBoundaryDirichletData
+        
+        BoundaryDirichletData
     end
     
     properties(Constant)
         hcrit = 1
-        D11 = 1
-        D22 = 1
     end
     
-    
     methods
-        function obj = EllipticProblemInHorizontalDirectionTest3d(N, Nz, M, Mz)
+        
+        function obj = EllipticMixedParticalDerivativeTest3d(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.matGetFunction;
             
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-            obj.RHS = obj.matAssembleRightHandSide;
+            x = obj.meshUnion.x;
+            y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
+            obj.RHS = eval(obj.MixedSecondDiffCexact);
             
             x = obj.NonhydrostaticSolver.BoundaryEdge.xb;
             y = obj.NonhydrostaticSolver.BoundaryEdge.yb;
             z = obj.NonhydrostaticSolver.BoundaryEdge.zb;
-            obj.DirichletData = eval(obj.Cexact);
+            obj.BoundaryDirichletData = eval(obj.Cexact);
             
-            obj.matAssembleGlobalStiffMatrix;
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = obj.meshUnion.mesh2d.z;
+            obj.SurfaceDirichletData = eval(obj.Cexact);
+            
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = -1 * ones(size(obj.meshUnion.mesh2d.z));
+            obj.BottomBoundaryDirichletData = eval(obj.Cexact);            
+            
+            
+            obj.AssembleGlobalStiffMatrix;
             
         end
         function EllipticProblemSolve(obj)
@@ -96,8 +110,8 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         
         function matGetFunction(obj)
             syms x y z;
-            obj.Cexact = sin(-pi/10*x)*sin(-pi/10*y);
-            obj.SecondDiffCexact = diff(diff(obj.Cexact, x), x) + diff(diff(obj.Cexact, y),y);
+            obj.Cexact = sin(-pi*x)*sin(pi*y)*sin(-pi/2*z);
+            obj.MixedSecondDiffCexact = diff(diff(obj.Cexact, z), x) + diff(diff(obj.Cexact, z),y);
         end
         
         function [ option ] = setOption( obj, option )
@@ -141,6 +155,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end

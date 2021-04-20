@@ -16,7 +16,7 @@
 
 #define DEBUG 0
 
-#define NRHS 10
+#define NRHS 12
 #define NLHS 1
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
