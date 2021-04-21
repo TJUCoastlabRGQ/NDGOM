@@ -9,6 +9,8 @@ void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, 
 	double *, double *, double *, double *, double *, double *, double *, \
 	int , double *, double *);
 
+void AssembleDataIntoPoint(double *, double *, double *, int );
+
 void SumInColumn(double *, double *, int );
 
 void SumInRow(double *, double *, int , int );
@@ -17,7 +19,7 @@ int GetGlobalFace(int , int , double *, double *, int );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
-	double *TempSPNPX = mxGetPr(prhs[0]);
+	double *TempMSPNPXY = mxGetPr(prhs[0]);
 	mwIndex *Tempjcs = mxGetJc(prhs[0]);
 	mwIndex *Tempirs = mxGetIr(prhs[0]);
 	int row, col;
@@ -34,13 +36,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	sr = mxGetPr(plhs[1]);
 	irs = mxGetIr(plhs[1]);
 	jcs = mxGetJc(plhs[1]);
-	memcpy(sr, TempSPNPX, Tempjcs[col] * sizeof(double));
+	memcpy(sr, TempMSPNPXY, Tempjcs[col] * sizeof(double));
 	memcpy(irs, Tempirs, Tempjcs[col] * sizeof(mwIndex));
 	memcpy(jcs, Tempjcs, (col + 1)*sizeof(mwIndex));
 
 	const mxArray *BoundaryEdge = prhs[3];
 	const mxArray *cell = prhs[4];
 	const mxArray *mesh = prhs[5];
+	const mxArray *SurfBoundEdge = prhs[6];
+	const mxArray *BottomBoundEdge = prhs[7];
+	double *SurfDirichDataValue = mxGetPr(prhs[8]);
+	double *BottomBoundDirichDataValue = mxGetPr(prhs[9]);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -70,10 +76,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *rx = mxGetPr(Temprx);
 	mxArray *Tempsx = mxGetField(mesh, 0, "sx");
 	double *sx = mxGetPr(Tempsx);
-	mxArray *Tempry = mxGetField(mesh, 0, "ry");
-	double *ry = mxGetPr(Tempry);
-	mxArray *Tempsy = mxGetField(mesh, 0, "sy");
-	double *sy = mxGetPr(Tempsy);
+	mxArray *Temprz = mxGetField(mesh, 0, "rz");
+	double *rz = mxGetPr(Tempry);
+	mxArray *Temptz = mxGetField(mesh, 0, "tz");
+	double *tz = mxGetPr(Tempsy);
 
 	mxArray *TempJs = mxGetField(BoundaryEdge, 0, "Js");
 	double *Js = mxGetPr(TempJs);
@@ -121,13 +127,33 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		TempJs = Js + edge * Nfp;
 
 		ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
-			Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
-			sy + (LocalEle - 1)*Np, Dr, Ds, Tau, nx + edge * Nfp, ny + edge * Nfp, \
+			Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, rz + (LocalEle - 1)*Np, \
+			tz + (LocalEle - 1)*Np, Dr, Ds, Tau, nx + edge * Nfp, nz + edge * Nfp, \
 			Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp);
 
 		free(FpIndex);
 		free(Tau);
 	}
+
+	mxArray *TempSurfJs = mxGetField(SurfBoundEdge, 0, "Js");
+	double *SurfJs = mxGetPr(TempSurfJs);
+	int SurfNfp = (int)mxGetM(TempSurfJs);
+	mxArray *TempSurfBENe = mxGetField(SurfBoundEdge, 0, "Ne");
+	int SurfBENe = (int)mxGetScalar(TempSurfBENe);
+	mxArray *TempSurfFToF = mxGetField(SurfBoundEdge, 0, "FToF");
+	double *SurfFToF = mxGetPr(TempSurfFToF);
+	mxArray *TempSurfFToE = mxGetField(SurfBoundEdge, 0, "FToE");
+	double *SurfFToE = mxGetPr(TempSurfFToE);
+	mxArray *TempSurfFToN1 = mxGetField(SurfBoundEdge, 0, "FToN1");
+	double *SurfFToN1 = mxGetPr(TempSurfFToN1);
+	mxArray *TempSurfnx = mxGetField(SurfBoundEdge, 0, "nx");
+	double *Surfnx = mxGetPr(TempSurfnx);
+	mxArray *TempSurfny = mxGetField(SurfBoundEdge, 0, "ny");
+	double *Surfny = mxGetPr(TempSurfny);
+	mxArray *TempSurfLMass2d = mxGetField(SurfBoundEdge, 0, "M");
+	double  *SurfLMass2d = mxGetPr(TempSurfLMass2d);
+	mxArray *TempSurfFLAV = mxGetField(SurfBoundEdge, 0, "LAV");
+	double *SurfFLAV = mxGetPr(TempSurfFLAV);
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
@@ -267,6 +293,12 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(DirichEdgeBuff);
 	free(TempEToE);
 	free(TempMass2d);
+}
+
+void AssembleDataIntoPoint(double *dest, double *source, double *Index, int Nfp){
+	for (int i = 0; i < Nfp; i++){
+		dest[(int)Index[i] - 1] += source[i];
+	}
 }
 
 void SumInColumn(double *dest, double *Source, int Np){

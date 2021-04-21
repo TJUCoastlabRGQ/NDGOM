@@ -56,7 +56,7 @@ classdef SWE3dVerticalVelocitySolver < handle
                     obj.RHSCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\(diag(mesh3d.J(:, (i-1)*Nz + j)) * mesh3d.cell.M);
                     obj.VertCoeMatrix{1}(:,:,(i-1)*Nz + j)  = CoeMatrix\M3d;
                 end
-                CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + 2 * M3d;
+                CoeMatrix = diag(mesh3d.J(:, i*Nz)) * mesh3d.cell.M * diag(mesh3d.tz(:, i * Nz)) * mesh3d.cell.Dt + M3d;
                 obj.RHSCoeMatrix{1}(:,:, i*Nz )  = CoeMatrix\(diag(mesh3d.J(:, i*Nz )) * mesh3d.cell.M);
             end
             %% we calculate from surface to bottom

@@ -1,21 +1,21 @@
-classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
+classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
-    %> $\frac{\partial^2p}{\partial \x^2} + \frac{\partial^2p}{\partial \y^2}$, the analytical
-    %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used
+    %> $\frac{\partial^2p}{\partial \sigma^2}$, the analytical
+    %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used
+    
     properties
-        ChLength = 40
+        ChLength = 2
         ChWidth = 2
     end
     
     properties
-        ExactSolution
-        
-        ExactRHS
         
         StiffMatrix
         
         RHS
+        
+        ExactSolution
         
         SimulatedSolution
         
@@ -28,42 +28,37 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         DirichExact
         
         NewmannExact
-        
-        DirichletData
     end
     
     properties(Constant)
         hcrit = 1
-        D11 = 1
-        D22 = 1
     end
     
     
     methods
-        function obj = EllipticProblemInHorizontalDirectionTest3d(N, Nz, M, Mz)
+        function obj = EllipticProblemInVerticalDirectionTest3d(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.matGetFunction;
-            
+            obj.DirichExact = zeros(obj.mesh2d.cell.Np,1);
+            obj.NewmannExact = zeros(obj.mesh2d.cell.Np,1);
+%             [ obj.StiffMatrix, LRHS, RRHS ] = obj.matAssembleGlobalStiffMatrix;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             obj.RHS = obj.matAssembleRightHandSide;
-            
-            x = obj.NonhydrostaticSolver.BoundaryEdge.xb;
-            y = obj.NonhydrostaticSolver.BoundaryEdge.yb;
-            z = obj.NonhydrostaticSolver.BoundaryEdge.zb;
-            obj.DirichletData = eval(obj.Cexact);
-            
-            obj.matAssembleGlobalStiffMatrix;
-            
+%             % The direction vector is considered in the initialization stage
+%             obj.RHS(:,1) = obj.RHS(:,1) - LRHS;
+%             % Minus or plus is considered when assemble RRHS
+%             obj.RHS(:,end) = obj.RHS(:,end) + RRHS;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
-            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            disp("The condition number is:");
-            disp(condest(obj.StiffMatrix));
+            
+            obj.SimulatedSolution = obj.NonhydrostaticSolver.SPNPS\obj.RHS(:);
+            disp("The condition number is:")
+            disp(condest(obj.NonhydrostaticSolver.SPNPS));
             disp("The maximum difference is:");
             disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
             disp("The minimum difference is:");
@@ -80,7 +75,7 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     
     methods(Access = protected)
         
-        matAssembleGlobalStiffMatrix(obj);
+        [ Matrix, Lrhs, Rrhs ] = matAssembleGlobalStiffMatrix(obj);
         
         rhs = matAssembleRightHandSide(obj);
         
@@ -95,9 +90,10 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
         end
         
         function matGetFunction(obj)
-            syms x y z;
-            obj.Cexact = sin(-pi/10*x)*sin(-pi/10*y);
-            obj.SecondDiffCexact = diff(diff(obj.Cexact, x), x) + diff(diff(obj.Cexact, y),y);
+            syms z;
+            obj.Cexact = sin(-pi/2*z);
+            obj.DiffCexact = diff(obj.Cexact, z);
+            obj.SecondDiffCexact = diff(obj.DiffCexact, z);
         end
         
         function [ option ] = setOption( obj, option )
@@ -141,6 +137,5 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+
 end

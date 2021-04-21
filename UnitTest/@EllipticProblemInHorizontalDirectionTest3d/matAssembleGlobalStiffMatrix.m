@@ -5,7 +5,7 @@ function matAssembleGlobalStiffMatrix(obj)
 
 AssembleMixedOrderTermGlobalStiffMatrix(obj);
 
-% % TempStiffMatrix = obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY;
+% TempStiffMatrix = obj.NonhydrostaticSolver.SPNPX + obj.NonhydrostaticSolver.SPNPY;
 disp("=========================For Stiff Matrix=========================")
 disp("The maximum difference is:");
 disp(max(max(obj.StiffMatrix-TempStiffMatrix)));
@@ -16,7 +16,6 @@ disp("The maximum difference is:");
 disp(max(max(obj.RHS(:)-TempRHS)));
 disp("The minimum difference is:");
 disp(min(min(obj.RHS(:)-TempRHS)));
-disp("====================================================================")
 end
 
 function AssembleMixedOrderTermGlobalStiffMatrix(obj)

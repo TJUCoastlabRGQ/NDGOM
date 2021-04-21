@@ -37,6 +37,12 @@ void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *
 	}
 }
 
+void AssembleDataIntoPoint(double *dest, double *source, double *PIndex, int Size){
+	for (int p = 0; p < Size; p++){
+		dest[(int)PIndex[p] - 1] = source[p];
+	}
+}
+
 /*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified.
 Left multiply the matrix source with a diagonal matrix composed of element contained in coe. 
 */

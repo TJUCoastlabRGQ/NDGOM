@@ -4,8 +4,8 @@ classdef EllipticProblemInHorizontalDirectionTest3d < SWEBarotropic3d
     %> $\frac{\partial^2p}{\partial \x^2} + \frac{\partial^2p}{\partial \y^2}$, the analytical
     %> solution $p=\pi^5 sin\left (-\frac{\pi}{10}x\right ) + \pi sin\left (-\frac{\pi}{10}y\right )$ is used
     properties
-        ChLength = 40
-        ChWidth = 2
+        ChLength = 20
+        ChWidth = 6
     end
     
     properties
@@ -141,6 +141,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end

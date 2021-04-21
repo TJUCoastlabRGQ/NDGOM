@@ -30,6 +30,8 @@ void Add(double *, double *, double *, int );
 
 void AddByConstant(double *, double *, double, int);
 
+void AssembleDataIntoPoint(double *, double *, double *, int);
+
 void Minus(double *, double *, double *, int);
 
 void MatrixMultiply(char*, char*, ptrdiff_t, ptrdiff_t, ptrdiff_t, double, double *, ptrdiff_t, \

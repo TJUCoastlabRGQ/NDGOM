@@ -1,6 +1,8 @@
 function runEllipticProblemInHorizontalDirectionTest3d
 M = [2 1 0.5 0.25 0.125];
 Mz = [1 1 1 1 1];
+% M = [4 2 1 0.5 0.25 0.125];
+% Mz = [1 1 1 1 1 1];
 Order = [1 2];
 
 Nmesh = numel(M);
