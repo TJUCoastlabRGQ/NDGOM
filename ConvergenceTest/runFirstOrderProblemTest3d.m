@@ -1,6 +1,8 @@
 function runFirstOrderProblemTest3d
-M = [ 1 0.5 0.25 0.125 ];
-Mz = [10 20 40 80 ];
+% M = [ 1 0.5 0.25 0.125 ];
+% Mz = [10 20 40 80 ];
+M = [ 2 2 2 2 ];
+Mz = [4 8 16 32 ];
 Order = [1 2];
 
 Nmesh = numel(M);
@@ -23,9 +25,9 @@ for n = 1:Ndeg
     for m = 1:Nmesh
         Solver = FirstOrderProblemTest3d(Order(n), Order(n), M(m), Mz(m));
         Solver.EllipticProblemSolve;
-        len(m, n) = M(m);
+        len(m, n) = 1/Mz(m);
         dofs(m,n) = numel(Solver.meshUnion(1).x);
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('FirstOrderProblemTest3d/3d','/','FirstOrderProblemTest3d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/FirstOrderProblemTest3d/3d','/','FirstOrderProblemTest3d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);

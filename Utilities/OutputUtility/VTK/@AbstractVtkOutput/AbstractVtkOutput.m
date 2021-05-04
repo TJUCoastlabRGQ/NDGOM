@@ -32,11 +32,11 @@ classdef AbstractVtkOutput < AbstractOutputFile
                 obj.varName{i} = fieldName{varIndex(i)};
             end
             if (mesh.type == enumMeshDim.One)
-                obj.folderName = [casename,'/1d/'];
+                obj.folderName = ['Result/',casename,'/1d/'];
             elseif (mesh.type == enumMeshDim.Two)
-                obj.folderName = [casename,'/2d/'];
+                obj.folderName = ['Result/',casename,'/2d/'];
             elseif (mesh.type == enumMeshDim.Three)
-                obj.folderName = [casename,'/3d/'];
+                obj.folderName = ['Result/',casename,'/3d/'];
             end            
             
         end

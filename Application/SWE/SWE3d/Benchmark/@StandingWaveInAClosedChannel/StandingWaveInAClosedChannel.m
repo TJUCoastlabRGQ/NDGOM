@@ -52,7 +52,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         AnalysisResult3d( obj );
         
         function NonhydroPostprocess(obj)
-            PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat(mfilename,'/2d/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('Result/',mfilename,'/2d/',mfilename));
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
@@ -108,7 +108,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 20;
+            ftime = 100;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

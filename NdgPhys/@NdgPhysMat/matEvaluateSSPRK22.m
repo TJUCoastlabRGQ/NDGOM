@@ -36,7 +36,7 @@ while( time < ftime )
                 = fphys{n}(:,:, obj.varFieldIndex) + dt*obj.frhs{n};
         end
         
-        fphys = obj.matEvaluateLimiter( fphys );
+%         fphys = obj.matEvaluateLimiter( fphys );
         fphys = obj.matEvaluatePostFunc( fphys );
         fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata(obj, fphys, dt);
     end
@@ -47,16 +47,16 @@ while( time < ftime )
     end
     %     obj.meshUnion(1).draw( fphys{1}(:,:,1) );
     %     drawnow;
-    visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) );
+%     visual.drawResult( fphys{1}(:, :, 1) + fphys{1}(:, :, 4) );
 %         visual.drawResult( fphys{1}(:, :, 1) );
     time = time + dt;
-%     obj.matUpdateOutputResult( time, fphys );
+    obj.matUpdateOutputResult( time, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ...
         ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
-% hwait.delete();
-% obj.matUpdateFinalResult( time, fphys );
+hwait.delete();
+obj.matUpdateFinalResult( time, fphys );
 obj.fphys = fphys;
 % toc;
 end

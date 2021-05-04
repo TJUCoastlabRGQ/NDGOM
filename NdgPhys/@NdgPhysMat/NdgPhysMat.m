@@ -158,7 +158,7 @@ classdef NdgPhysMat < NdgPhys
             for m = 1:obj.Nmesh
                 obj.outputFile(m).outputFinalResult( ...
                     time, fphys{m}(:,:,obj.outputFile(m).varIndex) );
-                obj.outputFile(m).closeOutputFile( ); %This function name can be changed again
+%                 obj.outputFile(m).closeOutputFile( ); %This function name can be changed again
             end
         end% function
     end

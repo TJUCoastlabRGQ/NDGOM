@@ -39,7 +39,6 @@ classdef NcOutput < AbstractNcOutput
         
         [ field ] = readOutputResult( obj, step );
         
-%         writeResultToVtk( obj, step, field );
         writeOutputResultAtStepToVtk( obj, step );
         
         writeOutputResultAtTimePointToVtk(obj, timePoint);
@@ -47,7 +46,7 @@ classdef NcOutput < AbstractNcOutput
         writeOutputResultToVtk( obj );
         
         function closeOutputFile(obj)
-            obj.delete();
+%             obj.delete();
         end
         
         function delete( obj )

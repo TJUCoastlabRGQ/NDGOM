@@ -2,37 +2,15 @@
 
 /*This function is called at the initialization stage to calculate the mixed second order derivative
 about nonhydrostatic pressure in horizontal direction, i.e. $\frac{\partial}{\partial x}(\frac{\partial q}{\partial \sigma})$
-and $\frac{\partial}{\partial y}(\frac{\partial q}{\partial \sigma})$.
+and $\frac{\partial}{\partial y}(\frac{\partial q}{\partial \sigma})$. The following primal form is given for the first term.
 For this term, the primal form is given as:
-$$-\left (\nabla_{\sigma}q,\nabla_h v\right )_{\Omega}+\left (\left \{\nabla_{\sigma}q\right \},[v]\right)_{\epsilon_i}+\\
-\left (\nabla_{\sigma}q,vn\right)_{\epsilon_D}+\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}+\\
-\left (\nabla_{\sigma}v,qn\right)_{\epsilon_D}-\tau\left ( q^--q^+, v^--v^+\right)_{\epsilon_i}-\tau\left ( q^-, v^-\right)_{\epsilon_D}$$*/
-
-void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, double *FToF, int LocalEle, int AdjacentEle, int Ne){
-	for (int f = 0; f < Ne; f++){
-		int TempLocalEle = (int)FToE[2 * f];
-		int TempAdjEle = (int)FToE[2 * f + 1];
-		if (LocalEle == TempLocalEle || LocalEle == TempAdjEle){
-			if (AdjacentEle == TempLocalEle || AdjacentEle == TempAdjEle){
-				if (AdjacentEle == TempAdjEle && LocalEle == TempLocalEle){
-					(*GlobalFace) = f;
-					break;
-				}
-				else if (AdjacentEle == TempLocalEle && LocalEle == TempAdjEle){
-					(*GlobalFace) = f;
-					break;
-				}
-				else{
-					printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model, check again!\n");
-					exit(0);
-				}
-			}
-		}
-	}
-}
+$$-\int_{\Omega}\frac{\partial v}{\partial x}\frac{\partial p}{\partial \sigma}d\Omega + \int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}\\
++ \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega + \int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega + \\
+\int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \int_{\epsilon_i} \tau [p]_x[v]_xd\Omega - \int_{\epsilon_D} \tau n_x^2pvd\Omega \\
+= \int_{\Omega}fvd\Omega + \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}q_Dd\Omega - \int_{\epsilon_D}\tau n_x^2vq_D d\Omega - \int_{\epsilon_N} n_x^2vq_N d\Omega$$*/
 
 /*This following funciton is used to assemble term corresponds to
-$$-\int_{\Omega}\nabla_h v \nabla_{\sigma} q_hd\boldsymbol{x}$$
+$$-\int_{\Omega}\frac{\partial v}{\partial x}\frac{\partial p}{\partial \sigma}d\Omega$$
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Startpoint: Number of nonzeros before the current studied element
@@ -91,9 +69,13 @@ void GetLocalVolumuIntegralTermForMixedSecondOrderTerm(double *dest, int StartPo
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\left (\left \{\nabla_{\sigma}q\right \},[v]\right)_{\epsilon_i}+\\
-\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}-\\
-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega + \\
+\int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega - \int_{\epsilon_D} \tau pvd\Omega$$.
+For this primal form, both $$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$$ and 
+$$\int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega$$ equal to zero
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 LocalEle: The studied local element
@@ -125,14 +107,14 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 	double *LocalEidM = malloc(Nfp*sizeof(double));
 	double *AdjEidM = malloc(Nfp*sizeof(double));
 	for (int i = 0; i < InternalFace; i++){
-		if (Flag[i] == 0){
+		if (Flag[i] == 0){//The local and adjacent facial point are the same with the data stored in FToN1 and FToN2
 			for (int p = 0; p < Nfp; p++){
 				LocalEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
 				AdjEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
 			}
 		}
 		else{
-			for (int p = 0; p < Nfp; p++){
+			for (int p = 0; p < Nfp; p++){//The local and adjacent facial point are reversed in FToN1 and FToN2
 				AdjEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
 				LocalEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
 			}
@@ -155,26 +137,30 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 		double *Contribution = malloc(Np*Np*sizeof(double));
 
 		double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-		// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
+		// $$\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega$$
 		double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
 		AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
 		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+
 		MultiplyByConstant(EleMass2d, EleMass2d, -0.5, Nfp*Nfp);
+
 		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d,
 			(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 		AssembleContributionIntoRow(TempContribution, EdgeContribution, AdjEidM, Np, Nfp);
 
-		// $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
-//		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
-//		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
-//		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
-//		MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,\
+		/*We delete this part, because $n_{\sigma}$ is zero on the  lateral face*/
+		/*$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$$*/
+/*		
+        DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
+		MatrixMultiply("T", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,\
 			(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-//		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
+*/
 
-
-		//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+		/*$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$*/
 		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
 		DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace[i], Nfp);
 		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
@@ -206,9 +192,13 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 
 
 /*The following part is used to assemble term corresponding to:
-$$\left (\left \{\nabla_{\sigma}q\right \},[v]\right)_{\epsilon_i}+\\
-\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}-\\
-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega + \\
+\int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega - \int_{\epsilon_D} \tau pvd\Omega$$.
+For this primal form, both $$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$$ and
+$$\int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega$$ equal to zero
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 LocalEle: The studied local element
@@ -267,18 +257,20 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int LocalEle,
 		double *Contribution = malloc(Np*Np*sizeof(double));
 
 		double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-		// $$\int_{\epsilon_i}\left\{\nabla_{\sigma}q\right\}[v]d\boldsymbol{x}$$
+		// $$\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega$$
 		double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
 		AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEidM, Nfp, Np);
 		DiagMultiply(Mass2d, Mass2d, Vector + i*Nfp, Nfp);
-		MultiplyByConstant(Mass2d, Mass2d, 0.5, Nfp*Nfp);
 
+		MultiplyByConstant(Mass2d, Mass2d, 0.5, Nfp*Nfp);
+		
 		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, Mass2d,
 			(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 		AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
 
-		// $$\left (\left \{\nabla_{\sigma}v\right \},[q]\right)_{\epsilon_i}$$
+		/***********We delete this part because nz = 0**********************/
+		/*$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$$*/
 //		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
 //		DiagMultiply(EleMass2d, Mass2d, Vector + i*Nfp, Nfp);
 //		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
@@ -310,9 +302,9 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int LocalEle,
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_D}q_h\nabla_h vn_{\sigma}d\boldsymbol{x} + \\
-\int_{\epsilon_D}\nabla_{\sigma} q_h vn_hd\boldsymbol{x} - \\
-\tau vq_h$$, here, the second term is zero since $n_h = 0$ on boundary.
+$$\int_{\epsilon_D}q_h\nabla_x vn_{\sigma}d\boldsymbol{x} + \\
+\int_{\epsilon_D}\nabla_{\sigma} q_h vn_xd\boldsymbol{x} - \\
+\int_{\epsilon_D}\tau vq_h$$, here, the second term is zero since $n_h = 0$ on boundary.
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Startpoint: Number of nonzeros before the current studied element in the sparse matrix, here it's the point to write the data
@@ -352,7 +344,7 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 
 	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, Eid, Np2d, Np);
-	//$$\int_{\epsilon_D}q_h\nabla_h vn_{\sigma}d\boldsymbol{x}$$
+	//$$\int_{\epsilon_D}q_h\nabla_x vn_{\sigma}d\boldsymbol{x}$$
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, Mass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
@@ -481,7 +473,10 @@ void ImposeBoundaryConditionInHorizontalDirection(double *dest, int LocalEle, in
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_{iv}}[q_h]\left\{\nabla_hv\right\}d\boldsymbol{x}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega$$.
+For this part, the second term equals to zero, since $n_x=0$ on the horizontal face
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Np: Number of interpolation point for the 3d element
@@ -520,6 +515,7 @@ void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, doub
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 
+	/*$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$*/
 	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, BotEid, Np2d, Np);
 	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
@@ -528,8 +524,9 @@ void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, doub
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
+	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
 	int GlobalFace = 0;
-	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface-2], Ne);
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface-2], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, BotEid, LocalEid, Np, Np2d, 1.0);
@@ -557,7 +554,10 @@ void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, doub
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_{iv}}[q_h]\left\{\nabla_hv\right\}d\boldsymbol{x}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega$$.
+For this part, the second term equals to zero, since $n_x=0$ on the horizontal face
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Np: Number of interpolation point for the 3d element
@@ -596,6 +596,7 @@ void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, double 
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 
+	/*$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$*/
 	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
@@ -604,8 +605,9 @@ void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, double 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
+	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
 	int GlobalFace = 0;
-	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 2], Ne);
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 2], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
@@ -627,7 +629,10 @@ void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, double 
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_{iv}}[q_h]\left\{\nabla_hv\right\}d\boldsymbol{x}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega$$.
+For this part, the second term equals to zero, since $n_x=0$ on the horizontal face.
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Np: Number of interpolation point for the 3d element
@@ -666,6 +671,7 @@ double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 
+	/*$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$*/
 	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, UpEid, Np2d, Np);
 	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
@@ -674,8 +680,9 @@ double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
+	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
 	int GlobalFace = 0;
-	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 1], Ne);
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 1], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, UpEid, LocalEid, Np, Np2d, 1.0);
@@ -703,7 +710,10 @@ double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 }
 
 /*The following part is used to assemble term corresponding to:
-$$\int_{\epsilon_{iv}}[q_h]\left\{\nabla_hv\right\}d\boldsymbol{x}$$
+$$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
+\int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega - \\
+\int_{\epsilon_i} \tau [p][v]d\Omega$$.
+For this part, the second term equals to zero, since $n_x=0$ on the horizontal face.
 The input parameter are as follows:
 dest: A pointer to the start of the sparse matrix
 Np: Number of interpolation point for the 3d element
@@ -741,6 +751,7 @@ void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, double *E
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 
+	/*$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$*/
 	double *FacialDiffMatrix = malloc(Np*Np2d*sizeof(double));
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 	double *EdgeContribution = malloc(Np*Np2d*sizeof(double));
@@ -749,8 +760,9 @@ void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, double *E
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np2d*Np);
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
+	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
 	int GlobalFace = 0;
-	FindGlobalBottomEdgeFace(&GlobalFace, FToE, FToF, LocalEle, (int)EToE[Nface - 1], Ne);
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 1], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
@@ -891,7 +903,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 
-	double *BotETau = malloc(BotENe*HorNfp*sizeof(double));
+	double *BotETau = malloc(BotENe*VertNfp*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -905,7 +917,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 
-	double *SurfETau = malloc(SurfENe*HorNfp*sizeof(double));
+	double *SurfETau = malloc(SurfENe*VertNfp*sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -976,6 +988,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						ImposeSecondOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
 							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, \
 							Dr, Ds, rd + ele * Nlayer * Np + L*Np, sd + ele * Nlayer * Np + L*Np, SurfETau + ele*VertNfp);
+						break;
 					}
 				}
 			}

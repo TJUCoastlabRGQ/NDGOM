@@ -142,6 +142,29 @@ void FindFaceAndDirectionVectorAtBoundary(double *FacialVector, int *GlobalFace,
 	}
 }
 
+void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, int LocalEle, int AdjacentEle, int Ne){
+	for (int f = 0; f < Ne; f++){
+		int TempLocalEle = (int)FToE[2 * f];
+		int TempAdjEle = (int)FToE[2 * f + 1];
+		if (LocalEle == TempLocalEle || LocalEle == TempAdjEle){
+			if (AdjacentEle == TempLocalEle || AdjacentEle == TempAdjEle){
+				if (AdjacentEle == TempAdjEle && LocalEle == TempLocalEle){
+					(*GlobalFace) = f;
+					break;
+				}
+				else if (AdjacentEle == TempLocalEle && LocalEle == TempAdjEle){
+					(*GlobalFace) = f;
+					break;
+				}
+				else{
+					printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model, check again!\n");
+					exit(0);
+				}
+			}
+		}
+	}
+}
+
 void GetSparsePatternInVerticalDirection(mwIndex *TempIr, mwIndex *TempJc, int Np, int Nlayer, int Ele2d){
 	int *SingleColumn = malloc(Np*Nlayer*sizeof(int));
 	int *SingleRow;

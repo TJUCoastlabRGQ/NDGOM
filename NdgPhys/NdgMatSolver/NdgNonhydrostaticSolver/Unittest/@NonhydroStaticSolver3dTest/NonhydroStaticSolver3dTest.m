@@ -97,6 +97,8 @@ classdef NonhydroStaticSolver3dTest < SWEBarotropic3d
             
             obj.matGetExactSolution;
             
+            obj.matCompileFile;
+            
             obj.NonhydrostaticSolver.TestPartialDerivativeCalculation(obj, obj.fphys, obj.fphys2d);
             
         end
@@ -136,6 +138,8 @@ classdef NonhydroStaticSolver3dTest < SWEBarotropic3d
         
         matConservativeVelocityUpdataTest( obj );
         
+        matCompileFile( obj );
+        
     end
     
     methods ( Access = protected )
@@ -144,9 +148,9 @@ classdef NonhydroStaticSolver3dTest < SWEBarotropic3d
             syms x y z;
             obj.U3d = sin(2*pi*x/obj.Lambda)*sin(2*pi*y/obj.Lambda)*sin(2*pi*z);
             obj.V3d = sin(2*pi*x/obj.Lambda)*sin(2*pi*y/obj.Lambda)*sin(2*pi*z);
-            obj.W3d = sin(2*pi*x/obj.Lambda)*sin(2*pi*y/obj.Lambda)*sin(2*pi*z);
-            obj.H = obj.A * sin(2*pi*x/obj.Lambda) * sin(2*pi*y/obj.Lambda) + obj.H0;
-            obj.Eta = obj.A * sin(2*pi*x/obj.Lambda) * sin(2*pi*y/obj.Lambda);
+            obj.W3d = sin(2*pi*x/obj.Lambda)*sin(2*pi*y/obj.Lambda)*sin(2*pi*z)*cos(100*z);
+            obj.H = obj.A * sin(2*pi*x/obj.Lambda) * sin(4*pi*y/obj.Lambda) + obj.H0;
+            obj.Eta = obj.H - obj.H0;
             obj.Sigma = (z - obj.Eta)/obj.H;
             obj.PSPX = diff(obj.Sigma, x);
             obj.PSPY = diff(obj.Sigma, y);
@@ -174,13 +178,13 @@ classdef NonhydroStaticSolver3dTest < SWEBarotropic3d
                 %water depth
                 x = obj.mesh2d(m).x;
                 y = obj.mesh2d(m).y;
-                fphys2d{m}(:,:,1) =  eval(obj.H);
+                fphys2d{m}(:,:,1) =  eval(obj.H) + rand(obj.mesh2d(m).cell.Np, obj.mesh2d(m).K);
                 x = obj.meshUnion(m).x;
                 y = obj.meshUnion(m).y;
                 z = obj.meshUnion(m).z;
-                fphys{m}(:,:,1) = eval(obj.H).*eval(obj.U3d);
-                fphys{m}(:,:,2) = eval(obj.H).*eval(obj.V3d);
-                fphys{m}(:,:,11) = eval(obj.H).*eval(obj.W3d);
+                fphys{m}(:,:,1) = ( eval(obj.H) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K)).*(eval(obj.U3d) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K));
+                fphys{m}(:,:,2) = ( eval(obj.H) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K)).*(eval(obj.V3d) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K));
+                fphys{m}(:,:,11) = ( eval(obj.H) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K)).*(eval(obj.W3d) + rand(obj.meshUnion(m).cell.Np, obj.meshUnion(m).K));
             end
         end
         

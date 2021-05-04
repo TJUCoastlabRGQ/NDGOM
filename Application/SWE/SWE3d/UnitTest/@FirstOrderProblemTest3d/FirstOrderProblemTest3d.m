@@ -38,21 +38,22 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
             obj.matGetFunction;
             z = zeros(obj.mesh2d.cell.Np,1);
             obj.DirichExact = eval(obj.Cexact);
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-%             [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
+%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+            [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
             obj.RHS = obj.matAssembleRightHandSide;
             % The direction vector is considered in the initialization stage
-%             obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
+            obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
-%             obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-            obj.SimulatedSolution = obj.NonhydrostaticSolver.PNPS\obj.RHS(:);
+            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+%             obj.SimulatedSolution = obj.NonhydrostaticSolver.PNPS\obj.RHS(:);
              disp("The condition number is:")
-            disp(condest(obj.NonhydrostaticSolver.PNPS));
+%             disp(condest(obj.NonhydrostaticSolver.PNPS));
+            disp(condest(sparse(obj.StiffMatrix)));
             disp("The maximum difference is:");
             disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
             disp("The minimum difference is:");

@@ -4,8 +4,9 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
     
     properties
         dt
-        d = 7.612
+%         d = 7.612
 %         d = 50
+        d = 10
         fexact
         A = 0.1;
         T
@@ -16,17 +17,16 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
         function obj = NonhydrostaticStandingWave2d(N, deltax, cellType)
             [ mesh ] = makeUniformMesh(N, deltax, cellType);
             obj = obj@SWEPreBlanaced2d();
-%             obj.outputFieldOrder = [1 2 3 6];
             obj.hmin = 1e-3;      
             obj.initPhysFromOptions( mesh );
                              
             c = sqrt(obj.gra*obj.Lambda/2/pi*tanh(2*pi*obj.d/obj.Lambda));
             obj.T = obj.Lambda/c;
-            obj.fexact = -obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*10);
+            obj.fexact = obj.A * cos(2*pi/obj.Lambda*mesh.x)*cos(2*pi/obj.T*20);
         end
                 
         function NonhydroPostprocess(obj)  
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/',mfilename,'/2d/',mfilename));
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
@@ -38,8 +38,8 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 %             Period = obj.Lambda / c;
             for t = 1:Ntime
 %                 exactEta(t) = -obj.A * cos(2*pi*x0/obj.Lambda + 2*pi*outputTime(t) /obj.T);
-                exactEta(t) = -obj.A * cos(2*pi/obj.Lambda*x0)*cos(2*pi/obj.T*outputTime(t));
-                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-h;
+                exactEta(t) = obj.A * cos(2*pi/obj.Lambda*x0)*cos(2*pi/obj.T*outputTime(t));
+                tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.5, x0, t )-h;
                 Eta(t) = tempdata(1);
             end
             figure;
@@ -68,7 +68,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             Ntime = PostProcess.Nt;
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
-            x0 = 17.5;
+            x0 = 10;
             h = obj.d;
             a = obj.A;
             for t = 1:Ntime
@@ -100,12 +100,12 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 %                 fphys{m}(:,:,1) =  obj.d;
 %                 fphys{m}(:,:,1) =  obj.A * cos(2*pi*mesh.x/obj.Lambda) * cos( 2*pi * sqrt(obj.gra*obj.d)/obj.Lambda*0) - fphys{m}(:,:,4);
 %                 fphys{m}(:,:,1) =  -obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
-                fphys{m}(:,:,1) =  -obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
+                fphys{m}(:,:,1) =  obj.A * cos( 2*pi*mesh.x/obj.Lambda ) - fphys{m}(:,:,4);  
             end
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -117,7 +117,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
-            option('outputNcfileNum') = 200;
+            option('outputNcfileNum') = 1;
             option('outputType') = enumOutputFile.VTK;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
@@ -126,22 +126,22 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 end
 
 function [ mesh ] = makeUniformMesh(N, deltax, type)
-% bctype = [...
-%     enumBoundaryCondition.Inner, ...
-%     enumBoundaryCondition.Inner, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall];
 bctype = [...
-    enumBoundaryCondition.Clamped, ...
-    enumBoundaryCondition.Clamped, ...
-    enumBoundaryCondition.Clamped, ...
-    enumBoundaryCondition.Clamped];
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall];
+% bctype = [...
+%     enumBoundaryCondition.Clamped, ...
+%     enumBoundaryCondition.Clamped, ...
+%     enumBoundaryCondition.Clamped, ...
+%     enumBoundaryCondition.Clamped];
 
 if (type == enumStdCell.Tri)
     mesh = makeUniformTriMesh(N, [0, 20], [0, 10*deltax], 20/deltax, 10, bctype);
 elseif(type == enumStdCell.Quad)
-%     mesh = makeUniformQuadMesh(N,[0, 20], [0, 10*deltax], 20/deltax, 10, bctype);
-    mesh = makeUniformQuadMesh(N,[ -1, 1 ], [ -1, 1 ], deltax, deltax, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 4*deltax], 20/deltax, 4, bctype);
+%     mesh = makeUniformQuadMesh(N,[ -1, 1 ], [ -1, 1 ], deltax, deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];
     msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';

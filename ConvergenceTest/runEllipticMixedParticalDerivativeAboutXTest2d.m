@@ -25,7 +25,7 @@ for n = 1:Ndeg
         Solver.EllipticProblemSolve;
         len(m, n) = 2/M(m);
         dofs(m,n) = numel(Solver.meshUnion(1).x);
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('EllipticMixedParticalDerivativeAboutXTest2d/2d','/','EllipticMixedParticalDerivativeAboutXTest2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticMixedParticalDerivativeAboutXTest2d/2d','/','EllipticMixedParticalDerivativeAboutXTest2d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);

@@ -10,7 +10,7 @@ classdef VtkOutput < AbstractVtkOutput
         outputResult(obj, field);
         
         function closeOutputFile(obj)
-            obj.delete();
+%             obj.delete();
         end
         %For vtk, doing nothing
         

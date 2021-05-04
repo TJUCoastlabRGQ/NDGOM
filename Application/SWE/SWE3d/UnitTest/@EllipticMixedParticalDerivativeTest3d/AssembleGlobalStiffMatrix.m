@@ -5,8 +5,18 @@ function AssembleGlobalStiffMatrix(obj)
 %    obj.NonhydrostaticSolver.SurfaceBoundaryEdge, obj.NonhydrostaticSolver.BottomBoundaryEdge, obj.SurfaceDirichletData, ...
 %    obj.BottomBoundaryDirichletData);
 
+% For this case we only test where the matlab version and C version is
+% equal when periodic boundary condition imposed at the lateral boundary, Newmann boundary
+% imposed at the bottom boundary and Dirichlet boundary condition imposed on the
+% surface boundary
+TempStiffMatrix = obj.NonhydrostaticSolver.MSPNPX + obj.NonhydrostaticSolver.MSPNPY;
+
 AssembleMixedOrderTermGlobalStiffMatrix(obj);
 
+disp("=======================The maximum difference is====================");
+disp(max(max(TempStiffMatrix - obj.StiffMatrix)));
+disp("=======================The minimum difference is====================");
+disp(min(min(TempStiffMatrix - obj.StiffMatrix)));
 end
 
 function AssembleMixedOrderTermGlobalStiffMatrix(obj)
@@ -209,38 +219,38 @@ Tau = bsxfun(@times,  (fm(:) )',...
     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 
-for face = 1:BottomBoundaryEdge.Ne
-    OP11 = zeros(Np);
-    ele = BottomBoundaryEdge.FToE(2*(face-1)+1);
-    eidM = BottomBoundaryEdge.FToN1(:,face);
-    nx = BottomBoundaryEdge.nx(:,face);
-    ny = BottomBoundaryEdge.ny(:,face);
-    nz = BottomBoundaryEdge.nz(:,face);
-    Js = BottomBoundaryEdge.Js(:,face);
-    FacialMass2d = diag(Js)*BottomBoundaryEdge.M;
-    % At present, at surface, we only impose Dirichlet boundary condition
-    %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
-    TempData = sum( Dx(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)) , 2) + ...
-        sum( Dy(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)) , 2);
-    obj.RHS(:, ele) = obj.RHS(:, ele) + ( ElementMassMatrix \ TempData );
-    %> For term $q_h\nabla_x vn_yd\boldsymbol{x}$
-    OP11(:,eidM) = OP11(:,eidM) + Dx(eidM,:)'*diag(nz)*FacialMass2d + Dy(eidM,:)'*diag(nz)*FacialMass2d;
-    %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
-    OP11(eidM,:) = OP11(eidM,:) + diag(nx)*FacialMass2d * Dz(eidM,:) + diag(ny)*FacialMass2d * Dz(eidM,:);
-    %> For term $-\tau n_x^2q_h v$
-    %             OP11(eidM,eidM) = OP11(eidM,eidM) - diag(nx.^2)*Tau(face)*FacialMass2d;
-    OP11(eidM,eidM) = OP11(eidM,eidM) - 2 * Tau(face)*FacialMass2d;
-    obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
-        ElementMassMatrix\OP11;
-    %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
-    TempData = zeros(Np,1);
-    %             TempData(eidM) = sum( Tau(face) * FacialMass2d * diag(nx.^2)*...
-    %                 diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-    TempData(eidM) = sum( 2 * Tau(face) * FacialMass2d*...
-        diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-    obj.RHS(:,ele) = obj.RHS(:, ele) - ( ElementMassMatrix \ TempData );
-    
-end
+% for face = 1:BottomBoundaryEdge.Ne
+%     OP11 = zeros(Np);
+%     ele = BottomBoundaryEdge.FToE(2*(face-1)+1);
+%     eidM = BottomBoundaryEdge.FToN1(:,face);
+%     nx = BottomBoundaryEdge.nx(:,face);
+%     ny = BottomBoundaryEdge.ny(:,face);
+%     nz = BottomBoundaryEdge.nz(:,face);
+%     Js = BottomBoundaryEdge.Js(:,face);
+%     FacialMass2d = diag(Js)*BottomBoundaryEdge.M;
+%     % At present, at surface, we only impose Dirichlet boundary condition
+%     %> For term $q_D\nabla_xv n_y d\boldsymbol{x}$
+%     TempData = sum( Dx(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)) , 2) + ...
+%         sum( Dy(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)) , 2);
+%     obj.RHS(:, ele) = obj.RHS(:, ele) + ( ElementMassMatrix \ TempData );
+%     %> For term $q_h\nabla_x vn_yd\boldsymbol{x}$
+%     OP11(:,eidM) = OP11(:,eidM) + Dx(eidM,:)'*diag(nz)*FacialMass2d + Dy(eidM,:)'*diag(nz)*FacialMass2d;
+%     %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
+%     OP11(eidM,:) = OP11(eidM,:) + diag(nx)*FacialMass2d * Dz(eidM,:) + diag(ny)*FacialMass2d * Dz(eidM,:);
+%     %> For term $-\tau n_x^2q_h v$
+%     %             OP11(eidM,eidM) = OP11(eidM,eidM) - diag(nx.^2)*Tau(face)*FacialMass2d;
+%     OP11(eidM,eidM) = OP11(eidM,eidM) - 2 * Tau(face)*FacialMass2d;
+%     obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
+%         ElementMassMatrix\OP11;
+%     %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
+%     TempData = zeros(Np,1);
+%     %             TempData(eidM) = sum( Tau(face) * FacialMass2d * diag(nx.^2)*...
+%     %                 diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+%     TempData(eidM) = sum( 2 * Tau(face) * FacialMass2d*...
+%         diag(obj.BottomBoundaryDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+%     obj.RHS(:,ele) = obj.RHS(:, ele) - ( ElementMassMatrix \ TempData );
+%     
+% end
 
 obj.StiffMatrix = sparse(obj.StiffMatrix);
 end

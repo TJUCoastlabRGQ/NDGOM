@@ -39,7 +39,7 @@ void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *
 
 void AssembleDataIntoPoint(double *dest, double *source, double *PIndex, int Size){
 	for (int p = 0; p < Size; p++){
-		dest[(int)PIndex[p] - 1] = source[p];
+		dest[(int)PIndex[p] - 1] += source[p];
 	}
 }
 

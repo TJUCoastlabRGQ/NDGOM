@@ -20,6 +20,9 @@ addpath( genpath( 'NdgLimiter') );
 addpath( genpath( 'Utilities') );
 addpath( genpath( 'Application') );
 addpath( genpath( 'NdgFilter') );
+addpath( genpath( 'ConvergenceTest') );
+addpath( genpath( 'Result'));
+addpath( genpath( 'NdgMath'));
 fprintf('\n----------------------------------------------------------\n')
 
 fprintf('Compile GOTM source files.\n');

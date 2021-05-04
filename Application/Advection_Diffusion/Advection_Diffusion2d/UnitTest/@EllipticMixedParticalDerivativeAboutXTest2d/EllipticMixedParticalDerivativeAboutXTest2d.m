@@ -47,7 +47,7 @@ classdef EllipticMixedParticalDerivativeAboutXTest2d < Adv_DiffAbstract2d
         function matGetExtFunc(obj)
             syms x y;
 %             obj.ExactFunc = sin(2*pi*x)*sin(2*pi*y);
-            obj.ExactFunc = sin(pi*x)*sin(pi/2*y);
+            obj.ExactFunc = sin(pi*x)*sin(5 * pi/2*y);
             obj.MixedSecondDiffTerm = diff(diff(obj.ExactFunc, y),x);
             DiffFuncy = diff(obj.ExactFunc,y);
             x = obj.meshUnion.BoundaryEdge.xb;
@@ -121,7 +121,7 @@ end
 function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
-    enumBoundaryCondition.Newmann, ...
+    enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet, ...
     enumBoundaryCondition.Dirichlet ];

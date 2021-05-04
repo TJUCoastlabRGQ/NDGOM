@@ -227,6 +227,113 @@ void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, 
 	free(TempMass2d);
 }
 
+void GetLocalToAdjacentContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int AdjEle, int Np, int Np2d, \
+	int NonzeroPerColumn, double *mass3d, double *mass2d, \
+	double *J, double *J2d, double *AdjEid, double *LocalEid, double *FToE, int Ne, double *Tau){
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, AdjEle, Ne);
+	double *Mass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass3d, mass3d, J, Np);
+	double *InvMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvMass3d, Mass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass2d, Mass2d, Tau + Np2d * GlobalFace, Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEid, LocalEid, Np, Np2d, 1.0);
+
+	/*Multiply the contribution by inverse matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	for (int i = 0; i < EleNumber; i++){
+		if (AdjEle == (int)TempEToE[i]){
+			int StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+			AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+			break;
+		}
+	}
+	free(Mass3d);
+	free(InvMass3d);
+	free(Mass2d);
+	free(TempContribution);
+	free(Contribution);
+
+}
+
+void GetLocalPenaltyContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int AdjEle, int Np, int Np2d, \
+	int NonzeroPerColumn, double *mass3d, double *mass2d, \
+	double *J, double *J2d, double *Eid, double* FToE, int Ne, double *Tau){
+
+	int GlobalFace = 0;
+	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, AdjEle, Ne);
+	double *Mass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass3d, mass3d, J, Np);
+	double *InvMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvMass3d, Mass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass2d, Mass2d, Tau + Np2d * GlobalFace, Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1.0);
+
+	/*Multiply the contribution by inverse matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	for (int i = 0; i < EleNumber; i++){
+		if (LocalEle == (int)TempEToE[i]){
+			int StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+			AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+			break;
+		}
+	}
+	free(Mass3d);
+	free(InvMass3d);
+	free(Mass2d);
+	free(TempContribution);
+	free(Contribution);
+}
+
+void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int Np2d, \
+	int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, double *J2d, double *Eid, double *Tau){
+
+	double *Mass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass3d, mass3d, J, Np);
+	double *InvMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvMass3d, Mass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d*sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+	/*Since nx = ny = 0 on surface, we only consider the penalty part here*/
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass2d, Mass2d, Tau, Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1.0);
+
+	/*Multiply the contribution by inverse matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	free(Mass3d);
+	free(InvMass3d);
+	free(Mass2d);
+	free(TempContribution);
+	free(Contribution);
+}
+
 /*The input parameters are organized as follows:
 Np: Number of interpolation points, indexed as 0.
 Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
@@ -276,7 +383,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int IENe = mxGetScalar(prhs[16]);
 	double *IELAV = mxGetPr(prhs[17]);
 
-	int TotalNonzero = Ele3d * (Nface - 2 + 1) * Np*Np - BENe * Np*Np;
+	int TotalNonzero = Ele3d * (Nface + 1) * Np*Np - BENe * Np*Np - 2 * Ele2d*Np*Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
@@ -285,13 +392,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int maxNfp = mxGetM(prhs[18]);
 	double *Nfp = mxGetPr(prhs[19]);
 	int IENfp = (int)Nfp[0];
+	int VertNfp = (int)Nfp[Nface - 1];
+	double *UpEidM = malloc(VertNfp*sizeof(double));
+	double *BotEidM = malloc(VertNfp*sizeof(double));
+	for (int i = 0; i < VertNfp; i++){
+		UpEidM[i] = Fmask[(Nface - 1)*maxNfp + i];
+		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
+	}
+
 	int P = (int)mxGetScalar(prhs[20]);
 	double *Vector = mxGetPr(prhs[21]);
 	double *rd = mxGetPr(prhs[22]);
 	double *sd = mxGetPr(prhs[23]);
 	double *Dr = mxGetPr(prhs[24]);
 	double *Ds = mxGetPr(prhs[25]);
-	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface2d, Nface, Ele3d, Np);
+
+	double *BotELAV = mxGetPr(prhs[26]);
+	int BotENe = (int)mxGetScalar(prhs[27]);
+	double *BotEFToE = mxGetPr(prhs[28]);
+
+	double *SurfELAV = mxGetPr(prhs[29]);
+	int SurfENe = (int)mxGetScalar(prhs[30]);
+	double *SurfEFToE = mxGetPr(prhs[31]);
+	double *M2d = mxGetPr(prhs[32]);
+	double *J2d = mxGetPr(prhs[33]);
+
+	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface, Nface, Ele3d, Np);
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
 	mwIndex *irs = mxGetIr(plhs[0]);
@@ -314,6 +440,34 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 
+	double *BotETau = malloc(BotENe*VertNfp*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < BotENe; face++){
+		double localRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2] - 1];
+		double adjacentRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2 + 1] - 1];
+		for (int p = 0; p < VertNfp; p++){
+			BotETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
+		}
+	}
+
+	double *SurfETau = malloc(SurfENe*VertNfp*sizeof(double));
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < SurfENe; face++){
+		double localRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2] - 1];
+		double adjacentRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2 + 1] - 1];
+		for (int p = 0; p < VertNfp; p++){
+			SurfETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
+		}
+	}
+
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -321,8 +475,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		int EleNumber = 0;
 		int StartPoint;
 		int LocalStartPoint;
-		double *TempEToE = malloc((Nface2d+1)*sizeof(double));
-		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface2d, ele+1);
+		double *TempEToE = malloc((Nface+1)*sizeof(double));
+		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
 
 		for (int i = 0; i < EleNumber; i++){
 			if (ele + 1 == (int)TempEToE[i]){
@@ -375,13 +529,107 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				}
 			}
 		}
-
 		free(TempEToE);
 		free(FacialVector);
 		free(GlobalFace);
 		free(AdjEle);
 		free(ReverseFlag);
+		free(LocalEidM);
+		free(AdjEidM);
 	}
+
+	free(Tau);
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int ele = 0; ele < Ele2d; ele++){
+		int StartPoint;
+		for (int L = 0; L < Nlayer; L++){
+			//Index of the studied element
+			int LocalEle = ele*Nlayer + L + 1;
+			//Index of the element that located upside of the studied element 
+			int UpEle = (int)EToE[ele*Nlayer*Nface + L*Nface + Nface - 1];
+			//Index of the element that located downside of the studied element
+			int DownEle = (int)EToE[ele*Nlayer*Nface + L*Nface + Nface - 2];
+
+			int EleNumber = 0;
+
+			double *TempEToE = malloc((Nface + 1)*sizeof(double));
+
+			FindUniqueElementAndSortOrder(TempEToE, EToE + (LocalEle - 1)*Nface, &EleNumber, Nface, LocalEle);
+
+			if (UpEle == DownEle){//Only one layer in the vertical direction, impose the Dirichlet boundary condition
+				for (int i = 0; i < EleNumber; i++){
+					if (LocalEle == (int)TempEToE[i]){
+						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+						ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d,\
+							J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+						break;
+					}
+				}
+			}
+			else{//two or more layers included in vertical direction
+				if (LocalEle == UpEle){//This is the top most cell, and L=0
+					for (int i = 0; i < EleNumber; i++){
+						if (LocalEle == (int)TempEToE[i]){
+							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
+							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+								J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+							break;
+						}
+					}
+
+					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, VertNfp,\
+						 jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						 J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, BotEFToE, BotENe, BotETau);
+
+					GetLocalToAdjacentContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEidM, BotEFToE, BotENe, BotETau);
+				}
+				else if (LocalEle == DownEle){// This is the bottom most cell.
+
+					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEFToE, BotENe, BotETau);
+
+					GetLocalToAdjacentContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, UpEidM, BotEFToE, BotENe, BotETau);
+				}
+				else{
+					/* Bottom surface*/
+					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, BotEFToE, BotENe, BotETau);
+
+					GetLocalToAdjacentContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEidM, BotEFToE, BotENe, BotETau);
+
+					/*Upper surface*/
+					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEFToE, BotENe, BotETau);
+
+					GetLocalToAdjacentContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, VertNfp, \
+						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, UpEidM, BotEFToE, BotENe, BotETau);
+
+				}
+
+			}
+			free(TempEToE);
+		}
+	}
+
+	free(UpEidM);
+	free(BotEidM);
+	free(BotETau);
+	free(SurfETau);
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

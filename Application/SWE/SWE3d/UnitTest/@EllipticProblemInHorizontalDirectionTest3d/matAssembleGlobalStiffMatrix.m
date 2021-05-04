@@ -82,6 +82,35 @@ for face = 1:InnerEdge.Ne
         ElementMassMatrix\OP21;
 end
 
+fm = repmat( (obj.meshUnion.BottomEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BottomEdge.FToE(1,:)))', 1, 1 );
+Tau = bsxfun(@times, (fm(:) )',...
+    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    3 )/3 * obj.meshUnion(1).cell.Nface/2);
+for face = 1:BottomEdge.Ne
+    OP11 = zeros(Np);
+    OP12 = zeros(Np);
+    OP22 = zeros(Np);
+    OP21 = zeros(Np);
+    ele = InnerEdge.FToE(2*(face-1)+1);
+    adjacentEle = InnerEdge.FToE(2*(face-1)+2);
+    eidM = InnerEdge.FToN1(:,face);
+    eidP = InnerEdge.FToN2(:,face);
+    OP11(eidM, eidM) = OP11(eidM, eidM) - Tau(face)* 1 * FacialMass2d;
+    OP12(eidP, eidM) = OP12(eidP, eidM) - Tau(face)* -1 * FacialMass2d;
+    OP22(eidP, eidP) = OP22(eidP, eidP) - Tau(face)* 1 * FacialMass2d;
+    OP21(eidM, eidP) = OP21(eidM, eidP) - Tau(face)* -1 * FacialMass2d;
+    obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
+        ElementMassMatrix\OP11;
+    obj.StiffMatrix((adjacentEle-1)*Np+1:adjacentEle*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((adjacentEle-1)*Np+1:adjacentEle*Np,(ele-1)*Np+1:ele*Np) + ...
+        ElementMassMatrix\OP12;
+    obj.StiffMatrix((adjacentEle-1)*Np+1:adjacentEle*Np,(adjacentEle-1)*Np+1:adjacentEle*Np) = ...
+        obj.StiffMatrix((adjacentEle-1)*Np+1:adjacentEle*Np,(adjacentEle-1)*Np+1:adjacentEle*Np) + ...
+        ElementMassMatrix\OP22;
+    obj.StiffMatrix((ele-1)*Np+1:ele*Np,(adjacentEle-1)*Np+1:adjacentEle*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(adjacentEle-1)*Np+1:adjacentEle*Np) + ...
+        ElementMassMatrix\OP21;    
+
+end
+
 fm = repmat( (obj.meshUnion.BoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BoundaryEdge.FToE(1,:)))', 1, 1 );
 Tau = bsxfun(@times, (fm(:) )',...
     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...

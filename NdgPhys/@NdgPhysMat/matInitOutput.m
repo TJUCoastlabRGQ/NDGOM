@@ -22,8 +22,8 @@ else
     error( 'Please set the output case name option "outputCaseName".' );
 end
 
-if ~isdir(casename)
-    mkdir(casename);
+if ~isdir(['Result/',casename])
+    mkdir(['Result/',casename]);
 end
 
 %> Number of the output file, this is useful when we need to conduct the hot
@@ -98,16 +98,16 @@ end
 function [ outputObj ] = initNcOutput( obj, mesh, casename, OutputFieldNum, dt, OutputFileNum, outputIntervalNum, varIndex, fieldName )
 outputObj = [];
 if mesh.type == enumMeshDim.Three
-    if ~isdir([casename,'/3d'])
-        mkdir([casename,'/3d']);
+    if ~isdir(['Result/',casename,'/3d'])
+        mkdir(['Result/',casename,'/3d']);
     end
 elseif mesh.type == enumMeshDim.Two
-    if ~isdir([casename,'/2d'])
-        mkdir([casename,'/2d']);
+    if ~isdir(['Result/',casename,'/2d'])
+        mkdir(['Result/',casename,'/2d']);
     end
 else
-    if ~isdir([casename,'/1d'])
-        mkdir([casename,'/1d']);
+    if ~isdir(['Result/',casename,'/1d'])
+        mkdir(['Result/',casename,'/1d']);
     end    
 end
 for m = 1:obj.Nmesh
@@ -120,7 +120,7 @@ for m = 1:obj.Nmesh
         str = '/1d/';
     end
     for n = 1:OutputFileNum
-        filename{n} = [ casename, str ,casename, '.', num2str(m), '-', num2str(obj.Nmesh),'.', num2str(n),'.','nc' ];
+        filename{n} = [ 'Result/',casename, str ,casename, '.', num2str(m), '-', num2str(obj.Nmesh),'.', num2str(n),'.','nc' ];
     end
     outputObj = [ outputObj, NcOutput( mesh, casename, OutputFieldNum, dt, varIndex ) ];
     outputObj(m).initFromMesh( mesh, filename, casename, outputIntervalNum, OutputFieldNum, varIndex, fieldName, dt );
@@ -130,12 +130,12 @@ end
 function [ outputObj ] = initVtkOutput( obj, mesh, casename, OutputFieldNum, dt, varIndex, fieldName )
 outputObj = [];
 if mesh.type == enumMeshDim.Three
-    if ~isdir([casename,'/3d'])
-        mkdir([casename,'/3d']);
+    if ~isdir(['Result/',casename,'/3d'])
+        mkdir(['Result/',casename,'/3d']);
     end
 elseif mesh.type == enumMeshDim.Two
-    if ~isdir([casename,'/2d'])
-        mkdir([casename,'/2d']);
+    if ~isdir(['Result/',casename,'/2d'])
+        mkdir(['Result/',casename,'/2d']);
     end
 end
 for m = 1:obj.Nmesh

@@ -508,7 +508,7 @@ switch computer('arch')
                     mfilename, srcfile{n}, outPath);
                 fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
                 file = [srcfile(n), libfile{:}];
-                mex('-g','-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
             end
         end
