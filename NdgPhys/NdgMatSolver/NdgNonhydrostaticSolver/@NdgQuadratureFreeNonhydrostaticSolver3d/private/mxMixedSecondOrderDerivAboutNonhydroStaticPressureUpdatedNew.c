@@ -6,8 +6,8 @@ and $\frac{\partial}{\partial y}(\frac{\partial q}{\partial \sigma})$. The follo
 For this term, the primal form is given as:
 $$-\int_{\Omega}\frac{\partial v}{\partial x}\frac{\partial p}{\partial \sigma}d\Omega + \int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}\\
 + \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega + \int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega + \\
-\int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \int_{\epsilon_i} \tau [p][v]d\Omega - \int_{\epsilon_D} \tau pvd\Omega \\
-= \int_{\Omega}fvd\Omega + \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}q_Dd\Omega - \int_{\epsilon_D}\tau vq_D d\Omega - \int_{\epsilon_N} n_x^2vq_N d\Omega$$*/
+\int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \int_{\epsilon_i} \tau [p]_x[v]_xd\Omega - \int_{\epsilon_D} \tau n_x^2pvd\Omega \\
+= \int_{\Omega}fvd\Omega + \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}q_Dd\Omega - \int_{\epsilon_D}\tau n_x^2vq_D d\Omega - \int_{\epsilon_N} n_x^2vq_N d\Omega$$*/
 
 /*This following funciton is used to assemble term corresponds to
 $$-\int_{\Omega}\frac{\partial v}{\partial x}\frac{\partial p}{\partial \sigma}d\Omega$$
@@ -73,7 +73,7 @@ $$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma} + \\
 \int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega + \\
 \int_{\epsilon_i}\left\{\frac{\partial p}{\partial \sigma}\right\}[v]_xd\Omega + \\
 \int_{\epsilon_D}\frac{\partial p}{\partial \sigma}n_xvd\Omega - \\
-\int_{\epsilon_i} \tau [p][v]d\Omega - \int_{\epsilon_D} \tau pvd\Omega$$.
+\int_{\epsilon_i} \tau [p]_x[v]_xd\Omega - \int_{\epsilon_D} \tau n_x^2pvd\Omega$$.
 For this primal form, both $$\int_{\epsilon_i}\left\{\frac{\partial v}{\partial x}\right\}[p]_{\sigma}$$ and 
 $$\int_{\epsilon_D}\frac{\partial v}{\partial x}n_{\sigma}pd\Omega$$ equal to zero
 The input parameter are as follows:
@@ -160,9 +160,13 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, in
 		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
 */
 
-		/*$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$*/
+		/*$$-\tau\left ([p]_x, [v]_x\right)_{\epsilon_i}$$*/
 		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
 		DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace[i], Nfp);
+
+		DiagMultiply(Mass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+		DiagMultiply(Mass2d, Mass2d, FacialVector + i*Nfp, Nfp);
+
 		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
 
 		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
@@ -278,9 +282,13 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int LocalEle,
 			(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 //		AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEidM, Np, Nfp);
 
-		//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+		/*$$-\tau\left ([p]_x, [v]_x\right)_{\epsilon_i}$$*/
 		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
 		DiagMultiply(Mass2d, Mass2d, Tau + Nfp*GlobalFace[i], Nfp);
+
+		DiagMultiply(Mass2d, Mass2d, Vector + i*Nfp, Nfp);
+		DiagMultiply(Mass2d, Mass2d, Vector + i*Nfp, Nfp);
+
 		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
 
 		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
@@ -350,10 +358,11 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, Eid, Np, Np2d);
 	//$$-\tau\left (  q^--q^+, v^--v^+\right)_{\epsilon_i}$$
+	/*
 	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
 	DiagMultiply(Mass2d, Mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1.0);
-
+	*/
 	/*Multiply the contribution by inverse matrix*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -525,11 +534,13 @@ void GetLocalToDownElementContributionForMixedSecondOrderTerm(double *dest, doub
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
+	/*
 	int GlobalFace = 0;
 	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface-2], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, BotEid, LocalEid, Np, Np2d, 1.0);
+	*/
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvDownMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -606,12 +617,13 @@ void GetLocalDownFacialContributionForMixedSecondOrderTerm(double *dest, double 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
+	/*
 	int GlobalFace = 0;
 	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 2], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
-
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -681,11 +693,13 @@ double *Ds, double *rd, double *sd, double *Tau, mwIndex *Jcs){
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
+	/*
 	int GlobalFace = 0;
 	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 1], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, UpEid, LocalEid, Np, Np2d, 1.0);
+	*/
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -761,11 +775,13 @@ void GetLocalUpFacialContributionForMixedSecondOrderTerm(double *dest, double *E
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*$\int_{\epsilon_i} \tau [p][v]d\Omega$*/
+	/*
 	int GlobalFace = 0;
 	FindGlobalBottomEdgeFace(&GlobalFace, FToE, LocalEle, (int)EToE[Nface - 1], Ne);
 	DiagMultiply(Mass2d, Mass2d, Tau + Np2d*GlobalFace, Np2d);
 	//Local to adjacent, positive, while local to local, minus.
 	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
+	*/
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
