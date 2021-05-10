@@ -34,6 +34,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double dt = mxGetScalar(prhs[8]);
 	double rho = mxGetScalar(prhs[9]);
 	double Hcrit = mxGetScalar(prhs[10]);
+	double *PUVPXY = mxGetPr(prhs[11]);
 
 	plhs[0] = mxCreateDoubleMatrix(Np*K, 1, mxREAL);
 	double *RHS = mxGetPr(plhs[0]);
@@ -52,8 +53,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K; k++){
 		for (int p = 0; p < Np; p++){
-			RHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
+//			RHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
 				PVPY[k*Np + p] + PVPS[k*Np + p] * PSPY[k*Np + p] + \
+				InvSHeight[k*Np + p] * PWPS[k*Np + p]);
+			RHS[k*Np + p] = rho / dt*(PUVPXY[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
+				PVPS[k*Np + p] * PSPY[k*Np + p] + \
 				InvSHeight[k*Np + p] * PWPS[k*Np + p]);
 		}
 	}

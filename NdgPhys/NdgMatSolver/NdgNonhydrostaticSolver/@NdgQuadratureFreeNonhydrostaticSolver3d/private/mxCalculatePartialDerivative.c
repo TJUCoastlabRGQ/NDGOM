@@ -52,6 +52,13 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *, double *, const mxArray *, 
 void GetSecondOrderPartialDerivativeInHorizontalDirectionNew(double *, double *, const mxArray *,\
 	const mxArray *,const mxArray *, const mxArray *, double *, double *, double *);
 
+void GetFirstOrderPartialDerivativeInHorizontalDirectionInFluxManner(double *, double *, double *, double *, double *, double *, const mxArray *, \
+	const mxArray *, const mxArray *, const mxArray *, double , double , signed char *);
+
+void DotCriticalDevideByLocalValue(double *, double *, int , double );
+
+void DotCriticalDevideByAveragedValue(double *, double *, double *, int , double );
+
 
 /*The following function is used to assemble the final partial derivative of $\sigma$ with respect to $x$ or
 $y$. They are explicitly given as $\frac{1}{H}\frac{\partial h}{\partial x}-\frac{\left (1+\sigma\right )}
@@ -251,6 +258,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	plhs[10] = mxCreateDoubleMatrix(Np, K, mxREAL);
 	double *PWPS = mxGetPr(plhs[10]);
 
+	plhs[11] = mxCreateDoubleMatrix(Np, K, mxREAL);
+	double *PUVPXY = mxGetPr(plhs[11]);
 
 
 #ifdef _OPENMP
@@ -272,6 +281,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	GetFirstOrderPartialDerivativeInHorizontalDirection(PHPX, PHPY, PUPX, PVPY, mesh, cell, InnerEdge, BoundaryEdge, h, \
 		u, v, hu, hv, zbot, gra, fext, *Hcrit, ftype);
+
+	GetFirstOrderPartialDerivativeInHorizontalDirectionInFluxManner(PUVPXY, hu, hv, h, zbot, fext, mesh, \
+		cell, InnerEdge, BoundaryEdge, *Hcrit, gra, ftype);
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -315,6 +327,251 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	free(InvV3d);
 
+}
+
+void GetFirstOrderPartialDerivativeInHorizontalDirectionInFluxManner(double *dest, double *Hu, double *Hv, double *h, double *z, double *fext, const mxArray *mesh,\
+	const mxArray *cell, const mxArray *InnerEdge, const mxArray *BoundaryEdge, double Hcrit, double gra, signed char *ftype){
+	mxArray *Temprx = mxGetField(mesh, 0, "rx");
+	double *rx = mxGetPr(Temprx);
+	mxArray *Tempsx = mxGetField(mesh, 0, "sx");
+	double *sx = mxGetPr(Tempsx);
+	mxArray *Tempry = mxGetField(mesh, 0, "ry");
+	double *ry = mxGetPr(Tempry);
+	mxArray *Tempsy = mxGetField(mesh, 0, "sy");
+	double *sy = mxGetPr(Tempsy);
+	mxArray *TempJ = mxGetField(mesh, 0, "J");
+	double *J = mxGetPr(TempJ);
+	mxArray *TempK = mxGetField(mesh, 0, "K");
+	int K = (int)mxGetScalar(TempK);
+
+	mxArray *TempDr = mxGetField(cell, 0, "Dr");
+	double *Dr = mxGetPr(TempDr);
+	mxArray *TempDs = mxGetField(cell, 0, "Ds");
+	double *Ds = mxGetPr(TempDs);
+	mxArray *TempNface = mxGetField(cell, 0, "Nface");
+	int Nface = (int)mxGetScalar(TempNface) - 2;
+	mxArray *TempNp = mxGetField(cell, 0, "Np");
+	int Np = (int)mxGetScalar(TempNp);
+	mxArray *TempInvM = mxGetField(cell, 0, "invM");
+	double *invM = mxGetPr(TempInvM);
+
+	mxArray *TempIENe = mxGetField(InnerEdge, 0, "Ne");
+	int IENe = (int)mxGetScalar(TempIENe);
+	mxArray *TempIENfp = mxGetField(InnerEdge, 0, "Nfp");
+	int IENfp = (int)mxGetScalar(TempIENfp);
+	mxArray *TempIEMb = mxGetField(InnerEdge, 0, "M");
+	double *IEMb = mxGetPr(TempIEMb);
+	mxArray *TempIEJs = mxGetField(InnerEdge, 0, "Js");
+	double *IEJs = mxGetPr(TempIEJs);
+	mxArray *TempIEnx = mxGetField(InnerEdge, 0, "nx");
+	double *IEnx = mxGetPr(TempIEnx);
+	mxArray *TempIEny = mxGetField(InnerEdge, 0, "ny");
+	double *IEny = mxGetPr(TempIEny);
+	mxArray *TempIELAV = mxGetField(InnerEdge, 0, "LAV");
+	double *IELAV = mxGetPr(TempIELAV);
+	mxArray *TempIEFToE = mxGetField(InnerEdge, 0, "FToE");
+	double *IEFToE = mxGetPr(TempIEFToE);
+	mxArray *TempIEFToF = mxGetField(InnerEdge, 0, "FToF");
+	double *IEFToF = mxGetPr(TempIEFToF);
+	mxArray *TempIEFToN1 = mxGetField(InnerEdge, 0, "FToN1");
+	double *IEFToN1 = mxGetPr(TempIEFToN1);
+	mxArray *TempIEFToN2 = mxGetField(InnerEdge, 0, "FToN2");
+	double *IEFToN2 = mxGetPr(TempIEFToN2);
+
+	mxArray *TempBENe = mxGetField(BoundaryEdge, 0, "Ne");
+	int BENe = (int)mxGetScalar(TempBENe);
+	mxArray *TempBENfp = mxGetField(BoundaryEdge, 0, "Nfp");
+	int BENfp = mxGetScalar(TempBENfp);
+	mxArray *TempBEMb = mxGetField(BoundaryEdge, 0, "M");
+	double *BEMb = mxGetPr(TempBEMb);
+	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
+	double *BEJs = mxGetPr(TempBEJs);
+	mxArray *TempBEnx = mxGetField(BoundaryEdge, 0, "nx");
+	double *BEnx = mxGetPr(TempBEnx);
+	mxArray *TempBEny = mxGetField(BoundaryEdge, 0, "ny");
+	double *BEny = mxGetPr(TempBEny);
+	mxArray *TempBELAV = mxGetField(BoundaryEdge, 0, "LAV");
+	double *BELAV = mxGetPr(TempBELAV);
+	mxArray *TempBEFToE = mxGetField(BoundaryEdge, 0, "FToE");
+	double *BEFToE = mxGetPr(TempBEFToE);
+	mxArray *TempBEFToF = mxGetField(BoundaryEdge, 0, "FToF");
+	double *BEFToF = mxGetPr(TempBEFToF);
+	mxArray *TempBEFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
+	double *BEFToN1 = mxGetPr(TempBEFToN1);
+
+	ptrdiff_t np = Np;
+	ptrdiff_t oneI = 1;
+	double one = 1.0, zero = 0.0;
+
+	double *u = malloc(Np*K*sizeof(double));
+	double *v = malloc(Np*K*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+			//For variable u, v, and w
+			DotCriticalDivide(u + k*Np, Hu + k*Np, &Hcrit, h + k*Np, Np);
+			DotCriticalDivide(v + k*Np, Hv + k*Np, &Hcrit, h + k*Np, Np);
+	}
+
+	double *VSVolumeIntegralX = malloc(Np*K*sizeof(double));
+	double *VSTempVolumeIntegralX = malloc(Np*K*sizeof(double));
+	double *VSVolumeIntegralY = malloc(Np*K*sizeof(double));
+	double *VSTempVolumeIntegralY = malloc(Np*K*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+		/*$\bold{r_x}\cdot (Dr*u3d)+\bold{s_x}\cdot (Ds*u3d)$*/
+		GetVolumnIntegral2d(VSVolumeIntegralX + k*Np, VSTempVolumeIntegralX + k*Np, &np, &oneI, &np, &one, \
+			Dr, Ds, &np, u + k*Np, &np, &zero, &np, rx + k*Np, sx + k*Np);
+		/*$\bold{r_y}\cdot (Dr*v3d)+\bold{s_y}\cdot (Ds*v3d)$*/
+		GetVolumnIntegral2d(VSVolumeIntegralY + k*Np, VSTempVolumeIntegralY + k*Np, &np, &oneI, &np, &one, \
+			Dr, Ds, &np, v + k*Np, &np, &zero, &np, ry + k*Np, sy + k*Np);
+
+		Add(dest + k*Np, VSVolumeIntegralX + k*Np, VSVolumeIntegralY + k*Np, Np);
+	}
+
+	double *VSIEFM = malloc(IENe*IENfp * 3 * sizeof(double));
+	double *IEhuM = VSIEFM, *IEhvM = VSIEFM + IENe*IENfp, *IEhM = VSIEFM + 2 * IENe*IENfp;
+	double *VSIEFP = malloc(IENe*IENfp * 3 * sizeof(double));
+	double *IEhuP = VSIEFP, *IEhvP = VSIEFP + IENe*IENfp, *IEhP = VSIEFP + 2 * IENe*IENfp;
+	double *VSIEFluxM = malloc(IENe*IENfp*sizeof(double));
+	double *VSIEFluxP = malloc(IENe*IENfp*sizeof(double));
+	double *VSIEFluxS = malloc(IENe*IENfp*sizeof(double));
+	memset(VSIEFluxS, 0, IENe*IENfp*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe; e++){
+		FetchInnerEdgeFacialValue(IEhM + e*IENfp, IEhP + e*IENfp, h, IEFToE + 2 * e, IEFToN1 + e*IENfp, IEFToN2 + e*IENfp, Np, IENfp);
+		FetchInnerEdgeFacialValue(IEhuM + e*IENfp, IEhuP + e*IENfp, Hu, IEFToE + 2 * e, IEFToN1 + e*IENfp, IEFToN2 + e*IENfp, Np, IENfp);
+		FetchInnerEdgeFacialValue(IEhvM + e*IENfp, IEhvP + e*IENfp, Hv, IEFToE + 2 * e, IEFToN1 + e*IENfp, IEFToN2 + e*IENfp, Np, IENfp);
+		GetFacialFluxTerm2d(VSIEFluxM + e*IENfp, IEhuM + e*IENfp, IEhvM + e*IENfp, IEnx + e*IENfp, IEny + e*IENfp, IENfp);
+		GetFacialFluxTerm2d(VSIEFluxP + e*IENfp, IEhuP + e*IENfp, IEhvP + e*IENfp, IEnx + e*IENfp, IEny + e*IENfp, IENfp);
+		GetPCENumericalFluxTerm_HLLC_LAI(VSIEFluxS + e*IENfp, VSIEFM + e*IENfp, VSIEFP + e*IENfp, IEnx + e*IENfp, IEny + e*IENfp, &gra, Hcrit, IENfp, IENe);
+		DotCriticalDevideByLocalValue(VSIEFluxM + e*IENfp, IEhM + e*IENfp, IENfp, Hcrit);
+		DotCriticalDevideByLocalValue(VSIEFluxP + e*IENfp, IEhP + e*IENfp, IENfp, Hcrit);
+		DotCriticalDevideByAveragedValue(VSIEFluxS + e*IENfp, IEhM + e*IENfp, IEhP + e*IENfp, IENfp, Hcrit);
+	}
+
+
+	double *VSBEfm = malloc(3 * BENe*BENfp*sizeof(double));
+	double *BEhuM = VSBEfm, *BEhvM = VSBEfm + BENe * BENfp, \
+		*BEhM = VSBEfm + 2 * BENe * BENfp;
+	double *VSBEfp = malloc(3 * BENe*BENfp*sizeof(double));
+	double *VSBEzM = malloc(BENe*BENfp*sizeof(double));
+	double *VSBEzP = malloc(BENe*BENfp*sizeof(double));
+	double *VSBEFluxM = malloc(BENe*BENfp*sizeof(double));
+	double *VSBEFluxS = malloc(BENe*BENfp*sizeof(double));
+
+	int Nfield = 3;
+	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < BENe; e++){
+		NdgEdgeType type = (NdgEdgeType)ftype[e];  // boundary condition
+		FetchBoundaryEdgeFacialValue(BEhuM + e*BENfp, Hu, BEFToE + 2 * e, BEFToN1 + e*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(BEhvM + e*BENfp, Hv, BEFToE + 2 * e, BEFToN1 + e*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(BEhM + e*BENfp, h, BEFToE + 2 * e, BEFToN1 + e*BENfp, Np, BENfp);
+		FetchBoundaryEdgeFacialValue(VSBEzM + e*BENfp, z, BEFToE + 2 * e, BEFToN1 + e*BENfp, Np, BENfp);
+
+		ImposeBoundaryCondition(&gra, type, BEnx + e*BENfp, BEny + e*BENfp, VSBEfm + e*BENfp, VSBEfp + e*BENfp, \
+			VSBEzM + e*BENfp, VSBEzP + e*BENfp, fext + e*BENfp, BENfp, Nfield, BENe);
+		EvaluateHydroStaticReconstructValue(Hcrit, VSBEfm + e*BENfp, VSBEfp + e*BENfp, VSBEzM + e*BENfp, VSBEzP + e*BENfp, BENfp, Nfield, BENe);
+		GetFacialFluxTerm2d(VSBEFluxM + e*BENfp, BEhuM + e*BENfp, BEhvM + e*BENfp, BEnx + e*BENfp, BEny + e*BENfp, BENfp);
+		GetPCENumericalFluxTerm_HLLC_LAI(VSBEFluxS + e*BENfp, VSBEfm + e*BENfp, VSBEfp + e*BENfp, BEnx + e*BENfp, BEny + e*BENfp, &gra, Hcrit, BENfp, BENe);
+		DotCriticalDevideByLocalValue(VSBEFluxM + e*BENfp, BEhM + e*BENfp, BENfp, Hcrit);
+		DotCriticalDevideByLocalValue(VSBEFluxS + e*BENfp, BEhM + e*BENfp, BENfp, Hcrit);
+	}
+
+	double *VSERHS = malloc(Np*K*Nface*sizeof(double));
+	memset(VSERHS,0,Np*K*Nface*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe; e++){
+		StrongFormInnerEdgeRHS(e, IEFToE, IEFToF, Np, K, IENfp, IEFToN1, IEFToN2, VSIEFluxM, VSIEFluxP, VSIEFluxS, IEJs, IEMb, VSERHS);
+	}
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < BENe; e++){
+		StrongFormBoundaryEdgeRHS(e, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, VSBEFluxM, VSBEFluxS, BEJs, BEMb, VSERHS);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+		for (int face = 1; face<Nface; face++){
+			Add(VSERHS + k*Np, VSERHS + k*Np, VSERHS + face*Np*K + k*Np, Np);
+		}
+	}
+
+	double *VSTempFacialIntegral = malloc(Np*K*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++) {
+		MultiEdgeContributionByLiftOperator(VSERHS + k*Np, VSTempFacialIntegral + k*Np, &np, &oneI, &np, \
+			&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
+	}
+
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+//		Minus(dest + k*Np, VSERHS + k*Np, dest + k*Np, Np);
+		Minus(dest + k*Np, dest + k*Np, VSERHS + k*Np, Np);
+	}
+
+	free(u);
+	free(v);
+	free(VSVolumeIntegralX);
+	free(VSTempVolumeIntegralX);
+	free(VSVolumeIntegralY);
+	free(VSTempVolumeIntegralY);
+	free(VSIEFM);
+	free(VSIEFP);
+	free(VSIEFluxM);
+	free(VSIEFluxP);
+	free(VSIEFluxS);
+	free(VSBEfm);
+	free(VSBEfp);
+	free(VSBEFluxM);
+	free(VSBEFluxS);
+	free(VSBEzM);
+	free(VSBEzP);
+	free(VSERHS);
+	free(VSTempFacialIntegral);
+}
+
+void DotCriticalDevideByLocalValue(double *dest, double *h, int Nfp, double Hcrit){
+	for (int i = 0; i < Nfp; i++){
+		if (h[i]>=Hcrit){
+			dest[i] = dest[i] / h[i];
+		}
+		else{
+			dest[i] = 0.0;
+		}
+	}
+}
+
+void DotCriticalDevideByAveragedValue(double *dest, double *hM, double *hP, int Nfp, double Hcrit){
+	for (int i = 0; i < Nfp; i++){
+		if (hM[i] >= Hcrit && hP[i] >= Hcrit){
+			dest[i] = dest[i] / ((hM[i] + hP[i]) / 2);
+		}
+	}
 }
 
 void GetSecondOrderPartialDerivativeInHorizontalDirection(double *SPSPX, double *SPSPY, const mxArray *mesh, const mxArray *cell, \
@@ -684,8 +941,8 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		EvaluateNonhydroVerticalFaceSurfFlux(NonhydroBotBEFluxM + 2*BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		/*Here, the vertical velocity at the bottom boundary is imposed as the numerical flux*/
-		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
-//		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
+//		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wb + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
+		DotProduct(NonhydroBotBEFluxS + 2 * BotBENe*BotBENfp + face*BotBENfp, wM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 	}
 
 #ifdef _OPENMP
