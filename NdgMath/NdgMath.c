@@ -54,6 +54,14 @@ void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
 	}
 }
 
+void DiagRightMultiply(double *dest, const double *source, const double *coe, int Np)
+{
+	for (int colI = 0; colI < Np; colI++){
+		for (int RowI = 0; RowI < Np;RowI++)
+			dest[colI*Np + Row] = coe[colI] * source[colI*Np + RowI];
+	}
+}
+
 void DotCriticalDivide(double *dest, double *source, double *criticalValue, double *Depth, int size){
 	for (int i = 0; i < size; i++){
 		if (Depth[i] >= *criticalValue)
