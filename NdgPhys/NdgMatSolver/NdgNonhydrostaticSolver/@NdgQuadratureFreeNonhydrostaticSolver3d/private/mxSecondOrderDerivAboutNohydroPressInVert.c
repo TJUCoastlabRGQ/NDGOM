@@ -115,8 +115,10 @@ void ImposeSecondOrderNonhydroDirichletBoundaryCondition(double *dest, int Start
 
 	/*The follow part is for term $-\int_{\partial \Omega^D}\tau^ksp_hd\boldsymbol{x}$*/
 	double *DirichletBuff2 = malloc(Np2d * Np2d * sizeof(double));
+	/*
 	DiagMultiply(DirichletBuff2, Mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, DirichletBuff2, Eid, Eid, Np, Np2d, -1);
+	*/
 
 	/*Multiply the contribution by inverse matrix*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
@@ -188,8 +190,11 @@ void GetLocalToUpElementContributionForSecondOrderTerm(double *dest, int StartPo
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	/*
 	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, UpEid, LocalEid, Np, Np2d, 1);
+	*/
+
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
@@ -256,8 +261,10 @@ void GetLocalToDownElementContributionForSecondOrderTerm(double *dest, int Start
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	/*
 	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, BotEid, LocalEid, Np, Np2d, 1);
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvDownMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -319,9 +326,12 @@ void GetLocalDownContributionForSecondOrderTerm(double *dest, int StartPoint, in
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Np2d);
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
+	
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	/*
 	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1);
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
@@ -383,8 +393,10 @@ void GetLocalUpContributionForSecondOrderTerm(double *dest, int StartPoint, int 
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
+	/*
 	DiagMultiply(TempMass2d, mass2d, Tau, Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 

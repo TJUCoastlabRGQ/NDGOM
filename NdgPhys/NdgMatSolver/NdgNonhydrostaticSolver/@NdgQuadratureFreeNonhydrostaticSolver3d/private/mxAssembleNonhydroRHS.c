@@ -53,10 +53,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K; k++){
 		for (int p = 0; p < Np; p++){
-//			RHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
+			RHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
 				PVPY[k*Np + p] + PVPS[k*Np + p] * PSPY[k*Np + p] + \
 				InvSHeight[k*Np + p] * PWPS[k*Np + p]);
-			RHS[k*Np + p] = rho / dt*(PUVPXY[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
+//			RHS[k*Np + p] = rho / dt*(PUVPXY[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
 				PVPS[k*Np + p] * PSPY[k*Np + p] + \
 				InvSHeight[k*Np + p] * PWPS[k*Np + p]);
 		}
