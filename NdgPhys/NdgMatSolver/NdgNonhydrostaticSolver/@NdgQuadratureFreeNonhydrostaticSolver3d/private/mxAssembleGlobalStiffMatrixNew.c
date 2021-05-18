@@ -2,6 +2,10 @@
 
 void GetInverseSquareHeight(double *, double *, double, int);
 
+void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int NonzeroPerColumn, double *M3d, \
+	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
+	double *K23, double *K33);
+
 void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int DownEle, int Np, int Nfp, \
 	int NonzeroPerColumn, double *M3d, double *M2d, double *J, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
@@ -260,7 +264,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			}
 		}
 		free(TempEToE);
-		free(FacialVector);
+		free(Facialnx);
+		free(Facialny);
 		free(GlobalFace);
 		free(AdjEle);
 		free(ReverseFlag);
@@ -388,6 +393,119 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(BotEidM);
 	free(InvSquaHeight);
 	free(K33);
+}
+
+void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int NonzeroPerColumn, double *M3d, \
+	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
+	double *K23, double *K33){
+	double *DiffMatrix = malloc(Np*Np*sizeof(double));
+	double *TempDiffMatrix = malloc(Np*Np*sizeof(double));
+	double *VertDiffMatrix = malloc(Np*Np*sizeof(double));
+	double *Mass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(Mass3d, M3d, J, Np);
+	double *InvMass3d = malloc(Np*Np*sizeof(double));
+	memcpy(InvMass3d, Mass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+	double *TempContributionBuff = malloc(Np*Np*sizeof(double));
+	double *ContributionBuff = malloc(Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	memset(Contribution, 0, Np*Np*sizeof(double));
+
+	double *VolumnContribution = malloc(Np*Np*sizeof(double));
+
+	/*For term $$k_{13}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial x}$$*/
+	DiagMultiply(DiffMatrix, Dr, rx, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sx, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+
+	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
+	DiagMultiply(VertDiffMatrix, VertDiffMatrix, K13, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{23}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial y}$$*/
+	DiagMultiply(DiffMatrix, Dr, ry, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sy, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+
+	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
+	DiagMultiply(VertDiffMatrix, VertDiffMatrix, K23, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{31}\frac{\partial v}{\partial x}\frac{\partial p_h}{\partial \sigma}$$*/
+	DiagMultiply(DiffMatrix, Dr, rx, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sx, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+	DiagMultiply(DiffMatrix, DiffMatrix, K31, Np);
+
+	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{32}\frac{\partial v}{\partial y}\frac{\partial p_h}{\partial \sigma}$$*/
+	DiagMultiply(DiffMatrix, Dr, ry, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sy, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+	DiagMultiply(DiffMatrix, DiffMatrix, K32, Np);
+
+	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{33}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial \sigma}$$*/
+	DiagMultiply(DiffMatrix, Dt, tz, Np);
+	DiagMultiply(DiffMatrix, DiffMatrix, K33, Np);
+
+	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*Multiply by inverse mass matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
+		(ptrdiff_t)Np, Contribution, (ptrdiff_t)Np, 0.0, VolumnContribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoSparseMatrix(dest + StartPoint, VolumnContribution, NonzeroPerColumn, Np);
+
+	free(DiffMatrix);
+	free(TempDiffMatrix);
+	free(VertDiffMatrix);
+	free(Mass3d);
+	free(InvMass3d);
+	free(TempContributionBuff);
+	free(ContributionBuff);
+	free(Contribution);
+	free(VolumnContribution);
 }
 
 void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int DownEle, int Np, int Nfp, \
