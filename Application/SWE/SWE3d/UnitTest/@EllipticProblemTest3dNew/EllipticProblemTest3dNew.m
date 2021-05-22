@@ -1,12 +1,21 @@
-classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
+classdef EllipticProblemTest3dNew < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
-    %> $\frac{\partial^2p}{\partial \sigma^2}$, the analytical
-    %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used
+    %> $$\nabla\cdot\mathbf{K}\nabla p=f$$. Here, $\mathbf {K}$ is
+    %> positive definite, and is given by,
+    %> $$\mathbf K = \left [\begin{matrix}1&&0&&k_{13}\\0&&1&&k_{23}\\
+    %> k_{31}&&k_{32}&&k_{33}\end {matrix}\right]$$. $k_{33}$ is calculated
+    %> as $k_{13}^2+k_{23}^2+\frac{1}{D^2}$
     
     properties
         ChLength = 10
         ChWidth = 10
+        Depth = 1
+        K11 = 1
+        K22 = 1
+        K13 = 0
+        K23 = 0
+        K33 = 0
     end
     
     properties
@@ -21,34 +30,24 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
         
         Cexact
         
-        DiffCexact
-        
         SecondDiffCexact
         
-        DirichExact
-        
-        NewmannExact
     end
     
     properties(Constant)
-        hcrit = 1
+        hcrit = 0.01
     end
     
     
     methods
-        function obj = EllipticProblemInVerticalDirectionTest3d(N, Nz, M, Mz)
+        function obj = EllipticProblemTest3dNew(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
+%             obj.K33 = obj.K13^2 + obj.K23^2 + 1/obj.Depth/obj.Depth;
             obj.matGetFunction;
-            obj.DirichExact = zeros(obj.mesh2d.cell.Np,1);
-            obj.NewmannExact = zeros(obj.mesh2d.cell.Np,1);
-            [ obj.StiffMatrix, LRHS, RRHS ] = obj.matAssembleGlobalStiffMatrix;
+            obj.AssembleGlobalStiffMatrix;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             obj.RHS = obj.matAssembleRightHandSide;
-            % The direction vector is considered in the initialization stage
-            obj.RHS(:,1) = obj.RHS(:,1) - LRHS;
-            % Minus or plus is considered when assemble RRHS
-            obj.RHS(:,end) = obj.RHS(:,end) + RRHS;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
@@ -56,14 +55,21 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
             
-%             obj.SimulatedSolution = obj.NonhydrostaticSolver.SPNPS\obj.RHS(:);
-            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
+            obj.SimulatedSolution = obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );
+            obj.SimulatedSolution = reshape(obj.StiffMatrix\obj.RHS(:), obj.meshUnion.cell.Np, obj.meshUnion.K);
             disp("The condition number is:")
-            disp(condest(obj.NonhydrostaticSolver.SPNPS));
+            disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
             disp("The maximum difference is:");
-            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp(max(max(obj.ExactSolution-obj.SimulatedSolution)));
             disp("The minimum difference is:");
-            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp(min(min(obj.ExactSolution-obj.SimulatedSolution)));
+            
+            disp("============For stiff matrix================")
+            disp("The maximum difference is:")
+            disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
+            disp("The minimum difference is:")
+            disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
+            disp("============End stiff matrix================")
         end
         
     end
@@ -87,14 +93,17 @@ classdef EllipticProblemInVerticalDirectionTest3d < SWEBarotropic3d
             for m = 1 : obj.Nmesh
                 fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
                 fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
+                fphys2d{m}(:,:,1) = obj.Depth*ones( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K);
             end
         end
         
         function matGetFunction(obj)
-            syms z;
-            obj.Cexact = sin(-pi/2*z);
-            obj.DiffCexact = diff(obj.Cexact, z);
-            obj.SecondDiffCexact = diff(obj.DiffCexact, z);
+            syms x y z;
+            obj.Cexact = sin(-pi/2*z)*sin(pi/5*x)*sin(pi/5*y);
+%             obj.Cexact = sin(-pi/2*z);
+            obj.SecondDiffCexact = diff(obj.K11*diff(obj.Cexact,x) + obj.K13*diff(obj.Cexact, z),x) + ...
+                diff(obj.K22*diff(obj.Cexact,y) + obj.K23*diff(obj.Cexact, z),y) + ...
+                diff(obj.K13*diff(obj.Cexact,x) + obj.K23*diff(obj.Cexact,y) + obj.K33*diff(obj.Cexact, z),z);
         end
         
         function [ option ] = setOption( obj, option )
@@ -138,5 +147,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 
 end

@@ -88,18 +88,18 @@ function Tau = matCalculatePenaltyParameter(mesh3d, mesh2d, DiffusionCoefficient
 %> @param[out] Tau The calculated penalty parameter with size ( Nz + 1 ) * K2d
 P = mesh2d.cell.N;
 %> for prisms, number of faces is 5
-n0 = 6;
+n0 = mesh2d.cell.Nface + 2;
 %> here Nz stands for ratio between area of surface and volume of the studied cell
 Nz = mesh3d.Nz;
 for i = 1:mesh2d.K
     %> The surface most face for each column
-    Tau(1,i) = (P+1)*(P+3)/3*n0/2*(Nz + 1)*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
+    Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
     for j = 2:Nz
-        Tau(j,i) = (P+1)*(P+3)/3*n0/2*(Nz + 1)*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+        Tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
             max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
     end
     %> The bottom most face for each column
-    Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*(Nz+1)*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+    Tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
 end
 end
 

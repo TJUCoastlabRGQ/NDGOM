@@ -58,7 +58,7 @@ void DiagRightMultiply(double *dest, const double *source, const double *coe, in
 {
 	for (int colI = 0; colI < Np; colI++){
 		for (int RowI = 0; RowI < Np;RowI++)
-			dest[colI*Np + Row] = coe[colI] * source[colI*Np + RowI];
+			dest[colI*Np + RowI] = coe[colI] * source[colI*Np + RowI];
 	}
 }
 

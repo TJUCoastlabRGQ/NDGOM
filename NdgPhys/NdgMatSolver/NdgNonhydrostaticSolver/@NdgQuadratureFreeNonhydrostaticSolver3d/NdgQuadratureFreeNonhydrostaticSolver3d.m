@@ -125,7 +125,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
 %                 obj.mesh, obj.cell, obj.BoundaryEdge, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
 
             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
-                obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, );
+                obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
+                obj.mesh2d.J, obj.mesh2d.K);
             
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.PUVPXY);
@@ -210,6 +211,17 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
+        end
+        
+        function SimulatedSolution = TestNewFormGlobalStiffMatrix( obj, physClass, fphys )
+                obj.PSPX = physClass.K13 * ones(physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+                obj.PSPY = physClass.K23 * ones(physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+                obj.SQPSPX = obj.PSPX .* obj.PSPX;
+                obj.SQPSPY = obj.PSPY .* obj.PSPY;
+                obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
+                obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
+                obj.mesh2d.J, obj.mesh2d.K);
+                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(:), physClass.meshUnion.cell.Np, physClass.meshUnion.K);
         end
         
     end
