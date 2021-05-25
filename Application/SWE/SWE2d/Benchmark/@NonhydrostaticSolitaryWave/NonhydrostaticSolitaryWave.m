@@ -5,24 +5,12 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
     properties
         H0
         H5
-%         H8
-%         H12
-%         H16
         U0
         U5
-%         U8
-%         U12
-%         U16
         W0
         W5
-%         W8
-%         W12
-%         W16
         P0
         P5
-%         P8
-%         P12 
-%         P16
     end
     
     methods
@@ -63,7 +51,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             set(gcf,'position',[50,50,1050,400]);           
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'k','Linewidth',1.5);            
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-            for i = 1:numel(time);
+            for i = 1:numel(time)
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,1)' - d,'k','Linewidth',1.5);
@@ -123,7 +111,7 @@ classdef NonhydrostaticSolitaryWave < SWEConventional2d
             set(gcf,'position',[50,50,1050,400]);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            for i = 1:numel(time);                      
+            for i = 1:numel(time)                      
                 [~,Index] = sort(abs(outputTime-time(i)));
                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
                 plot(xd,fg(:,5)','k','Linewidth',1.5);

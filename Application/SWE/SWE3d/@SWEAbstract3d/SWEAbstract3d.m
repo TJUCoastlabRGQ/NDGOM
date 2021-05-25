@@ -77,6 +77,7 @@ classdef SWEAbstract3d < NdgPhysMat
         HorizontalEddyViscositySolver
         
         VerticalVelocitySolver
+        
     end
     
     properties
@@ -102,7 +103,7 @@ classdef SWEAbstract3d < NdgPhysMat
     
     methods
         function obj = SWEAbstract3d(  )
-            % Doing nothing
+            obj.NonhydrostaticSolver = NdghydrostaticSolver3d( obj );
         end
         
         initPhysFromOptions( obj, mesh2d, mesh3d );

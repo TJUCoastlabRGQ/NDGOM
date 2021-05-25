@@ -13,9 +13,9 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         Depth = 1
         K11 = 1
         K22 = 1
-        K13 = 0
-        K23 = 0
-        K33 = 0
+        K13 = 0.01
+        K23 = 0.04
+        K33
     end
     
     properties
@@ -43,7 +43,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         function obj = EllipticProblemTest3dNew(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
-%             obj.K33 = obj.K13^2 + obj.K23^2 + 1/obj.Depth/obj.Depth;
+            obj.K33 = obj.K13^2 + obj.K23^2 + 1/obj.Depth/obj.Depth;
             obj.matGetFunction;
             obj.AssembleGlobalStiffMatrix;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );

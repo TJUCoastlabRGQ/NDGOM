@@ -1,4 +1,5 @@
 #include "SWENonhydrostatic3d.h"
+#include "stdio.h"
 
 void GetInverseSquareHeight(double *, double *, double, int);
 
@@ -303,7 +304,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
 						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//		     			ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+		     			ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
 							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 							J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 							sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
@@ -317,7 +318,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 					for (int i = 0; i < EleNumber; i++){
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
 								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 								J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
@@ -325,14 +326,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 							break;
 						}
 					}
-
-//					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
+					
+					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-
-//					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
+					
+					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (DownEle - 1)*Np, J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
@@ -340,48 +341,52 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt,\
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np,\
 						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np);
+						
 
 				}
 				else if (LocalEle == DownEle){// This is the bottom most cell.
+					
 
-//					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
+					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-
-//					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
+					
+					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
-						J + (DownEle - 1)*Np, J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
+						J + (DownEle - 1)*Np, J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
 						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
 						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np);
+						
 				}
 				else{
-//					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
+					
+					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-
-//					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
+					
+					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
-						J + (DownEle - 1)*Np, J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
+						J + (DownEle - 1)*Np, J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
 						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
 						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np);
-
-//					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
+                     
+					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-
-//					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
+                      
+					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (DownEle - 1)*Np, J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
@@ -389,6 +394,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
 						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np);
+						
 
 				}
 			}
@@ -560,8 +566,8 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
@@ -589,8 +595,8 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
@@ -614,8 +620,8 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
@@ -692,8 +698,8 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
@@ -721,8 +727,8 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1 * 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
@@ -746,8 +752,8 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1 * 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
@@ -817,8 +823,8 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{31}\frac{\partial p_h}{\partial x}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
 
@@ -840,8 +846,8 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial p_h}{\partial y}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
 
@@ -861,8 +867,8 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial p_h}{\partial \sigma}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
 
@@ -932,8 +938,8 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{31}\frac{\partial p_h}{\partial x}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
@@ -955,8 +961,8 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial p_h}{\partial y}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
@@ -976,8 +982,8 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial p_h}{\partial \sigma}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
 	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
@@ -1045,8 +1051,8 @@ void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int 
 	AssembleContributionIntoColumn(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{31}\frac{\partial p_h}{\partial x}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np2d);
 	AssembleContributionIntoRow(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial v}{\partial y}\right\}[p_h]_{\sigma} $$*/
@@ -1062,8 +1068,8 @@ void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int 
 	AssembleContributionIntoColumn(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial p_h}{\partial y}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np2d);
 	AssembleContributionIntoRow(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial v}{\partial \sigma}\right\}[p_h]_{\sigma} $$*/
@@ -1077,8 +1083,9 @@ void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int 
 	AssembleContributionIntoColumn(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial p_h}{\partial \sigma}\right\}[v]_{\sigma} $$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
-		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
+		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, BoundaryEdgeContribution, (ptrdiff_t)Np2d);
+
 	AssembleContributionIntoRow(TempContribution, BoundaryEdgeContribution, LocalEid, Np, Np2d);
 
 	/*Multiply by inverse mass matrix*/

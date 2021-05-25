@@ -17,11 +17,6 @@ Dx = diag(mesh.rx(:,1))*mesh.cell.Dr +  diag(mesh.sx(:,1))*mesh.cell.Ds +  diag(
 Dy = diag(mesh.ry(:,1))*mesh.cell.Dr +  diag(mesh.sy(:,1))*mesh.cell.Ds +  diag(mesh.ty(:,1))*mesh.cell.Dt;
 Dz = diag(mesh.rz(:,1))*mesh.cell.Dr +  diag(mesh.sz(:,1))*mesh.cell.Ds +  diag(mesh.tz(:,1))*mesh.cell.Dt;
 ElementMassMatrix = diag(mesh.J(:,1))*cell.M;
-%> For term $-\int_{\Omega_e}\nabla_x v\nabla_y q_hd\boldsymbol {x}$
-% OP11 = -1 * ( ElementMassMatrix\(Dx'*ElementMassMatrix*Dz) ) - ...
-%     ( ElementMassMatrix\(Dy'*ElementMassMatrix*Dz) ) ;  %checked
-
-K33 = obj.K13^2 + obj.K23^2 + 1/obj.Depth/obj.Depth;
 
 OP11 = -1 * (ElementMassMatrix\(K11 * Dx' * ElementMassMatrix * Dx + K13 * Dz' * ElementMassMatrix * Dx + ...
     K22 * Dy' * ElementMassMatrix * Dy + K23 * Dz' * ElementMassMatrix * Dy + ...
@@ -86,7 +81,7 @@ fm = repmat( (obj.meshUnion.BottomEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.Bott
 Tau = bsxfun(@times,  (fm(:) )',...
     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
-K33 = 0;
+
 for face = 1:BottomEdge.Ne
     OP11 = zeros(Np);
     OP12 = zeros(Np);
@@ -135,8 +130,6 @@ for face = 1:BottomEdge.Ne
         ElementMassMatrix\OP21;
 end
 
-K33 = obj.K13^2 + obj.K23^2 + 1/obj.Depth/obj.Depth;
-
 fm = repmat( (obj.meshUnion.SurfaceBoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.SurfaceBoundaryEdge.FToE(1,:)))', 1, 1 );
 Tau = bsxfun(@times,  (fm(:) )',...
     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
@@ -149,13 +142,13 @@ for face = 1:SurfaceBoundaryEdge.Ne
     Js = SurfaceBoundaryEdge.Js(:,face);
     FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
     
-%     OP11(:, eidM) = OP11(:, eidM) + K13*Dx(eidM, :)'*diag(nz)*FacialMass2d + K23*Dy(eidM, :)'*diag(nz)*FacialMass2d + ...
-%                     K33*Dz(eidM,:)'*diag(nz)*FacialMass2d; % Horizontal direction not consider here
+    OP11(:, eidM) = OP11(:, eidM) + K13*Dx(eidM, :)'*diag(nz)*FacialMass2d + K23*Dy(eidM, :)'*diag(nz)*FacialMass2d + ...
+                    K33*Dz(eidM,:)'*diag(nz)*FacialMass2d; % Horizontal direction not consider here
                 
-    %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
+%   %> For term $\nabla_y q_h v n_xd\boldsymbol{x}$
     
-%     OP11(eidM, :) = OP11(eidM, :) + K13 * diag(nz) * FacialMass2d * Dx(eidM, :) + K23*diag(nz)*FacialMass2d*Dy(eidM, :)+...
-%                     K33*diag(nz)*FacialMass2d*Dz(eidM,:);
+    OP11(eidM, :) = OP11(eidM, :) + K13 * diag(nz) * FacialMass2d * Dx(eidM, :) + K23*diag(nz)*FacialMass2d*Dy(eidM, :)+...
+                    K33*diag(nz)*FacialMass2d*Dz(eidM,:);
     %> For term $-\tau n_x^2q_h v$
     OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
     obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
