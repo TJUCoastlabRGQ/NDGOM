@@ -214,14 +214,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         end
         
         function SimulatedSolution = TestNewFormGlobalStiffMatrix( obj, physClass, fphys )
-                obj.PSPX = physClass.K13 * ones(physClass.meshUnion.cell.Np, physClass.meshUnion.K);
-                obj.PSPY = physClass.K23 * ones(physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+                obj.PSPX = physClass.K13;
+                obj.PSPY = physClass.K23;
                 obj.SQPSPX = obj.PSPX .* obj.PSPX;
                 obj.SQPSPY = obj.PSPY .* obj.PSPY;
                 obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
                 obj.mesh2d.J, obj.mesh2d.K);
-                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(:), physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(1:physClass.meshUnion.cell.Np*physClass.meshUnion.K)', physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+%                 SimulatedSolution = zeros(physClass.meshUnion.cell.Np, physClass.meshUnion.K);
         end
         
     end

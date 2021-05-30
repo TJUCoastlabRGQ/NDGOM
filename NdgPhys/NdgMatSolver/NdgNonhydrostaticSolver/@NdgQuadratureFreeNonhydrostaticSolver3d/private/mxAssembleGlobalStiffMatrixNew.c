@@ -172,9 +172,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int k = 0; k < K; k++){
 		GetInverseSquareHeight(InvSquaHeight + Np*k, Height + Np*k, Hcrit, Np);
 		for (int p = 0; p < Np; p++)
-			K33[k*Np + p] = SQPSPX[k*Np + p] + SQPSPY[k*Np + p] + \
-			InvSquaHeight[k*Np + p];
-//			K33[k*Np + p] = 0;
+//			K33[k*Np + p] = SQPSPX[k*Np + p] + SQPSPY[k*Np + p] + \
+//			InvSquaHeight[k*Np + p];
+			K33[k*Np + p] = 0;
 	}
 
 	int row, col;

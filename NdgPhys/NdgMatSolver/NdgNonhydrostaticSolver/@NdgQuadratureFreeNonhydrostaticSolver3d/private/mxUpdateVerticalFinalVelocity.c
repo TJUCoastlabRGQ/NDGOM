@@ -136,10 +136,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	for (int k = 0; k < K2d; k++){
 
 		AssembleDataIntoPoint(EleBotVertVelocity + k*Np, BottomVerticalVelocity + k*Np2d, BotEidM, Np2d);
-
+		/*For term $$\int_{\Omega}vFd\bold x$$*/
 		dgemm("N", "N", &np, &oneI, &np, &one, RHSCoeMatrix + k*NLayer*Np*Np + (NLayer - 1)*Np*Np, \
 			&np, RHS + k*NLayer*Np + (NLayer - 1)*Np, &np, &zero, VerticalVelocity + k*NLayer*Np + (NLayer - 1)*Np, \
 			&np);
+		/*For term $$\int_{\partial \Omega}^{bot}vw^*d\bold x$$*/
 		dgemm("N", "N", &np, &oneI, &np, &one, VertCoeMatrix + k*NLayer*Np*Np + (NLayer - 1)*Np*Np, \
 			&np, EleBotVertVelocity + k*Np, &np, &zero, VSTempVerticalVelocity + k*NLayer*Np + (NLayer - 1)*Np, \
 			&np);

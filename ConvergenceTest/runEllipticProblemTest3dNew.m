@@ -1,10 +1,6 @@
 function runEllipticProblemTest3dNew
-%RUNELLIPTICPROBLEMTEST3DNEW 此处显示有关此函数的摘要
-%   此处显示详细说明
-clear, clc
-M = [2.5 1.25 0.625 0.625/2 0.625/4];
-% M = [10 10 10 10];
-Mz = [4 8 16 32 64];
+M = [ 3/2 3/4 3/8 3/16 ];
+Mz = [2 3 8 16 ];
 Order = [1 2];
 
 Nmesh = numel(M);
@@ -92,31 +88,6 @@ for n = 1:3
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
 end
 
-% time = time./time(end);
-% figure(4);
-% hold on;
-
-
-
-% figure(4);
-% hold on;
-% for n = 1:Ndeg
-%     co = color{n};
-%     plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
-%         'LineWidth', linewidth, ...
-%         'MarkerSize', markersize ...
-%         );
-% end
-%
-% set(gca, 'XScale', 'log', 'YScale', 'log');
-%
-% lendstr = {'$H$','$HU$','$HV$'};
-% legend(lendstr,'Interpreter','Latex');
-% %     columnlegend(2,lendstr, 12);
-%
-% xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)
@@ -206,3 +177,4 @@ switch lower(location)
 end
 set(legend_h, 'Interpreter', 'Latex','Fontsize',fontsize);
 end
+

@@ -9,7 +9,6 @@ mesh = obj.meshUnion;
 InnerEdge = mesh.InnerEdge;
 BottomEdge = mesh.BottomEdge;
 SurfaceBoundaryEdge = mesh.SurfaceBoundaryEdge;
-BoundaryEdge = mesh.BoundaryEdge;
 cell = obj.meshUnion.cell;
 K = mesh.K;  Np = cell.Np;
 obj.StiffMatrix = zeros(K*Np);
@@ -277,76 +276,5 @@ for face = 1:SurfaceBoundaryEdge.Ne
         ElementMassMatrix\OP11;
     
 end
-
-fm = repmat( (obj.meshUnion.BoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BoundaryEdge.FToE(1,:)))', 1, 1 );
-Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
-    3 )/3 * obj.meshUnion(1).cell.Nface/2);
-
-% Impose dirichelet boundary condition at the boundary edge
-for face = 1:BoundaryEdge.Ne
-    OP11 = zeros(Np);
-    ele = BoundaryEdge.FToE(2*(face-1)+1);
-    eidM = BoundaryEdge.FToN1(:,face);
-    nx = BoundaryEdge.nx(:,face);
-    ny = BoundaryEdge.ny(:,face);
-    nz = BoundaryEdge.nz(:,face);
-    Js = BoundaryEdge.Js(:,face);
-    FacialMass2d = diag(Js)*BoundaryEdge.M;
-    
-    % For term $k_{11}*\frac{\partial v}{\partial x} n_x p$
-    OP11(:,eidM) =  OP11(:,eidM) + nx(1)*Dx(eidM,:)'*FacialMass2d;
-    % For term $k_{11}*\frac{\partial p}{\partial x} n_x v$
-    OP11(eidM, :) =  OP11(eidM, :) + nx(1)*FacialMass2d*Dx(eidM,:);    
-    
-        % For term $k_{13}*\frac{\partial v}{\partial \sigma} n_x p$
-    TempDz13 = diag(K13(:,ele)) * Dz;
-    OP11(:,eidM) = OP11(:,eidM) + nx(1)*TempDz13(eidM,:)'*FacialMass2d;
-    % For term $k_{13}*\frac{\partial p}{\partial \sigma} n_x v$
-    TempDz13 = diag(K13(:,ele)) * Dz;
-    OP11(eidM, :) = OP11(eidM, :) + nx(1)*FacialMass2d*TempDz13(eidM,:);    
-    
-    % For term $k_{22}*\frac{\partial p}{\partial y} n_y v$
-    OP11(:,eidM) = OP11(:,eidM) + ny(1)*Dy(eidM,:)'*FacialMass2d;
-        % For term $k_{22}*\frac{\partial p}{\partial y} n_y v$
-    OP11(eidM, :) = OP11(eidM, :) + ny(1)*FacialMass2d*Dy(eidM,:);
-      
-    % For term $k_{23}*\frac{\partial p}{\partial \sigma} n_y v$
-    TempDz23 = diag(K23(:,ele)) * Dz;
-    OP11(:,eidM) = OP11(:,eidM) + ny(1)*TempDz23(eidM,:)'*FacialMass2d; 
-    % For term $k_{23}*\frac{\partial p}{\partial \sigma} n_y v$
-    TempDz23 = diag(K23(:,ele)) * Dz;
-    OP11(eidM, :) = OP11(eidM, :) + ny(1)*FacialMass2d*TempDz23(eidM,:);     
-    
-    % For term $k_{31}*\frac{\partial p}{\partial x} n_{\sigma} v$
-    TempDx31 = diag(K13(:,ele)) * Dx;
-    OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDx31(eidM,:)'*FacialMass2d; 
-    % For term $k_{31}*\frac{\partial p}{\partial x} n_{\sigma} v$
-    TempDx31 = diag(K13(:,ele)) * Dx;
-    OP11(eidM, :) = OP11(eidM, :) + nz(1)*FacialMass2d*TempDx31(eidM,:); 
-    
-    % For term $k_{31}*\frac{\partial p}{\partial y} n_{\sigma} v$
-    TempDy32 = diag(K23(:,ele)) * Dy;
-    OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDy32(eidM,:)'*FacialMass2d;
-    % For term $k_{31}*\frac{\partial p}{\partial y} n_{\sigma} v$
-    TempDy32 = diag(K23(:,ele)) * Dy;
-    OP11(eidM, :) = OP11(eidM, :) + nz(1)*FacialMass2d*TempDy32(eidM,:);
-    
-    % For term $k_{33}*\frac{\partial p}{\partial \sigma} n_{\sigma} v$
-    TempDz33 = diag(K33(:,ele)) * Dz;
-    OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDz33(eidM,:)'*FacialMass2d;
-    % For term $k_{33}*\frac{\partial p}{\partial \sigma} n_{\sigma} v$
-    TempDz33 = diag(K33(:,ele)) * Dz;
-    OP11(eidM, :) = OP11(eidM, :) + nz(1)*FacialMass2d*TempDz33(eidM,:); 
-   
-    %> For term $-\tau n_x^2q_h v$
-    OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
-    
-    obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
-        ElementMassMatrix\OP11;
-    
-end
-
-
 obj.StiffMatrix = sparse(obj.StiffMatrix);
 end

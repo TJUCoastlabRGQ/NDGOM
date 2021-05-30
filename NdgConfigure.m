@@ -386,6 +386,15 @@ libfile = {'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhy
     'NdgMath/NdgSWE3D.c'};
 FuncHandle(path, srcfile, libfile);
 
+path = 'Application/SWE/SWE3d/UnitTest/@EllipticProblemTest3dNew/private/';
+srcfile = {[path,'mxAssembleGlobalStiffMatrixWithBCsImposed.c']};
+libfile = {'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.c',...
+    'NdgMath/NdgMath.c',...
+    'NdgMath/NdgSWE.c',...
+    'NdgMath/NdgMemory.c',...
+    'NdgMath/NdgSWE3D.c'};
+FuncHandle(path, srcfile, libfile);
+
 % SWE2d
 
 path = 'Application/SWE/VolumeFluxSolver/SWENonhydroVolumeFluxSolver2d/private/';
@@ -511,7 +520,7 @@ switch computer('arch')
                     mfilename, srcfile{n}, outPath);
                 fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
                 file = [srcfile(n), libfile{:}];
-                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                mex('-g','-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
             end
         end
