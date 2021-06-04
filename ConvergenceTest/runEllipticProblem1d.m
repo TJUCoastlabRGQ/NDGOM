@@ -1,5 +1,7 @@
-function runEllipticProblem2d
-M = [ 5 10 20 40];
+function runEllipticProblem1d
+%RUNELLIPTICPROBLEM1D Summary of this function goes here
+%   Detailed explanation goes here
+M = [ 10 20 40 80];
 % M = [ 2 1 0.5 0.25];
 Order = [1 2];
 
@@ -21,21 +23,27 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = EllipticProblem2d(Order(n), M(m), [0.04,0.01,0.01,0.04]);
+        Solver = EllipticProblemTest1d(Order(n), M(m));
 %         Solver = EllipticProblem2d(Order(n), M(m), [0,1,0,0]);
 %         Solver = EllipticMixedParticalDerivativeAboutXTest2d(Order(n),M(m));
         Solver.EllipticProblemSolve;
         len(m, n) = 2/M(m);
         dofs(m,n) = numel(Solver.fphys{1}(:,:,1));
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticProblem2d/2d','/','EllipticProblem2d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticProblemTest1d/1d','/','EllipticProblemTest1d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);
         fphys{1}(:,:,1) = reshape(Solver.SimulatedSolution, Solver.meshUnion.cell.Np, Solver.meshUnion.K);
         
-        if(all(Solver.meshUnion.BoundaryEdge.ftype == enumBoundaryCondition.Newmann))
+        if(Solver.meshUnion.BoundaryEdge.ftype(1) == enumBoundaryCondition.SlipWall && Solver.meshUnion.BoundaryEdge.ftype(1) == enumBoundaryCondition.SlipWall)
             fphys{1}(:,:,1) = fphys{1}(:,:,1) - (fphys{1}(1) - ExactValue{1}(1));
         end
+        
+        for i = 2:PostProcess.Nvar
+            fphys{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
+            ExactValue{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
+        end
+        
         
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         ErrInf( m, n ) = err(1);

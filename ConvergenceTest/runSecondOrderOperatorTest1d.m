@@ -35,7 +35,7 @@ for n = 1:Ndeg
     tic;
     Solver.matTimeStepping222;
     time(m,n) = toc;
-    PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('SecondOrderOperatorTest1d','/','1d/','SecondOrderOperatorTest1d'));
+    PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/SecondOrderOperatorTest1d','/','1d/','SecondOrderOperatorTest1d'));
     fext = cell(1);
     fext{1}(:,:,1) = Solver.FCexact;
     fphys = cell(1);

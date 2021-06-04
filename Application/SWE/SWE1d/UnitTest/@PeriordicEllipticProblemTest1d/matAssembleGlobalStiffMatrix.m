@@ -1,4 +1,4 @@
-function [ StiffMatrix ] = matAssembleGlobalStiffMatrix(obj)
+function [ StiffMatrix, LRHS, RRHS ] = matAssembleGlobalStiffMatrix(obj)
 meshUnion = obj.meshUnion;
 LeftEidM = meshUnion.cell.Fmask(1);
 RightEidM= meshUnion.cell.Fmask(2);
@@ -23,7 +23,10 @@ BottomAdjacentRows = (Np+1:2*Np)';
 %> Volume Integral Part, $$-\int_{\Omega}\nabla_hs\cdot\nabla_h p_hdx$$
 OP11 = -Dz1d' * ElementalMassMatrix * LocalPhysicalDiffMatrix;
 %> Local Bottom Integral part, checked
-% OP11 = LocalLeftBoundaryIntegral(LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(1), OP11);
+% [LRHS] = ImposeSurfaceNewmannBoundaryCondition( obj, LeftEidM, ElementalMassMatrix2d, ElementalMassMatrix );
+
+[ OP11, LRHS ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(1), OP11);
+
 %> Local Bottom Integral part
 OP11 = LocalRightBoundaryIntegral(RightEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(2), OP11);
 
@@ -66,13 +69,17 @@ end
 UpAdjacentRows = ((meshUnion.K-2)*Np+1:(meshUnion.K-1)*Np)';
 LocalRows    = ((meshUnion.K-1)*Np + 1:meshUnion.K * Np)';
 LocalColumns = (meshUnion.K-1)*Np + 1:meshUnion.K * Np;
-BottomAdjacentRows = (1:Np)';
+
 %> Volume Integral Part, $$-\int_{\Omega}\nabla_hs\cdot\nabla_h p_hdx$$
 OP11 = -Dz1d' * ElementalMassMatrix * LocalPhysicalDiffMatrix;
 %> Local Bottom Integral part, checked
 OP11 = LocalLeftBoundaryIntegral(LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(1), OP11);
+
+% [RRHS] = ImposeBottomNewmannBoundaryCondition( obj, RightEidM, ElementalMassMatrix2d, ElementalMassMatrix );
+
+[ OP11, RRHS ] = ImposeBottomDirichletBoundaryCondition(obj, RightEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(end), OP11);
+
 %> Local Bottom Integral part
-% OP11 = LocalRightBoundaryIntegral(RightEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(2), OP11);
 StiffMatrix(LocalRows(:),LocalColumns(:)) =  ElementalMassMatrix\OP11;
 %> Adjacent bottom integral part
 % OP12 = zeros(meshUnion.cell.Np);

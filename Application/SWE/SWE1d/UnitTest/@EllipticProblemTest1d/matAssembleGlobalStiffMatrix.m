@@ -29,8 +29,12 @@ OP12 = AdjacentRightBoundaryIntegral(RightEidM, LeftEidM, LocalPhysicalDiffMatri
 %> Assemble into the StiffMatrix, we don't consider the boundary condition
 %> here, since the gradient boundary condition at the surface, i.e. the
 %> left boundary, is set to be zero
-[ LBRHS ] = ImposeSurfaceNewmannBoundaryCondition(obj, LeftEidM, ElementalMassMatrix2d, ElementalMassMatrix);
-% [ OP11, LBRHS ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(1), OP11);
+if meshUnion.BoundaryEdge.ftype(1) == enumBoundaryCondition.SlipWall
+    [ LBRHS ] = ImposeSurfaceNewmannBoundaryCondition(obj, LeftEidM, ElementalMassMatrix2d, ElementalMassMatrix);
+else
+    [ OP11, LBRHS ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(1), OP11);    
+end
+
 % LBRHS = zeros(meshUnion.cell.Np, 1);
 StiffMatrix(LocalRows(:),LocalColumns(:)) =  ElementalMassMatrix\OP11;
 StiffMatrix(AdjacentRows(:),LocalColumns(:)) = ElementalMassMatrix\OP12;
@@ -77,9 +81,13 @@ OP11 = -Dz1d' * ElementalMassMatrix * LocalPhysicalDiffMatrix;
 %> Local Up Integral part, checked
 OP11 = LocalLeftBoundaryIntegral(LeftEidM, LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(1), OP11);
 %> Impose bottom Dirichlet boundary condition
-% [ OP11, RBRHS ] = ImposeBottomDirichletBoundaryCondition(obj, RightEidM,...
-%     LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(1), OP11 );
-[ RBRHS ] = ImposeBottomNewmannBoundaryCondition( obj, RightEidM, ElementalMassMatrix2d, ElementalMassMatrix );
+if meshUnion.BoundaryEdge.ftype(end) == enumBoundaryCondition.SlipWall
+    [ RBRHS ] = ImposeBottomNewmannBoundaryCondition( obj, RightEidM, ElementalMassMatrix2d, ElementalMassMatrix );
+else
+    [ OP11, RBRHS ] = ImposeBottomDirichletBoundaryCondition(obj, RightEidM,...
+        LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, Tau(1), OP11 );
+end
+
 % RBRHS = zeros(meshUnion.cell.Np, 1);
 %> Assemble the local integral part into the StiffMatrix
 StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix\OP11;

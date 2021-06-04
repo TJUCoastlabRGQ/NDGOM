@@ -54,7 +54,7 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
         function matGetExtFunc(obj)
             syms x y;
 %             obj.ExactFunc = sin(pi*x)*sin(pi/2*y);
-            obj.ExactFunc = sin(-pi/10*x) * sin(-pi/10*y);
+            obj.ExactFunc = sin(-pi/2*x) + sin(-pi/2*y);
             obj.SecondDiffTerm = diff(obj.D11 * diff(obj.ExactFunc, x),x) + diff(obj.D12 * diff(obj.ExactFunc, y),x) + ...
                 diff(obj.D21 * diff(obj.ExactFunc, x),y) + diff(obj.D22 * diff(obj.ExactFunc, y),y);
             DiffFuncX = diff(obj.ExactFunc, x);
@@ -63,6 +63,8 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
             y = obj.meshUnion.BoundaryEdge.yb;
             obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(obj.D11 * DiffFuncX + obj.D12 * DiffFuncY ) + ...
                 obj.meshUnion.BoundaryEdge.ny .* eval(obj.D21 * DiffFuncX + obj.D22 * DiffFuncY );
+%             obj.NewmannData = obj.meshUnion.BoundaryEdge.nx .* eval(obj.D11 * DiffFuncX ) + ...
+%                 obj.meshUnion.BoundaryEdge.ny .* eval( obj.D22 * DiffFuncY );            
             obj.DirichletData = eval(obj.ExactFunc);
         end
         
@@ -82,7 +84,7 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
         
         
         function f_ext = getExtFunc( obj, mesh, time )
-            f_ext = sin(2*pi*mesh.x).*sin(pi/2*mesh.y);
+            f_ext = sin(-pi/2*mesh.x) + sin(-pi/2*mesh.y);
         end
         
         function [ option ] = setOption( obj, option )
@@ -98,7 +100,7 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.NetCDF;
-            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
+            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.None;
             option('AdvDiffConstantHorizontalDiffusionValue') = 1;
         end
     end
@@ -117,13 +119,13 @@ end
 function [ mesh2d ] = makeChannelMesh( obj, N, M )
 
 bctype = [ ...
-    enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Dirichlet, ...
-    enumBoundaryCondition.Dirichlet ];
+    enumBoundaryCondition.Newmann, ...
+    enumBoundaryCondition.Newmann, ...
+    enumBoundaryCondition.Newmann, ...
+    enumBoundaryCondition.Newmann ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -1.25, 1.25 ], [ -1.25, 1.25 ], M, M, bctype);
+    [ -1.8, 1.8 ], [ -1.8, 1.8 ], M, M, bctype);
 
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );

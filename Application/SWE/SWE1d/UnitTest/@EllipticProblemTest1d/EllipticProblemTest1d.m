@@ -69,18 +69,17 @@ classdef EllipticProblemTest1d < SWEConventional1d
          obj.RHS(:,end) = obj.RHS(:,end) + RRHS;
          obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
          
-         obj.ExactRHS = obj.StiffMatrix * obj.ExactSolution(:);
-         figure;
-         hold on;
-         plot(obj.meshUnion.x(1:20:end), obj.ExactSolution(1:20:end),'ro','LineWidth',1.5);
-         plot(obj.meshUnion.x(:), obj.SimulatedSolution(:),'k','LineWidth',1.5);
-         legend({'Exact','Simulation'});
-         legend('boxoff');
-%          title('$u=x(1-x)e^{2x}$','interpreter','Latex');
-%          title('$u=x(1-x)$','interpreter','Latex');
-         title('$u=sin(-\frac{\pi}{2}x)$','interpreter','Latex');
-         box on;
-         set(gca, 'Linewidth',1.5, 'Fontsize',12);
+%          figure;
+%          hold on;
+%          plot(obj.meshUnion.x(1:5:end), obj.ExactSolution(1:5:end),'ro','LineWidth',1.5);
+%          plot(obj.meshUnion.x(:), obj.SimulatedSolution(:),'k','LineWidth',1.5);
+%          legend({'Exact','Simulation'});
+%          legend('boxoff');
+% %          title('$u=x(1-x)e^{2x}$','interpreter','Latex');
+% %          title('$u=x(1-x)$','interpreter','Latex');
+%          title('$u=sin(-\frac{\pi}{2}x)$','interpreter','Latex');
+%          box on;
+%          set(gca, 'Linewidth',1.5, 'Fontsize',12);
      end     
  end
     
@@ -126,7 +125,7 @@ classdef EllipticProblemTest1d < SWEConventional1d
 end
 
 function [ mesh ] = makeUniformMesh( N, M )
-xlim = [-1, 3];
-bcType = [enumBoundaryCondition.SlipWall, enumBoundaryCondition.SlipWall];
+xlim = [-1, 1];
+bcType = [enumBoundaryCondition.SlipWall, enumBoundaryCondition.Clamped];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
 end
