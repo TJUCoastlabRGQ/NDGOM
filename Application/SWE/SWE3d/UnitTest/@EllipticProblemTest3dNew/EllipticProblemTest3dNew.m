@@ -8,13 +8,13 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
     %> as $k_{13}^2+k_{23}^2+\frac{1}{D^2}$
     
     properties
-        ChLength = 3
-        ChWidth = 3
+        ChLength = 1
+        ChWidth = 1
         Depth = 1
         TempK11 = 1
         TempK22 = 1
-        TempK13 = 0
-        TempK23 = 0
+        TempK13 = 0.04
+        TempK23 = 0.04
         TempK33
         K11
         K22
@@ -37,8 +37,15 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         
         SecondDiffCexact
         
+        NewmannCexact
+        
         DirichletData
         
+        SurfaceDirichletData
+        
+        BottomDirichletData
+        
+        NewmannData
     end
     
     properties(Constant)
@@ -54,13 +61,13 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             obj.K22 = obj.TempK22 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K13 = obj.TempK13 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K23 = obj.TempK23 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
-            obj.K33 = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
+%             obj.K33 = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.TempK33 = obj.K33(1);
             obj.matGetFunction;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             obj.RHS = obj.matAssembleRightHandSide;
-            obj.AssembleGlobalStiffMatrix;
+%             obj.AssembleGlobalStiffMatrix;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
@@ -71,27 +78,44 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             x = obj.meshUnion.BoundaryEdge.xb;
             y = obj.meshUnion.BoundaryEdge.yb;
             z = obj.meshUnion.BoundaryEdge.zb;
+            nx = obj.meshUnion.BoundaryEdge.nx;
+            ny = obj.meshUnion.BoundaryEdge.ny;
+            nz = obj.meshUnion.BoundaryEdge.nz;
             obj.DirichletData = eval(obj.Cexact);
-            [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );
-            disp("============Before imposing boundary condition, for stiff matrix================")
-            disp("The maximum difference is:")
-            disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
-            disp("The minimum difference is:")
-            disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
-            disp("============End Before part test for stiff matrix================")                       
+            obj.NewmannData = eval(obj.NewmannCexact);
+            
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = zeros(size(x));
+            obj.SurfaceDirichletData = eval(obj.Cexact);
+            
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = -1 * ones(size(x));
+            obj.BottomDirichletData = eval(obj.Cexact);            
+            
+            [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );                      
             warning('off');
-            [ obj.RHS, GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(...
+            [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.DirichletData,...
                 struct(obj.meshUnion.BoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
+                obj.K23, obj.K33, int8(obj.meshUnion.BoundaryEdge.ftype), obj.NewmannData);
+            [ obj.RHS, ~ ] = mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed(...
+                obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.SurfaceDirichletData,...
+                struct(obj.meshUnion.SurfaceBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
                 obj.K23, obj.K33);
+            [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBottomBCsImposed(...
+                obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.BottomDirichletData,...
+                struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
+                obj.K23, obj.K33);            
             warning('on');
-            disp("============For stiff matrix================")
-            disp("The maximum difference is:")
-            disp(max(max(obj.StiffMatrix - GlobalStiffMatrix)));
-            disp("The minimum difference is:")
-            disp(min(min(obj.StiffMatrix - GlobalStiffMatrix)));            
-            disp("============End stiff matrix================")                   
-            obj.SimulatedSolution = GlobalStiffMatrix\obj.RHS(:);
+%             disp("============For stiff matrix================")
+%             disp("The maximum difference is:")
+%             disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
+%             disp("The minimum difference is:")
+%             disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
+%             disp("============End stiff matrix================")                   
+            obj.SimulatedSolution = obj.NonhydrostaticSolver.GlobalStiffMatrix\obj.RHS(:);
         end
         
     end
@@ -120,12 +144,17 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         end
         
         function matGetFunction(obj)
-            syms x y z;
-            obj.Cexact = sin(-pi/2*z)*cos(pi*x)*cos(pi*y);
+            syms x y z nx ny nz;
+            obj.Cexact = sin(pi*x)*sin(pi*y)*sin(pi*z);
+%             obj.Cexact = cos(8*pi*x) + cos(8*pi*y) + cos(-8*pi*z);
 %             obj.Cexact = sin(-pi/2*z);
             obj.SecondDiffCexact = diff(obj.TempK11*diff(obj.Cexact,x) + obj.TempK13*diff(obj.Cexact, z),x) + ...
                 diff(obj.TempK22*diff(obj.Cexact,y) + obj.TempK23*diff(obj.Cexact, z),y) + ...
                 diff(obj.TempK13*diff(obj.Cexact,x) + obj.TempK23*diff(obj.Cexact,y) + obj.TempK33*diff(obj.Cexact, z),z);
+            
+            obj.NewmannCexact = (obj.TempK11*diff(obj.Cexact,x) + obj.TempK13*diff(obj.Cexact, z))*nx + ...
+                (obj.TempK22*diff(obj.Cexact,y) + obj.TempK23*diff(obj.Cexact, z))*ny + ...
+                (obj.TempK13*diff(obj.Cexact,x) + obj.TempK23*diff(obj.Cexact,y) + obj.TempK33*diff(obj.Cexact, z))*nz;
         end
         
         function [ option ] = setOption( obj, option )
@@ -158,8 +187,11 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
+% mesh2d = makeUniformQuadMesh( N, ...
+%     [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

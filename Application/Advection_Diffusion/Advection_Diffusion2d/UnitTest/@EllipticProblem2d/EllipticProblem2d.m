@@ -38,8 +38,8 @@ classdef EllipticProblem2d < Adv_DiffAbstract2d
             obj.matGetExtFunc;
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
-%             obj.RHS = eval(obj.SecondDiffTerm);
-            obj.RHS = zeros(size(obj.meshUnion.x));
+            obj.RHS = eval(obj.SecondDiffTerm);
+%             obj.RHS = zeros(size(obj.meshUnion.x));
             obj.ExactSolution = eval(obj.ExactFunc);
             obj.AssembleGlobalStiffMatrix;
         end
@@ -123,7 +123,7 @@ bctype = [ ...
     enumBoundaryCondition.Dirichlet ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -10, 10 ], [ -10, 10 ], M, M, bctype);
+    [ -1.25, 1.25 ], [ -1.25, 1.25 ], M, M, bctype);
 
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'West-East' );
 % [ mesh2d ] = ImposePeriodicBoundaryCondition2d(  mesh2d, 'South-North' );

@@ -9,6 +9,7 @@ mesh = obj.meshUnion;
 InnerEdge = mesh.InnerEdge;
 BottomEdge = mesh.BottomEdge;
 SurfaceBoundaryEdge = mesh.SurfaceBoundaryEdge;
+
 cell = obj.meshUnion.cell;
 K = mesh.K;  Np = cell.Np;
 obj.StiffMatrix = zeros(K*Np);
@@ -278,3 +279,15 @@ for face = 1:SurfaceBoundaryEdge.Ne
 end
 obj.StiffMatrix = sparse(obj.StiffMatrix);
 end
+
+
+
+
+
+
+
+
+
+
+
+

@@ -306,33 +306,33 @@ for face = 1:BoundaryEdge.Ne
     TempDz13 = diag(K13(:,ele)) * Dz;
     OP11(eidM, :) = OP11(eidM, :) + nx(1)*FacialMass2d*TempDz13(eidM,:);    
     
-    % For term $k_{22}*\frac{\partial p}{\partial y} n_y v$
+    % For term $k_{22}*\frac{\partial v}{\partial y} n_y p$
     OP11(:,eidM) = OP11(:,eidM) + ny(1)*Dy(eidM,:)'*FacialMass2d;
         % For term $k_{22}*\frac{\partial p}{\partial y} n_y v$
     OP11(eidM, :) = OP11(eidM, :) + ny(1)*FacialMass2d*Dy(eidM,:);
       
-    % For term $k_{23}*\frac{\partial p}{\partial \sigma} n_y v$
+    % For term $k_{23}*\frac{\partial v}{\partial \sigma} n_y p$
     TempDz23 = diag(K23(:,ele)) * Dz;
     OP11(:,eidM) = OP11(:,eidM) + ny(1)*TempDz23(eidM,:)'*FacialMass2d; 
     % For term $k_{23}*\frac{\partial p}{\partial \sigma} n_y v$
     TempDz23 = diag(K23(:,ele)) * Dz;
     OP11(eidM, :) = OP11(eidM, :) + ny(1)*FacialMass2d*TempDz23(eidM,:);     
     
-    % For term $k_{31}*\frac{\partial p}{\partial x} n_{\sigma} v$
+    % For term $k_{31}*\frac{\partial v}{\partial x} n_{\sigma} p$
     TempDx31 = diag(K13(:,ele)) * Dx;
     OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDx31(eidM,:)'*FacialMass2d; 
     % For term $k_{31}*\frac{\partial p}{\partial x} n_{\sigma} v$
     TempDx31 = diag(K13(:,ele)) * Dx;
     OP11(eidM, :) = OP11(eidM, :) + nz(1)*FacialMass2d*TempDx31(eidM,:); 
     
-    % For term $k_{31}*\frac{\partial p}{\partial y} n_{\sigma} v$
+    % For term $k_{32}*\frac{\partial v}{\partial y} n_{\sigma} p$
     TempDy32 = diag(K23(:,ele)) * Dy;
     OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDy32(eidM,:)'*FacialMass2d;
     % For term $k_{31}*\frac{\partial p}{\partial y} n_{\sigma} v$
     TempDy32 = diag(K23(:,ele)) * Dy;
     OP11(eidM, :) = OP11(eidM, :) + nz(1)*FacialMass2d*TempDy32(eidM,:);
     
-    % For term $k_{33}*\frac{\partial p}{\partial \sigma} n_{\sigma} v$
+    % For term $k_{33}*\frac{\partial v}{\partial \sigma} n_{\sigma} p$
     TempDz33 = diag(K33(:,ele)) * Dz;
     OP11(:,eidM) = OP11(:,eidM) + nz(1)*TempDz33(eidM,:)'*FacialMass2d;
     % For term $k_{33}*\frac{\partial p}{\partial \sigma} n_{\sigma} v$
