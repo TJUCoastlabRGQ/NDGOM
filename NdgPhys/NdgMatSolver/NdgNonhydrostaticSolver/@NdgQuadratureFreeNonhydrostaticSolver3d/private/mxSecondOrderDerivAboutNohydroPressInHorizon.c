@@ -435,9 +435,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double adjacentRatio = IELAV[face] / LAV[(int)FToE[face * 2 + 1] - 1];
 		for (int p = 0; p < IENfp; p++){
 			//Tau[face*IENfp + p] = 2000000;
-//			Tau[face*IENfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+			Tau[face*IENfp + p] = max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
-			Tau[face*IENfp + p] = 1.0 / sqrt(IELAV[face]);
+//			Tau[face*IENfp + p] = 1.0 / sqrt(IELAV[face]);
 		}
 	}
 
@@ -450,9 +450,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double localRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2] - 1];
 		double adjacentRatio = BotELAV[face] / LAV[(int)BotEFToE[face * 2 + 1] - 1];
 		for (int p = 0; p < VertNfp; p++){
-//			BotETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+			BotETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
-			BotETau[face*VertNfp + p] = 0.5 * 1.0 / sqrt(BotELAV[face]);
+//			BotETau[face*VertNfp + p] = 0.5 * 1.0 / sqrt(BotELAV[face]);
 		}
 	}
 
@@ -464,9 +464,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double localRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2] - 1];
 		double adjacentRatio = SurfELAV[face] / LAV[(int)SurfEFToE[face * 2 + 1] - 1];
 		for (int p = 0; p < VertNfp; p++){
-//			SurfETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
+			SurfETau[face*VertNfp + p] = 0.5 * max(localRatio*(P + 1)*(P + 3) / 3 * Nface / 2, \
 				adjacentRatio*(P + 1)*(P + 3) / 3 * Nface / 2);
-			SurfETau[face*VertNfp + p] = 1.0 / sqrt(SurfELAV[face]); //This parameter is doubled
+//			SurfETau[face*VertNfp + p] = 1.0 / sqrt(SurfELAV[face]); //This parameter is doubled
 		}
 	}
 
@@ -566,7 +566,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
 						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-						ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+//						ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
 							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d,\
 							J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
 						break;
@@ -578,7 +578,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					for (int i = 0; i < EleNumber; i++){
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+//							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
 								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 								J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
 							break;

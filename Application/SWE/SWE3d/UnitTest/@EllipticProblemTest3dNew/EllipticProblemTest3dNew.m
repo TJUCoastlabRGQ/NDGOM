@@ -43,7 +43,11 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         
         SurfaceDirichletData
         
+        SurfaceNewmannData
+        
         BottomDirichletData
+        
+        BottomNewmannData
         
         NewmannData
     end
@@ -87,12 +91,20 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             x = obj.meshUnion.mesh2d.x;
             y = obj.meshUnion.mesh2d.y;
             z = zeros(size(x));
+            nx = obj.meshUnion.SurfaceBoundaryEdge.nx;
+            ny = obj.meshUnion.SurfaceBoundaryEdge.ny;
+            nz = obj.meshUnion.SurfaceBoundaryEdge.nz;            
             obj.SurfaceDirichletData = eval(obj.Cexact);
+            obj.SurfaceNewmannData = eval(obj.NewmannCexact);
             
             x = obj.meshUnion.mesh2d.x;
             y = obj.meshUnion.mesh2d.y;
             z = -1 * ones(size(x));
-            obj.BottomDirichletData = eval(obj.Cexact);            
+            nx = obj.meshUnion.BottomBoundaryEdge.nx;
+            ny = obj.meshUnion.BottomBoundaryEdge.ny;
+            nz = obj.meshUnion.BottomBoundaryEdge.nz;             
+            obj.BottomDirichletData = eval(obj.Cexact);
+            obj.BottomNewmannData = eval(obj.NewmannCexact);
             
             [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );                      
             warning('off');
@@ -103,11 +115,11 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             [ obj.RHS, ~ ] = mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.SurfaceDirichletData,...
                 struct(obj.meshUnion.SurfaceBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
-                obj.K23, obj.K33);
+                obj.K23, obj.K33, obj.SurfaceNewmannData, 'Neumann');
             [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBottomBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.BottomDirichletData,...
                 struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
-                obj.K23, obj.K33);            
+                obj.K23, obj.K33, obj.BottomNewmannData, 'Neumann');            
             warning('on');
 %             disp("============For stiff matrix================")
 %             disp("The maximum difference is:")
@@ -116,6 +128,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
 %             disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
 %             disp("============End stiff matrix================")                   
             obj.SimulatedSolution = obj.NonhydrostaticSolver.GlobalStiffMatrix\obj.RHS(:);
+            disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
         end
         
     end

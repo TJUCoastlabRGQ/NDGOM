@@ -1,7 +1,7 @@
 #include "SWENonhydrostatic3d.h"
 #include "stdio.h"
 
-void GetInverseSquareHeight(double *, double *, double, int);
+void GetInverseSquareHeight(double *, double *, double, int); 
 
 void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int NonzeroPerColumn, double *M3d, \
 	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
@@ -11,7 +11,7 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	int NonzeroPerColumn, double *M3d, double *M2d, double *J, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33);
+	double *AdjK23, double *AdjK33); 
 
 void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int UpEle, int Np, int Nfp, \
 	int NonzeroPerColumn, double *M3d, double *M2d, double *J, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
@@ -303,7 +303,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
 						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-		     			ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+//		     			ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
 							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 							J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 							sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
@@ -317,7 +317,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 					for (int i = 0; i < EleNumber; i++){
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+//							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
 								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 								J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
@@ -1110,7 +1110,7 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int
 	double *M3d, double *M2d, double *AdjacentJ, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
 	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
 	double *AdjK13, double *AdjK23){
-	// 这里的nx 和ny 由本地单元指出
+	// \D5\E2\C0\EF\B5\C4nx \BA\CDny \D3杀\BE\B5氐\A5元指\B3\F6
 	double *AdjMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(AdjMass3d, M3d, AdjacentJ, Np);
 	double *InvAdjMass3d = malloc(Np*Np*sizeof(double));

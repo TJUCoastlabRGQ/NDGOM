@@ -34,6 +34,12 @@ for n = 1:Ndeg
             fphys{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
             ExactValue{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
         end
+        
+        % For all Newmann boundary
+        
+        fphys{1}(:,:,1) = fphys{1}(:,:,1) - (fphys{1}(1) - ExactValue{1}(1));
+        
+        
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         ErrInf( m, n ) = err(1);
         

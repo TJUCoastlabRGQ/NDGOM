@@ -10,6 +10,9 @@ void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, 
 	double *, double *, double *, double *, double *, double *, double *, double *, double *, \
 	int , double *, double *, double *, double *, double *);
 
+void ImposeNewmannBoundaryCondition(double *, int , int , int , double *, \
+	double *, double *, double *, double *, double *);
+
 void SumInColumn(double *, double *, int );
 
 void SumInRow(double *, double *, int , int );
@@ -46,6 +49,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *K13 = mxGetPr(prhs[6]);
 	double *K23 = mxGetPr(prhs[7]);
 	double *K33 = mxGetPr(prhs[8]);
+
+        double *NewmannData = mxGetPr(prhs[9]);
+
+        char* BoundaryType;
+        BoundaryType = mxArrayToString(prhs[10]); 
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -133,16 +141,76 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		TempJ = J + (LocalEle - 1)*Np;
 		TempJs = Js + edge * Nfp;
 
+
+                if(!strcmp(BoundaryType, "Dirichlet")){
 		ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
-			Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
-			sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-			Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp,\
-			Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp,\
-			K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
+				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
+				Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
+				Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp, \
+				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+                }
+                else if(!strcmp(BoundaryType, "Newmann")){
+		  ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
+				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
+                }
+
 
 		free(FpIndex);
 		free(Tau);
 	}
+}
+
+void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int Nfp, double *Mass3d, \
+	double *J, double *Js, double *Mass2d, double *FpIndex, double *NewmannDataValue){
+
+	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
+	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
+
+	double *EleMass3d = malloc(Np*Np*sizeof(double));
+
+	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
+
+	DiagMultiply(EleMass3d, Mass3d, J, Np);
+	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
+	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
+
+	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
+
+	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
+
+	double *TempRHS = malloc(Np * 1 * sizeof(double));
+
+	double *TempFacialData = malloc(Nfp * 1 * sizeof(double));
+
+	ptrdiff_t Col = 1;
+
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, Col, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, NewmannDataValue, (ptrdiff_t)Nfp, 0.0, TempFacialData, (ptrdiff_t)Nfp);
+
+	AssembleDataIntoPoint(TempRHSBuff, TempFacialData, FpIndex, Nfp);
+
+	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
+		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
+
+	MultiplyByConstant(TempRHS, TempRHS, -1.0, Nfp);
+
+	Add(InputRHS, InputRHS, TempRHS, Np);
+
+
+	free(EleMass2d);
+
+	free(EleMass3d);
+
+	free(InvEleMass3d);
+
+	free(TempRHSBuff);
+
+	free(TempRHS);
+
+	free(TempFacialData);
+
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \

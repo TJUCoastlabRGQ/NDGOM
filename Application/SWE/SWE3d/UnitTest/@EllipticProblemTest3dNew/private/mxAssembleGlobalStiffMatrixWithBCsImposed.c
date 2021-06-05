@@ -113,7 +113,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	signed char *ftype = (signed char *)mxGetData(prhs[9]);
 
-	double *NewmannDataValue = mxGetPr(prhs[10]);
+	double *NewmannData = mxGetPr(prhs[10]);
 
 	/*
 	  This part can not parallized with OpemMP, since we may alter the the result at the same time
@@ -142,7 +142,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
 			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
-				TempJ, TempJs, LMass2d, FpIndex, NewmannDataValue + edge * Nfp);
+				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
 		}
 		else{
 			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
