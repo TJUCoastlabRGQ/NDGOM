@@ -13,14 +13,16 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         Depth = 1
         TempK11 = 1
         TempK22 = 1
-        TempK13 = 0.04
-        TempK23 = 0.04
+        TempK13 = 0
+        TempK23 = 0
         TempK33
         K11
         K22
         K13
         K23
         K33
+        SurfaceBoundaryEdgeType = 'Newmann'
+        BottomBoundaryEdgeType = 'Newmann'        
     end
     
     properties
@@ -90,7 +92,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             
             x = obj.meshUnion.mesh2d.x;
             y = obj.meshUnion.mesh2d.y;
-            z = zeros(size(x));
+            z = max(max(obj.meshUnion.z))*ones(size(x));
             nx = obj.meshUnion.SurfaceBoundaryEdge.nx;
             ny = obj.meshUnion.SurfaceBoundaryEdge.ny;
             nz = obj.meshUnion.SurfaceBoundaryEdge.nz;            
@@ -99,7 +101,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             
             x = obj.meshUnion.mesh2d.x;
             y = obj.meshUnion.mesh2d.y;
-            z = -1 * ones(size(x));
+            z = min(min(obj.meshUnion.z))*ones(size(x));
             nx = obj.meshUnion.BottomBoundaryEdge.nx;
             ny = obj.meshUnion.BottomBoundaryEdge.ny;
             nz = obj.meshUnion.BottomBoundaryEdge.nz;             
@@ -115,11 +117,11 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             [ obj.RHS, ~ ] = mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.SurfaceDirichletData,...
                 struct(obj.meshUnion.SurfaceBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
-                obj.K23, obj.K33, obj.SurfaceNewmannData, 'Neumann');
+                obj.K23, obj.K33, obj.SurfaceNewmannData, obj.SurfaceBoundaryEdgeType );
             [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBottomBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.BottomDirichletData,...
                 struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
-                obj.K23, obj.K33, obj.BottomNewmannData, 'Neumann');            
+                obj.K23, obj.K33, obj.BottomNewmannData, obj.BottomBoundaryEdgeType );            
             warning('on');
 %             disp("============For stiff matrix================")
 %             disp("The maximum difference is:")
@@ -158,7 +160,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
         
         function matGetFunction(obj)
             syms x y z nx ny nz;
-            obj.Cexact = sin(pi*x)*sin(pi*y)*sin(pi*z);
+            obj.Cexact = sin(pi*x)+sin(pi*y)+sin(pi*z);
 %             obj.Cexact = cos(8*pi*x) + cos(8*pi*y) + cos(-8*pi*z);
 %             obj.Cexact = sin(-pi/2*z);
             obj.SecondDiffCexact = diff(obj.TempK11*diff(obj.Cexact,x) + obj.TempK13*diff(obj.Cexact, z),x) + ...
@@ -207,7 +209,8 @@ mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
-zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+% zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+zs = ones(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );

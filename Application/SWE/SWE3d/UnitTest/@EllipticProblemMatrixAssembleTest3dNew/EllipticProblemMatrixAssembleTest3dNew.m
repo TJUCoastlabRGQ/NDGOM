@@ -16,6 +16,8 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
         K13 
         K23
         K33
+        SurfaceBoundaryEdgeType = 'Newmann'
+        BottomBoundaryEdgeType = 'Dirichlet'
     end
     
     properties
@@ -23,6 +25,8 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
         StiffMatrix
         
         RHS
+        
+        MatRHS
         
         ExactSolution
         
@@ -32,6 +36,19 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
         
         SecondDiffCexact
         
+        NewmannCexact
+        
+        DirichletData
+        
+        SurfaceDirichletData
+        
+        SurfaceNewmannData
+        
+        BottomDirichletData
+        
+        BottomNewmannData
+        
+        NewmannData  
     end
     
     properties(Constant)
@@ -49,24 +66,31 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
             obj.K23 = rand(mesh3d.cell.Np, mesh3d.K);
             obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
             obj.matGetFunction;
+            obj.RHS = obj.matAssembleRightHandSide;
             obj.AssembleGlobalStiffMatrix;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-            obj.RHS = obj.matAssembleRightHandSide;
         end
-        function EllipticProblemSolve(obj)
-            x = obj.meshUnion.x;
-            y = obj.meshUnion.y;
-            z = obj.meshUnion.z;
-            obj.ExactSolution = eval(obj.Cexact);
-            
-            obj.SimulatedSolution = obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );
-            obj.SimulatedSolution = reshape(obj.StiffMatrix\obj.RHS(1:obj.meshUnion.cell.Np*obj.meshUnion.K)', obj.meshUnion.cell.Np, obj.meshUnion.K);
-            disp("The condition number is:")
-            disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
+        function EllipticProblemSolve(obj)      
+            [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );                      
+            warning('off');
+            [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(...
+                obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.DirichletData,...
+                struct(obj.meshUnion.BoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
+                obj.K23, obj.K33, int8(obj.meshUnion.BoundaryEdge.ftype), obj.NewmannData);
+            [ obj.RHS, ~ ] = mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed(...
+                obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.SurfaceDirichletData,...
+                struct(obj.meshUnion.SurfaceBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
+                obj.K23, obj.K33, obj.SurfaceNewmannData, obj.SurfaceBoundaryEdgeType );
+            [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBottomBCsImposed(...
+                obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.BottomDirichletData,...
+                struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
+                obj.K23, obj.K33, obj.BottomNewmannData, obj.BottomBoundaryEdgeType );            
+            warning('on');           
+            disp("============For right hand side================")
             disp("The maximum difference is:");
-            disp(max(max(obj.ExactSolution-obj.SimulatedSolution)));
+            disp(max(max(obj.MatRHS(:)-obj.RHS(:))));
             disp("The minimum difference is:");
-            disp(min(min(obj.ExactSolution-obj.SimulatedSolution)));
+            disp(min(min(obj.MatRHS(:)-obj.RHS(:))));
             
             disp("============For stiff matrix================")
             disp("The maximum difference is:")
@@ -102,12 +126,48 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
         end
         
         function matGetFunction(obj)
-            syms x y z;
-            obj.Cexact = sin(-pi/2*z)*sin(pi/5*x)*sin(pi/5*y);
+            syms x y z nx ny nz;
+            obj.Cexact = sin(-pi/2*z)+sin(pi/2*x)+sin(pi/2*y);
 %             obj.Cexact = sin(-pi/2*z);
-            obj.SecondDiffCexact = diff(obj.K11*diff(obj.Cexact,x) + obj.K13*diff(obj.Cexact, z),x) + ...
-                diff(obj.K22*diff(obj.Cexact,y) + obj.K23*diff(obj.Cexact, z),y) + ...
-                diff(obj.K13*diff(obj.Cexact,x) + obj.K23*diff(obj.Cexact,y) + obj.K33*diff(obj.Cexact, z),z);
+            obj.SecondDiffCexact = diff(obj.K11(1)*diff(obj.Cexact,x) + obj.K13(1)*diff(obj.Cexact, z),x) + ...
+                diff(obj.K22(1)*diff(obj.Cexact,y) + obj.K23(1)*diff(obj.Cexact, z),y) + ...
+                diff(obj.K13(1)*diff(obj.Cexact,x) + obj.K23(1)*diff(obj.Cexact,y) + obj.K33(1)*diff(obj.Cexact, z),z);
+            
+            obj.NewmannCexact = (obj.K11(1)*diff(obj.Cexact,x) + obj.K13(1)*diff(obj.Cexact, z))*nx + ...
+                (obj.K22(1)*diff(obj.Cexact,y) + obj.K23(1)*diff(obj.Cexact, z))*ny + ...
+                (obj.K13(1)*diff(obj.Cexact,x) + obj.K23(1)*diff(obj.Cexact,y) + obj.K33(1)*diff(obj.Cexact, z))*nz;
+            
+            x = obj.meshUnion.x;
+            y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
+            obj.ExactSolution = eval(obj.Cexact);
+            
+            x = obj.meshUnion.BoundaryEdge.xb;
+            y = obj.meshUnion.BoundaryEdge.yb;
+            z = obj.meshUnion.BoundaryEdge.zb;
+            nx = obj.meshUnion.BoundaryEdge.nx;
+            ny = obj.meshUnion.BoundaryEdge.ny;
+            nz = obj.meshUnion.BoundaryEdge.nz;
+            obj.DirichletData = eval(obj.Cexact);
+            obj.NewmannData = eval(obj.NewmannCexact);
+            
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = max(max(obj.meshUnion.z))*ones(size(x));
+            nx = obj.meshUnion.SurfaceBoundaryEdge.nx;
+            ny = obj.meshUnion.SurfaceBoundaryEdge.ny;
+            nz = obj.meshUnion.SurfaceBoundaryEdge.nz;            
+            obj.SurfaceDirichletData = eval(obj.Cexact);
+            obj.SurfaceNewmannData = eval(obj.NewmannCexact);
+            
+            x = obj.meshUnion.mesh2d.x;
+            y = obj.meshUnion.mesh2d.y;
+            z = min(min(obj.meshUnion.z))*ones(size(x));
+            nx = obj.meshUnion.BottomBoundaryEdge.nx;
+            ny = obj.meshUnion.BottomBoundaryEdge.ny;
+            nz = obj.meshUnion.BottomBoundaryEdge.nz;             
+            obj.BottomDirichletData = eval(obj.Cexact);
+            obj.BottomNewmannData = eval(obj.NewmannCexact);            
         end
         
         function [ option ] = setOption( obj, option )
@@ -151,7 +211,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 
 end

@@ -417,6 +417,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *M2d = mxGetPr(prhs[32]);
 	double *J2d = mxGetPr(prhs[33]);
 
+	char* BoundaryType;
+	BoundaryType = mxArrayToString(prhs[34]);
+
 	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface, Nface, Ele3d, Np);
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
@@ -566,9 +569,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
 						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//						ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d,\
-							J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+						if (!strcmp(BoundaryType, "Dirichlet")){
+							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+								J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+						}
 						break;
 					}
 				}
@@ -578,9 +583,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					for (int i = 0; i < EleNumber; i++){
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
-								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
-								J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+							if (!strcmp(BoundaryType, "Dirichlet")){
+								ImposeDirichletBoundaryCondition(sr, StartPoint, Np, VertNfp, \
+									jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+									J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, SurfETau + ele*VertNfp);
+							}
 							break;
 						}
 					}

@@ -162,6 +162,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *J2d = mxGetPr(prhs[12]);
 	int K2d = (int)mxGetScalar(prhs[13]);
 
+	char* BoundaryType;
+	BoundaryType = mxArrayToString(prhs[14]);
+
 	double *K33 = malloc(Np*K*sizeof(double));
 
 	double *InvSquaHeight = malloc(Np*K*sizeof(double));
@@ -303,11 +306,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
 						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//		     			ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
-							jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
-							J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-							sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-							tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+						if (!strcmp(BoundaryType, "Dirichlet")){
+							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+								J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+								tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+						}
 						break;
 					}
 				}
@@ -317,11 +322,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 					for (int i = 0; i < EleNumber; i++){
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-//							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
-								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
-								J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-								tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+							if (!strcmp(BoundaryType, "Dirichlet")){
+								ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
+									jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
+									J + (LocalEle - 1)*Np, J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+									sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+									tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+							}
 							break;
 						}
 					}

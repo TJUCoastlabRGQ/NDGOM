@@ -50,10 +50,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *K23 = mxGetPr(prhs[7]);
 	double *K33 = mxGetPr(prhs[8]);
 
-        double *NewmannData = mxGetPr(prhs[9]);
+    double *NewmannData = mxGetPr(prhs[9]);
 
-        char* BoundaryType;
-        BoundaryType = mxArrayToString(prhs[10]); 
+    char* BoundaryType;
+    BoundaryType = mxArrayToString(prhs[10]); 
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -140,19 +140,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		TempEToE = EToE + (LocalEle - 1)*Nface;
 		TempJ = J + (LocalEle - 1)*Np;
 		TempJs = Js + edge * Nfp;
- 
-                if(!strcmp(BoundaryType, "Dirichlet")){
-		ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
+
+		if (!strcmp(BoundaryType, "Dirichlet")){
+			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
 				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 				Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
 				Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-                }
-                else if(!strcmp(BoundaryType, "Newmann")){
-		  ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
+		}
+		else if (!strcmp(BoundaryType, "Newmann")){
+			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
 				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
-                }
+		}
 
 		free(FpIndex);
 		free(Tau);
@@ -240,9 +240,9 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
 	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
 
-	double *TempContribution = malloc(Np*Np*sizeof(double));
-	memset(TempContribution, 0, Np*Np*sizeof(double));
-	double *Contribution = malloc(Np*Np*sizeof(double));
+//	double *TempContribution = malloc(Np*Np*sizeof(double));
+//	memset(TempContribution, 0, Np*Np*sizeof(double));
+//	double *Contribution = malloc(Np*Np*sizeof(double));
 
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
@@ -341,10 +341,12 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
+	/*
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(TempMass2d, EleMass2d, Tau, Nfp);
-	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
+	//For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
+	*/
 
 	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
 	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp);
@@ -375,8 +377,8 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(EleMass3d);
 	free(EleMass2d);
 	free(InvEleMass3d);
-	free(TempContribution);
-	free(Contribution);
+//	free(TempContribution);
+//	free(Contribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(WeightedEleMass2d);
@@ -385,7 +387,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(DirichEdge2d);
 	free(DirichEdgeBuff);
 	free(TempEToE);
-	free(TempMass2d);
+//	free(TempMass2d);
 	free(TempDiffMatrix);
 }
 

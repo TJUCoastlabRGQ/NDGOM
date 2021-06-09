@@ -73,7 +73,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
     
     methods
         function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )
-            obj.matSetInitializeCharacteristicMatrix( mesh );
+            obj.matSetInitializeCharacteristicMatrix( PhysClass.SurfaceBoundaryEdgeType, mesh );
             warning('off');
             obj.InnerEdge = struct(mesh.InnerEdge);
             obj.BoundaryEdge = struct(mesh.BoundaryEdge);
@@ -220,8 +220,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.SQPSPY = obj.PSPY .* obj.PSPY;
                 obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
-                obj.mesh2d.J, obj.mesh2d.K);
-                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(:), physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+                obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
+                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(1:physClass.meshUnion.cell.Np*physClass.meshUnion.K)', physClass.meshUnion.cell.Np, physClass.meshUnion.K);
         end
         
     end

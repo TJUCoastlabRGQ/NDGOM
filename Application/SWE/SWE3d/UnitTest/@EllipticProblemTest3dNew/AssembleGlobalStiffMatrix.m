@@ -245,38 +245,38 @@ for face = 1:BottomEdge.Ne
         ElementMassMatrix\OP21;
 end
 
-fm = repmat( (obj.meshUnion.SurfaceBoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.SurfaceBoundaryEdge.FToE(1,:)))', 1, 1 );
-Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
-    3 )/3 * obj.meshUnion(1).cell.Nface/2);
-for face = 1:SurfaceBoundaryEdge.Ne
-    OP11 = zeros(Np);
-    ele = SurfaceBoundaryEdge.FToE(2*(face-1)+1);
-    eidM = SurfaceBoundaryEdge.FToN1(:,face);
-    nz = SurfaceBoundaryEdge.nz(:,face);
-    Js = SurfaceBoundaryEdge.Js(:,face);
-    FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
-    
-    % For term $$k_{31}\frac{\partial v}{\partial x} pn_{\sigma}+ k_{32}\frac{\partial v}{\partial y}pn_{\sigma} + k_{33}\frac{\partial v}{\partial \sigma} pn_{\sigma}$$
-    % Here both p and v are local.
-    TempDx31 = diag(K13(:,ele))*Dx;
-    TempDy32 = diag(K23(:,ele))*Dy;
-    TempDz33 = diag(K33(:,ele))*Dz;
-    
-    OP11(:, eidM) = OP11(:, eidM) + TempDx31(eidM, :)'*diag(nz)*FacialMass2d + TempDy32(eidM, :)'*diag(nz)*FacialMass2d + ...
-                    TempDz33(eidM,:)'*diag(nz)*FacialMass2d; % Horizontal direction not consider here
-                
-    % For term $$k_{31}\frac{\partial p}{\partial x} vn_{\sigma}+ k_{32}\frac{\partial p}{\partial y}vn_{\sigma} + k_{33}\frac{\partial p}{\partial \sigma} vn_{\sigma}$$
-    % Here both p and v are local.
-    
-    OP11(eidM, :) = OP11(eidM, :) + diag(nz) * FacialMass2d * TempDx31(eidM, :) + diag(nz)*FacialMass2d*TempDy32(eidM, :)+...
-                    diag(nz)*FacialMass2d*TempDz33(eidM,:);
-    %> For term $-\tau n_x^2q_h v$
-    OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
-    obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
-        ElementMassMatrix\OP11;
-    
-end
+% fm = repmat( (obj.meshUnion.SurfaceBoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.SurfaceBoundaryEdge.FToE(1,:)))', 1, 1 );
+% Tau = bsxfun(@times,  (fm(:) )',...
+%     ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+%     3 )/3 * obj.meshUnion(1).cell.Nface/2);
+% for face = 1:SurfaceBoundaryEdge.Ne
+%     OP11 = zeros(Np);
+%     ele = SurfaceBoundaryEdge.FToE(2*(face-1)+1);
+%     eidM = SurfaceBoundaryEdge.FToN1(:,face);
+%     nz = SurfaceBoundaryEdge.nz(:,face);
+%     Js = SurfaceBoundaryEdge.Js(:,face);
+%     FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
+%     
+%     % For term $$k_{31}\frac{\partial v}{\partial x} pn_{\sigma}+ k_{32}\frac{\partial v}{\partial y}pn_{\sigma} + k_{33}\frac{\partial v}{\partial \sigma} pn_{\sigma}$$
+%     % Here both p and v are local.
+%     TempDx31 = diag(K13(:,ele))*Dx;
+%     TempDy32 = diag(K23(:,ele))*Dy;
+%     TempDz33 = diag(K33(:,ele))*Dz;
+%     
+%     OP11(:, eidM) = OP11(:, eidM) + TempDx31(eidM, :)'*diag(nz)*FacialMass2d + TempDy32(eidM, :)'*diag(nz)*FacialMass2d + ...
+%                     TempDz33(eidM,:)'*diag(nz)*FacialMass2d; % Horizontal direction not consider here
+%                 
+%     % For term $$k_{31}\frac{\partial p}{\partial x} vn_{\sigma}+ k_{32}\frac{\partial p}{\partial y}vn_{\sigma} + k_{33}\frac{\partial p}{\partial \sigma} vn_{\sigma}$$
+%     % Here both p and v are local.
+%     
+%     OP11(eidM, :) = OP11(eidM, :) + diag(nz) * FacialMass2d * TempDx31(eidM, :) + diag(nz)*FacialMass2d*TempDy32(eidM, :)+...
+%                     diag(nz)*FacialMass2d*TempDz33(eidM,:);
+%     %> For term $-\tau n_x^2q_h v$
+%     OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
+%     obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
+%         ElementMassMatrix\OP11;
+%     
+% end
 
 fm = repmat( (obj.meshUnion.BoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BoundaryEdge.FToE(1,:)))', 1, 1 );
 Tau = bsxfun(@times,  (fm(:) )',...

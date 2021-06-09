@@ -1,5 +1,5 @@
 #include "../../../../../../NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.h"
-#include <stdio.h>
+#include "../../../../../../NdgMath/NdgSWE.h"
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
@@ -49,11 +49,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *K13 = mxGetPr(prhs[6]);
 	double *K23 = mxGetPr(prhs[7]);
 	double *K33 = mxGetPr(prhs[8]);
-
-    double *NewmannData = mxGetPr(prhs[9]);
-
-    char* BoundaryType;
-    BoundaryType = mxArrayToString(prhs[10]); 
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -116,6 +111,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempFLAV = mxGetField(BoundaryEdge, 0, "LAV");
 	double *FLAV = mxGetPr(TempFLAV);
 
+	signed char *ftype = (signed char *)mxGetData(prhs[9]);
+
+	double *NewmannData = mxGetPr(prhs[10]);
+
 	/*
 	  This part can not parallized with OpemMP, since we may alter the the result at the same time
 	  through different threads.
@@ -141,7 +140,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		TempJ = J + (LocalEle - 1)*Np;
 		TempJs = Js + edge * Nfp;
 
-		if (!strcmp(BoundaryType, "Dirichlet")){
+		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
+			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
+				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
+		}
+		else{
 			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
 				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
@@ -149,11 +152,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
 		}
-		else if (!strcmp(BoundaryType, "Newmann")){
-			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
-				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
-		}
-
 		free(FpIndex);
 		free(Tau);
 	}
@@ -192,7 +190,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
 		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
 
-	MultiplyByConstant(TempRHS, TempRHS, -1.0, Nfp);
+	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
 
 	Add(InputRHS, InputRHS, TempRHS, Np);
 
@@ -422,7 +420,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	SumInColumn(DirichEdge2d, WeightedEleMass2d, Nfp);
 
-	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1, Nfp);
+	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1.0, Nfp);
 
 	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
 

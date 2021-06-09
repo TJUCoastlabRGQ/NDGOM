@@ -1,6 +1,6 @@
 function runEllipticProblemTest3dNew
-M = [1/8 1/16 1/32 1/64];
-Mz = [2 4 8 16];
+M = [1/8 1/16];
+Mz = [2 4];
 Order = [1];
 
 Nmesh = numel(M);

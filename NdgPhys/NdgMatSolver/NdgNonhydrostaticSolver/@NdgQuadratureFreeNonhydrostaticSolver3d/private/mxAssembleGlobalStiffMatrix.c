@@ -279,6 +279,9 @@ void ImposeNonhydroBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, d
 	}
 }
 
+/*$$\frac{\partial p}{\partial x}n_x + \frac{\partial p}{\partial y}n_y=-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial x^*}n_x - \\
+\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial y^*}n_y$$*/
+
 void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle,\
 	double *PsPx, double *PsPy, int Np, int Nfp, double *M3d, double *J, double *Js, double *M2d, \
 	double *EToE, int Nface, double *FpIndex, double *nx, double *ny, const mxArray *mesh, const mxArray *cell){
@@ -309,12 +312,13 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	DiagMultiply(Dz, Dt, tz + (LocalEle - 1)*Np, Np);
 	double *TempFacialData = malloc(Nfp*sizeof(double));
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
+	DiagMultiply(EleMass2d, M2d, Js, Nfp);
 	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(InvEleMass3d, M3d, J, Np);
 	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-	DiagMultiply(EleMass2d, M2d, Js, Nfp);
 
 	int UniNum = 0, StartPoint;
 	
@@ -329,22 +333,22 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 		if ((int)TempEToE[j] == LocalEle)
 			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
 	}
-	double *ContributionPerPoint = malloc(Np*sizeof(double));
-	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
+	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
+//	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 
-	double column = 1.0;
+//	double column = 1.0;
 
-	memset(TempContribution, 0, Np*Np*sizeof(double));
 	/*Begin to assemble the local contribution in to the Newmann boundary condition*/
+	/*
 	for (int j = 0; j < Np; j++){
-		memset(ContributionPerPoint, 0, Np*sizeof(double));
 		
 		FetchFacialData(TempFacialData, Dz + j*Np, FpIndex, Nfp);
-		/*$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}$*/
+		//接下来的部分有问题，同一内存的值不能反复变化
+		//$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}$
 		DotProduct(TempPsPx, TempPsPx, TempFacialData, Nfp);
-		/*$-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$*/
+		//$-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$
 		DotProduct(TempPsPy, TempPsPy, TempFacialData, Nfp);
-		/*$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$*/
+		//$-\frac{\partial \sigma}{\partial x}n_x\frac{\partial p}{\partial \sigma}-\frac{\partial \sigma}{\partial y}n_y\frac{\partial p}{\partial \sigma}$
 		Add(TempPsP, TempPsPx, TempPsPy, Nfp);
 
 		DiagMultiply(TempMass2d, EleMass2d, TempPsP, Nfp);
@@ -354,10 +358,29 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 		AssembleContributionIntoColumn(TempContribution + j*Np, ContributionPerPoint, &column, Np, 1);
 
 	}
+	*/
 
+	double *FacialDataX = malloc(Nfp *sizeof(double));
+	double *FacialDataY = malloc(Nfp*sizeof(double));
+
+	ptrdiff_t One = 1;
+
+	for (int j = 0; j < Nfp; j++){
+		//$\frac{\partial p}{\partial \sigma}$
+		FetchFacialData(TempFacialData, Dz + ((int)FpIndex[j] - 1)*Np, FpIndex, Nfp);
+		//$-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial x}n_x$
+		DotProduct(FacialDataX, TempFacialData, TempPsPx, Nfp);
+		//$-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial y}n_y$
+		DotProduct(FacialDataY, TempFacialData, TempPsPy, Nfp);
+		//$-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial x}n_x-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial y}n_y$
+		Add(TempPsP, FacialDataX, FacialDataY, Nfp);
+		//$M_{2d}\times \left \{-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial x}n_x-\frac{\partial p}{\partial \sigma}\frac{\partial \sigma}{\partial y}n_y\right \}$
+		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
+			(ptrdiff_t)Nfp, TempPsP, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
+		AssembleDataIntoPoint(TempContribution + ((int)FpIndex[j] - 1)*Np, ContributionPerPoint, FpIndex, Nfp);
+	}
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-
 	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
 
 	free(TempPsPx);
@@ -366,12 +389,15 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	free(Dz);
 	free(TempFacialData);
 	free(EleMass2d);
-	free(TempMass2d);
+//	free(TempMass2d);
 	free(TempContribution);
 	free(Contribution);
 	free(InvEleMass3d);
 	free(TempEToE);
 	free(ContributionPerPoint);
+	free(FacialDataX);
+	free(FacialDataY);
+
 }
 
 void SumInColumn(double *dest, double *Source, int Np){

@@ -192,7 +192,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
 		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
 
-	MultiplyByConstant(TempRHS, TempRHS, -1.0, Nfp);
+	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
 
 	Add(InputRHS, InputRHS, TempRHS, Np);
 
