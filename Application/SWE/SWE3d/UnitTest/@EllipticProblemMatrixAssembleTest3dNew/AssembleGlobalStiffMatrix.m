@@ -83,8 +83,8 @@ for face = 1:BoundaryEdge.Ne
         TempDy22 = diag(K22(:,ele))*Dy;
         TempDz23 = diag(K23(:,ele))*Dz;
         
-        OP11(:, eidM) = OP11(:, eidM) + 0.5*TempDx11(eidM, :)'*diag(nx)*FacialMass2d + 0.5*TempDz13(eidM, :)'*diag(nx)*FacialMass2d + ...
-            0.5*TempDy22(eidM,:)'*diag(ny)*FacialMass2d + 0.5*TempDz23(eidM, :)'*diag(ny)*FacialMass2d; % vertical direction not consider here
+        OP11(:, eidM) = OP11(:, eidM) + TempDx11(eidM, :)'*diag(nx)*FacialMass2d + TempDz13(eidM, :)'*diag(nx)*FacialMass2d + ...
+            TempDy22(eidM,:)'*diag(ny)*FacialMass2d + TempDz23(eidM, :)'*diag(ny)*FacialMass2d; % vertical direction not consider here
         
         %> For term $$\left \{k_{11}\frac{\partial p}{\partial x}\right \}[v]_x+   \left \{k_{13}\frac{\partial p}{\partial \sigma}\right \}[v]_x+
         %  \left \{ k_{22}\frac{\partial p}{\partial y}\right \}[v]_y + \left \{ k_{23}\frac{\partial p}{\partial \sigma}\right \}[v]_y
@@ -95,8 +95,8 @@ for face = 1:BoundaryEdge.Ne
         TempDy22 = diag(K22(:,ele))*Dy;
         TempDz23 = diag(K23(:,ele))*Dz;
         
-        OP11(eidM, :) = OP11(eidM, :) + 0.5 * diag(nx) * FacialMass2d * TempDx11(eidM, :) + 0.5 * diag(nx) * FacialMass2d * TempDz13(eidM, :)+...
-            0.5*diag(ny)*FacialMass2d*TempDy22(eidM,:) + 0.5*diag(ny)*FacialMass2d*TempDz23(eidM, :);
+        OP11(eidM, :) = OP11(eidM, :) + diag(nx) * FacialMass2d * TempDx11(eidM, :) + diag(nx) * FacialMass2d * TempDz13(eidM, :)+...
+            diag(ny)*FacialMass2d*TempDy22(eidM,:) + diag(ny)*FacialMass2d*TempDz23(eidM, :);
         
         %> For term $-\tau [q_h]_x[v]_x$  check to here
         OP11(eidM, eidM) = OP11(eidM, eidM) - Tau(face) * FacialMass2d;

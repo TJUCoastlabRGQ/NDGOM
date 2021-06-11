@@ -1,7 +1,7 @@
 function runEllipticProblemTest3dNew
-M = [1/8 1/16];
-Mz = [2 4];
-Order = [1];
+M = [1/8 1/16 1/32];
+Mz = [2 4 8];
+Order = [1 2];
 
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -36,9 +36,10 @@ for n = 1:Ndeg
         end
         
         % For all Newmann boundary
-        
-        fphys{1}(:,:,1) = fphys{1}(:,:,1) - (fphys{1}(1) - ExactValue{1}(1));
-        
+        if (all(Solver.meshUnion.BoundaryEdge.ftype == enumBoundaryCondition.SlipWall) && ...
+                strcmp(Solver.SurfaceBoundaryEdgeType, 'Newmann') && strcmp(Solver.BottomBoundaryEdgeType,'Newmann'))
+            fphys{1}(:,:,1) = fphys{1}(:,:,1) - (fphys{1}(1) - ExactValue{1}(1));
+        end
         
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         ErrInf( m, n ) = err(1);

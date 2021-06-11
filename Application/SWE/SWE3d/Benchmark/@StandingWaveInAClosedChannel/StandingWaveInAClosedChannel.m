@@ -8,7 +8,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %         ChLength = 100;
         ChLength = 20;
         %> channel width
-        ChWidth = 0.4;
+        ChWidth = 2;
         %> channel depth
         H0 = 10;
         %> x range
@@ -18,6 +18,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         finalTime = 10;
         % to be corrected
         GotmFile = fullfile('D:\PhdResearch\Application\SWE\SWE3d\Benchmark\@StandingWaveInAClosedChannel','\gotmturb.nml');
+    end
+    
+    properties
+        SurfaceBoundaryEdgeType = 'Dirichlet'
     end
     
     properties

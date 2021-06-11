@@ -53,7 +53,7 @@ while( time < ftime )
     time = time + dt;
     %     fphys{1}(:,:,1) = obj.matGetExtFunc( time );
     %> Update the diffusion coefficient
-    visual.drawResult( fphys{1}(:,:,1) );
+%     visual.drawResult( fphys{1}(:,:,1) );
 %     display(time);
     obj.matUpdateOutputResult( time,  fphys );
     timeRatio = time / ftime;

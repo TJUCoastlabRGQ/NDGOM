@@ -3,7 +3,7 @@
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
-void GetPenaltyParameter(double *, double , double , double, int, int);
+void GetPenaltyParameter(double *, double , double , int, int, int);
 
 void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
@@ -66,7 +66,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double  *Dt = mxGetPr(TempDt);
 	mxArray *TempP = mxGetField(cell, 0, "N");
-	double P = mxGetScalar(TempP);
+	int P = (int)mxGetScalar(TempP);
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
@@ -487,10 +487,10 @@ void SumInRow(double *dest, double *Source, int Np, int ColNum){
 	}
 }
 
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, double P, int Nface, int Nfp){
+void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
 	for (int i = 0; i < Nfp; i++){
-	//	dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
-		dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
+		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
+	//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
 	}
 }
 

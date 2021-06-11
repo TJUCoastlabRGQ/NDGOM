@@ -33,7 +33,8 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             edge = mesh.BoundaryEdge;
             [ BEfm, BEfp ] = edge.matEvaluateSurfValue( fphys );
             
-            [ ~, BEfp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, BEfm, BEfp, physClass.fext{1} );
+%             [ ~, BEfp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, BEfm, BEfp, physClass.fext{1} );
+            [ ~, BEfp ] = physClass.matImposeBoundaryCondition( edge, edge.nx, edge.ny, edge.nz, BEfm, BEfp, physClass.fext{1} );
             Kappa = obj.nv;
             for i = 1:physClass.Nvar
                 obj.matCalculateAuxialaryVariable( physClass, fphys{1}(:,:,physClass.varFieldIndex(i)), Kappa, i, ...
@@ -325,10 +326,10 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
             %> this penalty parameter is calculated as $\tau=\frac{(D_p+1)(D_p+d)}{d}\frac{n_0}{2}\frac{A}{V}\miu$
             [ HnvM, HnvP ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).InnerEdge, DiffusionCoefficient );
             
-%                         InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
-%                         InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, physClass.meshUnion(1).Nz );
-            InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, 1 );
-            InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, 1 );
+            InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
+            InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, physClass.meshUnion(1).Nz );
+%             InnerEdgeA_fm = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(1,:)))', 1, 1 );
+%             InnerEdgeA_fp = repmat( (physClass.mesh2d(1).InnerEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).InnerEdge.FToE(2,:)))', 1, 1 );
             InnerEdgeTau_fm = bsxfun(@times,  ( InnerEdgeA_fm(:) )',...
                 ( physClass.meshUnion(1).cell.N + 1 )*(physClass.meshUnion(1).cell.N + ...
                 double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvM);
@@ -337,8 +338,8 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
                 double(physClass.meshUnion(1).type) )/double(physClass.meshUnion(1).type) * physClass.meshUnion(1).cell.Nface/2 .* HnvP);
             obj.InnerEdgeTau = 1 * max( InnerEdgeTau_fm, InnerEdgeTau_fp );
             
-%                         BoundaryEdgeA_fm = repmat ( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
-            BoundaryEdgeA_fm = repmat ( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, 1 );
+            BoundaryEdgeA_fm = repmat ( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, physClass.meshUnion(1).Nz );
+%             BoundaryEdgeA_fm = repmat ( (physClass.mesh2d(1).BoundaryEdge.LAV./physClass.mesh2d(1).LAV(physClass.mesh2d(1).BoundaryEdge.FToE(1,:)))', 1, 1 );
             [ Hnv, ~ ] = obj.matEvaluateSurfValue(physClass.meshUnion(1).BoundaryEdge, DiffusionCoefficient);
             obj.BoundaryEdgeTau = 1 * bsxfun(@times, ( BoundaryEdgeA_fm(:) )', ...
                 ( physClass.meshUnion(1).cell.N + 1 )*( physClass.meshUnion(1).cell.N + ...

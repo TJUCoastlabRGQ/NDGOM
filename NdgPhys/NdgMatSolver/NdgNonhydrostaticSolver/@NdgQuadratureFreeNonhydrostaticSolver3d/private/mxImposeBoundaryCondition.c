@@ -1,23 +1,18 @@
-#include "../../../../../../NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.h"
-#include <stdio.h>
 
-void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
+#include "SWENonhydrostatic3d.h"
 
-void GetPenaltyParameter(double *, double , double , int, int, int);
+void GetInverseSquareHeight(double *, double *, double , int );
 
-void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
+void GetPenaltyParameter(double *, double , double , int , int , int );
+
+void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int , \
+	double *, double *, double *, double *, double *, double *, int , int , \
+	double *, double *, double *, double *, double *, int , double *);
+
+void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
 	double *, double *, double *, double *, double *, double *, double *, double *, double *, \
-	int , double *, double *, double *, double *, double *);
-
-void ImposeNewmannBoundaryCondition(double *, int , int , int , double *, \
-	double *, double *, double *, double *, double *);
-
-void SumInColumn(double *, double *, int );
-
-void SumInRow(double *, double *, int , int );
-
-int GetGlobalFace(int , int , double *, double *, int );
+	int, double *, double *, double *, double *);
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -27,33 +22,26 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int row, col;
 	row = (int)mxGetM(prhs[0]);
 	col = (int)mxGetN(prhs[0]);
-	double *TempRHS = mxGetPr(prhs[1]);
-	double *DirichDataValue = mxGetPr(prhs[2]);
-	plhs[0] = mxCreateDoubleMatrix(row, 1, mxREAL);
-	double *OutRHS = mxGetPr(plhs[0]);
-	memcpy(OutRHS, TempRHS, col*sizeof(double));
 	double *sr;
 	mwIndex *irs, *jcs;
-	plhs[1] = mxCreateSparse(row, col, Tempjcs[col], mxREAL);
-	sr = mxGetPr(plhs[1]);
-	irs = mxGetIr(plhs[1]);
-	jcs = mxGetJc(plhs[1]);
+	plhs[0] = mxCreateSparse(row, col, Tempjcs[col], mxREAL);
+	sr = mxGetPr(plhs[0]);
+	irs = mxGetIr(plhs[0]);
+	jcs = mxGetJc(plhs[0]);
 	memcpy(sr, StiffMatrix, Tempjcs[col] * sizeof(double));
 	memcpy(irs, Tempirs, Tempjcs[col] * sizeof(mwIndex));
 	memcpy(jcs, Tempjcs, (col + 1)*sizeof(mwIndex));
 
-	const mxArray *BoundaryEdge = prhs[3];
-	const mxArray *cell = prhs[4];
+	double *K13 = mxGetPr(prhs[1]);
+	double *K23 = mxGetPr(prhs[2]);
+	double Hcrit = mxGetScalar(prhs[3]);
+	double *Height = mxGetPr(prhs[4]);
+
 	const mxArray *mesh = prhs[5];
-
-	double *K13 = mxGetPr(prhs[6]);
-	double *K23 = mxGetPr(prhs[7]);
-	double *K33 = mxGetPr(prhs[8]);
-
-    double *NewmannData = mxGetPr(prhs[9]);
-
-    char* BoundaryType;
-    BoundaryType = mxArrayToString(prhs[10]); 
+	const mxArray *cell = prhs[6];
+	const mxArray *BottomBoundaryEdge = prhs[7];
+	const mxArray *BoundaryEdge = prhs[8];
+	signed char *ftype = (signed char *)mxGetData(prhs[9]);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -75,6 +63,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
+	mxArray *TempK = mxGetField(mesh, 0, "K");
+	int K = (int)mxGetScalar(TempK);
 	mxArray *TempEToE = mxGetField(mesh, 0, "EToE");
 	double *EToE = mxGetPr(TempEToE);
 	mxArray *TempJ = mxGetField(mesh, 0, "J");
@@ -94,127 +84,250 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *Temptz = mxGetField(mesh, 0, "tz");
 	double *tz = mxGetPr(Temptz);
 
-	mxArray *TempJs = mxGetField(BoundaryEdge, 0, "Js");
-	double *Js = mxGetPr(TempJs);
-	int Nfp = (int)mxGetM(TempJs);
+	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
+	double *BEJs = mxGetPr(TempBEJs);
+	int BENfp = (int)mxGetM(TempBEJs);
 	mxArray *TempBENe = mxGetField(BoundaryEdge, 0, "Ne");
 	int BENe = (int)mxGetScalar(TempBENe);
-	mxArray *TempFToF = mxGetField(BoundaryEdge, 0, "FToF");
-	double *FToF = mxGetPr(TempFToF);
-	mxArray *TempFToE = mxGetField(BoundaryEdge, 0, "FToE");
-	double *FToE = mxGetPr(TempFToE);
-	mxArray *TempFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
-	double *FToN1 = mxGetPr(TempFToN1);
-	mxArray *Tempnx = mxGetField(BoundaryEdge, 0, "nx");
-	double *nx = mxGetPr(Tempnx);
-	mxArray *Tempny = mxGetField(BoundaryEdge, 0, "ny");
-	double *ny = mxGetPr(Tempny);
-	mxArray *Tempnz = mxGetField(BoundaryEdge, 0, "nz");
-	double *nz = mxGetPr(Tempnz);
-	mxArray *TempLMass2d = mxGetField(BoundaryEdge, 0, "M");
-	double  *LMass2d = mxGetPr(TempLMass2d);
-	mxArray *TempFLAV = mxGetField(BoundaryEdge, 0, "LAV");
-	double *FLAV = mxGetPr(TempFLAV);
+	mxArray *TempBEFToF = mxGetField(BoundaryEdge, 0, "FToF");
+	double *BEFToF = mxGetPr(TempBEFToF);
+	mxArray *TempBEFToE = mxGetField(BoundaryEdge, 0, "FToE");
+	double *BEFToE = mxGetPr(TempBEFToE);
+	mxArray *TempBEFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
+	double *BEFToN1 = mxGetPr(TempBEFToN1);
+	mxArray *TempBEnx = mxGetField(BoundaryEdge, 0, "nx");
+	double *BEnx = mxGetPr(TempBEnx);
+	mxArray *TempBEny = mxGetField(BoundaryEdge, 0, "ny");
+	double *BEny = mxGetPr(TempBEny);
+	mxArray *TempBEnz = mxGetField(BoundaryEdge, 0, "nz");
+	double *BEnz = mxGetPr(TempBEnz);
+	mxArray *TempBELMass2d = mxGetField(BoundaryEdge, 0, "M");
+	double  *BELMass2d = mxGetPr(TempBELMass2d);
+	mxArray *TempBEFLAV = mxGetField(BoundaryEdge, 0, "LAV");
+	double *BEFLAV = mxGetPr(TempBEFLAV);
 
-	/*
-	  This part can not parallized with OpemMP, since we may alter the the result at the same time
-	  through different threads.
-	*/
-//#ifdef _OPENMP
-//#pragma omp parallel for num_threads(DG_THREADS)
-//#endif
+	mxArray *TempBotBEJs = mxGetField(BottomBoundaryEdge, 0, "Js");
+	double *BotBEJs = mxGetPr(TempBotBEJs);
+	int BotBENfp = (int)mxGetM(TempBotBEJs);
+	mxArray *TempBotBENe = mxGetField(BottomBoundaryEdge, 0, "Ne");
+	int BotBENe = (int)mxGetScalar(TempBotBENe);
+	mxArray *TempBotBEFToF = mxGetField(BottomBoundaryEdge, 0, "FToF");
+	double *BotBEFToF = mxGetPr(TempBotBEFToF);
+	mxArray *TempBotBEFToE = mxGetField(BottomBoundaryEdge, 0, "FToE");
+	double *BotBEFToE = mxGetPr(TempBotBEFToE);
+	mxArray *TempBotBEFToN1 = mxGetField(BottomBoundaryEdge, 0, "FToN1");
+	double *BotBEFToN1 = mxGetPr(TempBotBEFToN1);
+//	mxArray *TempBotBEnx = mxGetField(BottomBoundaryEdge, 0, "nx");
+//	double *BotBEnx = mxGetPr(TempBotBEnx);
+//	mxArray *TempBotBEny = mxGetField(BottomBoundaryEdge, 0, "ny");
+//	double *BotBEny = mxGetPr(TempBotBEny);
+//	mxArray *TempBotBEnz = mxGetField(BottomBoundaryEdge, 0, "nz");
+//	double *BotBEnz = mxGetPr(TempBotBEnz);
+	mxArray *TempBotBELMass2d = mxGetField(BottomBoundaryEdge, 0, "M");
+	double  *BotBELMass2d = mxGetPr(TempBotBELMass2d);
+	mxArray *TempBotBEFLAV = mxGetField(BottomBoundaryEdge, 0, "LAV");
+	double *BotBEFLAV = mxGetPr(TempBotBEFLAV);
+
+	double *InvSquaHeight = malloc(Np*K*sizeof(double));
+	double *K33 = malloc(Np*K*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+		GetInverseSquareHeight(InvSquaHeight + Np*k, Height + Np*k, Hcrit, Np);
+		for (int p = 0; p < Np; p++)
+			K33[k*Np + p] = pow(K13[k*Np + p], 2) + pow(K23[k*Np + p], 2) + \
+			InvSquaHeight[k*Np + p];
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
 	for (int edge = 0; edge < BENe; edge++){
-
-		double *FpIndex = malloc(Nfp*sizeof(double));
-
-		for (int p = 0; p < Nfp; p++){
-			FpIndex[p] = FToN1[Nfp*edge + p];
+		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
+			//Newmann boundary Doing Nothing
 		}
-		
+		else{
+
+			double *FpIndex = malloc(BENfp*sizeof(double));
+
+			for (int p = 0; p < BENfp; p++){
+				FpIndex[p] = BEFToN1[BENfp*edge + p];
+			}
+
+			int LocalEle;
+			LocalEle = (int)BEFToE[2 * edge];
+			double *Tau = malloc(BENfp*sizeof(double));
+			GetPenaltyParameter(Tau, LAV[LocalEle - 1], BEFLAV[edge], P, Nface, BENfp);
+
+			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
+			TempEToE = EToE + (LocalEle - 1)*Nface;
+			TempJ = J + (LocalEle - 1)*Np;
+			TempJs = BEJs + edge * BENfp;
+
+			ImposeDirichletBoundaryCondition(sr, irs, jcs, LocalEle, \
+				Np, BENfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
+				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
+				Dr, Ds, Dt, Tau, BEnx + edge * BENfp, BEny + edge * BENfp, BEnz + edge*BENfp, \
+				Mass3d, TempJ, TempJs, BELMass2d, TempEToE, Nface, FpIndex, \
+				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+
+			free(FpIndex);
+			free(Tau);
+		}
+	}
+
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int edge = 0; edge < BotBENe; edge++){
+
 		int LocalEle;
-		LocalEle = (int)FToE[2 * edge];
-		double *Tau = malloc(Nfp*sizeof(double));
-		GetPenaltyParameter(Tau, LAV[LocalEle - 1], FLAV[edge], P, Nface, Nfp);
-		
+		LocalEle = (int)BotBEFToE[2 * edge];
+		double *DxBuff = malloc(Np*Np*sizeof(double));
+		DiagMultiply(DxBuff, Dr, rx + (LocalEle - 1)*Np, Np);
+		double *Dx = malloc(Np*Np*sizeof(double));
+		DiagMultiply(Dx, Ds, sx + (LocalEle - 1)*Np, Np);
+		Add(Dx, Dx, DxBuff, Np*Np);
+
+		double *Dz = malloc(Np*Np*sizeof(double));
+		DiagMultiply(Dz, Dt, tz + (LocalEle - 1)*Np, Np);
+
+		double *DyBuff = malloc(Np*Np*sizeof(double));
+		DiagMultiply(DyBuff, Dr, ry + (LocalEle - 1)*Np, Np);
+		double *Dy = malloc(Np*Np*sizeof(double));
+		DiagMultiply(Dy, Ds, sy + (LocalEle - 1)*Np, Np);
+		Add(Dy, Dy, DyBuff, Np*Np);
+
 		double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
 		TempEToE = EToE + (LocalEle - 1)*Nface;
 		TempJ = J + (LocalEle - 1)*Np;
-		TempJs = Js + edge * Nfp;
+		TempJs = BotBEJs + edge * BotBENfp;
 
-		if (!strcmp(BoundaryType, "Dirichlet")){
-			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
-				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
-				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-				Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
-				Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp, \
-				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
-		}
-		else if (!strcmp(BoundaryType, "Newmann")){
-			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
-				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
+		double *FpIndex = malloc(BotBENfp*sizeof(double));
+
+		for (int p = 0; p < BotBENfp; p++){
+			FpIndex[p] = BotBEFToN1[BotBENfp*edge + p];
 		}
 
+		ImposeNewmannBoundaryCondition(sr, irs, jcs, LocalEle, \
+			K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np,\
+			Dx, Dy, Dz, Np, BotBENfp, \
+			Mass3d, TempJ, TempJs, BotBELMass2d, TempEToE, Nface, FpIndex);
+
+		free(DxBuff);
+		free(Dx);
+		free(Dz);
+		free(DyBuff);
+		free(Dy);
 		free(FpIndex);
-		free(Tau);
+	}
+
+	free(InvSquaHeight);
+	free(K33);
+}
+
+void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){
+	for (int i = 0; i < Np; i++){
+		if (source[i] >= Hcrit){
+			dest[i] = 1.0 / source[i] / source[i];
+		}
+		else{
+			dest[i] = 0;
+		}
 	}
 }
 
-void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int Nfp, double *Mass3d, \
-	double *J, double *Js, double *Mass2d, double *FpIndex, double *NewmannDataValue){
-
-	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
-	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
-
-	double *EleMass3d = malloc(Np*Np*sizeof(double));
-
-	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-
-	DiagMultiply(EleMass3d, Mass3d, J, Np);
-	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
-	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-
-	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
-
-	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
-
-	double *TempRHS = malloc(Np * 1 * sizeof(double));
-
-	double *TempFacialData = malloc(Nfp * 1 * sizeof(double));
-
-	ptrdiff_t Col = 1;
-
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, Col, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, NewmannDataValue, (ptrdiff_t)Nfp, 0.0, TempFacialData, (ptrdiff_t)Nfp);
-
-	AssembleDataIntoPoint(TempRHSBuff, TempFacialData, FpIndex, Nfp);
-
-	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
-		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
-
-	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
-
-	Add(InputRHS, InputRHS, TempRHS, Np);
-
-
-	free(EleMass2d);
-
-	free(EleMass3d);
-
-	free(InvEleMass3d);
-
-	free(TempRHSBuff);
-
-	free(TempRHS);
-
-	free(TempFacialData);
-
+void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
+	for (int i = 0; i < Nfp; i++){
+		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
+		//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
+	}
 }
 
-void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
-	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt,\
+void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, \
+	double *K31, double *K32, double *K33, double *Dx, double *Dy, double *Dz, int Np, int Nfp,\
+	double *M3d, double *J, double *Js, double *M2d, double *EToE, int Nface, double *FpIndex){
+
+	double *TempK31 = malloc(Np*Np*sizeof(double));
+	double *TempK32 = malloc(Np*Np*sizeof(double));
+	double *TempK33 = malloc(Np*Np*sizeof(double));
+	double *TempCoe = malloc(Np*Np*sizeof(double));
+
+	DiagMultiply(TempK31, Dx, K31, Np);
+
+	DiagMultiply(TempK32, Dy, K32, Np);
+
+	DiagMultiply(TempK33, Dz, K33, Np);
+
+	Add(TempCoe, TempK31, TempK32, Np*Np);
+
+//	Add(TempCoe, TempCoe, TempK33, Np*Np);
+
+	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
+	double *TempFacialData = malloc(Nfp*sizeof(double));
+	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
+	DiagMultiply(EleMass2d, M2d, Js, Nfp);
+	double *TempContribution = malloc(Np*Np*sizeof(double));
+	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
+	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
+	DiagMultiply(InvEleMass3d, M3d, J, Np);
+	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
+
+	int UniNum = 0, StartPoint;
+
+	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
+	double *TempEToE = malloc((Nface + 1)*sizeof(double));
+
+	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
+
+	int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
+
+	for (int j = 0; j < UniNum; j++){
+		if ((int)TempEToE[j] == LocalEle)
+			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
+	}
+	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
+
+	ptrdiff_t One = 1;
+
+	for (int j = 0; j < Nfp; j++){
+
+		FetchFacialData(TempFacialData, TempCoe + ((int)FpIndex[j] - 1)*Np, FpIndex, Nfp);
+
+		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
+			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
+
+		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
+
+		AssembleDataIntoPoint(TempContribution + ((int)FpIndex[j] - 1)*Np, ContributionPerPoint, FpIndex, Nfp);
+	}
+
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	free(TempK31);
+	free(TempK32);
+	free(TempK33);
+	free(TempCoe);
+	free(TempFacialData);
+	free(EleMass2d);
+	free(TempContribution);
+	free(Contribution);
+	free(InvEleMass3d);
+	free(TempEToE);
+	free(ContributionPerPoint);
+}
+
+void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, \
+	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, \
 	double *Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, double *EToE, \
-	int Nface, double *FpIndex, double *DirichData, double *K13, double *K23, double *K33){
+	int Nface, double *FpIndex, double *K13, double *K23, double *K33){
 	double *DxBuff = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DxBuff, Dr, rx, Np);
 	double *Dx = malloc(Np*Np*sizeof(double));
@@ -246,15 +359,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
-	double *WeightedEleMass2d = malloc(Nfp*Nfp*sizeof(double));
-	DiagMultiply(WeightedEleMass2d, EleMass2d, DirichData, Nfp);
-	double *TempRHS = malloc(Np*sizeof(double));
-	memset(TempRHS, 0, Np*sizeof(double));
-	double *TempRHSBuff = malloc(Np*sizeof(double));
-	memset(TempRHSBuff, 0, Np*sizeof(double));
-	double *DirichEdge2d = malloc(Nfp*sizeof(double));
-	memset(DirichEdge2d, 0, Nfp*sizeof(double));
-	double *DirichEdgeBuff = malloc(Nfp*Np*sizeof(double));
 
 	/*For fifth term part*/
 	/* For term $\int_{\partial \Omega^D}u_h\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
@@ -273,14 +377,8 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
-
 	/*For $k_{13}\frac{\partial v}{\partial \sigma}n_xp$*/
-	
+
 	DiagMultiply(TempDiffMatrix, Dz, K13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
 	/*The vector is a constant for a given face*/
@@ -296,12 +394,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
-
 	/*For $k_{22}\frac{\partial v}{\partial y}n_yp$*/
 	AssembleFacialDiffMatrix(FacialDiffMatrix, Dy, FpIndex, Nfp, Np);
 	/*The vector is a constant for a given face*/
@@ -316,12 +408,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	/*For $k_{23}\frac{\partial v}{\partial \sigma}n_yp$*/
 	DiagMultiply(TempDiffMatrix, Dz, K23, Np);
@@ -339,12 +425,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
-
 	/*For $k_{31}\frac{\partial v}{\partial x}n_{\sigma}p$*/
 	DiagMultiply(TempDiffMatrix, Dx, K13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
@@ -360,13 +440,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	/*For $k_{32}\frac{\partial v}{\partial y}n_{\sigma}p$*/
 	DiagMultiply(TempDiffMatrix, Dy, K23, Np);
@@ -384,12 +457,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
-
 	/*For $k_{33}\frac{\partial v}{\partial \sigma}n_{\sigma}p$*/
 	DiagMultiply(TempDiffMatrix, Dz, K33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
@@ -406,34 +473,14 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
-	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
-		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
-
-	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
-
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(TempMass2d, EleMass2d, Tau, Nfp);
 	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
 
-	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
-	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp);
-
-	SumInColumn(DirichEdge2d, WeightedEleMass2d, Nfp);
-
-	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1.0, Nfp);
-
-	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
-
 	/*Multiply the contribution by inverse matrix*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,\
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-
-	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
-	ptrdiff_t Col = 1;
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d,\
-		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
 
 	int UniNum = 0, StartPoint;
 	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
@@ -445,11 +492,8 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 			StartPoint = jcs[(LocalEle - 1)*Np] + j*Np;
 			AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
 			break;
-		}	
+		}
 	}
-
-
-	Add(InputRHS, InputRHS, TempRHS, Np);
 
 	free(DxBuff);
 	free(Dx);
@@ -463,48 +507,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(Contribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
-	free(WeightedEleMass2d);
-	free(TempRHS);
-	free(TempRHSBuff);
-	free(DirichEdge2d);
-	free(DirichEdgeBuff);
 	free(TempEToE);
 	free(TempMass2d);
 	free(TempDiffMatrix);
-}
-
-void SumInColumn(double *dest, double *Source, int Np){
-	for (int col = 0; col < Np; col++){
-		for (int Row = 0; Row < Np; Row++){
-			dest[col] += Source[col*Np + Row];
-		}
-	}
-}
-
-void SumInRow(double *dest, double *Source, int Np, int ColNum){
-	for (int row = 0; row < Np; row++){
-		for (int col = 0; col < ColNum; col++){
-			dest[row] += Source[col*Np + row];
-		}
-	}
-}
-
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
-	for (int i = 0; i < Nfp; i++){
-		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
-	//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
-	}
-}
-
-
-void GetFaceTypeAndFaceOrder(int *flag, int *face, int *ele, double *FToF, double *FToE, signed char *ftype, int edge){
-	(*ele) = (int)FToE[2 * edge];
-	(*face) = (int)FToF[2 * edge];
-	/*At present, only Newmann bounary is considered*/
-	if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
-		(*flag) = 1;
-	}
-	else{
-		(*flag) = 0;
-	}
 }

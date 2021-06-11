@@ -35,6 +35,12 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
         SurfBoundNewmannDate
         
         BotBoundNewmannDate
+        
+        BoundaryEdgefp3d
+        
+        SurfaceBoundaryEdgefp3d
+        
+        BottomBoundaryEdgefp3d
     end
 
     methods
@@ -78,6 +84,7 @@ classdef Adv_DiffAbstract3d < Adv_DiffAbstract
         end
         
         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, nz, fm, fp, fext )
+%         function [ fm, fp ] = matImposeBoundaryCondition( obj, edge, nx, ny, fm, fp, fext )
                 ind = ( edge.ftype == enumBoundaryCondition.Clamped );
                 fp(:, ind) = fext(:,ind);
                 ind = (edge.ftype == enumBoundaryCondition.UpperSurfaceBoundary);

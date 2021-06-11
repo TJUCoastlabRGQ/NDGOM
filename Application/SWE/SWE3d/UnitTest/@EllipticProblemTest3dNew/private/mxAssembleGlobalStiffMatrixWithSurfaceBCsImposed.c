@@ -3,7 +3,7 @@
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
-void GetPenaltyParameter(double *, double , double , double, int, int);
+void GetPenaltyParameter(double *, double , double , int, int, int);
 
 void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
@@ -71,7 +71,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double  *Dt = mxGetPr(TempDt);
 	mxArray *TempP = mxGetField(cell, 0, "N");
-	double P = mxGetScalar(TempP);
+	int P = (int)mxGetScalar(TempP);
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
@@ -192,7 +192,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
 		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
 
-	MultiplyByConstant(TempRHS, TempRHS, -1.0, Nfp);
+	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
 
 	Add(InputRHS, InputRHS, TempRHS, Np);
 
@@ -239,10 +239,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
 	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
 	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-
-//	double *TempContribution = malloc(Np*Np*sizeof(double));
-//	memset(TempContribution, 0, Np*Np*sizeof(double));
-//	double *Contribution = malloc(Np*Np*sizeof(double));
 
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
@@ -341,13 +337,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
-	/*
-	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
-	DiagMultiply(TempMass2d, EleMass2d, Tau, Nfp);
-	//For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$
-	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
-	*/
-
 	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
 	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp);
 
@@ -377,8 +366,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(EleMass3d);
 	free(EleMass2d);
 	free(InvEleMass3d);
-//	free(TempContribution);
-//	free(Contribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(WeightedEleMass2d);
@@ -387,7 +374,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(DirichEdge2d);
 	free(DirichEdgeBuff);
 	free(TempEToE);
-//	free(TempMass2d);
 	free(TempDiffMatrix);
 }
 
@@ -407,10 +393,10 @@ void SumInRow(double *dest, double *Source, int Np, int ColNum){
 	}
 }
 
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, double P, int Nface, int Nfp){
+void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
 	for (int i = 0; i < Nfp; i++){
-	//	dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
-		dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
+		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
+	//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
 	}
 }
 

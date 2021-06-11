@@ -96,7 +96,7 @@ while( time < ftime )
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
 %     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
-%     visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
