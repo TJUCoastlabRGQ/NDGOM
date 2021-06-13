@@ -243,8 +243,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateNonhydroVerticalFaceSurfFlux(QBEfluxMx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
 		EvaluateNonhydroVerticalFaceSurfFlux(QBEfluxMy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
 		if (type == NdgEdgeSlipWall){
-			DotProduct(QBEfluxSx + face*BENfp, qbM + face*SurfBENfp, BEnx + face*BENfp, BENfp);
-			DotProduct(QBEfluxSy + face*BENfp, qbM + face*SurfBENfp, BEny + face*BENfp, BENfp);
+			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
+			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
 		}
 		else{//impose zero boundary condition at other boundary
 			for (int i = 0; i < BENfp; i++){

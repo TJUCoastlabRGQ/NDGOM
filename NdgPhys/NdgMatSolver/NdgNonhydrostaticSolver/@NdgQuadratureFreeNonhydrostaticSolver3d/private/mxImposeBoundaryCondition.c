@@ -293,7 +293,7 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
 
 	ptrdiff_t One = 1;
-
+	/*
 	for (int j = 0; j < Nfp; j++){
 
 		FetchFacialData(TempFacialData, TempCoe + ((int)FpIndex[j] - 1)*Np, FpIndex, Nfp);
@@ -304,6 +304,19 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
 
 		AssembleDataIntoPoint(TempContribution + ((int)FpIndex[j] - 1)*Np, ContributionPerPoint, FpIndex, Nfp);
+	}
+	*/
+
+	for (int j = 0; j < Np; j++){
+
+		FetchFacialData(TempFacialData, TempCoe + j*Np, FpIndex, Nfp);
+
+		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
+			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
+
+		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
+
+		AssembleDataIntoPoint(TempContribution + j*Np, ContributionPerPoint, FpIndex, Nfp);
 	}
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,

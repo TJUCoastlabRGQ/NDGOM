@@ -12,7 +12,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
         %> number of variable field
         Nvar = 2
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2, 11 ]
+        varFieldIndex = [ 1, 2 ]
         %> number of variable field
         Nvar2d = 1
         %> index of variable in physical field
