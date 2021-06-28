@@ -73,7 +73,7 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             obj.matGetFunction;
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             obj.RHS = obj.matAssembleRightHandSide;
-%             obj.AssembleGlobalStiffMatrix;
+            obj.AssembleGlobalStiffMatrix;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
@@ -123,12 +123,12 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
                 struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
                 obj.K23, obj.K33, obj.BottomNewmannData, obj.BottomBoundaryEdgeType );           
             warning('on');
-%             disp("============For stiff matrix================")
-%             disp("The maximum difference is:")
-%             disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
-%             disp("The minimum difference is:")
-%             disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
-%             disp("============End stiff matrix================")                   
+            disp("============For stiff matrix================")
+            disp("The maximum difference is:")
+            disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
+            disp("The minimum difference is:")
+            disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
+            disp("============End stiff matrix================")                   
             obj.SimulatedSolution = obj.NonhydrostaticSolver.GlobalStiffMatrix\obj.RHS(:);
             disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
         end

@@ -105,6 +105,20 @@ void FetchBoundaryEdgeFacialValue(double *fm, double *source, \
 	}
 }
 
+void Flip(double *dest, int size){
+	double Temp;
+	int i, j;
+	i = 0;
+	j = size - 1;
+	while (i < j){
+		Temp = dest[i];
+		dest[i] = dest[j];
+		dest[j] = Temp;
+		++i;
+		--j;
+	}
+}
+
 
 void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, double *ny, int Nfp){
 	for (int i = 0; i < Nfp; i++)
@@ -248,9 +262,12 @@ void NdgExtend2dField(double *dest, double *source, int Np2d, int Index, int Np3
 	}
 }
 
-void RepmatValue(double *dest, double *source, int Layer){
-	for (int i = 0; i < Layer; i++)
-		dest[i] = *source;
+void RepmatValue(double *dest, double *source, int size, int Npz){
+	for (int i = 0; i < Npz; i++){
+		for (int j = 0; j < size; j++){
+			dest[i*size + j] = source[j];
+		}
+	}
 }
 
 void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \

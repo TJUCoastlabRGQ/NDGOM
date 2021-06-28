@@ -424,7 +424,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }        
     }
 
-	VSTempFacialIntegral3d = malloc(Np3d*K3d*sizeof(double));
 	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

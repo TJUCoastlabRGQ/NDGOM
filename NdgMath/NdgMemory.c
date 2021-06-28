@@ -446,6 +446,8 @@ void VertVelocitySolverMemoryAllocation(int Np2d, int K2d, int IENfp2d, int IENe
     MemoryAllocationCheck(VSTempVerticalVelocity,Np3d*K3d*sizeof(double));
 	VSBotVertVelocity = malloc(Np3d*K2d*sizeof(double));
     MemoryAllocationCheck(VSBotVertVelocity,Np3d*K2d*sizeof(double));
+	VSTempFacialIntegral3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(VSTempFacialIntegral3d, Np3d*K3d*sizeof(double));
 	VertVelocityInitialized = "True";
 }
 
@@ -488,7 +490,153 @@ void VertVelocitySolverMemoryDeAllocation(){
 	free(VSBEFluxM3d), VSBEFluxM3d = NULL;
 	free(VSTempVerticalVelocity), VSTempVerticalVelocity = NULL;
 	free(VSBotVertVelocity), VSBotVertVelocity = NULL;
+	free(VSTempFacialIntegral3d), VSTempFacialIntegral3d = NULL;
 	VertVelocityInitialized = "False";
+}
+
+/*This is for updated vertical velocity solver part*/
+double *UpdatedVSrhs2d = NULL, *UpdatedVSIEfm2d = NULL, *UpdatedVSIEfp2d = NULL, *UpdatedVSIEFluxM2d = NULL, \
+*UpdatedVSIEFluxP2d = NULL, *UpdatedVSIEFluxS2d = NULL, *UpdatedVSERHS2d = NULL, *UpdatedVSVolumeIntegralX = NULL, \
+*UpdatedVSTempVolumeIntegralX = NULL, *UpdatedVSVolumeIntegralY = NULL, *UpdatedVSTempVolumeIntegralY = NULL, \
+*UpdatedVSBEfm2d = NULL, *UpdatedVSBEzM2d = NULL, *UpdatedVSBEfp2d = NULL, *UpdatedVSBEzP2d = NULL, *UpdatedVSBEFluxS2d = NULL, \
+*UpdatedVSBEFluxM2d = NULL, *UpdatedVSTempFacialIntegral = NULL, *UpdatedVSfield2d = NULL, *UpdatedVSrhs3d = NULL, \
+*UpdatedVSIEfm3d = NULL, *UpdatedVSIEfp3d = NULL, *UpdatedVSIEFluxM3d = NULL, *UpdatedVSIEFluxP3d = NULL, *UpdatedVSIEFluxS3d = NULL, \
+*UpdatedVSERHS3d = NULL, *UpdatedVSVolumeIntegralX3d = NULL, *UpdatedVSTempVolumeIntegralX3d = NULL, \
+*UpdatedVSVolumeIntegralY3d = NULL, *UpdatedVSTempVolumeIntegralY3d = NULL, *UpdatedVSBEfm3d = NULL, \
+*UpdatedVSBEzM3d = NULL, *UpdatedVSBEfp3d = NULL, *UpdatedVSBEzP3d = NULL, *UpdatedVSBEFluxS3d = NULL, *UpdatedVSBEFluxM3d = NULL, \
+*UpdatedVSTempFacialIntegral3d = NULL, *UpdatedVSIEfmod = NULL, *UpdatedVSBEfmod = NULL, *Updatedfmod = NULL;
+
+char *UpdatedVertVelocityInitialized = "False";
+
+void UpdatedVertVelocitySolverMemoryAllocation(int Np2d, int K2d, int IENfp2d, int IENe2d, int Nface, int BENe2d, int BENfp2d, int Np3d, \
+	int K3d, int IENfp3d, int IENe3d, int BENe3d, int BENfp3d){
+	UpdatedVSrhs2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSrhs2d, Np2d*K2d*sizeof(double));
+	UpdatedVSIEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEfm2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	UpdatedVSIEfp2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEfp2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	UpdatedVSIEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxM2d, IENfp2d*IENe2d*sizeof(double));
+	UpdatedVSIEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxP2d, IENfp2d*IENe2d*sizeof(double));
+	UpdatedVSIEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxS2d, IENfp2d*IENe2d*sizeof(double));
+	UpdatedVSERHS2d = malloc(Np2d*K2d*Nface*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSERHS2d, Np2d*K2d*Nface*sizeof(double));
+	UpdatedVSVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSVolumeIntegralX, Np2d*K2d*sizeof(double));
+	UpdatedVSTempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempVolumeIntegralX, Np2d*K2d*sizeof(double));
+	UpdatedVSVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSVolumeIntegralY, Np2d*K2d*sizeof(double));
+	UpdatedVSTempVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempVolumeIntegralY, Np2d*K2d*sizeof(double));
+	UpdatedVSBEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEfm2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	UpdatedVSBEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEzM2d, BENe2d * BENfp2d*sizeof(double));
+	UpdatedVSBEfp2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEfp2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	UpdatedVSBEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEzP2d, BENe2d * BENfp2d*sizeof(double));
+	UpdatedVSBEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEFluxS2d, BENe2d*BENfp2d*sizeof(double));
+	UpdatedVSBEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEFluxM2d, BENe2d*BENfp2d*sizeof(double));
+	UpdatedVSTempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempFacialIntegral, Np2d*K2d*sizeof(double));
+	UpdatedVSfield2d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSfield2d, Np3d*K3d*sizeof(double));
+	UpdatedVSrhs3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSrhs3d, Np3d*K3d*sizeof(double));
+	UpdatedVSIEfm3d = malloc(IENfp3d*IENe3d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEfm3d, IENfp3d*IENe3d * 3 * sizeof(double));
+	UpdatedVSIEfp3d = malloc(IENfp3d*IENe3d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEfp3d, IENfp3d*IENe3d * 3 * sizeof(double));
+	UpdatedVSIEFluxM3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxM3d, IENfp3d*IENe3d*sizeof(double));
+	UpdatedVSIEFluxP3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxP3d, IENfp3d*IENe3d*sizeof(double));
+	UpdatedVSIEFluxS3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEFluxS3d, IENfp3d*IENe3d*sizeof(double));
+	UpdatedVSERHS3d = malloc(Np3d*K3d*Nface*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSERHS3d, Np3d*K3d*Nface*sizeof(double));
+	UpdatedVSVolumeIntegralX3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSVolumeIntegralX3d, Np3d*K3d*sizeof(double));
+	UpdatedVSTempVolumeIntegralX3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempVolumeIntegralX3d, Np3d*K3d*sizeof(double));
+	UpdatedVSVolumeIntegralY3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSVolumeIntegralY3d, Np3d*K3d*sizeof(double));
+	UpdatedVSTempVolumeIntegralY3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempVolumeIntegralY3d, Np3d*K3d*sizeof(double));
+	UpdatedVSBEfm3d = malloc(BENe3d * BENfp3d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEfm3d, BENe3d * BENfp3d * 3 * sizeof(double));
+	UpdatedVSBEzM3d = malloc(BENe3d * BENfp3d * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEzM3d, BENe3d * BENfp3d * sizeof(double));
+	UpdatedVSBEfp3d = malloc(BENe3d * BENfp3d * 3 * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEfp3d, BENe3d * BENfp3d * 3 * sizeof(double));
+	UpdatedVSBEzP3d = malloc(BENe3d * BENfp3d * sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEzP3d, BENe3d * BENfp3d * sizeof(double));
+	UpdatedVSBEFluxS3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEFluxS3d, BENe3d*BENfp3d*sizeof(double));
+	UpdatedVSBEFluxM3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEFluxM3d, BENe3d*BENfp3d*sizeof(double));
+	UpdatedVSTempFacialIntegral3d = malloc(Np3d*K3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSTempFacialIntegral3d, Np3d*K3d*sizeof(double));
+	UpdatedVSBEFluxM3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEFluxM3d, BENe3d*BENfp3d*sizeof(double));
+	UpdatedVSIEfmod = malloc(IENe2d*IENfp3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSIEfmod, IENe2d*IENfp3d*sizeof(double));
+	UpdatedVSBEfmod = malloc(BENe2d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(UpdatedVSBEfmod, BENe2d*BENfp3d*sizeof(double));
+	Updatedfmod = malloc(K2d*Np3d*sizeof(double));
+	MemoryAllocationCheck(Updatedfmod, K2d*Np3d*sizeof(double));
+	UpdatedVertVelocityInitialized = "True";
+}
+
+void UpdatedVertVelocitySolverMemoryDeAllocation(){
+	free(UpdatedVSrhs2d), UpdatedVSrhs2d = NULL;
+	free(UpdatedVSIEfm2d), UpdatedVSIEfm2d = NULL;
+	free(UpdatedVSIEfp2d), UpdatedVSIEfp2d = NULL;
+	free(UpdatedVSIEFluxM2d), UpdatedVSIEFluxM2d = NULL;
+	free(UpdatedVSIEFluxP2d), UpdatedVSIEFluxP2d = NULL;
+	free(UpdatedVSIEFluxS2d), UpdatedVSIEFluxS2d = NULL;
+	free(UpdatedVSERHS2d), UpdatedVSERHS2d = NULL;
+	free(UpdatedVSVolumeIntegralX), UpdatedVSVolumeIntegralX = NULL;
+	free(UpdatedVSTempVolumeIntegralX), UpdatedVSTempVolumeIntegralX = NULL;
+	free(UpdatedVSVolumeIntegralY), UpdatedVSVolumeIntegralY = NULL;
+	free(UpdatedVSTempVolumeIntegralY), UpdatedVSTempVolumeIntegralY = NULL;
+	free(UpdatedVSBEfm2d), UpdatedVSBEfm2d = NULL;
+	free(UpdatedVSBEzM2d), UpdatedVSBEzM2d = NULL;
+	free(UpdatedVSBEfp2d), UpdatedVSBEfp2d = NULL;
+	free(UpdatedVSBEzP2d), UpdatedVSBEzP2d = NULL;
+	free(UpdatedVSBEFluxS2d), UpdatedVSBEFluxS2d = NULL;
+	free(UpdatedVSBEFluxM2d), UpdatedVSBEFluxM2d = NULL;
+	free(UpdatedVSTempFacialIntegral), UpdatedVSTempFacialIntegral = NULL;
+	free(UpdatedVSfield2d), UpdatedVSfield2d = NULL;
+	free(UpdatedVSrhs3d), UpdatedVSrhs3d = NULL;
+	free(UpdatedVSIEfm3d), UpdatedVSIEfm3d = NULL;
+	free(UpdatedVSIEfp3d), UpdatedVSIEfp3d = NULL;
+	free(UpdatedVSIEFluxM3d), UpdatedVSIEFluxM3d = NULL;
+	free(UpdatedVSIEFluxP3d), UpdatedVSIEFluxP3d = NULL;
+	free(UpdatedVSIEFluxS3d), UpdatedVSIEFluxS3d = NULL;
+	free(UpdatedVSERHS3d), UpdatedVSERHS3d = NULL;
+	free(UpdatedVSVolumeIntegralX3d), UpdatedVSVolumeIntegralX3d = NULL;
+	free(UpdatedVSTempVolumeIntegralX3d), UpdatedVSTempVolumeIntegralX3d = NULL;
+	free(UpdatedVSVolumeIntegralY3d), UpdatedVSVolumeIntegralY3d = NULL;
+	free(UpdatedVSTempVolumeIntegralY3d), UpdatedVSTempVolumeIntegralY3d = NULL;
+	free(UpdatedVSBEfm3d), UpdatedVSBEfm3d = NULL;
+	free(UpdatedVSBEzM3d), UpdatedVSBEzM3d = NULL;
+	free(UpdatedVSBEfp3d), UpdatedVSBEfp3d = NULL;
+	free(UpdatedVSBEzP3d), UpdatedVSBEzP3d = NULL;
+	free(UpdatedVSBEFluxS3d), UpdatedVSBEFluxS3d = NULL;
+	free(UpdatedVSBEFluxM3d), UpdatedVSBEFluxM3d = NULL;
+	free(UpdatedVSTempFacialIntegral3d), UpdatedVSTempFacialIntegral3d = NULL;
+	free(UpdatedVSIEfmod); UpdatedVSIEfmod = NULL;
+	free(UpdatedVSBEfmod); UpdatedVSBEfmod = NULL;
+	free(Updatedfmod); Updatedfmod = NULL;
+	UpdatedVertVelocityInitialized = "False";
 }
 
 /*This is for PCE Solver part*/
@@ -558,6 +706,114 @@ void PCEMemoryDeAllocation(){
 	PCEInitialized = "False";
 }
 
+/*This is for Updated PCE Solver part*/
+double *PCEUpdatedIEfm2d = NULL, *PCEUpdatedIEfp2d = NULL, *PCEUpdatedIEFluxM2d = NULL, *PCEUpdatedIEFluxP2d = NULL, *PCEUpdatedIEFluxS2d = NULL, \
+*PCEUpdatedERHS2d = NULL, *PCEUpdatedVolumeIntegralX = NULL, *PCEUpdatedTempVolumeIntegralX = NULL, *PCEUpdatedVolumeIntegralY = NULL, \
+*PCEUpdatedTempVolumeIntegralY = NULL, *PCEUpdatedBEfm2d = NULL, *PCEUpdatedBEzM2d = NULL, *PCEUpdatedBEfp2d = NULL, *PCEUpdatedBEzP2d = NULL, \
+*PCEUpdatedBEFluxS2d = NULL, *PCEUpdatedBEFluxM2d = NULL, *PCEUpdatedPCETempFacialIntegral = NULL, *PCEUpdatedIEfmod = NULL, *PCEUpdatedBEfmod = NULL, \
+*PCEUpdatedIEfm3d = NULL, *PCEUpdatedIEfp3d = NULL, *PCEUpdatedIEFluxS3d = NULL, *PCEUpdatedBEfm3d = NULL, *PCEUpdatedBEfp3d = NULL, *PCEUpdatedBEFluxS3d = NULL, \
+*PCEUpdatedBEzM3d = NULL, *PCEUpdatedBEzP3d = NULL;
+
+char *PCEUpdatedInitialized = "False";
+
+void PCEUpdatedMemoryAllocation(int IENfp2d, int IENe2d, int Np2d, int K2d, int Nface, int BENe2d, int BENfp2d, \
+	int IENfp3d, int IENe3d, int BENe3d, int BENfp3d){
+	PCEUpdatedIEfm2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEfm2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	PCEUpdatedIEfp2d = malloc(IENfp2d*IENe2d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEfp2d, IENfp2d*IENe2d * 3 * sizeof(double));
+	PCEUpdatedIEFluxM2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEFluxM2d, IENfp2d*IENe2d*sizeof(double));
+	PCEUpdatedIEFluxP2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEFluxP2d, IENfp2d*IENe2d*sizeof(double));
+	PCEUpdatedIEFluxS2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEFluxS2d, IENfp2d*IENe2d*sizeof(double));
+	PCEUpdatedERHS2d = malloc(Np2d*K2d*Nface*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedERHS2d, Np2d*K2d*Nface*sizeof(double));
+	PCEUpdatedVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedVolumeIntegralX, Np2d*K2d*sizeof(double));
+	PCEUpdatedTempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedTempVolumeIntegralX, Np2d*K2d*sizeof(double));
+	PCEUpdatedVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedVolumeIntegralY, Np2d*K2d*sizeof(double));
+	PCEUpdatedTempVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedTempVolumeIntegralY, Np2d*K2d*sizeof(double));
+	PCEUpdatedBEfm2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEfm2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	PCEUpdatedBEzM2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEzM2d, BENe2d * BENfp2d*sizeof(double));
+	PCEUpdatedBEfp2d = malloc(BENe2d * BENfp2d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEfp2d, BENe2d * BENfp2d * 3 * sizeof(double));
+	PCEUpdatedBEzP2d = malloc(BENe2d * BENfp2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEzP2d, BENe2d * BENfp2d*sizeof(double));
+	PCEUpdatedBEFluxS2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEFluxS2d, BENe2d*BENfp2d*sizeof(double));
+	PCEUpdatedBEFluxM2d = malloc(BENe2d*BENfp2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEFluxM2d, BENe2d*BENfp2d*sizeof(double));
+	PCEUpdatedPCETempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedPCETempFacialIntegral, Np2d*K2d*sizeof(double));
+
+	PCEUpdatedIEfmod = malloc(IENe2d*IENfp3d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEfmod, IENe2d*IENfp3d*sizeof(double));
+	PCEUpdatedBEfmod = malloc(BENe2d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEfmod, BENe2d*BENfp3d*sizeof(double));
+
+	PCEUpdatedIEfm3d = malloc(IENfp3d*IENe3d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEfm3d, IENfp3d*IENe3d * 3 * sizeof(double));
+
+	PCEUpdatedIEfp3d = malloc(IENfp3d*IENe3d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEfp3d, IENfp3d*IENe3d * 3 * sizeof(double));
+
+	PCEUpdatedIEFluxS3d = malloc(IENfp3d*IENe3d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedIEFluxS3d, IENfp3d*IENe3d*sizeof(double));
+
+	PCEUpdatedBEfm3d = malloc(BENe3d * BENfp3d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEfm3d, BENe3d * BENfp3d * 3 * sizeof(double));
+
+	PCEUpdatedBEfp3d = malloc(BENe3d * BENfp3d * 3 * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEfp3d, BENe3d * BENfp3d * 3 * sizeof(double));
+
+	PCEUpdatedBEzM3d = malloc(BENe3d * BENfp3d * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEzM3d, BENe3d * BENfp3d * sizeof(double));
+
+	PCEUpdatedBEzP3d = malloc(BENe3d * BENfp3d * sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEzP3d, BENe3d * BENfp3d * sizeof(double));
+
+	PCEUpdatedBEFluxS3d = malloc(BENe3d*BENfp3d*sizeof(double));
+	MemoryAllocationCheck(PCEUpdatedBEFluxS3d, BENe3d*BENfp3d*sizeof(double));
+
+	PCEUpdatedInitialized = "True";
+}
+
+void PCEUpdatedMemoryDeAllocation(){
+	free(PCEUpdatedIEfm2d), PCEUpdatedIEfm2d = NULL;
+	free(PCEUpdatedIEfp2d), PCEUpdatedIEfp2d = NULL;
+	free(PCEUpdatedIEFluxM2d), PCEUpdatedIEFluxM2d = NULL;
+	free(PCEUpdatedIEFluxP2d), PCEUpdatedIEFluxP2d = NULL;
+	free(PCEUpdatedIEFluxS2d), PCEUpdatedIEFluxS2d = NULL;
+	free(PCEUpdatedERHS2d), PCEUpdatedERHS2d = NULL;
+	free(PCEUpdatedVolumeIntegralX), PCEUpdatedVolumeIntegralX = NULL;
+	free(PCEUpdatedTempVolumeIntegralX), PCEUpdatedTempVolumeIntegralX = NULL;
+	free(PCEUpdatedVolumeIntegralY), PCEUpdatedVolumeIntegralY = NULL;
+	free(PCEUpdatedTempVolumeIntegralY), PCEUpdatedTempVolumeIntegralY = NULL;
+	free(PCEUpdatedBEfm2d), PCEUpdatedBEfm2d = NULL;
+	free(PCEUpdatedBEzM2d), PCEUpdatedBEzM2d = NULL;
+	free(PCEUpdatedBEfp2d), PCEUpdatedBEfp2d = NULL;
+	free(PCEUpdatedBEzP2d), PCEUpdatedBEzP2d = NULL;
+	free(PCEUpdatedBEFluxS2d), PCEUpdatedBEFluxS2d = NULL;
+	free(PCEUpdatedBEFluxM2d), PCEUpdatedBEFluxM2d = NULL;
+	free(PCEUpdatedPCETempFacialIntegral), PCEUpdatedPCETempFacialIntegral = NULL;
+	free(PCEUpdatedIEfmod), PCEUpdatedIEfmod = NULL;
+	free(PCEUpdatedBEfmod), PCEUpdatedBEfmod = NULL;
+	free(PCEUpdatedIEfm3d), PCEUpdatedIEfm3d = NULL;
+	free(PCEUpdatedIEfp3d), PCEUpdatedIEfp3d = NULL;
+	free(PCEUpdatedBEfm3d), PCEUpdatedBEfm3d = NULL;
+	free(PCEUpdatedBEfp3d), PCEUpdatedBEfp3d = NULL;
+	free(PCEUpdatedBEzM3d), PCEUpdatedBEzM3d = NULL;
+	free(PCEUpdatedBEzP3d), PCEUpdatedBEzP3d = NULL;
+	free(PCEUpdatedBEFluxS3d), PCEUpdatedBEFluxS3d = NULL;
+	PCEUpdatedInitialized = "False";
+}
 
 /*This is for advection memory part*/
 double *TempFacialIntegral = NULL, *IEfm = NULL, *IEfp = NULL, *IEFluxM = NULL, *IEFluxP = NULL, \

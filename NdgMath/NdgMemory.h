@@ -35,8 +35,18 @@ void PCEMemoryAllocation(int ,int ,int ,int ,int ,int ,int );
 
 void PCEMemoryDeAllocation();
 
+void PCEUpdatedMemoryAllocation(int, int, int, int, int, int, int, \
+	int, int, int, int);
+
+void PCEUpdatedMemoryDeAllocation();
+
 void VertVelocitySolverMemoryAllocation(int, int, int, int, int, int, int, int, \
 	int, int, int, int, int);
+
+void UpdatedVertVelocitySolverMemoryAllocation(int, int, int, int, int, int, int, int, \
+	int, int, int, int, int);
+
+void UpdatedVertVelocitySolverMemoryDeAllocation();
 
 void VertVelocitySolverMemoryDeAllocation();
 

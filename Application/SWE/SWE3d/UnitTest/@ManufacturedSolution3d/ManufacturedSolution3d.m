@@ -113,7 +113,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 3 4];
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             obj.PostProcess = NdgPostProcess(obj.meshUnion(1),...
-                strcat('ManufacturedSolution3d/','3d/','ManufacturedSolution3d'));
+                strcat('Result/ManufacturedSolution3d/','3d/','ManufacturedSolution3d'));
             obj.ErrNorm2 = cell(4,1);
             obj.ErrRatio = cell(4,1);
             obj.Index = 1;

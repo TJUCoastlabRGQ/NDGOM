@@ -275,28 +275,56 @@ Etat2d = -1 * ( mesh.mesh2d.rx .* (mesh.mesh2d.cell.Dr * obj.fphys2d{1}(:,:,2)) 
     mesh.mesh2d.ry .* (mesh.mesh2d.cell.Dr * obj.fphys2d{1}(:,:,3)) + ...
     mesh.mesh2d.sy .* (mesh.mesh2d.cell.Ds * obj.fphys2d{1}(:,:,3)) );
 
+%%> The following is the depth-averaged version from the bottom
+edge = mesh.InnerEdge;
+[fm, fp] = edge.matEvaluateSurfValue( obj.fphys );
+Inputfm = zeros(edge.Nfp, edge.Ne, 3);
+Inputfp = zeros(edge.Nfp, edge.Ne, 3);
+Inputfm(:,:,1) = fm(:,:,1);Inputfm(:,:,2) = fm(:,:,2);Inputfm(:,:,3) = fm(:,:,4);
+Inputfp(:,:,1) = fp(:,:,1);Inputfp(:,:,2) = fp(:,:,2);Inputfp(:,:,3) = fp(:,:,4);
+FluxS3d = mxCalculateInnerEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit);
+FluxS = edge.VerticalColumnIntegralField(FluxS3d);
 edge = mesh.mesh2d.InnerEdge;
-[fm, fp] = edge.matEvaluateSurfValue( obj.fphys2d );
+[fm2d, fp2d] = edge.matEvaluateSurfValue( obj.fphys2d );
+Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm2d(:,:,2).*edge.nx + fm2d(:,:,3).*edge.ny,...
+    fp2d(:,:,2).*edge.nx + fp2d(:,:,3).*edge.ny, FluxS);
+
+edge = mesh.BoundaryEdge;
+[fm, fp] = edge.matEvaluateSurfValue( obj.fphys );
 Inputfm = zeros(edge.Nfp, edge.Ne, 3);
 Inputfp = zeros(edge.Nfp, edge.Ne, 3);
-Inputfm(:,:,1) = fm(:,:,2);Inputfm(:,:,2) = fm(:,:,3);Inputfm(:,:,3) = fm(:,:,1);
-Inputfp(:,:,1) = fp(:,:,2);Inputfp(:,:,2) = fp(:,:,3);Inputfp(:,:,3) = fp(:,:,1);
-FluxS = mxCalculateInnerEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit);
-
-Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm(:,:,2).*edge.nx + fm(:,:,3).*edge.ny,...
-    fp(:,:,2).*edge.nx + fp(:,:,3).*edge.ny, FluxS);
-
+Inputfm(:,:,1) = fm(:,:,1);Inputfm(:,:,2) = fm(:,:,2);Inputfm(:,:,3) = fm(:,:,4);
+Inputfp(:,:,1) = fp(:,:,1);Inputfp(:,:,2) = fp(:,:,2);Inputfp(:,:,3) = fp(:,:,4);
+zM = fm(:,:,6); zP = fp(:,:,6);
+FluxS3d = mxCalculateBoundaryEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit, zM, zP, int8(edge.ftype), obj.fext3d{1});
+FluxS = edge.VerticalColumnIntegralField(FluxS3d);
 edge = mesh.mesh2d.BoundaryEdge;
-[fm, fp] = edge.matEvaluateSurfValue( obj.fphys2d );
-Inputfm = zeros(edge.Nfp, edge.Ne, 3);
-Inputfp = zeros(edge.Nfp, edge.Ne, 3);
-Inputfm(:,:,1) = fm(:,:,2);Inputfm(:,:,2) = fm(:,:,3);Inputfm(:,:,3) = fm(:,:,1);
-Inputfp(:,:,1) = fp(:,:,2);Inputfp(:,:,2) = fp(:,:,3);Inputfp(:,:,3) = fp(:,:,1);
-zM = fm(:,:,4); zP = fp(:,:,4);
+[fm2d, ~] = edge.matEvaluateSurfValue( obj.fphys2d );
+Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm2d(:,:,2).*edge.nx + fm2d(:,:,3).*edge.ny, FluxS);
 
-FluxS = mxCalculateBoundaryEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit, zM, zP, edge.ftype, obj.fext2d{1});
+%%> The following is the two-dimensional version
+% edge = mesh.mesh2d.InnerEdge;
+% [fm, fp] = edge.matEvaluateSurfValue( obj.fphys2d );
+% Inputfm = zeros(edge.Nfp, edge.Ne, 3);
+% Inputfp = zeros(edge.Nfp, edge.Ne, 3);
+% Inputfm(:,:,1) = fm(:,:,2);Inputfm(:,:,2) = fm(:,:,3);Inputfm(:,:,3) = fm(:,:,1);
+% Inputfp(:,:,1) = fp(:,:,2);Inputfp(:,:,2) = fp(:,:,3);Inputfp(:,:,3) = fp(:,:,1);
+% FluxS = mxCalculateInnerEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit);
+% Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm(:,:,2).*edge.nx + fm(:,:,3).*edge.ny,...
+%     fp(:,:,2).*edge.nx + fp(:,:,3).*edge.ny, FluxS);
 
-Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm(:,:,2).*edge.nx + fm(:,:,3).*edge.ny, FluxS);
+
+% edge = mesh.mesh2d.BoundaryEdge;
+% [fm, fp] = edge.matEvaluateSurfValue( obj.fphys2d );
+% Inputfm = zeros(edge.Nfp, edge.Ne, 3);
+% Inputfp = zeros(edge.Nfp, edge.Ne, 3);
+% Inputfm(:,:,1) = fm(:,:,2);Inputfm(:,:,2) = fm(:,:,3);Inputfm(:,:,3) = fm(:,:,1);
+% Inputfp(:,:,1) = fp(:,:,2);Inputfp(:,:,2) = fp(:,:,3);Inputfp(:,:,3) = fp(:,:,1);
+% zM = fm(:,:,4); zP = fp(:,:,4);
+% 
+% FluxS = mxCalculateBoundaryEdgeNumFluxTerm( struct(edge), Inputfm, Inputfp, obj.gra, obj.hcrit, zM, zP, edge.ftype, obj.fext2d{1});
+% 
+% Etat2d = Etat2d + edge.matEvaluateStrongFormEdgeRHS( fm(:,:,2).*edge.nx + fm(:,:,3).*edge.ny, FluxS);
 
 
 TempEtax = cell(1); TempEtax{1} = Etax;

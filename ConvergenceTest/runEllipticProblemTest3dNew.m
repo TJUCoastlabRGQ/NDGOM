@@ -1,7 +1,7 @@
 function runEllipticProblemTest3dNew
 M = [1/8 1/16 1/32];
 Mz = [2 4 8];
-Order = [1 2];
+Order = [1];
 
 Nmesh = numel(M);
 Ndeg = numel(Order);

@@ -22,7 +22,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	const mxArray *mesh = prhs[11];
 	const mxArray *cell = prhs[12];
 	const mxArray *BottomBoundaryEdge = prhs[13];
-	double *PUVPXY = mxGetPr(prhs[14]);
 
 	mxArray *TempK = mxGetField(mesh, 0, "K");
 	int K = (int)mxGetScalar(TempK);
@@ -80,9 +79,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 		for (int i = 0; i < Np; i++){
 			RHS[k*Np + i] = -1.0 * H[k*Np + i] * \
 				(PUPX[k*Np + i] + PVPY[k*Np + i] + PSPX[k*Np + i] * PUPS[k*Np + i] + \
-				PSPY[k*Np + i] * PVPS[k*Np + i]);
-//			RHS[k*Np + i] = -1.0 * H[k*Np + i] * \
-				(PUVPXY[k*Np + i] + PSPX[k*Np + i] * PUPS[k*Np + i] + \
 				PSPY[k*Np + i] * PVPS[k*Np + i]);
 		}
 	}

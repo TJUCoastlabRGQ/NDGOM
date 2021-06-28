@@ -149,7 +149,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			//Newmann boundary Doing Nothing
 		}
 		else{
-
 			double *FpIndex = malloc(BENfp*sizeof(double));
 
 			for (int p = 0; p < BENfp; p++){
@@ -242,7 +241,7 @@ void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){
 
 void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
 	for (int i = 0; i < Nfp; i++){
-		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
+		dest[i] = 100 * (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
 		//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
 	}
 }

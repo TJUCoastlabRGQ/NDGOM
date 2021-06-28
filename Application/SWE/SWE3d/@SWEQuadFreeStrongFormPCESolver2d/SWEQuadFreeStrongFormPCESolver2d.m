@@ -7,6 +7,10 @@ classdef SWEQuadFreeStrongFormPCESolver2d
         InnerEdge
         BoundaryEdge
         cell
+        mesh3d
+        cell3d
+        InnerEdge3d
+        BoundaryEdge3d        
     end
     
     methods
@@ -17,13 +21,23 @@ classdef SWEQuadFreeStrongFormPCESolver2d
             obj.InnerEdge = struct(mesh.mesh2d.InnerEdge);
             obj.BoundaryEdge = struct(mesh.mesh2d.BoundaryEdge);
             obj.cell = struct(mesh.mesh2d.cell);
+            obj.mesh3d = struct(mesh);
+            obj.InnerEdge3d = struct(mesh.InnerEdge);
+            obj.BoundaryEdge3d = struct(mesh.BoundaryEdge);
+            obj.cell3d = struct(mesh.cell);            
             warning('on');
             obj.matClearGlobalMemory( );
         end
-        function evaluateAdvectionRHS( obj, physClass, fphys2d )
+        function evaluateAdvectionRHS( obj, physClass, fphys2d, fphys )
 % %             tic;
-            physClass.frhs2d{1} = mxEvaluatePCERHS( obj.mesh, obj.InnerEdge, obj.BoundaryEdge,...
-                obj.cell, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), fphys2d{1}, physClass.fext2d{1}, physClass.gra, physClass.hcrit );
+%             physClass.frhs2d{1} = mxEvaluatePCERHS( obj.mesh, obj.InnerEdge, obj.BoundaryEdge,...
+%                 obj.cell, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), fphys2d{1}, physClass.fext2d{1}, physClass.gra, physClass.hcrit );
+            
+            physClass.frhs2d{1} = mxEvaluatePCERHSUpdated( obj.mesh, obj.mesh3d, obj.cell3d, obj.InnerEdge, obj.BoundaryEdge,...
+                obj.cell, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype),...
+                fphys2d{1}, fphys{1}, physClass.fext2d{1}, physClass.fext3d{1}, physClass.gra, physClass.hcrit, ...
+                obj.InnerEdge3d, obj.BoundaryEdge3d);
+            
 % %             t1 = toc;
 % %             tic;
             % evaluate inner edge
@@ -79,6 +93,7 @@ classdef SWEQuadFreeStrongFormPCESolver2d
         
         function matClearGlobalMemory( obj )
             clear mxEvaluatePCERHS;
+            clear mxEvaluatePCERHSUpdated;
         end
         
     end

@@ -140,6 +140,9 @@ classdef SWE3dVerticalVelocitySolver < handle
             [ VerticalVelocity ] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+%             [ VerticalVelocity ] = mxCalculateVerticalVelocityUpdate(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1},...
+%                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
 % %             t1 = toc;
 % %             tic;
 % %             edge = physClass.meshUnion.InnerEdge;
@@ -229,6 +232,7 @@ classdef SWE3dVerticalVelocitySolver < handle
         
         function matClearGlobalMemory(obj)
             clear mxCalculateVerticalVelocity;
+            clear mxCalculateVerticalVelocityUpdate;
         end
     end
     

@@ -113,7 +113,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 100;
+            ftime = 20;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -146,7 +146,7 @@ function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.ClampedDepth, ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
@@ -160,8 +160,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 
 end
 

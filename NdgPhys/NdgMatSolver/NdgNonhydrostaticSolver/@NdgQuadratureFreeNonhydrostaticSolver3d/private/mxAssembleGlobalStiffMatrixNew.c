@@ -404,6 +404,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 				}
 			}
+			free(TempEToE);
 		}
 	}
 	free(UpEidM);
@@ -898,11 +899,11 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	free(InvLocalMass3d);
 	free(FacialMass2d);
 	free(TempContribution);
+	free(Contribution);
 	free(DiffMatrix);
 	free(TempDiffMatrix);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
-
 }
 
 
@@ -1013,12 +1014,11 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	free(InvLocalMass3d);
 	free(FacialMass2d);
 	free(TempContribution);
+	free(Contribution);
 	free(DiffMatrix);
 	free(TempDiffMatrix);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
-	free(Contribution);
-
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int Np2d, \
@@ -1190,6 +1190,7 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
 	free(LocalDiff);
+	free(Contribution);
 }
 
 void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
