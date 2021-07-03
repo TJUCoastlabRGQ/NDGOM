@@ -5,10 +5,11 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
     properties(Constant)
         rho = 1000
         amplitude = 0.01
-        hcrit = 0.15;
+        hcrit = 0.01
         d = 0.4
+        AD = 0
         T = 2.02
-        ChLength = 40
+        ChLength = 35
         %         ChWidth = 0.05
         ChWidth = 0.1
     end
@@ -27,7 +28,7 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
         maxSigma %> maximum sponge strength
         SpongeCoefficient
         Ylim = [0 0.1]
-        Xlim = [0 40]
+        Xlim = [0 35]
     end
     
     methods (Access = public)
@@ -45,6 +46,8 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             bp = obj.Xlim(2) - obj.spgLength;
             ind = obj.meshUnion.yc > bp; % right part is sponge region
             obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
+            
+            obj.WaveCharacterEstimate;
             
             %methods from LongXiang Li
             %             Nb = 10;
@@ -65,16 +68,17 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
         end
         
         function VideoPostprocess(obj)
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+            PostProcess = NdgPostProcess(obj.mesh2d(1),strcat('Result/WavetransformOverAnSurbmergedBar3d/2d','/','WavetransformOverAnSurbmergedBar3d'));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 6, 'WavetransformOverAnSurbmergedBar', obj.fphys{1}(:,:,4) );
+            PostProcess.drawAnimation(Visual, 1, 6, 'WavetransformOverAnSurbmergedBar', obj.fphys2d{1}(:,:,4) );
+%             function drawAnimation( obj, Visual, fildId, frameRate, videoName, topography )
         end
         
         function VisualPostprocess(obj)
-            time = 40;
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+            time = 10;
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/WavetransformOverAnSurbmergedBar3d/2d','/','WavetransformOverAnSurbmergedBar3d'));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             [~,Index] = sort(abs(outputTime-time));
             [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
@@ -86,7 +90,7 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
             ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
             zlabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
-            set(gca,'Ylim',[-10,12]);
+            set(gca,'Ylim',[0.385,0.415]);
             set(gca,'FontSize',12);
             set(gcf,'Position',[309 198 1252 614]);
             view(122, 66);
@@ -121,16 +125,39 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             % Stelling and Zijlema, 2003
             omega = 2*pi/obj.T;
             
+%             h3d = zeros(size(obj.fext3d{1}(:,:,1)));
+%             h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+%             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth & (all(obj.meshUnion(1).BoundaryEdge.xb == obj.Xlim(1))' ));
+%             h3d(:,Index) = Eta + obj.d;
+%             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth & (all(obj.meshUnion(1).BoundaryEdge.xb == obj.Xlim(2))' ));
+%             h3d(:,Index) = obj.d;
+%             obj.fext3d{1}(:,:,3) = h3d;
+%             
+%             
+%             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth & (all(obj.mesh2d.BoundaryEdge.xb  == obj.Xlim(1)))');
+%             h2d(:,Index) = Eta + obj.d;
+%             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth & (all(obj.mesh2d.BoundaryEdge.xb  == obj.Xlim(2)))');
+%             h2d(:,Index) = obj.d;            
+%             obj.fext2d{1}(:,:,3) = h2d;
+
+            hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
             h3d = zeros(size(obj.fext3d{1}(:,:,1)));
+            hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
             h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+            Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel);
+            hu3d(:,Index) = omega*obj.amplitude/obj.k/(obj.d + obj.AD )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d + obj.AD);
+            obj.fext3d{1}(:,:,1) = hu3d;
             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h3d(:,Index) = Eta + obj.d;
+            h3d(:,Index) = obj.d + obj.AD;
             obj.fext3d{1}(:,:,3) = h3d;
             
-            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h2d(:,Index) = Eta + obj.d;
-            obj.fext2d{1}(:,:,3) = h2d;
             
+            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+            hu2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d + obj.AD )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d + obj.AD);
+            obj.fext2d{1}(:,:,1) = hu2d;
+            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+            h2d(:,Index) = obj.d + obj.AD;            
+            obj.fext2d{1}(:,:,3) = h2d;
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
@@ -175,58 +202,59 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
         
         function [ fphys2d, fphys ] = setInitialField( obj )
             fphys2d = cell( obj.Nmesh, 1 );
-            fphys = cell( obj.Nmesh, 1 );
-            for m = 1 : obj.Nmesh
-                mesh2d = obj.mesh2d(m);
-                mesh3d = obj.meshUnion(m);
-                fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
-                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
-                % bottom elevation
-                fphys2d{m}(:, :, 4) =  -0.4 * ones(size(mesh2d.x));
-                %water depth
-                fphys2d{m}(:,:,1) = -1 .* fphys2d{m}(:, :, 4);
-                %                  fphys2d{m}(:,:,1) = 2.89677;
-            end
-            % %                         alpha = 20/360*2*pi;
-            %                         fphys = cell( 1, 1 );
-            %                         mesh = obj.meshUnion(1);
-            %                         fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
-            %                         fphys{1}(:,:,1) = 0.4;
-            % %                         fphys{1}(:,:,4) = - 0.04;
-            %
-            %                         index =  ( 6 <= mesh.x & mesh.x <= 12);
-            %                         fphys{1}(index) =  0.4 - ( mesh.x(index) - 6 ) ./ 20;
-            % %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
-            %
-            %                         index = ( 12 <= mesh.x & mesh.x <= 14);
-            %                         fphys{1}(index) =  0.1;
-            % %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
-            %
-            %                         index = ( 14 <= mesh.x & mesh.x <= 17);
-            %                         fphys{1}(index) =  0.1 + ( mesh.x(index) - 14 ) ./ 10;
-            % %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
-            %
-            %                         index = ( 18.95 <= mesh.x & mesh.x <= 23.95);
-            %                         fphys{1}(index) =  0.4 - ( mesh.x(index) - 18.95 ) ./ 25;
-            %
-            %                         index = ( 23.95 <= mesh.x );
-            %                         fphys{1}(index) = 0.2;
-            % %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
-            %
-            %                         fphys{1}(:,:,4) = -fphys{1}(:,:,1);
-            %                         obj.initial_fphys = fphys{1};
+%             fphys = cell( obj.Nmesh, 1 );
+%             for m = 1 : obj.Nmesh
+%                 mesh2d = obj.mesh2d(m);
+%                 mesh3d = obj.meshUnion(m);
+%                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
+%                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
+%                 % bottom elevation
+%                 fphys2d{m}(:, :, 4) =  -obj.d * ones(size(mesh2d.x));
+%                 %water depth
+%                 fphys2d{m}(:,:,1) = -1 .* fphys2d{m}(:, :, 4);
+%                 %                  fphys2d{m}(:,:,1) = 2.89677;
+%             end
+            %                         alpha = 20/360*2*pi;
+                                    fphys = cell( 1, 1 );
+                                    mesh = obj.meshUnion(1);
+                                    mesh2d = obj.mesh2d(1);
+                                    fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
+                                    fphys2d{1} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
+                                    fphys2d{1}(:,:,1) = 0.4 + obj.AD;
+            %                         fphys{1}(:,:,4) = - 0.04;
+            
+                                    index =  ( 6 <= mesh2d.x & mesh2d.x <= 12);
+                                    fphys2d{1}(index) =  0.4 - ( mesh2d.x(index) - 6 ) ./ 20 + obj.AD;
+            %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
+            
+                                    index = ( 12 <= mesh2d.x & mesh2d.x <= 14);
+                                    fphys2d{1}(index) =  0.1 + obj.AD;
+            %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
+            
+                                    index = ( 14 <= mesh2d.x & mesh2d.x <= 17);
+                                    fphys2d{1}(index) =  0.1 + ( mesh2d.x(index) - 14 ) ./ 10 + obj.AD;
+            %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
+            
+                                    index = ( 18.95 <= mesh2d.x & mesh2d.x <= 23.95);
+                                    fphys2d{1}(index) =  0.4 - ( mesh2d.x(index) - 18.95 ) ./ 25 + obj.AD;
+            
+                                    index = ( 23.95 <= mesh2d.x );
+                                    fphys2d{1}(index) = 0.2 + obj.AD;
+            
+                                    fphys2d{1}(:,:,4) = -fphys2d{1}(:,:,1);
+                                    obj.initial_fphys = fphys{1};
             
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 45;
+            ftime = 40;
             outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 20;
+            option('outputNcfileNum') = 1;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             %             option('EddyViscosityType') = enumEddyViscosity.Constant;
             %             option('GOTMSetupFile') = obj.GotmFile;
@@ -264,8 +292,8 @@ function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.ClampedDepth, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.ZeroGrad ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);

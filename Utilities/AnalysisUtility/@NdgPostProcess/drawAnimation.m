@@ -9,7 +9,8 @@ for t = 1:1:obj.Nt
     for m = 1:obj.Nmesh
         Visual.drawResult( field{m}(:,:,varId) + topography );
     end
-    zlim([-0.05, 0.05]);
+    view(0,1);
+    zlim([-0.012, 0.012]);
 %     zlim([0.217, 0.228]);
     frame = getframe( gcf );
     writeVideo( video, frame );

@@ -12,24 +12,27 @@ char *SWENonhydro3dInitialized = "False";
 
 double *NonhydroHU2d = NULL, *NonhydroHV2d = NULL, \
 *TempNonhydroHU2d = NULL, *TempNonhydroHV2d = NULL, *TempNonhydrofield3d = NULL, *Nonhydrofmod = NULL, \
-*NonhydroVariable = NULL, *PUPX = NULL, *PVPY = NULL, *PHPX = NULL, *PHPY = NULL, *PSPX = NULL, \
-*PSPY = NULL, *TempPSPX = NULL, *TempPSPY = NULL, *NonhydroIEfm = NULL, *NonhydroIEfp = NULL, \
+*NonhydroVariable = NULL, *PUPX = NULL,*PVPY = NULL, *PHPX = NULL,*PHPY = NULL, *PSPX = NULL, \
+*PSPY = NULL, *TempPSPX = NULL,*TempPSPY = NULL, *NonhydroIEfm = NULL, *NonhydroIEfp = NULL, \
 *NonhydroIEFluxM = NULL, *NonhydroIEFluxP = NULL, *NonhydroIEFluxS = NULL, *NonhydroERHS = NULL, \
 *NonhydroBEfm = NULL, *NonhydroBEfp = NULL, *NonhydroBEFluxM = NULL, *NonhydroBEFluxS = NULL, \
-*NonhydroTempFacialIntegral = NULL, *NonhydroTempVolumeIntegral = NULL, *NonhydrozM = NULL, *NonhydrozP = NULL, \
-*CoePS = NULL, *NonhydroBotEfm = NULL, *NonhydroBotEfp = NULL, \
-*NonhydroBotEFluxM = NULL, *NonhydroBotEFluxP = NULL, *NonhydroBotEFluxS = NULL, \
-*NonhydroBotBEfm = NULL, *NonhydroBotBEFluxM = NULL, *NonhydroBotBEFluxS = NULL, *NonhydroSurfBEfm = NULL, \
-*NonhydroSurfBEFluxM = NULL, *NonhydroSurfBEFluxS = NULL, *NonhydroRHS2d = NULL, \
-*Weta = NULL, *Wbot = NULL, *ueta = NULL, *ubot = NULL, *veta = NULL, *vbot = NULL, \
-*etax = NULL, *etay = NULL, *TempZx2d = NULL, *TempZy2d = NULL, *NonhydroIEfm2d = NULL, \
-*NonhydroIEfp2d = NULL, *NonhydroIEFluxM2d = NULL, *NonhydroIEFluxP2d = NULL, \
-*NonhydroIEFluxS2d = NULL, *NonhydroERHS2d = NULL, *NonhydroPCEVolumeIntegralX = NULL, \
-*NonhydroPCETempVolumeIntegralX = NULL, *NonhydroPCEVolumeIntegralY = NULL, \
+*NonhydroTempFacialIntegral = NULL, *NonhydroTempVolumeIntegral = NULL,*NonhydrozM = NULL, *NonhydrozP = NULL, \
+*CoePS = NULL,*NonhydroBotEfm = NULL,*NonhydroBotEfp = NULL, *NonhydroBotEFluxM = NULL,*NonhydroBotEFluxP = NULL,*NonhydroBotEFluxS = NULL, \
+*NonhydroBotBEfm = NULL,*NonhydroBotBEFluxM = NULL,*NonhydroBotBEFluxS = NULL,*NonhydroSurfBEfm = NULL, \
+*NonhydroSurfBEFluxM = NULL,*NonhydroSurfBEFluxS = NULL,*NonhydroRHS2d = NULL, \
+*Weta = NULL,*Wbot = NULL,*ueta = NULL,*ubot = NULL,*veta = NULL,*vbot = NULL, \
+*etax = NULL,*etay = NULL, *TempZx2d = NULL,*TempZy2d = NULL,*NonhydroIEfm2d = NULL, \
+*NonhydroIEfp2d = NULL,*NonhydroIEFluxM2d = NULL,*NonhydroIEFluxP2d = NULL, \
+*NonhydroIEFluxS2d = NULL,*NonhydroERHS2d = NULL,*NonhydroPCEVolumeIntegralX = NULL, \
+*NonhydroPCETempVolumeIntegralX = NULL,*NonhydroPCEVolumeIntegralY = NULL, \
 *NonhydroPCETempVolumeIntegralY = NULL, *NonhydroBEfm2d = NULL, *NonhydroBEzM2d = NULL, \
-*NonhydroBEfp2d = NULL, *NonhydroBEzP2d = NULL, *NonhydroBEFluxS2d = NULL, \
-*NonhydroBEFluxM2d = NULL, *NonhydroPCETempFacialIntegral = NULL;
+*NonhydroBEfp2d = NULL,*NonhydroBEzP2d = NULL,*NonhydroBEFluxS2d = NULL, \
+*NonhydroBEFluxM2d = NULL,*NonhydroPCETempFacialIntegral = NULL, *NonhydroIEfmod = NULL, \
+*NonhydroBEfmod = NULL;
 
+/*The following space is allocated in file mxCalculatePartialDerivative.c and file mxCalculatePartialDerivativeUpdated.c.
+* We note that, ONLY ONE function can be called any time, Or the program would crash
+*/
 void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int Nface3d,\
 	int BENfp, int BENe, int BotENfp, int BotENe, int BotBENfp, int BotBENe, int SurfBENfp,\
 	int SurfBENe, int Np2d, int K2d, int IENfp2d, int IENe2d, int Nface2d, int BENfp2d,\
@@ -188,49 +191,52 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 	NonhydroPCETempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
 	MemoryAllocationCheck(NonhydroPCETempFacialIntegral, Np2d*K2d*sizeof(double));
 
+	/*The following memory is allocated in the updated version of function */
+	NonhydroIEfmod = malloc(IENe2d*IENfp*sizeof(double));
+	MemoryAllocationCheck(NonhydroIEfmod, IENe2d*IENfp*sizeof(double));
+	NonhydroBEfmod = malloc(BENe2d*BENfp*sizeof(double));
+	MemoryAllocationCheck(NonhydroBEfmod, BENe2d*BENfp*sizeof(double));
+
 	SWENonhydro3dInitialized = "True";
 }
 
 void SWENonhydro3dMemoryDeAllocation(){
 	free(NonhydroVariable), NonhydroVariable = NULL;
-	free(NonhydroERHS), NonhydroERHS = NULL;
-	free(NonhydroHU2d), NonhydroHU2d = NULL;
-	free(NonhydroHV2d), NonhydroHV2d = NULL; 
-	free(TempNonhydroHU2d), TempNonhydroHU2d = NULL;
-	free(TempNonhydroHV2d), TempNonhydroHV2d = NULL;
-	free(TempNonhydrofield3d), TempNonhydrofield3d = NULL;
-	free(Nonhydrofmod), Nonhydrofmod = NULL; 
-	free(NonhydroVariable), NonhydroVariable = NULL;
 	free(PUPX), PUPX = NULL;
 	free(PVPY), PVPY = NULL;
 	free(PHPX), PHPX = NULL;
 	free(PHPY), PHPY = NULL;
-	free(PSPX), PSPX = NULL; 
+	free(PSPX), PSPX = NULL;
 	free(PSPY), PSPY = NULL;
 	free(TempPSPX), TempPSPX = NULL;
 	free(TempPSPY), TempPSPY = NULL;
+	free(NonhydroHU2d), NonhydroHU2d = NULL;
+	free(NonhydroHV2d), NonhydroHV2d = NULL;
+	free(TempNonhydroHU2d), TempNonhydroHU2d = NULL;
+	free(TempNonhydroHV2d), TempNonhydroHV2d = NULL;
+	free(TempNonhydrofield3d), TempNonhydrofield3d = NULL;
+	free(Nonhydrofmod), Nonhydrofmod = NULL;
 	free(NonhydroIEfm), NonhydroIEfm = NULL;
-	free(NonhydroIEfp), NonhydroIEfp = NULL; 
+	free(NonhydroIEfp), NonhydroIEfp = NULL;
 	free(NonhydroIEFluxM), NonhydroIEFluxM = NULL;
 	free(NonhydroIEFluxP), NonhydroIEFluxP = NULL;
 	free(NonhydroIEFluxS), NonhydroIEFluxS = NULL;
-	free(NonhydroERHS), NonhydroERHS = NULL; 
+	free(NonhydroERHS), NonhydroERHS = NULL;
 	free(NonhydroBEfm), NonhydroBEfm = NULL;
 	free(NonhydroBEfp), NonhydroBEfp = NULL;
 	free(NonhydroBEFluxM), NonhydroBEFluxM = NULL;
-	free(NonhydroBEFluxS), NonhydroBEFluxS = NULL; 
+	free(NonhydroBEFluxS), NonhydroBEFluxS = NULL;
 	free(NonhydroTempFacialIntegral), NonhydroTempFacialIntegral = NULL;
 	free(NonhydroTempVolumeIntegral), NonhydroTempVolumeIntegral = NULL;
 	free(NonhydrozM), NonhydrozM = NULL;
-	free(NonhydrozP), NonhydrozP = NULL; 
-	free(TempPSPX), TempPSPX = NULL;
-	free(TempPSPY), TempPSPY = NULL;
+	free(NonhydrozP), NonhydrozP = NULL;
 	free(CoePS), CoePS = NULL;
 	free(NonhydroBotEfm), NonhydroBotEfm = NULL;
-	free(NonhydroBotEfp), NonhydroBotEfp = NULL; 
+	free(NonhydroBotEfp), NonhydroBotEfp = NULL;
 	free(NonhydroBotEFluxM), NonhydroBotEFluxM = NULL;
 	free(NonhydroBotEFluxP), NonhydroBotEFluxP = NULL;
-	free(NonhydroBotEFluxS), NonhydroBotEFluxS = NULL; 
+	free(NonhydroBotEFluxS), NonhydroBotEFluxS = NULL;
+	free(NonhydroBotBEfm); NonhydroBotBEfm = NULL;
 	free(NonhydroBotBEFluxM), NonhydroBotBEFluxM = NULL;
 	free(NonhydroBotBEFluxS), NonhydroBotBEFluxS = NULL;
 	free(NonhydroSurfBEfm), NonhydroSurfBEfm = NULL; 
@@ -264,9 +270,90 @@ void SWENonhydro3dMemoryDeAllocation(){
 	free(NonhydroBEFluxS2d), NonhydroBEFluxS2d = NULL; 
 	free(NonhydroBEFluxM2d), NonhydroBEFluxM2d = NULL;
 	free(NonhydroPCETempFacialIntegral), NonhydroPCETempFacialIntegral = NULL;
-
+	free(NonhydroIEfmod), NonhydroIEfmod = NULL;
+	free(NonhydroBEfmod), NonhydroBEfmod = NULL;
 	SWENonhydro3dInitialized = "False";
 }
+
+/*The following global space is used in file mxCalculateBottomVerticalVelocity.c*/
+double *NonhydroUbot = NULL, *NonhydroVbot = NULL, *NonhydroHbot = NULL, \
+*NonhydroZxbot = NULL, *NonhydroZybot = NULL;
+
+char *NHVertVelocityInitialized = "False";
+void SWENonhydroVertVelocityMemoryAllocation( int Nfp, int Ne){
+	double *NonhydroUbot = malloc(Nfp*Ne*sizeof(double));
+	MemoryAllocationCheck(NonhydroUbot, Nfp*Ne*sizeof(double));
+	double *NonhydroVbot = malloc(Nfp*Ne*sizeof(double));
+	MemoryAllocationCheck(NonhydroVbot, Nfp*Ne*sizeof(double));
+	double *NonhydroHbot = malloc(Nfp*Ne*sizeof(double));
+	MemoryAllocationCheck(NonhydroHbot, Nfp*Ne*sizeof(double));
+	double *NonhydroZxbot = malloc(Nfp*Ne*sizeof(double));
+	MemoryAllocationCheck(NonhydroZxbot, Nfp*Ne*sizeof(double));
+	double *NonhydroZybot = malloc(Nfp*Ne*sizeof(double));
+	MemoryAllocationCheck(NonhydroZybot, Nfp*Ne*sizeof(double));
+	NHVertVelocityInitialized = "True";
+}
+
+void SWENonhydroVertVelocityMemoryDeAllocation(){
+	free(NonhydroUbot), NonhydroUbot = NULL;
+	free(NonhydroVbot), NonhydroVbot = NULL;
+	free(NonhydroHbot), NonhydroHbot = NULL;
+	free(NonhydroZxbot), NonhydroZxbot = NULL;
+	free(NonhydroZybot), NonhydroZybot = NULL;
+	NHVertVelocityInitialized = "False";
+}
+
+
+/*The following global space is used in file mxAssembleGlobalStiffMatrixNew.c*/
+
+double *K33 = NULL, *InvSquaHeight = NULL, *InnerEdgeTau = NULL, *BottomEdgeTau = NULL, *SurfaceEdgeTau = NULL;
+char *GlobalStiffMatrixInitialized = "False";
+
+void GlobalStiffMatrixMemoryAllocation(int Np3d, int K3d, int IENe, int BotENe, int SurfBENe){
+	K33 = malloc(sizeof(double)*Np3d*K3d);
+	MemoryAllocationCheck(K33, sizeof(double)*Np3d*K3d);
+	InvSquaHeight = malloc(sizeof(double)*Np3d*K3d);
+	MemoryAllocationCheck(InvSquaHeight, sizeof(double)*Np3d*K3d);
+	InnerEdgeTau = malloc(IENe*sizeof(double));
+	MemoryAllocationCheck(InnerEdgeTau, sizeof(double)*IENe);
+	BottomEdgeTau = malloc(BotENe*sizeof(double));
+	MemoryAllocationCheck(BottomEdgeTau, BotENe*sizeof(double));
+	SurfaceEdgeTau = malloc(SurfBENe*sizeof(double));
+	MemoryAllocationCheck(SurfaceEdgeTau, SurfBENe*sizeof(double));
+	GlobalStiffMatrixInitialized = "True";
+}
+
+void GlobalStiffMatrixMemoryDeAllocation(){
+	free(K33); K33 = NULL;
+	free(InvSquaHeight); InvSquaHeight = NULL;
+	free(InnerEdgeTau); InnerEdgeTau = NULL;
+	free(BottomEdgeTau); BottomEdgeTau = NULL;
+	free(SurfaceEdgeTau); SurfaceEdgeTau = NULL;
+	GlobalStiffMatrixInitialized = "False";
+}
+
+/*The following global space is used in file mxImposeBoundaryCondition.c*/
+
+double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL;
+char *ImposeBoundaryInitialized = "False";
+
+void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe){
+	ImposeBCsInvSquaHeight = malloc(sizeof(double)*Np*K);
+	MemoryAllocationCheck(ImposeBCsInvSquaHeight, sizeof(double)*Np*K);
+	ImposeBCsK33 = malloc(sizeof(double)*Np*K);
+	MemoryAllocationCheck(ImposeBCsK33, sizeof(double)*Np*K);
+	BETau = malloc(BENe*sizeof(double));
+	MemoryAllocationCheck(BETau, sizeof(double)*BENe);
+	ImposeBoundaryInitialized = "True";
+}
+
+void SWENH3dImposeBoundaryMemoryDeAllocation(){
+	free(ImposeBCsInvSquaHeight); ImposeBCsInvSquaHeight = NULL;
+	free(ImposeBCsK33); ImposeBCsK33 = NULL;
+	free(BETau); BETau = NULL;
+	ImposeBoundaryInitialized = "False";
+}
+
 
 /*This is for vertical diffusion part*/
 double *Tau = NULL;

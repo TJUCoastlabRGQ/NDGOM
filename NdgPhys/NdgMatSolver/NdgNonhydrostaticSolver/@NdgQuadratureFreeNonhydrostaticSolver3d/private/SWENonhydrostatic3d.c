@@ -24,6 +24,29 @@ void AssembleContributionIntoSparseMatrix(double *dest, double *src, int Nonzero
 	}
 }
 
+void CalculatePenaltyParameter(double *Tau, double *FToE, double *FToN1, double *FToN2, int Np, int Nfp,\
+	int Index, double *K13, double *K23, double *K33, double *ELAV, double *MLAV, int P, int Nface){
+	
+	int LocalEle = (int)FToE[2*Index];
+	int AdjEle = (int)FToE[2 * Index + 1];
+	double *LocalK13 = K13 + (LocalEle - 1)*Np;
+	double *LocalK23 = K23 + (LocalEle - 1)*Np;
+	double *LocalK33 = K33 + (LocalEle - 1)*Np;
+	double *AdjK13 = K13 + (AdjEle - 1)*Np;
+	double *AdjK23 = K23 + (AdjEle - 1)*Np;
+	double *AdjK33 = K33 + (AdjEle - 1)*Np;
+	double MaximumK = 1.0;
+	for (int i = 0; i < Nfp; i++){
+		MaximumK = max(MaximumK, abs(LocalK13[(int)FToN1[Index*Nfp + i]-1]));
+		MaximumK = max(MaximumK, abs(LocalK23[(int)FToN1[Index*Nfp + i]-1]));
+		MaximumK = max(MaximumK, LocalK33[(int)FToN1[Index*Nfp + i]-1]);
+		MaximumK = max(MaximumK, abs(AdjK13[(int)FToN2[Index*Nfp + i]-1]));
+		MaximumK = max(MaximumK, abs(AdjK23[(int)FToN2[Index*Nfp + i]-1]));
+		MaximumK = max(MaximumK, AdjK33[(int)FToN2[Index*Nfp + i]-1]);
+	}
+	*(Tau + Index) = 10 * 10 * 10 * MaximumK*(P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*max(ELAV[Index] / MLAV[LocalEle - 1], ELAV[Index] / MLAV[AdjEle - 1]);
+}
+
 void EvaluateNonhydroVerticalFaceSurfFlux(double *dest, double *fm, double *n, int Nfp){
 	for (int i = 0; i < Nfp; i++){
 		dest[i] = fm[i] * n[i];

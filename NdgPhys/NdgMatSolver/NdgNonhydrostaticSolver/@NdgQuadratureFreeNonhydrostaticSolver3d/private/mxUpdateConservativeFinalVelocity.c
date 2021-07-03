@@ -247,12 +247,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
 		}
 		else{//impose zero boundary condition at other boundary
-//			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
-//			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
-			for (int i = 0; i < BENfp; i++){
+			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
+			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
+/*			for (int i = 0; i < BENfp; i++){
 				QBEfluxSx[face*BENfp + i] = 0;
 				QBEfluxSy[face*BENfp + i] = 0;
-			}
+			}*/
 		}
 	}
 
@@ -379,7 +379,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		for (int p = 0; p < SurfBENfp; p++){
 			QSurfBEfluxS[face*SurfBENfp + p] = 0;
 		}
-//		DotProduct(QSurfBEfluxS + face*SurfBENfp, qSurfBEM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 	}
 
 #ifdef _OPENMP

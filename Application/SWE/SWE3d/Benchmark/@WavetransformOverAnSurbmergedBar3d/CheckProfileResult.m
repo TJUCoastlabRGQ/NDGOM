@@ -1,7 +1,7 @@
 function CheckProfileResult(obj)
 y = 0.025; x = [10.5 12.5 13.5 14.5 15.7 17.3 19 21];
 d = [ 0.175 0.1 0.1 0.15 0.27 0.4 0.398 0.318];
-PostProcess = NdgPostProcess(obj.meshUnion(1),'WavetransformOverAnSurbmergedBar/WavetransformOverAnSurbmergedBar');
+PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,'Result/WavetransformOverAnSurbmergedBar3d/2d/WavetransformOverAnSurbmergedBar3d');
 Ntime = PostProcess.Nt;
 outputTime = ncread( PostProcess.outputFile{1}, 'time' );
 

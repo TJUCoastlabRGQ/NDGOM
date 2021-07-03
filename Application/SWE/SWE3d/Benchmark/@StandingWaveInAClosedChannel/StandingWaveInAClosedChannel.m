@@ -8,7 +8,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %         ChLength = 100;
         ChLength = 20;
         %> channel width
-        ChWidth = 2;
+        ChWidth = 0.5;
         %> channel depth
         H0 = 10;
         %> x range
@@ -88,7 +88,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             %             YData1=get(D1,'YData'); %get the y data
             %             close(h);
             %             plot(XData1, YData1,'k--','LineWidth',1.5);
-            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5);
+            plot(outputTime(1:1:end),exactEta(1:1:end),'ro','markersize',4.5);
             h = legend('SWE','Theory');
             set(h,'fontsize',15);
             legend('boxoff');
@@ -113,7 +113,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 20;
+            ftime = 50;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -146,7 +146,7 @@ function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.ClampedDepth, ...
+    enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...

@@ -8,10 +8,22 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
+void SWENH3dImposeBoundaryMemoryAllocation(int, int, int);
+
+void SWENH3dImposeBoundaryMemoryDeAllocation();
+
 void SWENonhydro3dMemoryAllocation(int , int , int , int , int , int , int , int , int , int , \
 	int , int , int , int , int , int , int , int , int , int );
 
 void SWENonhydro3dMemoryDeAllocation();
+
+void SWENonhydroVertVelocityMemoryAllocation(int, int);
+
+void SWENonhydroVertVelocityMemoryDeAllocation();
+
+void GlobalStiffMatrixMemoryAllocation(int , int, int, int, int );
+
+void GlobalStiffMatrixMemoryDeAllocation();
 
 void MemoryAllocationCheck(double *, int );
 

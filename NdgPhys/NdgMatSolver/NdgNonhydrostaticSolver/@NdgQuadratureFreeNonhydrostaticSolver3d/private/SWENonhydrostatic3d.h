@@ -45,4 +45,7 @@ void FindGlobalBottomEdgeFace(int *, double *, int , int , int );
 
 void FindFaceAndDirectionVectorAtBoundary(double *, int *, int *, int, int, double *, double *, int, double *, int);
 
+void CalculatePenaltyParameter(double *, double *, double *, double *, int , int , \
+	int , double *, double *, double *, double *, double *, int , int );
+
 #endif

@@ -6,7 +6,7 @@ fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -14,6 +14,8 @@ while( time < ftime )
     
     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
+    
+    %计算底部垂向流速
     
     tloc = time + dt;
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
@@ -35,7 +37,7 @@ while( time < ftime )
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
     
     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
-    
+    %进去以后计算底部流速
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
@@ -59,7 +61,7 @@ while( time < ftime )
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6); 
     
     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
-    
+    %进去以后计算底部流速，并利用上一个中间步的流速进行底部边界施加边界条件
 %     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
       
     %> The final velocity
@@ -74,13 +76,13 @@ while( time < ftime )
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
     
-    fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
+%     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
     
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
-    %     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
+%     visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs

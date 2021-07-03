@@ -84,9 +84,12 @@ Localtz: A pointer to the start of the transformation Jacobian of the element of
 Tau: A pointer to the penalty parameter of the up face
 */
 
-void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+//void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
 	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEidM, double *AdjEidM, double *Dr, double *Ds, \
 	double *Localrd, double *Adjrd, double *Localsd, double *Adjsd, double *Tau, double *Vector){
+void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEidM, double *AdjEidM, double *Dr, double *Ds, \
+	double *Localrd, double *Adjrd, double *Localsd, double *Adjsd, double *Vector){
 
 	double *AdjMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(AdjMass3d, mass3d, J, Np);
@@ -129,11 +132,12 @@ void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int S
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, AdjEidM, Np, Nfp);
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
-	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
+/*	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(TempMass2d, FacialMass2d, Tau, Nfp);
 	DiagMultiply(TempMass2d, TempMass2d, Vector, Nfp);
 	DiagMultiply(TempMass2d, TempMass2d, Vector, Nfp);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
@@ -149,7 +153,7 @@ void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, int S
 	free(LocalDiff);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
-	free(TempMass2d);
+//	free(TempMass2d);
 }
 
 /*The following function is used to assemble terms corresponding to
@@ -165,9 +169,12 @@ Localtz: A pointer to the start of the transformation Jacobian of the element of
 Tau: A pointer to the penalty parameter of the up face
 */
 
-void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+//void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
 	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEidM, double *Dr, double *Ds, \
 	double *Localrd, double *Localsd, double *Tau, double *Vector){
+void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEidM, double *Dr, double *Ds, \
+	double *Localrd, double *Localsd, double *Vector){
 
 	double *LocalMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(LocalMass3d, mass3d, J, Np);
@@ -206,11 +213,12 @@ void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, 
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEidM, Np, Nfp);
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
-	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
+/*	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(TempMass2d, FacialMass2d, Tau, Nfp);
 	DiagMultiply(TempMass2d, TempMass2d, Vector, Nfp);
 	DiagMultiply(TempMass2d, TempMass2d, Vector, Nfp);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
+	*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,\
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
@@ -224,7 +232,7 @@ void GetLocalFacialContributionForSecondOrderTerm(double *dest, int StartPoint, 
 	free(LocalDiff);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
-	free(TempMass2d);
+//	free(TempMass2d);
 }
 
 void GetLocalToAdjacentContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int AdjEle, int Np, int Np2d, \
@@ -430,6 +438,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 	free(TempIr);
 	free(TempJc);
+	/*
 	
 	double *Tau = malloc(IENe*IENfp*sizeof(double));
 
@@ -475,6 +484,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 //			SurfETau[face*VertNfp + p] = 1.0 / sqrt(SurfELAV[face]); //This parameter is doubled
 		}
 	}
+	*/
 
 
 #ifdef _OPENMP
@@ -526,7 +536,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 			GetLocalFacialContributionForSecondOrderTerm(sr, LocalStartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
 				M3d, M, J + ele*Np, Js + GlobalFace[i] * IENfp, LocalEidM, Dr, Ds, \
-				rd + ele*Np, sd + ele*Np, Tau + GlobalFace[i] * IENfp, FacialVector + i * IENfp);
+				rd + ele*Np, sd + ele*Np, FacialVector + i * IENfp);
 
 			for (int j = 0; j < EleNumber; j++){
 				if ((int)TempEToE[j] == AdjEle[i]){
@@ -534,7 +544,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					GetLocalToAdjacentElementContributionForSecondOrderTerm(sr, StartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
 						M3d, M, J + (int)(TempEToE[j] - 1)*Np, Js + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dr, Ds, \
 						rd + ele*Np, rd + (int)(TempEToE[j] - 1)*Np, sd + ele*Np, sd + (int)(TempEToE[j] - 1)*Np, \
-						Tau + GlobalFace[i] * IENfp, FacialVector + i*IENfp);
+						FacialVector + i*IENfp);
 				}
 			}
 		}
@@ -547,8 +557,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		free(AdjEidM);
 	}
 
-	free(Tau);
-
+//	free(Tau);
+	/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -614,7 +624,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, UpEidM, BotEFToE, BotENe, BotETau);
 				}
 				else{
-					/* Bottom surface*/
+					// Bottom surface
 					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, VertNfp, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, BotEidM, BotEFToE, BotENe, BotETau);
@@ -623,7 +633,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEidM, BotEFToE, BotENe, BotETau);
 
-					/*Upper surface*/
+					//Upper surface
 					GetLocalPenaltyContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, VertNfp, \
 						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M3d, M2d, \
 						J + (LocalEle - 1)*Np, J2d + ele*VertNfp, UpEidM, BotEFToE, BotENe, BotETau);
@@ -638,11 +648,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			free(TempEToE);
 		}
 	}
+	*/
 
 	free(UpEidM);
 	free(BotEidM);
-	free(BotETau);
-	free(SurfETau);
+//	free(BotETau);
+//	free(SurfETau);
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

@@ -414,7 +414,7 @@ void GetLocalUpContributionForSecondOrderTerm(double *dest, int StartPoint, int 
 }
 
 
-void CalculatePenaltyParameter(double *dest, const int Np2d, int Nz, int P, int Nface)
+void CalculatePenaltyParameterNew(double *dest, const int Np2d, int Nz, int P, int Nface)
 {
 	//Note: the penalty parameter for the bottom most face of each column is not needed, so we leave them undefined 
 	for (int Layer = 0; Layer < Nz; Layer++)
@@ -492,7 +492,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < Ele2d; i++){
-		CalculatePenaltyParameter(Tau + i*Np2d*(Nlayer + 1), Np2d, Nlayer + 1, P, Nface);
+		CalculatePenaltyParameterNew(Tau + i*Np2d*(Nlayer + 1), Np2d, Nlayer + 1, P, Nface);
 	}
 
 #ifdef _OPENMP

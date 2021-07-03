@@ -9,7 +9,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         amplitude = 0.01
         d = 0.4
         T = 2.02
-        ChLength = 30
+        ChLength = 35
 %         ChWidth = 0.05
         ChWidth = 0.1
     end
@@ -18,7 +18,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         initial_fphys
         length
         k
-        spgLength = 4; %> sponge region size
+        spgLength = 10; %> sponge region size
         distance %> distance to boundary nodes
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
@@ -35,7 +35,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
             obj.WaveCharacterEstimate;
-            obj.outputFieldOrder = [1, 2, 3, 6];
+            obj.outputFieldOrder2d = [1, 2, 3, 6];
                    
             bp = obj.Xlim(2) - obj.spgLength;
             ind = obj.meshUnion.yc > bp; % right part is sponge region
@@ -60,7 +60,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         end
         
         function VideoPostprocess(obj)
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'/',mfilename));
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/WavetransformOverAnSurbmergedBar/2d','/','WavetransformOverAnSurbmergedBar'));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
@@ -162,7 +162,7 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
         end
         
         function fphys = setInitialField( obj )
-%                         alpha = 20/360*2*pi;
+% %                         alpha = 20/360*2*pi;
                         fphys = cell( 1, 1 );
                         mesh = obj.meshUnion(1);
                         fphys{1} = zeros( mesh.cell.Np, mesh.K, obj.Nfield );
@@ -189,6 +189,9 @@ classdef WavetransformOverAnSurbmergedBar < SWEPreBlanaced2d
 %                         fphys{1}(index + 3 * numel(mesh.x)) = - fphys{1}(index);
             
                         fphys{1}(:,:,4) = -fphys{1}(:,:,1);
+
+%                         fphys{1}(:,:,1) = 0.4;
+%                         fphys{1}(:,:,4) = -1 * fphys{1}(:,:,1);
                         obj.initial_fphys = fphys{1};
             
         end
