@@ -13,9 +13,10 @@ while( time < ftime )
     end
     
     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
+    
     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
     
-    %计算底部垂向流速
+    obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
     
     tloc = time + dt;
     obj.matUpdateExternalField( tloc, fphys2d, fphys );

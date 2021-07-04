@@ -125,6 +125,11 @@ void GetFacialFluxTerm2d(double *dest, double *hu, double *hv, double *nx, doubl
 		dest[i] = hu[i] * nx[i] + hv[i] * ny[i];
 }
 
+void GetScalarFluxTerm2d(double *dest, double *C, double *Vector, int Nfp){
+	for (int i = 0; i < Nfp; i++)
+		dest[i] = C[i] * Vector[i];
+}
+
 void GetMeshAverageValue(double *dest, double *LAV, char *transA, char *transB, ptrdiff_t *ROPA, ptrdiff_t *COPB, ptrdiff_t *COPA, double *Alpha, double *A, \
 	ptrdiff_t *LDA, double *fphys, double *Jacobian, ptrdiff_t *LDB, double *Beta, ptrdiff_t *LDC, double *wq){
 

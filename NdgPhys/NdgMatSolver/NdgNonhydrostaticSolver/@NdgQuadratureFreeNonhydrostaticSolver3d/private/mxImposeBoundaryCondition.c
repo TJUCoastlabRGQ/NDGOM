@@ -1,7 +1,11 @@
 
 #include "SWENonhydrostatic3d.h"
 
-extern double *ImposeBCsK33, *ImposeBCsInvSquaHeight, *BETau;
+extern double *ImposeBCsK33, *ImposeBCsInvSquaHeight, *BETau, *ImposeBCsNewmannData, *ImposeBCsWx, *ImposeBCsWy, \
+*ImposeBCsWxRHS2d, *ImposeBCsWyRHS2d, *ImposeBCsWIEFluxMx2d, *ImposeBCsWIEFluxMy2d, *ImposeBCsWIEFluxPx2d, *ImposeBCsWIEFluxPy2d, \
+*ImposeBCsWIEFluxSx2d, *ImposeBCsWIEFluxSy2d, *ImposeBCsVolumeIntegralX, *ImposeBCsTempVolumeIntegralX, *ImposeBCsVolumeIntegralY, \
+*ImposeBCsTempVolumeIntegralY, *ImposeBCsIEfm, *ImposeBCsIEfp, *ImposeBCsERHSx, *ImposeBCsERHSy, *ImposeBCsTempFacialIntegral, \
+*ImposeBCsBotBEU, *ImposeBCsBotBEV, *ImposeBCsBotBEH;
 
 extern char *ImposeBoundaryInitialized;
 
@@ -18,14 +22,16 @@ void GetInverseSquareHeight(double *, double *, double , int );
 
 void GetPenaltyParameter(double *, double , double , int , int , int );
 
-void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int , \
+void ImposeNewmannBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int , \
 	double *, double *, double *, double *, double *, double *, int , int , \
-	double *, double *, double *, double *, double *, int , double *);
+	double *, double *, double *, double *, double *, int , double *, double *);
 
 void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
     double *, double *, double *, double *, double *, double *, double *, double *, \
 	int, double *, double *, double *, double *, double);
+
+void GetScalarCentralFluxTerm2d(double *, double *, double *, double *, int );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
@@ -56,6 +62,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	const mxArray *BottomBoundaryEdge = prhs[7];
 	const mxArray *BoundaryEdge = prhs[8];
 	signed char *ftype = (signed char *)mxGetData(prhs[9]);
+	const mxArray *mesh2d = prhs[10];
+	const mxArray *cell2d = prhs[11];
+	const mxArray *InnerEdge2d = prhs[12];
+	const mxArray *BoundaryEdge2d = prhs[13];
+	double *Wold = mxGetPr(prhs[14]);
+	double *Wnew = mxGetPr(prhs[15]);
+	double deltatime = mxGetScalar(prhs[16]);
+	double rho = mxGetScalar(prhs[17]);
+	double *Hu = mxGetPr(prhs[18]);
+	double *Hv = mxGetPr(prhs[19]);
+	double *RHS = mxGetPr(prhs[20]);
+
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -95,10 +113,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *ry = mxGetPr(Tempry);
 	mxArray *Tempsy = mxGetField(mesh, 0, "sy");
 	double *sy = mxGetPr(Tempsy);
-	mxArray *Temprz = mxGetField(mesh, 0, "rz");
-	double *rz = mxGetPr(Temprz);
+//	mxArray *Temprz = mxGetField(mesh, 0, "rz");
+//	double *rz = mxGetPr(Temprz);
 	mxArray *Temptz = mxGetField(mesh, 0, "tz");
 	double *tz = mxGetPr(Temptz);
+
+	plhs[1] = mxCreateDoubleMatrix(Np*K, 1, mxREAL);
+	double *OutRHS = mxGetPr(plhs[1]);
+	memcpy(OutRHS, RHS, Np*K*sizeof(double));
 
 	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
 	double *BEJs = mxGetPr(TempBEJs);
@@ -146,8 +168,53 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempBotBEFLAV = mxGetField(BottomBoundaryEdge, 0, "LAV");
 	double *BotBEFLAV = mxGetPr(TempBotBEFLAV);
 
+	mxArray *TempNp2d = mxGetField(cell2d, 0, "Np");
+	int Np2d = (int)mxGetScalar(TempNp2d);
+	mxArray *TempDr2d = mxGetField(cell2d, 0, "Dr");
+	double *Dr2d = mxGetPr(TempDr2d);
+	mxArray *TempDs2d = mxGetField(cell2d, 0, "Ds");
+	double *Ds2d = mxGetPr(TempDs2d);
+	mxArray *TempNface2d = mxGetField(cell2d, 0, "Nface");
+	int Nface2d = (int)mxGetScalar(TempNface2d);
+	mxArray *TempinvM2d = mxGetField(cell2d, 0, "invM");
+	double *invM2d = mxGetPr(TempinvM2d);
+
+	mxArray *TempK2d = mxGetField(mesh2d, 0, "K");
+	int K2d = (int)mxGetScalar(TempK2d);
+	mxArray *Temprx2d = mxGetField(mesh2d, 0, "rx");
+	double *rx2d = mxGetPr(Temprx2d);
+	mxArray *Tempsx2d = mxGetField(mesh2d, 0, "sx");
+	double *sx2d = mxGetPr(Tempsx2d);
+	mxArray *Tempry2d = mxGetField(mesh2d, 0, "ry");
+	double *ry2d = mxGetPr(Tempry2d);
+	mxArray *Tempsy2d = mxGetField(mesh2d, 0, "sy");
+	double *sy2d = mxGetPr(Tempsy2d);
+	mxArray *TempJ2d = mxGetField(mesh2d, 0, "J");
+	double *J2d = mxGetPr(TempJ2d);
+
+	mxArray *TempIENe2d = mxGetField(InnerEdge2d, 0, "Ne");
+	int IENe2d = (int)mxGetScalar(TempIENe2d);
+	mxArray *TempIENfp2d = mxGetField(InnerEdge2d, 0, "Nfp");
+	int IENfp2d = (int)mxGetScalar(TempIENfp2d);
+	mxArray *TempIEnx2d = mxGetField(InnerEdge2d, 0, "nx");
+	double *IEnx2d = mxGetPr(TempIEnx2d);
+	mxArray *TempIEny2d = mxGetField(InnerEdge2d, 0, "ny");
+	double *IEny2d = mxGetPr(TempIEny2d);
+	mxArray *TempIEFToN12d = mxGetField(InnerEdge2d, 0, "FToN1");
+	double* IEFToN12d = mxGetPr(TempIEFToN12d);
+	mxArray *TempIEFToN22d = mxGetField(InnerEdge2d, 0, "FToN2");
+	double* IEFToN22d = mxGetPr(TempIEFToN22d);
+	mxArray *TempIEMb2d = mxGetField(InnerEdge2d, 0, "M");
+	double* IEMb2d = mxGetPr(TempIEMb2d);
+	mxArray *TempIEJs2d = mxGetField(InnerEdge2d, 0, "Js");
+	double *IEJs2d = mxGetPr(TempIEJs2d);
+	mxArray *TempIEFToE2d = mxGetField(InnerEdge2d, 0, "FToE");
+	double *IEFToE2d = mxGetPr(TempIEFToE2d);
+	mxArray *TempIEFToF2d = mxGetField(InnerEdge2d, 0, "FToF");
+	double *IEFToF2d = mxGetPr(TempIEFToF2d);
+
 	if (!strcmp("False", ImposeBoundaryInitialized)){
-		SWENH3dImposeBoundaryMemoryAllocation(Np, K, BENe);
+		SWENH3dImposeBoundaryMemoryAllocation(Np, K, BENe, Np2d, K2d, Nface2d, IENfp2d, IENe2d, BotBENe, BotBENfp);
 	}
 
 #ifdef _OPENMP
@@ -182,7 +249,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			int LocalEle;
 			LocalEle = (int)BEFToE[2 * edge];
 
-			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
+			double *TempEToE , *TempJ = NULL, *TempJs = NULL;
 			TempEToE = EToE + (LocalEle - 1)*Nface;
 			TempJ = J + (LocalEle - 1)*Np;
 			TempJs = BEJs + edge * BENfp;
@@ -198,7 +265,108 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			*/
 		}
 	}
+	/*The following part is used to calculate the Neumann boundary condition according to 
+	$\frac{\partial w}{\partial t}+u\frac{\partial w}{\partial x}+v\frac{\partial w}{\partial y}=\rho D \frac{\partial p}{\partial \sigma}$*/
+	ptrdiff_t np = Np2d;
+	ptrdiff_t oneI = 1;
+	double one = 1.0, zero = 0.0;
 
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
+		GetVolumnIntegral2d(ImposeBCsVolumeIntegralX + k*Np2d, ImposeBCsTempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
+			Dr2d, Ds2d, &np, Wnew + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
+		/*$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$*/
+		GetVolumnIntegral2d(ImposeBCsVolumeIntegralY + k*Np2d, ImposeBCsTempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
+			Dr2d, Ds2d, &np, Wnew + k*Np2d, &np, &zero, &np, ry2d + k*Np2d, sy2d + k*Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe2d; e++){
+		FetchInnerEdgeFacialValue(ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, Wnew, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxMx2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxPx2d + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxMy2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxPy2d + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+		GetScalarCentralFluxTerm2d(ImposeBCsWIEFluxSx2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarCentralFluxTerm2d(ImposeBCsWIEFluxSy2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+	}
+
+	memset(ImposeBCsERHSx, 0, Np2d*K2d*Nface2d*sizeof(double));
+	memset(ImposeBCsERHSy, 0, Np2d*K2d*Nface2d*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe2d; e++){
+		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, ImposeBCsWIEFluxMx2d, ImposeBCsWIEFluxPx2d, ImposeBCsWIEFluxSx2d, IEJs2d, IEMb2d, ImposeBCsERHSx);
+		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, ImposeBCsWIEFluxMy2d, ImposeBCsWIEFluxPy2d, ImposeBCsWIEFluxSy2d, IEJs2d, IEMb2d, ImposeBCsERHSy);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		for (int face = 1; face<Nface2d; face++){
+			Add(ImposeBCsERHSx + k*Np2d, ImposeBCsERHSx + k*Np2d, ImposeBCsERHSx + face*Np2d*K2d + k*Np2d, Np2d);
+			Add(ImposeBCsERHSy + k*Np2d, ImposeBCsERHSy + k*Np2d, ImposeBCsERHSy + face*Np2d*K2d + k*Np2d, Np2d);
+		}
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++) {
+		MultiEdgeContributionByLiftOperator(ImposeBCsERHSx + k*Np2d, ImposeBCsTempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
+		MultiEdgeContributionByLiftOperator(ImposeBCsERHSy + k*Np2d, ImposeBCsTempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		Minus(ImposeBCsWx + k*Np2d, ImposeBCsVolumeIntegralX + k*Np2d, ImposeBCsERHSx + k*Np2d, Np2d);
+		Minus(ImposeBCsWy + k*Np2d, ImposeBCsVolumeIntegralY + k*Np2d, ImposeBCsERHSy + k*Np2d, Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < BotBENe; face++){
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEU + face*BotBENfp, Hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEV + face*BotBENfp, Hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEH + face*BotBENfp, Height, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		DotCriticalDivide(ImposeBCsBotBEU + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+
+		DotCriticalDivide(ImposeBCsBotBEV + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$u\frac{\partial w}{\partial x}$*/
+		DotProduct(ImposeBCsWx + face*BotBENfp, ImposeBCsWx + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+		/*$v\frac{\partial w}{\partial y}$*/
+		DotProduct(ImposeBCsWy + face*BotBENfp, ImposeBCsWy + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+		/*$w_{new} - w_{old}$*/
+		Minus(ImposeBCsNewmannData + face*BotBENfp, Wnew + face*BotBENfp, Wold + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t}$*/
+		DotDivideByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, deltatime, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x}$*/
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWx + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}$*/
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWy + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{\rho}\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, rho, BotBENfp);
+		/*$\frac{1}{\rho D}\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$*/
+		DotProduct(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$n_{\sigma}\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, -1.0, BotBENfp);
+	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -233,10 +401,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			FpIndex[p] = BotBEFToN1[BotBENfp*edge + p];
 		}
 
-		ImposeNewmannBoundaryCondition(sr, irs, jcs, LocalEle, \
+		ImposeNewmannBoundaryCondition( OutRHS, sr, irs, jcs, LocalEle, \
 			K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, ImposeBCsK33 + (LocalEle - 1)*Np, \
 			Dx, Dy, Dz, Np, BotBENfp, \
-			Mass3d, TempJ, TempJs, BotBELMass2d, TempEToE, Nface, FpIndex);
+			Mass3d, TempJ, TempJs, BotBELMass2d, TempEToE, Nface, FpIndex, ImposeBCsNewmannData + edge * BotBENfp);
 
 		free(DxBuff);
 		free(Dx);
@@ -258,9 +426,9 @@ void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){
 	}
 }
 
-void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, \
+void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, \
 	double *K31, double *K32, double *K33, double *Dx, double *Dy, double *Dz, int Np, int Nfp,\
-	double *M3d, double *J, double *Js, double *M2d, double *EToE, int Nface, double *FpIndex){
+	double *M3d, double *J, double *Js, double *M2d, double *EToE, int Nface, double *FpIndex, double *NewmannData){
 
 	double *TempK31 = malloc(Np*Np*sizeof(double));
 	double *TempK32 = malloc(Np*Np*sizeof(double));
@@ -275,6 +443,13 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 
 	Add(TempCoe, TempK31, TempK32, Np*Np);
 
+	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
+
+	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
+
+	double *TempRHS = malloc(Np * 1 * sizeof(double));
+
+	double *TempRHSFacialData = malloc(Nfp * 1 * sizeof(double));
 //	Add(TempCoe, TempCoe, TempK33, Np*Np);
 
 	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
@@ -331,6 +506,18 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 		AssembleDataIntoPoint(TempContribution + j*Np, ContributionPerPoint, FpIndex, Nfp);
 	}
 	
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, NewmannData, (ptrdiff_t)Nfp, 0.0, TempRHSFacialData, (ptrdiff_t)Nfp);
+
+	AssembleDataIntoPoint(TempRHSBuff, TempRHSFacialData, FpIndex, Nfp);
+
+	/*Multiply the contribution due to Neumann boundary condition by inverse matrix*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, One, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
+		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
+
+	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
+
+	Add(RHSdest + (LocalEle - 1)*Np, RHSdest + (LocalEle - 1)*Np, TempRHS, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -348,6 +535,9 @@ void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, in
 	free(InvEleMass3d);
 	free(TempEToE);
 	free(ContributionPerPoint);
+	free(TempRHSBuff);
+	free(TempRHS);
+	free(TempRHSFacialData);
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, \
@@ -536,4 +726,9 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 	free(TempEToE);
 	free(TempMass2d);
 	free(TempDiffMatrix);
+}
+
+void GetScalarCentralFluxTerm2d(double *dest, double *fm, double *fp, double *Vector, int Nfp){
+	for (int i = 0; i < Nfp; i++)
+		dest[i] = 0.5*Vector[i] * (fm[i] + fp[i]);
 }

@@ -130,12 +130,14 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.SurfaceBoundaryEdge, obj.cell2d.M, ...
                 obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
             
-            obj.GlobalStiffMatrix = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
-                physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
-                obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
-            
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit);
+            
+           [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
+                physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
+                obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
+                obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
+                fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS );
             
             NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
             
@@ -143,11 +145,13 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
             
+            obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
+            
 %             fphys{1}(1:4,:,obj.varIndex(3)) = 0;
         end
         
         function matCalculateBottomVerticalVelocity( obj, physClass, fphys )
-            obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys, obj.varIndex, obj.mesh, physClass.hcrit );
+            obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
         end
         
         function fphys = matUpdataVerticalVelocity( obj, physClass, fphys, fphys2d )
@@ -173,6 +177,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             clear mxCalculatePartialDerivativeUpdated;
             clear mxAssembleGlobalStiffMatrixNew;
             clear mxImposeBoundaryCondition;
+            clear mxCalculateBottomVerticalVelocity;
         end
         
         function TestPartialDerivativeCalculation(obj, physClass, fphys, fphys2d)

@@ -85,6 +85,8 @@ void GetVolumnIntegral3d(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t
 
 void GetFacialFluxTerm2d(double *, double *, double *, double *, double *, int);
 
+void GetScalarFluxTerm2d(double *, double *, double *, int);
+
 void MultiEdgeContributionByLiftOperator(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *, \
 	double *, ptrdiff_t *, ptrdiff_t *, double *, ptrdiff_t *, double *, int);
 

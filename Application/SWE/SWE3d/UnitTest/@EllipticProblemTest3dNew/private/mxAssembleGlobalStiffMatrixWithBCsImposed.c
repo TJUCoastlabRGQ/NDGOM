@@ -186,7 +186,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 	AssembleDataIntoPoint(TempRHSBuff, TempFacialData, FpIndex, Nfp);
 
-	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
+	/*Multiply the contribution due to Neumann boundary condition by inverse matrix*/
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
 		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
 

@@ -281,15 +281,15 @@ double *NonhydroUbot = NULL, *NonhydroVbot = NULL, *NonhydroHbot = NULL, \
 
 char *NHVertVelocityInitialized = "False";
 void SWENonhydroVertVelocityMemoryAllocation( int Nfp, int Ne){
-	double *NonhydroUbot = malloc(Nfp*Ne*sizeof(double));
+	NonhydroUbot = malloc(Nfp*Ne*sizeof(double));
 	MemoryAllocationCheck(NonhydroUbot, Nfp*Ne*sizeof(double));
-	double *NonhydroVbot = malloc(Nfp*Ne*sizeof(double));
+	NonhydroVbot = malloc(Nfp*Ne*sizeof(double));
 	MemoryAllocationCheck(NonhydroVbot, Nfp*Ne*sizeof(double));
-	double *NonhydroHbot = malloc(Nfp*Ne*sizeof(double));
+	NonhydroHbot = malloc(Nfp*Ne*sizeof(double));
 	MemoryAllocationCheck(NonhydroHbot, Nfp*Ne*sizeof(double));
-	double *NonhydroZxbot = malloc(Nfp*Ne*sizeof(double));
+	NonhydroZxbot = malloc(Nfp*Ne*sizeof(double));
 	MemoryAllocationCheck(NonhydroZxbot, Nfp*Ne*sizeof(double));
-	double *NonhydroZybot = malloc(Nfp*Ne*sizeof(double));
+	NonhydroZybot = malloc(Nfp*Ne*sizeof(double));
 	MemoryAllocationCheck(NonhydroZybot, Nfp*Ne*sizeof(double));
 	NHVertVelocityInitialized = "True";
 }
@@ -334,16 +334,67 @@ void GlobalStiffMatrixMemoryDeAllocation(){
 
 /*The following global space is used in file mxImposeBoundaryCondition.c*/
 
-double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL;
+double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL, *ImposeBCsNewmannData = NULL, *ImposeBCsWx = NULL, *ImposeBCsWy = NULL,\
+*ImposeBCsWxRHS2d = NULL, *ImposeBCsWyRHS2d = NULL, *ImposeBCsWIEFluxMx2d = NULL, *ImposeBCsWIEFluxMy2d = NULL, *ImposeBCsWIEFluxPx2d = NULL, *ImposeBCsWIEFluxPy2d = NULL, \
+*ImposeBCsWIEFluxSx2d = NULL, *ImposeBCsWIEFluxSy2d = NULL, *ImposeBCsVolumeIntegralX = NULL, *ImposeBCsTempVolumeIntegralX = NULL, *ImposeBCsVolumeIntegralY = NULL, \
+*ImposeBCsTempVolumeIntegralY = NULL, *ImposeBCsIEfm = NULL, *ImposeBCsIEfp = NULL, *ImposeBCsERHSx = NULL, *ImposeBCsERHSy = NULL, *ImposeBCsTempFacialIntegral = NULL, \
+*ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL;
 char *ImposeBoundaryInitialized = "False";
 
-void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe){
+void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, int K2d, int Nface2d, int IENfp2d, int IENe2d, int BotBENe, int BotBENfp){
 	ImposeBCsInvSquaHeight = malloc(sizeof(double)*Np*K);
 	MemoryAllocationCheck(ImposeBCsInvSquaHeight, sizeof(double)*Np*K);
 	ImposeBCsK33 = malloc(sizeof(double)*Np*K);
 	MemoryAllocationCheck(ImposeBCsK33, sizeof(double)*Np*K);
 	BETau = malloc(BENe*sizeof(double));
 	MemoryAllocationCheck(BETau, sizeof(double)*BENe);
+	ImposeBCsNewmannData = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsNewmannData, Np2d*K2d*sizeof(double));
+	ImposeBCsWx = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWx, Np2d*K2d*sizeof(double));
+	ImposeBCsWy = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWy, Np2d*K2d*sizeof(double));
+	ImposeBCsWxRHS2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWxRHS2d, Np2d*K2d*sizeof(double));
+	ImposeBCsWyRHS2d = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWyRHS2d, Np2d*K2d*sizeof(double));
+	ImposeBCsWIEFluxMx2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxMx2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsWIEFluxMy2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxMy2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsWIEFluxPx2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxPx2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsWIEFluxPy2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxPy2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsWIEFluxSx2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxSx2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsWIEFluxSy2d = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsWIEFluxSy2d, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsVolumeIntegralX, Np2d*K2d*sizeof(double));
+	ImposeBCsTempVolumeIntegralX = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempVolumeIntegralX, Np2d*K2d*sizeof(double));
+	ImposeBCsVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsVolumeIntegralY, Np2d*K2d*sizeof(double));
+	ImposeBCsTempVolumeIntegralY = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempVolumeIntegralY, Np2d*K2d*sizeof(double));
+	ImposeBCsIEfm = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsIEfm, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsIEfp = malloc(IENfp2d*IENe2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsIEfp, IENfp2d*IENe2d*sizeof(double));
+	ImposeBCsERHSx = malloc(Np2d*K2d*Nface2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsERHSx, Np2d*K2d*Nface2d*sizeof(double));
+	ImposeBCsERHSy = malloc(Np2d*K2d*Nface2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsERHSy, Np2d*K2d*Nface2d*sizeof(double));
+	ImposeBCsTempFacialIntegral = malloc(Np2d*K2d*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempFacialIntegral, Np2d*K2d*sizeof(double));
+	ImposeBCsBotBEU = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBEU, BotBENe*BotBENfp*sizeof(double));
+	ImposeBCsBotBEV = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBEV, BotBENe*BotBENfp*sizeof(double));
+	ImposeBCsBotBEH = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBEH, BotBENe*BotBENfp*sizeof(double));
+
 	ImposeBoundaryInitialized = "True";
 }
 
@@ -351,6 +402,29 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 	free(ImposeBCsInvSquaHeight); ImposeBCsInvSquaHeight = NULL;
 	free(ImposeBCsK33); ImposeBCsK33 = NULL;
 	free(BETau); BETau = NULL;
+	free(ImposeBCsNewmannData), ImposeBCsNewmannData = NULL;
+	free(ImposeBCsWx), ImposeBCsWx = NULL;
+	free(ImposeBCsWy), ImposeBCsWy = NULL;
+	free(ImposeBCsWxRHS2d), ImposeBCsWxRHS2d = NULL;
+	free(ImposeBCsWyRHS2d), ImposeBCsWyRHS2d = NULL;
+	free(ImposeBCsWIEFluxMx2d), ImposeBCsWIEFluxMx2d = NULL;
+	free(ImposeBCsWIEFluxMy2d), ImposeBCsWIEFluxMy2d = NULL;
+	free(ImposeBCsWIEFluxPx2d), ImposeBCsWIEFluxPx2d = NULL;
+	free(ImposeBCsWIEFluxPy2d), ImposeBCsWIEFluxPy2d = NULL;
+	free(ImposeBCsWIEFluxSx2d), ImposeBCsWIEFluxSx2d = NULL;
+	free(ImposeBCsWIEFluxSy2d), ImposeBCsWIEFluxSy2d = NULL;
+	free(ImposeBCsVolumeIntegralX), ImposeBCsVolumeIntegralX = NULL;
+	free(ImposeBCsTempVolumeIntegralX), ImposeBCsTempVolumeIntegralX = NULL;
+	free(ImposeBCsVolumeIntegralY), ImposeBCsVolumeIntegralY = NULL;
+	free(ImposeBCsTempVolumeIntegralY), ImposeBCsTempVolumeIntegralY = NULL;
+	free(ImposeBCsIEfm), ImposeBCsIEfm = NULL;
+	free(ImposeBCsIEfp), ImposeBCsIEfp = NULL;
+	free(ImposeBCsERHSx), ImposeBCsERHSx = NULL;
+	free(ImposeBCsERHSy), ImposeBCsERHSy = NULL;
+	free(ImposeBCsTempFacialIntegral), ImposeBCsTempFacialIntegral = NULL;
+	free(ImposeBCsBotBEU), ImposeBCsBotBEU = NULL;
+	free(ImposeBCsBotBEV), ImposeBCsBotBEV = NULL;
+	free(ImposeBCsBotBEH), ImposeBCsBotBEH = NULL;
 	ImposeBoundaryInitialized = "False";
 }
 
