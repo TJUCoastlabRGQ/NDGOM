@@ -345,27 +345,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPSPY + face*BotBENfp, K23, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 
-//		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEU + face*BotBENfp, Hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEU + face*BotBENfp, Hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 
-//		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEV + face*BotBENfp, Hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEV + face*BotBENfp, Hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 
 		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEH + face*BotBENfp, Height, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 
-//		DotCriticalDivide(ImposeBCsBotBEU + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		DotCriticalDivide(ImposeBCsBotBEU + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
 
-//		DotCriticalDivide(ImposeBCsBotBEV + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		DotCriticalDivide(ImposeBCsBotBEV + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
 		/*$u\frac{\partial w}{\partial x}$*/
-//		DotProduct(ImposeBCsWx + face*BotBENfp, ImposeBCsWx + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+		DotProduct(ImposeBCsWx + face*BotBENfp, ImposeBCsWx + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
 		/*$v\frac{\partial w}{\partial y}$*/
-//		DotProduct(ImposeBCsWy + face*BotBENfp, ImposeBCsWy + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+		DotProduct(ImposeBCsWy + face*BotBENfp, ImposeBCsWy + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
 		/*$w_{new} - w_{old}$*/
 		Minus(ImposeBCsNewmannData + face*BotBENfp, Wnew + face*BotBENfp, Wold + face*BotBENfp, BotBENfp);
 		/*$\frac{w_{new} - w_{old}}{\Delta t}$*/
 		DotDivideByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, deltatime, BotBENfp);
 		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x}$*/
-//		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWx + face*BotBENfp, BotBENfp);
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWx + face*BotBENfp, BotBENfp);
 		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}$*/
-//		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWy + face*BotBENfp, BotBENfp);
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWy + face*BotBENfp, BotBENfp);
 		/*$\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$*/
 		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, rho, BotBENfp);
 		/*$\frac{1}{\rho D}\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$*/
