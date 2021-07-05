@@ -274,6 +274,11 @@ void RepmatValue(double *dest, double *source, int size, int Npz){
 		}
 	}
 }
+/*Note: source[i] equals to zero is not excluded*/
+void ReverseValue(double *dest, double *source, int size){
+	for (int i = 0; i < size; i++)
+		dest[i] = 1.0 / source[i];
+}
 
 void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \
 	int Nfp, double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){

@@ -338,7 +338,7 @@ double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL, *Imp
 *ImposeBCsWxRHS2d = NULL, *ImposeBCsWyRHS2d = NULL, *ImposeBCsWIEFluxMx2d = NULL, *ImposeBCsWIEFluxMy2d = NULL, *ImposeBCsWIEFluxPx2d = NULL, *ImposeBCsWIEFluxPy2d = NULL, \
 *ImposeBCsWIEFluxSx2d = NULL, *ImposeBCsWIEFluxSy2d = NULL, *ImposeBCsVolumeIntegralX = NULL, *ImposeBCsTempVolumeIntegralX = NULL, *ImposeBCsVolumeIntegralY = NULL, \
 *ImposeBCsTempVolumeIntegralY = NULL, *ImposeBCsIEfm = NULL, *ImposeBCsIEfp = NULL, *ImposeBCsERHSx = NULL, *ImposeBCsERHSy = NULL, *ImposeBCsTempFacialIntegral = NULL, \
-*ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL;
+*ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL, *ImposeBCsBotBEPSPX = NULL, *ImposeBCsBotBEPSPY = NULL;
 char *ImposeBoundaryInitialized = "False";
 
 void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, int K2d, int Nface2d, int IENfp2d, int IENe2d, int BotBENe, int BotBENfp){
@@ -394,7 +394,10 @@ void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, in
 	MemoryAllocationCheck(ImposeBCsBotBEV, BotBENe*BotBENfp*sizeof(double));
 	ImposeBCsBotBEH = malloc(BotBENe*BotBENfp*sizeof(double));
 	MemoryAllocationCheck(ImposeBCsBotBEH, BotBENe*BotBENfp*sizeof(double));
-
+	ImposeBCsBotBEPSPX = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBEPSPX, BotBENe*BotBENfp*sizeof(double));
+	ImposeBCsBotBEPSPY = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBEPSPY, BotBENe*BotBENfp*sizeof(double));
 	ImposeBoundaryInitialized = "True";
 }
 
@@ -425,6 +428,8 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 	free(ImposeBCsBotBEU), ImposeBCsBotBEU = NULL;
 	free(ImposeBCsBotBEV), ImposeBCsBotBEV = NULL;
 	free(ImposeBCsBotBEH), ImposeBCsBotBEH = NULL;
+	free(ImposeBCsBotBEPSPX), ImposeBCsBotBEPSPX = NULL;
+	free(ImposeBCsBotBEPSPY), ImposeBCsBotBEPSPY = NULL;
 	ImposeBoundaryInitialized = "False";
 }
 

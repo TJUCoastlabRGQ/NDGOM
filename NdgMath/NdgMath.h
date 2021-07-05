@@ -63,6 +63,8 @@ void FetchBoundaryEdgeFacialValue(double *, double *, double *, double *, int , 
 
 void Flip(double *, int);
 
+void ReverseValue(double *, double *, int );
+
 void RepmatValue(double *, double *, int , int );
 
 void AssembleContributionIntoColumn(double *, double *, double *, int, int);
