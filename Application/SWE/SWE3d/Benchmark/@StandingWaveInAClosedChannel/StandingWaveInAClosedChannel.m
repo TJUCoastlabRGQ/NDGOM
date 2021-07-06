@@ -62,7 +62,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 17.5;
+            x0 = 18;
             h = obj.H0;
             a = obj.A;
             c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
