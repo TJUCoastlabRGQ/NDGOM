@@ -113,16 +113,16 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         function fphys = NdgConservativeNonhydrostaticUpdata(obj, physClass, fphys, fphys2d, deltatime)
             
             [ obj.PSPX, obj.PSPY, obj.SQPSPX, obj.SQPSPY, obj.PUPX, ...
-                obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS, ~ ] = mxCalculatePartialDerivativeUpdated( physClass.hcrit,...
+                obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS, obj.Wnew ] = mxCalculatePartialDerivativeUpdated( physClass.hcrit,...
                 obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge, obj.BottomBoundaryEdge, ...
                 obj.SurfaceBoundaryEdge, fphys{1}, obj.varIndex, int8(physClass.meshUnion.BoundaryEdge.ftype), ...
                 physClass.gra, physClass.fext3d{ 1 }, fphys2d{1}(:,:,1),  fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, ...
                 obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
             
-            edge = physClass.meshUnion.BottomBoundaryEdge;
-            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-            obj.Wnew = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
+%             edge = physClass.meshUnion.BottomBoundaryEdge;
+%             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+%             obj.Wnew = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
 %             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrix( obj.PNPS, obj.SPNPX, obj.SPNPY, obj.SPNPS, ...
 %                 obj.MSPNPX, obj.MSPNPY, obj.PSPX, obj.PSPY, obj.SPSPX, obj.SPSPY, obj.SQPSPX, obj.SQPSPY,...
@@ -155,11 +155,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         end
         
         function matCalculateBottomVerticalVelocity( obj, physClass, fphys )
-%             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
+            obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
             
-            edge = physClass.meshUnion.BottomBoundaryEdge;
-            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-            obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
+%             edge = physClass.meshUnion.BottomBoundaryEdge;
+%             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+%             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
         end
         
