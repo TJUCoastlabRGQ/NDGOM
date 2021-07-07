@@ -23,7 +23,7 @@ classdef NdgVertLimiter3d < NdgVertLimiter
             obj.Nvc2d = obj.assembleVertexCellConnect2d( mesh );
         end
         
-        function fphys = matLimit( obj, ~, fphys, fieldId )
+        function fphys = matLimit( obj, fphys, fieldId )
             % calculate the cell averages
             Nmesh = obj.Nmesh;
             cvar = cell( Nmesh, 1 );

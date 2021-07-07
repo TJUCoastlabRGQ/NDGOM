@@ -38,6 +38,9 @@ while( time < ftime )
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
     
     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
+    
+%    [ fphys ] = obj.matImposeLimiter( fphys );  
+    
     %进去以后计算底部流速
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -62,6 +65,8 @@ while( time < ftime )
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6); 
     
     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
+    
+%     [ fphys ] = obj.matImposeLimiter( fphys );  
     %进去以后计算底部流速，并利用上一个中间步的流速进行底部边界施加边界条件
 %     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
       

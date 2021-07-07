@@ -30,7 +30,7 @@ for i = 1:numel(x)
     set(gcf,'position',[50,50,1050,400]);
     plot(Time',Data(i,:),'LineWidth',1.5);
     hold on;
-    plot(data(:,1),data(:,2),'o','markersize',6);
+    plot(data(:,1),data(:,2),'o','markersize',6, 'LineWidth',1.5);
     set(gca,'YLIM',[-2, 4],'Fontsize',12);
     set(gca,'XLIM',[33, 39],'Fontsize',12);
     xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');

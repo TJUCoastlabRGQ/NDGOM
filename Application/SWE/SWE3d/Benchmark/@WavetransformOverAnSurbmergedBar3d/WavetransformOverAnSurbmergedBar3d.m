@@ -49,6 +49,8 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             
             obj.WaveCharacterEstimate;
             
+            obj.Limiter = NdgVertLimiter3d(obj.meshUnion(1));
+            
             %methods from LongXiang Li
             %             Nb = 10;
             %             xb = bp * ones( Nb, 1 );

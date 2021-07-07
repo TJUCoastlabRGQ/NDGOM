@@ -22,6 +22,10 @@ classdef SWEBarotropic3d < SWEAbstract3d
     end
     
     properties
+        Limiter
+    end
+    
+    properties
         %> the 2d field to be put in the output file
         outputFieldOrder2d =  1
         %> the 3d field to be put in the output file
@@ -30,8 +34,9 @@ classdef SWEBarotropic3d < SWEAbstract3d
     
     methods
         function fphys = matImposeLimiter(obj, fphys)
-            fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(1) );
-            fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(2) );
+            for i = 1:obj.Nvar
+                fphys = obj.Limiter.matLimit( fphys, obj.varFieldIndex(i) );
+            end
         end
     end
     
