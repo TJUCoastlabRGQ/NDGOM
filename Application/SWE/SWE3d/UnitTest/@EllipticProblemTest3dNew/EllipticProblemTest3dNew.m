@@ -7,6 +7,10 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
     %> k_{31}&&k_{32}&&k_{33}\end {matrix}\right]$$. $k_{33}$ is calculated
     %> as $k_{13}^2+k_{23}^2+\frac{1}{D^2}$
     
+    %> We note that, this function cannot be used directly since 20210709,
+    %> we adopted mass lumping to make the resulting stiff matrix symmetric positive
+    %> definite
+    
     properties
         ChLength = 1
         ChWidth = 1
@@ -65,14 +69,16 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.K11 = obj.TempK11 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K22 = obj.TempK22 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-            obj.K13 = obj.TempK13 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-            obj.K23 = obj.TempK23 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
+%             obj.K13 = obj.TempK13 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
+%             obj.K23 = obj.TempK23 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            obj.K13 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            obj.K23 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
 %             obj.K33 = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.TempK33 = obj.K33(1);
-            obj.matGetFunction;
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-            obj.RHS = obj.matAssembleRightHandSide;
+%             obj.matGetFunction;
+%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+%             obj.RHS = obj.matAssembleRightHandSide;
             obj.AssembleGlobalStiffMatrix;
         end
         function EllipticProblemSolve(obj)
