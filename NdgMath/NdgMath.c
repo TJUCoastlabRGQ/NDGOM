@@ -215,6 +215,19 @@ void GetVolumnIntegral3d(double *dest, double *tempdest, ptrdiff_t *RowOPA, ptrd
 	}
 }
 
+/*The following function is used to lump the mass matrix, i.e. sum each row of the mass matrix and put the sum at the diagonal position*/
+void MassLumping(double *dest, double *source, int Np){
+	memset(dest, 0, Np*Np*sizeof(double));
+	double Tempdata;
+	for (int row = 0; row < Np; row++){
+		Tempdata = 0;
+		for (int col = 0; col < Np; col++){
+			Tempdata += source[row + col*Np];
+		}
+		dest[row + row*Np] = Tempdata;
+	}
+}
+
 /*This function is used to get the inverse matrix of the given matrix, and has been verified*/
 void MatrixInverse(double *dest, ptrdiff_t Np)
 {

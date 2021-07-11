@@ -428,9 +428,12 @@ FuncHandle(path, srcfile, libfile);
 % SWE3d
 path = 'Application/SWE/SWE3d/@SWEAbstract3d/private/';
 AddIncludePath(path);
-libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c'};
+libfile = {'Application/SWE/SWE3d/@SWEAbstract3d/private/mxSWE3d.c',...
+    'NdgMath/NdgMath.c',...
+    'NdgMath/NdgMemory.c'};
 srcfile = { ...
-    [path, 'mxUpdateTimeInterval3d.c']};
+    [path, 'mxUpdateTimeInterval3d.c'],...
+    [path, 'mxUpdateNonhydroTimeInterval3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'Application/SWE/SWE3d/SWE3dVerticalVelocitySolver/private/';

@@ -8,6 +8,10 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
+void SWENH3dTimeIntervalMemoryAllocation(int, int, int);
+
+void SWENH3dTimeIntervalMemoryDeAllocation();
+
 void SWENH3dImposeBoundaryMemoryAllocation(int, int, int, int, int, int, int, int, int, int);
 
 void SWENH3dImposeBoundaryMemoryDeAllocation();

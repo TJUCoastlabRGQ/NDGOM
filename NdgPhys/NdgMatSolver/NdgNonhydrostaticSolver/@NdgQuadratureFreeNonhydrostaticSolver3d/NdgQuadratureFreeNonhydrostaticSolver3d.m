@@ -135,13 +135,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
             
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
-                obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit);
+                obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.mesh.J, obj.cell.M);
             
            [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
                 physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS );
+            
+            obj.GlobalStiffMatrix = (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
             
             NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
             

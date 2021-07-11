@@ -6,6 +6,30 @@ void MemoryAllocationCheck(double *dest, int size){
     }
 }
 
+double *TimeIntervalu = NULL, *TimeIntervalv = NULL, *TimeIntervalw = NULL, *TimeIntervalt = NULL;
+char *TimeIntervalInitialized = "False";
+
+void SWENH3dTimeIntervalMemoryAllocation(int Np, int K3d, int K2d){
+	TimeIntervalu = malloc(Np*K3d*sizeof(double));
+	MemoryAllocationCheck(TimeIntervalu, Np*K3d*sizeof(double));
+	TimeIntervalv = malloc(Np*K3d*sizeof(double));
+	MemoryAllocationCheck(TimeIntervalv, Np*K3d*sizeof(double));
+	TimeIntervalw = malloc(Np*K3d*sizeof(double));
+	MemoryAllocationCheck(TimeIntervalw, Np*K3d*sizeof(double));
+	TimeIntervalt = malloc(K2d*sizeof(double));
+	MemoryAllocationCheck(TimeIntervalw, K2d*sizeof(double));
+
+	TimeIntervalInitialized = "True";
+}
+
+void SWENH3dTimeIntervalMemoryDeAllocation(){
+	free(TimeIntervalu); TimeIntervalu = NULL;
+	free(TimeIntervalv); TimeIntervalv = NULL;
+	free(TimeIntervalw); TimeIntervalw = NULL;
+	free(TimeIntervalt); TimeIntervalt = NULL;
+	TimeIntervalInitialized = "False";
+}
+
 /*This is for three-dimensional non-hydrostatic model*/
 
 char *SWENonhydro3dInitialized = "False";

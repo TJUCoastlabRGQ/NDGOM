@@ -39,6 +39,8 @@ void Minus(double *, double *, double *, int);
 void MatrixMultiply(char*, char*, ptrdiff_t, ptrdiff_t, ptrdiff_t, double, double *, ptrdiff_t, \
 	double *, ptrdiff_t, double, double *, ptrdiff_t);
 
+void MassLumping(double *, double *, int);
+
 void MatrixInverse(double *, ptrdiff_t );
 
 void DotProduct(double *, double *, double *, int );
