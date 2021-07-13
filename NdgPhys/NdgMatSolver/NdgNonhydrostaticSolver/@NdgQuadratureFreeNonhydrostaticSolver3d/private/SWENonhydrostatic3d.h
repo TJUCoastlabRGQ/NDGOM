@@ -21,7 +21,9 @@
 #include <omp.h>
 #endif
 
-void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np);
+void AssembleFacialContributionIntoSparseMatrix(double *, mwIndex *, mwIndex *, double *, double *, int, int, double *, int, int);
+
+void AssembleVolumnContributionIntoSparseMatrix(double *, mwIndex *, mwIndex *, int, double *, int);
 
 void AssembleFacialDiffMatrix(double *, double *, double *, int, int);
 
@@ -29,9 +31,8 @@ void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );
 
-void GetSparsePatternInVerticalDirection(mwIndex *, mwIndex *, int, int, int);
-
-void GetSparsePatternInHorizontalDirection(mwIndex *, mwIndex *, double *, int, int, int, int);
+void GetSparsePatternInHorizontalDirection(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
+	double *, double *, int, int, int, int, int);
 
 void FetchFacialData(double *, double *, double *, int );
 

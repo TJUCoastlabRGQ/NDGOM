@@ -15,44 +15,44 @@ void MyExit()
 
 void GetInverseSquareHeight(double *, double *, double, int); 
 
-void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int NonzeroPerColumn, double *M3d, \
+void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *M3d, \
 	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
-	double *K23, double *K33);
+	double *K23, double *K33, int LocalEle);
 
-void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int DownEle, int Np, int Nfp, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
-	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
-	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33, double Tau); 
-
-void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int UpEle, int Np, int Nfp, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
+void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int DownEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
 	double *AdjK23, double *AdjK33, double Tau);
 
-void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int Np, int Nfp, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *Eid, double *rx, double *sx, double *ry, \
+void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int UpEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
+	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
+	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
+	double *AdjK23, double *AdjK33, double Tau);
+
+
+void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
 	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau);
 
-void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int Np, int Nfp, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *Eid, double *rx, double *sx, double *ry, \
+void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
 	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau);
 
-void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
-	double *M2d, double *J2d, double *EidM, double *Dt, double *tz, double *nx, \
-	double *ny, double *K13, double *K23, double Tau);
+void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, \
+	double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, \
+	double *K23, double *K33, double Tau, int LocalEle);
 
-void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
 	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
 	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
-	double *AdjK13, double *AdjK23, double Tau);
+	double *AdjK13, double *AdjK23, double Tau, int LocalEle, int AdjEle);
 
-void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int Nfp, \
-	int NonzeroPerColumn, double *M2d, \
-	 double *J2d, double *LocalEid, double *rx, double *sx, \
-	double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau);
-
+void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
+	double *M2d, double *J2d, double *LocalEid, double *Dt, double *tz, double *nx, \
+	double *ny, double *K13, double *K23, double Tau, int LocalEle);
 /*This function is used to assemble the global stiff matrix used in the 
 three-dimensional non-hydrostatic solver, the input parameters are organized as follows:
 PNPS: $\frac{\partial q}{\partial \sigma}$, indexed as 0;
@@ -283,19 +283,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int ele = 0; ele < K; ele++){
 		int EleNumber = 0;
-		int StartPoint;
-		int LocalStartPoint;
 		double *TempEToE = malloc((Nface + 1)*sizeof(double));
 		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
 
 		for (int i = 0; i < EleNumber; i++){
 			if (ele + 1 == (int)TempEToE[i]){
 				LocalStartPoint = jcs[ele*Np] + i*Np;
-				GetLocalVolumnIntegralTerm(sr, LocalStartPoint, \
-					Np, jcs[ele*Np + 1] - jcs[ele*Np], M3d, \
-					Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
+				GetLocalVolumnIntegralTerm(sr, irs, jcs, \
+					Np, M3d,Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
 					sy + ele*Np, tz + ele*Np, J + ele*Np, K13 + ele*Np, \
-					K23 + ele*Np, K33 + ele*Np);
+					K23 + ele*Np, K33 + ele*Np, ele + 1);
 				break;
 			}
 		}
@@ -331,17 +328,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				}
 			}
 
-			GetLocalFacialContributionInHorizontalDirection(sr, LocalStartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
+			GetLocalFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
 				IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, Dt, tz + ele*Np, Facialnx + i * IENfp, \
-				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + GlobalFace[i]));
+				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1);
 
 			for (int j = 0; j < EleNumber; j++){
 				if ((int)TempEToE[j] == AdjEle[i]){
-					StartPoint = jcs[ele*Np] + j*Np;
-					GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, StartPoint, Np, IENfp, jcs[ele*Np + 1] - jcs[ele*Np], \
+					GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp,\
 						IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
 						tz + (int)(TempEToE[j] - 1)*Np, Facialnx + i*IENfp, Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, \
-						K13 + (int)(TempEToE[j] - 1)*Np, K23 + (int)(TempEToE[j] - 1)*Np, *(InnerEdgeTau + GlobalFace[i]));
+						K13 + (int)(TempEToE[j] - 1)*Np, K23 + (int)(TempEToE[j] - 1)*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1, AdjEle[i]);
+
 				}
 			}
 		}
@@ -377,14 +374,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			if (UpEle == DownEle){//Only one layer in the vertical direction, impose the Dirichlet boundary condition
 				for (int i = 0; i < EleNumber; i++){
 					if (LocalEle == (int)TempEToE[i]){
-						StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
 						if (!strcmp(BoundaryType, "Dirichlet")){
-							ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
-								jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+							ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
 								J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 								tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
-								K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele));
+								K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
 						}
 						break;
 					}
@@ -396,26 +391,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						if (LocalEle == (int)TempEToE[i]){
 							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
 							if (!strcmp(BoundaryType, "Dirichlet")){
-								ImposeDirichletBoundaryCondition(sr, StartPoint, Np, Np2d, \
-									jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+								ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
 									J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 									sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 									tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-									K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele));
+									K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
 							}
 							break;
 						}
 					}
 					
-					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
 						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
 					
-					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
@@ -428,15 +420,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				else if (LocalEle == DownEle){// This is the bottom most cell.
 					
 
-					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
 						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L-1)*K2d + ele));
 					
-					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
@@ -447,15 +437,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				}
 				else{
 					
-					GetLocalUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
 						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
 					
-					GetLocalToUpFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, UpEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
@@ -463,15 +451,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
 						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
                      
-					GetLocalDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
 						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
                       
-					GetLocalToDownFacialContribution(sr, jcs, TempEToE, EleNumber, LocalEle, DownEle, Np, Np2d, \
-						jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np], M2d, \
+					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
@@ -489,9 +475,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(BotEidM);
 }
 
-void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int NonzeroPerColumn, double *M3d, \
+void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *M3d, \
 	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
-	double *K23, double *K33){
+	double *K23, double *K33, int LocalEle){
 	double *DiffMatrix = malloc(Np*Np*sizeof(double));
 	double *TempDiffMatrix = malloc(Np*Np*sizeof(double));
 	double *VertDiffMatrix = malloc(Np*Np*sizeof(double));
@@ -582,7 +568,7 @@ void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int Nonzer
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
 
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+	AssembleVolumnContributionIntoSparseMatrix(dest, Ir, Jc, Np, Contribution, LocalEle);
 
 	free(DiffMatrix);
 	free(TempDiffMatrix);
@@ -594,8 +580,8 @@ void GetLocalVolumnIntegralTerm(double *dest, int StartPoint, int Np, int Nonzer
 	free(Contribution);
 }
 
-void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int DownEle, int Np, int Np2d, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
+void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int DownEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
 	double *AdjK23, double *AdjK33, double Tau){
@@ -699,15 +685,14 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, DownEid, LocalEid, Np, Np2d, 1.0);
 
-	int StartPoint;
+	double *SortedDownEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedDownEid, DownEid, Np2d);
+	double *SortedLocalEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Np2d);
+	Sort(SortedDownEid, Np2d);
+	Sort(SortedLocalEid, Np2d);
 
-	for (int i = 0; i < EleNumber; i++){
-		if ((int)TempEToE[i] == DownEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedLocalEid, SortedDownEid, Np, Np2d, TempContribution, LocalEle, DownEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -716,10 +701,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *jcs, double *TempET
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(TempMass2d);
+	free(SortedDownEid);
+	free(SortedLocalEid);
 }
 
-void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int UpEle, int Np, int Np2d, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
+void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int UpEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
 	double *AdjK23, double *AdjK33, double Tau){
@@ -823,15 +810,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, UpEid, LocalEid, Np, Np2d, 1.0);
 
-	int StartPoint;
+	double *SortedUpEid = malloc(Np2d*sizeof(double));
+	double *SortedLocalEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedUpEid, UpEid, Np2d);
+	memcpy(SortedLocalEid, LocalEid, Np2d);
 
-	for (int i = 0; i < EleNumber; i++){
-		if ((int)TempEToE[i] == UpEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedLocalEid, SortedUpEid, Np, Np2d, TempContribution, LocalEle, UpEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -840,12 +824,13 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(TempMass2d);
+	free(SortedUpEid);
+	free(SortedLocalEid);
 }
 
 
-
-void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int Np, int Np2d, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
+void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
 	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
@@ -931,15 +916,11 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
 
-	int StartPoint;
+	double *SortedLocalEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Np2d*sizeof(double));
+	Sort(SortedLocalEid, Np2d);
 
-	for (int i = 0; i < EleNumber; i++){
-		if ((int)TempEToE[i] == LocalEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedLocalEid, SortedLocalEid, Np, Np2d, TempContribution, LocalEle, LocalEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -948,11 +929,11 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *jcs, double *TempEToE
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(TempMass2d);
+	free(SortedLocalEid);
 }
 
-
-void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, int EleNumber, int LocalEle, int Np, int Np2d, \
-	int NonzeroPerColumn, double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
+void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
 	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
@@ -1038,15 +1019,11 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
 
-	int StartPoint;
+	double *SortedLocalEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Np2d*sizeof(double));
+	Sort(SortedLocalEid, Np2d);
 
-	for (int i = 0; i < EleNumber; i++){
-		if ((int)TempEToE[i] == LocalEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedLocalEid, SortedLocalEid, Np, Np2d, TempContribution, LocalEle, LocalEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -1055,13 +1032,13 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *jcs, double *TempEToE, 
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(TempMass2d);
+	free(SortedLocalEid);
 }
 
-void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int Np2d, \
-	int NonzeroPerColumn, double *M2d, \
-	double *J2d, double *LocalEid, double *rx, double *sx,\
+void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx,\
 	double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, \
-	double *K23, double *K33, double Tau){
+	double *K23, double *K33, double Tau, int LocalEle){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Np2d);
@@ -1129,7 +1106,11 @@ void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int 
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
 
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
+	double *SortedLocalEid = malloc(Nfp*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Nfp*sizeof(double));
+	Sort(SortedLocalEid, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEid, SortedLocalEid, Np, Nfp, TempContribution, LocalEle, LocalEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -1138,14 +1119,14 @@ void ImposeDirichletBoundaryCondition(double *dest, int StartPoint, int Np, int 
 	free(FacialDiffMatrix);
 	free(BoundaryEdgeContribution);
 	free(TempMass2d);
+	free(SortedLocalEid);
 }
 
 
-
-void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
 	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
 	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
-	double *AdjK13, double *AdjK23, double Tau){
+	double *AdjK13, double *AdjK23, double Tau, int LocalEle, int AdjEle){
 	// \D5\E2\C0\EF\B5\C4nx \BA\CDny \D3ɱ\BE\B5ص\A5Ԫָ\B3\F6
 	double *FacialMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Nfp);
@@ -1202,7 +1183,14 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Nfp*Nfp);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, AdjEid, LocalEid, Np, Nfp, 1.0);
 
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
+	double *SortedAdjEid = malloc(Nfp*sizeof(double));
+	memcpy(SortedAdjEid, AdjEid, Nfp);
+	double *SortedLocalEid = malloc(Nfp*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Nfp);
+	Sort(SortedAdjEid, Nfp);
+	Sort(SortedLocalEid, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEid, SortedAdjEid, Np, Nfp, TempContribution, LocalEle, AdjEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
@@ -1211,11 +1199,13 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, int
 	free(InnerEdgeContribution);
 	free(LocalDiff);
 	free(TempMass2d);
+	free(SortedLocalEid);
+	free(SortedAdjEid);
 }
 
-void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoint, int Np, int Nfp, int NonzeroPerColumn, \
+void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
 	double *M2d, double *J2d, double *LocalEid, double *Dt, double *tz, double *nx, \
-	double *ny, double *K13, double *K23, double Tau){
+	double *ny, double *K13, double *K23, double Tau, int LocalEle){
 
 	double *FacialMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Nfp);
@@ -1272,13 +1262,18 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, int StartPoin
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Nfp*Nfp);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Nfp, -1.0);
 
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
+	double *SortedLocalEidM = malloc(Nfp*sizeof(double));
+	memcpy(SortedLocalEidM, LocalEid, Nfp*sizeof(double));
+	Sort(SortedLocalEidM, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEidM, SortedLocalEidM, Np, Nfp, TempContribution, LocalEle, LocalEle);
 	free(FacialMass2d);
 	free(TempContribution);
 	free(LocalDiff);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
 	free(TempMass2d);
+	free(SortedLocalEidM);
 }
 
 void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){

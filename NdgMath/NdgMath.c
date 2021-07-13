@@ -293,6 +293,25 @@ void ReverseValue(double *dest, double *source, int size){
 		dest[i] = 1.0 / source[i];
 }
 
+void Sort(double *dest, int Num){
+	// Adopt bubble method to sort the given array.
+	int isSorted;
+	double temp;
+	for (int i = 0; i<Num - 1; i++){
+		//Suppose the rest data are already sorted
+		isSorted = 1;
+		for (int j = 0; j<Num - 1 - i; j++){
+			if (dest[j] > dest[j + 1]){
+				temp = dest[j];
+				dest[j] = dest[j + 1];
+				dest[j + 1] = temp;
+				isSorted = 0;  //Once swapped, it indicates the data is not sorted
+			}
+		}
+		if (isSorted) break; //if no swap needed, it indicates the data is already sorted.
+	}
+}
+
 void StrongFormBoundaryEdgeRHS(int edgeIndex, double *FToE, double *FToF, int Np, int K, \
 	int Nfp, double *FToN1, double *fluxM_, double *fluxS_, double *Js, double *Mb, double *rhs){
 	const int e1 = (int)FToE[2 * edgeIndex] - 1;

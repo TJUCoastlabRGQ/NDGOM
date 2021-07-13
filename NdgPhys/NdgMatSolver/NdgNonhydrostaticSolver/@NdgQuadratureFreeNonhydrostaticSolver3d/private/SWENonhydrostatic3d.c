@@ -13,13 +13,33 @@ void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2
 	}
 }
 
-/*Function checked*/
-void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np){
-	double *Tempdest = dest;
-	for (int col = 0; col < Np; col++){
-		Tempdest = dest + col * NonzeroNum;
-		for (int row = 0; row < Np; row++){
-			Tempdest[row] += src[col*Np + row];
+/*We note here that, when the local faicl contribution is assembled to the sparse matrix, AdjEid here refers to the LocalEid, 
+* and AdjEle is the local element.
+*/
+void AssembleFacialContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwIndex *Jc, double *LocalEid, double *AdjEid, int Np, int Nfp, double *Tempdest, int LocalEle, int AdjEle){
+	for (int i = 0; i < Nfp; i++){
+		int Sp = (int)Jc[(LocalEle - 1)*Np + (int)LocalEid[i] - 1];
+		for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + (int)LocalEid[i]] - Sp; j++){
+			if (Ir[Sp + j] == (mwIndex)((AdjEle - 1)*Np + AdjEid[0] - 1)){
+				for (int p = 0; p < Nfp; p++){
+					dest[Sp + j + p] += Tempdest[((int)LocalEid[i] - 1)*Np + (int)AdjEid[p] - 1];
+				}
+			}
+			continue;
+		}
+	}
+}
+
+void AssembleVolumnContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *Tempdest, int LocalEle){
+	for (int i = 0; i < Np; i++){
+		int Sp = (int)Jc[(LocalEle - 1)*Np + i];
+		for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + i + 1] - Sp; j++){
+			if (Ir[Sp + j] == (mwIndex)((LocalEle - 1)*Np)){
+				for (int p = 0; p < Np; p++){
+					dest[Sp + j + p] += Tempdest[(i - 1)*Np + p];
+				}
+			}
+			continue;
 		}
 	}
 }
@@ -102,22 +122,8 @@ void FindUniqueElementAndSortOrder(double *dest, double *Src, int *OutNum, int I
 			dest[(*OutNum) - 1] = CurrentCell;
 			}
 	}
-	// Adopt bubble method to sort the given array.
-	int isSorted;
-	double temp;
-	for (int i = 0; i<(*OutNum) - 1; i++){
-		//Suppose the rest data are already sorted
-		isSorted = 1;
-		for (int j = 0; j<(*OutNum) - 1 - i; j++){
-			if (dest[j] > dest[j + 1]){
-				temp = dest[j];
-				dest[j] = dest[j + 1];
-				dest[j + 1] = temp;
-				isSorted = 0;  //Once swapped, it indicates the data is not sorted
-			}
-		}
-		if (isSorted) break; //if no swap needed, it indicates the data is already sorted.
-	}
+
+	Sort(dest, *OutNum);
 }
 
 void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, \
@@ -188,84 +194,11 @@ void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, int LocalEle, int A
 	}
 }
 
-void GetSparsePatternInVerticalDirection(mwIndex *TempIr, mwIndex *TempJc, int Np, int Nlayer, int Ele2d){
-	int *SingleColumn = malloc(Np*Nlayer*sizeof(int));
-	int *SingleRow;
-	int SingleNonzero;
-	if (Nlayer == 1){
-		SingleNonzero = Np*Np;
-		SingleRow = malloc(SingleNonzero*sizeof(int));
-		for (int ic = 0; ic < Np; ic++){
-			SingleColumn[ic] = (ic + 1)*Np;
-			for (int jr = 0; jr < Np; jr++){
-				SingleRow[ic*Np + jr] = jr;
-			}
-		}
-	}
-	else if (Nlayer == 2){
-		SingleNonzero = Np*Np * 2 * 2;
-		SingleRow = malloc(SingleNonzero*sizeof(int));
-		for (int ic = 0; ic < 2 * Np; ic++){
-			SingleColumn[ic] = (ic + 1)*Np * 2;
-			for (int jr = 0; jr < 2 * Np; jr++){
-				SingleRow[ic*Np * 2 + jr] = jr;
-			}
-		}
-	}
-	else{
-		SingleNonzero = Np*Np * 2 * 2 + (Nlayer - 2)*Np*Np * 3;
-		SingleRow = malloc(SingleNonzero*sizeof(int));
-		int NSumR = 0;
-		for (int Layer = 0; Layer < 1; Layer++){
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++){
-				SingleColumn[ic] = (ic + 1) * 2 * Np;
-				for (int jr = 0; jr < 2 * Np; jr++){
-					SingleRow[NSumR + ic*Np * 2 + jr] = jr;
-				}
-			}
-		}
-		NSumR = Np * Np * 2;
-		for (int Layer = 1; Layer < Nlayer - 1; Layer++){
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++){
-				SingleColumn[ic] = SingleColumn[ic - 1] + 3 * Np;
-				for (int jr = 0; jr < 3 * Np; jr++){
-					SingleRow[NSumR + (ic - Np) * 3 * Np + jr] = (Layer - 1)*Np + jr;
-				}
-			}
-		}
-		NSumR = Np*Np * 2 + (Nlayer - 2)*Np * 3 * Np;
-		for (int Layer = Nlayer - 1; Layer < Nlayer; Layer++){
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++){
-				SingleColumn[ic] = SingleColumn[ic - 1] + 2 * Np;
-				for (int jr = 0; jr < 2 * Np; jr++){
-					SingleRow[NSumR + (ic - (Nlayer - 1)*Np) * 2 * Np + jr] = (Layer - 1)*Np + jr;   //测试
-				}
-			}
-		}
-	}
-
-	//接下来对稀疏矩阵的索引坐标进行复制。
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
-	for (int i = 0; i < Ele2d; i++){
-
-		for (int j = 0; j < SingleNonzero; j++){
-			TempIr[i*SingleNonzero + j] = SingleRow[j] + i*Nlayer*Np;
-		}
-		for (int j = 0; j < Nlayer*Np; j++){
-			TempJc[1 + i*Nlayer*Np + j] = i * SingleColumn[Nlayer*Np - 1] + SingleColumn[j];
-		}
-	}
-
-	free(SingleColumn);
-	free(SingleRow);
-}
-
-
 /*We note here that Nface2d in the function call can be Nface, when we study the mixed second order derivative in horizontal direction*/
-void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, double *EToE, int Nface2d, int Nface, int Ele3d, int Np){
-	double *TempEToE = malloc((Nface2d+1)*Ele3d*sizeof(double));
+void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
+	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d){
+
+	double *TempEToE = malloc((Nface+1)*Ele3d*sizeof(double));
 	int *UniNum = malloc(Ele3d*sizeof(int));
 
 	//First we need to know how many elements are adjacent to a studied element.
@@ -273,7 +206,7 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int e = 0; e < Ele3d; e++){
-		FindUniqueElementAndSortOrder(TempEToE + e*(Nface2d + 1), EToE + e*Nface, UniNum + e, Nface2d, e+1);
+		FindUniqueElementAndSortOrder(TempEToE + e*(Nface + 1), EToE + e*Nface, UniNum + e, Nface, e+1);
 	}
 	/*
 	* next we'll move on the the construction of the index of the sparse matrix,
@@ -281,27 +214,106 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 	* this part can't be parallised since the number of nonzeros of a studied
 	* column is influenced by that of the columns come before the studied one.
 	*/
-	
-	for (int i = 0; i < Ele3d; i++){
-		int NumRow = *(UniNum + i)*Np;
-		for (int j = 0; j < Np; j++){
-			TempJc[i*Np + j + 1] = TempJc[i*Np + j] + NumRow;
-		}
-	}
+	/*The row index, with (Nface+1)*Np the possible maximum influence scope and Np the number of point for each cell*/
+	mwIndex *Ir = malloc((Nface + 1)*Np*Np*sizeof(mwIndex));
+	/*Number of point influenced by each point*/
+	int *NumRowPerPoint = malloc(Np*sizeof(int));
+	/*The position the row index of each point has been inserted*/
+	int *CurrentPosition = malloc(Np*sizeof(int));
 
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
+	double *LocalEidM = NULL, *AdjacentEidM = NULL;
+
 	for (int i = 0; i < Ele3d; i++){
-		for (int e = 0; e < *(UniNum + i); e++){
-			int ele = (int)TempEToE[i*(Nface2d+1) + e];
-			for (int col = 0; col < Np; col++){
-				for (int row = 0; row < Np; row++){
-					TempIr[(int)TempJc[i*Np + col] + e*Np + row] = row + (ele - 1)*Np;
+		memset(Ir, 0, (Nface + 1)*Np*Np*sizeof(mwIndex));
+		memset(NumRowPerPoint, 0, Np*sizeof(int));
+		memset(CurrentPosition, 0, Np*sizeof(int));
+		for (int e = 0; e < *(UniNum + i);e++){
+			int TempEle = (int)TempEToE[i*(Nface + 1) + e];
+			/*The cell studied is located upside or downside of cell i*/
+			if (TempEle != (i + 1) && (TempEle == EToE[i*Nface + Nface - 2] || TempEle == EToE[i*Nface + Nface - 1])){
+				LocalEidM = malloc(BotENfp*sizeof(double));
+				AdjacentEidM = malloc(BotENfp*sizeof(double));
+				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, BotENfp, BotEFToE, BotEFToN1, BotEFToN2, BotENe, i + 1, TempEle);
+				for (int p = 0; p < BotENfp; p++){
+					/*The current point influence the point indexed by AdjacentEidM*/
+					NumRowPerPoint[(int)LocalEidM[p] - 1] += BotENfp;
+					/*The row index of the point been influenced*/
+					Ir[(int)(LocalEidM[p] - 1)*Np*Np + CurrentPosition[(int)(LocalEidM[p] - 1)] + p] = (mwIndex)(AdjacentEidM[p] - 1 + (TempEle - 1)*Np);
+				}
+				for (int p = 0; p < BotENfp; p++){
+					/*Increase the insert position of each point by BotENfp*/
+					CurrentPosition[(int)(LocalEidM[p] - 1)] += BotENfp;
+				}
+				free(LocalEidM), LocalEidM = NULL;
+				free(AdjacentEidM), AdjacentEidM = NULL;
+			}
+			/*The cell studied is located adjacent to cell in horizontal direction*/
+			else if (TempEle != (i + 1) && (TempEle != EToE[i*Nface + Nface - 2] && TempEle != EToE[i*Nface + Nface - 1])){
+				LocalEidM = malloc(IENfp*sizeof(double));
+				AdjacentEidM = malloc(IENfp*sizeof(double));
+				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, IENfp, IEFToE, IEFToN1, IEFToN2, IENe, i+1, TempEle);
+				for (int p = 0; p < IENfp; p++){
+					NumRowPerPoint[(int)LocalEidM[p] - 1] += IENfp;
+					Ir[(int)(LocalEidM[p] - 1)*Np*Np + CurrentPosition[(int)(LocalEidM[p] - 1)] + p] = (mwIndex)(AdjacentEidM[p] - 1 + (TempEle - 1)*Np);
+				}
+				for (int p = 0; p < BotENfp; p++){
+					CurrentPosition[(int)(LocalEidM[p] - 1)] += IENfp;
+				}
+				free(LocalEidM), LocalEidM = NULL;
+				free(AdjacentEidM), AdjacentEidM = NULL;
+			}
+			/*The cell studied is cell i itself*/
+			else if (TempEle == (i + 1)){
+				for (int p = 0; p < Np; p++){
+					NumRowPerPoint[p] += Np;
+					Ir[p*Np*Np + CurrentPosition[p] + p] = (mwIndex)(p + (TempEle - 1)*Np);
+				}
+				for (int p = 0; p < Np; p++){
+					CurrentPosition[p] += Np;
 				}
 			}
 		}
+		for (int p = 0; p < Np; p++){
+			TempJc[i*Np + p + 1] = TempJc[i*Np + p] + NumRowPerPoint[p];
+		}
+		for (int col = 0; col < Np; col++){
+			for (int p = 0; p < NumRowPerPoint[col]; p++){
+				/*The row index in the sparse matrix*/
+				TempIr[TempJc[i*Np + col] + p] = Ir[col * (Nface + 1) * Np + p];
+			}
+		}
+
 	}
 	free(TempEToE);
 	free(UniNum);
+	free(Ir);
+	free(NumRowPerPoint);
+	free(CurrentPosition);
+}
+
+void FindFaceAndFacialPoint(double *Localdest, double *Adjacentdest, int Nfp, double *FToE, double *FToN1, double *FToN2, int Ne, int LocalEle, int AdjEle){
+	for (int i = 0; i < Ne; i++){
+		if ((int)FToE[2 * i] == LocalEle && (int)FToE[2 * i + 1] == AdjEle){
+			for (int p = 0; p < Nfp; p++){
+				Localdest[p] = FToN1[i*Nfp + p];
+				Adjacentdest[p] = FToN2[i*Nfp + p];
+			}
+			Sort(Localdest, Nfp);
+			Sort(Adjacentdest, Nfp);
+			break;
+		}
+		else if ((int)FToE[2 * i + 1] == LocalEle && (int)FToE[2 * i] == AdjEle){
+			for (int p = 0; p < Nfp; p++){
+				Localdest[p] = FToN2[i*Nfp + p];
+				Adjacentdest[p] = FToN1[i*Nfp + p];
+			}
+			Sort(Localdest, Nfp);
+			Sort(Adjacentdest, Nfp);
+			break;
+		}
+		else{
+			printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model in function FindFaceAndFacialPoint, check again!\n");
+			exit(0);
+		}
+	}
 }
