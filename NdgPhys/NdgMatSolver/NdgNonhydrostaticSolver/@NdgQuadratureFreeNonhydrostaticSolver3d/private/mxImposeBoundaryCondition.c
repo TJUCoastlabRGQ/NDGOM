@@ -500,19 +500,6 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 
-	int UniNum = 0, StartPoint;
-
-	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
-	double *TempEToE = malloc((Nface + 1)*sizeof(double));
-
-	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
-
-	int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
-
-	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == LocalEle)
-			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
-	}
 	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
 
 	ptrdiff_t One = 1;
@@ -552,7 +539,11 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 
 	Add(RHSdest + (LocalEle - 1)*Np, RHSdest + (LocalEle - 1)*Np, TempRHSBuff, Np);
 
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
+	double *SortedFpIndex = malloc(Nfp*sizeof(double));
+	memcpy(SortedFpIndex, FpIndex, Nfp*sizeof(double));
+	Sort(SortedFpIndex, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, Irs, Jcs, SortedFpIndex, SortedFpIndex, Np, Nfp, TempContribution, LocalEle, LocalEle);
 
 	free(TempK31);
 	free(TempK32);
@@ -561,10 +552,10 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 	free(TempFacialData);
 	free(EleMass2d);
 	free(TempContribution);
-	free(TempEToE);
 	free(ContributionPerPoint);
 	free(TempRHSBuff);
 	free(TempRHSFacialData);
+	free(SortedFpIndex);
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, \
@@ -662,71 +653,16 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For $k_{31}\frac{\partial v}{\partial x}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dx, K13, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
-
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{31}\frac{\partial p}{\partial x}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/*For $k_{32}\frac{\partial v}{\partial y}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dy, K23, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
-
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{32}\frac{\partial p}{\partial y}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/*For $k_{33}\frac{\partial v}{\partial \sigma}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dz, K33, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
-
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{33}\frac{\partial p}{\partial \sigma}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	MultiplyByConstant(TempMass2d, EleMass2d, Tau, Nfp*Nfp);
 	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
 
-	int UniNum = 0, StartPoint;
-	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
-	double *TempEToE = malloc((Nface + 1)*sizeof(double));
-	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
-	int NonzeroPerColumn = jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np];
-	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == LocalEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + j*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, TempContribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	double *SortedFpIndex = malloc(Nfp*sizeof(double));
+	memcpy(SortedFpIndex, FpIndex, Nfp*sizeof(double));
+	Sort(SortedFpIndex, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedFpIndex, SortedFpIndex, Np, Nfp, TempContribution, LocalEle, LocalEle);
 
 	free(DxBuff);
 	free(Dx);
@@ -737,9 +673,9 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 	free(TempContribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
-	free(TempEToE);
 	free(TempMass2d);
 	free(TempDiffMatrix);
+	free(SortedFpIndex);
 }
 
 void GetScalarCentralFluxTerm2d(double *dest, double *fm, double *fp, double *Vector, int Nfp){

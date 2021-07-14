@@ -1,4 +1,5 @@
 #include "SWENonhydrostatic3d.h"
+#include "stdio.h"
 
 /*This function is called at the initialization stage to calcualte the second order derivative
 about nonhydrostatic pressure in horizontal direction, i.e. $\frac{\partial^2 p}{\partial x^2}$
@@ -131,12 +132,11 @@ void GetLocalToAdjacentElementContributionForSecondOrderTerm(double *dest, mwInd
 	*/
 	double *SortedLocalEidM = malloc(Nfp*sizeof(double));
 	memcpy(SortedLocalEidM, LocalEidM, Nfp*sizeof(double));
+	Sort(SortedLocalEidM, Nfp);
 	double *SortedAdjEidM = malloc(Nfp*sizeof(double));
 	memcpy(SortedAdjEidM, AdjEidM, Nfp*sizeof(double));
-	Sort(SortedLocalEidM, Nfp);
 	Sort(SortedAdjEidM, Nfp);
 	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEidM, SortedAdjEidM, Np, Nfp, TempContribution, LocalEle, AdjEle);
-
 	free(FacialMass2d);
 	free(TempContribution);
 	free(AdjDiffBuff);
@@ -209,6 +209,7 @@ void GetLocalFacialContributionForSecondOrderTerm(double *dest, mwIndex *Ir, mwI
 	*/
 	double *SortedLocalEidM = malloc(Nfp*sizeof(double));
 	memcpy(SortedLocalEidM, LocalEidM, Nfp*sizeof(double));
+	Sort(SortedLocalEidM, Nfp);
 	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEidM, SortedLocalEidM, Np, Nfp, TempContribution, LocalEle, LocalEle);
 
 	free(FacialMass2d);
@@ -303,9 +304,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *J = mxGetPr(prhs[33]);
 	double *M3d = mxGetPr(prhs[34]);
 
-	double *BotEFToE = mxGetPr(prhs[35]);
-	double *BotEFToN1 = mxGetPr(prhs[36]);
-	double *BotEFToN2 = mxGetPr(prhs[37]);
+	double *BotEFToN1 = mxGetPr(prhs[35]);
+	double *BotEFToN2 = mxGetPr(prhs[36]);
 
 	int TotalNonzero = Ele3d * Np*Np + IENe * IENfp * IENfp * 2 + BotENe * VertNfp * VertNfp * 2;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
@@ -313,7 +313,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	TempJc[0] = 0;
 
 	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, FToE, FToN1, FToN2, BotEFToE, \
-		BotEFToN1, BotEFToN2, Nface, IENfp, VertNfp, Np, Ele3d);
+		BotEFToN1, BotEFToN2, Nface, IENfp, VertNfp, Np, Ele3d, IENe, BotENe);
 
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
@@ -321,9 +321,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	memcpy(irs, TempIr, TotalNonzero*sizeof(mwIndex));
 	mwIndex *jcs = mxGetJc(plhs[0]);
 	memcpy(jcs, TempJc, (Np*Ele3d + 1)*sizeof(mwIndex));
-
-	free(TempIr);
-	free(TempJc);
 
 
 #ifdef _OPENMP

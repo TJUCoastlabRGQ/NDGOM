@@ -62,9 +62,9 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.K11 = ones(mesh3d.cell.Np, mesh3d.K);
             obj.K22 = obj.K11;
-            obj.K13 = rand(mesh3d.cell.Np, mesh3d.K);
-            obj.K23 = rand(mesh3d.cell.Np, mesh3d.K);
-            obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
+            obj.K13 = 0 * rand(mesh3d.cell.Np, mesh3d.K);
+            obj.K23 = 0 * rand(mesh3d.cell.Np, mesh3d.K);
+            obj.K33 = 0 * (obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth);
             obj.matGetFunction;
             obj.RHS = obj.matAssembleRightHandSide;
             obj.AssembleGlobalStiffMatrix;

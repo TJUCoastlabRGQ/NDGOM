@@ -7,8 +7,8 @@ void GetPenaltyParameter(double *, double , double , int, int, int);
 
 void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
-	double *, double *, double *, double *, double *, double *, double *, double *, double *, \
-	int , double *, double *, double *, double *, double *);
+	double *, double *, double *, double *, double *, double *, double *, double *, \
+	int, double *, double *, double *, double *, double *);
 
 void ImposeNewmannBoundaryCondition(double *, int , int , int , double *, \
 	double *, double *, double *, double *, double *);
@@ -146,7 +146,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 				Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
-				Mass3d, TempJ, TempJs, LMass2d, TempEToE, Nface, FpIndex, DirichDataValue + edge * Nfp, \
+				Mass3d, TempJ, TempJs, LMass2d, Nface, FpIndex, DirichDataValue + edge * Nfp, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
 		}
 		else if (!strcmp(BoundaryType, "Newmann")){
@@ -167,17 +167,9 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 	double *EleMass3d = malloc(Np*Np*sizeof(double));
 
-	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-
-	DiagMultiply(EleMass3d, Mass3d, J, Np);
-	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
-	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-
 	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
 
 	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
-
-	double *TempRHS = malloc(Np * 1 * sizeof(double));
 
 	double *TempFacialData = malloc(Nfp * 1 * sizeof(double));
 
@@ -188,24 +180,16 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 	AssembleDataIntoPoint(TempRHSBuff, TempFacialData, FpIndex, Nfp);
 
-	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
-		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
+	MultiplyByConstant(TempRHSBuff, TempRHSBuff, -1.0, Np);
 
-	MultiplyByConstant(TempRHS, TempRHS, -1.0, Np);
-
-	Add(InputRHS, InputRHS, TempRHS, Np);
+	Add(InputRHS, InputRHS, TempRHSBuff, Np);
 
 
 	free(EleMass2d);
 
 	free(EleMass3d);
 
-	free(InvEleMass3d);
-
 	free(TempRHSBuff);
-
-	free(TempRHS);
 
 	free(TempFacialData);
 
@@ -213,7 +197,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
 	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt,\
-	double *Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, double *EToE, \
+	double *Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, \
 	int Nface, double *FpIndex, double *DirichData, double *K13, double *K23, double *K33){
 	double *DxBuff = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DxBuff, Dr, rx, Np);
@@ -236,9 +220,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	DiagMultiply(EleMass3d, Mass3d, J, Np);
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
-	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
-	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
 
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
@@ -346,17 +327,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
 
-	/*Multiply the contribution due to Dirichlet boundary condition by inverse matrix*/
-	ptrdiff_t Col = 1;
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, Col, (ptrdiff_t)Np, 1.0, InvEleMass3d,\
-		(ptrdiff_t)Np, TempRHSBuff, (ptrdiff_t)Np, 0.0, TempRHS, (ptrdiff_t)Np);
-
-	int UniNum = 0, StartPoint;
-	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
-	double *TempEToE = malloc((Nface + 1)*sizeof(double));
-
-
-	Add(InputRHS, InputRHS, TempRHS, Np);
+	Add(InputRHS, InputRHS, TempRHSBuff, Np);
 
 	free(DxBuff);
 	free(Dx);
@@ -365,15 +336,12 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(Dz);
 	free(EleMass3d);
 	free(EleMass2d);
-	free(InvEleMass3d);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(WeightedEleMass2d);
-	free(TempRHS);
 	free(TempRHSBuff);
 	free(DirichEdge2d);
 	free(DirichEdgeBuff);
-	free(TempEToE);
 	free(TempDiffMatrix);
 }
 

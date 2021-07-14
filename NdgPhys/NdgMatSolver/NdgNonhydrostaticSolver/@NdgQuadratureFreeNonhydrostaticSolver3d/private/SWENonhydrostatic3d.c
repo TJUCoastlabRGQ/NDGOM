@@ -36,7 +36,7 @@ void AssembleVolumnContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwInd
 		for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + i + 1] - Sp; j++){
 			if (Ir[Sp + j] == (mwIndex)((LocalEle - 1)*Np)){
 				for (int p = 0; p < Np; p++){
-					dest[Sp + j + p] += Tempdest[(i - 1)*Np + p];
+					dest[Sp + j + p] += Tempdest[i*Np + p];
 				}
 			}
 			continue;
@@ -196,7 +196,7 @@ void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, int LocalEle, int A
 
 /*We note here that Nface2d in the function call can be Nface, when we study the mixed second order derivative in horizontal direction*/
 void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
-	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d){
+	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d, int IENe, int BotENe){
 
 	double *TempEToE = malloc((Nface+1)*Ele3d*sizeof(double));
 	int *UniNum = malloc(Ele3d*sizeof(int));
@@ -238,7 +238,9 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 					/*The current point influence the point indexed by AdjacentEidM*/
 					NumRowPerPoint[(int)LocalEidM[p] - 1] += BotENfp;
 					/*The row index of the point been influenced*/
-					Ir[(int)(LocalEidM[p] - 1)*Np*Np + CurrentPosition[(int)(LocalEidM[p] - 1)] + p] = (mwIndex)(AdjacentEidM[p] - 1 + (TempEle - 1)*Np);
+					for (int j = 0; j < BotENfp; j++){
+						Ir[(int)(LocalEidM[p] - 1)*Np*(Nface + 1) + CurrentPosition[(int)(LocalEidM[p] - 1)] + j] = (mwIndex)(AdjacentEidM[j] - 1 + (TempEle - 1)*Np);
+					}
 				}
 				for (int p = 0; p < BotENfp; p++){
 					/*Increase the insert position of each point by BotENfp*/
@@ -254,11 +256,14 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, IENfp, IEFToE, IEFToN1, IEFToN2, IENe, i+1, TempEle);
 				for (int p = 0; p < IENfp; p++){
 					NumRowPerPoint[(int)LocalEidM[p] - 1] += IENfp;
-					Ir[(int)(LocalEidM[p] - 1)*Np*Np + CurrentPosition[(int)(LocalEidM[p] - 1)] + p] = (mwIndex)(AdjacentEidM[p] - 1 + (TempEle - 1)*Np);
+					for (int j = 0; j < IENfp; j++){
+						Ir[(int)(LocalEidM[p] - 1)*Np*(Nface + 1) + CurrentPosition[(int)(LocalEidM[p] - 1)] + j] = (mwIndex)(AdjacentEidM[j] - 1 + (TempEle - 1)*Np);
+					}
 				}
-				for (int p = 0; p < BotENfp; p++){
+				for (int p = 0; p < IENfp; p++){
 					CurrentPosition[(int)(LocalEidM[p] - 1)] += IENfp;
 				}
+
 				free(LocalEidM), LocalEidM = NULL;
 				free(AdjacentEidM), AdjacentEidM = NULL;
 			}
@@ -266,7 +271,9 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 			else if (TempEle == (i + 1)){
 				for (int p = 0; p < Np; p++){
 					NumRowPerPoint[p] += Np;
-					Ir[p*Np*Np + CurrentPosition[p] + p] = (mwIndex)(p + (TempEle - 1)*Np);
+					for (int j = 0; j < Np; j++){
+						Ir[p*Np*(Nface + 1) + CurrentPosition[p] + j] = (mwIndex)(j + (TempEle - 1)*Np);
+					}
 				}
 				for (int p = 0; p < Np; p++){
 					CurrentPosition[p] += Np;
@@ -310,10 +317,6 @@ void FindFaceAndFacialPoint(double *Localdest, double *Adjacentdest, int Nfp, do
 			Sort(Localdest, Nfp);
 			Sort(Adjacentdest, Nfp);
 			break;
-		}
-		else{
-			printf("Problems occured when finding the topological relation for the three dimensional nonhydrostatic model in function FindFaceAndFacialPoint, check again!\n");
-			exit(0);
 		}
 	}
 }

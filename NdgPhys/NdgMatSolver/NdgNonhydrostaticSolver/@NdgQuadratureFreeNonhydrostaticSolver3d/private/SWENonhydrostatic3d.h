@@ -32,7 +32,7 @@ void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );
 
 void GetSparsePatternInHorizontalDirection(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
-	double *, double *, int, int, int, int, int);
+	double *, double *, int, int, int, int, int, int , int );
 
 void FetchFacialData(double *, double *, double *, int );
 
@@ -45,6 +45,8 @@ void FindFaceAndDirectionVector(double *, int *, int *, int *, int *, int , int 
 void FindGlobalBottomEdgeFace(int *, double *, int , int , int );
 
 void FindFaceAndDirectionVectorAtBoundary(double *, int *, int *, int, int, double *, double *, int, double *, int);
+
+void FindFaceAndFacialPoint(double *, double *, int, double *, double *, double *, int, int, int);
 
 void CalculatePenaltyParameter(double *, double *, double *, double *, int , int , \
 	int , double *, double *, double *, double *, double *, int , int );

@@ -286,16 +286,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		double *TempEToE = malloc((Nface + 1)*sizeof(double));
 		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
 
-		for (int i = 0; i < EleNumber; i++){
-			if (ele + 1 == (int)TempEToE[i]){
-				LocalStartPoint = jcs[ele*Np] + i*Np;
-				GetLocalVolumnIntegralTerm(sr, irs, jcs, \
-					Np, M3d,Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
-					sy + ele*Np, tz + ele*Np, J + ele*Np, K13 + ele*Np, \
-					K23 + ele*Np, K33 + ele*Np, ele + 1);
-				break;
-			}
-		}
+		GetLocalVolumnIntegralTerm(sr, irs, jcs, \
+			Np, M3d, Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
+			sy + ele*Np, tz + ele*Np, J + ele*Np, K13 + ele*Np, \
+			K23 + ele*Np, K33 + ele*Np, ele + 1);
 
 		double *Facialnx = malloc(Nface2d*IENfp*sizeof(double));
 		double *Facialny = malloc(Nface2d*IENfp*sizeof(double));
@@ -1106,11 +1100,11 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, in
 	MultiplyByConstant(TempMass2d, FacialMass2d, Tau, Np2d*Np2d);
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, LocalEid, LocalEid, Np, Np2d, -1.0);
 
-	double *SortedLocalEid = malloc(Nfp*sizeof(double));
-	memcpy(SortedLocalEid, LocalEid, Nfp*sizeof(double));
-	Sort(SortedLocalEid, Nfp);
+	double *SortedLocalEid = malloc(Np2d*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Np2d*sizeof(double));
+	Sort(SortedLocalEid, Np2d);
 
-	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEid, SortedLocalEid, Np, Nfp, TempContribution, LocalEle, LocalEle);
+	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEid, SortedLocalEid, Np, Np2d, TempContribution, LocalEle, LocalEle);
 
 	free(FacialMass2d);
 	free(TempContribution);
