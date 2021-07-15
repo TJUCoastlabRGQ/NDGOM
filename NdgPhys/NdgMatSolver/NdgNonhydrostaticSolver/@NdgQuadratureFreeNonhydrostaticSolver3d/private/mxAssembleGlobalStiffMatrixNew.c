@@ -680,9 +680,9 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, DownEid, LocalEid, Np, Np2d, 1.0);
 
 	double *SortedDownEid = malloc(Np2d*sizeof(double));
-	memcpy(SortedDownEid, DownEid, Np2d);
+	memcpy(SortedDownEid, DownEid, Np2d*sizeof(double));
 	double *SortedLocalEid = malloc(Np2d*sizeof(double));
-	memcpy(SortedLocalEid, LocalEid, Np2d);
+	memcpy(SortedLocalEid, LocalEid, Np2d*sizeof(double));
 	Sort(SortedDownEid, Np2d);
 	Sort(SortedLocalEid, Np2d);
 
@@ -806,8 +806,10 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 
 	double *SortedUpEid = malloc(Np2d*sizeof(double));
 	double *SortedLocalEid = malloc(Np2d*sizeof(double));
-	memcpy(SortedUpEid, UpEid, Np2d);
-	memcpy(SortedLocalEid, LocalEid, Np2d);
+	memcpy(SortedUpEid, UpEid, Np2d*sizeof(double));
+	memcpy(SortedLocalEid, LocalEid, Np2d*sizeof(double));
+	Sort(SortedUpEid, Np2d);
+	Sort(SortedLocalEid, Np2d);
 
 	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedLocalEid, SortedUpEid, Np, Np2d, TempContribution, LocalEle, UpEle);
 
@@ -1116,7 +1118,6 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, in
 	free(SortedLocalEid);
 }
 
-
 void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
 	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
 	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
@@ -1178,9 +1179,9 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwI
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, AdjEid, LocalEid, Np, Nfp, 1.0);
 
 	double *SortedAdjEid = malloc(Nfp*sizeof(double));
-	memcpy(SortedAdjEid, AdjEid, Nfp);
+	memcpy(SortedAdjEid, AdjEid, Nfp*sizeof(double));
 	double *SortedLocalEid = malloc(Nfp*sizeof(double));
-	memcpy(SortedLocalEid, LocalEid, Nfp);
+	memcpy(SortedLocalEid, LocalEid, Nfp*sizeof(double));
 	Sort(SortedAdjEid, Nfp);
 	Sort(SortedLocalEid, Nfp);
 

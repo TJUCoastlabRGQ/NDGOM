@@ -143,7 +143,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS );
             
-            obj.GlobalStiffMatrix = (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
+%             obj.GlobalStiffMatrix = (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
             
             NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
             

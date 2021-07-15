@@ -1,5 +1,4 @@
 #include "SWENonhydrostatic3d.h"
-
 /*Function checked*/
 void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2d, int Np3d)
 {
@@ -17,15 +16,34 @@ void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2
 * and AdjEle is the local element.
 */
 void AssembleFacialContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwIndex *Jc, double *LocalEid, double *AdjEid, int Np, int Nfp, double *Tempdest, int LocalEle, int AdjEle){
-	for (int i = 0; i < Nfp; i++){
-		int Sp = (int)Jc[(LocalEle - 1)*Np + (int)LocalEid[i] - 1];
-		for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + (int)LocalEid[i]] - Sp; j++){
-			if (Ir[Sp + j] == (mwIndex)((AdjEle - 1)*Np + AdjEid[0] - 1)){
-				for (int p = 0; p < Nfp; p++){
-					dest[Sp + j + p] += Tempdest[((int)LocalEid[i] - 1)*Np + (int)AdjEid[p] - 1];
+	for (int cp = 0; cp < Np; cp++){
+		/*Start point*/
+		int Sp = (int)Jc[(LocalEle - 1)*Np + cp];
+		int Flag = 0;
+		for (int index = 0; index < Nfp; index++){
+			/*If the point is located on the face, then Np points in a column are influcenced due to term $(p,\nabla l)_{\partial \Omega}$*/
+			if (cp == (int)LocalEid[index] - 1){
+				for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + cp + 1] - Sp; j++){
+					if (Ir[Sp + j] == (mwIndex)((AdjEle - 1)*Np)){
+						for (int rp = 0; rp < Np; rp++){
+							dest[Sp + j + rp] += Tempdest[cp*Np + rp];
+						}
+						Flag = 1;
+						break;
+					}
+				}
+				break;
+			}
+		}
+		if (Flag == 0){/*The point is not located on the face, then Nfp points are influcenced due to term $(\nabla p, l)_{\partial \Omega}$*/
+			for (int i = 0; i < Nfp; i++){
+				for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + cp + 1] - Sp; j++){
+					if (Ir[Sp + j] == (mwIndex)((AdjEle - 1)*Np + AdjEid[i] - 1)){
+						dest[Sp + j] += Tempdest[cp*Np + (int)AdjEid[i] - 1];
+						break;
+					}
 				}
 			}
-			continue;
 		}
 	}
 }
@@ -227,24 +245,35 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 		memset(Ir, 0, (Nface + 1)*Np*Np*sizeof(mwIndex));
 		memset(NumRowPerPoint, 0, Np*sizeof(int));
 		memset(CurrentPosition, 0, Np*sizeof(int));
-		for (int e = 0; e < *(UniNum + i);e++){
+		for (int e = 0; e < *(UniNum + i); e++){
 			int TempEle = (int)TempEToE[i*(Nface + 1) + e];
 			/*The cell studied is located upside or downside of cell i*/
 			if (TempEle != (i + 1) && (TempEle == EToE[i*Nface + Nface - 2] || TempEle == EToE[i*Nface + Nface - 1])){
 				LocalEidM = malloc(BotENfp*sizeof(double));
 				AdjacentEidM = malloc(BotENfp*sizeof(double));
 				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, BotENfp, BotEFToE, BotEFToN1, BotEFToN2, BotENe, i + 1, TempEle);
-				for (int p = 0; p < BotENfp; p++){
-					/*The current point influence the point indexed by AdjacentEidM*/
-					NumRowPerPoint[(int)LocalEidM[p] - 1] += BotENfp;
-					/*The row index of the point been influenced*/
+				for (int cp = 0; cp < Np; cp++){
+					int Flag = 0;
 					for (int j = 0; j < BotENfp; j++){
-						Ir[(int)(LocalEidM[p] - 1)*Np*(Nface + 1) + CurrentPosition[(int)(LocalEidM[p] - 1)] + j] = (mwIndex)(AdjacentEidM[j] - 1 + (TempEle - 1)*Np);
+						/*The studied point is located on the face, the maximum scope is determined by $(\nabla l, p)_{\partial \Omega}$*/
+						if (cp == (int)LocalEidM[j] - 1){
+							NumRowPerPoint[cp] += Np;
+							Flag = 1;
+							for (int rp = 0; rp < Np; rp++){
+								Ir[cp*Np*(Nface + 1) + CurrentPosition[cp] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+							}
+							CurrentPosition[cp] += Np;
+							break;
+						}
 					}
-				}
-				for (int p = 0; p < BotENfp; p++){
-					/*Increase the insert position of each point by BotENfp*/
-					CurrentPosition[(int)(LocalEidM[p] - 1)] += BotENfp;
+					/*The studied point is not located on the face, the maximum scope is determined by $( l, \nabla p)_{\partial \Omega}$*/
+					if (Flag == 0){
+						NumRowPerPoint[cp] += BotENfp;
+						for (int rp = 0; rp < BotENfp; rp++){
+							Ir[cp*Np*(Nface + 1) + CurrentPosition[cp] + rp] = (mwIndex)(AdjacentEidM[rp] - 1 + (TempEle - 1)*Np);
+						}
+						CurrentPosition[cp] += BotENfp;
+					}
 				}
 				free(LocalEidM), LocalEidM = NULL;
 				free(AdjacentEidM), AdjacentEidM = NULL;
@@ -253,40 +282,53 @@ void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, dou
 			else if (TempEle != (i + 1) && (TempEle != EToE[i*Nface + Nface - 2] && TempEle != EToE[i*Nface + Nface - 1])){
 				LocalEidM = malloc(IENfp*sizeof(double));
 				AdjacentEidM = malloc(IENfp*sizeof(double));
-				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, IENfp, IEFToE, IEFToN1, IEFToN2, IENe, i+1, TempEle);
-				for (int p = 0; p < IENfp; p++){
-					NumRowPerPoint[(int)LocalEidM[p] - 1] += IENfp;
+				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, IENfp, IEFToE, IEFToN1, IEFToN2, IENe, i + 1, TempEle);
+				for (int cp = 0; cp < Np; cp++){
+					int Flag = 0;
 					for (int j = 0; j < IENfp; j++){
-						Ir[(int)(LocalEidM[p] - 1)*Np*(Nface + 1) + CurrentPosition[(int)(LocalEidM[p] - 1)] + j] = (mwIndex)(AdjacentEidM[j] - 1 + (TempEle - 1)*Np);
+						/*The studied point is located on the face, the maximum scope is determined by $(\nabla l, p)_{\partial \Omega}$*/
+						if (cp == (int)LocalEidM[j] - 1){
+							NumRowPerPoint[cp] += Np;
+							Flag = 1;
+							for (int rp = 0; rp < Np; rp++){
+								Ir[cp*Np*(Nface + 1) + CurrentPosition[cp] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+							}
+							CurrentPosition[cp] += Np;
+							break;
+						}
+					}
+					/*The studied point is not located on the face, the maximum scope is determined by $( l, \nabla p)_{\partial \Omega}$*/
+					if (Flag == 0){
+						NumRowPerPoint[cp] += IENfp;
+						for (int rp = 0; rp < IENfp; rp++){
+							Ir[cp*Np*(Nface + 1) + CurrentPosition[cp] + rp] = (mwIndex)(AdjacentEidM[rp] - 1 + (TempEle - 1)*Np);
+						}
+						CurrentPosition[cp] += IENfp;
 					}
 				}
-				for (int p = 0; p < IENfp; p++){
-					CurrentPosition[(int)(LocalEidM[p] - 1)] += IENfp;
-				}
-
 				free(LocalEidM), LocalEidM = NULL;
 				free(AdjacentEidM), AdjacentEidM = NULL;
 			}
 			/*The cell studied is cell i itself*/
 			else if (TempEle == (i + 1)){
-				for (int p = 0; p < Np; p++){
-					NumRowPerPoint[p] += Np;
-					for (int j = 0; j < Np; j++){
-						Ir[p*Np*(Nface + 1) + CurrentPosition[p] + j] = (mwIndex)(j + (TempEle - 1)*Np);
+				for (int cp = 0; cp < Np; cp++){
+					NumRowPerPoint[cp] += Np;
+					for (int rp = 0; rp < Np; rp++){
+						Ir[cp*Np*(Nface + 1) + CurrentPosition[cp] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
 					}
 				}
-				for (int p = 0; p < Np; p++){
-					CurrentPosition[p] += Np;
+				for (int cp = 0; cp < Np; cp++){
+					CurrentPosition[cp] += Np;
 				}
 			}
 		}
-		for (int p = 0; p < Np; p++){
-			TempJc[i*Np + p + 1] = TempJc[i*Np + p] + NumRowPerPoint[p];
+		for (int cp = 0; cp < Np; cp++){
+			TempJc[i*Np + cp + 1] = TempJc[i*Np + cp] + NumRowPerPoint[cp];
 		}
 		for (int col = 0; col < Np; col++){
-			for (int p = 0; p < NumRowPerPoint[col]; p++){
+			for (int rp = 0; rp < NumRowPerPoint[col]; rp++){
 				/*The row index in the sparse matrix*/
-				TempIr[TempJc[i*Np + col] + p] = Ir[col * (Nface + 1) * Np + p];
+				TempIr[TempJc[i*Np + col] + rp] = Ir[col * (Nface + 1) * Np + rp];
 			}
 		}
 

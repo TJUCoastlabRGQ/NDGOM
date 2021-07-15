@@ -307,7 +307,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *BotEFToN1 = mxGetPr(prhs[35]);
 	double *BotEFToN2 = mxGetPr(prhs[36]);
 
-	int TotalNonzero = Ele3d * Np*Np + IENe * IENfp * IENfp * 2 + BotENe * VertNfp * VertNfp * 2;
+	int TotalNonzero = Ele3d * Np*Np + 2 * IENe * (2*Np*IENfp - IENfp*IENfp) + 2*BotENe * (2*Np*VertNfp -VertNfp*VertNfp );
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
