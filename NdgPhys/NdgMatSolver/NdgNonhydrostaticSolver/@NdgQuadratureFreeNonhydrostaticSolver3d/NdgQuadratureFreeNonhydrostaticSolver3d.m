@@ -45,6 +45,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
     properties
         GlobalStiffMatrix
         
+        BoundNonhydroPressure
+        
         NonhydroRHS
         
         Wold
@@ -90,6 +92,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             warning('on');
             obj.varIndex = zeros(6,1);
             obj.rho = 1000;
+            obj.BoundNonhydroPressure = zeros(obj.BoundaryEdge.Nfp, obj.BoundaryEdge.Ne);
             for i = 1:PhysClass.Nfield
                 if (strcmp(PhysClass.fieldName3d{i},'hu'))
                     obj.varIndex(1) = i;
@@ -142,10 +145,14 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS );
-            
-%             obj.GlobalStiffMatrix = (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
-            
-            NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
+%             tic;
+            obj.GlobalStiffMatrix = -1 * (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
+%             ittol = 1e-8; maxit = 10000; Droptol = 1e-4;
+%             Cinc = ichol(obj.GlobalStiffMatrix, struct('droptol', Droptol));
+%             NonhydroPressure = pcg(obj.GlobalStiffMatrix, -1*obj.NonhydroRHS, ittol, maxit, Cinc', Cinc);
+%             toc;
+
+            NonhydroPressure = obj.GlobalStiffMatrix\(-1*obj.NonhydroRHS);
             
             fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...

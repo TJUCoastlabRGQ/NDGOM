@@ -150,7 +150,7 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             hu3d(:,Index) = omega*obj.amplitude/obj.k/(obj.d + obj.AD )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d + obj.AD);
             obj.fext3d{1}(:,:,1) = hu3d;
             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h3d(:,Index) = obj.d + obj.AD;
+            h3d(:,Index) = Eta + obj.d + obj.AD;
             obj.fext3d{1}(:,:,3) = h3d;
             
             
@@ -158,7 +158,7 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
             hu2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d + obj.AD )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d + obj.AD);
             obj.fext2d{1}(:,:,1) = hu2d;
             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h2d(:,Index) = obj.d + obj.AD;            
+            h2d(:,Index) = Eta + obj.d + obj.AD;            
             obj.fext2d{1}(:,:,3) = h2d;
         end
         

@@ -4,10 +4,11 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
     
     properties(Constant)
         rho = 1000
+%         amplitude = 0.0232
         amplitude = 0.0232
         d = 0.45
-        T = 1
-        hcrit = 0.01
+        T = 2
+        hcrit = 0.005
         ChLength = 26
         %         ChWidth = 0.05
         ChWidth = 0.1
@@ -21,7 +22,7 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
         initial_fphys
         length
         k
-        spgLength = 4; %> sponge region size
+        spgLength = 10; %> sponge region size
         distance %> distance to boundary nodes
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
@@ -120,25 +121,33 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             obj.k = 2*pi/obj.length;
         end
         
-        function matUpdateExternalField( obj, time, ~, ~ )
+        function matUpdateExternalField( obj, time, ~, fphys )
             Eta =  obj.amplitude * sin(2*pi/obj.T*time);
             % Stelling and Zijlema, 2003
             omega = 2*pi/obj.T;
-            hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
+            hv3d = zeros(size(obj.fext3d{1}(:,:,1)));
             h3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
+            hv2d = zeros(size(obj.fext2d{1}(:,:,1)));
             h2d = zeros(size(obj.fext2d{1}(:,:,1)));
             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel);
-            hu3d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
-            obj.fext3d{1}(:,:,1) = hu3d;
+            % water depth at the boundary
+            % the sigma coordinate at the boundary
+            zb = obj.meshUnion(1).z(:,Index);
+            zb = zb(obj.meshUnion(1).BoundaryEdge.FToN1(:,Index));
+            % the z level at the boundary
+            zb = zb.*(Eta + obj.d) - Eta;
+            obj.NonhydrostaticSolver.BoundNonhydroPressure(:,Index) = -obj.NonhydrostaticSolver.rho * obj.gra*obj.amplitude*sin(omega*time)*(1-cosh(obj.k*(zb+obj.d))./cosh(obj.k*obj.d));
+            hv3d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
+            obj.fext3d{1}(:,:,2) = hv3d;
+%             obj.NonhydrostaticSolver.BoundNonhydroPressure(:,Index) = 
             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
             h3d(:,Index) = obj.d;
             obj.fext3d{1}(:,:,3) = h3d;
             
             
             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
-            hu2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
-            obj.fext2d{1}(:,:,1) = hu2d;
+            hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
+            obj.fext2d{1}(:,:,2) = hv2d;
             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
             h2d(:,Index) = obj.d;
             obj.fext2d{1}(:,:,3) = h2d;
@@ -203,7 +212,9 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             fphys2d{1}(index) = fphys2d{1}(index)+0.3-...
                 0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
             
-            fphys2d{1}(:,:,4) = -fphys2d{1}(:,:,1);            
+%             fphys2d{1}(:,:,4) = -fphys2d{1}(:,:,1); 
+            fphys2d{1}(:,:,1) = obj.d;
+            fphys2d{1}(:,:,4) = -obj.d;   
             
         end
         
@@ -257,7 +268,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [-10, 10], [-10, 16], 20/0.2, 26/0.1, bctype);
+    [-10, -9.9], [-10, 22], 0.1/0.1, 32/0.1, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

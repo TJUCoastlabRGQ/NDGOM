@@ -248,7 +248,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 			CalculatePenaltyParameter(BETau, BEFToE, BEFToN1, BEFToN2, Np, BENfp, \
 				edge, K13, K23, ImposeBCsK33, BELAV, LAV, max(N, Nz), Nface);
-			
 
 			int LocalEle;
 			LocalEle = (int)BEFToE[2 * edge];
