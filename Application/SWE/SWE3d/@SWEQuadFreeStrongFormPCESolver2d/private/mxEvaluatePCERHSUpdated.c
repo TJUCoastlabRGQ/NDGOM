@@ -247,6 +247,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	int Nfield = 3;
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
+	/*The following void pointer is added on 08/25/2021 to accomadate the usage of function ImposeBoundaryCondition*/
+	double *varFieldIndex = NULL;
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -257,7 +259,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchBoundaryEdgeFacialValue(BEhvM2d + e*BENfp2d, hv2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		FetchBoundaryEdgeFacialValue(PCEUpdatedBEzM2d + e*BENfp2d, z2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		ImposeBoundaryCondition(&gra, type, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, PCEUpdatedBEfm2d + e*BENfp2d, PCEUpdatedBEfp2d + e*BENfp2d, \
-			PCEUpdatedBEzM2d + e*BENfp2d, PCEUpdatedBEzP2d + e*BENfp2d, fext2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
+			PCEUpdatedBEzM2d + e*BENfp2d, PCEUpdatedBEzP2d + e*BENfp2d, fext2d + e*BENfp2d, BENfp2d, Nfield, BENe2d, varFieldIndex);
 		EvaluateHydroStaticReconstructValue(Hcrit, PCEUpdatedBEfm2d + e*BENfp2d, PCEUpdatedBEfp2d + e*BENfp2d, PCEUpdatedBEzM2d + e*BENfp2d, PCEUpdatedBEzP2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
 		GetFacialFluxTerm2d(PCEUpdatedBEFluxM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d);
 	}
@@ -305,7 +307,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchBoundaryEdgeFacialValue(PCEUpdatedBEzM3d + e*BENfp3d, z3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
 
 		ImposeBoundaryCondition(&gra, type, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, PCEUpdatedBEfm3d + e*BENfp3d, PCEUpdatedBEfp3d + e*BENfp3d, \
-			PCEUpdatedBEzM3d + e*BENfp3d, PCEUpdatedBEzP3d + e*BENfp3d, fext3d + e*BENfp3d, BENfp3d, Nfield, BENe3d);
+			PCEUpdatedBEzM3d + e*BENfp3d, PCEUpdatedBEzP3d + e*BENfp3d, fext3d + e*BENfp3d, BENfp3d, Nfield, BENe3d, varFieldIndex);
 		EvaluateHydroStaticReconstructValue(Hcrit, PCEUpdatedBEfm3d + e*BENfp3d, PCEUpdatedBEfp3d + e*BENfp3d, PCEUpdatedBEzM3d + e*BENfp3d, PCEUpdatedBEzP3d + e*BENfp3d, BENfp3d, Nfield, BENe3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(PCEUpdatedBEFluxS3d + e*BENfp3d, PCEUpdatedBEfm3d + e*BENfp3d, PCEUpdatedBEfp3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, &gra, Hcrit, BENfp3d, BENe3d);
 	}

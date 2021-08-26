@@ -2,7 +2,7 @@
 
 /*This function is used to impose the boundary condition for the pure hydrulic problem*/
 void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *ny, double *fm, double *fp, \
-	double *zM, double *zP, double *fext, int Nfp, int Nvar, int Ne){
+	double *zM, double *zP, double *fext, int Nfp, int Nvar, int Ne, double *varIndex){
 	/*All other fields except H, Hu, Hv are set to be the inner value at the boundaries unless they are prescribed out of the program */
 	// assign the local node values
 	double *huM = fm, *hvM = fm + Nfp*Ne, *hM = fm + 2 * Nfp*Ne;
@@ -39,7 +39,8 @@ void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *
 			huP[i] = huE[i];
 			hvP[i] = hvE[i];
 			for (int n = 3; n < Nvar; n++){
-				fp[n*Nfp*Ne + i] = fext[n*Nfp*Ne + i];
+		//		fp[n*Nfp*Ne + i] = fext[n*Nfp*Ne + i];
+                fp[n*Nfp*Ne+i]=fext[(int)(varIndex[n-1]-1)*Nfp*Ne+i];
 			}
 		}
 	}
@@ -57,9 +58,10 @@ void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *
 		for (int i = 0; i < Nfp; i++){
 			hP[i] = hM[i];
 			huP[i] = huE[i];
-			hvP[i] = hvE[i];
+			hvP[i] = hvE[i]; 
 			for (int n = 3; n < Nvar; n++){
-				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
+				//fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
+                fp[n*Nfp*Ne+i]=fext[(int)(varIndex[n-1]-1)*Nfp*Ne+i];
 			}
 		}
 	}

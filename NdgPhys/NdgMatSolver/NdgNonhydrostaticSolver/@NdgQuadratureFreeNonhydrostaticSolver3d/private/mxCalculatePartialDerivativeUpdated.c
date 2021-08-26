@@ -807,6 +807,8 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 	double *BEhM3d = NonhydroBEfm + 2 * BENe3d * BENfp3d;
 
 	int Nfield = 2;
+	/*The following void pointer is added on 08/25/2021 to accomadate the usage of function ImposeBoundaryCondition*/
+	double *varFieldIndex = NULL;
 
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 
@@ -821,7 +823,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 		FetchBoundaryEdgeFacialValue(NonhydrozM + e*BENfp3d, z3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
 
 		ImposeBoundaryCondition(&gra, type, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, NonhydroBEfm + e*BENfp3d, NonhydroBEfp + e*BENfp3d, \
-			NonhydrozM + e*BENfp3d, NonhydrozP + e*BENfp3d, fext3d + e*BENfp3d, BENfp3d, Nfield, BENe3d);
+			NonhydrozM + e*BENfp3d, NonhydrozP + e*BENfp3d, fext3d + e*BENfp3d, BENfp3d, Nfield, BENe3d, varFieldIndex);
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + e*BENfp3d, NonhydroBEfp + e*BENfp3d, NonhydrozM + e*BENfp3d, NonhydrozP + e*BENfp3d, BENfp3d, Nfield, BENe3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(NonhydroBEFluxS + e*BENfp3d, NonhydroBEfm + e*BENfp3d, NonhydroBEfp + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, &gra, Hcrit, BENfp3d, BENe3d);
 	}
@@ -850,7 +852,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 		FetchBoundaryEdgeFacialValue(BEhvM2d + e*BENfp2d, hv2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		FetchBoundaryEdgeFacialValue(NonhydroBEzM2d + e*BENfp2d, z2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		ImposeBoundaryCondition(&gra, type, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, NonhydroBEfm2d + e*BENfp2d, NonhydroBEfp2d + e*BENfp2d, \
-			NonhydroBEzM2d + e*BENfp2d, NonhydroBEzP2d + e*BENfp2d, fext2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
+			NonhydroBEzM2d + e*BENfp2d, NonhydroBEzP2d + e*BENfp2d, fext2d + e*BENfp2d, BENfp2d, Nfield, BENe2d, varFieldIndex);
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm2d + e*BENfp2d, NonhydroBEfp2d + e*BENfp2d, NonhydroBEzM2d + e*BENfp2d, NonhydroBEzP2d + e*BENfp2d, BENfp2d, Nfield, BENe2d);
 		GetFacialFluxTerm2d(NonhydroBEFluxM2d + e*BENfp2d, BEhuM2d + e*BENfp2d, BEhvM2d + e*BENfp2d, BEnx2d + e*BENfp2d, BEny2d + e*BENfp2d, BENfp2d);
 	}
@@ -1035,6 +1037,9 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 	double *UIEfluxS = NonhydroIEFluxS, *VIEfluxS = NonhydroIEFluxS + IENe*IENfp, \
 		*HIEfluxSx = NonhydroIEFluxS + 2 * IENe*IENfp, *HIEfluxSy = NonhydroIEFluxS + 3 * IENe*IENfp;
+    /*The following null pointer is added on 08/25/2021 to accomdate the usage of function ImposeBoundaryCondition,
+     defined in SWE.c. For this part, this parameter is actually useless*/
+    double *varFieldIndex = NULL;
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -1105,9 +1110,19 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 		FetchBoundaryEdgeFacialValue(NonhydrozM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 
 		ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, \
-			NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, fext + face*BENfp, BENfp, 2, BENe);
+			NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, fext + face*BENfp, BENfp, 2, BENe, varFieldIndex);
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
+
+	
+        if (type == NdgEdgeClampedVel) {
+			for (int i = 0; i < BENfp; i++){
+				hP[i + face*BENfp] = hM[i + face*BENfp];
+				uP[i + face*BENfp] = uM[i + face*BENfp];
+				vP[i + face*BENfp] = vM[i + face*BENfp];
+			}
+		}
+		
 
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);

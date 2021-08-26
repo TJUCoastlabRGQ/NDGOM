@@ -1,9 +1,7 @@
 classdef Malpasset2d < SWEPreBlanaced2d
     
     properties( Constant )
-        hmin = 1e-1
         n = 0.029.^2
-        gra = 9.81
         gmshfile = 'Application\SWE\SWE2d\Benchmark\@Malpasset2d\mesh\quadMesh\malpasset.msh';
         trianglefile = 'mesh/triMeshLai/mesh';
     end
@@ -43,6 +41,7 @@ classdef Malpasset2d < SWEPreBlanaced2d
         function obj = Malpasset2d( N )
             obj = obj@SWEPreBlanaced2d();
 %             mesh = readTriMeshFile( N, obj.trianglefile );
+            obj.hmin = 1e-1;
             mesh = makeGmshFileUMeshUnion2d( N, obj.gmshfile );
             obj.initPhysFromOptions( mesh );
             

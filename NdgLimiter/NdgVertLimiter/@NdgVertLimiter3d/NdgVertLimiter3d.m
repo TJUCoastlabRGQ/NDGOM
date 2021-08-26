@@ -10,6 +10,15 @@ classdef NdgVertLimiter3d < NdgVertLimiter
         Nvc2d
     end
     
+    properties
+        % Inverse Vandmonde matrix corresponding to the first order, is used to
+        % calculate the mode coefficient of the corrected vertex value
+        InvVandVert
+        % Vandmonde matrix corresponding to the first order, is used to
+        % calculate the intepolation value at the intepolation point
+        VandInterp
+    end
+    
     methods
         
         function obj = NdgVertLimiter3d( mesh )
@@ -21,6 +30,26 @@ classdef NdgVertLimiter3d < NdgVertLimiter
             warning('on');
             obj.Nv2d = mesh.mesh2d.Nv;
             obj.Nvc2d = obj.assembleVertexCellConnect2d( mesh );
+            obj.InvVandVert = zeros(mesh.cell.Nv);
+            obj.VandInterp = zeros(mesh.cell.Np, mesh.cell.Nv);
+            if mesh.cell.type == enumStdCell.PrismTri
+                ColIndex = [1, 2, mesh.cell.N + 2, mesh.cell.Nz * mesh.cell.Nph + 1,...
+                    mesh.cell.Nz * mesh.cell.Nph + 2, mesh.cell.Nz * mesh.cell.Nph + mesh.cell.N + 2];
+                RowIndex = [1, mesh.cell.N + 1, (mesh.cell.N + 1)*(mesh.cell.N + 2)/2,...
+                    mesh.cell.Nz * mesh.cell.Nph + 1, mesh.cell.Nz * mesh.cell.Nph + mesh.cell.N + 1, ...
+                    mesh.cell.Nz * mesh.cell.Nph + (mesh.cell.N + 1)*(mesh.cell.N + 2)/2];
+            elseif mesh.cell.type == enumStdCell.PrismQuad
+                ColIndex = [1, 2, mesh.cell.N + 2, mesh.cell.N + 3,...
+                    (mesh.cell.N + 1)^2+1, (mesh.cell.N + 1)^2+2,...
+                    (mesh.cell.N + 1)^2+mesh.cell.N + 2, (mesh.cell.N + 1)^2+mesh.cell.N + 3];
+                RowIndex = [1, mesh.cell.N + 1, (mesh.cell.N + 1)*mesh.cell.N + 1, (mesh.cell.N + 1)^2,...
+                    mesh.cell.Nz * mesh.cell.Nph + 1, mesh.cell.Nz * mesh.cell.Nph + mesh.cell.N + 1,...
+                    mesh.cell.Nz * mesh.cell.Nph + (mesh.cell.N + 1)*mesh.cell.N + 1,...
+                    mesh.cell.Nz * mesh.cell.Nph + (mesh.cell.N + 1)^2];
+                
+            end
+            obj.InvVandVert = inv(mesh.cell.V(RowIndex, ColIndex));
+            obj.VandInterp = mesh.cell.V(:, ColIndex);
         end
         
         function fphys = matLimit( obj, fphys, fieldId )
@@ -47,7 +76,7 @@ classdef NdgVertLimiter3d < NdgVertLimiter
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, obj.Nv, obj.Nvc, obj.VToK,...
                 obj.meshUnion.mesh2d.cell.Fmask, obj.meshUnion.mesh2d.cell.Np,...
                 obj.meshUnion.cell.Nz, obj.meshUnion.cell.N, obj.meshUnion.mesh2d.cell.Nv, obj.meshUnion.LAV,...
-                obj.meshUnion.EToV, obj.meshUnion.Nz, obj.Nv2d, obj.Nvc2d);
+                obj.meshUnion.EToV, obj.meshUnion.Nz, obj.Nv2d, obj.Nvc2d, obj.InvVandVert, obj.VandInterp);
         end
     end
     

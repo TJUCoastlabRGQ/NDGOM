@@ -123,15 +123,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
             
-%             edge = physClass.meshUnion.BottomBoundaryEdge;
-%             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-%             obj.Wnew = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
+            %             edge = physClass.meshUnion.BottomBoundaryEdge;
+            %             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+            %             obj.Wnew = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
-%             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrix( obj.PNPS, obj.SPNPX, obj.SPNPY, obj.SPNPS, ...
-%                 obj.MSPNPX, obj.MSPNPY, obj.PSPX, obj.PSPY, obj.SPSPX, obj.SPSPY, obj.SQPSPX, obj.SQPSPY,...
-%                 fphys{1}(:,:,obj.varIndex(4)), physClass.hcrit, obj.BoundaryEdge2d, ...
-%                 obj.mesh, obj.cell, obj.BoundaryEdge, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
-
+            %             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrix( obj.PNPS, obj.SPNPX, obj.SPNPY, obj.SPNPS, ...
+            %                 obj.MSPNPX, obj.MSPNPY, obj.PSPX, obj.PSPY, obj.SPSPX, obj.SPSPY, obj.SQPSPX, obj.SQPSPY,...
+            %                 fphys{1}(:,:,obj.varIndex(4)), physClass.hcrit, obj.BoundaryEdge2d, ...
+            %                 obj.mesh, obj.cell, obj.BoundaryEdge, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
+            
             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.BottomEdge,...
                 obj.SurfaceBoundaryEdge, obj.cell2d.M, ...
@@ -140,19 +140,32 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.mesh.J, obj.cell.M);
             
-           [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
+            [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
                 physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
-                fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS );
+                fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure);
+            
+            %             obj.GlobalStiffMatrix = mxAssemblePositiveDefiniteStiffMatrix( obj.GlobalStiffMatrix );
+            %
+            % %             ittol = 1e-8; maxit = 10000; Droptol = 1e-4;
+            % %             Cinc = ichol(obj.GlobalStiffMatrix, struct('droptol', Droptol));
+            % %             NonhydroPressure = pcg(obj.GlobalStiffMatrix, -1*obj.NonhydroRHS, ittol, maxit, Cinc', Cinc);
+            % %             toc;
+            %
+            %             NonhydroPressure = obj.GlobalStiffMatrix\(-1*obj.NonhydroRHS);
+            
 %             tic;
-            obj.GlobalStiffMatrix = -1 * (obj.GlobalStiffMatrix + obj.GlobalStiffMatrix')./2;
-%             ittol = 1e-8; maxit = 10000; Droptol = 1e-4;
-%             Cinc = ichol(obj.GlobalStiffMatrix, struct('droptol', Droptol));
-%             NonhydroPressure = pcg(obj.GlobalStiffMatrix, -1*obj.NonhydroRHS, ittol, maxit, Cinc', Cinc);
+              NonhydroPressure = obj.GlobalStiffMatrix\(obj.NonhydroRHS);
 %             toc;
-
-            NonhydroPressure = obj.GlobalStiffMatrix\(-1*obj.NonhydroRHS);
+            
+%             tic;
+%              [rowptr, colind, val] = crs_matrix(obj.GlobalStiffMatrix);
+%              [TempNonhydroPressure,flag,relres,iter,reshis] = petscSolveCRS(rowptr, colind, val, obj.NonhydroRHS,...
+%                  PETSC_KSPGMRES, 1.e-10, int32(10000000), PETSC_PCJACOBI, 'right');
+%             toc;
+            
+            
             
             fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
@@ -160,15 +173,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             
             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
             
-%             fphys{1}(1:4,:,obj.varIndex(3)) = 0;
+            %             fphys{1}(1:4,:,obj.varIndex(3)) = 0;
         end
         
         function matCalculateBottomVerticalVelocity( obj, physClass, fphys )
             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
             
-%             edge = physClass.meshUnion.BottomBoundaryEdge;
-%             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-%             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
+            %             edge = physClass.meshUnion.BottomBoundaryEdge;
+            %             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+            %             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
         end
         
@@ -182,13 +195,13 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
             
-%             Rhs = -fphys{1}(:,:,obj.varIndex(4)) .* ( obj.PUPX + obj.PVPY + obj.PUPS .* obj.PSPX + obj.PVPS .* obj.PSPY );
-%             
-%             fphys{1}(:,:,obj.varIndex(3)) = fphys{1}(:,:,obj.varIndex(4)) .* physClass.meshUnion(1).VerticalIntegralField(Rhs);
+            %             Rhs = -fphys{1}(:,:,obj.varIndex(4)) .* ( obj.PUPX + obj.PVPY + obj.PUPS .* obj.PSPX + obj.PVPS .* obj.PSPY );
+            %
+            %             fphys{1}(:,:,obj.varIndex(3)) = fphys{1}(:,:,obj.varIndex(4)) .* physClass.meshUnion(1).VerticalIntegralField(Rhs);
             
-             fphys{1}(:,:,obj.varIndex(3)) = mxUpdateVerticalFinalVelocity( fphys{1}, obj.varIndex, physClass.hcrit, obj.PSPX,...
+            fphys{1}(:,:,obj.varIndex(3)) = mxUpdateVerticalFinalVelocity( fphys{1}, obj.varIndex, physClass.hcrit, obj.PSPX,...
                 obj.PSPY, obj.PUPX, obj.PVPY, obj.PUPS, obj.PVPS, physClass.VerticalVelocitySolver.RHSCoeMatrix{1},...
-                physClass.VerticalVelocitySolver.VertCoeMatrix{1}, obj.mesh, obj.cell, obj.BottomBoundaryEdge);            
+                physClass.VerticalVelocitySolver.VertCoeMatrix{1}, obj.mesh, obj.cell, obj.BottomBoundaryEdge);
         end
         
         function matClearGlobalMemory( obj )
@@ -255,14 +268,14 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         end
         
         function SimulatedSolution = TestNewFormGlobalStiffMatrix( obj, physClass, fphys )
-                obj.PSPX = physClass.K13;
-                obj.PSPY = physClass.K23;
-                obj.SQPSPX = obj.PSPX .* obj.PSPX;
-                obj.SQPSPY = obj.PSPY .* obj.PSPY;
-                obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
+            obj.PSPX = physClass.K13;
+            obj.PSPY = physClass.K23;
+            obj.SQPSPX = obj.PSPX .* obj.PSPX;
+            obj.SQPSPY = obj.PSPY .* obj.PSPY;
+            obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
                 obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
-                SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(1:physClass.meshUnion.cell.Np*physClass.meshUnion.K)', physClass.meshUnion.cell.Np, physClass.meshUnion.K);
+            SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(1:physClass.meshUnion.cell.Np*physClass.meshUnion.K)', physClass.meshUnion.cell.Np, physClass.meshUnion.K);
         end
         
     end

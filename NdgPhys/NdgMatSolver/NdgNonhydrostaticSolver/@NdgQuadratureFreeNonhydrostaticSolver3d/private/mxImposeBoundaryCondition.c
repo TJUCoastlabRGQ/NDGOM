@@ -21,6 +21,10 @@ void MyExit()
 	return;
 }
 
+void SumInColumn(double *, double *, int);
+
+void SumInRow(double *, double *, int, int);
+
 void GetInverseSquareHeight(double *, double *, double , int );
 
 void GetPenaltyParameter(double *, double , double , int , int , int );
@@ -30,10 +34,10 @@ void ImposeNewmannBoundaryCondition(double *, double *, mwIndex *, mwIndex *, in
 	double *, double *, double *, double *, double *, double *, int, int, \
 	double *, double *, double *, int, double *, double *);
 
-void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, int, \
-	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
-    double *, double *, double *, double *, double *, double *, \
-	int, double *, double *, double *, double *, double);
+void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, int , \
+	int , int , double *, double *, double *, double *, double *, double *, double *, double *, \
+	double *, double *, double *, double *, double *, double *, \
+	int , double *, double *, double *, double *, double );
 
 void GetScalarCentralFluxTerm2d(double *, double *, double *, double *, int );
 
@@ -78,6 +82,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *Hv = mxGetPr(prhs[19]);
 	double *RHS = mxGetPr(prhs[20]);
 	double *PWPS = mxGetPr(prhs[21]);
+	double *BoundaryNonhydro = mxGetPr(prhs[22]);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -257,19 +262,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			TempJ = J + (LocalEle - 1)*Np;
 			TempJs = BEJs + edge * BENfp;
 
-			ImposeDirichletBoundaryCondition(sr, irs, jcs, LocalEle, \
+			ImposeDirichletBoundaryCondition(sr, irs, jcs, OutRHS + (LocalEle - 1)*Np, BoundaryNonhydro + edge * BENfp, LocalEle, \
 				Np, BENfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 				Dr, Ds, Dt, BEnx + edge * BENfp, BEny + edge * BENfp, BEnz + edge*BENfp, \
 				TempJs, BELMass2d, TempEToE, Nface, FpIndex, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, ImposeBCsK33 + (LocalEle - 1)*Np, *(BETau + edge));
 
+
 			free(FpIndex);
 			*/
 		}
 	}
 	/*The following part is used to calculate the Neumann boundary condition according to 
-	$\frac{\partial w}{\partial t}+u\frac{\partial w}{\partial x}+v\frac{\partial w}{\partial y} + w\frac{\partial w}{\partial z}=-\frac{1}{\rho D} \frac{\partial p}{\partial \sigma}$*/
+	$\frac{\partial w}{\partial t^*} + u\frac{\partial w}{\partial x^*}+v\frac{\partial w}{\partial y^*} + w\frac{\partial w}{\partial z^*}=-\frac{1}{\rho D} \frac{\partial p}{\partial \sigma}$,
+	*this relation is further transformed into the $\sigma$ coordinate as:
+	*$\frac{\partial w}{\partial t} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial t^*} + u(\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x^*})+
+	* v(\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y^*}) + \frac{w}{D}\frac{\partial w}{\partial \sigma}=-\frac{1}{\rho D} \frac{\partial p}{\partial \sigma}$.
+	* At bottom, since $\sigma=-1$ always stands, so $\frac{\partial \sigma}{\partial t^*}=0$. 
+	*/
 	ptrdiff_t np = Np2d;
 	ptrdiff_t oneI = 1;
 	double one = 1.0, zero = 0.0;
@@ -557,7 +568,7 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 	free(SortedFpIndex);
 }
 
-void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, \
+void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *RHSdest, double *BoundNonhydro, int LocalEle, \
 	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, \
 	double *nx, double *ny, double *nz, double *Js, double *Mass2d, double *EToE, \
 	int Nface, double *FpIndex, double *K13, double *K23, double *K33, double Tau){
@@ -580,6 +591,14 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
+	double *WeightedEleMass2d = malloc(Nfp*Nfp*sizeof(double));
+	DiagMultiply(WeightedEleMass2d, EleMass2d, BoundNonhydro, Nfp);
+	double *TempRHSBuff = malloc(Np*sizeof(double));
+	memset(TempRHSBuff, 0, Np*sizeof(double));
+	double *DirichEdgeBuff = malloc(Nfp*Np*sizeof(double));
+
+	double *DirichEdge2d = malloc(Nfp*sizeof(double));
+	memset(DirichEdge2d, 0, Nfp*sizeof(double));
 
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
@@ -604,6 +623,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	/*For $k_{13}\frac{\partial v}{\partial \sigma}n_xp$*/
 
 	DiagMultiply(TempDiffMatrix, Dz, K13, Np);
@@ -621,6 +646,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	/*For $k_{22}\frac{\partial v}{\partial y}n_yp$*/
 	AssembleFacialDiffMatrix(FacialDiffMatrix, Dy, FpIndex, Nfp, Np);
 	/*The vector is a constant for a given face*/
@@ -635,6 +666,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	/*For $k_{23}\frac{\partial v}{\partial \sigma}n_yp$*/
 	DiagMultiply(TempDiffMatrix, Dz, K23, Np);
@@ -652,10 +689,27 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	MultiplyByConstant(TempMass2d, EleMass2d, Tau, Nfp*Nfp);
 	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
+
+	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
+	MultiplyByConstant(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp * Nfp);
+
+	SumInColumn(DirichEdge2d, WeightedEleMass2d, Nfp);
+
+	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1.0, Nfp);
+
+	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
+
+	Add(RHSdest, RHSdest, TempRHSBuff, Np);
 
 	double *SortedFpIndex = malloc(Nfp*sizeof(double));
 	memcpy(SortedFpIndex, FpIndex, Nfp*sizeof(double));
@@ -672,9 +726,29 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 	free(TempContribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
+	free(WeightedEleMass2d);
+	free(TempRHSBuff);
+	free(DirichEdge2d);
+	free(DirichEdgeBuff);
 	free(TempMass2d);
 	free(TempDiffMatrix);
 	free(SortedFpIndex);
+}
+
+void SumInColumn(double *dest, double *Source, int Np){
+	for (int col = 0; col < Np; col++){
+		for (int Row = 0; Row < Np; Row++){
+			dest[col] += Source[col*Np + Row];
+		}
+	}
+}
+
+void SumInRow(double *dest, double *Source, int Np, int ColNum){
+	for (int row = 0; row < Np; row++){
+		for (int col = 0; col < ColNum; col++){
+			dest[row] += Source[col*Np + row];
+		}
+	}
 }
 
 void GetScalarCentralFluxTerm2d(double *dest, double *fm, double *fp, double *Vector, int Nfp){

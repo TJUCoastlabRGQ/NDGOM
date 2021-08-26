@@ -83,7 +83,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 		}
 		ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, fm + face*BENfp, fp + face*BENfp, \
-			zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nvar, BENe);
+			zM + face*BENfp, zP + face*BENfp, fext + face*BENfp, BENfp, Nvar, BENe, varFieldIndex);
 
 		EvaluateHydroStaticReconstructValue(Hcrit, fm + face*BENfp, fp + face*BENfp, zM + face*BENfp, zP + face*BENfp, BENfp, Nvar, BENe);
 		EvaluateFaceRiemannProblem(fRiemann + face * 2, fm + face*BENfp, fp + face*BENfp, \

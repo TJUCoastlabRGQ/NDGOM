@@ -1,4 +1,4 @@
-classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
+classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
     %WAVETRANSFORMOVERANELLIPTICALSHOAL 此处显示有关此类的摘要
     %   此处显示详细说明
     
@@ -27,16 +27,14 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
         SpongeCoefficient
-        Ylim = [-10 16]
+        Ylim = [-10 6]
         Xlim = [-10 10]
         %         Xlim = [0 0.2]
     end
     
     methods (Access = public)
-        function obj = WaveTransformOverAnEllipticalShoal3d( N, Nz, Mz )
-            gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
-            gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
-            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
+        function obj = WaveTransformOverAnEllipticalShoal3dTest( N, Nz, Mz )
+            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz);
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
             obj.Nfield = 11;
@@ -129,6 +127,7 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             % Stelling and Zijlema, 2003
             omega = 2*pi/obj.T;
             hv3d = zeros(size(obj.fext3d{1}(:,:,1)));
+            hw3d = zeros(size(obj.fext3d{1}(:,:,1)));
             h3d = zeros(size(obj.fext3d{1}(:,:,1)));
             hv2d = zeros(size(obj.fext2d{1}(:,:,1)));
             h2d = zeros(size(obj.fext2d{1}(:,:,1)));
@@ -150,6 +149,53 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
 %             h3d(:,Index) = obj.d + Eta;
 %             obj.fext3d{1}(:,:,3) = h3d;
 
+%             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel);
+%             ele = obj.meshUnion(1).BoundaryEdge.FToE(1, Index);
+%             % water depth at the boundary
+%             % the sigma coordinate at the boundary
+%             zb = obj.meshUnion(1).z(:,ele);
+%             zb = zb(obj.meshUnion(1).BoundaryEdge.FToN1(:,Index));
+%             % the z level at the boundary
+%             zb = zb.*(Eta + obj.d) + Eta;
+% %             zb = zb.*obj.d;
+%             TempBoundNonhydroPressure = -obj.NonhydrostaticSolver.rho * obj.gra*obj.amplitude*sin(omega*time)*(1-cosh(obj.k*(zb+obj.d))./cosh(obj.k*obj.d));
+%             TempBoundNonhydroPressure(numel(TempBoundNonhydroPressure(:,1)) - obj.meshUnion.cell.N:end,:) = 0;
+%             obj.NonhydrostaticSolver.BoundNonhydroPressure(:,Index) = TempBoundNonhydroPressure;
+% %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
+% %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
+%             %% The depth-averaged version
+% %             hv3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+% %             hw3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*(cosh(obj.k*(obj.d + Eta))-1)/sinh(obj.k*obj.d)*cos(omega*time);
+%             %% The depth-dependent version 1 28.99
+%             hv3d(:,Index) = (Eta + obj.d) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+%             hw3d(:,Index) = (Eta + obj.d) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+%             %% The depth-dependent version 2 23.39
+% %             hv3d(:,Index) = (obj.d) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+% %             hw3d(:,Index) = (obj.d) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));            
+%             obj.fext3d{1}(:,:,2) = hv3d;
+%             obj.fext3d{1}(:,:,11) = hw3d;
+%             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+%             h3d(:,Index) = obj.d + Eta;
+%             obj.fext3d{1}(:,:,3) = h3d;
+%             
+%             
+% %             obj.fext2d{1}(:,:,2) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField( hv3d );
+%             
+%             
+%             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+% %             hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
+% %             hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * obj.d;
+%             %% 28.99
+%             hv2d(:,Index) = omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+%             %% The depth-depent version 2 23.39
+% %             hv2d(:,Index) = omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+%             
+%             obj.fext2d{1}(:,:,2) = hv2d;
+%             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+%             h2d(:,Index) = obj.d + Eta;
+%             obj.fext2d{1}(:,:,3) = h2d;
+            
+            
             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel);
             ele = obj.meshUnion(1).BoundaryEdge.FToE(1, Index);
             % water depth at the boundary
@@ -238,14 +284,14 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             fphys2d{1}(index) = fphys2d{1}(index)+0.3-...
                 0.5*sqrt(1-(tempx(index)/5).^2-(tempy(index)/3.75).^2);
             
-            fphys2d{1}(:,:,4) = -fphys2d{1}(:,:,1); 
-%             fphys2d{1}(:,:,1) = obj.d;
-%             fphys2d{1}(:,:,4) = -obj.d;   
+%             fphys2d{1}(:,:,4) = -fphys2d{1}(:,:,1); 
+            fphys2d{1}(:,:,1) = obj.d;
+            fphys2d{1}(:,:,4) = -obj.d;   
             
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 35;
+            ftime = 70;
             outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -285,10 +331,16 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
     
 end
 
-function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, gmshFileElement, gmshBoundaryFile )
+function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
 
-mesh2d = makeGmshFileUMeshUnion2d( N, gmshFileElement, gmshBoundaryFile );
+bctype = [ ...
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall ];
 
+mesh2d = makeUniformQuadMesh( N, ...
+    [ -10, -9.8 ], [ -10, 6 ], 1, 16/0.1, bctype);
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );

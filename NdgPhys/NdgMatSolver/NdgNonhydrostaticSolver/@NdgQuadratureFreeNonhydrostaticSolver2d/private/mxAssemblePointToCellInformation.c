@@ -8,6 +8,7 @@
 #include <omp.h>
 #endif
 
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	/* check input & output */

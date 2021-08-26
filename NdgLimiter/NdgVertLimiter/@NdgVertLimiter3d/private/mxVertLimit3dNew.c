@@ -1,5 +1,6 @@
 #include "../../../../NdgMath/NdgMath.h"
 #include "../../../../NdgMath/NdgSWE.h"
+#include <stdio.h>
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -99,6 +100,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int NLayer = (int)mxGetScalar(prhs[24]);
 	int MNv2d = (int)mxGetScalar(prhs[25]);
 	double *MNvc2d = mxGetPr(prhs[26]);
+	double *InvVandVert = mxGetPr(prhs[27]);
+	double *VandInterp = mxGetPr(prhs[28]);
 
 	size_t NdimOut = 3;
 	mwSize dimOut[3] = { Np, K, Nvar };
@@ -158,18 +161,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	                            /********************************************************************/
 	/*Allocate memory for fm and fp defined over boundary edges. Here, variables correspond to hu, hv, h, hT, hS,
 	sediment and other passive transport material, vertical velocity omega is not included for boundary edges*/
+
+	double *huM = NULL, *hvM = NULL, *hM = NULL;
+
 	double *hu = fphys, *hv = fphys + Np*K, \
 		*h = fphys + 3 * Np*K, *z = fphys + 5 * Np*K;
+	/*
 	double *fm = malloc(BENfp*BENe*(Nvar + 1)*sizeof(double));
-	double *huM = fm, *hvM = fm + BENfp*BENe, *hM = fm + 2 * BENfp*BENe;
+	huM = fm, hvM = fm + BENfp*BENe, hM = fm + 2 * BENfp*BENe;
 	double *fp = malloc(BENfp*BENe*(Nvar + 1)*sizeof(double));
 	double *zM = malloc(BENfp*BENe*sizeof(double));
 	double *zP = malloc(BENfp*BENe*sizeof(double));
-	/*Since we only need the vertex value, so we choose to use the vertex value only*/
+	//Since we only need the vertex value, so we choose to use the vertex value only
 	double *fRiemann = malloc(4*BENe*Nvar*sizeof(double));
 
-	/*Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
-	Finally, calculate the local Riemann problem to get variable at the interface*/
+	// Fetch variable fm and fp first, then impose boundary condition and conduct hydrostatic reconstruction.
+	//Finally, calculate the local Riemann problem to get variable at the interface
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -179,8 +186,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 		FetchBoundaryEdgeFacialValue(hM + face*BENfp, h, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 		FetchBoundaryEdgeFacialValue(zM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
-		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
-		here 1 stands for the memory occupied by water depth h*/
+		// The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
+		// here 1 stands for the memory occupied by water depth h
 		for (int field = 2; field < Nvar; field++){
 			FetchBoundaryEdgeFacialValue(fm + (field + 1)*BENe*BENfp + face*BENfp, \
 				fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
@@ -194,9 +201,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENe, BENfp, Nvar, Nh, Nz);
 	}
 
-	/*
-	Boundary Edge part to be considered here, this part is used to alter fmax and fmin
-	*/
+	
+	// Boundary Edge part to be considered here, this part is used to alter fmax and fmin
+	
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -209,7 +216,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	free(zM);
 	free(zP);
 	free(fRiemann);
+	*/
 
+	/*
 	double *Surffm = malloc(SurfBENfp*SurfBENe*Nvar*sizeof(double));
 	huM = Surffm;
 	hvM = Surffm + SurfBENfp*SurfBENe;
@@ -261,6 +270,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 	free(BotBEfm);
+	*/
 	
 /******************************************************************Boundary edge part finished************************************************************************************/
 
@@ -317,19 +327,61 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				double Lambda;
 				/*Get the mininum Lambda*/
 				GetMinimumSlope(&Lambda, LambdaMax, LambdaMin, Nv3d);
-				/*Here we only alter the vertex value only, if high order case is considered, we need to change this part*/
+				double *LVertValue = malloc(2 * Nv2d*sizeof(double));
+				/*Here we alter the vertex value first, then we calculate the mode coefficient according to the vertex value, 
+				* then we multiply the mode coefficient by the vandemonde matrix corresponding to the first order to regain the 
+				* intepolation point date value
+				*/
 				for (int L = 0; L < 2; L++){
 					for (int i = 0; i < Nv2d; i++){
 						/*Global index of the studied vertex of the studied cell*/
 						int nodeId = k * Np + L*Np2d*Nz + (int)Fmask2d[i * Nfp2d] - 1;
-						flimit[var*Np*K + nodeId] = Lambda * flimit[var*Np*K + nodeId] + (1 - Lambda)*Ave[var*K + k];
+						LVertValue[L*Nv2d + i] = Lambda * flimit[var*Np*K + nodeId] + (1 - Lambda)*Ave[var*K + k];
+						//flimit[var*Np*K + nodeId] = Lambda * flimit[var*Np*K + nodeId] + (1 - Lambda)*Ave[var*K + k];
 					}
 				}
+				double alpha = 1.0, beta = 0.0;
+
+				ptrdiff_t RowA, ColB, ColA;
+
+				double *fmod = malloc(2 * Nv2d*sizeof(double));
+
+				RowA = 2 * Nv2d, ColB = 1, ColA = 2 * Nv2d;
+
+				MatrixMultiply("n", "n", RowA, ColB, ColA, alpha, InvVandVert, \
+					RowA, LVertValue, RowA, beta, fmod, RowA);
+
+				RowA = Np, ColB = 1, ColA = 2 * Nv2d;
+
+				MatrixMultiply("n", "n", RowA, ColB, ColA, alpha, VandInterp, \
+					RowA, fmod, RowA, beta, flimit + var*Np*K + k*Np, RowA);
+
+				free(LVertValue);
+				free(fmod);
 				free(LambdaMax);
 				free(LambdaMin);
 			}
 		}
 	}
+
+	/*Calculate the average value first*/
+/*	double *AfterAve = malloc(K*Nvar*sizeof(double));
+	memset(AfterAve, 0, K*Nvar*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K; k++){
+		for (int var = 0; var < Nvar; var++){
+			GetMeshAverageValue(AfterAve + var*K + k, LAV + k, transA, transB, &ROPA, &COPB, &COPA, &Alpha, A, \
+				&LDA, flimit + var*Np*K + k*Np, J + k*Np, &LDB, &Beta, &LDC, wq);
+			printf("The difference is:%f\n", pow(10.0,12.0)*(*(AfterAve + var*K + k) - *(Ave + var*K + k)) + 1.0);
+		}
+	}
+
+	free(AfterAve);
+	*/
+
 	free(Ave);
 	free(fmin);
 	free(fmax);

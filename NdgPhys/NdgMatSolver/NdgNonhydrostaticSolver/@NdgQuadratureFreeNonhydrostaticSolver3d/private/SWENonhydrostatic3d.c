@@ -82,7 +82,7 @@ void CalculatePenaltyParameter(double *Tau, double *FToE, double *FToN1, double 
 		MaximumK = max(MaximumK, abs(AdjK23[(int)FToN2[Index*Nfp + i]-1]));
 		MaximumK = max(MaximumK, AdjK33[(int)FToN2[Index*Nfp + i]-1]);
 	}
-	*(Tau + Index) = 500*MaximumK*(P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*max(ELAV[Index] / MLAV[LocalEle - 1], ELAV[Index] / MLAV[AdjEle - 1]);
+	*(Tau + Index) = 10000*MaximumK*(P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*max(ELAV[Index] / MLAV[LocalEle - 1], ELAV[Index] / MLAV[AdjEle - 1]);
 }
 
 void EvaluateNonhydroVerticalFaceSurfFlux(double *dest, double *fm, double *n, int Nfp){

@@ -33,7 +33,7 @@ classdef WavetransformOverAnSurbmergedBar3d < SWEBarotropic3d
     
     methods (Access = public)
         function obj = WavetransformOverAnSurbmergedBar3d( N, Nz, M, Mz )
-            % setup mesh domain
+            % setup mesh domain            
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];

@@ -181,7 +181,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			ImposeBoundaryCondition(&gra, facetype, BEnx + face*BENfp, BEny + face*BENfp, HorDiffTempBEfm + face*BENfp, HorDiffTempBEfp + face*BENfp, \
-				HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
+				HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe, varIndex);
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			EvaluateHydroStaticReconstructValue(*Hcrit, HorDiffTempBEfm + face*BENfp, HorDiffTempBEfp + face*BENfp, HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, BENfp, Nfield + 1, BENe);
 			/*We divide the variable by water depth to get the original variable*/
@@ -245,7 +245,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			ImposeBoundaryCondition(&gra, facetype, BEnx + face*BENfp, BEny + face*BENfp, HorDiffTempBEfm + face*BENfp, HorDiffTempBEfp + face*BENfp, \
-				HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe);
+				HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe, varIndex);
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			EvaluateHydroStaticReconstructValue(*Hcrit, HorDiffTempBEfm + face*BENfp, HorDiffTempBEfp + face*BENfp, HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, BENfp, Nfield + 1, BENe);
 			/*We divide the variable by water depth to get the original variable*/
