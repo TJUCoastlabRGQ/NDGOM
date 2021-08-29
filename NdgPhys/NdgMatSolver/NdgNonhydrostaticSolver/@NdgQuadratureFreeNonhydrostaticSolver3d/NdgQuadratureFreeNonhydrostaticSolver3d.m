@@ -74,6 +74,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         cell2d
     end
     
+    properties
+        PARDISO_INITIALIZED = 0
+        PARDISO_INFO = []
+    end
+    
     methods
         function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )
             obj.matSetInitializeCharacteristicMatrix( PhysClass.SurfaceBoundaryEdgeType, mesh );
@@ -155,15 +160,47 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %
             %             NonhydroPressure = obj.GlobalStiffMatrix\(-1*obj.NonhydroRHS);
             
-%             tic;
-              NonhydroPressure = obj.GlobalStiffMatrix\(obj.NonhydroRHS);
-%             toc;
+            %             tic;
+            %             NonhydroPressure = obj.GlobalStiffMatrix\(obj.NonhydroRHS);
+            %             toc;
+            %==========================================For unsymmetric matrix======================================================
+            verbose = false;
+            if ~obj.PARDISO_INITIALIZED
+                
+                obj.PARDISO_INFO = pardisoinit(11,0);
+                % Analyze the matrix and compute a symbolic factorization.
+                obj.PARDISO_INFO = pardisoreorder(obj.GlobalStiffMatrix, obj.PARDISO_INFO,verbose);
+                
+                obj.PARDISO_INITIALIZED = 1;
+            end
+            % Compute the numeric factorization.
+            obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
+            % Compute the solutions X using the symbolic factorization.
+            [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
+
+%             pardisofree(PARDISO_INFO);
+%             clear PARDISO_INFO
             
-%             tic;
-%              [rowptr, colind, val] = crs_matrix(obj.GlobalStiffMatrix);
-%              [TempNonhydroPressure,flag,relres,iter,reshis] = petscSolveCRS(rowptr, colind, val, obj.NonhydroRHS,...
-%                  PETSC_KSPGMRES, 1.e-10, int32(10000000), PETSC_PCJACOBI, 'right');
-%             toc;
+            
+            %==========================================For symmetric matrix=======================================================
+            %             tic;
+            %             obj.GlobalStiffMatrix = mxAssemblePositiveDefiniteStiffMatrix( obj.GlobalStiffMatrix );
+            %             verbose = false;
+            %             info = pardisoinit(-2,0);
+            %             p    = randperm(numel(obj.NonhydroRHS));
+            %             info = pardisoreorder(tril(obj.GlobalStiffMatrix),info,verbose,p);
+            %             info = pardisofactor(tril(obj.GlobalStiffMatrix),info,verbose);
+            %             [SymNonhydroPressure, info] = pardisosolve(tril(obj.GlobalStiffMatrix),obj.NonhydroRHS,info,verbose);
+            %             pardisofree(info);
+            %             clear info
+            %             SymVersion = toc
+            
+            %==========================================For PETSc usage=============================================================
+            %             tic;
+            %              [rowptr, colind, val] = crs_matrix(obj.GlobalStiffMatrix);
+            %              [TempNonhydroPressure,flag,relres,iter,reshis] = petscSolveCRS(rowptr, colind, val, obj.NonhydroRHS,...
+            %                  PETSC_KSPGMRES, 1.e-10, int32(10000000), PETSC_PCJACOBI, 'right');
+            %             toc;
             
             
             
@@ -209,6 +246,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             clear mxAssembleGlobalStiffMatrixNew;
             clear mxImposeBoundaryCondition;
             clear mxCalculateBottomVerticalVelocity;
+            if obj.PARDISO_INITIALIZED
+                obj.PARDISO_INITIALIZED = 0;
+                pardisofree(obj.PARDISO_INFO);
+                clear obj.PARDISO_INFO
+            end
         end
         
         function TestPartialDerivativeCalculation(obj, physClass, fphys, fphys2d)
@@ -272,8 +314,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.PSPY = physClass.K23;
             obj.SQPSPX = obj.PSPX .* obj.PSPX;
             obj.SQPSPY = obj.PSPY .* obj.PSPY;
+            %             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
+            %                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.BottomEdge,...
+            %                 obj.SurfaceBoundaryEdge, obj.cell2d.M, ...
+            %                 obj.mesh2d.J, obj.mesh2d.K,
+            %                 physClass.SurfaceBoundaryEdgeType);
+            
             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
-                obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.cell2d.M, ...
+                obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.BottomEdge,...
+                obj.SurfaceBoundaryEdge, obj.cell2d.M, ...
                 obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
             SimulatedSolution = reshape(obj.GlobalStiffMatrix\physClass.RHS(1:physClass.meshUnion.cell.Np*physClass.meshUnion.K)', physClass.meshUnion.cell.Np, physClass.meshUnion.K);
         end

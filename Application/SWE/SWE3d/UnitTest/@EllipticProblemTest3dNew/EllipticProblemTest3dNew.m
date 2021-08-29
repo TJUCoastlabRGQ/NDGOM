@@ -69,17 +69,17 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.K11 = obj.TempK11 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K22 = obj.TempK22 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             obj.K13 = obj.TempK13 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             obj.K23 = obj.TempK23 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
-            obj.K13 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
-            obj.K23 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            obj.K13 = obj.TempK13 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            obj.K23 = obj.TempK23 * ones(obj.meshUnion.cell.Np, obj.meshUnion.K);
+%             obj.K13 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
+%             obj.K23 = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
 %             obj.K33 = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
             obj.TempK33 = obj.K33(1);
-%             obj.matGetFunction;
-%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-%             obj.RHS = obj.matAssembleRightHandSide;
-            obj.AssembleGlobalStiffMatrix;
+            obj.matGetFunction;
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+            obj.RHS = obj.matAssembleRightHandSide;
+%             obj.AssembleGlobalStiffMatrix;
         end
         function EllipticProblemSolve(obj)
             x = obj.meshUnion.x;
@@ -127,16 +127,18 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBottomBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.BottomDirichletData,...
                 struct(obj.meshUnion.BottomBoundaryEdge), struct(obj.meshUnion.cell), struct(obj.meshUnion), obj.K13, ...
-                obj.K23, obj.K33, obj.BottomNewmannData, obj.BottomBoundaryEdgeType );           
-            warning('on');
-            disp("============For stiff matrix================")
-            disp("The maximum difference is:")
-            disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
-            disp("The minimum difference is:")
-            disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
-            disp("============End stiff matrix================")                   
+                obj.K23, obj.K33, obj.BottomNewmannData, obj.BottomBoundaryEdgeType );      
+            
             obj.SimulatedSolution = obj.NonhydrostaticSolver.GlobalStiffMatrix\obj.RHS(:);
-            disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
+            
+%             warning('on');
+%             disp("============For stiff matrix================")
+%             disp("The maximum difference is:")
+%             disp(max(max(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));
+%             disp("The minimum difference is:")
+%             disp(min(min(obj.StiffMatrix - obj.NonhydrostaticSolver.GlobalStiffMatrix)));            
+%             disp("============End stiff matrix================")                   
+%             disp(condest(obj.NonhydrostaticSolver.GlobalStiffMatrix));
         end
         
     end

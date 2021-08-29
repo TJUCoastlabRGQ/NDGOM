@@ -3,11 +3,9 @@
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
-void GetPenaltyParameter(double *, double , double , int, int, int);
-
 void ImposeDirichletBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
 	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
-	double *, double *, double *, double *, double *, double *, double *, double *, \
+	double , double *, double *, double *, double *, double *, double *, double *, \
 	int, double *, double *, double *, double *, double *);
 
 void ImposeNewmannBoundaryCondition(double *, int , int , int , double *, \
@@ -70,8 +68,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double  *Ds = mxGetPr(TempDs);
 	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double  *Dt = mxGetPr(TempDt);
-	mxArray *TempP = mxGetField(cell, 0, "N");
-	int P = (int)mxGetScalar(TempP);
+	mxArray *TempN = mxGetField(cell, 0, "N");
+	int N = (int)mxGetScalar(TempN);
+	mxArray *TempNz = mxGetField(cell, 0, "Nz");
+	int Nz = (int)mxGetScalar(TempNz);
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
@@ -116,6 +116,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempFLAV = mxGetField(BoundaryEdge, 0, "LAV");
 	double *FLAV = mxGetPr(TempFLAV);
 
+	double *Tau = malloc(BENe * sizeof(double));
+
 	/*
 	  This part can not parallized with OpemMP, since we may alter the the result at the same time
 	  through different threads.
@@ -133,8 +135,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		
 		int LocalEle;
 		LocalEle = (int)FToE[2 * edge];
-		double *Tau = malloc(Nfp*sizeof(double));
-		GetPenaltyParameter(Tau, LAV[LocalEle - 1], FLAV[edge], P, Nface, Nfp);
+
+		CalculatePenaltyParameter(Tau, FToE, FToN1, FToN1, Np, Nfp, \
+			edge, K13, K23, K33, FLAV, LAV, max(N, Nz), Nface);
 		
 		double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
 		TempEToE = EToE + (LocalEle - 1)*Nface;
@@ -145,7 +148,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
 				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-				Dr, Ds, Dt, Tau, nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
+				Dr, Ds, Dt, *(Tau+edge), nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
 				Mass3d, TempJ, TempJs, LMass2d, Nface, FpIndex, DirichDataValue + edge * Nfp, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
 		}
@@ -155,8 +158,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		}
 
 		free(FpIndex);
-		free(Tau);
 	}
+	free(Tau);
 }
 
 void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int Nfp, double *Mass3d, \
@@ -164,8 +167,6 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
-
-	double *EleMass3d = malloc(Np*Np*sizeof(double));
 
 	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
 
@@ -187,8 +188,6 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 	free(EleMass2d);
 
-	free(EleMass3d);
-
 	free(TempRHSBuff);
 
 	free(TempFacialData);
@@ -197,7 +196,7 @@ void ImposeNewmannBoundaryCondition(double *InputRHS, int LocalEle, int Np, int 
 
 void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *irs, mwIndex *jcs, int LocalEle, \
 	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt,\
-	double *Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, \
+	double Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, \
 	int Nface, double *FpIndex, double *DirichData, double *K13, double *K23, double *K33){
 	double *DxBuff = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DxBuff, Dr, rx, Np);
@@ -216,8 +215,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	double *TempDiffMatrix = malloc(Np*Np*sizeof(double));
 
-	double *EleMass3d = malloc(Np*Np*sizeof(double));
-	DiagMultiply(EleMass3d, Mass3d, J, Np);
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
 
@@ -319,11 +316,11 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
-	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp);
+	MultiplyByConstant(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp * Nfp);
 
 	SumInColumn(DirichEdge2d, WeightedEleMass2d, Nfp);
 
-	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1, Nfp);
+	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1.0, Nfp);
 
 	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
 
@@ -334,7 +331,6 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(DyBuff);
 	free(Dy);
 	free(Dz);
-	free(EleMass3d);
 	free(EleMass2d);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
@@ -358,13 +354,6 @@ void SumInRow(double *dest, double *Source, int Np, int ColNum){
 		for (int col = 0; col < ColNum; col++){
 			dest[row] += Source[col*Np + row];
 		}
-	}
-}
-
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
-	for (int i = 0; i < Nfp; i++){
-		dest[i] = (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
-	//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
 	}
 }
 

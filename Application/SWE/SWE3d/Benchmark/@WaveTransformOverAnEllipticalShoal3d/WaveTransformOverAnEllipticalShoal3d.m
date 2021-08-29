@@ -129,9 +129,7 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             % Stelling and Zijlema, 2003
             omega = 2*pi/obj.T;
             hv3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            h3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            hv2d = zeros(size(obj.fext2d{1}(:,:,1)));
-            h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+            hw3d = zeros(size(obj.fext3d{1}(:,:,1)));
             
 %             Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel);
 %             ele = obj.meshUnion(1).BoundaryEdge.FToE(1, Index);
@@ -163,20 +161,31 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
             TempBoundNonhydroPressure(numel(TempBoundNonhydroPressure(:,1)) - obj.meshUnion.cell.N:end,:) = 0;
             obj.NonhydrostaticSolver.BoundNonhydroPressure(:,Index) = TempBoundNonhydroPressure;
 %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
-            hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
+%             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
+            %% The depth-averaged version
+%             hv3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+%             hw3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*(cosh(obj.k*(obj.d + Eta))-1)/sinh(obj.k*obj.d)*cos(omega*time);
+            %% The depth-dependent version 1 28.99
+%             hv3d(:,Index) = obj.d * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+%             hw3d(:,Index) = obj.d * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %% The depth-dependent version 2 23.39
+            hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));            
             obj.fext3d{1}(:,:,2) = hv3d;
-            Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h3d(:,Index) = obj.d + Eta;
-            obj.fext3d{1}(:,:,3) = h3d;
+            obj.fext3d{1}(:,:,11) = hw3d;
+            
+            obj.fext2d{1}(:,:,2) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField( hv3d );
             
             
-            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
+%             Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedVel );
 %             hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d);
-            hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * obj.d;
-            obj.fext2d{1}(:,:,2) = hv2d;
-            Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-            h2d(:,Index) = obj.d + Eta;
-            obj.fext2d{1}(:,:,3) = h2d;
+%             hv2d(:,Index) = omega*obj.amplitude/obj.k/(obj.d )*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * obj.d;
+            %% 28.99
+%             hv2d(:,Index) = omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+            %% The depth-depent version 2 23.39
+%             hv2d(:,Index) = omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
+            
+%             obj.fext2d{1}(:,:,2) = hv2d;
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
