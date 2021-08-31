@@ -213,14 +213,16 @@ void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, int LocalEle, int A
 	}
 }
 
-/*We note here that Nface2d in the function call can be Nface, when we study the mixed second order derivative in horizontal direction*/
-void GetSparsePatternInHorizontalDirection(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
+/* The following function is called at file mxSecondOrderDerivAboutNohydroPressInHorizon.c to determine the sparse pattern of the corresponding sparse matrix.
+ * In this function call, we assume that the whole computational domain is wet.  
+*/
+void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
 	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d, int IENe, int BotENe){
 
 	double *TempEToE = malloc((Nface+1)*Ele3d*sizeof(double));
 	int *UniNum = malloc(Ele3d*sizeof(int));
 
-	//First we need to know how many elements are adjacent to a studied element.
+	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif

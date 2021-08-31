@@ -312,7 +312,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
 
-	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, FToE, FToN1, FToN2, BotEFToE, \
+	GetSparsePattern(TempIr, TempJc, EToE, FToE, FToN1, FToN2, BotEFToE, \
 		BotEFToN1, BotEFToN2, Nface, IENfp, VertNfp, Np, Ele3d, IENe, BotENe);
 
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);

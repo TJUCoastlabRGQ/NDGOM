@@ -164,6 +164,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %             NonhydroPressure = obj.GlobalStiffMatrix\(obj.NonhydroRHS);
             %             toc;
             %==========================================For unsymmetric matrix======================================================
+            tic;
             verbose = false;
             if ~obj.PARDISO_INITIALIZED
                 
@@ -177,6 +178,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
             % Compute the solutions X using the symbolic factorization.
             [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
+            toc;
 
 %             pardisofree(PARDISO_INFO);
 %             clear PARDISO_INFO

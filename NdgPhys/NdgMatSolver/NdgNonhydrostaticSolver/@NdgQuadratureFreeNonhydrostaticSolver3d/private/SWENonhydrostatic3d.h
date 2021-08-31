@@ -31,7 +31,7 @@ void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );
 
-void GetSparsePatternInHorizontalDirection(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
+void GetSparsePattern(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
 	double *, double *, int, int, int, int, int, int , int );
 
 void FetchFacialData(double *, double *, double *, int );
