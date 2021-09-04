@@ -1,8 +1,6 @@
-function runEllipticMixedParticalDerivativeTest3d
-
-%=====================================================Boundary condition is not well imposed, and we neglect this part here=============================================
-M = [0.5 0.25 0.125];
-Mz = [2 4 8 16];
+function runEllipticProblemHorizontal3d
+M = [8 16 32 64 128 256 512 1024];
+Mz = [1 1 1 1 1 1 1 1];
 Order = [1 2];
 
 Nmesh = numel(M);
@@ -23,11 +21,11 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = EllipticMixedParticalDerivativeTest3d(Order(n), Order(n), M(m), Mz(m));
+        Solver = EllipticProblemInHorizontal3d(Order(n), Order(n), M(m), Mz(m));
         Solver.EllipticProblemSolve;
-        len(m, n) = M(m);
+        len(m, n) = 1/M(m);
         dofs(m,n) = numel(Solver.meshUnion(1).x);
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('EllipticMixedParticalDerivativeTest3d/3d','/','EllipticMixedParticalDerivativeTest3d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticProblemInHorizontal3d/3d','/','EllipticProblemInHorizontal3d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);
@@ -36,6 +34,13 @@ for n = 1:Ndeg
             fphys{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
             ExactValue{1}(:,:,i) = zeros(size(fphys{1}(:,:,1)));
         end
+        
+        % For all Newmann boundary
+        if (all(Solver.meshUnion.BoundaryEdge.ftype == enumBoundaryCondition.SlipWall) && ...
+                strcmp(Solver.SurfaceBoundaryEdgeType, 'Newmann') && strcmp(Solver.BottomBoundaryEdgeType,'Newmann'))
+            fphys{1}(:,:,1) = fphys{1}(:,:,1) - (fphys{1}(1) - ExactValue{1}(1));
+        end
+        
         err = PostProcess.evaluateNormErrInf( fphys, ExactValue );
         ErrInf( m, n ) = err(1);
         
@@ -90,31 +95,6 @@ for n = 1:3
     ylabel(ylabel_str{n}, 'Interpreter', 'Latex', 'FontSize', fontsize);
 end
 
-% time = time./time(end);
-% figure(4);
-% hold on;
-
-
-
-% figure(4);
-% hold on;
-% for n = 1:Ndeg
-%     co = color{n};
-%     plot(time(:, n)./max(max(time)), Err2(:, n), [co, marker{1}, linestyle],...
-%         'LineWidth', linewidth, ...
-%         'MarkerSize', markersize ...
-%         );
-% end
-%
-% set(gca, 'XScale', 'log', 'YScale', 'log');
-%
-% lendstr = {'$H$','$HU$','$HV$'};
-% legend(lendstr,'Interpreter','Latex');
-% %     columnlegend(2,lendstr, 12);
-%
-% xlabel('$time \;\rm {(s)}$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% ylabel('$L_2$', 'Interpreter', 'Latex', 'FontSize', fontsize);
-% box on; grid on;
 end
 
 function t1 = convergence_table(len, err1, err2, errInf)

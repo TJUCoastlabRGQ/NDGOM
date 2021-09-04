@@ -1,5 +1,4 @@
 #include "../../../../../../NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.h"
-#include "../../../../../../NdgMath/NdgSWE.h"
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 
@@ -47,6 +46,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *K13 = mxGetPr(prhs[6]);
 	double *K23 = mxGetPr(prhs[7]);
 	double *K33 = mxGetPr(prhs[8]);
+
+    double *NewmannData = mxGetPr(prhs[9]);
+
+    char* BoundaryType;
+    BoundaryType = mxArrayToString(prhs[10]); 
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -111,12 +115,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempFLAV = mxGetField(BoundaryEdge, 0, "LAV");
 	double *FLAV = mxGetPr(TempFLAV);
 
-	signed char *ftype = (signed char *)mxGetData(prhs[9]);
-
-	double *NewmannData = mxGetPr(prhs[10]);
-
 	double *Tau = malloc(BENe * sizeof(double));
-
 	/*
 	  This part can not parallized with OpemMP, since we may alter the the result at the same time
 	  through different threads.
@@ -134,27 +133,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		
 		int LocalEle;
 		LocalEle = (int)FToE[2 * edge];
-        
+
 		CalculatePenaltyParameter(Tau, FToE, FToN1, FToN1, Np, Nfp, \
 			edge, K13, K23, K33, FLAV, LAV, max(N, Nz), Nface);
 		
-		double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
-		TempEToE = EToE + (LocalEle - 1)*Nface;
+		double *TempJ = NULL, *TempJs = NULL;
 		TempJ = J + (LocalEle - 1)*Np;
 		TempJs = Js + edge * Nfp;
 
-		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
-			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
-				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
-		}
-		else{
+		if (!strcmp(BoundaryType, "Dirichlet")){
 			ImposeDirichletBoundaryCondition(sr, OutRHS + (LocalEle - 1)*Np, irs, jcs, LocalEle, \
 				Np, Nfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-				Dr, Ds, Dt, *(Tau + edge), nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
+				Dr, Ds, Dt, *(Tau+edge), nx + edge * Nfp, ny + edge * Nfp, nz + edge*Nfp, \
 				Mass3d, TempJ, TempJs, LMass2d, Nface, FpIndex, DirichDataValue + edge * Nfp, \
 				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
 		}
+		else if (!strcmp(BoundaryType, "Newmann")){
+			ImposeNewmannBoundaryCondition(OutRHS + (LocalEle - 1)*Np, LocalEle, Np, Nfp, Mass3d, \
+				TempJ, TempJs, LMass2d, FpIndex, NewmannData + edge * Nfp);
+		}
+
 		free(FpIndex);
 	}
 	free(Tau);
@@ -218,13 +217,12 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
+	double *Contribution = malloc(Np*Np*sizeof(double));
 
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
 	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
-
 	double *WeightedEleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(WeightedEleMass2d, EleMass2d, DirichData, Nfp);
-
 	double *TempRHSBuff = malloc(Np*sizeof(double));
 	memset(TempRHSBuff, 0, Np*sizeof(double));
 	double *DirichEdge2d = malloc(Nfp*sizeof(double));
@@ -320,6 +318,73 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
+	/*For $k_{31}\frac{\partial v}{\partial x}n_{\sigma}p$*/
+	DiagMultiply(TempDiffMatrix, Dx, K13, Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
+	/*The vector is a constant for a given face*/
+	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/* For term $k_{31}\frac{\partial p}{\partial x}n_{\sigma}v$*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
+	/*For $k_{32}\frac{\partial v}{\partial y}n_{\sigma}p$*/
+	DiagMultiply(TempDiffMatrix, Dy, K23, Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
+	/*The vector is a constant for a given face*/
+	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/* For term $k_{32}\frac{\partial p}{\partial y}n_{\sigma}v$*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
+	/*For $k_{33}\frac{\partial v}{\partial \sigma}n_{\sigma}p$*/
+	DiagMultiply(TempDiffMatrix, Dz, K33, Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
+	/*The vector is a constant for a given face*/
+	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
+
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
+	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/* For term $k_{33}\frac{\partial p}{\partial \sigma}n_{\sigma}v$*/
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
+
+	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
 	MultiplyByConstant(TempMass2d, EleMass2d, Tau, Nfp * Nfp);
 	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
@@ -334,13 +399,13 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 
 	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
 
-	Add(InputRHS, InputRHS, TempRHSBuff, Np);
-
 	double *SortedEid = malloc(Nfp*sizeof(double));
 	memcpy(SortedEid, FpIndex, Nfp*sizeof(double));
 	Sort(SortedEid, Nfp);
 
 	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedEid, SortedEid, Np, Nfp, TempContribution, LocalEle, LocalEle);
+
+	Add(InputRHS, InputRHS, TempRHSBuff, Np);
 
 	free(SortedEid);
 	free(DxBuff);
@@ -350,6 +415,7 @@ void ImposeDirichletBoundaryCondition(double *dest, double *InputRHS, mwIndex *i
 	free(Dz);
 	free(EleMass2d);
 	free(TempContribution);
+	free(Contribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
 	free(WeightedEleMass2d);
@@ -375,6 +441,7 @@ void SumInRow(double *dest, double *Source, int Np, int ColNum){
 		}
 	}
 }
+
 
 void GetFaceTypeAndFaceOrder(int *flag, int *face, int *ele, double *FToF, double *FToE, signed char *ftype, int edge){
 	(*ele) = (int)FToE[2 * edge];
