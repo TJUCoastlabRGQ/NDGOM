@@ -32,7 +32,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         SQPSPY
         % Partial derivative of u with respect to x, $\frac{\partial u}{\partial x}$
         PUPX
-        % Partial derivative of v with respect to x, $\frac{\partial v}{\partial y}$
+        % Partial derivative of u with respect to y, $\frac{\partial u}{\partial y}$
+        PUPY
+        % Partial derivative of v with respect to x, $\frac{\partial v}{\partial x}$
+        PVPX
+        % Partial derivative of v with respect to y, $\frac{\partial v}{\partial y}$
         PVPY
         % Partial derivative of u with respect to $\sigma$, $\frac{\partial u}{\partial \sigma}$
         PUPS
@@ -40,6 +44,10 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         PVPS
         % Partial derivative of w with respect to $\sigma$, $\frac{\partial w}{\partial \sigma}$
         PWPS
+        % Partial derivative of H with respect to x, $\frac{\partial H}{\partial x}$
+        PHPX
+        % Partial derivative of H with respect to y, $\frac{\partial H}{\partial y}$
+        PHPY
     end
     
     properties
@@ -52,6 +60,14 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         Wold
         
         Wnew
+        
+        Uold
+        
+        Unew
+        
+        Vold
+        
+        Vnew
     end
     
     properties
@@ -120,8 +136,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         
         function fphys = NdgConservativeNonhydrostaticUpdata(obj, physClass, fphys, fphys2d, deltatime)
             
-            [ obj.PSPX, obj.PSPY, obj.SQPSPX, obj.SQPSPY, obj.PUPX, ...
-                obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS, obj.Wnew ] = mxCalculatePartialDerivativeUpdated( physClass.hcrit,...
+            [ obj.PSPX, obj.PSPY, obj.SQPSPX, obj.SQPSPY, obj.PUPX, obj.PUPY, ...
+                obj.PVPX, obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS, obj.Wnew, obj.Unew, obj.Vnew, obj.PHPX, obj.PHPY ] = mxCalculatePartialDerivativeUpdated( physClass.hcrit,...
                 obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge, obj.BottomBoundaryEdge, ...
                 obj.SurfaceBoundaryEdge, fphys{1}, obj.varIndex, int8(physClass.meshUnion.BoundaryEdge.ftype), ...
                 physClass.gra, physClass.fext3d{ 1 }, fphys2d{1}(:,:,1),  fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, ...
@@ -149,7 +165,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
-                fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure);
+                fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure, obj.Unew, obj.Uold, obj.Vnew, obj.Vold,...
+                obj.PUPX, obj.PUPY, obj.PUPS, obj.PVPX, obj.PVPY, obj.PVPS, obj.PHPX, obj.PHPY, physClass.gra);
             
             %             obj.GlobalStiffMatrix = mxAssemblePositiveDefiniteStiffMatrix( obj.GlobalStiffMatrix );
             %
@@ -164,7 +181,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %             NonhydroPressure = obj.GlobalStiffMatrix\(obj.NonhydroRHS);
             %             toc;
             %==========================================For unsymmetric matrix======================================================
-            tic;
+            %             tic;
             verbose = false;
             if ~obj.PARDISO_INITIALIZED
                 
@@ -178,10 +195,10 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
             % Compute the solutions X using the symbolic factorization.
             [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
-            toc;
-
-%             pardisofree(PARDISO_INFO);
-%             clear PARDISO_INFO
+            %             toc;
+            
+            %             pardisofree(PARDISO_INFO);
+            %             clear PARDISO_INFO
             
             
             %==========================================For symmetric matrix=======================================================
@@ -221,6 +238,12 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %             edge = physClass.meshUnion.BottomBoundaryEdge;
             %             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
             %             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
+            
+            edge = physClass.meshUnion.BottomBoundaryEdge;
+            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+            obj.Uold = fm(:,:,obj.varIndex(1))./fm(:,:,obj.varIndex(4));
+            obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
+            obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
         end
         

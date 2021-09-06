@@ -1,12 +1,13 @@
 
 #include "SWENonhydrostatic3d.h"
 
-extern double *ImposeBCsK33, *ImposeBCsInvSquaHeight, *BETau, *ImposeBCsNewmannData, *ImposeBCsWx, *ImposeBCsWy, \
+extern double *ImposeBCsK33, *ImposeBCsInvSquaHeight, *BETau, *ImposeBCsNewmannData, *ImposeBCsTempNewmannData, *ImposeBCsWx, *ImposeBCsWy, \
 *ImposeBCsWxRHS2d, *ImposeBCsWyRHS2d, *ImposeBCsWIEFluxMx2d, *ImposeBCsWIEFluxMy2d, *ImposeBCsWIEFluxPx2d, *ImposeBCsWIEFluxPy2d, \
 *ImposeBCsWIEFluxSx2d, *ImposeBCsWIEFluxSy2d, *ImposeBCsVolumeIntegralX, *ImposeBCsTempVolumeIntegralX, *ImposeBCsVolumeIntegralY, \
 *ImposeBCsTempVolumeIntegralY, *ImposeBCsIEfm, *ImposeBCsIEfp, *ImposeBCsERHSx, *ImposeBCsERHSy, *ImposeBCsTempFacialIntegral, \
-*ImposeBCsBotBEU, *ImposeBCsBotBEV, *ImposeBCsBotBEH, *ImposeBCsBotBEPSPX, *ImposeBCsBotBEPSPY, *ImposeBCsBotBEPWPS, *ImposeBCsCombinedTerms,\
-*ImposeBCsWs;
+*ImposeBCsBotBEU, *ImposeBCsBotBEV, *ImposeBCsBotBEH, *ImposeBCsBotBECoe, *ImposeBCsBotBEPWPS, \
+*ImposeBCsWs, *ImposeBCsPUPX, *ImposeBCsPUPY, *ImposeBCsPUPS, *ImposeBCsPVPX, *ImposeBCsPVPY, *ImposeBCsPVPS, \
+*ImposeBCsPWPH, *ImposeBCsPHPX, *ImposeBCsPHPY;
 
 extern char *ImposeBoundaryInitialized;
 
@@ -81,6 +82,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *RHS = mxGetPr(prhs[20]);
 	double *PWPS = mxGetPr(prhs[21]);
 	double *BoundaryNonhydro = mxGetPr(prhs[22]);
+
+	double *Unew = mxGetPr(prhs[23]);
+	double *Uold = mxGetPr(prhs[24]);
+	double *Vnew = mxGetPr(prhs[25]);
+	double *Vold = mxGetPr(prhs[26]);
+	double *PUPX = mxGetPr(prhs[27]);
+	double *PUPY = mxGetPr(prhs[28]);
+	double *PUPS = mxGetPr(prhs[29]);
+	double *PVPX = mxGetPr(prhs[30]);
+	double *PVPY = mxGetPr(prhs[31]);
+	double *PVPS = mxGetPr(prhs[32]);
+	double *PHPX = mxGetPr(prhs[33]);
+	double *PHPY = mxGetPr(prhs[34]);
+	double gra = mxGetScalar(prhs[35]);
+
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -351,12 +367,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
-		/*$\frac{\partial w}{\partial \sigma}$*/
-		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPWPS + face*BotBENfp, PWPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
-		/*$\frac{\partial \sigma}{\partial x}$*/
-		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPSPX + face*BotBENfp, K13, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
-		/*$\frac{\partial \sigma}{\partial y}$*/
-		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPSPY + face*BotBENfp, K23, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 		/*Hu*/
 		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEU + face*BotBENfp, Hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 		/*Hv*/
@@ -367,56 +377,124 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		DotCriticalDivide(ImposeBCsBotBEU + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
 		/*$v=\frac{Hv}{H}$*/
 		DotCriticalDivide(ImposeBCsBotBEV + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
-		/*$\frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}$*/
-		DotProduct(ImposeBCsCombinedTerms + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, BotBENfp);
-		/*$\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}$, now the data is temporarily stored in ImposeBCsWx*/
-		Add(ImposeBCsWx + face*BotBENfp, ImposeBCsWx + face*BotBENfp, ImposeBCsCombinedTerms + face*BotBENfp, BotBENfp);
-		/*$u\left (\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}\right )$, now the data is temporarily stored in ImposeBCsWx*/
+		/*$\frac{w}{H}$*/
+		DotCriticalDivide(ImposeBCsPWPH + face*BotBENfp, Wnew + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$\frac{\partial H}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPHPX + face*BotBENfp, PHPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial H}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPHPY + face*BotBENfp, PHPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		/**********************************************************For the third part**********************************************************************/
+		/*$\frac{\partial w}{\partial \sigma}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPWPS + face*BotBENfp, PWPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$K_{33}$. For convenience, this data is temporarily stored in ImposeBCsBotBECoe*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, ImposeBCsK33, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$u\left (\frac{\partial w}{\partial x}\right )$, now the data is temporarily stored in ImposeBCsWx*/
 		DotProduct(ImposeBCsWx + face*BotBENfp, ImposeBCsWx + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
-
-		/*$\frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y}$, now the combined term changes*/
-		DotProduct(ImposeBCsCombinedTerms + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, ImposeBCsBotBEPSPY + face*BotBENfp, BotBENfp);
-		/*$\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y}$, now the data is temporarily stored in ImposeBCsWy*/
-		Add(ImposeBCsWy + face*BotBENfp, ImposeBCsWy + face*BotBENfp, ImposeBCsCombinedTerms + face*BotBENfp, BotBENfp);
-		/*$v\left (\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsWy*/
+		/*$v\left (\frac{\partial w}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsWy*/
 		DotProduct(ImposeBCsWy + face*BotBENfp, ImposeBCsWy + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
-
-        /*$\frac{w}{D}$, now the data is temporarily stored in ImposeBCsWs*/
-		DotCriticalDivide(ImposeBCsWs + face*BotBENfp, Wnew + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
 		/*$\frac{w}{D}\frac{\partial w}{\partial \sigma}$, now the data is temporarily stored in ImposeBCsWs*/
-		DotProduct(ImposeBCsWs + face*BotBENfp, ImposeBCsWs + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, BotBENfp);
-
+		DotProduct(ImposeBCsWs + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, BotBENfp);
 		/*$w_{new} - w_{old}$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		Minus(ImposeBCsNewmannData + face*BotBENfp, Wnew + face*BotBENfp, Wold + face*BotBENfp, BotBENfp);
 		/*$\frac{w_{new} - w_{old}}{\Delta t}$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		DotDivideByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, deltatime, BotBENfp);
-		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
 		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWx + face*BotBENfp, BotBENfp);
-		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}\right ) + v\left (\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y}\right )$*/
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x}\right ) + v\left (\frac{\partial w}{\partial y}\right )$*/
 		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWy + face*BotBENfp, BotBENfp);
-
-		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x}\right ) + v\left (\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y}\right ) + \frac{w}{D}\frac{\partial w}{\partial \sigma}$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left (\frac{\partial w}{\partial x} \right ) + v\left (\frac{\partial w}{\partial y}\right ) + \frac{w}{D}\frac{\partial w}{\partial \sigma}$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsWs + face*BotBENfp, BotBENfp);
-		/*$\rho \left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		/*$\rho \left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y} + \frac{w}{D}\frac{\partial w}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, rho, BotBENfp);
-		/*$\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		/*$\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y} + \frac{w}{D}\frac{\partial w}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		DotProduct(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
-		/*$n_{\sigma}\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		/*$n_{\sigma}\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y} + \frac{w}{D}\frac{\partial w}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
 		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, -1.0, BotBENfp);
-		/*$\left (\frac{\partial \sigma}{\partial x}\right )^2$*/
-		DotProduct(ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, BotBENfp);
-		/*$\left (\frac{\partial \sigma}{\partial y}\right )^2$*/
-		DotProduct(ImposeBCsBotBEPSPY + face*BotBENfp, ImposeBCsBotBEPSPY + face*BotBENfp, ImposeBCsBotBEPSPY + face*BotBENfp, BotBENfp);
-		/*$\frac{1}{D}$, the wet-dry condition need to be considered*/
-		ReverseValue(ImposeBCsBotBEH + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
-		/*$\frac{1}{D^2}$*/
-		DotProduct(ImposeBCsBotBEH + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
-		/*$\left (\frac{\partial \sigma}{\partial x}\right )^2 + \left (\frac{\partial \sigma}{\partial y}\right )^2$*/
-		Add(ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEPSPY + face*BotBENfp, BotBENfp);
-		/*$\left (\frac{\partial \sigma}{\partial x}\right )^2 + \left (\frac{\partial \sigma}{\partial y}\right )^2 + \frac{1}{D^2}$*/
-		Add(ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$-n_{\sigma}\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y} + \frac{w}{D}\frac{\partial w}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, -1.0, BotBENfp);
+		/*$n_{\sigma}\rho D K_{33}\left (\frac{w_{new} - w_{old}}{\Delta t} + u\frac{\partial w}{\partial x} + v\frac{\partial w}{\partial y} + \frac{w}{D}\frac{\partial w}{\partial \sigma}\right )$*/
+		DotProduct(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
 
-		DotProduct(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsBotBEPSPX + face*BotBENfp, BotBENfp);
+		/**********************************************************For the first part**********************************************************************/
+		/*$\frac{\partial u}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPX + face*BotBENfp, PUPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial u}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPY + face*BotBENfp, PUPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial u}{\partial s}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPS + face*BotBENfp, PUPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$u_{new} - u_{old}$, now the data is temporarily stored in ImposeBCsTempNewmannData*/
+		Minus(ImposeBCsTempNewmannData + face*BotBENfp, Unew + face*BotBENfp, Uold + face*BotBENfp, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t}$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		DotDivideByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, deltatime, BotBENfp);
+		/*$u\left (\frac{\partial u}{\partial x}\right )$, now the data is temporarily stored in ImposeBCsBotBEPUPX*/
+		DotProduct(ImposeBCsPUPX + face*BotBENfp, ImposeBCsPUPX + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPUPX + face*BotBENfp, BotBENfp);
+		/*$v\left (\frac{\partial u}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsBotBEPUPY*/
+		DotProduct(ImposeBCsPUPY + face*BotBENfp, ImposeBCsPUPY + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x} + v\left (\frac{\partial u}{\partial y}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPUPY + face*BotBENfp, BotBENfp);
+		/*$\frac{w}{H}\left (\frac{\partial u}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsBotBEPUPS*/
+		DotProduct(ImposeBCsPUPS + face*BotBENfp, ImposeBCsPUPS + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPUPS + face*BotBENfp, BotBENfp);
+		/*$g\frac{\partial H}{\partial x}$, now the data is temporarily stored in ImposeBCsBotBEPHPX*/
+		MultiplyByConstant(ImposeBCsPHPX + face*BotBENfp, ImposeBCsPHPX + face*BotBENfp, gra, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma} \right )+ g\frac{\partial H}{\partial x}$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPHPX + face*BotBENfp, BotBENfp);
+		/*$\rho \left (\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma} \right )+ g\frac{\partial H}{\partial x}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, rho, BotBENfp);
+		/*$K_{31}$. For convenience, this data is temporarily stored in ImposeBCsBotBECoe*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, K13, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$K_{31}\rho \left (\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma} \right )+ g\frac{\partial H}{\partial x}\right )$*/
+		DotProduct(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
+		/*$-K_{31}\rho \left (\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma} \right )+ g\frac{\partial H}{\partial x}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, -1.0, BotBENfp);
+		/*$-n_{\sigma}K_{31}\rho \left (\frac{u_{new} - u_{old}}{\Delta t} + u\left (\frac{\partial u}{\partial x}\right ) + v\left (\frac{\partial u}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial u}{\partial \sigma} \right )+ g\frac{\partial H}{\partial x}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, -1.0, BotBENfp);
+		/*Add the first and third term together, and the data is stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, BotBENfp);
+
+		/**********************************************************For the second part**********************************************************************/
+		/*$\frac{\partial v}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPX + face*BotBENfp, PVPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial v}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPY + face*BotBENfp, PVPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial v}{\partial s}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPS + face*BotBENfp, PVPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$v_{new} - v_{old}$, now the data is temporarily stored in ImposeBCsTempNewmannData, the original data stored in this space is rewritten*/
+		Minus(ImposeBCsTempNewmannData + face*BotBENfp, Vnew + face*BotBENfp, Vold + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t}$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		DotDivideByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, deltatime, BotBENfp);
+		/*$u\left (\frac{\partial v}{\partial x}\right )$, now the data is temporarily stored in ImposeBCsBotBEPVPX*/
+		DotProduct(ImposeBCsPVPX + face*BotBENfp, ImposeBCsPVPX + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPVPX + face*BotBENfp, BotBENfp);
+		/*$v\left (\frac{\partial v}{\partial y}\right )$, now the data is temporarily stored in ImposeBCsBotBEPVPY*/
+		DotProduct(ImposeBCsPVPY + face*BotBENfp, ImposeBCsPVPY + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x} + v\left (\frac{\partial v}{\partial y}\right ), now the data is temporarily stored in ImposeBCsNewmannData $*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPVPY + face*BotBENfp, BotBENfp);
+		/*$\frac{w}{H}\left (\frac{\partial v}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsBotBEPVPS*/
+		DotProduct(ImposeBCsPVPS + face*BotBENfp, ImposeBCsPVPS + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma}\right )$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPVPS + face*BotBENfp, BotBENfp);
+		/*$g\frac{\partial H}{\partial y}$, now the data is temporarily stored in ImposeBCsBotBEPHPX*/
+		MultiplyByConstant(ImposeBCsPHPY + face*BotBENfp, ImposeBCsPHPY + face*BotBENfp, gra, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma} \right )+ g\frac{\partial H}{\partial y}$, now the data is temporarily stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsPHPY + face*BotBENfp, BotBENfp);
+		/*$\rho \left (\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma} \right )+ g\frac{\partial H}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, rho, BotBENfp);
+		/*$K_{32}$. For convenience, this data is temporarily stored in ImposeBCsBotBECoe*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, K23, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$K_{32}\rho \left (\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma} \right )+ g\frac{\partial H}{\partial y}\right )$*/
+		DotProduct(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
+		/*$-K_{32}\rho \left (\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma} \right )+ g\frac{\partial H}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, -1.0, BotBENfp);
+		/*$-n_{\sigma}K_{31}\rho \left (\frac{v_{new} - v_{old}}{\Delta t} + u\left (\frac{\partial v}{\partial x}\right ) + v\left (\frac{\partial v}{\partial y}\right ) + \frac{w}{H}\left (\frac{\partial v}{\partial \sigma} \right )+ g\frac{\partial H}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsTempNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, -1.0, BotBENfp);
+		/*Add the first, the second and the third term together, and the data is stored in ImposeBCsNewmannData*/
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsTempNewmannData + face*BotBENfp, BotBENfp);
 	}
 
 
@@ -481,65 +559,13 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 	double *K31, double *K32, double *K33, double *Dx, double *Dy, double *Dz, int Np, int Nfp,\
 	double *Js, double *M2d, double *EToE, int Nface, double *FpIndex, double *NewmannData){
 
-	/*$n_z\left (k_{31}\frac{\partial p}{\partial x} + k_{32}\frac{\partial p}{\partial y}\right ) = -n_z\frac{\partial p}{\partial \sigma}$*/
-
-	double *TempK31 = malloc(Np*Np*sizeof(double));
-	double *TempK32 = malloc(Np*Np*sizeof(double));
-	//double *TempK33 = malloc(Np*Np*sizeof(double));
-	double *TempCoe = malloc(Np*Np*sizeof(double));
-
-	DiagMultiply(TempK31, Dx, K31, Np);
-
-	DiagMultiply(TempK32, Dy, K32, Np);
-
-	//DiagMultiply(TempK33, Dz, K33, Np);
-
-	Add(TempCoe, TempK31, TempK32, Np*Np);
-
 	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
-
 	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
-
 	double *TempRHSFacialData = malloc(Nfp * 1 * sizeof(double));
-//	Add(TempCoe, TempCoe, TempK33, Np*Np);
-
-	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
 	double *TempFacialData = malloc(Nfp*sizeof(double));
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, M2d, Js, Nfp);
-	double *TempContribution = malloc(Np*Np*sizeof(double));
-	memset(TempContribution, 0, Np*Np*sizeof(double));
-
-	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
-
 	ptrdiff_t One = 1;
-	/*For the following case, only the points on the face have contribution to the stiffmatrix*/
-	/*
-	for (int j = 0; j < Nfp; j++){
-
-		FetchFacialData(TempFacialData, TempCoe + ((int)FpIndex[j] - 1)*Np, FpIndex, Nfp);
-
-		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
-			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
-
-		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
-
-		AssembleDataIntoPoint(TempContribution + ((int)FpIndex[j] - 1)*Np, ContributionPerPoint, FpIndex, Nfp);
-	}
-	*/
-	
-	/*For the following case, all the points of the study cell have contribution to the stiffmatrix*/
-	for (int j = 0; j < Np; j++){
-
-		FetchFacialData(TempFacialData, TempCoe + j*Np, FpIndex, Nfp);
-
-		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
-			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
-
-		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
-
-		AssembleDataIntoPoint(TempContribution + j*Np, ContributionPerPoint, FpIndex, Nfp);
-	}
 	
 	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
 		(ptrdiff_t)Nfp, NewmannData, (ptrdiff_t)Nfp, 0.0, TempRHSFacialData, (ptrdiff_t)Nfp);
@@ -550,23 +576,10 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 
 	Add(RHSdest + (LocalEle - 1)*Np, RHSdest + (LocalEle - 1)*Np, TempRHSBuff, Np);
 
-	double *SortedFpIndex = malloc(Nfp*sizeof(double));
-	memcpy(SortedFpIndex, FpIndex, Nfp*sizeof(double));
-	Sort(SortedFpIndex, Nfp);
-
-	AssembleFacialContributionIntoSparseMatrix(dest, Irs, Jcs, SortedFpIndex, SortedFpIndex, Np, Nfp, TempContribution, LocalEle, LocalEle);
-
-	free(TempK31);
-	free(TempK32);
-	//free(TempK33);
-	free(TempCoe);
 	free(TempFacialData);
 	free(EleMass2d);
-	free(TempContribution);
-	free(ContributionPerPoint);
 	free(TempRHSBuff);
 	free(TempRHSFacialData);
-	free(SortedFpIndex);
 }
 
 void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *RHSdest, double *BoundNonhydro, int LocalEle, \

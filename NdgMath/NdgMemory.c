@@ -36,7 +36,7 @@ char *SWENonhydro3dInitialized = "False";
 
 double *NonhydroHU2d = NULL, *NonhydroHV2d = NULL, \
 *TempNonhydroHU2d = NULL, *TempNonhydroHV2d = NULL, *TempNonhydrofield3d = NULL, *Nonhydrofmod = NULL, \
-*NonhydroVariable = NULL, *PUPX = NULL,*PVPY = NULL, *PHPX = NULL,*PHPY = NULL, *PSPX = NULL, \
+*NonhydroVariable = NULL, *PSPX = NULL, \
 *PSPY = NULL, *TempPSPX = NULL,*TempPSPY = NULL, *NonhydroIEfm = NULL, *NonhydroIEfp = NULL, \
 *NonhydroIEFluxM = NULL, *NonhydroIEFluxP = NULL, *NonhydroIEFluxS = NULL, *NonhydroERHS = NULL, \
 *NonhydroBEfm = NULL, *NonhydroBEfp = NULL, *NonhydroBEFluxM = NULL, *NonhydroBEFluxS = NULL, \
@@ -53,6 +53,7 @@ double *NonhydroHU2d = NULL, *NonhydroHV2d = NULL, \
 *NonhydroBEfp2d = NULL,*NonhydroBEzP2d = NULL,*NonhydroBEFluxS2d = NULL, \
 *NonhydroBEFluxM2d = NULL,*NonhydroPCETempFacialIntegral = NULL, *NonhydroIEfmod = NULL, \
 *NonhydroBEfmod = NULL;
+//double *PHPX = NULL, *PHPY = NULL;
 
 /*The following space is allocated in file mxCalculatePartialDerivative.c and file mxCalculatePartialDerivativeUpdated.c.
 * We note that, ONLY ONE function can be called any time, Or the program would crash
@@ -65,14 +66,12 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 	/*In the main function*/
 	NonhydroVariable = malloc(Np3d*K3d*3*sizeof(double));
 	MemoryAllocationCheck(NonhydroVariable, Np3d*K3d * 3 * sizeof(double));
-	PUPX = malloc(Np3d*K3d*sizeof(double));
-	MemoryAllocationCheck(PUPX, Np3d*K3d*sizeof(double));
-	PVPY = malloc(Np3d*K3d*sizeof(double));
-	MemoryAllocationCheck(PVPY, Np3d*K3d*sizeof(double));
+	/*
 	PHPX = malloc(Np3d*K3d*sizeof(double));
 	MemoryAllocationCheck(PHPX, Np3d*K3d*sizeof(double));
 	PHPY = malloc(Np3d*K3d*sizeof(double));
 	MemoryAllocationCheck(PHPY, Np3d*K3d*sizeof(double));
+	*/
 	PSPX = malloc(Np3d*K3d*sizeof(double));
 	MemoryAllocationCheck(PSPX, Np3d*K3d*sizeof(double));
 	PSPY = malloc(Np3d*K3d*sizeof(double));
@@ -101,23 +100,26 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 	MemoryAllocationCheck(NonhydroIEfm, IENe*IENfp * 3 * sizeof(double));
     NonhydroIEfp = malloc(IENe*IENfp * 3 * sizeof(double));
 	MemoryAllocationCheck(NonhydroIEfp, IENe*IENfp * 3 * sizeof(double));
-	NonhydroIEFluxM = malloc(IENe*IENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroIEFluxM, IENe*IENfp * 4 * sizeof(double));
-	NonhydroIEFluxP = malloc(IENe*IENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroIEFluxP, IENe*IENfp * 4 * sizeof(double));
-	NonhydroIEFluxS = malloc(IENe*IENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroIEFluxS, IENe*IENfp * 4 * sizeof(double));
-	NonhydroERHS = malloc(4 * Np3d*K3d*Nface3d*sizeof(double));
-	MemoryAllocationCheck(NonhydroERHS, 4 * Np3d*K3d*Nface3d*sizeof(double));
+	NonhydroIEFluxM = malloc(IENe*IENfp * 6 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxM, IENe*IENfp * 6 * sizeof(double));
+	NonhydroIEFluxP = malloc(IENe*IENfp * 6 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxP, IENe*IENfp * 6 * sizeof(double));
+	NonhydroIEFluxS = malloc(IENe*IENfp * 6 * sizeof(double));
+	MemoryAllocationCheck(NonhydroIEFluxS, IENe*IENfp * 6 * sizeof(double));
+	/*Space allocated for the right hand correspoinding to PUPX PUPY PVPX PVPY PHPX PHPY,
+	This space is bigger than that for PUPS PVPS and PWPS
+	*/ 
+	NonhydroERHS = malloc(6 * Np3d*K3d*(Nface3d-2)*sizeof(double));
+	MemoryAllocationCheck(NonhydroERHS, 6 * Np3d*K3d*(Nface3d - 2) *sizeof(double));
 
 	NonhydroBEfm = malloc(BENe*BENfp * 3 * sizeof(double));
 	MemoryAllocationCheck(NonhydroBEfm, BENe*BENfp * 3 * sizeof(double));
 	NonhydroBEfp = malloc(BENe*BENfp * 3 * sizeof(double));
 	MemoryAllocationCheck(NonhydroBEfp, BENe*BENfp * 3 * sizeof(double));
-	NonhydroBEFluxM = malloc(BENe*BENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroBEFluxM, BENe*BENfp * 4 * sizeof(double));
-	NonhydroBEFluxS = malloc(BENe*BENfp * 4 * sizeof(double));
-	MemoryAllocationCheck(NonhydroBEFluxS, BENe*BENfp * 4 * sizeof(double));
+	NonhydroBEFluxM = malloc(BENe*BENfp * 6 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxM, BENe*BENfp * 6 * sizeof(double));
+	NonhydroBEFluxS = malloc(BENe*BENfp * 6 * sizeof(double));
+	MemoryAllocationCheck(NonhydroBEFluxS, BENe*BENfp * 6 * sizeof(double));
 	NonhydroTempFacialIntegral = malloc(Np3d*K3d*sizeof(double));
 	MemoryAllocationCheck(NonhydroTempFacialIntegral, Np3d*K3d*sizeof(double));
 	NonhydroTempVolumeIntegral = malloc(Np3d*K3d*sizeof(double));
@@ -226,10 +228,10 @@ void SWENonhydro3dMemoryAllocation(int Np3d, int K3d, int IENfp, int IENe, int N
 
 void SWENonhydro3dMemoryDeAllocation(){
 	free(NonhydroVariable), NonhydroVariable = NULL;
-	free(PUPX), PUPX = NULL;
-	free(PVPY), PVPY = NULL;
+	/*
 	free(PHPX), PHPX = NULL;
 	free(PHPY), PHPY = NULL;
+	*/
 	free(PSPX), PSPX = NULL;
 	free(PSPY), PSPY = NULL;
 	free(TempPSPX), TempPSPX = NULL;
@@ -362,8 +364,11 @@ double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL, *Imp
 *ImposeBCsWxRHS2d = NULL, *ImposeBCsWyRHS2d = NULL, *ImposeBCsWIEFluxMx2d = NULL, *ImposeBCsWIEFluxMy2d = NULL, *ImposeBCsWIEFluxPx2d = NULL, *ImposeBCsWIEFluxPy2d = NULL, \
 *ImposeBCsWIEFluxSx2d = NULL, *ImposeBCsWIEFluxSy2d = NULL, *ImposeBCsVolumeIntegralX = NULL, *ImposeBCsTempVolumeIntegralX = NULL, *ImposeBCsVolumeIntegralY = NULL, \
 *ImposeBCsTempVolumeIntegralY = NULL, *ImposeBCsIEfm = NULL, *ImposeBCsIEfp = NULL, *ImposeBCsERHSx = NULL, *ImposeBCsERHSy = NULL, *ImposeBCsTempFacialIntegral = NULL, \
-*ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL, *ImposeBCsBotBEPSPX = NULL, *ImposeBCsBotBEPSPY = NULL, *ImposeBCsBotBEPWPS = NULL, \
-*ImposeBCsCombinedTerms = NULL, *ImposeBCsWs = NULL;
+*ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL, *ImposeBCsBotBECoe = NULL, *ImposeBCsBotBEPWPS = NULL, \
+*ImposeBCsWs = NULL, \
+*ImposeBCsPUPX = NULL, *ImposeBCsPUPY = NULL, *ImposeBCsPUPS = NULL, \
+*ImposeBCsPVPX = NULL, *ImposeBCsPVPY = NULL, *ImposeBCsPVPS = NULL, *ImposeBCsTempNewmannData = NULL, \
+*ImposeBCsPWPH = NULL, *ImposeBCsPHPX = NULL, *ImposeBCsPHPY = NULL;
 char *ImposeBoundaryInitialized = "False";
 
 void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, int K2d, int Nface2d, int IENfp2d, int IENe2d, int BotBENe, int BotBENfp){
@@ -419,16 +424,35 @@ void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, in
 	MemoryAllocationCheck(ImposeBCsBotBEV, BotBENe*BotBENfp*sizeof(double));
 	ImposeBCsBotBEH = malloc(BotBENe*BotBENfp*sizeof(double));
 	MemoryAllocationCheck(ImposeBCsBotBEH, BotBENe*BotBENfp*sizeof(double));
-	ImposeBCsBotBEPSPX = malloc(BotBENe*BotBENfp*sizeof(double));
-	MemoryAllocationCheck(ImposeBCsBotBEPSPX, BotBENe*BotBENfp*sizeof(double));
-	ImposeBCsBotBEPSPY = malloc(BotBENe*BotBENfp*sizeof(double));
-	MemoryAllocationCheck(ImposeBCsBotBEPSPY, BotBENe*BotBENfp*sizeof(double));
+	ImposeBCsBotBECoe = malloc(BotBENe*BotBENfp*sizeof(double));
+	MemoryAllocationCheck(ImposeBCsBotBECoe, BotBENe*BotBENfp*sizeof(double));
 	ImposeBCsBotBEPWPS = malloc(BotBENe*BotBENfp*sizeof(double));
 	MemoryAllocationCheck(ImposeBCsBotBEPWPS, BotBENe*BotBENfp*sizeof(double));
-	ImposeBCsCombinedTerms = malloc(BotBENe*BotBENfp*sizeof(double));
-	MemoryAllocationCheck(ImposeBCsCombinedTerms, BotBENe*BotBENfp*sizeof(double));
 	ImposeBCsWs = malloc(BotBENe*BotBENfp*sizeof(double));
 	MemoryAllocationCheck(ImposeBCsWs, BotBENe*BotBENfp*sizeof(double));
+	ImposeBCsPUPX = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPUPX, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPUPY = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPUPY, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPUPS = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPUPS, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPVPX = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPVPX, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPVPY = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPVPY, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPVPS = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPVPS, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsTempNewmannData = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempNewmannData, BotBENe*BotBENfp * sizeof(double));
+	/*$\frac{\partial w}{\partial H}$*/
+	ImposeBCsPWPH = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPWPH, BotBENe*BotBENfp * sizeof(double));
+	/*$\frac{\partial H}{\partial x}$*/
+	ImposeBCsPHPX = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPHPX, BotBENe*BotBENfp * sizeof(double));
+	/*$\frac{\partial H}{\partial y}$*/
+	ImposeBCsPHPY = malloc(BotBENe*BotBENfp * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPHPY, BotBENe*BotBENfp * sizeof(double));
 	ImposeBoundaryInitialized = "True";
 }
 
@@ -459,11 +483,19 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 	free(ImposeBCsBotBEU), ImposeBCsBotBEU = NULL;
 	free(ImposeBCsBotBEV), ImposeBCsBotBEV = NULL;
 	free(ImposeBCsBotBEH), ImposeBCsBotBEH = NULL;
-	free(ImposeBCsBotBEPSPX), ImposeBCsBotBEPSPX = NULL;
-	free(ImposeBCsBotBEPSPY), ImposeBCsBotBEPSPY = NULL;
+	free(ImposeBCsBotBECoe), ImposeBCsBotBECoe = NULL;
 	free(ImposeBCsBotBEPWPS), ImposeBCsBotBEPWPS = NULL;
-	free(ImposeBCsCombinedTerms), ImposeBCsCombinedTerms = NULL;
 	free(ImposeBCsWs), ImposeBCsWs = NULL;
+	free(ImposeBCsPUPX), ImposeBCsPUPX = NULL;
+	free(ImposeBCsPUPY), ImposeBCsPUPY = NULL;
+	free(ImposeBCsPUPS), ImposeBCsPUPS = NULL;
+	free(ImposeBCsPVPX), ImposeBCsPVPX = NULL;
+	free(ImposeBCsPVPY), ImposeBCsPVPY = NULL;
+	free(ImposeBCsPVPS), ImposeBCsPVPS = NULL;
+	free(ImposeBCsTempNewmannData), ImposeBCsTempNewmannData = NULL;
+	free(ImposeBCsPWPH), ImposeBCsPWPH = NULL;
+	free(ImposeBCsPHPX), ImposeBCsPHPX = NULL;
+	free(ImposeBCsPHPY), ImposeBCsPHPY = NULL;
 	ImposeBoundaryInitialized = "False";
 }
 
