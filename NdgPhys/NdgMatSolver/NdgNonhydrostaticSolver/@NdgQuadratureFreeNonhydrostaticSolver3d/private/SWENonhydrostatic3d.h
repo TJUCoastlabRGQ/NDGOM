@@ -34,6 +34,12 @@ void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, d
 void GetSparsePattern(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
 	double *, double *, int, int, int, int, int, int , int );
 
+void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *, mwIndex *, double *, double *, double *, double *, \
+	int , int , int , int , int , int , double *);
+
+void GetSparsePatternForVerticalFirstOrderTerm(mwIndex *, mwIndex *, double *, double *, double *, double *, \
+	int , int , int , int , int , int , double *);
+
 void FetchFacialData(double *, double *, double *, int );
 
 void FetchDataInSparseMatrix(double *, double *, int , int );

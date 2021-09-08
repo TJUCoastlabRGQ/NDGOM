@@ -48,6 +48,30 @@ void AssembleFacialContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwInd
 	}
 }
 
+/*We note here that, when the local faicl contribution is assembled to the sparse matrix, AdjEid here refers to the LocalEid,
+* and AdjEle is the local element.
+*/
+void AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(double *dest, mwIndex *Ir, mwIndex *Jc, double *LocalEid, int Np, int Nfp, double *Tempdest, int LocalEle, int AdjEle) {
+	for (int cp = 0; cp < Np; cp++) {
+		/*Start point*/
+		int Sp = (int)Jc[(LocalEle - 1)*Np + cp];
+		for (int index = 0; index < Nfp; index++) {
+			/*If the point is located on the face, then Np points in a column are influcenced due to the matrix multiplication of inverse mass matrix and facial contribution term*/
+			if (cp == (int)LocalEid[index] - 1) {
+				for (int j = 0; j < (int)Jc[(LocalEle - 1)*Np + cp + 1] - Sp; j++) {
+					if (Ir[Sp + j] == (mwIndex)((AdjEle - 1)*Np)) {
+						for (int rp = 0; rp < Np; rp++) {
+							dest[Sp + j + rp] += Tempdest[cp*Np + rp];
+						}
+						break;
+					}
+				}
+				break;
+			}
+		}
+	}
+}
+
 void AssembleVolumnContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *Tempdest, int LocalEle){
 	for (int i = 0; i < Np; i++){
 		int Sp = (int)Jc[(LocalEle - 1)*Np + i];
@@ -333,6 +357,181 @@ void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IE
 			for (int rp = 0; rp < NumRowPerPoint[col]; rp++){
 				/*The row index in the sparse matrix*/
 				TempIr[TempJc[i*Np + col] + rp] = Ir[col * (Nface + 1) * Np + rp];
+			}
+		}
+
+	}
+	free(TempEToE);
+	free(UniNum);
+	free(Ir);
+	free(NumRowPerPoint);
+	free(CurrentPosition);
+}
+
+
+/* The following function is called in file mxFirstOrderDerivAboutNohydroPressInHorizontal.c to determine the sparse pattern of the corresponding sparse matrix.
+* In this function call, we assume that the whole computational domain is wet.
+*/
+void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, \
+	 int Nface, int IENfp, int MaxNfp, int Np, int Ele3d, int IENe, double *Fmask) {
+
+	/*Only the element itself and face in horizontal direction considered*/
+	double *TempEToE = malloc((Nface - 2 + 1)*Ele3d * sizeof(double));
+	int *UniNum = malloc(Ele3d * sizeof(int));
+
+	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < Ele3d; e++) {
+		FindUniqueElementAndSortOrder(TempEToE + e*(Nface - 2 + 1), EToE + e*Nface, UniNum + e, Nface - 2, e + 1);
+	}
+	/*
+	* next we'll move on the the construction of the index of the sparse matrix,
+	* we first need to know how many nonzeros are contained in each column, and
+	* this part can't be parallised since the number of nonzeros of a studied
+	* column is influenced by that of the columns come before the studied one.
+	*/
+	/*The row index, with (Nface-2+1)*Np the possible maximum influence scope and Np the number of point for each cell*/
+	mwIndex *Ir = malloc((Nface - 2 + 1)*Np*Np * sizeof(mwIndex));
+	/*Number of point influenced by each point*/
+	int *NumRowPerPoint = malloc(Np * sizeof(int));
+	/*The position the row index of each point has been inserted*/
+	int *CurrentPosition = malloc(Np * sizeof(int));
+
+	double *LocalEidM = NULL, *AdjacentEidM = NULL;
+
+	for (int i = 0; i < Ele3d; i++) {
+		memset(Ir, 0, (Nface - 2 + 1)*Np*Np * sizeof(mwIndex));
+		memset(NumRowPerPoint, 0, Np * sizeof(int));
+		memset(CurrentPosition, 0, Np * sizeof(int));
+		for (int e = 0; e < *(UniNum + i); e++) {
+			int TempEle = (int)TempEToE[i*(Nface - 2 + 1) + e];
+			/*The cell studied is located adjacent to cell in horizontal direction*/
+			if (TempEle != (i + 1)) {
+				LocalEidM = malloc(IENfp * sizeof(double));
+				AdjacentEidM = malloc(IENfp * sizeof(double));
+				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, IENfp, IEFToE, IEFToN1, IEFToN2, IENe, i + 1, TempEle);
+				int PIndex;
+				for (int cp = 0; cp < IENfp; cp++) {
+					PIndex = (int)LocalEidM[cp] - 1;
+					NumRowPerPoint[PIndex] += Np;
+
+					for (int rp = 0; rp < Np; rp++) {
+						Ir[PIndex*Np*(Nface - 2 + 1) + CurrentPosition[PIndex] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+					}
+
+					CurrentPosition[PIndex] += Np;
+				}
+				free(LocalEidM), LocalEidM = NULL;
+				free(AdjacentEidM), AdjacentEidM = NULL;
+			}
+			/*The cell studied is cell i itself*/
+			else if (TempEle == (i + 1)) {
+				for (int cp = 0; cp < Np; cp++) {
+					NumRowPerPoint[cp] += Np;
+					for (int rp = 0; rp < Np; rp++) {
+						Ir[cp*Np*(Nface - 2 + 1) + CurrentPosition[cp] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+					}
+					CurrentPosition[cp] += Np;
+				}
+			}
+		}
+		for (int cp = 0; cp < Np; cp++) {
+			TempJc[i*Np + cp + 1] = TempJc[i*Np + cp] + NumRowPerPoint[cp];
+		}
+		for (int col = 0; col < Np; col++) {
+			for (int rp = 0; rp < NumRowPerPoint[col]; rp++) {
+				/*The row index in the sparse matrix*/
+				TempIr[TempJc[i*Np + col] + rp] = Ir[col * (Nface - 2 + 1) * Np + rp];
+			}
+		}
+
+	}
+	free(TempEToE);
+	free(UniNum);
+	free(Ir);
+	free(NumRowPerPoint);
+	free(CurrentPosition);
+}
+
+
+/* The following function is called in file mxFirstOrderDerivAboutNohydroPressInVert.c to determine the sparse pattern of the corresponding sparse matrix.
+* In this function call, we assume that the whole computational domain is wet.
+*/
+void GetSparsePatternForVerticalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *BotEFToE, double *BotEFToN1, double *BotEFToN2, \
+	int Nface, int BotENfp, int MaxNfp, int Np, int Ele3d, int BotENe, double *Fmask) {
+
+	/*Only the element itself and face in vertical direction considered*/
+	double *TempEToE = malloc(3*Ele3d * sizeof(double));
+	int *UniNum = malloc(Ele3d * sizeof(int));
+
+	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < Ele3d; e++) {
+		/*We only need to rank the last two elements at the bottom and surface*/
+		FindUniqueElementAndSortOrder(TempEToE + e*3, EToE + e*Nface + Nface - 2, UniNum + e, 2, e + 1);
+	}
+	/*
+	* next we'll move on the the construction of the index of the sparse matrix,
+	* we first need to know how many nonzeros are contained in each column, and
+	* this part can't be parallised since the number of nonzeros of a studied
+	* column is influenced by that of the columns come before the studied one.
+	*/
+	/*The row index, with (Nface+1)*Np the possible maximum influence scope and Np the number of point for each cell*/
+	mwIndex *Ir = malloc(3*Np*Np * sizeof(mwIndex));
+	/*Number of point influenced by each point*/
+	int *NumRowPerPoint = malloc(Np * sizeof(int));
+	/*The position the row index of each point has been inserted*/
+	int *CurrentPosition = malloc(Np * sizeof(int));
+
+	double *LocalEidM = NULL, *AdjacentEidM = NULL;
+
+	for (int i = 0; i < Ele3d; i++) {
+		memset(Ir, 0, 3*Np*Np * sizeof(mwIndex));
+		memset(NumRowPerPoint, 0, Np * sizeof(int));
+		memset(CurrentPosition, 0, Np * sizeof(int));
+		for (int e = 0; e < *(UniNum + i); e++) {
+			int TempEle = (int)TempEToE[i*3 + e];
+			/*The cell studied is located upside or downside to cell in vertical direction*/
+			if (TempEle != (i + 1)) {
+				LocalEidM = malloc(BotENfp * sizeof(double));
+				AdjacentEidM = malloc(BotENfp * sizeof(double));
+				FindFaceAndFacialPoint(LocalEidM, AdjacentEidM, BotENfp, BotEFToE, BotEFToN1, BotEFToN2, BotENe, i + 1, TempEle);
+				int PIndex;
+				for (int cp = 0; cp < BotENfp; cp++) {
+					PIndex = (int)LocalEidM[cp] - 1;
+					NumRowPerPoint[PIndex] += Np;
+
+					for (int rp = 0; rp < Np; rp++) {
+						Ir[PIndex*Np*3 + CurrentPosition[PIndex] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+					}
+
+					CurrentPosition[PIndex] += Np;
+				}
+				free(LocalEidM), LocalEidM = NULL;
+				free(AdjacentEidM), AdjacentEidM = NULL;
+			}
+			/*The cell studied is cell i itself*/
+			else if (TempEle == (i + 1)) {
+				for (int cp = 0; cp < Np; cp++) {
+					NumRowPerPoint[cp] += Np;
+					for (int rp = 0; rp < Np; rp++) {
+						Ir[cp*Np*3 + CurrentPosition[cp] + rp] = (mwIndex)(rp + (TempEle - 1)*Np);
+					}
+					CurrentPosition[cp] += Np;
+				}
+			}
+		}
+		for (int cp = 0; cp < Np; cp++) {
+			TempJc[i*Np + cp + 1] = TempJc[i*Np + cp] + NumRowPerPoint[cp];
+		}
+		for (int col = 0; col < Np; col++) {
+			for (int rp = 0; rp < NumRowPerPoint[col]; rp++) {
+				/*The row index in the sparse matrix*/
+				TempIr[TempJc[i*Np + col] + rp] = Ir[col * 3 * Np + rp];
 			}
 		}
 
