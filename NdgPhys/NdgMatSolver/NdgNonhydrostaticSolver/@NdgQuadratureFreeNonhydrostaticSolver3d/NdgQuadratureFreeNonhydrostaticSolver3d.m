@@ -9,6 +9,10 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         SPNPY
         % First order partial derivative about nonhydrostatic pressure in vertical direction, $\frac{\partial p}{\partial \sigma}$
         PNPS
+        % First order partial derivative about nonhydrostatic pressure in horizontal direction, $\frac{\partial p}{\partial x}$
+        PNPX
+        % First order partial derivative about nonhydrostatic pressure in horizontal direction, $\frac{\partial p}{\partial y}$
+        PNPY
         % Second order partial derivative about nonhydrostatic pressure in vertical direction, $\frac{\partial^2 p}{\partial \sigma^2}$
         SPNPS
         % Mixed Second order partial derivative about nonhydrostatic pressure in direction x, $\frac{\partial}{\partial x}\left(\frac{\partial p}{\partial \sigma}\right)$

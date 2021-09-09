@@ -241,15 +241,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int Ele3d = (int)mxGetScalar(prhs[1]);
 	int Nlayer = (int)mxGetScalar(prhs[2]);
 	int Ele2d = (int)mxGetScalar(prhs[3]);
+	int BotENe = (Nlayer - 1)*Ele2d;
 	int Nface = (int)mxGetScalar(prhs[4]);
 	double *EToE = mxGetPr(prhs[5]);
-	int TotalNonzero = Ele3d * 3 * Np*Np - Ele2d * 2 * Np*Np;
-	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
-	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
 	double *tz = mxGetPr(prhs[6]);
 	double *Dt = mxGetPr(prhs[7]);
-	//double *Mass3d = malloc(Np*Np*sizeof(double));
 	double *J = mxGetPr(prhs[8]);
 	double *J2d = mxGetPr(prhs[9]);
 	double *M2d = mxGetPr(prhs[10]);
@@ -264,8 +261,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		UpEidM[i] = Fmask[(Nface - 1)*maxNfp + i];
 		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
 	}
+	double *BotEFToE = mxGetPr(prhs[14]);
+	double *BotEFToN1 = mxGetPr(prhs[15]);
+	double *BotEFToN2 = mxGetPr(prhs[16]);
 
-	GetSparsePatternInVerticalDirection(TempIr, TempJc, Np, Nlayer, Ele2d);
+
+	int TotalNonzero = Ele3d * Np*Np + BotENe * 2 * Np2d*Np;
+	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
+	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
+
+	GetSparsePatternForVerticalFirstOrderTerm(TempIr, TempJc, EToE, BotEFToE, BotEFToN1, BotEFToN2, \
+		Nface, Np2d, maxNfp, Np, Ele3d, BotENe, Fmask);
+
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
 	mwIndex *irs = mxGetIr(plhs[0]);
@@ -277,7 +284,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int e = 0; e < Ele2d; e++){
-		int StartPoint;
 
 		for (int L = 0; L < Nlayer; L++){
 			//Index of the studied element

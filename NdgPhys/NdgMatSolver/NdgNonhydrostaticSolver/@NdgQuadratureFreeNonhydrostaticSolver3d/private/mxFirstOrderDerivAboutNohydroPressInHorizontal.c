@@ -234,29 +234,28 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *FToF = mxGetPr(prhs[7]);
 	double *FToN1 = mxGetPr(prhs[8]);
 	double *FToN2 = mxGetPr(prhs[9]);
+	double *J = mxGetPr(prhs[10]);
+	double *Js = mxGetPr(prhs[11]);
+	double *M3d = mxGetPr(prhs[12]);
+	double *LM2d = mxGetPr(prhs[13]);
+	int IENe = mxGetScalar(prhs[14]);
 
-	double *J = mxGetPr(prhs[11]);
-	double *Js = mxGetPr(prhs[13]);
-	double *M3d = mxGetPr(prhs[14]);
-	double *LM2d = mxGetPr(prhs[15]);
-	int BENe = mxGetScalar(prhs[17]);
-	int IENe = mxGetScalar(prhs[18]);
-	int TotalNonzero = Ele3d * (Nface + 1) * Np*Np - BENe * Np*Np - 2 * Ele2d*Np*Np;
+	double *Nfp = mxGetPr(prhs[15]);
+	int HorNfp = (int)Nfp[0];
+
+	double *Vector = mxGetPr(prhs[16]);
+	double *rd = mxGetPr(prhs[17]);
+	double *sd = mxGetPr(prhs[18]);
+	double *Dr = mxGetPr(prhs[19]);
+	double *Ds = mxGetPr(prhs[20]);
+
+	int TotalNonzero = Ele3d * Np * Np + 2 * IENe * HorNfp * Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
 	TempJc[0] = 0;
-	GetSparsePatternInHorizontalDirection(TempIr, TempJc, EToE, Nface, Nface, Ele3d, Np);
 
-	double *Fmask = mxGetPr(prhs[19]);
-	int maxNfp = mxGetM(prhs[19]);
-	double *Nfp = mxGetPr(prhs[20]);
-	int HorNfp = (int)Nfp[0];
-
-	double *Vector = mxGetPr(prhs[23]);
-	double *rd = mxGetPr(prhs[24]);
-	double *sd = mxGetPr(prhs[25]);
-	double *Dr = mxGetPr(prhs[27]);
-	double *Ds = mxGetPr(prhs[28]);
+	GetSparsePatternForHorizontalFirstOrderTerm(TempIr, TempJc, EToE, FToE, FToN1, FToN2, \
+		Nface, IENfp, MaxNfp, Np, Ele3d, IENe, Fmask);
 	
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
