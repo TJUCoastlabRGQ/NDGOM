@@ -27,6 +27,8 @@ void AssembleVolumnContributionIntoSparseMatrix(double *, mwIndex *, mwIndex *, 
 
 void AssembleFacialDiffMatrix(double *, double *, double *, int, int);
 
+void AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(double *, mwIndex *, mwIndex *, double *, int, int, double *, int, int);
+
 void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );

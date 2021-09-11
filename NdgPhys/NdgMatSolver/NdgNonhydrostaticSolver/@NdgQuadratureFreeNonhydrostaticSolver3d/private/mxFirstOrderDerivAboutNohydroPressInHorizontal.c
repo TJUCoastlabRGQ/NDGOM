@@ -10,7 +10,7 @@ void GetLocalVolumuIntegralTermForFirstOrderHorizontalTerm(double *dest, mwIndex
 	DiagMultiply(DiffMatrix, Ds, sd, Np);
 	Add(DiffMatrix, DiffMatrix, DiffMatrixBuff, Np*Np);
 
-	AssembleVolumnContributionIntoSparseMatrix(dest, Ir, Jc, Np, DiffSigma, LocalEle);
+	AssembleVolumnContributionIntoSparseMatrix(dest, Ir, Jc, Np, DiffMatrix, LocalEle);
 
 	free(DiffMatrixBuff);
 	free(DiffMatrix);
@@ -248,6 +248,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *sd = mxGetPr(prhs[18]);
 	double *Dr = mxGetPr(prhs[19]);
 	double *Ds = mxGetPr(prhs[20]);
+	double *Fmask = mxGetPr(prhs[21]);
+	int MaxNfp = (int)mxGetM(prhs[21]);
 
 	int TotalNonzero = Ele3d * Np * Np + 2 * IENe * HorNfp * Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
@@ -255,7 +257,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	TempJc[0] = 0;
 
 	GetSparsePatternForHorizontalFirstOrderTerm(TempIr, TempJc, EToE, FToE, FToN1, FToN2, \
-		Nface, IENfp, MaxNfp, Np, Ele3d, IENe, Fmask);
+		Nface, HorNfp, MaxNfp, Np, Ele3d, IENe, Fmask);
 	
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);

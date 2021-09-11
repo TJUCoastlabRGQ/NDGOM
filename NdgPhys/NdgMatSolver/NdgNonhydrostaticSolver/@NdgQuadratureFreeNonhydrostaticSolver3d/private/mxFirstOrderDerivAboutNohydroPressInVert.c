@@ -244,7 +244,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int BotENe = (Nlayer - 1)*Ele2d;
 	int Nface = (int)mxGetScalar(prhs[4]);
 	double *EToE = mxGetPr(prhs[5]);
-	TempJc[0] = 0;
 	double *tz = mxGetPr(prhs[6]);
 	double *Dt = mxGetPr(prhs[7]);
 	double *J = mxGetPr(prhs[8]);
@@ -269,6 +268,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int TotalNonzero = Ele3d * Np*Np + BotENe * 2 * Np2d*Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
 	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
+	TempJc[0] = 0;
 
 	GetSparsePatternForVerticalFirstOrderTerm(TempIr, TempJc, EToE, BotEFToE, BotEFToN1, BotEFToN2, \
 		Nface, Np2d, maxNfp, Np, Ele3d, BotENe, Fmask);
