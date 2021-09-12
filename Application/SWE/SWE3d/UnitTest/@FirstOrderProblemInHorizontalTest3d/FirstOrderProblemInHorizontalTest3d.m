@@ -1,29 +1,21 @@
-classdef FirstOrderProblemTest3d < SWEBarotropic3d
+classdef FirstOrderProblemInHorizontalTest3d < SWEBarotropic3d
     
     %> Note: This solver is used for test purpose of operator
     %> $\frac{\partial p}{\partial \sigma }$, the analytical
     %> solution $p=sin\left (-\frac{\pi}{2}z\right )$ is used   
     
     properties
-        ChLength = 2
-        ChWidth = 2
+        ChLength = 3
+        ChWidth = 3
     end
     
     properties
         
-        StiffMatrix
+        StiffMatrixInX
         
-        RHS
-        
-        ExactSolution
-        
-        SimulatedSolution
-        
-        Cexact
-        
-        DiffCexact
+        StiffMatrixInY
                 
-        DirichExact
+        SurfaceBoundaryEdgeType = "Dirichlet"
         
     end
     
@@ -32,32 +24,27 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
     end
     
     methods
-        function obj = FirstOrderProblemTest3d(N, Nz, M, Mz)
-            [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
+        function obj = FirstOrderProblemInHorizontalTest3d(N, Nz, M)
+            [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M);
             obj.initPhysFromOptions( mesh2d, mesh3d );
-            obj.matGetFunction;
-            z = zeros(obj.mesh2d.cell.Np,1);
-            obj.DirichExact = eval(obj.Cexact);
-%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
-            [ obj.StiffMatrix, LRHS ] = obj.matAssembleGlobalStiffMatrix;
-            obj.RHS = obj.matAssembleRightHandSide;
-            % The direction vector is considered in the initialization stage
-            obj.RHS(:,1) = obj.RHS(:,1) + LRHS;
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+            [ obj.StiffMatrixInX, obj.StiffMatrixInY, Lrhs ] = obj.matAssembleGlobalStiffMatrix;
         end
         function EllipticProblemSolve(obj)
-            x = obj.meshUnion.x;
-            y = obj.meshUnion.y;
-            z = obj.meshUnion.z;
-            obj.ExactSolution = eval(obj.Cexact);
-            obj.SimulatedSolution = obj.StiffMatrix\obj.RHS(:);
-%             obj.SimulatedSolution = obj.NonhydrostaticSolver.PNPS\obj.RHS(:);
-             disp("The condition number is:")
-%             disp(condest(obj.NonhydrostaticSolver.PNPS));
-            disp(condest(sparse(obj.StiffMatrix)));
+            disp("============For stiff matrix in x direction===============");
             disp("The maximum difference is:");
-            disp(max(max(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp(max(max(obj.StiffMatrixInX - obj.NonhydrostaticSolver.PNPX)));
             disp("The minimum difference is:");
-            disp(min(min(obj.ExactSolution(:)-obj.SimulatedSolution)));
+            disp(min(min(obj.StiffMatrixInX - obj.NonhydrostaticSolver.PNPX)));
+            disp("============End stiff matrix in x direction==============")
+            
+            disp("============For stiff matrix in y direction===============");
+            disp("The maximum difference is:");
+            disp(max(max(obj.StiffMatrixInY - obj.NonhydrostaticSolver.PNPY)));
+            disp("The minimum difference is:");
+            disp(min(min(obj.StiffMatrixInY - obj.NonhydrostaticSolver.PNPY)));
+            disp("============End stiff matrix in y direction==============")
+            
         end
         
     end
@@ -70,7 +57,7 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
     
     methods(Access = protected)
         
-        [ Matrix, Lrhs ] = matAssembleGlobalStiffMatrix(obj);
+        [ MatrixInX, MatrixInY, Lrhs ] = matAssembleGlobalStiffMatrix(obj);
         
         rhs = matAssembleRightHandSide(obj);
         
@@ -112,7 +99,7 @@ classdef FirstOrderProblemTest3d < SWEBarotropic3d
     
 end
 
-function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
+function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M )
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
@@ -121,7 +108,9 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
+    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], M, M, bctype);
+
+Mz = 1;
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

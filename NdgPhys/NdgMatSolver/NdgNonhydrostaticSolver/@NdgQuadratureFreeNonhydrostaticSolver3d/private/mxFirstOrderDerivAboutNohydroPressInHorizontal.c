@@ -84,9 +84,9 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, mw
 
 		DiagMultiply(EleMass2d, Mass2d, FacialVector + i*Nfp, Nfp);
 
-		MultiplyByConstant(EleMass2d, EleMass2d, -0.5, Nfp*Nfp);
+		MultiplyByConstant(EleMass2d, EleMass2d, 0.5, Nfp*Nfp);
 		
-		AssembleContributionIntoRowAndColumn(TempContribution, EleMass2d, AdjEidM, LocalEidM, Np, Nfp, 1.0);
+		AssembleContributionIntoRowAndColumn(TempContribution, EleMass2d, AdjEidM, LocalEidM, Np, Nfp, -1.0);
 		
 		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
 			(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
@@ -170,7 +170,7 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 
 		DiagMultiply(Mass2d, Mass2d, Vector + i*Nfp, Nfp);
 
-		MultiplyByConstant(Mass2d, Mass2d, -0.5, Nfp*Nfp);
+		MultiplyByConstant(Mass2d, Mass2d, 0.5, Nfp*Nfp);
 
 		AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEidM, LocalEidM, Np, Nfp, -1.0);
 
@@ -270,8 +270,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int ele = 0; ele < Ele2d; ele++){
-		int StartPoint;
-		int LocalStartPoint;
 		for (int L = 0; L < Nlayer; L++){
 			//Index of the studied element
 			int LocalEle = ele*Nlayer + L + 1;
@@ -284,7 +282,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 			for (int i = 0; i < EleNumber; i++){
 				if (LocalEle == TempEToE[i]){
-					LocalStartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
 
 					GetLocalVolumuIntegralTermForFirstOrderHorizontalTerm(sr, irs, jcs, \
 						Np, Dr, Ds, rd + (LocalEle - 1)*Np, sd + (LocalEle - 1)*Np, LocalEle);

@@ -1,9 +1,9 @@
-function runFirstOrderProblemTest3d
+function runFirstOrderProblemInVerticalTest3d
 % M = [ 1 0.5 0.25 0.125 ];
 % Mz = [10 20 40 80 ];
 M = [ 2 2 2 2 ];
 Mz = [4 8 16 32 ];
-Order = [1 2];
+Order = [1 2 3 4];
 
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -15,7 +15,7 @@ markersize = 8;
 
 linestyle = '-';
 
-color = {'k', 'r'};  %black for order one, red for order two
+color = {'k', 'r', 'b', 'g'};  %black for order one, red for order two
 marker = {'o'};%circle for the computed field
 
 ErrInf = zeros(Nmesh, Ndeg);
@@ -23,11 +23,11 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = FirstOrderProblemTest3d(Order(n), Order(n), M(m), Mz(m));
+        Solver = FirstOrderProblemInVerticalTest3d(Order(1), Order(n), M(m), Mz(m));
         Solver.EllipticProblemSolve;
         len(m, n) = 1/Mz(m);
         dofs(m,n) = numel(Solver.meshUnion(1).x);
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/FirstOrderProblemTest3d/3d','/','FirstOrderProblemTest3d'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/FirstOrderProblemInVerticalTest3d/3d','/','FirstOrderProblemInVerticalTest3d'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);
