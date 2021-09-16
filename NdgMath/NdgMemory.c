@@ -365,10 +365,11 @@ double *ImposeBCsInvSquaHeight = NULL, *ImposeBCsK33 = NULL, *BETau = NULL, *Imp
 *ImposeBCsWIEFluxSx2d = NULL, *ImposeBCsWIEFluxSy2d = NULL, *ImposeBCsVolumeIntegralX = NULL, *ImposeBCsTempVolumeIntegralX = NULL, *ImposeBCsVolumeIntegralY = NULL, \
 *ImposeBCsTempVolumeIntegralY = NULL, *ImposeBCsIEfm = NULL, *ImposeBCsIEfp = NULL, *ImposeBCsERHSx = NULL, *ImposeBCsERHSy = NULL, *ImposeBCsTempFacialIntegral = NULL, \
 *ImposeBCsBotBEU = NULL, *ImposeBCsBotBEV = NULL, *ImposeBCsBotBEH = NULL, *ImposeBCsBotBECoe = NULL, *ImposeBCsBotBEPWPS = NULL, \
-*ImposeBCsWs = NULL, \
-*ImposeBCsPUPX = NULL, *ImposeBCsPUPY = NULL, *ImposeBCsPUPS = NULL, \
-*ImposeBCsPVPX = NULL, *ImposeBCsPVPY = NULL, *ImposeBCsPVPS = NULL, *ImposeBCsTempNewmannData = NULL, \
-*ImposeBCsPWPH = NULL, *ImposeBCsPHPX = NULL, *ImposeBCsPHPY = NULL;
+*ImposeBCsWs = NULL, *ImposeBCsPUPX = NULL, *ImposeBCsPUPY = NULL, *ImposeBCsPUPS = NULL, *ImposeBCsPVPX = NULL, *ImposeBCsPVPY = NULL, \
+*ImposeBCsPVPS = NULL, *ImposeBCsTempNewmannData = NULL, *ImposeBCsPWPH = NULL, *ImposeBCsPHPX = NULL, *ImposeBCsPHPY = NULL, \
+*ImposeBCsPzPx = NULL, *ImposeBCsPzPy = NULL, *ImposeBCsTempDataInX = NULL, *ImposeBCsTempDataInY = NULL, *ImposeBCsTempDataInZ = NULL, \
+*ImposeBCsInverseH = NULL, *ImposeBCsPNPS = NULL, *ImposeBCsPNPX = NULL, *ImposeBCsPNPY = NULL, *ImposeBCsGPEtaPX = NULL, \
+*ImposeBCsDPNPSX = NULL, *ImposeBCsGPEtaPY = NULL, *ImposeBCsDPNPSY = NULL, *ImposeBCsInvHeight = NULL;
 char *ImposeBoundaryInitialized = "False";
 
 void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, int K2d, int Nface2d, int IENfp2d, int IENe2d, int BotBENe, int BotBENfp){
@@ -453,6 +454,34 @@ void SWENH3dImposeBoundaryMemoryAllocation(int Np, int K, int BENe, int Np2d, in
 	/*$\frac{\partial H}{\partial y}$*/
 	ImposeBCsPHPY = malloc(BotBENe*BotBENfp * sizeof(double));
 	MemoryAllocationCheck(ImposeBCsPHPY, BotBENe*BotBENfp * sizeof(double));
+	ImposeBCsPzPx = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPzPx, Np2d*K2d * sizeof(double));
+	ImposeBCsPzPy = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPzPy, Np2d*K2d * sizeof(double));
+	ImposeBCsTempDataInX = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempDataInX, Np2d*K2d * sizeof(double));
+	ImposeBCsTempDataInY = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempDataInY, Np2d*K2d * sizeof(double));
+	ImposeBCsTempDataInZ = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsTempDataInZ, Np2d*K2d * sizeof(double));
+	ImposeBCsInverseH = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsInverseH, Np2d*K2d * sizeof(double));
+	ImposeBCsPNPS = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPNPS, Np2d*K2d * sizeof(double));
+	ImposeBCsPNPX = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPNPX, Np2d*K2d * sizeof(double));
+	ImposeBCsPNPY = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsPNPY, Np2d*K2d * sizeof(double));
+	ImposeBCsGPEtaPX = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsGPEtaPX, Np2d*K2d * sizeof(double));
+	ImposeBCsDPNPSX = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsDPNPSX, Np2d*K2d * sizeof(double));
+	ImposeBCsGPEtaPY = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsGPEtaPY, Np2d*K2d * sizeof(double));
+	ImposeBCsDPNPSY = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsDPNPSY, Np2d*K2d * sizeof(double));
+	ImposeBCsInvHeight = malloc(Np*	K * sizeof(double));
+	MemoryAllocationCheck(ImposeBCsInvHeight, Np*K * sizeof(double));
 	ImposeBoundaryInitialized = "True";
 }
 
@@ -496,6 +525,20 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 	free(ImposeBCsPWPH), ImposeBCsPWPH = NULL;
 	free(ImposeBCsPHPX), ImposeBCsPHPX = NULL;
 	free(ImposeBCsPHPY), ImposeBCsPHPY = NULL;
+	free(ImposeBCsPzPx), ImposeBCsPzPx = NULL;
+	free(ImposeBCsPzPy), ImposeBCsPzPy = NULL;
+	free(ImposeBCsTempDataInX), ImposeBCsTempDataInX = NULL;
+	free(ImposeBCsTempDataInY), ImposeBCsTempDataInY = NULL;
+	free(ImposeBCsTempDataInZ), ImposeBCsTempDataInZ = NULL;
+	free(ImposeBCsInverseH), ImposeBCsInverseH = NULL;
+	free(ImposeBCsPNPS), ImposeBCsPNPS = NULL;
+	free(ImposeBCsPNPX), ImposeBCsPNPX = NULL;
+	free(ImposeBCsPNPY), ImposeBCsPNPY = NULL;
+	free(ImposeBCsGPEtaPX), ImposeBCsGPEtaPX = NULL;
+	free(ImposeBCsDPNPSX), ImposeBCsDPNPSX = NULL;
+	free(ImposeBCsGPEtaPY), ImposeBCsGPEtaPY = NULL;
+	free(ImposeBCsDPNPSY), ImposeBCsDPNPSY = NULL;
+	free(ImposeBCsInvHeight), ImposeBCsInvHeight = NULL;
 	ImposeBoundaryInitialized = "False";
 }
 

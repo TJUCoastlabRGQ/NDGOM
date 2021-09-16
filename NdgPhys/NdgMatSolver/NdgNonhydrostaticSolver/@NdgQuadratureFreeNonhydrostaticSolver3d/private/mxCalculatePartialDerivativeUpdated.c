@@ -483,7 +483,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 	for (int face = 0; face < BotENe; face++){
 		for (int field = 0; field < 3; field++){
 			StrongFormInnerEdgeRHS(face, BotEFToE, BotEFToF, Np, K, BotENfp, BotEFToN1, BotEFToN2, NonhydroBotEFluxM + field*BotENe*BotENfp, \
-				NonhydroBotEFluxP + field*BotENe*BotENfp, NonhydroBotEFluxS + field*BotENe*BotENfp, BotEJs, BotEMb, NonhydroERHS + field*Np*K*2);
+				NonhydroBotEFluxP + field*BotENe*BotENfp, NonhydroBotEFluxS + field*BotENe*BotENfp, BotEJs, BotEMb, NonhydroERHS + field*Np*K*Nface);
 		}
 	}
 
@@ -516,7 +516,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 #endif
 	for (int face = 0; face < BotBENe; face++){
 		for (int field = 0; field < 3; field++){
-			StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, NonhydroBotBEFluxM + field*BotBENe*BotBENfp, NonhydroBotBEFluxS + field*BotBENe*BotBENfp, BotBEJs, BotBEMb, NonhydroERHS + field*Np*K*2);
+			StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, NonhydroBotBEFluxM + field*BotBENe*BotBENfp, NonhydroBotBEFluxS + field*BotBENe*BotBENfp, BotBEJs, BotBEMb, NonhydroERHS + field*Np*K*Nface);
 		}
 	}
 
@@ -550,7 +550,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 #endif
 	for (int face = 0; face < SurfBENe; face++){
 		for (int field = 0; field < 3; field++){
-			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, NonhydroSurfBEFluxM + field*SurfBENe*SurfBENfp, NonhydroSurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, NonhydroERHS + field*Np*K*2);
+			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, NonhydroSurfBEFluxM + field*SurfBENe*SurfBENfp, NonhydroSurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, NonhydroERHS + field*Np*K*Nface);
 		}
 	}
 
@@ -559,8 +559,8 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field<3; field++){
-			for (int face = 1; face<2; face++){
-				Add(NonhydroERHS + field*Np*K*2 + k*Np, NonhydroERHS + field*Np*K*2 + k*Np, NonhydroERHS + field*Np*K*2 + face*Np*K + k*Np, Np);
+			for (int face = 1; face<Nface; face++){
+				Add(NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroERHS + field*Np*K*Nface + face*Np*K + k*Np, Np);
 			}
 		}
 	}
@@ -575,7 +575,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 	for (int k = 0; k < K; k++) {
 		for (int field = 0; field < 3; field++){
 
-			MultiEdgeContributionByLiftOperator(NonhydroERHS + field*Np*K*2 + k*Np, NonhydroTempFacialIntegral + k*Np, &np, &oneI, &np, \
+			MultiEdgeContributionByLiftOperator(NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroTempFacialIntegral + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
@@ -603,9 +603,9 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 
 		Minus(PupsDest + k*Np, PupsDest + k*Np, NonhydroERHS + k*Np, Np);
 
-		Minus(PvpsDest + k*Np, PvpsDest + k*Np, NonhydroERHS + Np*K*2 + k*Np, Np);
+		Minus(PvpsDest + k*Np, PvpsDest + k*Np, NonhydroERHS + Np*K*Nface + k*Np, Np);
 
-		Minus(PwpsDest + k*Np, PwpsDest + k*Np, NonhydroERHS + 2 * Np*K*2 + k*Np, Np);
+		Minus(PwpsDest + k*Np, PwpsDest + k*Np, NonhydroERHS + 2 * Np*K*Nface + k*Np, Np);
 
 	}
 }
