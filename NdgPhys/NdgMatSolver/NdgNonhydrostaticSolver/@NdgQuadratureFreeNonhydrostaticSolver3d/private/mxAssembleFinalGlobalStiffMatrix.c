@@ -173,6 +173,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				DotProduct(Coey, Coey, Hy + (EI - 1)*Np, Np);
 
 				Add(Coex, Coex, Coey, Np);
+
+				DotProduct(Coex, Coex, PNPS + StartPoint + i*Np, Np);
+
 				MatrixMultiply("N", "N", (ptrdiff_t)Np, One, (ptrdiff_t)Np, 1.0, EleMass3d + UEI*Np*Np, (ptrdiff_t)Np, Coex, \
 					(ptrdiff_t)Np, 0.0, TempStiffMatrix, Np);
 				int StiffStartPoint = jcs[e*Np + p];

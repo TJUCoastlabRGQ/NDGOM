@@ -31,9 +31,8 @@ void GetInverseSquareHeight(double *, double *, double *, double , int );
 void GetPenaltyParameter(double *, double , double , int , int , int );
 
 
-void ImposeNewmannBoundaryCondition(double *, double *, mwIndex *, mwIndex *, int, \
-	double *, double *, double *, double *, double *, double *, int, int, \
-	double *, double *, double *, int, double *, double *);
+void ImposeNewmannBoundaryCondition(double *, int , \
+	int , int , double *, double *, double *, double *, double *);
 
 void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, int , \
 	int , int , double *, double *, double *, double *, double *, double *, double *, double *, \
@@ -239,17 +238,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempIEFToF2d = mxGetField(InnerEdge2d, 0, "FToF");
 	double *IEFToF2d = mxGetPr(TempIEFToF2d);
 
-	plhs[2] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-	double *OutPWPX = mxGetPr(plhs[2]);
-	plhs[3] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-	double *OutPWPY = mxGetPr(plhs[3]);
-	plhs[4] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-	double *OutPNPS = mxGetPr(plhs[4]);
-	plhs[5] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-	double *OutPNPX = mxGetPr(plhs[5]);
-	plhs[6] = mxCreateDoubleMatrix(Np2d, K2d, mxREAL);
-	double *OutPNPY = mxGetPr(plhs[6]);
-
 	if (!strcmp("False", ImposeBoundaryInitialized)){
 		SWENH3dImposeBoundaryMemoryAllocation(Np, K, BENe, Np2d, K2d, Nface2d, IENfp2d, IENe2d, BotBENe, BotBENfp);
 	}
@@ -376,9 +364,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		Minus(ImposeBCsWx + k*Np2d, ImposeBCsVolumeIntegralX + k*Np2d, ImposeBCsERHSx + k*Np2d, Np2d);
 		Minus(ImposeBCsWy + k*Np2d, ImposeBCsVolumeIntegralY + k*Np2d, ImposeBCsERHSy + k*Np2d, Np2d);
 	}
-
-	memcpy(OutPWPX, ImposeBCsWx, Np2d*K2d*sizeof(double));
-	memcpy(OutPWPY, ImposeBCsWy, Np2d*K2d * sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -599,10 +584,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, -1.0, BotBENfp);
 	}
 
-	memcpy(OutPNPS, ImposeBCsPNPS, Np2d*K2d * sizeof(double));
-	memcpy(OutPNPX, ImposeBCsPNPX, Np2d*K2d * sizeof(double));
-	memcpy(OutPNPY, ImposeBCsPNPY, Np2d*K2d * sizeof(double));
-
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -636,10 +617,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			FpIndex[p] = BotBEFToN1[BotBENfp*edge + p];
 		}
 
-		ImposeNewmannBoundaryCondition( OutRHS, sr, irs, jcs, LocalEle, \
-			K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, ImposeBCsK33 + (LocalEle - 1)*Np, \
-			Dx, Dy, Dz, Np, BotBENfp, \
-			TempJs, BotBELMass2d, TempEToE, Nface, FpIndex, ImposeBCsNewmannData + edge * BotBENfp);
+		ImposeNewmannBoundaryCondition( OutRHS, LocalEle, Np, BotBENfp, \
+			TempJs, BotBELMass2d, TempEToE, FpIndex, ImposeBCsNewmannData + edge * BotBENfp);
 
 		free(DxBuff);
 		free(Dx);
@@ -663,14 +642,12 @@ void GetInverseSquareHeight(double *Squadest, double *Invdest, double *source, d
 	}
 }
 
-void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, \
-	double *K31, double *K32, double *K33, double *Dx, double *Dy, double *Dz, int Np, int Nfp,\
-	double *Js, double *M2d, double *EToE, int Nface, double *FpIndex, double *NewmannData){
+void ImposeNewmannBoundaryCondition(double *RHSdest, int LocalEle, \
+	int Np, int Nfp, double *Js, double *M2d, double *EToE, double *FpIndex, double *NewmannData){
 
 	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
 	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
 	double *TempRHSFacialData = malloc(Nfp * 1 * sizeof(double));
-//	double *TempFacialData = malloc(Nfp*sizeof(double));
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, M2d, Js, Nfp);
 	ptrdiff_t One = 1;
@@ -684,7 +661,6 @@ void ImposeNewmannBoundaryCondition(double *RHSdest, double *dest, mwIndex *Irs,
 
 	Add(RHSdest + (LocalEle - 1)*Np, RHSdest + (LocalEle - 1)*Np, TempRHSBuff, Np);
 
-//	free(TempFacialData);
 	free(EleMass2d);
 	free(TempRHSBuff);
 	free(TempRHSFacialData);
