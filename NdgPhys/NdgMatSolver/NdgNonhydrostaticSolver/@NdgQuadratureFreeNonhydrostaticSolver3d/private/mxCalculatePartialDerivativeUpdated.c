@@ -475,7 +475,7 @@ void GetFirstOrderPartialDerivativeInVerticalDirection(double *PupsDest, double 
 	}
 	/*This part is also used by partial derivative in horizontal direction*/
 
-	memset(NonhydroERHS, 0, Np*K * 3 * 2*sizeof(double));
+	memset(NonhydroERHS, 0, Np*K * 3 * Nface*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

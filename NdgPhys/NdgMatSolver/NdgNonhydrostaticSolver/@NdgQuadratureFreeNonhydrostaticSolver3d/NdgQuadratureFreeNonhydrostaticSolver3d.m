@@ -232,8 +232,9 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
             
 %             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
-            edge = physClass.meshUnion.BottomBoundaryEdge;
             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
+            obj.Uold = fm(:,:,obj.varIndex(1))./fm(:,:,obj.varIndex(4));
+            obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
         end
