@@ -437,6 +437,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/*$-\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )\right )$*/
 		MultiplyByConstant(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, -1.0, BotBENfp);
 
+		memset(ImposeBCsPNPS + face*BotBENfp, 0, BotBENfp * sizeof(double));
+
 		/**********************************************************For the first part**********************************************************************/
 		/*$\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
 		DotProduct(ImposeBCsDPNPSX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, BotBENfp);
