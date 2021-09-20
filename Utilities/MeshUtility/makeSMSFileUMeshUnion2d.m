@@ -41,7 +41,7 @@ end
 
 if Ntri > 0
     stdTri = StdTri(N);
-    triMesh = NdgMesh2d(stdTri, Nv, vx, vy, Ntri, EToVTri{1}, EToRTri{1});
+    triMesh = NdgMesh2d(stdTri, Nv, vx, vy, Ntri, (EToVTri{1})', EToRTri{1});
 end
 
 if Nquad > 0
@@ -62,7 +62,8 @@ if k
         fgetl(fid1); % The rest part of the line include NOP
         IOOBN = fscanf(fid1,'%d',TempNOP); % Index of open boundary nodes
         for i = 1:numel(IOOBN) - 1
-            BCToV{1}( IBCToV, : ) = [ IOOBN(i), IOOBN(i+1), 6]; % 6 stands for clamped depth condition
+%             BCToV{1}( IBCToV, : ) = [ IOOBN(i), IOOBN(i+1), 6]; % 6 stands for clamped depth condition
+            BCToV{1}( :, IBCToV ) = [ IOOBN(i), IOOBN(i+1), 6];
             IBCToV = IBCToV + 1;
         end
     end
@@ -81,7 +82,8 @@ if k
         fgetl(fid1); % The rest part of the line include NOP
         IOSWN = fscanf(fid1,'%d',TempNOP); % Index of slip wall boundary nodes
         for i = 1:numel(IOSWN) - 1
-            BCToV{1}( IBCToV, : ) = [ IOSWN(i), IOSWN(i+1), 2]; % 6 stands for slip condition
+%             BCToV{1}( IBCToV, : ) = [ IOSWN(i), IOSWN(i+1), 2]; % 6 stands for slip condition
+            BCToV{1}( :, IBCToV ) = [ IOSWN(i), IOSWN(i+1), 2]; % 6 stands for slip condition
             IBCToV = IBCToV + 1;
         end
     end
@@ -100,7 +102,7 @@ elseif (Ntri > 0) && (Nquad == 0)
     mesh = triMesh;
     mesh.ConnectMeshUnion( 1, mesh);
     mesh.InnerEdge = NdgInnerEdge2d( mesh, 1 );
-    mesh.BoundaryEdge = NdgHaloEdge2d( mesh, mesh.ind, BCToV );
+    mesh.BoundaryEdge = NdgHaloEdge2d( mesh, mesh.ind, BCToV{1} );
 elseif (Nquad > 0) && (Ntri == 0)
     mesh = quadMesh;
     mesh.ConnectMeshUnion( 1, mesh);

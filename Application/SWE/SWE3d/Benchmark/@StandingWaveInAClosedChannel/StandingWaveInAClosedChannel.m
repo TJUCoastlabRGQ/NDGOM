@@ -33,8 +33,12 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     
     methods
         function obj = StandingWaveInAClosedChannel( N, Nz, M, Mz )
+            
+            gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/Element.msh' ];
+            gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/Boundary.msh' ];
+            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
             % setup mesh domain
-            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
             obj.Nfield = 11;
@@ -141,18 +145,11 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
     end
 end
 
-function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
+function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, gmshFileElement, gmshBoundaryFile )
 
-bctype = [ ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+mesh2d = makeGmshFileUMeshUnion2d( N, gmshFileElement, gmshBoundaryFile );
 
-mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
-
-cell = StdPrismQuad( N, Nz );
+cell = StdPrismTri( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
@@ -162,5 +159,29 @@ mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+
 end
+
+% function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
+% 
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall ];
+% 
+% mesh2d = makeUniformQuadMesh( N, ...
+%     [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
+% 
+% cell = StdPrismQuad( N, Nz );
+% zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+% mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
+% mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
+% mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
+% mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
+% mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
+% mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% end
 
