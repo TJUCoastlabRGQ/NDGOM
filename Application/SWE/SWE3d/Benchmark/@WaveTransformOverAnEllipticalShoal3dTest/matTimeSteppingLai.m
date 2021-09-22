@@ -25,6 +25,8 @@ while( time < ftime )
     
     obj.matEvaluateSourceTerm( fphys );
     
+    obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
+
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
     % $H^*u^*$, $H^*v^*$, $H^*w^*$
@@ -54,6 +56,8 @@ while( time < ftime )
     
     obj.matEvaluateSourceTerm( fphys );
     
+    obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
+
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = fphys{1}(:,:,obj.varFieldIndex) + dt * obj.frhs{1}; 
