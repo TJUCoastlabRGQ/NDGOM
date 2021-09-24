@@ -1431,7 +1431,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 #endif
 	for (int face = 0; face < BENe; face++){
 		for (int field = 0; field < 6; field++){
-			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, NonhydroBEFluxM + field*BENe*BENfp, NonhydroBEFluxS + field*BENe*BENfp, BEJs, BEMb, NonhydroERHS + field*Np*K*(Nface-2));
+//			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, NonhydroBEFluxM + field*BENe*BENfp, NonhydroBEFluxS + field*BENe*BENfp, BEJs, BEMb, NonhydroERHS + field*Np*K*(Nface-2));
 		}
 	}
 

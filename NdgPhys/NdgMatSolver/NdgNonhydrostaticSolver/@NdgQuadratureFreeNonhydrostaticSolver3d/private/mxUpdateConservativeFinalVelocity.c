@@ -362,7 +362,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
-		StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, QBotBEfluxM, QBotBEfluxS, BotBEJs, BotBEMb, NonhydroERHS);
+//		StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, QBotBEfluxM, QBotBEfluxS, BotBEJs, BotBEMb, NonhydroERHS);
 	}
 
 	double *qSurfBEM = malloc(SurfBENe*SurfBENfp*sizeof(double));
