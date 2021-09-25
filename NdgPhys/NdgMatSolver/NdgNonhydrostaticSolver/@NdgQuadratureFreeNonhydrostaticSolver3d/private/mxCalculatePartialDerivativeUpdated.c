@@ -1391,6 +1391,14 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
 
+		
+		if (type == NdgEdgeSlipWall) {
+			for (int i = 0; i < BENfp; i++) {
+				hP[i + face*BENfp] = hM[i + face*BENfp];
+				uP[i + face*BENfp] = uM[i + face*BENfp];
+				vP[i + face*BENfp] = vM[i + face*BENfp];
+			}
+		}
 /*	
         if (type == NdgEdgeClampedVel) {
 			for (int i = 0; i < BENfp; i++){
