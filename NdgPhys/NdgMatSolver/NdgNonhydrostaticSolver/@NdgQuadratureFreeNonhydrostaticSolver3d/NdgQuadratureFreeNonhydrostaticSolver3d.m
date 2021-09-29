@@ -73,7 +73,6 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         
         Vnew
         
-        NonhydroPressure
     end
     
     properties
@@ -122,7 +121,6 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.varIndex = zeros(6,1);
             obj.rho = 1000;
             obj.BoundNonhydroPressure = zeros(obj.BoundaryEdge.Nfp, obj.BoundaryEdge.Ne);
-            obj.NonhydroPressure = zeros(obj.cell.Np, obj.mesh.K);
             for i = 1:PhysClass.Nfield
                 if (strcmp(PhysClass.fieldName3d{i},'hu'))
                     obj.varIndex(1) = i;
@@ -213,7 +211,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             % Compute the numeric factorization.
             obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
             % Compute the solutions X using the symbolic factorization.
-            [DiffNonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
+            [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
             
             %==========================================For symmetric matrix=======================================================
             %             tic;
@@ -237,7 +235,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             
             
             
-            fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( DiffNonhydroPressure, fphys{1}, obj.varIndex, ...
+            fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
             
@@ -247,7 +245,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
-            obj.NonhydroPressure = obj.NonhydroPressure + reshape(DiffNonhydroPressure, obj.cell.Np, obj.mesh.K);
+%             obj.NonhydroPressure = obj.NonhydroPressure + reshape(DiffNonhydroPressure, obj.cell.Np, obj.mesh.K);
             
         end
         

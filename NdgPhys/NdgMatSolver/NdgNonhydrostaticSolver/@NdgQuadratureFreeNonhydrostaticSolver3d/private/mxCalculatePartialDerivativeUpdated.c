@@ -1365,6 +1365,8 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 	uM = NonhydroBEfm, vM = NonhydroBEfm + BENfp*BENe, hM = NonhydroBEfm + 2 * BENfp*BENe;
 	uP = NonhydroBEfp, vP = NonhydroBEfp + BENfp*BENe, hP = NonhydroBEfp + 2 * BENfp*BENe;
 
+//	double *Hext = fext + 2 * BENfp*BENe;
+
 	double *UBEfluxM = NonhydroBEFluxM, *VBEfluxM = NonhydroBEFluxM + BENe*BENfp, \
 		*HBEfluxMx = NonhydroBEFluxM + 2 * BENe*BENfp, *HBEfluxMy = NonhydroBEFluxM + 3 * BENe*BENfp, \
 		*UBEfluxMy = NonhydroBEFluxM + 4 * BENe*BENfp, *VBEfluxMx = NonhydroBEFluxM + 5 * BENe*BENfp;
@@ -1391,7 +1393,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
 
-		
+/*		
 		if (type == NdgEdgeSlipWall) {
 			for (int i = 0; i < BENfp; i++) {
 				hP[i + face*BENfp] = hM[i + face*BENfp];
@@ -1399,6 +1401,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 				vP[i + face*BENfp] = vM[i + face*BENfp];
 			}
 		}
+*/
 /*	
         if (type == NdgEdgeClampedVel) {
 			for (int i = 0; i < BENfp; i++){
@@ -1411,8 +1414,12 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
+		MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);
+//		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, Hext + face*BENfp, BENfp);
 		DotCriticalDivide(vM + face*BENfp, vM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
+		MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 0.95, BENfp);
+//		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, Hext + face*BENfp, BENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxM + face*BENfp, uM + face*BENfp, BEnx + face*BENfp, BENfp);
 
@@ -1439,7 +1446,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 #endif
 	for (int face = 0; face < BENe; face++){
 		for (int field = 0; field < 6; field++){
-//			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, NonhydroBEFluxM + field*BENe*BENfp, NonhydroBEFluxS + field*BENe*BENfp, BEJs, BEMb, NonhydroERHS + field*Np*K*(Nface-2));
+			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, NonhydroBEFluxM + field*BENe*BENfp, NonhydroBEFluxS + field*BENe*BENfp, BEJs, BEMb, NonhydroERHS + field*Np*K*(Nface-2));
 		}
 	}
 

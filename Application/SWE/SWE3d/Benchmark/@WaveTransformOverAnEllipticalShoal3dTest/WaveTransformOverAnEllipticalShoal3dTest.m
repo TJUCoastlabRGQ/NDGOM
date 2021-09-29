@@ -28,7 +28,9 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         maxSigma %> maximum sponge strength
         SpongeCoefficient
         Ylim = [-10 0]
-        Xlim = [-10 10]
+        Xlim = [-10 9.9]
+%         Ylim = [-10 0]
+%         Xlim = [-10 10]
         %         Xlim = [0 0.2]
     end
     
@@ -39,6 +41,7 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
 %             SMSFile = [ fileparts( mfilename('fullpath') ), '/mesh/0920.grd' ];
 %             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, SMSFile );
+%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz);
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
             obj.Nfield = 11;
@@ -174,6 +177,8 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             obj.fext3d{1}(:,:,2) = hv3d;
+%             obj.fext3d{1}(:,:,3) = obj.d + Eta;
+%             obj.fext3d{1}(:,:,3) = obj.d;
             obj.fext3d{1}(:,:,11) = hw3d;
             
             obj.fext2d{1}(:,:,2) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField( hv3d );
@@ -370,7 +375,7 @@ end
 %     enumBoundaryCondition.SlipWall ];
 % 
 % mesh2d = makeUniformQuadMesh( N, ...
-%     [ -10, -9.8 ], [ -10, 6 ], 1, 16/0.1, bctype);
+%     [ -10, -9.9 ], [ -10, 0 ], 1, 10/0.1, bctype);
 % cell = StdPrismQuad( N, Nz );
 % zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 % mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );

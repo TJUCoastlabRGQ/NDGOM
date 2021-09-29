@@ -87,17 +87,17 @@ while( time < ftime )
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
     %     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
-    visual.drawResult( fphys2d{1}(:,:,1) );
+%     visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
     time = time + dt;
     
     %> Update the diffusion coefficient
-    display(time);
+%     display(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
-    waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
+%     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
 hwait.delete();
 obj.fphys2d = fphys2d;

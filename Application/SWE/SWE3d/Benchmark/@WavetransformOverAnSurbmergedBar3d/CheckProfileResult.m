@@ -11,6 +11,8 @@ Time = outputTime(Index);
 Data = zeros(numel(x), numel(Time));
 j = 0;
 
+position = [10.5 12.5 13.5 14.5 15.7 17.3 19 21];
+
 for i = 1:numel(x)
     j = j + 1;
     t = 1;
@@ -27,8 +29,9 @@ for i = 1:numel(x)
     data = xlsread(filename);
     
     figure;
-    set(gcf,'position',[50,50,1050,400]);
-    plot(Time',Data(i,:),'LineWidth',1.5);
+%     set(gcf,'position',[50,50,1050,400]);
+    set(gcf,'position',[50,50,650,250]);
+    plot(Time',Data(i,:),'k','LineWidth',1.5);
     hold on;
     plot(data(:,1),data(:,2),'o','markersize',6, 'LineWidth',1.5);
     set(gca,'YLIM',[-2, 4],'Fontsize',12);
@@ -36,7 +39,8 @@ for i = 1:numel(x)
     xlabel({'$t\;\rm{(s)}$'},'Interpreter','latex');
     ylabel({'$\eta\;\rm{(cm)}$'},'Interpreter','latex');
     set(gca,'Fontsize',15);
-    title(str,'position',[33.5,3.2],'Fontsize',15);
+%     title(str,'position',[33.5,3.2],'Fontsize',15);
+    title(str,'position',[33.7,3],'Fontsize',15);
 end
 
 end

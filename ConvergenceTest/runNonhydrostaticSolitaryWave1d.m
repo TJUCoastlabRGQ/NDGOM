@@ -204,6 +204,7 @@ if nargin < 4
    location = 'NorthEast'; 
 end
 [legend_h,object_h,~,~] = legend( str );
+% [legend_h,object_h,~,~] = legend( str,'Interpreter', 'Latex');
 numlines = length(str);
 numpercolumn = ceil(numlines/numcolumns);
 pos = get(legend_h, 'position');
