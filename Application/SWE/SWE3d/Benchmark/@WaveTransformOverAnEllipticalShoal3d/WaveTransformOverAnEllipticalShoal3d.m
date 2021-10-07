@@ -34,8 +34,8 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
     
     methods (Access = public)
         function obj = WaveTransformOverAnEllipticalShoal3d( N, Nz, Mz )
-            gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
-            gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
+            gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElementNew.msh' ];
+            gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundaryNew.msh' ];
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
@@ -81,13 +81,13 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
         end
         
         function VisualPostprocess(obj)
-            time = 35;
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
+            time = 30;
+            PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             [~,Index] = sort(abs(outputTime-time));
-            [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
+            [ fphys2d ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
             Visual = makeVisualizationFromNdgPhys( obj );
-            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
+            Visual.drawResult( fphys2d{1}(:,:,1)+ obj.fphys2d{1}(:, :, 4) );
             shading interp;
             %            axis off;
             %            hold on;

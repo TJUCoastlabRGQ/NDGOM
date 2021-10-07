@@ -25,7 +25,7 @@ while( time < ftime )
     
     obj.matEvaluateSourceTerm( fphys );
     
-    obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
+%     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
@@ -53,7 +53,7 @@ while( time < ftime )
     
     obj.matEvaluateSourceTerm( fphys );
     
-    obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
+%     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
@@ -86,7 +86,7 @@ while( time < ftime )
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
-    %     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
 %     visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
@@ -97,7 +97,7 @@ while( time < ftime )
 %     display(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
-%     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
+    waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
 end
 hwait.delete();
 obj.fphys2d = fphys2d;

@@ -10,7 +10,7 @@ end
 
 function  YprofileProcess(obj, y)
 % Nout = obj.outputFile.outputStep;
-WaveTransformPos = NdgPostProcess(obj.meshUnion(1),strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
+WaveTransformPos = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
 [ time ] = ncread( WaveTransformPos.outputFile{1}, 'time' );
 Nout = numel(time);
 
@@ -25,7 +25,7 @@ for i = 1:numel(y)
     ypf = y(i).*ones(size(xpf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(30* Nout/35)+1:ceil(35* Nout/35);
+    index = ceil(25* Nout/30)+1:ceil(30* Nout/30);
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
@@ -66,7 +66,7 @@ function  XprofileProcess(obj, x)
 % Nout = obj.outputFile.outputStep;
 % Nout = 1652;
 % Nout = 1616;
-WaveTransformPos = NdgPostProcess(obj.meshUnion(1),strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
+WaveTransformPos = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
 [ time ] = ncread( WaveTransformPos.outputFile{1}, 'time' );
 Nout = numel(time);
 
@@ -81,7 +81,7 @@ for i = 1:numel(x)
     xpf = x(i).*ones(size(ypf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(30* Nout/35)+1:ceil(35* Nout/35);  
+    index = ceil(25* Nout/30)+1:ceil(30* Nout/30);  
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
