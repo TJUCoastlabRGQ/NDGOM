@@ -22,13 +22,14 @@ classdef NdgPostProcess < handle
             [ obj.outputFile ] = cell( obj.Nmesh, 1 );
             
             for n = 1:obj.Nmesh
-                [ obj.outputFile{n} ] = [ casename, '.', num2str(n), '-', ...
-                    num2str(obj.Nmesh), '.1.nc'];
+%                 [ obj.outputFile{n} ] = [ casename, '.', num2str(n), '-', ...
+%                     num2str(obj.Nmesh), '.1.nc'];
+                obj.outputFile{n} = 'D:\Sharewithpc\2d\WaveTransformOverAnEllipticalShoal3d.1-1.1.nc';
             end
             
             [ obj.Nt ] = accessOutputStepNumber( obj );
             [ obj.Nvar ] = accessOutputVarNumber( obj );
-% [ obj.Nvar ] = 3;
+            % [ obj.Nvar ] = 3;
             [ obj.time ] = cell( obj.Nmesh, 1 );
             for m = 1:obj.Nmesh
                 obj.time{m} = obj.assessOutputVar( m, 'time' );
@@ -47,8 +48,8 @@ classdef NdgPostProcess < handle
             for t = 1:delta:obj.Nt
                 field = obj.accessOutputResultAtStepNum( t );
                 for m = 1:obj.Nmesh
-                    obj.meshUnion(m).draw( field{m}(:,:,varId) + physField );                    
-                end    
+                    obj.meshUnion(m).draw( field{m}(:,:,varId) + physField );
+                end
             end
         end
         
