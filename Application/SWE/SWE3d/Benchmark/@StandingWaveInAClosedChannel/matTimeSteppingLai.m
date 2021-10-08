@@ -86,8 +86,8 @@ while( time < ftime )
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
-    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
-%     visual.drawResult( fphys2d{1}(:,:,1) );
+%     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
+    visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs

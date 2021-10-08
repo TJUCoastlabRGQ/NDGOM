@@ -90,12 +90,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		for (int p = 0; p < Np; p++) {
 			int StartPoint = JcPNPX[e*Np + p];
-			int Nonzero = (int)JcPNPX[e*Np + p + 1] - (int)JcPNPX[e*Np + p];
+			int Nonzero = (int)JcPNPX[e*Np + p + 1] - StartPoint;
 			/*How many elements are contained in the current row, we note that Np points are influenced for each cell for this special case*/
+			/*This can be seen from the initialization stage. We note that less than Np points are actually influenced for facial integral part,
+			To faciliate the assemble of the sparse matrix, space for the first order term is enlarged.*/
 			int Ele = Nonzero / Np;
 			for (int i = 0; i < Ele; i++) {
 				/*The index of the influenced element*/
-				int EI = IrPNPX[StartPoint + i*Np] / Np + 1;
+				int EI = (int)IrPNPX[StartPoint + i*Np] / Np + 1;
 				/*The index of the studied element in UniElement, this is used when call the mass matrix*/
 				int UEI;
 				for (int j = 0; j < OutNum; j++) {
@@ -129,11 +131,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		for (int p = 0; p < Np; p++) {
 			int StartPoint = JcPNPS[e*Np + p];
-			int Nonzero = JcPNPS[e*Np + p + 1] - JcPNPS[e*Np + p];
+			int Nonzero = JcPNPS[e*Np + p + 1] - StartPoint;
 			int Ele = Nonzero / Np;
 			for (int i = 0; i < Ele; i++) {
 				/*The index of the influenced element*/
-				int EI = IrPNPS[StartPoint + i*Np] / Np + 1;
+				int EI = (int)IrPNPS[StartPoint + i*Np] / Np + 1;
 				/*The index of the studied element in UniElement, this is used when call the mass matrix*/
 				int UEI;
 				for (int j = 0; j < OutNum; j++) {

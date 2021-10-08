@@ -326,14 +326,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, Dt, tz + ele*Np, Facialnx + i * IENfp, \
 				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1);
 
-			for (int j = 0; j < EleNumber; j++){
-				if ((int)TempEToE[j] == AdjEle[i]){
-					GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp,\
-						IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
-						tz + (int)(TempEToE[j] - 1)*Np, Facialnx + i*IENfp, Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, \
-						K13 + (int)(TempEToE[j] - 1)*Np, K23 + (int)(TempEToE[j] - 1)*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1, AdjEle[i]);
-
-				}
+			if (AdjEle[i] != ele + 1) {
+				GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
+					IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
+					tz + (int)(AdjEle[i] - 1)*Np, Facialnx + i*IENfp, Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, \
+					K13 + (int)(AdjEle[i] - 1)*Np, K23 + (int)(AdjEle[i] - 1)*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1, AdjEle[i]);
 			}
 		}
 		free(TempEToE);
@@ -350,7 +347,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int ele = 0; ele < K2d; ele++){
-		int StartPoint;
 		for (int L = 0; L < Nlayer; L++){
 			//Index of the studied element
 			int LocalEle = ele*Nlayer + L + 1;
@@ -359,98 +355,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			//Index of the element that located downside of the studied element
 			int DownEle = (int)EToE[ele*Nlayer*Nface + L*Nface + Nface - 2];
 
-			int EleNumber = 0;
-
-			double *TempEToE = malloc((Nface + 1)*sizeof(double));
-
-			FindUniqueElementAndSortOrder(TempEToE, EToE + (LocalEle - 1)*Nface, &EleNumber, Nface, LocalEle);
-
 			if (UpEle == DownEle){//Only one layer in the vertical direction, impose the Dirichlet boundary condition
-				for (int i = 0; i < EleNumber; i++){
-					if (LocalEle == (int)TempEToE[i]){
-						if (!strcmp(BoundaryType, "Dirichlet")){
-							ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
-								J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-								sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-								tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
-								K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
-						}
-						break;
-					}
+				if (!strcmp(BoundaryType, "Dirichlet")){
+					ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
+						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
+						K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
 				}
 			}
-			else{//two or more layers included in vertical direction
-				if (LocalEle == UpEle){//This is the top most cell, and L=0
-					for (int i = 0; i < EleNumber; i++){
-						if (LocalEle == (int)TempEToE[i]){
-							StartPoint = jcs[(LocalEle - 1)*Np] + i*Np;
-							if (!strcmp(BoundaryType, "Dirichlet")){
-								ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
-									J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-									sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-									tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-									K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
-							}
-							break;
-						}
+			else {//two or more layers included in vertical direction
+				if (LocalEle == UpEle) {//This is the top most cell, and L=0
+					if (!strcmp(BoundaryType, "Dirichlet")) {
+						ImposeDirichletBoundaryCondition(sr, irs, jcs, Np, Np2d, M2d, \
+							J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+							sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+							tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
+							K33 + (LocalEle - 1)*Np, *(SurfaceEdgeTau + ele), LocalEle);
 					}
-					
-					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
-						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
-					
-					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
-						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
-						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt,\
-						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np,\
-						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
-						
-
-				}
-				else if (LocalEle == DownEle){// This is the bottom most cell.
-					
-
-					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L-1)*K2d + ele));
-					
-					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
-						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
-						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
-						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
-						
-				}
-				else{
-					
-					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
-						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
-						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np,\
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
-					
-					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
-						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
-						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
-						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
-						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
-                     
 					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
 						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
-                      
 					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
@@ -458,11 +385,52 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
 						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
-						
-
 				}
-			}
-			free(TempEToE);
+				else if (LocalEle == DownEle) {// This is the bottom most cell.
+					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+
+					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
+						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
+						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
+						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
+						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
+						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+				}
+				else {
+					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
+						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+
+					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
+						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
+						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
+						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
+						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
+						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+
+					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
+						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
+						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+
+					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
+						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
+						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
+						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
+						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt, \
+						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
+						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+				}
+			}					
 		}
 	}
 	free(UpEidM);
