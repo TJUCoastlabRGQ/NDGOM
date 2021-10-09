@@ -98,6 +98,17 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
     end
     
     properties
+        SortedIEnx
+        SortedIEny
+        SortedIEGlobalFace
+        SortedIEAdjEle
+        SortedIEReverseFlag
+        SortedIEInternalFace
+        UniEleNumber
+        UniEle
+    end
+    
+    properties
         PARDISO_INITIALIZED = 0
         PARDISO_INFO = []
     end
@@ -143,6 +154,12 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 Index =(find(obj.varIndex(i) == PhysClass.varFieldIndex));
                 obj.rhsIndex(i) = Index;
             end
+            
+            [obj.UniEleNumber, obj.UniEle, obj.SortedIEnx, obj.SortedIEny, obj.SortedIEGlobalFace, ...
+                obj.SortedIEAdjEle, obj.SortedIEReverseFlag, obj.SortedIEInternalFace ] = mxGetInnerEdgeTopologyRelation(...
+                obj.InnerEdge.FToE, obj.InnerEdge.FToF, obj.InnerEdge.nx, obj.InnerEdge.ny, obj.InnerEdge.Ne, obj.cell.Nface, ...
+                obj.InnerEdge.Nfp, obj.mesh.EToE, obj.mesh.K);
+            
             obj.matClearGlobalMemory( );
         end
         
@@ -167,8 +184,9 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             
             obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.SPNPX, obj.SPNPY, obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.BottomEdge,...
-                obj.SurfaceBoundaryEdge, obj.cell2d.M, ...
-                obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType);
+                obj.SurfaceBoundaryEdge, obj.cell2d.M, obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType,...
+                obj.SortedIEnx, obj.SortedIEny, obj.SortedIEGlobalFace, obj.SortedIEAdjEle, obj.SortedIEReverseFlag,...
+                obj.SortedIEInternalFace);
             
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.mesh.J, obj.cell.M);
@@ -183,7 +201,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             
             obj.GlobalStiffMatrix = mxAssembleFinalGlobalStiffMatrix(obj.cell.Np, obj.mesh.K, physClass.hcrit, obj.mesh.EToE, obj.cell.Nface,...
                 obj.cell.M, obj.mesh.J, obj.GlobalStiffMatrix, obj.PNPX, obj.PNPY, obj.PNPS, fphys{1}(:,:,obj.varIndex(4)), ...
-                obj.PHPX, obj.PHPY, fphys{1}(:,:,obj.varIndex(5)), fphys{1}(:,:,obj.varIndex(6)), obj.mesh.z);
+                obj.PHPX, obj.PHPY, fphys{1}(:,:,obj.varIndex(5)), fphys{1}(:,:,obj.varIndex(6)), obj.mesh.z, obj.UniEleNumber, obj.UniEle);
             
             %             obj.GlobalStiffMatrix = mxAssemblePositiveDefiniteStiffMatrix( obj.GlobalStiffMatrix );
             %
@@ -245,7 +263,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
-%             obj.NonhydroPressure = obj.NonhydroPressure + reshape(DiffNonhydroPressure, obj.cell.Np, obj.mesh.K);
+            %             obj.NonhydroPressure = obj.NonhydroPressure + reshape(DiffNonhydroPressure, obj.cell.Np, obj.mesh.K);
             
         end
         
@@ -269,7 +287,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
             
-             physClass.frhs{1}(:,:,obj.rhsIndex) = mxCalculateNonhydroRHS( obj.NonhydroPressure, fphys{1}, obj.rhsIndex, ...
+            physClass.frhs{1}(:,:,obj.rhsIndex) = mxCalculateNonhydroRHS( obj.NonhydroPressure, fphys{1}, obj.rhsIndex, ...
                 obj.varIndex, obj.rho, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, physClass.frhs{1}, int8(physClass.meshUnion.BoundaryEdge.ftype));
             

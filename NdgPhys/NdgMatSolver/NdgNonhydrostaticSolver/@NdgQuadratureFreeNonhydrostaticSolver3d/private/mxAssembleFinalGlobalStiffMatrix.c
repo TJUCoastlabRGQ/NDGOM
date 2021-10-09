@@ -49,6 +49,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	double *Z = mxGetPr(prhs[16]);
 
+	double *UniEleNumber = mxGetPr(prhs[17]);
+	double *UniEle = mxGetPr(prhs[18]);
+
 	double *InverseHeight = malloc(Np*K * sizeof(double));
 
 	plhs[0] = mxCreateSparse(row, col, JcStiffMatrix[col], mxREAL);
@@ -73,9 +76,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int e = 0; e < K; e++) {
-		int OutNum = 0;
-		double *UniElement = malloc((Nface + 1) * sizeof(double));
-		FindUniqueElementAndSortOrder(UniElement, EToE + e*Nface, &OutNum, Nface, e + 1);
+		int OutNum = (int)UniEleNumber[e];
+		double *UniElement = UniEle + e * (Nface + 1);
+		//FindUniqueElementAndSortOrder(UniElement, EToE + e*Nface, &OutNum, Nface, e + 1);
 		double *EleMass3d = malloc(Np*Np*OutNum * sizeof(double));
 		for (int i = 0; i < OutNum; i++) {
 			DiagMultiply(EleMass3d+i*Np*Np,Mass3d,J+((int)UniElement[i]-1)*Np,Np);
@@ -197,7 +200,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(TempCoey);
 		free(TempStiffMatrix);
 		free(EleMass3d);
-		free(UniElement);
+//		free(UniElement);
 	}
 	free(InverseHeight);
 }

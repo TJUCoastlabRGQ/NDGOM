@@ -50,32 +50,32 @@ Jcs: A pointer to the array that contains the number of nonzero element in each 
 */
 
 void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, double *mass3d, \
-	double *mass2d, double *J, double *Js, int LocalEle, int *AdjEle, double *FacialVector, int *GlobalFace,\
-	int InternalFace, int Nface, double *TempEToE, int *Flag, double *FToN1, double *FToN2){
+	double *mass2d, double *J, double *Js, int LocalEle, double *AdjEle, double *FacialVector, double *GlobalFace,\
+	double InternalFace, int Nface, double *TempEToE, double *Flag, double *FToN1, double *FToN2){
 
 	double *LocalEidM = malloc(Nfp*sizeof(double));
 	double *AdjEidM = malloc(Nfp*sizeof(double));
-	for (int i = 0; i < InternalFace; i++){
-		if (Flag[i] == 0){//The local and adjacent facial point are the same with the data stored in FToN1 and FToN2
+	for (int i = 0; i < (int)InternalFace; i++){
+		if ((int)Flag[i] == 0){//The local and adjacent facial point are the same with the data stored in FToN1 and FToN2
 			for (int p = 0; p < Nfp; p++){
-				LocalEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
-				AdjEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
+				LocalEidM[p] = FToN1[(int)GlobalFace[i] * Nfp + p];
+				AdjEidM[p] = FToN2[(int)GlobalFace[i] * Nfp + p];
 			}
 		}
 		else{
 			for (int p = 0; p < Nfp; p++){//The local and adjacent facial point are reversed in FToN1 and FToN2
-				AdjEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
-				LocalEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
+				AdjEidM[p] = FToN1[(int)GlobalFace[i] * Nfp + p];
+				LocalEidM[p] = FToN2[(int)GlobalFace[i] * Nfp + p];
 			}
 		}
 
 		double *AdjMass3d = malloc(Np*Np*sizeof(double));
-		DiagMultiply(AdjMass3d, mass3d, J + Np*(AdjEle[i] - 1), Np);
+		DiagMultiply(AdjMass3d, mass3d, J + Np*((int)AdjEle[i] - 1), Np);
 		double *InvAdjMass3d = malloc(Np*Np*sizeof(double));
 		memcpy(InvAdjMass3d, AdjMass3d, Np*Np*sizeof(double));
 		MatrixInverse(InvAdjMass3d, (ptrdiff_t)Np);
 		double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
-		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*(int)GlobalFace[i], Nfp);
 		double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 
 		double *TempContribution = malloc(Np*Np*sizeof(double));
@@ -91,7 +91,7 @@ void GetLocalToAdjacentElementContributionInHorizontalDirection(double *dest, mw
 		MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvAdjMass3d,
 			(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
 
-		AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEidM, Np, Nfp, Contribution, LocalEle, AdjEle[i]);
+		AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEidM, Np, Nfp, Contribution, LocalEle, (int)AdjEle[i]);
 
 		free(AdjMass3d);
 		free(InvAdjMass3d);
@@ -139,19 +139,19 @@ Jcs: A pointer to the array that contains the number of nonzero element in each 
 */
 
 void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
-	double *mass3d, double *mass2d, double *J, double *Js, int LocalEle, double *Vector, int *GlobalFace, \
-	int InternalFace, int *Flag, double *FToN1, double *FToN2){
+	double *mass3d, double *mass2d, double *J, double *Js, int LocalEle, double *Vector, double *GlobalFace, \
+	double InternalFace, double *Flag, double *FToN1, double *FToN2){
 
 	double *LocalEidM = malloc(Nfp*sizeof(double));
-	for (int i = 0; i < InternalFace; i++){
+	for (int i = 0; i < (int)InternalFace; i++){
 		if (Flag[i] == 0){
 			for (int p = 0; p < Nfp; p++){
-				LocalEidM[p] = FToN1[GlobalFace[i] * Nfp + p];
+				LocalEidM[p] = FToN1[(int)GlobalFace[i] * Nfp + p];
 			}
 		}
 		else{
 			for (int p = 0; p < Nfp; p++){
-				LocalEidM[p] = FToN2[GlobalFace[i] * Nfp + p];
+				LocalEidM[p] = FToN2[(int)GlobalFace[i] * Nfp + p];
 			}
 		}
 
@@ -162,7 +162,7 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 		MatrixInverse(InvLocalMass3d, (ptrdiff_t)Np);
 
 		double *Mass2d = malloc(Nfp*Nfp*sizeof(double));
-		DiagMultiply(Mass2d, mass2d, Js + Nfp*GlobalFace[i], Nfp);
+		DiagMultiply(Mass2d, mass2d, Js + Nfp*(int)GlobalFace[i], Nfp);
 
 		double *TempContribution = malloc(Np*Np*sizeof(double));
 		memset(TempContribution, 0, Np*Np*sizeof(double));
@@ -274,7 +274,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			//Index of the studied element
 			int LocalEle = ele*Nlayer + L + 1;
 
-			int EleNumber = 0;
+			double EleNumber = 0;
 
 			double *TempEToE = malloc((Nface + 1)*sizeof(double));
 
@@ -291,10 +291,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 
 			double *FacialVector = malloc(Nface2d*HorNfp*sizeof(double));
-			int *GlobalFace = malloc(Nface2d*sizeof(int));
-			int *AdjEle = malloc(Nface2d*sizeof(int));
-			int *ReverseFlag = malloc(Nface2d*sizeof(int));
-			int InternalFace = 0;
+			double *GlobalFace = malloc(Nface2d*sizeof(double));
+			double *AdjEle = malloc(Nface2d*sizeof(double));
+			double *ReverseFlag = malloc(Nface2d*sizeof(double));
+			double InternalFace = 0;
 			
 			FindFaceAndDirectionVector(FacialVector, GlobalFace, AdjEle, \
 				&InternalFace, ReverseFlag, HorNfp, LocalEle, FToE, FToF, Vector, IENe, Nface2d);

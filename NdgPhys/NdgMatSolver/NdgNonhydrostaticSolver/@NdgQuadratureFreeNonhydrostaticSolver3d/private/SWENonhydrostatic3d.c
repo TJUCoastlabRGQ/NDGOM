@@ -145,14 +145,14 @@ void FetchFacialData(double *dest, double *src, double *FpIndex, int Nfp){
 
 }
 
-void FindUniqueElementAndSortOrder(double *dest, double *Src, int *OutNum, int InNum, int LocalElement){
+void FindUniqueElementAndSortOrder(double *dest, double *Src, double *OutNum, double InNum, int LocalElement){
 	//First, take the unique value in Src and store them in dest.
 	(*OutNum)= 1;
-	dest[(*OutNum) - 1] = LocalElement;
+	dest[(int)(*OutNum) - 1] = LocalElement;
 	for (int i = 0; i < InNum; i++){
 		int Flag;
 		int CurrentCell = (int)Src[i];
-		for (int j = 0; j < (*OutNum); j++){
+		for (int j = 0; j < (int)(*OutNum); j++){
 			if (CurrentCell == dest[j]){
 				Flag = 0;
 				break;
@@ -163,38 +163,38 @@ void FindUniqueElementAndSortOrder(double *dest, double *Src, int *OutNum, int I
 		}
 		if (Flag){
 			(*OutNum)++;
-			dest[(*OutNum) - 1] = CurrentCell;
+			dest[(int)(*OutNum) - 1] = CurrentCell;
 			}
 	}
 
-	Sort(dest, *OutNum);
+	Sort(dest, (int)(*OutNum));
 }
 
-void FindFaceAndDirectionVector(double *FacialVector, int *GlobalFace, \
-	int *AdjEle, int *InternalFace, int *Flag, int Nfp, int LocalEle, double *FToE, \
+void FindFaceAndDirectionVector(double *FacialVector, double *GlobalFace, \
+	double *AdjEle, double *InternalFace, double *Flag, int Nfp, int LocalEle, double *FToE, \
 	double *FToF, double *Vector, int IENe, int Nface2d){
 	*InternalFace = 0;
 	for (int i = 0; i < IENe; i++){
 		if ((int)FToE[2 * i] == LocalEle){
-			AdjEle[*InternalFace] = (int)FToE[2 * i + 1];
+			AdjEle[(int)(*InternalFace)] = (int)FToE[2 * i + 1];
 			for (int p = 0; p < Nfp; p++){
-				FacialVector[(*InternalFace)*Nfp + p] = Vector[i*Nfp + p];
+				FacialVector[(int)(*InternalFace)*Nfp + p] = Vector[i*Nfp + p];
 			}
-			GlobalFace[*InternalFace] = i;
-			Flag[*InternalFace] = 0;
-			(*InternalFace)++;
+			GlobalFace[(int)*InternalFace] = i;
+			Flag[(int)(*InternalFace)] = 0;
+			*InternalFace = *InternalFace + 1;
 		}
 		if ((int)FToE[2 * i + 1] == LocalEle){
-			AdjEle[*InternalFace] = (int)FToE[2 * i];
+			AdjEle[(int)(*InternalFace)] = (int)FToE[2 * i];
 			for (int p = 0; p < Nfp; p++){
-				FacialVector[(*InternalFace)*Nfp + p] = -1 * Vector[i*Nfp + p];
+				FacialVector[(int)(*InternalFace)*Nfp + p] = -1 * Vector[i*Nfp + p];
 			}
-			GlobalFace[*InternalFace] = i;
-			Flag[*InternalFace] = 1;
-			(*InternalFace)++;
+			GlobalFace[(int)(*InternalFace)] = i;
+			Flag[(int)(*InternalFace)] = 1;
+			*InternalFace = *InternalFace + 1;
 		}
 		/*If internal face number equals to Nface2d, we have find all the internal face, just skip the loop*/
-		if ((*InternalFace) == Nface2d) break;
+		if ((int)(*InternalFace) == Nface2d) break;
 	}
 }
 
@@ -245,7 +245,7 @@ void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IE
 	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d, int IENe, int BotENe){
 
 	double *TempEToE = malloc((Nface+1)*Ele3d*sizeof(double));
-	int *UniNum = malloc(Ele3d*sizeof(int));
+	double *UniNum = malloc(Ele3d*sizeof(double));
 
 	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
 #ifdef _OPENMP
@@ -273,7 +273,7 @@ void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IE
 		memset(Ir, 0, (Nface + 1)*Np*Np*sizeof(mwIndex));
 		memset(NumRowPerPoint, 0, Np*sizeof(int));
 		memset(CurrentPosition, 0, Np*sizeof(int));
-		for (int e = 0; e < *(UniNum + i); e++){
+		for (int e = 0; e < (int)(*(UniNum + i)); e++){
 			int TempEle = (int)TempEToE[i*(Nface + 1) + e];
 			/*The cell studied is located upside or downside of cell i*/
 			if (TempEle != (i + 1) && (TempEle == EToE[i*Nface + Nface - 2] || TempEle == EToE[i*Nface + Nface - 1])){
@@ -377,7 +377,7 @@ void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJ
 
 	/*Only the element itself and face in horizontal direction considered*/
 	double *TempEToE = malloc((Nface - 2 + 1)*Ele3d * sizeof(double));
-	int *UniNum = malloc(Ele3d * sizeof(int));
+	double *UniNum = malloc(Ele3d * sizeof(double));
 
 	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
 #ifdef _OPENMP
@@ -405,7 +405,7 @@ void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJ
 		memset(Ir, 0, (Nface - 2 + 1)*Np*Np * sizeof(mwIndex));
 		memset(NumRowPerPoint, 0, Np * sizeof(int));
 		memset(CurrentPosition, 0, Np * sizeof(int));
-		for (int e = 0; e < *(UniNum + i); e++) {
+		for (int e = 0; e < (int)(*(UniNum + i)); e++) {
 			int TempEle = (int)TempEToE[i*(Nface - 2 + 1) + e];
 			/*The cell studied is located adjacent to cell in horizontal direction*/
 			if (TempEle != (i + 1)) {
@@ -464,7 +464,7 @@ void GetSparsePatternForVerticalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJc,
 
 	/*Only the element itself and face in vertical direction considered*/
 	double *TempEToE = malloc(3*Ele3d * sizeof(double));
-	int *UniNum = malloc(Ele3d * sizeof(int));
+	double *UniNum = malloc(Ele3d * sizeof(double));
 
 	//First we need to know how many unique elements are adjacent to a studied element, and sort the order
 #ifdef _OPENMP
@@ -493,7 +493,7 @@ void GetSparsePatternForVerticalFirstOrderTerm(mwIndex *TempIr, mwIndex *TempJc,
 		memset(Ir, 0, 3*Np*Np * sizeof(mwIndex));
 		memset(NumRowPerPoint, 0, Np * sizeof(int));
 		memset(CurrentPosition, 0, Np * sizeof(int));
-		for (int e = 0; e < *(UniNum + i); e++) {
+		for (int e = 0; e < (int)(*(UniNum + i)); e++) {
 			int TempEle = (int)TempEToE[i*3 + e];
 			/*The cell studied is located upside or downside to cell in vertical direction*/
 			if (TempEle != (i + 1)) {

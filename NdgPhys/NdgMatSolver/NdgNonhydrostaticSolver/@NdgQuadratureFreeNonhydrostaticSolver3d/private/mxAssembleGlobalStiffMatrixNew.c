@@ -1,5 +1,4 @@
 #include "SWENonhydrostatic3d.h"
-#include "stdio.h"
 
 extern double *K33, *InvSquaHeight, *InnerEdgeTau, *BottomEdgeTau, *SurfaceEdgeTau;
 extern char *GlobalStiffMatrixInitialized;
@@ -213,6 +212,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	char* BoundaryType;
 	BoundaryType = mxArrayToString(prhs[16]);
 
+	double *SortedIEnx = mxGetPr(prhs[17]);
+	double *SortedIEny = mxGetPr(prhs[18]);
+	double *SortedIEGlobalFace = mxGetPr(prhs[19]);
+	double *SortedIEAdjEle = mxGetPr(prhs[20]);
+	double *SortedIEReverseFlag = mxGetPr(prhs[21]);
+	double *SortedIEInternalFace = mxGetPr(prhs[22]);
+
 	if (!strcmp("False", GlobalStiffMatrixInitialized)){
 		GlobalStiffMatrixMemoryAllocation(Np, K, IENe, BotENe, SurfBENe);
 	}
@@ -282,26 +288,32 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int ele = 0; ele < K; ele++){
-		int EleNumber = 0;
-		double *TempEToE = malloc((Nface + 1)*sizeof(double));
-		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
+		//int EleNumber = (int)UniEleNumber[ele];
+		//double *TempEToE = UniEle + ele * (Nface + 1);
+		//FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
 
 		GetLocalVolumnIntegralTerm(sr, irs, jcs, \
 			Np, M3d, Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
 			sy + ele*Np, tz + ele*Np, J + ele*Np, K13 + ele*Np, \
 			K23 + ele*Np, K33 + ele*Np, ele + 1);
 
-		double *Facialnx = malloc(Nface2d*IENfp*sizeof(double));
-		double *Facialny = malloc(Nface2d*IENfp*sizeof(double));
-		int *GlobalFace = malloc(Nface2d*sizeof(int));
-		int *AdjEle = malloc(Nface2d*sizeof(int));
-		int *ReverseFlag = malloc(Nface2d*sizeof(int));
-		int InternalFace = 0;
+		double *Facialnx = SortedIEnx + ele * Nface2d * IENfp;
+		//malloc(Nface2d*IENfp * sizeof(double));
+		double *Facialny = SortedIEny + ele * Nface2d * IENfp; 
+		//malloc(Nface2d*IENfp*sizeof(double));
+		double *GlobalFace = SortedIEGlobalFace + ele * Nface2d;
+		//malloc(Nface2d*sizeof(int));
+		double *AdjEle = SortedIEAdjEle + ele * Nface2d;
+		//malloc(Nface2d*sizeof(int));
+		double *ReverseFlag = SortedIEReverseFlag + ele * Nface2d;
+		//malloc(Nface2d*sizeof(int));
+		int InternalFace = (int)SortedIEInternalFace[ele];
+		//0;
 
-		FindFaceAndDirectionVector(Facialnx, GlobalFace, AdjEle, \
+//		FindFaceAndDirectionVector(Facialnx, GlobalFace, AdjEle, \
 			&InternalFace, ReverseFlag, IENfp, ele + 1, IEFToE, IEFToF, IEnx, IENe, Nface2d);
 
-		FindFaceAndDirectionVector(Facialny, GlobalFace, AdjEle, \
+//		FindFaceAndDirectionVector(Facialny, GlobalFace, AdjEle, \
 			&InternalFace, ReverseFlag, IENfp, ele + 1, IEFToE, IEFToF, IEny, IENe, Nface2d);
 
 		double *LocalEidM = malloc(IENfp*sizeof(double));
@@ -309,36 +321,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		double *AdjEidM = malloc(IENfp*sizeof(double));
 
 		for (int i = 0; i < InternalFace; i++){
-			if (ReverseFlag[i] == 0){
+			if ((int)ReverseFlag[i] == 0){
 				for (int p = 0; p < IENfp; p++){
-					LocalEidM[p] = IEFToN1[GlobalFace[i] * IENfp + p];
-					AdjEidM[p] = IEFToN2[GlobalFace[i] * IENfp + p];
+					LocalEidM[p] = IEFToN1[(int)GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = IEFToN2[(int)GlobalFace[i] * IENfp + p];
 				}
 			}
 			else{
 				for (int p = 0; p < IENfp; p++){
-					LocalEidM[p] = IEFToN2[GlobalFace[i] * IENfp + p];
-					AdjEidM[p] = IEFToN1[GlobalFace[i] * IENfp + p];
+					LocalEidM[p] = IEFToN2[(int)GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = IEFToN1[(int)GlobalFace[i] * IENfp + p];
 				}
 			}
 
 			GetLocalFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
-				IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, Dt, tz + ele*Np, Facialnx + i * IENfp, \
-				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1);
+				IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, Dt, tz + ele*Np, Facialnx + i * IENfp, \
+				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + (int)GlobalFace[i]), ele + 1);
 
 			if (AdjEle[i] != ele + 1) {
 				GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
-					IEMb, IEJs + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
+					IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
 					tz + (int)(AdjEle[i] - 1)*Np, Facialnx + i*IENfp, Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, \
-					K13 + (int)(AdjEle[i] - 1)*Np, K23 + (int)(AdjEle[i] - 1)*Np, *(InnerEdgeTau + GlobalFace[i]), ele + 1, AdjEle[i]);
+					K13 + (int)(AdjEle[i] - 1)*Np, K23 + (int)(AdjEle[i] - 1)*Np, *(InnerEdgeTau + (int)GlobalFace[i]), ele + 1, AdjEle[i]);
 			}
 		}
-		free(TempEToE);
-		free(Facialnx);
-		free(Facialny);
-		free(GlobalFace);
-		free(AdjEle);
-		free(ReverseFlag);
+//		free(TempEToE);
+//		free(Facialnx);
+//		free(Facialny);
+//		free(GlobalFace);
+//		free(AdjEle);
+//		free(ReverseFlag);
 		free(LocalEidM);
 		free(AdjEidM);
 	}

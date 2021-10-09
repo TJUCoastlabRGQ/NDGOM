@@ -1,4 +1,5 @@
 function matTimeSteppingLai( obj )
+tic;
 time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
 fphys2d = obj.fphys2d;
@@ -115,4 +116,5 @@ obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
 obj.matClearGlobalMemory();
 % obj.outputFile.closeOutputFile();
+toc;
 end

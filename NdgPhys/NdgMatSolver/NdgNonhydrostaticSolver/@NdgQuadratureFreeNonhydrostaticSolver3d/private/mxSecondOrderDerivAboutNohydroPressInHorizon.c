@@ -327,7 +327,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int ele = 0; ele < Ele3d; ele++){
-		int EleNumber = 0;
+		double EleNumber = 0;
 		double *TempEToE = malloc((Nface+1)*sizeof(double));
 		FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
 
@@ -340,10 +340,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 
 		double *FacialVector = malloc(Nface2d*IENfp*sizeof(double));
-		int *GlobalFace = malloc(Nface2d*sizeof(int));
-		int *AdjEle = malloc(Nface2d*sizeof(int));
-		int *ReverseFlag = malloc(Nface2d*sizeof(int));
-		int InternalFace = 0;
+		double *GlobalFace = malloc(Nface2d*sizeof(double));
+		double *AdjEle = malloc(Nface2d*sizeof(double));
+		double *ReverseFlag = malloc(Nface2d*sizeof(double));
+		double InternalFace = 0;
 
 		FindFaceAndDirectionVector(FacialVector, GlobalFace, AdjEle, \
 			&InternalFace, ReverseFlag, IENfp, ele + 1, FToE, FToF, Vector, IENe, Nface2d);
@@ -355,27 +355,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		for (int i = 0; i < InternalFace; i++){
 			if (ReverseFlag[i] == 0){
 				for (int p = 0; p < IENfp; p++){
-					LocalEidM[p] = FToN1[GlobalFace[i] * IENfp + p];
-					AdjEidM[p] = FToN2[GlobalFace[i] * IENfp + p];
+					LocalEidM[p] = FToN1[(int)GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = FToN2[(int)GlobalFace[i] * IENfp + p];
 				}
 			}
 			else{
 				for (int p = 0; p < IENfp; p++){
-					LocalEidM[p] = FToN2[GlobalFace[i] * IENfp + p];
-					AdjEidM[p] = FToN1[GlobalFace[i] * IENfp + p];
+					LocalEidM[p] = FToN2[(int)GlobalFace[i] * IENfp + p];
+					AdjEidM[p] = FToN1[(int)GlobalFace[i] * IENfp + p];
 				}
 			}
 
 			GetLocalFacialContributionForSecondOrderTerm(sr, irs, jcs, Np, IENfp, \
-				 M, Js + GlobalFace[i] * IENfp, LocalEidM, Dr, Ds, \
+				 M, Js + (int)GlobalFace[i] * IENfp, LocalEidM, Dr, Ds, \
 				rd + ele*Np, sd + ele*Np, FacialVector + i * IENfp, ele + 1);
 
 			for (int j = 0; j < EleNumber; j++){
 				if ((int)TempEToE[j] == AdjEle[i]){
 					GetLocalToAdjacentElementContributionForSecondOrderTerm(sr, irs, jcs, Np, IENfp, \
-					    M, Js + GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dr, Ds, \
+					    M, Js + (int)GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dr, Ds, \
 						rd + ele*Np, rd + (int)(TempEToE[j] - 1)*Np, sd + ele*Np, sd + (int)(TempEToE[j] - 1)*Np, \
-						FacialVector + i*IENfp, AdjEle[i], ele + 1);
+						FacialVector + i*IENfp, (int)AdjEle[i], ele + 1);
 				}
 			}
 		}

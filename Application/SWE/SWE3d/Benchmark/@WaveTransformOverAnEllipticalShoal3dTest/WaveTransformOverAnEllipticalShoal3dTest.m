@@ -261,7 +261,7 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 50;
+            ftime = 0.5;
             outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
