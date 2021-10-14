@@ -66,7 +66,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 18;
+            x0 = 17.5;
             h = obj.H0;
             a = obj.A;
             c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
@@ -92,7 +92,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             %             YData1=get(D1,'YData'); %get the y data
             %             close(h);
             %             plot(XData1, YData1,'k--','LineWidth',1.5);
-            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5,'LineWidth', 1);
+            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',6,'LineWidth', 1);
             h = legend('SWE','Theory');
             set(h,'fontsize',15);
             legend('boxoff');

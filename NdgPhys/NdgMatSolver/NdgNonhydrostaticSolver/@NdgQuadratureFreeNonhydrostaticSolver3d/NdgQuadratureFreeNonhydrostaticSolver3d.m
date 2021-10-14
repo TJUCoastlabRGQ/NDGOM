@@ -267,6 +267,31 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             
         end
         
+        function [ time, fphys2d, fphys3d ] = matHotStart( obj, mesh3d, file2d, file3d, fphys2d, fphys3d)
+            ncid2d = netcdf.open(file2d, 'WRITE');
+            ncid3d = netcdf.open(file3d, 'WRITE');
+            % Time is the first variable in netcdf
+            Time = netcdf.getVar(ncid2d, 0);
+            time = Time(end);
+            % Variable is the second variable in netcdf
+            field2d = netcdf.getVar(ncid2d, 1);
+            % H, HU and HV
+            fphys2d(:,:,1) = field2d(:,:,1, numel(Time));
+            fphys2d(:,:,2) = field2d(:,:,2, numel(Time));
+            fphys2d(:,:,3) = field2d(:,:,3, numel(Time));
+            %Hu, Hv, omega, Hw
+            field3d = netcdf.getVar(ncid3d, 1);
+            fphys3d(:,:,1) = field3d(:,:,1, numel(Time));
+            fphys3d(:,:,2) = field3d(:,:,2, numel(Time));
+            fphys3d(:,:,3) = field3d(:,:,3, numel(Time));
+            %> H in extended three dimensional fields
+            fphys3d(:,:,4) = mesh3d.Extend2dField( fphys2d(:,:,1) );
+            fphys3d(:,:,7) = fphys3d(:,:,4) + fphys3d(:,:,6);
+            fphys3d(:,:,11) = field3d(:,:,4, numel(Time));
+            netcdf.close(ncid2d);
+            netcdf.close(ncid3d);
+        end
+        
         function matCalculateBottomVerticalVelocity( obj, physClass, fphys )
             %             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
             edge = physClass.meshUnion.BottomBoundaryEdge;

@@ -27,8 +27,8 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         sigma %> sponge strength
         maxSigma %> maximum sponge strength
         SpongeCoefficient
-        Ylim = [-10 0]
-        Xlim = [-10 9.9]
+        Ylim = [-10 -4]
+        Xlim = [-10 9.75]
 %         Ylim = [-10 0]
 %         Xlim = [-10 10]
         %         Xlim = [0 0.2]
@@ -36,12 +36,12 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
     
     methods (Access = public)
         function obj = WaveTransformOverAnEllipticalShoal3dTest( N, Nz, Mz )
-            gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
-            gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
-            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
+%             gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
+%             gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
+%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
 %             SMSFile = [ fileparts( mfilename('fullpath') ), '/mesh/0920.grd' ];
 %             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, SMSFile );
-%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz);
+            [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz);
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
             obj.Nfield = 11;
@@ -261,7 +261,7 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 0.5;
+            ftime = 100;
             outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -326,22 +326,22 @@ end
 % 
 % end
 
-function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, gmshFileElement, gmshBoundaryFile )
-
-mesh2d = makeGmshFileUMeshUnion2d( N, gmshFileElement, gmshBoundaryFile );
-
-cell = StdPrismTri( N, Nz );
-zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
-mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
-mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
-mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
-mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-
-end
+% function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, gmshFileElement, gmshBoundaryFile )
+% 
+% mesh2d = makeGmshFileUMeshUnion2d( N, gmshFileElement, gmshBoundaryFile );
+% 
+% cell = StdPrismTri( N, Nz );
+% zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+% mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
+% mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
+% mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
+% mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
+% mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
+% mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% 
+% end
 
 % function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
 % 
@@ -366,25 +366,25 @@ end
 % 
 % end
 
-% function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
-% 
-% bctype = [ ...
-%     enumBoundaryCondition.ClampedVel, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall ];
-% 
-% mesh2d = makeUniformQuadMesh( N, ...
-%     [ -10, -9.8 ], [ -10, 0 ], 1, 10/0.1, bctype);
-% cell = StdPrismQuad( N, Nz );
-% zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
-% mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
-% mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
-% mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-% mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
-% mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
-% mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-% 
-% end
+function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
+
+bctype = [ ...
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall ];
+
+mesh2d = makeUniformQuadMesh( N, ...
+    [ -10, -9.75 ], [ -10, -4 ], 1, 6/0.25, bctype);
+cell = StdPrismQuad( N, Nz );
+zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
+mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );
+mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
+mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
+mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+
+end

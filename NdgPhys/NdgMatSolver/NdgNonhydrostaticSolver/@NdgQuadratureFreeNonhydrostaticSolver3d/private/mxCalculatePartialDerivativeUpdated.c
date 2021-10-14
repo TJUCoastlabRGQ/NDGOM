@@ -1414,18 +1414,16 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
-		MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);
+//      MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);
 //		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, Hext + face*BENfp, BENfp);
 		DotCriticalDivide(vM + face*BENfp, vM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
-		MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 0.95, BENfp);
+//      MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 0.95, BENfp);
 //		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, Hext + face*BENfp, BENfp);
-		/*
 		if (type == NdgEdgeClampedVel) {
-			MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);
-			MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 0.95, BENfp);
+			MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 1.4, BENfp);
+			MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 1.4, BENfp);
 		}
-		*/
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxM + face*BENfp, uM + face*BENfp, BEnx + face*BENfp, BENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxMy + face*BENfp, uM + face*BENfp, BEny + face*BENfp, BENfp);
