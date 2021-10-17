@@ -25,7 +25,7 @@ for i = 1:numel(y)
     ypf = y(i).*ones(size(xpf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(25* Nout/30)+1:ceil(30* Nout/30);
+    index = ceil(25* Nout/27.94)+1:ceil(27.94* Nout/27.94);
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
@@ -81,7 +81,7 @@ for i = 1:numel(x)
     xpf = x(i).*ones(size(ypf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(25* Nout/30)+1:ceil(30* Nout/30);  
+    index = ceil(25* Nout/27.94)+1:ceil(27.94* Nout/27.94);  
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     

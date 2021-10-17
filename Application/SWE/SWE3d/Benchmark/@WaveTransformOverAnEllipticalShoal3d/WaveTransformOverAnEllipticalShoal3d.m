@@ -81,7 +81,7 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
         end
         
         function VisualPostprocess(obj)
-            time = 30;
+            time = 27;
             PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             [~,Index] = sort(abs(outputTime-time));

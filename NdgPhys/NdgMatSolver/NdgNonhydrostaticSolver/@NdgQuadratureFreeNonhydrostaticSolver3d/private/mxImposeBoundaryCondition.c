@@ -99,6 +99,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double gra = mxGetScalar(prhs[35]);
 	double *PzPx = mxGetPr(prhs[36]);
 	double *PzPy = mxGetPr(prhs[37]);
+	double *BEBCsNewmannData = mxGetPr(prhs[38]);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -258,6 +259,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int edge = 0; edge < BENe; edge++){
 		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
 			//Newmann boundary Doing Nothing
+		}
+		else if ((NdgEdgeType)ftype[edge] == NdgEdgeClampedVel) {
+			int LocalEle;
+			LocalEle = (int)BEFToE[2 * edge];
+
+			double *TempEToE = NULL, *TempJs = NULL;
+			TempEToE = EToE + (LocalEle - 1)*Nface;
+			TempJs = BEJs + edge * BENfp;
+
+			double *FpIndex = malloc(BENfp * sizeof(double));
+
+			for (int p = 0; p < BENfp; p++) {
+				FpIndex[p] = BEFToN1[BENfp*edge + p];
+			}
+
+			ImposeNewmannBoundaryCondition(OutRHS, LocalEle, Np, BENfp, \
+				TempJs, BELMass2d, TempEToE, FpIndex, BEBCsNewmannData + edge * BENfp);
+
+			free(FpIndex);
 		}
 		else{
 			/*

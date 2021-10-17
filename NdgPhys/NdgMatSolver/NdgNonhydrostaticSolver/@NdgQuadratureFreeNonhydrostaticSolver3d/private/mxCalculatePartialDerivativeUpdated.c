@@ -41,7 +41,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *, double *, const mxArray *, 
 	const mxArray *, const mxArray *, const mxArray *, const mxArray *, const mxArray *, \
 	const mxArray *, const mxArray *, signed char *, signed char *, double *, double *, double *, \
 	double *, double *, double *, double *, double *, double *, double *, double *, double *, double , \
-	double , double *, double *, double *, double *, double *);
+	double , double *, double *, double *, double *, double *, double *);
 
 void DotCriticalDevideByLocalValue(double *, double *, int , double );
 
@@ -179,6 +179,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	const mxArray *InnerEdge2d = prhs[17];
 	const mxArray *BoundaryEdge2d = prhs[18];
 
+	double *pept = mxGetPr(prhs[21]);
+
 	if (!strcmp("False", SWENonhydro3dInitialized)){
 	   mxArray *TempNface = mxGetField(cell, 0, "Nface");
 	   int Nface3d = (int)mxGetScalar(TempNface);
@@ -315,7 +317,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 	GetVerticalVelocityAtSurfaceAndBottom(Weta, Wbot, cell, SurfaceBoundaryEdge, BottomBoundaryEdge, InnerEdge, BoundaryEdge, mesh2d, InnerEdge2d, BoundaryEdge2d, \
-		cell2d, ftype2d, ftype, PHPX, PHPY, NonhydroHU2d, hu, NonhydroHV2d, hv, z2d, zbot, h2d, h, fext2d, fext, gra, *Hcrit, zx, zy, u, v, w);
+		cell2d, ftype2d, ftype, PHPX, PHPY, NonhydroHU2d, hu, NonhydroHV2d, hv, z2d, zbot, h2d, h, fext2d, fext, gra, *Hcrit, zx, zy, u, v, w, pept);
 
 	memcpy(Wnew, Wbot, Np2d*K2d*sizeof(double));
 
@@ -614,7 +616,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 	const mxArray *BottomBoundaryEdge, const mxArray *InnerEdge, const mxArray *BoundaryEdge, const mxArray *mesh2d, const mxArray *InnerEdge2d,\
 	const mxArray *BoundaryEdge2d, const mxArray *cell2d, signed char *ftype2d, signed char *ftype3d, double *PHPX, double *PHPY, double *hu2d, \
 	double *hu, double *hv2d, double *hv, double *z2d, double *z3d, double *h2d, double *h3d, double *fext2d, double *fext3d, double gra, \
-	double Hcrit, double *zx3d, double *zy3d, double *u, double *v, double *w){
+	double Hcrit, double *zx3d, double *zy3d, double *u, double *v, double *w, double *pept){
 	/******************************For the following version, the flux at the boundary is calculated by depth-integration of it's three dimension value**************************************/
 	/*
 	mxArray *Temprx2d = mxGetField(mesh2d, 0, "rx");
@@ -965,6 +967,7 @@ void GetVerticalVelocityAtSurfaceAndBottom(double *Wetadest, double *Wbotdest, c
 	free(InvV2d);
 	*/
 	/******************************For the following version, the flux at the boundary is calculated by the Riemann solver**************************************/
+/*
 mxArray *Temprx2d = mxGetField(mesh2d, 0, "rx");
 double *rx2d = mxGetPr(Temprx2d);
 int Np2d = (int)mxGetM(Temprx2d);
@@ -977,10 +980,10 @@ mxArray *Tempsy2d = mxGetField(mesh2d, 0, "sy");
 double *sy2d = mxGetPr(Tempsy2d);
 mxArray *TempJ2d = mxGetField(mesh2d, 0, "J");
 double *J2d = mxGetPr(TempJ2d);
-
+*/
 mxArray *TempNp = mxGetField(cell, 0, "Np");
 int Np = (int)mxGetScalar(TempNp);
-
+/*
 //Properties contained in two dimensional inner edge
 mxArray *TempIENe2d = mxGetField(InnerEdge2d, 0, "Ne");
 int IENe2d = (int)mxGetScalar(TempIENe2d);
@@ -1032,7 +1035,7 @@ mxArray *TempNface = mxGetField(cell2d, 0, "Nface");
 int Nface = (int)mxGetScalar(TempNface);
 mxArray *TempinvM2d = mxGetField(cell2d, 0, "invM");
 double *invM2d = mxGetPr(TempinvM2d);
-
+*/
 //For bottom boundary edge object
 mxArray *TempBotBENe = mxGetField(BottomBoundaryEdge, 0, "Ne");
 int BotBENe = (int)mxGetScalar(TempBotBENe);
@@ -1051,7 +1054,7 @@ mxArray *TempSurfBEFToE = mxGetField(SurfaceBoundaryEdge, 0, "FToE");
 double *SurfBEFToE = mxGetPr(TempSurfBEFToE);
 mxArray *TempSurfBEFToN1 = mxGetField(SurfaceBoundaryEdge, 0, "FToN1");
 double *SurfBEFToN1 = mxGetPr(TempSurfBEFToN1);
-
+/*
 double *IEhuM2d = NonhydroIEfm2d, *IEhvM2d = NonhydroIEfm2d + IENfp2d * IENe2d, \
 *IEhM2d = NonhydroIEfm2d + 2 * IENfp2d*IENe2d;
 
@@ -1162,6 +1165,7 @@ for (int k = 0; k < K2d; k++) {
 for (int k = 0; k < K2d; k++) {
 	Minus(NonhydroRHS2d + k*Np2d, NonhydroERHS2d + k*Np2d, NonhydroRHS2d + k*Np2d, Np2d);
 }
+*/
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -1183,7 +1187,8 @@ for (int face = 0; face < SurfBENe; face++) {
 	Add(etay + face*SurfBENfp, etay + face*SurfBENfp, TempZy2d + face*SurfBENfp, SurfBENfp);
 	DotProduct(etay + face*SurfBENfp, veta + face*SurfBENfp, etay + face*SurfBENfp, SurfBENfp);
 	//$w_{\eta} = \frac{\partial \eta}{\partial t} + u_{\eta}\frac{\partial \eta}{\partial x} + v_{\eta}\frac{\partial \eta}{\partial y}$
-	Add(Wetadest + face*SurfBENfp, NonhydroRHS2d + face*SurfBENfp, etax + face*SurfBENfp, SurfBENfp);
+	//Add(Wetadest + face*SurfBENfp, NonhydroRHS2d + face*SurfBENfp, etax + face*SurfBENfp, SurfBENfp);
+	Add(Wetadest + face*SurfBENfp, pept + face*SurfBENfp, etax + face*SurfBENfp, SurfBENfp);
 	Add(Wetadest + face*SurfBENfp, Wetadest + face*SurfBENfp, etay + face*SurfBENfp, SurfBENfp);
 }
 
@@ -1420,10 +1425,12 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
 //      MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 0.95, BENfp);
 //		DotCriticalDivide(vP + face*BENfp, vP + face*BENfp, &Hcrit, Hext + face*BENfp, BENfp);
-		if (type == NdgEdgeClampedVel) {
-			MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 1.4, BENfp);
-			MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 1.4, BENfp);
+/*		
+       if (type == NdgEdgeClampedVel) {
+			MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 1.05, BENfp);
+			MultiplyByConstant(vP + face*BENfp, vP + face*BENfp, 1.05, BENfp);
 		}
+	*/	
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxM + face*BENfp, uM + face*BENfp, BEnx + face*BENfp, BENfp);
 
 		EvaluateNonhydroVerticalFaceSurfFlux(UBEfluxMy + face*BENfp, uM + face*BENfp, BEny + face*BENfp, BENfp);

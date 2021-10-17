@@ -3,8 +3,8 @@ time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
 fphys2d = obj.fphys2d;
 fphys = obj.fphys;
-[time, fphys2d{1}, fphys{1}] = obj.NonhydrostaticSolver.matHotStart(obj.meshUnion(1),'D:\PhdResearch\Result\StandingWaveInAClosedChannel-backup\2d\StandingWaveInAClosedChannel.1-1.5.nc',...
-'D:\PhdResearch\Result\StandingWaveInAClosedChannel-backup\3d\StandingWaveInAClosedChannel.1-1.5.nc', fphys2d{1}, fphys{1});
+% [time, fphys2d{1}, fphys{1}] = obj.NonhydrostaticSolver.matHotStart(obj.meshUnion(1),'D:\PhdResearch\Result\StandingWaveInAClosedChannel-backup\2d\StandingWaveInAClosedChannel.1-1.5.nc',...
+% 'D:\PhdResearch\Result\StandingWaveInAClosedChannel-backup\3d\StandingWaveInAClosedChannel.1-1.5.nc', fphys2d{1}, fphys{1});
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )

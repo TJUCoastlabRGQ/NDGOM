@@ -59,6 +59,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         
         BoundNonhydroPressure
         
+        BoundNonhydroGrad
+        
         NonhydroRHS
         
         Wold
@@ -132,6 +134,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.varIndex = zeros(6,1);
             obj.rho = 1000;
             obj.BoundNonhydroPressure = zeros(obj.BoundaryEdge.Nfp, obj.BoundaryEdge.Ne);
+            obj.BoundNonhydroGrad = zeros(obj.BoundaryEdge.Nfp, obj.BoundaryEdge.Ne);
             for i = 1:PhysClass.Nfield
                 if (strcmp(PhysClass.fieldName3d{i},'hu'))
                     obj.varIndex(1) = i;
@@ -171,7 +174,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, fphys{1}, obj.varIndex, ...
                 int8(physClass.meshUnion.BoundaryEdge.ftype), physClass.gra, physClass.fext3d{ 1 }, fphys2d{1}(:,:,1),...
                 fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
-                int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype));
+                int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), physClass.frhs2d{1}(:,:,1));
             
             edge = physClass.meshUnion.BottomBoundaryEdge;
             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
@@ -197,7 +200,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure, obj.Unew, obj.Uold, obj.Vnew, obj.Vold,...
                 obj.PUPX, obj.PUPY, obj.PUPS, obj.PVPX, obj.PVPY, obj.PVPS, obj.PHPX, obj.PHPY, physClass.gra, fphys{1}(:,:,obj.varIndex(5)), ...
-                fphys{1}(:,:,obj.varIndex(6)));
+                fphys{1}(:,:,obj.varIndex(6)), obj.BoundNonhydroGrad);
             
             obj.GlobalStiffMatrix = mxAssembleFinalGlobalStiffMatrix(obj.cell.Np, obj.mesh.K, physClass.hcrit, obj.mesh.EToE, obj.cell.Nface,...
                 obj.cell.M, obj.mesh.J, obj.GlobalStiffMatrix, obj.PNPX, obj.PNPY, obj.PNPS, fphys{1}(:,:,obj.varIndex(4)), ...

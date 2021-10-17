@@ -29,18 +29,18 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         SpongeCoefficient
         Ylim = [-10 -4]
         Xlim = [-10 9.75]
-%         Ylim = [-10 0]
-%         Xlim = [-10 10]
+        %         Ylim = [-10 0]
+        %         Xlim = [-10 10]
         %         Xlim = [0 0.2]
     end
     
     methods (Access = public)
         function obj = WaveTransformOverAnEllipticalShoal3dTest( N, Nz, Mz )
-%             gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
-%             gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
-%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
-%             SMSFile = [ fileparts( mfilename('fullpath') ), '/mesh/0920.grd' ];
-%             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, SMSFile );
+            %             gmshElementFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalElement.msh' ];
+            %             gmshBoundaryFile = [ fileparts( mfilename('fullpath') ), '/mesh/EllipticShoalBoundary.msh' ];
+            %             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, gmshElementFile, gmshBoundaryFile );
+            %             SMSFile = [ fileparts( mfilename('fullpath') ), '/mesh/0920.grd' ];
+            %             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz, SMSFile );
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, Mz);
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [1 2 3 11];
@@ -167,18 +167,21 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             obj.NonhydrostaticSolver.BoundNonhydroPressure(:,Index) = 0 * TempBoundNonhydroPressure;
             %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
             %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
-            %% The depth-averaged version
-            %             hv3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
-            %             hw3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*(cosh(obj.k*(obj.d + Eta))-1)/sinh(obj.k*obj.d)*cos(omega*time);
+            %% The depth-averaged version, value is averaged from -h to 0
+            hv3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sin(omega*time);
+            hw3d(:,Index) =  omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*(cosh(obj.k*obj.d)-1)/sinh(obj.k*obj.d)*cos(omega*time);
+%             obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 * obj.NonhydrostaticSolver.rho*obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
+            obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 *obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
+            
             %% The depth-dependent version 1 28.99
             %             hv3d(:,Index) = obj.d * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             %             hw3d(:,Index) = obj.d * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             %% The depth-dependent version 2 23.39
-            hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-            hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %             hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %             hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             obj.fext3d{1}(:,:,2) = hv3d;
-%             obj.fext3d{1}(:,:,3) = obj.d + Eta;
-%             obj.fext3d{1}(:,:,3) = obj.d;
+            %             obj.fext3d{1}(:,:,3) = obj.d + Eta;
+            %             obj.fext3d{1}(:,:,3) = obj.d;
             obj.fext3d{1}(:,:,11) = hw3d;
             
             obj.fext2d{1}(:,:,2) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField( hv3d );
@@ -303,9 +306,9 @@ end
 
 
 % function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, SMSFile )
-% 
+%
 % [ mesh2d ] = makeSMSFileUMeshUnion2d( N, SMSFile );
-% 
+%
 % cell = StdPrismTri( N, Nz );
 % zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 % mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
@@ -314,22 +317,22 @@ end
 % mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 % mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 % mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% 
+%
 % Index = ( mesh3d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth);
 % mesh3d.BoundaryEdge.ftype(Index) = enumBoundaryCondition.ClampedVel;
-% 
+%
 % Index = ( mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth);
 % mesh2d.BoundaryEdge.ftype(Index) = enumBoundaryCondition.ClampedVel;
-% 
+%
 % % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-% 
+%
 % end
 
 % function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz, gmshFileElement, gmshBoundaryFile )
-% 
+%
 % mesh2d = makeGmshFileUMeshUnion2d( N, gmshFileElement, gmshBoundaryFile );
-% 
+%
 % cell = StdPrismTri( N, Nz );
 % zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 % mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
@@ -340,17 +343,17 @@ end
 % mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 % % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-% 
+%
 % end
 
 % function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
-% 
+%
 % bctype = [ ...
 %     enumBoundaryCondition.ClampedVel, ...
 %     enumBoundaryCondition.SlipWall, ...
 %     enumBoundaryCondition.SlipWall, ...
 %     enumBoundaryCondition.SlipWall ];
-% 
+%
 % mesh2d = makeUniformQuadMesh( N, ...
 %     [ -10, -5 ], [ -10, 6 ], 20, 80, bctype);
 % cell = StdPrismQuad( N, Nz );
@@ -363,7 +366,7 @@ end
 % mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
-% 
+%
 % end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, Mz)
