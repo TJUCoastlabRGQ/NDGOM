@@ -154,7 +154,7 @@ classdef SWEAbstract3d < NdgPhysMat
                                                         
         [ Omega, w ] = matEvaluateVerticalVelocity( obj, mesh3d, fphys2d, fphys );
                 
-        matEvaluateSourceTerm( obj, fphys );
+        matEvaluateSourceTerm( obj, fphys, fphys2d, time );
         
         matInitEddyViscositySolver( obj );
         

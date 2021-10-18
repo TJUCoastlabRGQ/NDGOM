@@ -234,6 +234,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             % Compute the solutions X using the symbolic factorization.
             [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
             
+            
             %==========================================For symmetric matrix=======================================================
             %             tic;
             %             obj.GlobalStiffMatrix = mxAssemblePositiveDefiniteStiffMatrix( obj.GlobalStiffMatrix );

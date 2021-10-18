@@ -20,15 +20,16 @@ while( time < ftime )
     obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
     
     tloc = time + dt;
+    
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
-    obj.matEvaluateSourceTerm( fphys );
-    
 %     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
 
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
+    
+    obj.matEvaluateSourceTerm( fphys, fphys2d, tloc );
     
     % $H^*u^*$, $H^*v^*$, $H^*w^*$
     [ fphys{1}(:,:,obj.varFieldIndex)] = Tempfphys + dt * obj.frhs{1};
@@ -55,11 +56,11 @@ while( time < ftime )
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
-    obj.matEvaluateSourceTerm( fphys );
-    
 %     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
 
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
+    
+    obj.matEvaluateSourceTerm( fphys, fphys2d, tloc );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = fphys{1}(:,:,obj.varFieldIndex) + dt * obj.frhs{1}; 
     
