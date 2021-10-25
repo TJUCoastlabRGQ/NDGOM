@@ -1,7 +1,7 @@
-function runEllipticProblemTest3dNew
-M = [1/8 1/16 1/32 1/64];
-Mz = [2 4 8 16];
-Order = [1];
+function runEllipticProblemConvergenceTest3dNew
+M = [4 8 16];
+Mz = [2 4 8];
+Order = [1, 2];
 
 Nmesh = numel(M);
 Ndeg = numel(Order);
@@ -21,11 +21,11 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = EllipticProblemTest3dNew(Order(n), Order(n), M(m), Mz(m));
+        Solver = EllipticProblemConvergenceTest3dNew(Order(n), Order(n), M(m), Mz(m));
         Solver.EllipticProblemSolve;
         len(m, n) = 1/Mz(m);
         dofs(m,n) = numel(Solver.meshUnion(1).x);
-        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticProblemTest3dNew/3d','/','EllipticProblemTest3dNew'));
+        PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/EllipticProblemConvergenceTest3dNew/3d','/','EllipticProblemConvergenceTest3dNew'));
         ExactValue = cell(1);
         ExactValue{1} = Solver.ExactSolution;
         fphys = cell(1);

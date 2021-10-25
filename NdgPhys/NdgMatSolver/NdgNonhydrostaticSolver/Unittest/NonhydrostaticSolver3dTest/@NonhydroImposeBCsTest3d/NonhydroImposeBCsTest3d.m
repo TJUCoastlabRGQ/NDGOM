@@ -34,10 +34,11 @@ classdef NonhydroImposeBCsTest3d < SWEBarotropic3d
         function obj = NonhydroImposeBCsTest3d(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
+            obj.varFieldIndex = [1 2 11];
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
         end
         
-        function matImposeNonhydroBCsTest(obj)
+        function EllipticProblemSolve(obj)
             
             TempStiffMatrix = abs(rand(obj.meshUnion.cell.Np*obj.meshUnion.K));
             
@@ -63,10 +64,10 @@ classdef NonhydroImposeBCsTest3d < SWEBarotropic3d
             PVPS = rand(obj.meshUnion.cell.Np,obj.meshUnion.K);
             PHPX = rand(obj.meshUnion.cell.Np,obj.meshUnion.K);
             PHPY = rand(obj.meshUnion.cell.Np,obj.meshUnion.K);
-            obj.matAssembleStiffMatrixAndRHS( TempStiffMatrix, TempRHS, PSPX, PSPY, Wold, Wnew, deltatime, ...
+            obj.matAssembleStiffMatrixAndRHS( TempRHS, PSPX, PSPY, Wold, Wnew, deltatime, ...
                 PWPS, Unew, Uold, Vnew, Vold, PUPX, PUPY, PUPS, PVPX, PVPY, PVPS, PHPX, PHPY);
             
-            [ NewStiffMatrix, NewRHS, Wx, Wy, PNPS, PNPX, PNPY ] = obj.NonhydrostaticSolver.TestImposeBoundaryCondition( obj, ...
+            [ ~, NewRHS] = obj.NonhydrostaticSolver.TestImposeBoundaryCondition( obj, ...
                 obj.fphys, sparse(TempStiffMatrix), TempRHS, PSPX, PSPY, Wold, Wnew, deltatime, ...
                 PWPS, Unew, Uold, Vnew, Vold, PUPX, PUPY, PUPS, PVPX, PVPY, PVPS, PHPX, PHPY);
             
@@ -77,50 +78,50 @@ classdef NonhydroImposeBCsTest3d < SWEBarotropic3d
             disp(min(min(NewRHS - obj.RHS)))
             disp('=================================End RHS========================================')
             
-            disp('==================================For Wx========================================')
-            disp('The maximum value is:')
-            disp(max(max(Wx)))
-            disp('The maximum difference is:')
-            disp(max(max(Wx - obj.MatWx)));
-            disp('The minimum difference is:')
-            disp(min(min(Wx - obj.MatWx)))
-            disp('=================================End Wx========================================')
-            
-            disp('==================================For Wy========================================')
-            disp('The maximum value is:')
-            disp(max(max(Wy)))
-            disp('The maximum difference is:')
-            disp(max(max(Wy - obj.MatWy)));
-            disp('The minimum difference is:')
-            disp(min(min(Wy - obj.MatWy)))
-            disp('=================================End Wy========================================')
-            
-            disp('==================================For PNPS========================================')
-            disp('The maximum value is:')
-            disp(max(max(PNPS)))
-            disp('The maximum difference is:')
-            disp(max(max(PNPS - obj.MatPNPS)));
-            disp('The minimum difference is:')
-            disp(min(min(PNPS - obj.MatPNPS)))
-            disp('=================================End PNPS========================================')
-            
-            disp('==================================For PNPX========================================')
-            disp('The maximum value is:')
-            disp(max(max(PNPX)))
-            disp('The maximum difference is:')
-            disp(max(max(PNPX - obj.MatPNPX)));
-            disp('The minimum difference is:')
-            disp(min(min(PNPX - obj.MatPNPX)))
-            disp('=================================End PNPX========================================')
-            
-            disp('==================================For PNPY========================================')
-            disp('The maximum value is:')
-            disp(max(max(PNPY)))
-            disp('The maximum difference is:')
-            disp(max(max(PNPY - obj.MatPNPY)));
-            disp('The minimum difference is:')
-            disp(min(min(PNPY - obj.MatPNPY)))
-            disp('=================================End PNPY========================================')
+%             disp('==================================For Wx========================================')
+%             disp('The maximum value is:')
+%             disp(max(max(Wx)))
+%             disp('The maximum difference is:')
+%             disp(max(max(Wx - obj.MatWx)));
+%             disp('The minimum difference is:')
+%             disp(min(min(Wx - obj.MatWx)))
+%             disp('=================================End Wx========================================')
+%             
+%             disp('==================================For Wy========================================')
+%             disp('The maximum value is:')
+%             disp(max(max(Wy)))
+%             disp('The maximum difference is:')
+%             disp(max(max(Wy - obj.MatWy)));
+%             disp('The minimum difference is:')
+%             disp(min(min(Wy - obj.MatWy)))
+%             disp('=================================End Wy========================================')
+%             
+%             disp('==================================For PNPS========================================')
+%             disp('The maximum value is:')
+%             disp(max(max(PNPS)))
+%             disp('The maximum difference is:')
+%             disp(max(max(PNPS - obj.MatPNPS)));
+%             disp('The minimum difference is:')
+%             disp(min(min(PNPS - obj.MatPNPS)))
+%             disp('=================================End PNPS========================================')
+%             
+%             disp('==================================For PNPX========================================')
+%             disp('The maximum value is:')
+%             disp(max(max(PNPX)))
+%             disp('The maximum difference is:')
+%             disp(max(max(PNPX - obj.MatPNPX)));
+%             disp('The minimum difference is:')
+%             disp(min(min(PNPX - obj.MatPNPX)))
+%             disp('=================================End PNPX========================================')
+%             
+%             disp('==================================For PNPY========================================')
+%             disp('The maximum value is:')
+%             disp(max(max(PNPY)))
+%             disp('The maximum difference is:')
+%             disp(max(max(PNPY - obj.MatPNPY)));
+%             disp('The minimum difference is:')
+%             disp(min(min(PNPY - obj.MatPNPY)))
+%             disp('=================================End PNPY========================================')
         end
     end
     

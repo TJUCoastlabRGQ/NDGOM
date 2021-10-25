@@ -12,15 +12,21 @@ BottomEdge = mesh.BottomEdge;
 BoundaryEdge = mesh.BoundaryEdge;
 SurfaceBoundaryEdge = mesh.SurfaceBoundaryEdge;
 BottomBoundaryEdge = mesh.BottomBoundaryEdge;
+Data = cell(1);
+Data{1}(:,:,1) = obj.K11;
+Data{1}(:,:,2) = obj.K22;
+Data{1}(:,:,3) = obj.K33;
+Data{1}(:,:,4) = obj.K13;
+Data{1}(:,:,5) = obj.K23;
 
-cell = obj.meshUnion.cell;
-K = mesh.K;  Np = cell.Np;
+Cell = obj.meshUnion.cell;
+K = mesh.K;  Np = Cell.Np;
 obj.StiffMatrix = zeros(K*Np);
 %For this test, the mesh is uniform
 Dx = diag(mesh.rx(:,1))*mesh.cell.Dr +  diag(mesh.sx(:,1))*mesh.cell.Ds +  diag(mesh.tx(:,1))*mesh.cell.Dt;
 Dy = diag(mesh.ry(:,1))*mesh.cell.Dr +  diag(mesh.sy(:,1))*mesh.cell.Ds +  diag(mesh.ty(:,1))*mesh.cell.Dt;
 Dz = diag(mesh.rz(:,1))*mesh.cell.Dr +  diag(mesh.sz(:,1))*mesh.cell.Ds +  diag(mesh.tz(:,1))*mesh.cell.Dt;
-ElementMassMatrix = diag(sum(diag(mesh.J(:,1))*cell.M, 2));
+ElementMassMatrix = diag(sum(diag(mesh.J(:,1))*Cell.M, 2));
 
 % For term $$k_{11}\frac{\partial v}{\partial x}\frac{\partial p}{\partial x} + k_{13}\frac{\partial v}{\partial \sigma}\frac{\partial p}{\partial x} +
 % k_{22}\frac{\partial v}{\partial y}\frac{\partial p}{\partial y} + k_{23}\frac{\partial v}{\partial \sigma}\frac{\partial p}{\partial y} + \
@@ -33,19 +39,23 @@ for i = 1:K
         (diag(K33(:,i)) * Dz)' * ElementMassMatrix * Dz);
 end
 
-fm = repmat( (obj.meshUnion.BoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BoundaryEdge.FToE(1,:)))', 1, 1 );
+edge = obj.meshUnion.BoundaryEdge;
+[ Mium, Miup ] = edge.matEvaluateSurfValue( Data );
+maxCoe = max(max(max(max(max(max(max(Mium(:,:,1), abs(Mium(:,:,3))), abs(Mium(:,:,4))), abs(Mium(:,:,5))), abs(Miup(:,:,3))), abs(Miup(:,:,4))), abs(Miup(:,:,5)))); 
+fm = repmat( (obj.meshUnion.BoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BoundaryEdge.FToE(1,:)))', 1, 1 ).*maxCoe';
+
 Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    10000 * ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 for face = 1:BoundaryEdge.Ne
     if BoundaryEdge.ftype(face) == enumBoundaryCondition.SlipWall
-        ele = BoundaryEdge.FToE(2*(face-1)+1);
-        eidM = BoundaryEdge.FToN1(:,face);
-        Js = BoundaryEdge.Js(:,face);
-        FacialMass2d = diag(Js)*BoundaryEdge.M;
-        TempData = zeros(Np,1);
-        TempData(eidM) = FacialMass2d * obj.NewmannData(:,face);
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
+%         ele = BoundaryEdge.FToE(2*(face-1)+1);
+%         eidM = BoundaryEdge.FToN1(:,face);
+%         Js = BoundaryEdge.Js(:,face);
+%         FacialMass2d = diag(Js)*BoundaryEdge.M;
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = FacialMass2d * obj.NewmannData(:,face);
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
     else
         OP11 = zeros(Np);
         ele = BoundaryEdge.FToE(2*(face-1)+1);
@@ -57,23 +67,23 @@ for face = 1:BoundaryEdge.Ne
         Js = BoundaryEdge.Js(:,face);
         FacialMass2d = diag(Js)*BoundaryEdge.M;
         
-        TempDx11 = diag(obj.K11(:,ele))*Dx;
-        TempDz13 = diag(obj.K13(:,ele))*Dz;
-        TempDy22 = diag(obj.K22(:,ele))*Dy;
-        TempDz23 = diag(obj.K23(:,ele))*Dz;
-        TempDx31 = diag(obj.K13(:,ele))*Dx;
-        TempDy32 = diag(obj.K23(:,ele))*Dy;
-        TempDz33 = diag(obj.K33(:,ele))*Dz;
+%         TempDx11 = diag(obj.K11(:,ele))*Dx;
+%         TempDz13 = diag(obj.K13(:,ele))*Dz;
+%         TempDy22 = diag(obj.K22(:,ele))*Dy;
+%         TempDz23 = diag(obj.K23(:,ele))*Dz;
+%         TempDx31 = diag(obj.K13(:,ele))*Dx;
+%         TempDy32 = diag(obj.K23(:,ele))*Dy;
+%         TempDz33 = diag(obj.K33(:,ele))*Dz;
         
-        TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp))  + ...
-            TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2);
-        
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
+%         TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp))  + ...
+%             TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2);
+%         
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
         
         %> For term $$\left \{k_{11}\frac{\partial v}{\partial x} \right \}[p]_x+  \left \{k_{13}\frac{\partial v}{\partial \sigma} \right \}[p]_x
         %  + \left \{ k_{22}\frac{\partial v}{\partial y} \right \}[p]_y + \left \{ k_{23}\frac{\partial v}{\partial \sigma} \right \}[p]_y$$.
@@ -104,17 +114,21 @@ for face = 1:BoundaryEdge.Ne
         obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
             OP11;
         
-        %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
-        TempData = zeros(Np,1);
-        TempData(eidM) = sum( Tau(face) * FacialMass2d *...
-            diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-        obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
+%         %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = sum( Tau(face) * FacialMass2d *...
+%             diag(obj.DirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+%         obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
     end
 end
 
-fm = repmat( (obj.meshUnion.InnerEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.InnerEdge.FToE(1,:)))', 1, 1 );
+edge = obj.meshUnion.InnerEdge;
+[ Mium, Miup ] = edge.matEvaluateSurfValue( Data );
+maxCoe = max(max(max(max(max(max(max(Mium(:,:,1), abs(Mium(:,:,3))), abs(Mium(:,:,4))), abs(Mium(:,:,5))), abs(Miup(:,:,3))), abs(Miup(:,:,4))), abs(Miup(:,:,5)))); 
+fm = repmat( (edge.LAV./obj.meshUnion.LAV(edge.FToE(1,:)))', 1, 1 ).*maxCoe';
+
 Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    10000 * ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 for face = 1:InnerEdge.Ne
     OP11 = zeros(Np);
@@ -221,9 +235,13 @@ for face = 1:InnerEdge.Ne
        OP21;
 end
 
-fm = repmat( (obj.meshUnion.BottomEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BottomEdge.FToE(1,:)))', 1, 1 );
+edge = obj.meshUnion.BottomEdge;
+[ Mium, Miup ] = edge.matEvaluateSurfValue( Data );
+maxCoe = max(max(max(max(max(max(max(Mium(:,:,1), abs(Mium(:,:,3))), abs(Mium(:,:,4))), abs(Mium(:,:,5))), abs(Miup(:,:,3))), abs(Miup(:,:,4))), abs(Miup(:,:,5)))); 
+fm = repmat( (edge.LAV./obj.meshUnion.LAV(edge.FToE(1,:)))', 1, 1 ).*maxCoe';
+
 Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    10000 * ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 
 for face = 1:BottomEdge.Ne
@@ -328,9 +346,13 @@ for face = 1:BottomEdge.Ne
         OP21;
 end
 
-fm = repmat( (obj.meshUnion.SurfaceBoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.SurfaceBoundaryEdge.FToE(1,:)))', 1, 1 );
+edge = obj.meshUnion.SurfaceBoundaryEdge;
+[ Mium, Miup ] = edge.matEvaluateSurfValue( Data );
+maxCoe = max(max(max(max(max(max(max(Mium(:,:,1), abs(Mium(:,:,3))), abs(Mium(:,:,4))), abs(Mium(:,:,5))), abs(Miup(:,:,3))), abs(Miup(:,:,4))), abs(Miup(:,:,5)))); 
+fm = repmat( (edge.LAV./obj.meshUnion.LAV(edge.FToE(1,:)))', 1, 1 ).*maxCoe';
+
 Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    10000 * ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 
 if strcmp(obj.SurfaceBoundaryEdgeType, 'Dirichlet')
@@ -345,23 +367,23 @@ if strcmp(obj.SurfaceBoundaryEdgeType, 'Dirichlet')
         Js = SurfaceBoundaryEdge.Js(:,face);
         FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
         
-        TempDx11 = diag(obj.K11(:,ele))*Dx;
-        TempDz13 = diag(obj.K13(:,ele))*Dz;
-        TempDy22 = diag(obj.K22(:,ele))*Dy;
-        TempDz23 = diag(obj.K23(:,ele))*Dz;
-        TempDx31 = diag(obj.K13(:,ele))*Dx;
-        TempDy32 = diag(obj.K23(:,ele))*Dy;
-        TempDz33 = diag(obj.K33(:,ele))*Dz;
-        
-        TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp))  + ...
-            TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)), 2);
-        
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
+%         TempDx11 = diag(obj.K11(:,ele))*Dx;
+%         TempDz13 = diag(obj.K13(:,ele))*Dz;
+%         TempDy22 = diag(obj.K22(:,ele))*Dy;
+%         TempDz23 = diag(obj.K23(:,ele))*Dz;
+%         TempDx31 = diag(obj.K13(:,ele))*Dx;
+%         TempDy32 = diag(obj.K23(:,ele))*Dy;
+%         TempDz33 = diag(obj.K33(:,ele))*Dz;
+%         
+%         TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp))  + ...
+%             TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)), 2);
+%         
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
         
         % For term $$k_{31}\frac{\partial v}{\partial x} pn_{\sigma}+ k_{32}\frac{\partial v}{\partial y}pn_{\sigma} + k_{33}\frac{\partial v}{\partial \sigma} pn_{\sigma}$$
         % Here both p and v are local.
@@ -382,28 +404,32 @@ if strcmp(obj.SurfaceBoundaryEdgeType, 'Dirichlet')
         obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
             OP11;
         
-        %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
-        TempData = zeros(Np,1);
-        TempData(eidM) = sum( Tau(face) * FacialMass2d *...
-            diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-        obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
+%         %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = sum( Tau(face) * FacialMass2d *...
+%             diag(obj.SurfaceDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+%         obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
         
     end
 elseif strcmp(obj.SurfaceBoundaryEdgeType, 'Newmann')
     for face = 1:SurfaceBoundaryEdge.Ne
-        ele = SurfaceBoundaryEdge.FToE(2*(face-1)+1);
-        eidM = SurfaceBoundaryEdge.FToN1(:,face);
-        Js = SurfaceBoundaryEdge.Js(:,face);
-        FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
-        TempData = zeros(Np,1);
-        TempData(eidM) = FacialMass2d * obj.SurfaceNewmannData(:,face);
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
+%         ele = SurfaceBoundaryEdge.FToE(2*(face-1)+1);
+%         eidM = SurfaceBoundaryEdge.FToN1(:,face);
+%         Js = SurfaceBoundaryEdge.Js(:,face);
+%         FacialMass2d = diag(Js)*SurfaceBoundaryEdge.M;
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = FacialMass2d * obj.SurfaceNewmannData(:,face);
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
     end
 end
 
-fm = repmat( (obj.meshUnion.BottomBoundaryEdge.LAV./obj.meshUnion.LAV(obj.meshUnion.BottomBoundaryEdge.FToE(1,:)))', 1, 1 );
+edge = obj.meshUnion.BottomBoundaryEdge;
+[ Mium, Miup ] = edge.matEvaluateSurfValue( Data );
+maxCoe = max(max(max(max(max(max(max(Mium(:,:,1), abs(Mium(:,:,3))), abs(Mium(:,:,4))), abs(Mium(:,:,5))), abs(Miup(:,:,3))), abs(Miup(:,:,4))), abs(Miup(:,:,5)))); 
+fm = repmat( (edge.LAV./obj.meshUnion.LAV(edge.FToE(1,:)))', 1, 1 ).*maxCoe';
+
 Tau = bsxfun(@times,  (fm(:) )',...
-    ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
+    10000 * ( obj.meshUnion(1).cell.N + 1 )*(obj.meshUnion(1).cell.N + ...
     3 )/3 * obj.meshUnion(1).cell.Nface/2);
 
 if strcmp(obj.BottomBoundaryEdgeType, 'Dirichlet')
@@ -418,23 +444,23 @@ if strcmp(obj.BottomBoundaryEdgeType, 'Dirichlet')
         Js = BottomBoundaryEdge.Js(:,face);
         FacialMass2d = diag(Js)*BottomBoundaryEdge.M;
         
-        TempDx11 = diag(obj.K11(:,ele))*Dx;
-        TempDz13 = diag(obj.K13(:,ele))*Dz;
-        TempDy22 = diag(obj.K22(:,ele))*Dy;
-        TempDz23 = diag(obj.K23(:,ele))*Dz;
-        TempDx31 = diag(obj.K13(:,ele))*Dx;
-        TempDy32 = diag(obj.K23(:,ele))*Dy;
-        TempDz33 = diag(obj.K33(:,ele))*Dz;
-        
-        TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp))  + ...
-            TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
-            TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)), 2);
-        
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
+%         TempDx11 = diag(obj.K11(:,ele))*Dx;
+%         TempDz13 = diag(obj.K13(:,ele))*Dz;
+%         TempDy22 = diag(obj.K22(:,ele))*Dy;
+%         TempDz23 = diag(obj.K23(:,ele))*Dz;
+%         TempDx31 = diag(obj.K13(:,ele))*Dx;
+%         TempDy32 = diag(obj.K23(:,ele))*Dy;
+%         TempDz33 = diag(obj.K33(:,ele))*Dz;
+%         
+%         TempData = sum( TempDx11(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp))  + ...
+%             TempDz13(eidM,:)' * FacialMass2d * diag(nx) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy22(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz23(eidM,:)' * FacialMass2d * diag(ny) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDx31(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDy32(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)) + ...
+%             TempDz33(eidM,:)' * FacialMass2d * diag(nz) * diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)), 2);
+%         
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) +  TempData;
         
         % For term $$k_{31}\frac{\partial v}{\partial x} pn_{\sigma}+ k_{32}\frac{\partial v}{\partial y}pn_{\sigma} + k_{33}\frac{\partial v}{\partial \sigma} pn_{\sigma}$$
         % Here both p and v are local.
@@ -454,22 +480,22 @@ if strcmp(obj.BottomBoundaryEdgeType, 'Dirichlet')
         OP11(eidM,eidM) = OP11(eidM,eidM) - Tau(face)*FacialMass2d;
         obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) = obj.StiffMatrix((ele-1)*Np+1:ele*Np,(ele-1)*Np+1:ele*Np) + ...
             OP11;
-        %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
-        TempData = zeros(Np,1);
-        TempData(eidM) = sum( Tau(face) * FacialMass2d *...
-            diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
-        obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
+%         %> For term $-\tau n_x^2 q_D v d\boldsymbol{x}$
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = sum( Tau(face) * FacialMass2d *...
+%             diag(obj.BottomDirichletData((face-1)*Nfp+1:face*Nfp)), 2 );
+%         obj.MatRHS(:, ele) = obj.MatRHS(:,ele) - TempData;
         
     end
 elseif strcmp(obj.BottomBoundaryEdgeType, 'Newmann')
     for face = 1:BottomBoundaryEdge.Ne
-        ele = BottomBoundaryEdge.FToE(2*(face-1)+1);
-        eidM = BottomBoundaryEdge.FToN1(:,face);
-        Js = BottomBoundaryEdge.Js(:,face);
-        FacialMass2d = diag(Js)*BottomBoundaryEdge.M;
-        TempData = zeros(Np,1);
-        TempData(eidM) = FacialMass2d * obj.BottomNewmannData(:,face);
-        obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
+%         ele = BottomBoundaryEdge.FToE(2*(face-1)+1);
+%         eidM = BottomBoundaryEdge.FToN1(:,face);
+%         Js = BottomBoundaryEdge.Js(:,face);
+%         FacialMass2d = diag(Js)*BottomBoundaryEdge.M;
+%         TempData = zeros(Np,1);
+%         TempData(eidM) = FacialMass2d * obj.BottomNewmannData(:,face);
+%         obj.MatRHS(:,ele) = obj.MatRHS(:,ele) -  TempData ;
     end
 end
 obj.StiffMatrix = sparse(obj.StiffMatrix);

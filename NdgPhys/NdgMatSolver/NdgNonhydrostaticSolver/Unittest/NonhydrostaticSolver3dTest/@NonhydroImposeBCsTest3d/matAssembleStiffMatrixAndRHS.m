@@ -1,4 +1,4 @@
-function matAssembleStiffMatrixAndRHS( obj, TempStiffMatrix, TempRHS, PSPX, PSPY, Wold, Wnew, deltatime, PWPS, Unew, Uold, Vnew, Vold, PUPX, PUPY, PUPS, PVPX, PVPY, PVPS, PHPX, PHPY)
+function matAssembleStiffMatrixAndRHS( obj, TempRHS, PSPX, PSPY, Wold, Wnew, deltatime, PWPS, Unew, Uold, Vnew, Vold, PUPX, PUPY, PUPS, PVPX, PVPY, PVPS, PHPX, PHPY)
 
 rho = obj.NonhydrostaticSolver.rho;
 K31 = PSPX;

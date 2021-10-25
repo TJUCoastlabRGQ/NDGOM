@@ -100,6 +100,11 @@ srcfile = {[path, 'mxEvaluateStrongFormEdgeRHS.c'], ...
 libfile = {'NdgMath/NdgMath.c'};
 FuncHandle(path, srcfile, libfile);
 
+path = 'NdgEdge\@NdgSurfaceHaloEdge3d\private\';
+srcfile = {[path, 'mxEvaluateStrongFormEdgeRHS.c']};
+libfile = {'NdgMath/NdgMath.c'};
+FuncHandle(path, srcfile, libfile);
+
 % Limiter
 path = 'NdgLimiter/NdgBJ/@NdgBJAbstract/private/';
 srcfile = {[path, 'mxEvaluateVertAverage.c']};
@@ -399,18 +404,7 @@ libfile = {'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhy
     'NdgMath/NdgSWE3D.c'};
 FuncHandle(path, srcfile, libfile);
 
-path = 'Application/SWE/SWE3d/UnitTest/@EllipticProblemTest3dNew/private/';
-srcfile = {[path,'mxAssembleGlobalStiffMatrixWithBCsImposed.c'],...
-    [path,'mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed.c'],...
-    [path,'mxAssembleGlobalStiffMatrixWithBottomBCsImposed.c']};
-libfile = {'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.c',...
-    'NdgMath/NdgMath.c',...
-    'NdgMath/NdgSWE.c',...
-    'NdgMath/NdgMemory.c',...
-    'NdgMath/NdgSWE3D.c'};
-FuncHandle(path, srcfile, libfile);
-
-path = 'Application/SWE/SWE3d/UnitTest/@EllipticProblemMatrixAssembleTest3dNew/private/';
+path = 'NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/Unittest/NonhydrostaticSolver3dTest/@EllipticProblemMatrixAssembleTest3dNew/private/';
 srcfile = {[path,'mxAssembleGlobalStiffMatrixWithBCsImposed.c'],...
     [path,'mxAssembleGlobalStiffMatrixWithSurfaceBCsImposed.c'],...
     [path,'mxAssembleGlobalStiffMatrixWithBottomBCsImposed.c']};

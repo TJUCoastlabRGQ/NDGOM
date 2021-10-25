@@ -27,6 +27,7 @@ classdef FirstOrderProblemInHorizontalTest3d < SWEBarotropic3d
         function obj = FirstOrderProblemInHorizontalTest3d(N, Nz, M)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M);
             obj.initPhysFromOptions( mesh2d, mesh3d );
+            obj.varFieldIndex = [1 2 11];
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
             [ obj.StiffMatrixInX, obj.StiffMatrixInY, Lrhs ] = obj.matAssembleGlobalStiffMatrix;
         end

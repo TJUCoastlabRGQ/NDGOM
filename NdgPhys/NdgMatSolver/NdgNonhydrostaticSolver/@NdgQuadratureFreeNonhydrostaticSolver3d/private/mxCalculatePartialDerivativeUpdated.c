@@ -29,7 +29,7 @@ void MyExit()
 	return;
 }
 
-void GetFirstOrderPartialDerivativeInHorizontalDirection(double *, double *, double *, double *, double *, \
+void GetFirstOrderPartialDerivativeInHorizontalDirection( double *, double *, double *, double *, double *, \
 	double *, const mxArray *, const mxArray *, const mxArray *, \
 	const mxArray *, double *, double *, double *, double *, double *, double *, double, double *, double, signed char *);
 
@@ -320,6 +320,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		cell2d, ftype2d, ftype, PHPX, PHPY, NonhydroHU2d, hu, NonhydroHV2d, hv, z2d, zbot, h2d, h, fext2d, fext, gra, *Hcrit, zx, zy, u, v, w, pept);
 
 	memcpy(Wnew, Wbot, Np2d*K2d*sizeof(double));
+	//memcpy(Wnew, Weta, Np2d*K2d * sizeof(double));
 
 	memcpy(Unew, ubot, Np2d*K2d * sizeof(double));
 
@@ -1214,7 +1215,7 @@ for (int face = 0; face < BotBENe; face++) {
 
 }
 
-void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *PHPY, double *PUPX, \
+void GetFirstOrderPartialDerivativeInHorizontalDirection( double *PHPX, double *PHPY, double *PUPX, \
 	double *PUPY, double *PVPX, double *PVPY, const mxArray *mesh, const mxArray *cell, const mxArray *InnerEdge, \
 	const mxArray *BoundaryEdge, double *h, double *u, double *v, double *hu, double *hv, double *z, \
 	double gra, double *fext, double Hcrit, signed char *ftype){
@@ -1398,6 +1399,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
 
+
 /*		
 		if (type == NdgEdgeSlipWall) {
 			for (int i = 0; i < BENfp; i++) {
@@ -1416,7 +1418,6 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection(double *PHPX, double *P
 			}
 		}
 */		
-
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
 //      MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);

@@ -12,8 +12,6 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
         ChLength = 26
         %         ChWidth = 0.05
         ChWidth = 0.1
-        
-        
     end
     
     properties
@@ -231,7 +229,7 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
                     - 10 * obj.SpongeCoefficient.* fphys{m}(:,:,11);
             end
             
-            ys = 5;
+            ys = 5.125;
  %% The following is the momentum source part           
 %             soruce = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
 %             
@@ -478,7 +476,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -10, -9.75 ], [ -10, 20 ], 1, 30/0.05, bctype);
+    [ -10, -9.75 ], [ -10, 20 ], 1, 30/0.25, bctype);
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );

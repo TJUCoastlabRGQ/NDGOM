@@ -23,7 +23,7 @@ while( time < ftime )
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
-    obj.matEvaluateSourceTerm( fphys );
+%     obj.matEvaluateSourceTerm( fphys );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     

@@ -17,17 +17,20 @@ classdef EllipticProblemAssembleFinalStiffMatrix3d < SWEBarotropic3d
     end
     
     properties(Constant)
-        hcrit = 0.01
+        % This parameter is negative such that all randomly produced water
+        % depth is larger than the critical depth
+        hcrit = -0.01
     end
     
     methods
         function obj = EllipticProblemAssembleFinalStiffMatrix3d(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
+            obj.varFieldIndex = [1 2 11];
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
         end
         
-        function matStiffMatrixCompare(obj)
+        function EllipticProblemSolve(obj)
             PHPX = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
             PHPY = rand(obj.meshUnion.cell.Np, obj.meshUnion.K);
             

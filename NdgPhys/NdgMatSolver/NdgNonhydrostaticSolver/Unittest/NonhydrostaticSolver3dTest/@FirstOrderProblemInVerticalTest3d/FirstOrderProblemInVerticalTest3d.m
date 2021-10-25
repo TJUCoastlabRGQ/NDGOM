@@ -37,6 +37,7 @@ classdef FirstOrderProblemInVerticalTest3d < SWEBarotropic3d
         function obj = FirstOrderProblemInVerticalTest3d(N, Nz, M, Mz)
             [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
             obj.initPhysFromOptions( mesh2d, mesh3d );
+            obj.varFieldIndex = [1 2 11];
             obj.matGetFunction;
             z = zeros(obj.mesh2d.cell.Np,1);
             obj.DirichExact = eval(obj.Cexact);
