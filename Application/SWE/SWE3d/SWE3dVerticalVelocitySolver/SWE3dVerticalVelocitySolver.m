@@ -135,14 +135,52 @@ classdef SWE3dVerticalVelocitySolver < handle
         function VerticalVelocity = matCalculateVerticalVelocity( obj, physClass, fphys2d, fphys )
             BotEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end-1) ~= 0, end-1 );
             UpEidM = physClass.meshUnion.cell.Fmask( physClass.meshUnion.cell.Fmask( :,end) ~= 0, end );  
+            
+            PHPX = physClass.meshUnion.rx .* (physClass.meshUnion.cell.Dr*fphys{1}(:,:,4)) + physClass.meshUnion.sx .* (physClass.meshUnion.cell.Ds*fphys{1}(:,:,4));
+            PHPY = physClass.meshUnion.ry .* (physClass.meshUnion.cell.Dr*fphys{1}(:,:,4)) + physClass.meshUnion.sy .* (physClass.meshUnion.cell.Ds*fphys{1}(:,:,4));
+            edge = physClass.meshUnion.InnerEdge;
+            [fm, fp] = edge.matEvaluateSurfValue( fphys );
+            [ FluxMDx ] = fm(:,:,4) .* edge.nx;
+            [ FluxPDx ] = fp(:,:,4) .* edge.nx;
+            [ FluxSDx ] = (FluxMDx + FluxPDx)./2;
+            PHPX = PHPX - edge.matEvaluateStrongFromEdgeRHS( FluxMDx, FluxPDx, FluxSDx ) ; 
+            
+            [ FluxMDy ] = fm(:,:,4) .* edge.ny;
+            [ FluxPDy ] = fp(:,:,4) .* edge.ny;
+            [ FluxSDy ] = (FluxMDy + FluxPDy)./2;
+            PHPY = PHPY - edge.matEvaluateStrongFromEdgeRHS( FluxMDy, FluxPDy, FluxSDy ) ; 
+            
+            VerticalVelocity = fphys{1}(:,:,11) ./ fphys{1}(:,:,4) - (1 + physClass.meshUnion.z).*physClass.meshUnion(1).Extend2dField( physClass.frhs2d{1} ) - ...
+                fphys{1}(:,:,1) ./ fphys{1}(:,:,4) .* (1 + physClass.meshUnion.z) .* PHPX - fphys{1}(:,:,2) ./ fphys{1}(:,:,4) .* (1 + physClass.meshUnion.z) .* PHPY;
+            
             % The C version from bottom to surface      
 % %             tic;
-            [ VerticalVelocity ] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
-                fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
-                obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+
+%             [ VerticalVelocity ] = mxCalculateVerticalVelocityVersionOne(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
+%                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+
+%             [ VerticalVelocity ] = mxCalculateVerticalVelocityUpdateVersionTwo(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1},...
+%                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype),  obj.RHSCoeMatrix{1}, obj.VertCoeMatrix{1}, BotEidM, UpEidM);
+
+%             [ VerticalVelocity ] = mxCalculateVerticalVelocity(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
+%                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+
+%             [ VerticalVelocity ] = mxCalculateVerticalVelocityUpdateVersionFour(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1},...
+%                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+            
 %             [ VerticalVelocity ] = mxCalculateVerticalVelocityUpdate(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
 %                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1},...
 %                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+
+%               [ VerticalVelocity ] = mxCalculateVerticalVelocityVersionSix(obj.mesh2d, obj.mesh3d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.InnerEdge3d,  obj.BoundaryEdge3d,...
+%                 fphys2d{1}, fphys{1}, physClass.hcrit, obj.cell2d, obj.cell3d, physClass.gra, physClass.fext2d{1}, physClass.fext3d{1}, obj.RHSCoeMatrix{1},...
+%                 obj.VertCoeMatrix{1}, BotEidM, UpEidM, int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), int8(physClass.meshUnion.BoundaryEdge.ftype) );
+
+
 % %             t1 = toc;
 % %             tic;
 % %             edge = physClass.meshUnion.InnerEdge;
@@ -232,7 +270,11 @@ classdef SWE3dVerticalVelocitySolver < handle
         
         function matClearGlobalMemory(obj)
             clear mxCalculateVerticalVelocity;
-            clear mxCalculateVerticalVelocityUpdate;
+            clear mxCalculateVerticalVelocityUpdate;            
+            clear mxCalculateVerticalVelocityVersionOne;
+            clear mxCalculateVerticalVelocityUpdateVersionTwo;
+            clear mxCalculateVerticalVelocityUpdateVersionFour;
+            clear mxCalculateVerticalVelocityVersionSix;
         end
     end
     

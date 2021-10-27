@@ -26,6 +26,11 @@ void MyExit()
 	return;
 }
 
+void FetchBoundaryData(double *dest, double *source, double *destIndex, double *sourceIndex, int size)
+{
+	for (int i = 0; i < size; i++)
+		dest[(int)destIndex[i] - 1] = source[(int)sourceIndex[i] - 1];
+}
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -473,14 +478,45 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		Minus(UpdatedVSrhs3d + k*Np3d, UpdatedVSrhs3d + k*Np3d, UpdatedVSfield2d + k*Np3d, Np3d);
 	}
 
+
+	/*The coefficient matrix corresponds to the right hand side of horizontal partial derivative term*/
+	double *RHSCoeMatrix = mxGetPr(prhs[16]);
+	/*The coefficient matrix corresponds to the bottom vertical velocity, this part also contributes to the right hand side*/
+	double *VertCoeMatrix = mxGetPr(prhs[17]);
+
+	/*The interpolation point index at the bottom most face*/
+	double *BotEidM = mxGetPr(prhs[18]);
+	/*The interpolation point index at the up most face*/
+	double *UpEidM = mxGetPr(prhs[19]);
+
+	double *VSBotVertVelocity = malloc(Np3d*K2d * sizeof(double));
+	memset(VSBotVertVelocity, 0, Np3d*K2d * sizeof(double));
+
+	double *VSTempVerticalVelocity = malloc(Np3d*K3d * sizeof(double));
+	memset(VSTempVerticalVelocity, 0, Np3d*K3d * sizeof(double));
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int k = 0; k < K2d; k++){
-		VerticalIntegralFromBottom(VerticalVelocity + k*NLayer*Np3d, UpdatedVSrhs3d + k*NLayer*Np3d, Jz + k*NLayer*Np3d, Updatedfmod + k*Np3d, NLayer, (ptrdiff_t)Np3d, InvV3d, Np2d, Npz, Vint);
+	for (int k = 0; k < K2d; k++) {
+		dgemm("N", "N", &np, &oneI, &np, &one, RHSCoeMatrix + k*NLayer*Np3d*Np3d + (NLayer - 1)*Np3d*Np3d, \
+			&np, UpdatedVSrhs3d + k*NLayer*Np3d + (NLayer - 1)*Np3d, &np, &zero, VerticalVelocity + k*NLayer*Np3d + (NLayer - 1)*Np3d, \
+			&np);
+		for (int L = 1; L < NLayer; L++) {
+			FetchBoundaryData(VSBotVertVelocity + k*Np3d, VerticalVelocity + k*NLayer*Np3d + (NLayer - L)*Np3d, BotEidM, UpEidM, Np2d);
+			dgemm("N", "N", &np, &oneI, &np, &one, RHSCoeMatrix + k*NLayer*Np3d*Np3d + (NLayer - L - 1)*Np3d*Np3d, \
+				&np, UpdatedVSrhs3d + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, &np, &zero, VerticalVelocity + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, \
+				&np);
+			dgemm("N", "N", &np, &oneI, &np, &one, VertCoeMatrix + k*NLayer*Np3d*Np3d + (NLayer - L - 1)*Np3d*Np3d, \
+				&np, VSBotVertVelocity + k*Np3d, &np, &zero, VSTempVerticalVelocity + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, \
+				&np);
+			Add(VerticalVelocity + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, VerticalVelocity + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, \
+				VSTempVerticalVelocity + k*NLayer*Np3d + (NLayer - L - 1)*Np3d, Np3d);
+
+		}
 	}
 
-
+	free(VSBotVertVelocity);
+	free(VSTempVerticalVelocity);
 	free(InvV2d);
 	free(InvV3d);
 }

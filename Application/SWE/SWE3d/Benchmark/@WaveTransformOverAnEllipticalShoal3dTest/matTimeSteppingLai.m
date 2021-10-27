@@ -20,6 +20,7 @@ while( time < ftime )
     obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
     
     tloc = time + dt;
+%     tloc = time;
     
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
     
@@ -29,7 +30,7 @@ while( time < ftime )
 
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
-    obj.matEvaluateSourceTerm( fphys, fphys2d, tloc );
+    obj.matEvaluateSourceTerm( fphys );
     
     % $H^*u^*$, $H^*v^*$, $H^*w^*$
     [ fphys{1}(:,:,obj.varFieldIndex)] = Tempfphys + dt * obj.frhs{1};
@@ -49,7 +50,7 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-%     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d ); 
+    fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d ); 
     
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
@@ -60,7 +61,7 @@ while( time < ftime )
 
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
-    obj.matEvaluateSourceTerm( fphys, fphys2d, tloc );
+    obj.matEvaluateSourceTerm( fphys );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = fphys{1}(:,:,obj.varFieldIndex) + dt * obj.frhs{1}; 
     
@@ -93,7 +94,7 @@ while( time < ftime )
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
     
-%     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
+    fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
     
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
