@@ -1,5 +1,5 @@
-#include "../../../../../../NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.h"
-#include "../../../../../../NdgMath/NdgSWE.h"
+#include "../../../../../../../NdgPhys/NdgMatSolver/NdgNonhydrostaticSolver/@NdgQuadratureFreeNonhydrostaticSolver3d/private/SWENonhydrostatic3d.h"
+#include "../../../../../../../NdgMath/NdgSWE.h"
 
 void GetFaceTypeAndFaceOrder(int *, int *, int *, double *, double *, signed char *, int);
 

@@ -5,6 +5,8 @@ fphys2d = obj.fphys2d;
 fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
+[time, fphys2d{1}, fphys{1}] = obj.NonhydrostaticSolver.matHotStart(obj.meshUnion(1),'C:\Students\RGQ\FinalCaseResult\2d\WaveTransformOverAnEllipticalShoal3d.1-1.1000.nc',...
+'C:\Students\RGQ\FinalCaseResult\3d\WaveTransformOverAnEllipticalShoal3d.1-1.1000.nc', fphys2d{1}, fphys{1});
 while( time < ftime )
     dt = 0.5*obj.matUpdateTimeInterval( fphys );
     %       dt = 0.1;
