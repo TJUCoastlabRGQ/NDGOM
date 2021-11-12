@@ -81,13 +81,23 @@ classdef WaveTransformOverAnEllipticalShoal3d < SWEBarotropic3d
         end
         
         function VisualPostprocess(obj)
-            time = 27;
+            time = 30;
             PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             [~,Index] = sort(abs(outputTime-time));
-            [ fphys2d ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
+            [ Tempfphys2d ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
+            Height = Tempfphys2d{1}(:,:,1);
+            
+            fphys2d = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
+            
+            for i = 1:obj.meshUnion.mesh2d.cell.Np * obj.meshUnion.mesh2d.K
+                Index = find(obj.meshUnion.mesh2d.x == obj.meshUnion.mesh2d.x(i) & obj.meshUnion.mesh2d.y == obj.meshUnion.mesh2d.y(i));
+                TempData = sum(Height(Index))/numel(Index);
+                fphys2d(Index) = TempData;
+            end
+
             Visual = makeVisualizationFromNdgPhys( obj );
-            Visual.drawResult( fphys2d{1}(:,:,1)+ obj.fphys2d{1}(:, :, 4) );
+            Visual.drawResult( fphys2d + obj.fphys2d{1}(:, :, 4) );
             shading interp;
             %            axis off;
             %            hold on;

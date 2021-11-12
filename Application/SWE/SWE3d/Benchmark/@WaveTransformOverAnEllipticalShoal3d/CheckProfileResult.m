@@ -1,10 +1,14 @@
 function CheckProfileResult(obj)
-y = [1, 3, 5, 7, 9]; x = [-2 0 2];
+% y = [1, 3, 5, 7, 9]; 
+y = 8.6; 
+% x = [-2 0 2];
+% x = -2.12;
+% x = [-2.12 0 2];
 % fontsize = 15;
 % markersize = 6;
 
 YprofileProcess(obj, y);
-XprofileProcess(obj, x);
+% XprofileProcess(obj, x);
 
 end
 
@@ -15,8 +19,8 @@ WaveTransformPos = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('WaveTransformO
 Nout = numel(time);
 
 for i = 1:numel(y)
-    str = strcat('$Section',32,num2str(i),'$');
-    csv = strcat('profile',num2str(i),'.csv');
+    str = strcat('$Section',32,num2str(i + 4),'$');
+    csv = strcat('profile',num2str(i + 4),'.csv');
     filename = [ fileparts( mfilename('fullpath') ), ...
     '/data/',csv];
     data = xlsread(filename);
@@ -25,7 +29,7 @@ for i = 1:numel(y)
     ypf = y(i).*ones(size(xpf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(25* Nout/27.94)+1:ceil(27.94* Nout/27.94);
+    index = ceil(26.8* Nout/35)+1:ceil(30.8* Nout/35); 
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
@@ -77,11 +81,11 @@ for i = 1:numel(x)
     '/data/',csv];
     data = xlsread(filename);
   
-    ypf = 0:0.1:12;
+    ypf = 0:0.1:11.05;
     xpf = x(i).*ones(size(ypf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(25* Nout/27.94)+1:ceil(27.94* Nout/27.94);  
+    index = ceil(26.8* Nout/35)+1:ceil(30.8* Nout/35); 
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
