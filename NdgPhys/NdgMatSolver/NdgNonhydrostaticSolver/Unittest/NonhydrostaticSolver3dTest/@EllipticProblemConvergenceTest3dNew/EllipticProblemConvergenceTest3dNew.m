@@ -2,6 +2,10 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
     %ELLIPTICPROBLEMCONVERGENCETEST3DNEW 此处显示有关此类的摘要
     %   此处显示详细说明
     
+    properties
+        ConstantCoe = 'False'
+    end
+    
     methods
         function obj = EllipticProblemConvergenceTest3dNew(N, Nz, M, Mz)
             obj = obj@EllipticProblemMatrixAssembleTest3dNew(N, Nz, M, Mz);
@@ -9,14 +13,31 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
         
         function EllipticProblemSolve(obj)
             mesh3d = obj.meshUnion;
-            obj.K11 = ones(mesh3d.cell.Np, mesh3d.K);
-            obj.K22 = obj.K11;
-            obj.K13 = 0.04 * ones(mesh3d.cell.Np, mesh3d.K);
-            obj.K23 = 0.04 * ones(mesh3d.cell.Np, mesh3d.K);
-            obj.K33 = (obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth);
+            x = mesh3d.x;
+            y = mesh3d.y;
+            z = mesh3d.z;
             obj.matGetFunction;
+            obj.K11 = eval(obj.symK11);
+            if numel(obj.K11) == 1
+                obj.K11 = obj.K11 * ones(size(x));
+            end
+            obj.K22 = obj.K11;
+            obj.K13 = eval(obj.symK13);
+            if numel(obj.K13) == 1
+                obj.ConstantCoe = 'True';
+                obj.K13 = obj.K13 * ones(size(x));
+            end
+            obj.K23 = eval(obj.symK23);
+            if numel(obj.K23) == 1
+                obj.K23 = obj.K23 * ones(size(x));
+            end            
+            obj.K33 = eval(obj.symK33);
+            if numel(obj.K33) == 1
+                obj.K33 = obj.K33 * ones(size(x));
+            end            
             obj.RHS = obj.matAssembleRightHandSide;
-            obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );
+%             obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys, obj.fphys2d );
+            obj.NonhydrostaticSolver.AssembleStiffMatrix( obj, obj.fphys, obj.fphys2d );
             obj.matAssembleGlobalStiffMatrixWithBCsImposed;
             obj.matAssembleGlobalStiffMatrixWithSurfaceBCsImposed;
             obj.matAssembleGlobalStiffMatrixWithBottomBCsImposed;
@@ -38,18 +59,40 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
     end
     methods(Access = protected)
         
+                %> set initial function
+        function [fphys2d, fphys] = setInitialField( obj )
+            syms x y;
+            %variable water depth
+            obj.D = 1*0.1*cos(pi*x)*cos(pi*y)+obj.Depth;
+            fphys2d = cell( obj.Nmesh, 1 );
+            fphys = cell( obj.Nmesh, 1 );
+            for m = 1 : obj.Nmesh
+                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
+                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
+                x = obj.mesh2d(m).x;
+                y = obj.mesh2d(m).y;
+                fphys2d{m}(:,:,1) = eval(obj.D);
+            end
+        end
+        
         function matGetFunction(obj)
             syms x y z nx ny nz;
+            obj.Cexact = sin(-pi/2*z)*sin(1/2*x)*sin(1/2*y);             
+            obj.symK11 = 0*x + 0*y + 1;
+            obj.symK22 = 0*x + 0*y + 1;
+            obj.symK13 =1*( -1/obj.D*(diff(obj.D,x)) - z/obj.D*diff(obj.D,x)) + 0*0.04;
+            obj.symK23 =1*(-1/obj.D*(diff(obj.D,y)) - z/obj.D*diff(obj.D,y)) + 0*0.04;
+            obj.symK33 = obj.symK13^2 + obj.symK23^2 + 1./obj.D./obj.D;
             
-            obj.Cexact = sin(-pi/2*z)+sin(pi/2*x)+sin(pi/2*y);    
-
-            obj.SecondDiffCexact = diff(obj.K11(1)*diff(obj.Cexact,x) + obj.K13(1)*diff(obj.Cexact, z),x) + ...
-                diff(obj.K22(1)*diff(obj.Cexact,y) + obj.K23(1)*diff(obj.Cexact, z),y) + ...
-                diff(obj.K13(1)*diff(obj.Cexact,x) + obj.K23(1)*diff(obj.Cexact,y) + obj.K33(1)*diff(obj.Cexact, z),z);
+            obj.SecondDiffCexact = diff(diff(obj.Cexact,x) + obj.symK13*diff(obj.Cexact, z),x) + ...
+                diff(diff(obj.Cexact,y) + obj.symK23*diff(obj.Cexact, z),y) + ...
+                diff(obj.symK13*diff(obj.Cexact,x) + obj.symK23*diff(obj.Cexact,y) + obj.symK33*diff(obj.Cexact, z),z) - ...
+                diff(obj.Cexact,x)*diff(obj.symK13,z) - diff(obj.Cexact,z)*obj.symK13*diff(obj.symK13,z) - ...
+                diff(obj.Cexact,y)*diff(obj.symK23,z) - diff(obj.Cexact,z)*obj.symK23*diff(obj.symK23,z);
             
-            obj.NewmannCexact = (obj.K11(1)*diff(obj.Cexact,x) + obj.K13(1)*diff(obj.Cexact, z))*nx + ...
-                (obj.K22(1)*diff(obj.Cexact,y) + obj.K23(1)*diff(obj.Cexact, z))*ny + ...
-                (obj.K13(1)*diff(obj.Cexact,x) + obj.K23(1)*diff(obj.Cexact,y) + obj.K33(1)*diff(obj.Cexact, z))*nz;
+            obj.NewmannCexact = (diff(obj.Cexact,x) + obj.symK13*diff(obj.Cexact, z))*nx + ...
+                (diff(obj.Cexact,y) + obj.symK23*diff(obj.Cexact, z))*ny + ...
+                (obj.symK13*diff(obj.Cexact,x) + obj.symK23*diff(obj.Cexact,y) + obj.symK33*diff(obj.Cexact, z))*nz;
             
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;

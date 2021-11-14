@@ -13,7 +13,7 @@ markersize = 8;
 
 linestyle = '-';
 
-color = {'k', 'r'};  %black for order one, red for order two
+color = {'k', 'r', 'b'};  %black for order one, red for order two
 marker = {'o'};%circle for the computed field
 
 ErrInf = zeros(Nmesh, Ndeg);

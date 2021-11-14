@@ -8,13 +8,19 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
     %> as $k_{13}^2+k_{23}^2+\frac{1}{D^2}$
     
     properties
-        ChLength = 1
-        ChWidth = 1
+        ChLength = 2
+        ChWidth = 2
         Depth = 1
+        D
+        symK11
         K11
+        symK22
         K22
+        symK13
         K13
+        symK23
         K23
+        symK33
         K33
         SurfaceBoundaryEdgeType = 'Dirichlet'
         BottomBoundaryEdgeType = 'Newmann'
@@ -128,12 +134,16 @@ classdef EllipticProblemMatrixAssembleTest3dNew < SWEBarotropic3d
         
         %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
+            syms x y;
+            obj.D = 0.01*cos(pi*x)*cos(pi*y)+obj.Depth;
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
                 fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
                 fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
-                fphys2d{m}(:,:,1) = obj.Depth*ones( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K);
+                x = obj.mesh2d(m).x;
+                y = obj.mesh2d(m).y;
+                fphys2d{m}(:,:,1) = eval(obj.D);
             end
         end
         
