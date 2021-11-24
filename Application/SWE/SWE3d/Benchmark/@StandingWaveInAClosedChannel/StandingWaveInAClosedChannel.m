@@ -8,7 +8,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %         ChLength = 100;
         ChLength = 20;
         %> channel width
-        ChWidth = 1;
+        ChWidth = 2;
         %> channel depth
         H0 = 10;
         %> x range

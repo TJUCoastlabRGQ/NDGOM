@@ -45,6 +45,7 @@ for i = 1:numel(NL)
     Solver.matTimeSteppingLai;
     Time(i) = toc;
     Solver.outputFile2d.mergeOutputResult;
+    Err = zeros(1,1);
     PostProcess = NdgPostProcess(Solver.meshUnion(1).mesh2d,strcat('Result/','StandingWaveInAClosedChannel','/2d/','StandingWaveInAClosedChannel'));
     Ntime = PostProcess.Nt;
     outputTime = ncread( PostProcess.outputFile{1}, 'time' );
@@ -60,9 +61,9 @@ for i = 1:numel(NL)
         exactEta(t) = Solver.A * cos(2*pi/Solver.Lambda*x0)*cos(2*pi/T*outputTime(t));
         tempdata = PostProcess.interpolateOutputStepResultToGaugePoint(  x0, 0.2, x0, t )-Solver.H0;
         Eta(t) = tempdata(1);
-        Err(i) = Err(i) + (exactEta(t)  - Eta(t))^2;
+        Err(1) = Err(1) + (exactEta(t)  - Eta(t))^2;
     end
-    Err(i) = sqrt(Err(i)/Ntime);
+    Err(1) = sqrt(Err(1)/Ntime);
     
 end
 end
