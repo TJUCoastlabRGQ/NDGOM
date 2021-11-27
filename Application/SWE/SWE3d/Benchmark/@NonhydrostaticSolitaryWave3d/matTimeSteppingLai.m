@@ -8,8 +8,7 @@ fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-%     dt = obj.matUpdateTimeInterval( fphys );
-    dt = 0.005;
+    dt = 0.5*obj.matUpdateTimeInterval( fphys );
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;

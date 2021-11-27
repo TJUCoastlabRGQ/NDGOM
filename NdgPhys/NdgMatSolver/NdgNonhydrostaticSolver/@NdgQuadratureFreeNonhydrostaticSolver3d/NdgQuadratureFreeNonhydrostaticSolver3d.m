@@ -264,6 +264,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
             
+            fphys{1}(:,:,13) = reshape(NonhydroPressure,[obj.cell.Np, obj.mesh.K]) + obj.rho * physClass.gra * (-1 * obj.mesh.z.*fphys{1}(:,:,4));
+            
             %             obj.NonhydroPressure = obj.NonhydroPressure + reshape(DiffNonhydroPressure, obj.cell.Np, obj.mesh.K);
             
         end
