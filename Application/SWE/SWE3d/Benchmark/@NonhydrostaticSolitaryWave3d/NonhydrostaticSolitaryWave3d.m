@@ -6,7 +6,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
         %> channel length
         hcrit = 0.01;
         %         ChLength = 100;
-        ChLength = 200;
+        ChLength = 150;
         %> channel width
         ChWidth = 1;
         %> channel depth
@@ -91,52 +91,56 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             PostProcess3d = NdgPostProcess(obj.meshUnion(1),strcat('Result/',mfilename,'/3d/',mfilename));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
 %% plot eta
-%             figure;
-%             hold on;            
-%             set(gcf,'position',[50,50,1050,400]);           
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'k','Linewidth',1.5);            
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-%             for i = 1:numel(time)
-%                 [~,Index] = sort(abs(outputTime-time(i)));
-%                 [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
-%                 plot(xd,fg(:,1)' - d,'k','Linewidth',1.5);
-%             end
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H10(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H20(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H30(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-% %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H8(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-% %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H12(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-% %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H16(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
-%             set(gca,'Fontsize',12);
-%             xlabel({'$\it x \;\rm{(m)}$'},'Interpreter','latex');
-%             ylabel({'$\eta \;\rm {(m)}$'},'Interpreter','latex');    
-%             box on;
-%             
-%             
+            figure;
+            hold on;            
+            set(gcf,'position',[50,50,1050,400]);           
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'k','Linewidth',1.5);            
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H0(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+            for i = 1:numel(time)
+                [~,Index] = sort(abs(outputTime-time(i)));
+                [ fg ] = PostProcess.interpolateOutputStepResultToGaugePoint(  xd, yd, xd, Index(1) );
+                plot(xd,fg(:,1)' - d,'k','Linewidth',1.5);
+            end
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H10(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H20(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.H30(1:deltapoint:numel(mesh.x)) - d,'ro','markersize',4.5);
+            text(108,0.175,'$0\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
+            text(76,0.175,'$10\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
+            text(45,0.175,'$20\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
+            text(13,0.175,'$30\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
+
+            set(gca,'Fontsize',14);
+            xlabel({'$\it x \;\rm{(m)}$'},'Interpreter','latex');
+            ylabel({'$\eta \;\rm {(m)}$'},'Interpreter','latex');    
+            box on;
+            set(gca,'LineWidth',1.5);  
+            
+            
 % %             set(gca,'YLim',[-0.05 a+0.05],'Fontsize',15);   
 %% plot U
-%             figure;
-%             hold on;            
-%             set(gcf,'position',[50,50,1050,400]);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-%             for i = 1:numel(time)           
-%                 [~,Index] = sort(abs(outputTime-time(i)));
-%                 fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
-%                 Hu = obj.meshUnion.cell.VCV * fresult{1}(:,:,1);
-%                 H = obj.meshUnion.cell.VCV * fresult{1}(:,:,3);
-%                 u = Hu./H;
-%                 plot(mesh.x(1:deltapoint:numel(mesh.x)),u(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
-%             end
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU10(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-% %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-% %             set(gca,'Fontsize',12);
-% %             xlabel({'$\it x(m)$'},'Interpreter','latex');
-% %             ylabel({'$U\;\rm{(m/s)}$'},'Interpreter','latex');    
-% %             box on;
-% % %             set(gca,'YLim',[-0.05 a],'Fontsize',15);                   
+            figure;
+            hold on;            
+            set(gcf,'position',[50,50,1050,400]);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            for i = 1:numel(time)           
+                [~,Index] = sort(abs(outputTime-time(i)));
+                fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
+                Hu = obj.meshUnion.cell.VCV * fresult{1}(:,:,1);
+                H = obj.meshUnion.cell.VCV * fresult{1}(:,:,3);
+                u = Hu./H;
+                plot(mesh.x(1:deltapoint:numel(mesh.x)),u(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+            end
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU10(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEU30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.U16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+            set(gca,'Fontsize',14);
+            xlabel({'$\it x(m)$'},'Interpreter','latex');
+            ylabel({'$u\;\rm{(m/s)}$'},'Interpreter','latex');    
+            box on;
+            set(gca,'LineWidth',1.5);  
+%             set(gca,'YLim',[-0.05 a],'Fontsize',15);                   
 %% plot W
             figure;
             hold on;            
@@ -146,8 +150,8 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             for i = 1:numel(time)                      
                 [~,Index] = sort(abs(outputTime-time(i)));
                 fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
-                Hv = obj.meshUnion.cell.VCV * fresult{1}(:,2:obj.meshUnion(1).Nz:end,4);
-                H = obj.meshUnion.cell.VCV * fresult{1}(:,2:obj.meshUnion(1).Nz:end,3);
+                Hv = obj.meshUnion.cell.VCV * fresult{1}(:,1:obj.meshUnion(1).Nz:end,4);
+                H = obj.meshUnion.cell.VCV * fresult{1}(:,1:obj.meshUnion(1).Nz:end,3);
                 v = Hv./H;
                 plot(mesh.x(1:deltapoint:numel(mesh.x)),v(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
             end
@@ -155,10 +159,11 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEW20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEW30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
 % %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.W16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-%             set(gca,'Fontsize',12);
-%             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
-%             ylabel({'$w\;\rm {(m/s)}$'},'Interpreter','latex');   
-%             box on;
+            set(gca,'Fontsize',14);
+            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+            ylabel({'$w\;\rm {(m/s)}$'},'Interpreter','latex');   
+            box on;
+            set(gca,'LineWidth',1.5);  
 % %             set(gca,'YLim',[-0.3*a 0.3*a+0.01],'Fontsize',15);       
 %% plot P
             figure;
@@ -169,17 +174,18 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             for i = 1:numel(time)                      
                 [~,Index] = sort(abs(outputTime-time(i)));
                 fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
-                p = obj.meshUnion.cell.VCV * fresult{1}( :,2:obj.meshUnion(1).Nz:end,5 );
+                p = obj.meshUnion.cell.VCV * fresult{1}( :,1:obj.meshUnion(1).Nz:end,5 );
                 plot(mesh.x(1:deltapoint:numel(mesh.x)),p(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
             end
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP10(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
 % %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-%             set(gca,'Fontsize',12);
-%             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
-%             ylabel({'$P$'},'Interpreter','latex');   
-%             box on;
+            set(gca,'Fontsize',14);
+            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+            ylabel({'$p\;\rm {(Pa)}$'},'Interpreter','latex');   
+            set(gca,'LineWidth',1.5);  
+            box on;
         end
     end
     
@@ -215,7 +221,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
         
         
         function [ option ] = setOption( obj, option )
-            ftime = 10;
+            ftime = 30;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -248,7 +254,7 @@ bctype = [ ...
 % mesh2d = makeUniformQuadMesh( N, ...
 %     [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 90, 180 ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
+    [ 0, obj.ChLength ], [0, obj.ChWidth], M, ceil(obj.ChWidth/(obj.ChLength/M)), bctype);
  
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
