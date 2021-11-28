@@ -21,42 +21,28 @@
 #include <omp.h>
 #endif
 
-void AssembleFacialContributionIntoSparseMatrix(double *, mwIndex *, mwIndex *, double *, double *, int, int, double *, int, int);
-
-void AssembleVolumnContributionIntoSparseMatrix(double *, mwIndex *, mwIndex *, int, double *, int);
+void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np);
 
 void AssembleFacialDiffMatrix(double *, double *, double *, int, int);
-
-void AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(double *, mwIndex *, mwIndex *, double *, int, int, double *, int, int);
 
 void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );
 
-void GetSparsePattern(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
-	double *, double *, int, int, int, int, int, int , int );
+void GetSparsePatternInVerticalDirection(mwIndex *, mwIndex *, int, int, int);
 
-void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *, mwIndex *, double *, double *, double *, double *, \
-	int , int , int , int , int , int , double *);
-
-void GetSparsePatternForVerticalFirstOrderTerm(mwIndex *, mwIndex *, double *, double *, double *, double *, \
-	int , int , int , int , int , int , double *);
+void GetSparsePatternInHorizontalDirection(mwIndex *, mwIndex *, double *, int, int, int, int);
 
 void FetchFacialData(double *, double *, double *, int );
 
 void FetchDataInSparseMatrix(double *, double *, int , int );
 
-void FindUniqueElementAndSortOrder(double *, double *, double *, double, int );
+void FindUniqueElementAndSortOrder(double *, double *, int *, int, int );
 
-void FindFaceAndDirectionVector(double *, double *, double *, double *, double *, int , int , double *, double *, double *, int , int );
+void FindFaceAndDirectionVector(double *, int *, int *, int *, int *, int , int , double *, double *, double *, int , int );
 
 void FindGlobalBottomEdgeFace(int *, double *, int , int , int );
 
 void FindFaceAndDirectionVectorAtBoundary(double *, int *, int *, int, int, double *, double *, int, double *, int);
-
-void FindFaceAndFacialPoint(double *, double *, int, double *, double *, double *, int, int, int);
-
-void CalculatePenaltyParameter(double *, double *, double *, double *, int , int , \
-	int , double *, double *, double *, double *, double *, int , int );
 
 #endif

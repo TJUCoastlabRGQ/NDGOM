@@ -27,7 +27,7 @@ typedef enum {
 } NdgEdgeType;
 
 void ImposeBoundaryCondition(double *, NdgEdgeType , double *, double *, double *, double *, \
-	double *, double *, double *, int , int , int, double * );
+	double *, double *, double *, int , int , int );
 
 void EvaluateHydroStaticReconstructValue(double , double *, double *, double *, double *, int , int , int );
 
