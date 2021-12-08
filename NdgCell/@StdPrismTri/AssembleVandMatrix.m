@@ -26,13 +26,14 @@ for n = 1:obj.Nz+1
 end% for
 
 % vertical integral vandermonde matrix
-Vint = EvaluateVerticalIntegralOrthogonalFunc( obj );
+[ Vint, VintU ] = EvaluateVerticalIntegralOrthogonalFunc( obj );
 % Vint2 = EvaluateVerticalIntegralOrthogonalFunc2( obj );
 
 obj.V = V;
 obj.V1d = V1d;
 obj.Vh = Vh;
 obj.Vint = Vint;
+obj.VintU = VintU;
 obj.VCV = tempVCV/V;
 
 end% func
@@ -57,24 +58,30 @@ end% func
 % 
 % end
 
-function Vz = EvaluateVerticalIntegralOrthogonalFunc( obj )
+function [ Vz, VzU ]  = EvaluateVerticalIntegralOrthogonalFunc( obj )
 
 Vz = zeros(obj.Np, obj.Np);
+VzU = zeros(obj.Np, obj.Np);
 for n = 1:obj.Np
     fh = obj.EvaluateHorizontalOrthogonalFunc( obj.N, n, obj.r, obj.s );
     ind = ceil( n / obj.Nph ); % vertical orthogonal polynomial index
     if ind == 1
         fv = LegendreNorm1d( ind , obj.t );
         Vz(:, n) = (obj.t+1) .* fv;
+        VzU(:, n) = 2 .* fv - Vz(:,n);
     else
         fvm = LegendreNorm1d( ind - 1, obj.t );
         fvp = LegendreNorm1d( ind + 1, obj.t );
         Vz(:, n) = ( fvp ./ sqrt( 2*ind+1 ) - fvm ./ sqrt( 2*ind-3 ) ) ./ sqrt( 2*ind - 1 );
+        
+        fvm = LegendreNorm1d( ind - 1, ones(size(obj.t)) );
+        fvp = LegendreNorm1d( ind + 1, ones(size(obj.t)) );
+        VzU(:, n) = ( fvp ./ sqrt( 2*ind+1 ) - fvm ./ sqrt( 2*ind-3 ) ) ./ sqrt( 2*ind-1 ) - ...
+            Vz(:, n);        
     end
-    
     Vz(:, n) = Vz(:, n) .* fh;
+    VzU(:, n) = VzU(:, n) .* fh;
 end% for
-
 end
 
 function [ f ] = LegendreNorm1d( ind, r )

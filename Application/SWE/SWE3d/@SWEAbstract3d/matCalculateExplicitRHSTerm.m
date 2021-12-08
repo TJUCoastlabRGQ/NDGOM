@@ -11,6 +11,7 @@ obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
 % obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d );
 obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
 obj.matEvaluateSourceTerm( fphys );
+obj.matEvaluateBaroclinicTerm( fphys );
 obj.ExplicitRHS2d(:,:,RKIndex) = obj.frhs2d{1}(:,:,1);
 obj.ExplicitRHS(:,:,RKIndex:Stage:end) = obj.frhs{1}(:,:,:);
 

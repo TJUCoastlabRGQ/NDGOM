@@ -92,7 +92,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             %             YData1=get(D1,'YData'); %get the y data
             %             close(h);
             %             plot(XData1, YData1,'k--','LineWidth',1.5);
-            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',6,'LineWidth', 1);
+            plot(outputTime(1:4:end),exactEta(1:4:end),'ro','markersize',6,'LineWidth', 1);
             h = legend('SWE','Theory');
             set(h,'fontsize',15);
             legend('boxoff');
@@ -117,7 +117,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 20;
+            ftime = 50;
             outputIntervalNum = 1500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
@@ -181,7 +181,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

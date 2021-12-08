@@ -28,6 +28,8 @@ void VerticalFaceColumnIntegral(double *, double *, double *, double *, ptrdiff_
 
 void VerticalIntegralFromBottom(double *, double *, double *, double *, int, ptrdiff_t, double *, int, int, double *);
 
+void VerticalIntegralFromSurface(double *, double *, double *, double *, int, ptrdiff_t, double *, int, int, double *);
+
 void VerticalRepmatFacialValue(double *, double *, int , int , int , int , int );
 
 #endif

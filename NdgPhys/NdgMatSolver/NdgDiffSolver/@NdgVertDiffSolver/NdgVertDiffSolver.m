@@ -3,21 +3,26 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     %   此处显示详细说明
     
     properties
+        BoundaryEdgeType = 'Dirichlet'
     end
     
     methods
         
-         function obj = NdgVertDiffSolver( physClass )
-            obj = obj@AbstractDiffSolver( physClass ); 
+        function obj = NdgVertDiffSolver( physClass )
+            obj = obj@AbstractDiffSolver( physClass );
             if physClass.option.isKey('AdvDiffVerticalDiffusionType')
-               if physClass.option.isKey('AdvDiffConstantVerticalDiffusionValue')
-                   value = physClass.getOption('AdvDiffConstantVerticalDiffusionValue');
-                   obj.nv = value * ones(size(physClass.meshUnion(1).x));
-                   fprintf('Value of the constant vertical diffusion coefficient is set to be: %f\n',value);
-                   obj.matUpdatePenaltyParameter(  physClass, obj.nv );
-               end
-            end            
-         end
+                if physClass.option.isKey('AdvDiffConstantVerticalDiffusionValue')
+                    value = physClass.getOption('AdvDiffConstantVerticalDiffusionValue');
+                    obj.nv = value * ones(size(physClass.meshUnion(1).x));
+                    fprintf('Value of the constant vertical diffusion coefficient is set to be: %f\n',value);
+                    obj.matUpdatePenaltyParameter(  physClass, obj.nv );
+                end
+            end
+            if physClass.option.isKey('BottomBoundaryEdgeType')
+                obj.BoundaryEdgeType = char(physClass.getOption('BottomBoundaryEdgeType'));
+            end
+            fprintf('The bottom boundary condition for momentum is: %s\n',obj.BoundaryEdgeType);
+        end
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
         %> return the physical field with vertical diffusion considered
         %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -37,7 +42,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         
         function matUpdateViscosity(obj)
             %doing nothing
-        end        
+        end
         
         fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         
@@ -54,7 +59,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             %> @param[in] DiffusionCoefficient The diffusion coefficient
             BotEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
             UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
-%             obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
+            %             obj.tau = zeros( physClass.meshUnion(1).Nz+1, physClass.mesh2d(1).K );
             obj.tau = zeros( numel(BotEidM), physClass.mesh2d(1).K * ( physClass.meshUnion(1).Nz+1 ) );
             P = physClass.mesh2d(1).cell.N;
             %> for tri-prisms, number of faces is 5, for quad-prism, number of face is 6
@@ -65,13 +70,13 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                 %> The surface most face for each column
                 %     Tau(1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(UpEidM, (i-1)*Nz+1));
                 for j = 2:Nz
-%                     obj.tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
-%                         max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
+                    %                     obj.tau(j,i) = (P+1)*(P+3)/3*n0/2*Nz*max(max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1)),...
+                    %                         max(DiffusionCoefficient(UpEidM, (i-1)*Nz+j)));
                     obj.tau(:, (i-1)*( physClass.meshUnion(1).Nz+1 ) + j ) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+j-1),...
                         DiffusionCoefficient(UpEidM, (i-1)*Nz+j));
                 end
                 %> The bottom most face for each column
-%                 obj.tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
+                %                 obj.tau(Nz+1,i) = (P+1)*(P+3)/3*n0/2*Nz*max(DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz));
                 obj.tau(:, (i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1 ) = (P+1)*(P+3)/3*n0/2*Nz*DiffusionCoefficient(BotEidM, (i-1)*Nz+Nz);
             end
         end
