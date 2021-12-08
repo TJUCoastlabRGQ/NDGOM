@@ -90,6 +90,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         
     end

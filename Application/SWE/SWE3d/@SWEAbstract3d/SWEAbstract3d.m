@@ -140,6 +140,10 @@ classdef SWEAbstract3d < NdgPhysMat
             obj.matUpdateWetDryState(fphys);
         end
         
+        function matEvaluateBaroclinicTerm( obj, fphys )
+            %doing nothing here
+        end
+        
     end
     
     methods ( Access = protected )

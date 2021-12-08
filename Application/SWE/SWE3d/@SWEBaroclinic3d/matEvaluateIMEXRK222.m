@@ -1,6 +1,4 @@
 function matEvaluateIMEXRK222( obj )
-tic;
-profile on;
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 Stage = size(EXa,2);
 time = obj.getOption('startTime');
@@ -27,6 +25,7 @@ while( time < ftime )
     
     tloc = time + c( 1 ) * dt;
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
+    fphys{1}(:,:,14) = obj.matCalculateDensityField( fphys{1} );
     obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, 1);
     for intRK = 1:2
         tloc = time + c( intRK+1 ) * dt;
@@ -111,9 +110,6 @@ obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
 obj.matClearGlobalMemory();
-profile viewer;
-profile off;
-toc;
 % obj.outputFile.closeOutputFile();
 end
 

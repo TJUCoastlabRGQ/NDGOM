@@ -245,6 +245,59 @@ void VerticalIntegralFromBottom(double *dest, double *source, double *Jz, double
 }
 
 /*
+* Purpose: This function is used to integrate the three dimensional physical field from surface to a given elevation
+*
+* Input:
+*      double[Np x Nlayer] dest the pointer to the start address of the integral field, from bottom to any given elevation
+* 	   double[Np x Nlayer] source three dimensional field to be integrated
+*      double[Np x Nlayer] Jz the jacobian coefficient in vertical direction
+* 	   double[Np] fmod the space used to store the mode coefficient
+* 	   int[1] NLayer number of layers in vertical direction
+*      ptrdiff_t[1] Np the number of interpolation points for the 3d master cell
+* 	   double[Np x Np] InvV3d inverse Vandermonde matrix
+*      int[1] Np2d the number of interpolation points for the 2d master cell
+*      int[1] Npz number of interpolation points in vertical direction
+*      double[Np x Np] Vint the integral matrix used to integrate the physical field
+* Output:
+* 		double[Np x Nlayer] the pointer to the start address of the integral field, from bottom to any given elevation
+*/
+void VerticalIntegralFromSurface(double *dest, double *source, double *Jz, double *fmod, int NLayer, ptrdiff_t Np, double *InvV3d, int Np2d, int Npz, double *Vint) {
+
+	memset(dest, 0, NLayer * Np * 0 * sizeof(double));
+	double *TempSource = malloc((int)Np * sizeof(double));
+	int *BotEid = malloc(Np2d * sizeof(int));
+	for (int i = 0; i < Np2d; i++) {
+		BotEid[i] = i;
+	}
+	double *FacialData = malloc(Np2d * sizeof(double));
+	double *TempAverageData = malloc(Np * sizeof(double));
+	ptrdiff_t one = 1;
+	double beta = 0, alpha = 1.0;
+// For the surface most element
+	DotProduct(TempSource, source + (1 - 1)*(int)Np, Jz + (1 - 1)*(int)Np, (int)Np);
+	dgemm("N", "N", &Np, &one, &Np, &alpha, InvV3d, &Np, TempSource, &Np, &beta, fmod, &Np);
+	dgemm("N", "N", &Np, &one, &Np, &alpha, Vint, &Np, fmod, &Np, &beta, dest + (1 - 1)*(int)Np, &Np);
+
+	FetchFacialValue(FacialData, dest + (1 - 1)*(int)Np, Np2d, BotEid);
+
+	RepmatValue(TempAverageData, FacialData, Np2d, Npz);
+
+	for (int L = 1; L < NLayer; L++) {
+		DotProduct(TempSource, source + L*(int)Np, Jz + L*(int)Np, (int)Np);
+		dgemm("N", "N", &Np, &one, &Np, &alpha, InvV3d, &Np, TempSource, &Np, &beta, fmod, &Np);
+		dgemm("N", "N", &Np, &one, &Np, &alpha, Vint, &Np, fmod, &Np, &beta, dest + L*(int)Np, &Np);
+		Add(dest + L*(int)Np, dest + L*(int)Np, TempAverageData, Np);
+		FetchFacialValue(FacialData, dest + L*(int)Np, Np2d, BotEid);
+		RepmatValue(TempAverageData, FacialData, Np2d, Npz);
+	}
+
+	free(TempSource);
+	free(BotEid);
+	free(FacialData);
+	free(TempAverageData);
+}
+
+/*
 * Purpose: This function is used to repmat the two-dimensional edge value in vertical direction
 *
 * Input:

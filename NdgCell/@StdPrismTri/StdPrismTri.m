@@ -47,8 +47,12 @@ classdef StdPrismTri < handle
         TNfp
     end
     properties ( SetAccess = protected)
-        %> Vandermonde matrix
+        %> Vandermonde matrix, Vint here is the integral matrix from bottom
+        % up
         V, Vh, Vint, V1d
+        %> Vandermonde matrix, VintU here is the integral matrix from up
+        % down
+        VintU        
         %> project matrx from interpolation points to central point in
         %> vertical direction, and this is needed for GOTM implementation
         VCV

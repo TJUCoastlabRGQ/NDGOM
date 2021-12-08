@@ -76,7 +76,7 @@ classdef NonhydrostaticSolitaryWave1d < SWEConventional1d
             text(-3.5,0.2,'$0\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
             text(13.5,0.2,'$5\;\rm s\rightarrow$','Interpreter','latex','Fontsize',14);
             box on;
-            
+          
 %             set(gca,'YLim',[-0.05 a+0.05],'Fontsize',15);   
 %% plot U
             figure(2);
