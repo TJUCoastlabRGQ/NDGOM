@@ -1,6 +1,6 @@
 #include "mxGOTM.h"
-#include<string.h>
-#include<math.h>
+#include <string.h>
+#include <math.h>
 #include "../../../../../NdgMath/NdgMemory.h"
 //#include <blas.h>
 

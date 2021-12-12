@@ -18,6 +18,13 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
         outputFieldOrder3d = [1 2 3 12 13]
     end
     
+    methods
+        function obj = SWEBaroclinic3d(  )
+            clear mxCalculateDensityField;
+            clear mxCalculateBaroclinicTerm;
+        end
+    end
+    
     methods( Access = protected )
         function rho = matCalculateDensityField( obj, fphys )
             rho = mxCalculateDensityField( fphys(:,:,4), fphys(:,:,12), fphys(:,:,13), obj.meshUnion.z,  obj.hcrit, ...

@@ -8,6 +8,7 @@ function [ Ncell, EToV ] = InitPrismTriConnect3d( N, Nz )
     for lay = 1 : Nz
         s2 = Np + Np * (lay - 1);
         s1 = Np - 2 + Np * (lay - 1);
+%         s1 = Np - 2;
         for row = 1 : N
             v1 = s2; v2 = s1;
             for kb = 1:row
