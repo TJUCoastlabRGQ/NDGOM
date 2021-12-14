@@ -6,6 +6,124 @@ void MemoryAllocationCheck(double *dest, int size){
     }
 }
 
+/*The following part is for calculation of density, and is called from mxCalculateDensityField.c*/
+double *BaroclinicT = NULL, *BaroclinicS = NULL, *BaroclinicDTS = NULL;
+
+char *BaroDensityInitialized = "False";
+
+void BaroDensityMemoryAllocation( int Np, int K) {
+	BaroclinicT = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicT, Np*K * sizeof(double));
+	BaroclinicS = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicS, Np*K * sizeof(double));
+	BaroclinicDTS = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicDTS, Np*K * sizeof(double));
+	BaroDensityInitialized = "True";
+}
+
+void BaroDensityMemoryDeAllocation(int Np, int K) {
+	free(BaroclinicT), BaroclinicT = NULL;
+	free(BaroclinicS), BaroclinicS = NULL;
+	free(BaroclinicDTS), BaroclinicDTS = NULL;
+	BaroDensityInitialized = "False";
+}
+
+/*The following part is for calculation of baroclinic term, and is called from mxCalculateBaroclinicTerm.c*/
+
+double *BaroclinicPDPX = NULL, *BaroclinicPDPY = NULL, *BaroclinicPRHOPX = NULL, *BaroclinicPRHOPY = NULL,\
+*BaroclinicPRHOPS = NULL, *BaroclinicInXPartOne = NULL, *BaroclinicInXPartTwo = NULL, *BaroclinicInYPartOne = NULL,\
+*BaroclinicInYPartTwo = NULL, *BaroclinicInXTempRHS = NULL, *BaroclinicInYTempRHS = NULL, *Baroclinicfmod = NULL,\
+*BaroclinicBotEfm = NULL, *BaroclinicBotEfp = NULL, *BaroclinicBotEFluxM = NULL, *BaroclinicBotEFluxP = NULL, \
+*BaroclinicBotEFluxS = NULL, *BaroclinicIEfm = NULL, *BaroclinicIEfp = NULL, *BaroclinicIEfluxM = NULL, \
+*BaroclinicIEfluxP = NULL, *BaroclinicIEfluxS = NULL, *BaroclinicERHS = NULL, *BaroclinicTempFacialIntegral = NULL,\
+*BaroclinicTempVolumeIntegral = NULL;
+
+char *BaroclinicPartInitialized = "False";
+
+void BaroclinicPartMemoryAllocation(int Np, int K, int K2d, int BotENe, int BotENfp, int IENe, int IENfp, int Nface) {
+	BaroclinicPDPX = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicPDPX, Np*K * sizeof(double));
+	BaroclinicPDPY = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicPDPY, Np*K * sizeof(double));
+	BaroclinicPRHOPX = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicPRHOPX, Np*K * sizeof(double));
+	BaroclinicPRHOPY = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicPRHOPY, Np*K * sizeof(double));
+	BaroclinicPRHOPS = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicPRHOPS, Np*K * sizeof(double));
+	BaroclinicInXPartOne = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInXPartOne, Np*K * sizeof(double));
+	BaroclinicInXPartTwo = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInXPartTwo, Np*K * sizeof(double));
+	BaroclinicInYPartOne = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInYPartOne, Np*K * sizeof(double));
+	BaroclinicInYPartTwo = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInYPartTwo, Np*K * sizeof(double));
+	BaroclinicInXTempRHS = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInXTempRHS, Np*K * sizeof(double));
+	BaroclinicInYTempRHS = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicInYTempRHS, Np*K * sizeof(double));
+	Baroclinicfmod = malloc(Np*K2d * sizeof(double));
+	MemoryAllocationCheck(Baroclinicfmod, Np*K2d * sizeof(double));
+	BaroclinicBotEfm = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBotEfm, Np*K * sizeof(double));
+	BaroclinicBotEfp = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBotEfp, BotENe*BotENfp * sizeof(double));
+	BaroclinicBotEFluxM = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBotEFluxM, BotENe*BotENfp * sizeof(double));
+	BaroclinicBotEFluxP = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBotEFluxP, BotENe*BotENfp * sizeof(double));
+	BaroclinicBotEFluxS = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBotEFluxS, BotENe*BotENfp * sizeof(double));
+	BaroclinicTempFacialIntegral = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicTempFacialIntegral, Np*K * sizeof(double));
+	BaroclinicIEfm = malloc(IENe*IENfp * 2 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicIEfm, IENe*IENfp * 2 * sizeof(double));
+	BaroclinicIEfp = malloc(IENe*IENfp * 2 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicIEfp, IENe*IENfp * 2 * sizeof(double));
+	BaroclinicIEfluxM = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicIEfluxM, IENe*IENfp * 4 * sizeof(double));
+	BaroclinicIEfluxP = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicIEfluxP, IENe*IENfp * 4 * sizeof(double));
+	BaroclinicIEfluxS = malloc(IENe*IENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicIEfluxS, IENe*IENfp * 4 * sizeof(double));
+	BaroclinicERHS = malloc(4 * Np*K*(Nface - 2) * sizeof(double));
+	MemoryAllocationCheck(BaroclinicERHS, 4 * Np*K*(Nface - 2) * sizeof(double));
+	BaroclinicTempVolumeIntegral = malloc(Np*K * sizeof(double));
+	MemoryAllocationCheck(BaroclinicTempVolumeIntegral, Np*K * sizeof(double));
+	BaroclinicPartInitialized = "True";
+}
+
+void BaroclinicPartMemoryDeAllocation() {
+	free(BaroclinicPDPX), BaroclinicPDPX = NULL;
+	free(BaroclinicPDPY), BaroclinicPDPY = NULL;
+	free(BaroclinicPRHOPX), BaroclinicPRHOPX = NULL;
+	free(BaroclinicPRHOPY), BaroclinicPRHOPY = NULL;
+	free(BaroclinicPRHOPS), BaroclinicPRHOPS = NULL;
+	free(BaroclinicInXPartOne), BaroclinicInXPartOne = NULL;
+	free(BaroclinicInXPartTwo), BaroclinicInXPartTwo = NULL;
+	free(BaroclinicInYPartOne), BaroclinicInYPartOne = NULL;
+	free(BaroclinicInYPartTwo), BaroclinicInYPartTwo = NULL;
+	free(BaroclinicInXTempRHS), BaroclinicInXTempRHS = NULL;
+	free(BaroclinicInYTempRHS), BaroclinicInYTempRHS = NULL;
+	free(Baroclinicfmod), Baroclinicfmod = NULL;
+	free(BaroclinicBotEfm), BaroclinicBotEfm = NULL;
+	free(BaroclinicBotEfp), BaroclinicBotEfp = NULL;
+	free(BaroclinicBotEFluxM), BaroclinicBotEFluxM = NULL;
+	free(BaroclinicBotEFluxP), BaroclinicBotEFluxP = NULL;
+	free(BaroclinicBotEFluxS), BaroclinicBotEFluxS = NULL;
+	free(BaroclinicTempFacialIntegral), BaroclinicTempFacialIntegral = NULL;
+	free(BaroclinicIEfm), BaroclinicIEfm = NULL;
+	free(BaroclinicIEfp), BaroclinicIEfp = NULL;
+	free(BaroclinicIEfluxM), BaroclinicIEfluxM = NULL;
+	free(BaroclinicIEfluxP), BaroclinicIEfluxP = NULL;
+	free(BaroclinicIEfluxS), BaroclinicIEfluxS = NULL;
+	free(BaroclinicERHS), BaroclinicERHS = NULL;
+	free(BaroclinicTempFacialIntegral), BaroclinicTempFacialIntegral = NULL;
+	free(BaroclinicTempVolumeIntegral), BaroclinicTempVolumeIntegral = NULL;
+	BaroclinicPartInitialized = "False";
+}
+
 double *TimeIntervalu = NULL, *TimeIntervalv = NULL, *TimeIntervalw = NULL, *TimeIntervalt = NULL;
 char *TimeIntervalInitialized = "False";
 
@@ -561,11 +679,12 @@ void VertDiffMemoryDeAllocation(){
 }
 
 /*This is for GOTM part*/
-double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL,\
-*numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL,\
-*huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL,\
-*BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL,\
-*SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL;
+double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
+*numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL, \
+*huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
+*BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
+*SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
+*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL;
 
 char *GOTMInitialized = "False";
 
@@ -604,6 +723,18 @@ void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K3d){
     MemoryAllocationCheck(SurfaceFrictionVelocity, sizeof(double)*Num2d);
 	eddyViscosityDate = malloc(sizeof(double)*(Num2d * Interface));
     MemoryAllocationCheck(eddyViscosityDate, sizeof(double)*(Num2d * Interface));
+	rhoCentralDate = malloc(sizeof(double)*(Np2d*K3d));
+	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(Np2d*K3d));
+	rhoVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
+	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(Num2d*Interface));
+	eddyDiffusionDate = malloc(sizeof(double)*(Num2d * Interface));
+	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(Num2d * Interface));
+	eddyTKEDate = malloc(sizeof(double)*(Num2d * Interface));
+	MemoryAllocationCheck(eddyTKEDate, sizeof(double)*(Num2d * Interface));
+	eddyLengthDate = malloc(sizeof(double)*(Num2d * Interface));
+	MemoryAllocationCheck(eddyLengthDate, sizeof(double)*(Num2d * Interface));
+	eddyEPSDate = malloc(sizeof(double)*(Num2d * Interface));
+	MemoryAllocationCheck(eddyEPSDate, sizeof(double)*(Num2d * Interface));
 	GOTMInitialized = "True";
 }
 
@@ -625,6 +756,12 @@ void GotmSolverMemoryDeAllocation(){
 	free(SurfaceFrictionLength); SurfaceFrictionLength = NULL;
 	free(SurfaceFrictionVelocity); SurfaceFrictionVelocity = NULL;
 	free(eddyViscosityDate); eddyViscosityDate = NULL;
+	free(rhoCentralDate); rhoCentralDate = NULL;
+	free(rhoVerticalLine); rhoVerticalLine = NULL;
+	free(eddyDiffusionDate); eddyDiffusionDate = NULL;
+	free(eddyTKEDate); eddyTKEDate = NULL;
+	free(eddyLengthDate); eddyLengthDate = NULL;
+	free(eddyEPSDate); eddyEPSDate = NULL;
 	GOTMInitialized = "False";
 }
 

@@ -25,8 +25,10 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         function obj = BottomBoundaryLayerCase( N, Nz, M, Mz )
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
+            obj.Nfield = 15; % [ Hu, Hv, w, H, miu, Z, eta, Zx, Zy ]
+            obj.fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hc','rho', 'Tke', 'Eps'};
             obj.outputFieldOrder2d = [ 1 2 3];
-            obj.outputFieldOrder3d = [ 1 2 3 4 5];
+            obj.outputFieldOrder3d = [ 1 2 3 4 5 14 15 ];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             %> time interval
@@ -100,6 +102,8 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
+            option('PhysicalSurfaceRoughnessLength') = 0.02;
+            option('PhysicalBottomRoughnessLength') = 0.0015;
         end
         
     end
@@ -114,7 +118,7 @@ bctype = [ ...
     enumBoundaryCondition.ClampedDepth ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ -obj.ChLength/2, obj.ChLength/2 ], 0.02*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.02*ceil(obj.ChLength/M), bctype);
+    [ -obj.ChLength/2, obj.ChLength/2 ], 0.03*[ -obj.ChLength/2, obj.ChLength/2 ], ceil(obj.ChLength/M), 0.03*ceil(obj.ChLength/M), bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

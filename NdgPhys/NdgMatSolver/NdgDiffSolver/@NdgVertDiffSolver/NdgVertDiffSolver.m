@@ -22,7 +22,14 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
                 obj.BoundaryEdgeType = char(physClass.getOption('BottomBoundaryEdgeType'));
             end
             fprintf('The bottom boundary condition for momentum is: %s\n',obj.BoundaryEdgeType);
+            
+            obj.matClearGlobalMemory( );
         end
+        
+        function matClearGlobalMemory( obj )
+            clear mxUpdateImplicitRHS;
+        end
+        
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
         %> return the physical field with vertical diffusion considered
         %> @detail this function is used to calculate the right hand side corresponding to the vertical

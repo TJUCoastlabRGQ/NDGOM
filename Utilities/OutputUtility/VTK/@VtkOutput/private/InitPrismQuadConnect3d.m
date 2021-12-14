@@ -11,7 +11,7 @@ function [ Ncell, EToV ] = InitPrismQuadConnect3d(N, Nz)
     sk = 1; 
     for lay = 1 : Nz
         s2 = Np - N + Np * (lay - 1);
-        s1 = s2 - ( N + 1 ) + Np * (lay - 1);
+        s1 = s2 - ( N + 1 );
         for row = 1 : N
             v1 = s1; v2 = s2;
             for kb = 1:N

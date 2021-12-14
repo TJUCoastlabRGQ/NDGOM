@@ -1,6 +1,4 @@
 function matEvaluateIMEXRK222( obj )
-tic;
-profile on;
 [EXa, IMa, EXb, IMb, c] = GetRKParamter();
 Stage = size(EXa,2);
 time = obj.getOption('startTime');
@@ -43,6 +41,10 @@ while( time < ftime )
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
+        
+        fphys{1}(:,:,14) = obj.VerticalEddyViscositySolver.Tke;
+        
+        fphys{1}(:,:,15) = obj.VerticalEddyViscositySolver.Eps;
         
 %         fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
@@ -111,9 +113,6 @@ obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
 obj.matClearGlobalMemory();
-profile viewer;
-profile off;
-toc;
 % obj.outputFile.closeOutputFile();
 end
 
