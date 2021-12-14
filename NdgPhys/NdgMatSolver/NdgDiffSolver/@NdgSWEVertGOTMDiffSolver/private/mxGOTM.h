@@ -23,7 +23,8 @@
 
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
-*BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate;
+*BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
+*rhoCentralDate, *rhoVerticalLine, *eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate;
 
 extern char *GOTMInitialized;
 
@@ -34,11 +35,12 @@ void mapCentralPointDateToVerticalDate(double *, double *, int , long long int ,
 /*This function is used to calculate the shear production term*/
 void CalculateShearFrequencyDate(double *, int , int , double , long long int );
 
-void CalculateBuoyanceFrequencyDate(int , int , long long int );
+//void CalculateBuoyanceFrequencyDate(int , int , long long int );
+void CalculateBuoyanceFrequencyDate(double *, int, int, double, long long int, double, double);
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
-void CalculateLengthScaleAndShearVelocity(double *, double, double *, double *, double *, int, int, int, double, long long int);/*This is the interface to do_turbulence function in GOTM*/
-//void DGDoTurbulence(double *dt, double *H2d, double *ShearProductionDate, double *buoyanceProductionDate, double *utaus, double *utaub, double *z0s, double *z0b);
+void CalculateLengthScaleAndShearVelocity(double , double , double *, double , double *, double *, double *, int , int , long long int );//void DGDoTurbulence(double *dt, double *H2d, double *ShearProductionDate, double *buoyanceProductionDate, double *utaus, double *utaub, double *z0s, double *z0b);
+
 void DGDoTurbulence(double *, double *, double , double *, int, int, long long int);
 /*This function is used to map the date calculated by GOTM to the output matrix*/
 void mapVedgeDateToDof(double *, double *, int, int, int, long long int);

@@ -4,13 +4,13 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
     
     properties
         %> num of 3d physical field
-        Nfield = 14
+        Nfield = 15
         %> field name of each field
-        fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hT', 'hS', 'rho'};
+        fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hc','rho','hT', 'hS'};
         %> number of variable field
         Nvar = 4
         %> index of variable in physical field
-        varFieldIndex = [ 1, 2, 12, 13 ]
+        varFieldIndex = [ 1, 2, 14, 15 ]
     end
     
     properties

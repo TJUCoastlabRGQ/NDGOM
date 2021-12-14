@@ -25,7 +25,7 @@ while( time < ftime )
     
     tloc = time + c( 1 ) * dt;
     obj.matUpdateExternalField( tloc, fphys2d, fphys );
-    fphys{1}(:,:,14) = obj.matCalculateDensityField( fphys{1} );
+    fphys{1}(:,:,13) = obj.matCalculateDensityField( fphys{1} );
     obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, 1);
     for intRK = 1:2
         tloc = time + c( intRK+1 ) * dt;
@@ -60,7 +60,7 @@ while( time < ftime )
         %> update the vertical velocity
         fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
 
-        
+        fphys{1}(:,:,13) = obj.matCalculateDensityField( fphys{1} );
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, Stage, intRK + 1);
         
         % fphys2d = obj.matEvaluateLimiter( fphys2d );

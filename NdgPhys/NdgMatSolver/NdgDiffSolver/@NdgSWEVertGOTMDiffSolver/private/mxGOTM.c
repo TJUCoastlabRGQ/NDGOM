@@ -6,11 +6,6 @@
 
 /*the Von kamma constant*/
 double kappa = 0.41;
-/*the limit value for the surface roughness*/
-double z0s_min = 0.02;
-//double z0s_min = 0;
-/*this value is used for computing bottom roughness*/
-double avmolu = 1.3e-6;
 
 void getGotmDate(int index, long long int nlev){
 	for (int i = 0; i < nlev + 1; i++){
@@ -33,7 +28,8 @@ void setGotmDate(int index, long long int nlev){
 }
 
 
-void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, long long int nlev, int Np2d, int K2d){
+void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen,\
+	long long int nlev, int Np2d, int K2d){
 
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
 
@@ -44,7 +40,8 @@ void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int 
 	}
 }
 
-void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d, ptrdiff_t *Np3d, double *VCV){
+void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d,\
+	ptrdiff_t *Np3d, double *VCV){
 	char *chn = "N";
 	double alpha = 1;
 	double beta = 0;
@@ -58,7 +55,8 @@ void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, p
 	}
 }
 
-void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, long long int nlev, int Np2d){
+void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, \
+	long long int nlev, int Np2d){
 	//This has been verified by tests
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -111,32 +109,32 @@ void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, l
 
 }
 
-void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *DragCoefficient, double *Taux, double *Tauy, int Np2d, int K2d, int NMaxItration, double h0b, long long int nlev){
+void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double *H2d, double hcrit, double *DragCoefficient, \
+	double *Taux, double *Tauy, int Np2d, int K2d, long long int nlev) {
 	/*for surface friction length, another way is the charnock method*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int p = 0; p < Np2d * K2d; p++){
-		SurfaceFrictionLength[p] = z0s_min;
+	for (int p = 0; p < Np2d * K2d; p++) {
+		SurfaceFrictionLength[p] = z0s;
 		SurfaceFrictionVelocity[p] = 0;
-        DragCoefficient[p] = 0;
-		double Tempz0b = 0;
-        double rr = 0;
-		if (H2d[p] >= hcrit){
-			for (int itera = 0; itera < NMaxItration; itera++){
-				Tempz0b = 0.1*avmolu / max(avmolu, BottomFrictionVelocity[p]) + 0.03*h0b;
-				Tempz0b = 0.0015;
-				/*$rr=\frac{\kappa}{log(\frac{z0b+\frac{h(1)}{2}}{z0b})$, where z0b is the bottom roughness length and h(1) is the height of the first layer of cell,
-				*detail of this part can refer to the friction.F90 file in GOTM
-				*/
-				rr = kappa / log((Tempz0b + layerHeight[p*(nlev + 1) + 1] / 2) / Tempz0b);
-				BottomFrictionVelocity[p] = rr * sqrt(pow((huVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2) + pow((hvVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2));
-			}
-			BottomFrictionLength[p] = Tempz0b;
-            /*Note that, the surface-stress here must be devided by rho_0*/
-            SurfaceFrictionVelocity[p] = pow(pow(Taux[p],2) + pow(Tauy[p],2),1/4);
-            DragCoefficient[p] = pow(rr,2);
-            /*According to GOTM, DragCoefficient[p] = pow(rr,2)/layerHeight[p*(nlev + 1) + 1] should be adopted, see uequation.F90*/
+		DragCoefficient[p] = 0;
+		double rr = 0;
+		if (H2d[p] >= hcrit) {
+			rr = kappa / log((z0b + layerHeight[p*(nlev + 1) + 1] / 2) / z0b);
+			BottomFrictionVelocity[p] = rr * sqrt(pow((huVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2) + pow((hvVerticalLine[p*(nlev + 1) + 1] / H2d[p]), 2));
+			BottomFrictionLength[p] = z0b;
+			/*Note that, the surface-stress here must be devided by rho_0, the following calculation is according to friction.F90 in gotm*/
+			/*Formula by GOTM*/
+			//SurfaceFrictionVelocity[p] = pow(pow(Taux[p] / rho0, 2) + pow(Tauy[p] / rho0, 2), 1 / 4);
+			/*Formula by SLIM, we note that Taux and Tauy here have already devided by rho0*/
+			SurfaceFrictionVelocity[p] = sqrt(hypot(Taux[p], Tauy[p]));
+			/*Formula by SLIM*/
+			//SurfaceFrictionVelocity[p] = pow(pow(pow(Taux[p], 2) + pow(Tauy[p], 2),1/2)/rho0, 1 / 2);
+			/*Formula by SLIM*/
+			DragCoefficient[p] = pow(rr,2);   //Cd = rr^2;
+			/*Formula by GOTM, see friction.F90(Line 122) and uequation.F90(Line 182)*/
+			//DragCoefficient[p] = pow(rr, 2) / layerHeight[p*(nlev + 1) + 1]
 		}
 	}
 }
@@ -151,6 +149,10 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 			 getGotmDate(p, nlev);
 			 for (int L = 0; L < nlev + 1; L++){
 				 eddyViscosityDate[p*(nlev + 1) + L] = TURBULENCE_mp_NUM[L];
+			//	 eddyDiffusionDate[p*(nlev + 1) + L] = TURBULENCE_mp_NUH[L];
+				 eddyTKEDate[p*(nlev + 1) + L] = TURBULENCE_mp_TKE[L];
+				 eddyLengthDate[p*(nlev + 1) + L] = TURBULENCE_mp_L[L];
+				 eddyEPSDate[p*(nlev + 1) + L] = TURBULENCE_mp_EPS[L];
 			 }
 		 }
 	 }
@@ -173,11 +175,27 @@ void CalculateLengthScaleAndShearVelocity(double *H2d, double hcrit, double *Dra
 	 }
  }
 
- void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, long long int nlev){
+ void CalculateBuoyanceFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev, \
+	 double gra, double rho0){
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	 for (int i = 0; i < Np2d*K2d*(nlev + 1); i++)
-		 buoyanceFrequencyDate[i] = 0;
+	 for (int p = 0; p < Np2d*K2d; p++) {
+		 if (H2d[p] >= hcrit) {
+			 for (int L = 1; L < nlev; L++) {
+				 shearFrequencyDate[p*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[p*(nlev + 1) + L + 1] - rhoVerticalLine[p*(nlev + 1) + L]) / (0.5*(layerHeight[p*(nlev + 1) + L + 1] + layerHeight[p*(nlev + 1) + L]));
+				 shearFrequencyDate[p*(nlev + 1) + L] = max(shearFrequencyDate[p*(nlev + 1) + L], 0.0);
+			 }
+			 //For each vertical segment, we have NN(0) = NN(1), NN(nlev) = NN(nlev - 1)
+			 buoyanceFrequencyDate[p*(nlev + 1)] = buoyanceFrequencyDate[p*(nlev + 1) + 1];
+			 buoyanceFrequencyDate[p*(nlev + 1) + nlev] = buoyanceFrequencyDate[p*(nlev + 1) + nlev - 1];
+		 }
+		 else
+		 {
+			 for (int L = 0; L < nlev; L++) {
+				 shearFrequencyDate[p*(nlev + 1) + L] = 0;
+			 }
+		 }
+	 }
  }
