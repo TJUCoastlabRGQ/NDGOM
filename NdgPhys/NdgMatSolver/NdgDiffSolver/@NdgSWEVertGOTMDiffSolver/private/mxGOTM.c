@@ -90,6 +90,7 @@ void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long
 }
 
 
+
 void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 #ifdef _OPENMP
