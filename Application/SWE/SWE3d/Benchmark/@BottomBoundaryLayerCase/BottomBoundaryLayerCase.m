@@ -104,6 +104,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('ConstantHorizontalEddyViscosityValue') = 0;
             option('PhysicalSurfaceRoughnessLength') = 0.02;
             option('PhysicalBottomRoughnessLength') = 0.0015;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         
     end
