@@ -56,17 +56,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         end
         
         function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
-            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
+%             obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
             obj.matUpdataNewmannBoundaryCondition( physClass, fphys);
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage);
         end
         
-        function matClearGlobalMemory(obj)
-            clear mxUpdateEddyViscosity;
-        end
-    end
-    
-    methods(Access = protected)
         function matUpdateViscosity(obj, physClass, H2d, Hu, Hv, dt, rho )
             %             [ obj.nv, physClass.Cf{1} ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
             %                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
@@ -74,8 +68,14 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
                 H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0);
-        end
+        end        
         
+        function matClearGlobalMemory(obj)
+            clear mxUpdateEddyViscosity;
+        end
+    end
+    
+    methods(Access = protected)
         function matUpdataNewmannBoundaryCondition( obj, physClass, fphys)
             VCV = physClass.meshUnion(1).cell.VCV;
             Nz = physClass.meshUnion(1).Nz;

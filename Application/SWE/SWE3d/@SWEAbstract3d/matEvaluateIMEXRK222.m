@@ -42,12 +42,6 @@ while( time < ftime )
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
             Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
         
-        fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
-        
-        fphys{1}(:,:,14) = obj.VerticalEddyViscositySolver.Tke;
-        
-        fphys{1}(:,:,15) = obj.VerticalEddyViscositySolver.Eps;
-        
 %         fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
 %         [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
@@ -89,7 +83,16 @@ while( time < ftime )
 %     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt);
     
 %     [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
-    [ fphys ] = obj.matImposeLimiter( fphys );       
+%     [ fphys ] = obj.matImposeLimiter( fphys ); 
+ 
+   obj.VerticalEddyViscositySolver.matUpdateViscosity( obj, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2), dt, fphys{1}(:,:,13));
+    
+   fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
+        
+   fphys{1}(:,:,14) = obj.VerticalEddyViscositySolver.Tke;
+        
+   fphys{1}(:,:,15) = obj.VerticalEddyViscositySolver.Eps;    
+    
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
@@ -102,6 +105,7 @@ while( time < ftime )
     obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, Stage*obj.Nvar);
     obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, ( Stage - 1 ) * obj.Nvar);
     time = time + dt;
+    disp(time);
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
