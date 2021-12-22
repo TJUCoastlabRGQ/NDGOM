@@ -504,6 +504,7 @@ for i = 1:numel(file)
 end
 libfile{numel(file)+1} = [path,'mxGOTM.c'];
 libfile{numel(file)+2} = 'NdgMath/NdgMemory.c';
+libfile{numel(file)+3} = 'NdgMath/NdgMath.c';
 srcfile = {[path,'mxUpdateEddyViscosity.c']};
 FuncHandle(path, srcfile, libfile);
 
@@ -562,7 +563,7 @@ switch computer('arch')
                     mfilename, srcfile{n}, outPath);
                 fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
                 file = [srcfile(n), libfile{:}];
-                mex('-g','-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
             end
         end

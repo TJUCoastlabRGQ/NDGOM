@@ -2,6 +2,7 @@
 #include <string.h>
 #include <math.h>
 #include "../../../../../NdgMath/NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
 
 /*
 * Purpose: This function is used to update the eddy viscosity according to the flow field
@@ -48,12 +49,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double z0b = mxGetScalar(prhs[16]);
 	double gra = mxGetScalar(prhs[17]);
 	double rho0 = mxGetScalar(prhs[18]);
-	int Num2d = Np2d*K2d;
 	int Interface = (int)nlev + 1;
 //	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){
-		GotmSolverMemoryAllocation(Num2d, Interface, Np2d, K3d);
+		GotmSolverMemoryAllocation(Interface, Np2d, K3d, K2d);
 		/* Get number of characters in the input string.  Allocate enough
 		memory to hold the converted string. */
 		long long int buflen = (long long int)mxGetN(prhs[10]) + 1;
@@ -61,7 +61,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/* Copy the string data into buf. */
 		mxGetString(prhs[10], buf, (mwSize)buflen);
 		long long int _nNamelist = 2;
-		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, Np2d, K2d);
+		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, K2d);
 		free(buf);
 	}
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
@@ -71,12 +71,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		//plhs[4] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 		//plhs[5] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 		//plhs[6] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
-
-		//mapVedgeDateToDof(eddyTKEDate, PtrOutTKE, Np2d, K2d, Np3d, nlev);
-
-		//mapVedgeDateToDof(eddyLengthDate, PtrOutLength, Np2d, K2d, Np3d, nlev);
-
-		//mapVedgeDateToDof(eddyEPSDate, PtrOutEPS, Np2d, K2d, Np3d, nlev);
 		
 		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
         double *PtrOutDragCoefficient = mxGetPr(plhs[1]);
@@ -95,43 +89,57 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempNp3d = (ptrdiff_t)Np3d;
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
-		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
+		double *J2d = mxGetPr(prhs[19]);
+		double *wq2d = mxGetPr(prhs[20]);
+		double *Vq2d = mxGetPr(prhs[21]);
+		int RVq2d = (int)mxGetM(prhs[21]);
+		int CVq2d = (int)mxGetN(prhs[21]);
+		double *LAV2d = mxGetPr(prhs[22]);
 
-		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
+		/*Calculate the water depth at cell center first*/
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+		for (int i = 0; i < K2d; i++) {
+			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d + i);
+		}
+		
+		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+
+		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S.
 		Details about the latter manner can be found in Tuomas and Vincent(2012, Ocean modelling)
 		*/
-		InterpolationToCentralPoint(rho, rhoCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
+		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
 
 		//Tc to be continued
 		//Sc to be continued
-		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, nlev, Np2d);
+		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, nlev);
 
-		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, nlev, Np2d);
+		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, nlev);
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S*/
-		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, nlev, Np2d);
+		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, nlev);
 		//Tvl to be continued
 		//Svl to be continued
-		CalculateWaterDepth(h, Np2d, K2d, hcrit, nlev);
+		CalculateWaterDepth(K2d, hcrit, nlev);
 
-		CalculateShearFrequencyDate(h, Np2d, K2d, hcrit, nlev);
+		CalculateShearFrequencyDate(K2d, hcrit, nlev);
 
-		CalculateBuoyanceFrequencyDate(h, Np2d, K2d, hcrit, nlev, gra, rho0);
+		CalculateBuoyanceFrequencyDate( Np2d, K2d, hcrit, nlev, gra, rho0);
 
-		CalculateLengthScaleAndShearVelocity(z0b, z0s, h, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, nlev);
+		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, K2d, nlev);
 
-		DGDoTurbulence(&dt, h, hcrit, NULL, Np2d, K2d, nlev);
+		DGDoTurbulence(&dt, hcrit, NULL, K2d, nlev);
 
-		mapVedgeDateToDof(eddyViscosityDate, PtrOutEddyViscosity, Np2d, K2d, Np3d, nlev);
-/* If the following parts are to be exported, the corresponding parts in DGDoTurbulence in file mxGOTM.c need to be activated*/
-//		mapVedgeDateToDof(eddyDiffusionDate, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(nuhGOTM, PtrOutEddyViscosity, Np2d, K2d, Np3d, nlev);
+//		mapVedgeDateToDof(numGOTM, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, nlev);
 
-//		mapVedgeDateToDof(eddyDiffusionDate, PtrOutDiffusionCoeForS, Np2d, K2d, Np3d, nlev);
+//		mapVedgeDateToDof(numGOTM, PtrOutDiffusionCoeForS, Np2d, K2d, Np3d, nlev);
 
-		mapVedgeDateToDof(eddyTKEDate, PtrOutTKE, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(tkeGOTM, PtrOutTKE, Np2d, K2d, Np3d, nlev);
 
-//		mapVedgeDateToDof(eddyLengthDate, PtrOutLength, Np2d, K2d, Np3d, nlev);
+//		mapVedgeDateToDof(LGOTM, PtrOutLength, Np2d, K2d, Np3d, nlev);
 
-		mapVedgeDateToDof(eddyEPSDate, PtrOutEPS, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, nlev);
 
 }

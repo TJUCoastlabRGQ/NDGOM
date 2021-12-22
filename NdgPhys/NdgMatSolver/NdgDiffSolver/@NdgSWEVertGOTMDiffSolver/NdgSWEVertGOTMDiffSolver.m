@@ -67,7 +67,8 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             %                 H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0);
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
-                H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0);
+                H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
+                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV );
         end        
         
         function matClearGlobalMemory(obj)

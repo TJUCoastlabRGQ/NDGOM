@@ -684,57 +684,60 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
-*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL;
+*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, *hcenter = NULL;
 
 char *GOTMInitialized = "False";
 
-void GotmSolverMemoryAllocation(int Num2d, int Interface, int Np2d, int K3d){
-	tkeGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
-    MemoryAllocationCheck(tkeGOTM, sizeof(double)*(Num2d*Interface));
-	epsGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
-    MemoryAllocationCheck(epsGOTM, sizeof(double)*(Num2d*Interface));
-	LGOTM = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(LGOTM, sizeof(double)*(Num2d*Interface));
-	nuhGOTM = malloc(sizeof(double)*(Num2d*Interface)); 
-    MemoryAllocationCheck(nuhGOTM, sizeof(double)*(Num2d*Interface));
-	numGOTM = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(numGOTM, sizeof(double)*(Num2d*Interface));
-	layerHeight = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(layerHeight, sizeof(double)*(Num2d*Interface));
-	huCentralDate = malloc(sizeof(double)*(Np2d*K3d));
-    MemoryAllocationCheck(huCentralDate, sizeof(double)*(Np2d*K3d));
-	hvCentralDate = malloc(sizeof(double)*(Np2d*K3d));
-    MemoryAllocationCheck(hvCentralDate, sizeof(double)*(Np2d*K3d));
-	huVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(huVerticalLine, sizeof(double)*(Num2d*Interface));
-	hvVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(hvVerticalLine, sizeof(double)*(Num2d*Interface));
-	shearFrequencyDate = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(shearFrequencyDate, sizeof(double)*(Num2d*Interface));
-	buoyanceFrequencyDate = malloc(sizeof(double)*(Num2d*Interface));
-    MemoryAllocationCheck(buoyanceFrequencyDate, sizeof(double)*(Num2d*Interface));
-	BottomFrictionLength = malloc(sizeof(double)*Num2d);
-    MemoryAllocationCheck(BottomFrictionLength, sizeof(double)*Num2d);
-	BottomFrictionVelocity = malloc(sizeof(double)*Num2d);
-    MemoryAllocationCheck(BottomFrictionVelocity, sizeof(double)*Num2d);
-	SurfaceFrictionLength = malloc(sizeof(double)*Num2d);
-    MemoryAllocationCheck(SurfaceFrictionLength, sizeof(double)*Num2d);
-	SurfaceFrictionVelocity = malloc(sizeof(double)*Num2d);
-    MemoryAllocationCheck(SurfaceFrictionVelocity, sizeof(double)*Num2d);
-	eddyViscosityDate = malloc(sizeof(double)*(Num2d * Interface));
-    MemoryAllocationCheck(eddyViscosityDate, sizeof(double)*(Num2d * Interface));
-	rhoCentralDate = malloc(sizeof(double)*(Np2d*K3d));
-	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(Np2d*K3d));
-	rhoVerticalLine = malloc(sizeof(double)*(Num2d*Interface));
-	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(Num2d*Interface));
-	eddyDiffusionDate = malloc(sizeof(double)*(Num2d * Interface));
-	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(Num2d * Interface));
-	eddyTKEDate = malloc(sizeof(double)*(Num2d * Interface));
-	MemoryAllocationCheck(eddyTKEDate, sizeof(double)*(Num2d * Interface));
-	eddyLengthDate = malloc(sizeof(double)*(Num2d * Interface));
-	MemoryAllocationCheck(eddyLengthDate, sizeof(double)*(Num2d * Interface));
-	eddyEPSDate = malloc(sizeof(double)*(Num2d * Interface));
-	MemoryAllocationCheck(eddyEPSDate, sizeof(double)*(Num2d * Interface));
+void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
+	tkeGOTM = malloc(sizeof(double)*(K2d*Interface)); 
+    MemoryAllocationCheck(tkeGOTM, sizeof(double)*(K2d*Interface));
+	epsGOTM = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(epsGOTM, sizeof(double)*(K2d*Interface));
+	LGOTM = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(LGOTM, sizeof(double)*(K2d*Interface));
+	nuhGOTM = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(nuhGOTM, sizeof(double)*(K2d*Interface));
+	numGOTM = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(numGOTM, sizeof(double)*(K2d*Interface));
+	layerHeight = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(layerHeight, sizeof(double)*(K2d*Interface));
+	huCentralDate = malloc(sizeof(double)*(K3d));
+    MemoryAllocationCheck(huCentralDate, sizeof(double)*(K3d));
+	hvCentralDate = malloc(sizeof(double)*(K3d));
+    MemoryAllocationCheck(hvCentralDate, sizeof(double)*(K3d));
+	//The space occupied by the first data in huVerticalLine is not used
+	huVerticalLine = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(huVerticalLine, sizeof(double)*(K2d*Interface));
+	hvVerticalLine = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(hvVerticalLine, sizeof(double)*(K2d*Interface));
+	shearFrequencyDate = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(shearFrequencyDate, sizeof(double)*(K2d*Interface));
+	buoyanceFrequencyDate = malloc(sizeof(double)*(K2d*Interface));
+    MemoryAllocationCheck(buoyanceFrequencyDate, sizeof(double)*(K2d*Interface));
+	BottomFrictionLength = malloc(sizeof(double)*K2d);
+    MemoryAllocationCheck(BottomFrictionLength, sizeof(double)*K2d);
+	BottomFrictionVelocity = malloc(sizeof(double)*K2d);
+    MemoryAllocationCheck(BottomFrictionVelocity, sizeof(double)*K2d);
+	SurfaceFrictionLength = malloc(sizeof(double)*K2d);
+    MemoryAllocationCheck(SurfaceFrictionLength, sizeof(double)*K2d);
+	SurfaceFrictionVelocity = malloc(sizeof(double)*K2d);
+    MemoryAllocationCheck(SurfaceFrictionVelocity, sizeof(double)*K2d);
+	eddyViscosityDate = malloc(sizeof(double)*(K2d * Interface));
+    MemoryAllocationCheck(eddyViscosityDate, sizeof(double)*(K2d * Interface));
+	rhoCentralDate = malloc(sizeof(double)*(K2d));
+	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K2d));
+	rhoVerticalLine = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(K2d*Interface));
+	eddyDiffusionDate = malloc(sizeof(double)*(K2d * Interface));
+	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(K2d * Interface));
+	eddyTKEDate = malloc(sizeof(double)*(K2d * Interface));
+	MemoryAllocationCheck(eddyTKEDate, sizeof(double)*(K2d * Interface));
+	eddyLengthDate = malloc(sizeof(double)*(K2d * Interface));
+	MemoryAllocationCheck(eddyLengthDate, sizeof(double)*(K2d * Interface));
+	eddyEPSDate = malloc(sizeof(double)*(K2d * Interface));
+	MemoryAllocationCheck(eddyEPSDate, sizeof(double)*(K2d * Interface));
+	hcenter = malloc(K2d * sizeof(double));
+	MemoryAllocationCheck(hcenter, sizeof(double)*K2d);
 	GOTMInitialized = "True";
 }
 
@@ -762,6 +765,7 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyTKEDate); eddyTKEDate = NULL;
 	free(eddyLengthDate); eddyLengthDate = NULL;
 	free(eddyEPSDate); eddyEPSDate = NULL;
+	free(hcenter); hcenter = NULL;
 	GOTMInitialized = "False";
 }
 

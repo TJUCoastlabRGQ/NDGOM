@@ -24,30 +24,36 @@
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
-*rhoCentralDate, *rhoVerticalLine, *eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate;
+*rhoCentralDate, *rhoVerticalLine, *eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,\
+*hcenter;
 
 extern char *GOTMInitialized;
 
 /*This function is used to interpolate the physical value from interpolation point to central point in vertical direction*/
-void InterpolationToCentralPoint(double *, double *, ptrdiff_t *, ptrdiff_t *, ptrdiff_t *, double *);
-/*This function is used to map the date located at the central point to the vertical line that the GOTM adapted*/
-void mapCentralPointDateToVerticalDate(double *, double *, int , long long int , int );
+void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
+	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV);/*This function is used to map the date located at the central point to the vertical line that the GOTM adapted*/
+
+void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, \
+	long long int nlev);
 /*This function is used to calculate the shear production term*/
-void CalculateShearFrequencyDate(double *, int , int , double , long long int );
+void CalculateShearFrequencyDate(int K2d, double hcrit, long long int nlev);
 
 //void CalculateBuoyanceFrequencyDate(int , int , long long int );
-void CalculateBuoyanceFrequencyDate(double *, int, int, double, long long int, double, double);
+void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, double hcrit, long long int nlev, \
+	double gra, double rho0);
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
-void CalculateLengthScaleAndShearVelocity(double , double , double *, double , double *, double *, double *, int , int , long long int );//void DGDoTurbulence(double *dt, double *H2d, double *ShearProductionDate, double *buoyanceProductionDate, double *utaus, double *utaub, double *z0s, double *z0b);
+void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
+	double *Taux, double *Tauy, int K2d, long long int nlev);
 
-void DGDoTurbulence(double *, double *, double , double *, int, int, long long int);
+void DGDoTurbulence(double *TimeStep, double hcrit, double *Grass, int K2d, long long int nlev);
 /*This function is used to map the date calculated by GOTM to the output matrix*/
-void mapVedgeDateToDof(double *, double *, int, int, int, long long int);
+void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev);
 /*This function is used to initialize the GOTM module*/
-void InitTurbulenceModelGOTM(long long int *, char *, long long int, long long int, int, int);
+void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, \
+	long long int nlev, int K2d);
 /*This function is used to calculate the water depth for each layer*/
-void CalculateWaterDepth(double *, int, int, double, long long int);
+void CalculateWaterDepth(int K2d, double hcrit, long long int nlev);
 
 void getGotmDate(int, long long int);
 
@@ -64,16 +70,10 @@ void TURBULENCE_mp_DO_TURBULENCE(long long int *, double *, double *, double *,
 
 void MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
 
-void TURBULENCE_mp_INIT_TURBULENCE(long long int *, char *, long long int *, long long int );
-
-void MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(long long int *);
-
-void TURBULENCE_mp_DO_TURBULENCE(long long int *, double *, double *, double *,
-	double *, double *, double *, double *, double *, double *, double *);
-
-void MTRIDIAGONAL_mp_CLEAN_TRIDIAGONAL();
-
 void TURBULENCE_mp_CLEAN_TURBULENCE();
+
+void GetElementCentralData(double *dest, double *source, double *Jacobian, \
+	double *wq, double *Vq, ptrdiff_t RVq, ptrdiff_t CVq, double *LAV);
 
 double * TURBULENCE_mp_TKE;
 double * TURBULENCE_mp_EPS;
