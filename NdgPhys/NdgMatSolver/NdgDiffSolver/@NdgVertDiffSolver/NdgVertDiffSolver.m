@@ -43,13 +43,13 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         function  fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, SystemRHS, ImplicitParameter, dt, intRK, Stage )
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         end
-    end
-    
-    methods( Access = protected )
         
         function matUpdateViscosity(obj)
             %doing nothing
-        end
+        end        
+    end
+    
+    methods( Access = protected )
         
         fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         

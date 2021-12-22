@@ -78,8 +78,10 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	mxArray *TempV = mxGetField(cell, 0, "V");
 	double *V = mxGetPr(TempV);
 
-	mxArray *TempK2d = mxGetField(BottomEdge, 0, "Ne");
-	int K2d = (int)mxGetScalar(TempK2d);
+	int K2d = K/ NLayer;
+
+	mxArray *TempBotENe = mxGetField(BottomEdge, 0, "Ne");
+	int BotENe = (int)mxGetScalar(TempBotENe);
 
 	plhs[0] = mxCreateDoubleMatrix(Np, K, mxREAL);
 	double *OutRHSInX = mxGetPr(plhs[0]);
@@ -87,7 +89,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	double *OutRHSInY = mxGetPr(plhs[1]);
 
 	if (!strcmp("False", BaroclinicPartInitialized)) {
-		BaroclinicPartMemoryAllocation( Np, K, K2d, K2d, Nph, IENe, IENfp, Nface);
+		BaroclinicPartMemoryAllocation( Np, K, K2d, BotENe, Nph, IENe, IENfp, Nface);
 	}
 
 	GetFirstOrderPartialDerivativeInHorizontalDirection(BaroclinicPDPX, BaroclinicPDPY, BaroclinicPRHOPX, BaroclinicPRHOPY, h, rho, InnerEdge, cell, mesh);

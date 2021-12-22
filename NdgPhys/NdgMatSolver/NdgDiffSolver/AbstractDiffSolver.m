@@ -13,13 +13,15 @@ classdef AbstractDiffSolver < handle
         nv
     end
     
-    methods( Access = protected, Abstract)
+    methods( Access = public, Abstract)
         %> this function is used to update the viscosity
         matUpdateViscosity(obj)
+    end    
+    
+    methods( Access = protected, Abstract)
         %> this function is used to update the penalty parameter adopted in
         %> IP form
         matUpdatePenaltyParameter(obj)
-        
     end
     
     methods
