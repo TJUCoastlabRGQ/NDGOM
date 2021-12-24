@@ -44,7 +44,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         end
         
-        function matUpdateViscosity(obj)
+        function matUpdateViscosity(obj, ~, ~, ~, ~, ~, ~ )
             %doing nothing
         end        
     end

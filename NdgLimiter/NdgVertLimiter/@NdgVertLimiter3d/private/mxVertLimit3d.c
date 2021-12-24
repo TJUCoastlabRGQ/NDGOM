@@ -2,6 +2,7 @@
 #include "mex.h"
 #include <math.h>
 #include "blas.h"
+#include "stdio.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -102,8 +103,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                     *fmod = (double*)malloc(sizeof(double)*Npz);
             for (int i = 0; i < Nph; i++){
                 for (int j = 0; j < Npz; j++){
-                    //Fetch the original value in each line and store them in tempValue
+                    //Fetch the original value in each line and store them in tempValue, from top to down
                     *(tempValue+j) = fphys[k*Np + Nph*(Npz - 1) + i - j*Nph];
+					//*(tempValue + j) = fphys[k*Np + i - j*Nph];
                 }
                 // Calculate the corresponding mode coefficients for each vertical line
                 dgemm(tran, tran, &Nq_ptrdiff, &one_ptrdiff, &Np_ptrdiff, &one, V1d,
@@ -114,9 +116,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 /*Calculate the slope parameter first*/
                 double Lambda;
                 if (fphys[k*Np + Nph * (Npz - 1) + i] > amax)
-                    Lambda = (amax - avar[k]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avar[k] );
+                    Lambda = (amax - avar[k]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avar[k] + pow(10,-10) );
                 else if (fphys[k*Np + Nph * (Npz - 1) + i] < amin)
-                    Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i]);
+                    Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10));
                 else
                     Lambda = 1;
                 /*Limit the value in vertical direction*/
@@ -144,11 +146,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             double Lambda = 1;
             for (int i=0;i<Np;i++){
                 if ( fphys[k*Np + i] > amax )
-                    Lambda = min( Lambda, ( amax - avar[k] )/( fphys[k*Np + i] - avar[k] ) );
+                    Lambda = min( Lambda, ( amax - avar[k] )/( fphys[k*Np + i] - avar[k] + pow(10, -10)) );
                 else if(fphys[k*Np + i] < amin)
-                    Lambda = min( Lambda, ( avar[k] - amin )/( avar[k] - fphys[k*Np + i] ) );
-                else
-                    Lambda = min( Lambda, 1 );
+                    Lambda = min( Lambda, ( avar[k] - amin )/( avar[k] - fphys[k*Np + i] + pow(10, -10)) );
             }
             Lambda = max( 0, Lambda );
             for(int i=0; i<Np;i++){

@@ -26,8 +26,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 		for (int i = 0; i < Nvar; i++){
 			Add(SystemRHS + i*Np*K + k*Np, SystemRHS + i*Np*K + k*Np, Tempfphys + i*Np*K + k*Np, Np);
 			for (int j = 0; j < IStage; j++){
+                // The last number in EXa is zero, so we don't need to calculate the last stage
 				MultiplyByConstant(TempRHS + k*Np, ExplicitRHS + (i*EStage + j)*Np*K + k*Np, dt*EXa[j], Np);
 				Add(SystemRHS + i*Np*K + k*Np, SystemRHS + i*Np*K + k*Np, TempRHS + k*Np, Np);
+                // ImplicitRHS is initialized to zero at the begining, so it cause no problem when we assemble it into the RHS when they are not calculated
 				MultiplyByConstant(TempRHS + k*Np, ImplicitRHS + (i*IStage + j)*Np*K + k*Np, dt*IMa[j], Np);
 				Add(SystemRHS + i*Np*K + k*Np, SystemRHS + i*Np*K + k*Np, TempRHS + k*Np, Np);
 			}

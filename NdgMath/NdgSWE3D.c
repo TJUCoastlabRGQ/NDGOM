@@ -43,21 +43,25 @@ void EvaluateHorizontalFaceSurfFlux(double *flux, double *fm, double *nz, double
 void EvaluateHorizontalFaceNumFlux(double *FluxS, double *fm, double *fp, double *nz, double Hcrit, int Nfp, int Nvar, int Ne){
 	double *hum = fm, *hvm = fm + Nfp*Ne, *omegam = fm + 2 * Nfp*Ne, *Hm = fm + 3 * Nfp*Ne;
 	double *hup = fp, *hvp = fp + Nfp*Ne, *omegap = fp + 2 * Nfp*Ne, *Hp = fp + 3 * Nfp*Ne;
-	double um, vm, up, vp, variablem, variablep, thetam, thetap;
+	double um, vm, up, vp, variablem, variablep, thetam, thetap, omegan;
 	for (int i = 0; i < Nfp; i++){
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, hum + i, &um);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, hvm + i, &vm);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hup + i, &up);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hvp + i, &vp);
-		*(FluxS + i) = 0.5*(um*omegam[i] + up*omegap[i]) * nz[i];
-		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] + vp*omegap[i]) * nz[i];
+		omegan = omegam[i] * nz[i];
+		*(FluxS + i) = 0.5*(um*omegam[i] *(1 + Sign(&omegan)) + up*omegap[i] *(1 - Sign(&omegan))) * nz[i];
+		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] *(1 + Sign(&omegan)) + vp*omegap[i] *(1 - Sign(&omegan))) * nz[i];
+//		*(FluxS + i) = 0.5*(um*omegam[i] + up*omegap[i]) * nz[i];
+//		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] + vp*omegap[i]) * nz[i];
 		for (int n = 2; n < Nvar; n++){
 			/*Here 2*Ne*Nfp stands for the memory occupied by h and omega*/
 			variablem = *(fm + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			variablep = *(fp + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, &variablem, &thetam);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, &variablep, &thetap);
-			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] + thetap*omegap[i]) * nz[i];
+//			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] + thetap*omegap[i]) * nz[i];
+			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] * (1 + Sign(&omegan)) + thetap*omegap[i] * (1 - Sign(&omegan))) * nz[i];
 		}
 	}
 

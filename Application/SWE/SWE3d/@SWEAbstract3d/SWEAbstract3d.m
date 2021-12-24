@@ -146,6 +146,28 @@ classdef SWEAbstract3d < NdgPhysMat
             %doing nothing here
         end
         
+        function matEvaluateTemporalDiscrete( obj )            
+            switch obj.getOption('temporalDiscreteType')
+                case enumTemporalDiscrete.SSPRK22
+                    obj.matEvaluateSSPRK22();  
+                case enumTemporalDiscrete.IMEXRK343
+                    obj.matEvaluateIMEXRK343();
+                case enumTemporalDiscrete.IMEXRK222 
+                    obj.matEvaluateIMEXRK222();    
+                case enumTemporalDiscrete.IMEXRK111
+                    obj.matEvaluateIMEXRK111(); 
+                case enumTemporalDiscrete.MRK244
+                    obj.matEvaluateMRK244();                     
+                case enumTemporalDiscrete.EXRK33
+                    obj.matEvaluateEXRK33();                    
+                otherwise
+                    msgID = [ mfilename, ':UnknownTemproalDicsreteType'];
+                    msgtext = ['The temporal discrete type ', ...
+                        obj.getOption('temporalDiscreteType') ,' is invalid.'];
+                    throw( MException(msgID, msgtext) );
+            end
+        end% func        
+        
     end
     
     methods ( Access = protected )

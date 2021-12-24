@@ -87,14 +87,14 @@ while( time < ftime )
  
    obj.VerticalEddyViscositySolver.matUpdateViscosity( obj, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2), dt, fphys{1}(:,:,13));
     
-   fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
+%    fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
         
-   fphys{1}(:,:,14) = obj.VerticalEddyViscositySolver.Tke;
-        
-   fphys{1}(:,:,15) = obj.VerticalEddyViscositySolver.Eps;    
+%    fphys{1}(:,:,14) = obj.VerticalEddyViscositySolver.Tke;
+%         
+%    fphys{1}(:,:,15) = obj.VerticalEddyViscositySolver.Eps;    
     
-    fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
-    fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
+   fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
+   fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
 %     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
     visual.drawResult( fphys2d{1}(:,:,1) );
