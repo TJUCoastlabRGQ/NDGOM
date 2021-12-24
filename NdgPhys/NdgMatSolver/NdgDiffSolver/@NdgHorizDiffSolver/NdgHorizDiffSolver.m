@@ -56,8 +56,12 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
                     BEfp(:,:,physClass.varFieldIndex(i)));
                 
             end
-            
         end
+        
+        function matUpdateViscosity(obj)
+            %doing nothing
+        end
+        
     end
     
     methods( Access = protected )
@@ -68,10 +72,6 @@ classdef NdgHorizDiffSolver < AbstractDiffSolver
 %             ind = ( edge.ftype == enumBoundaryCondition.Dirichlet );
 %             fp(:, ind, 1) = fm(:, ind, 1);
 %         end
-        
-        function matUpdateViscosity(obj)
-            %doing nothing
-        end
         
         function [ invM ] = assembleMassMatrix( obj, mesh )
             cell = mesh.cell;

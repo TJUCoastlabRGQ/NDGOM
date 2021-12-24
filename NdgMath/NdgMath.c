@@ -293,6 +293,15 @@ void ReverseValue(double *dest, double *source, int size){
 		dest[i] = 1.0 / source[i];
 }
 
+int Sign(double *input) {
+	if ((*input) > 0)
+		return 1;
+	else if ((*input) < 0)
+		return -1;
+	else
+		return 0;
+}
+
 void Sort(double *dest, int Num){
 	// Adopt bubble method to sort the given array.
 	int isSorted;

@@ -53,6 +53,8 @@ void MultiplyByConstant(double *, double *, double, int);
 
 void DotCriticalDivide(double *, double *, double *, double *, int);
 
+int Sign(double *);
+
 void Sort(double *, int);
 
 void StrongFormInnerEdgeRHS(int , double *, double *, int , int ,int , double *, double *, double *, \

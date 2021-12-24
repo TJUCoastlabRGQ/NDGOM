@@ -1,4 +1,4 @@
-function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage)
+function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, EXStage)
 %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
 %> return the physical field with vertical diffusion considered
 %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -9,7 +9,7 @@ function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, 
 %> @param[in] ImplicitParameter The implicit parameter at the corresponding IMEXRK stage
 %> @param[in] dt The time step
 %> @param[in] RKIndex The intermediate stage of IMEXRK time stepping method
-%> @param[in] IMStage The total stage of the implicit part of IMEXRK time stepping method
+%> @param[in] EXStage The total stage of the explicit part of IMEXRK time stepping method
 %> @param[out] fphys The physical field with vertical diffusion
 %> considered
 
@@ -21,7 +21,7 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
 % Np = physClass.meshUnion(1).cell.Np;
 
 % tic;
-[fphys, physClass.ImplicitRHS(:,:,RKIndex:IMStage-1:end)] = mxUpdateImplicitRHS(...
+[fphys, physClass.ImplicitRHS(:,:,RKIndex:EXStage-1:end)] = mxUpdateImplicitRHS(...
     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
     physClass.meshUnion(1).cell.M, physClass.meshUnion(1).tz, physClass.meshUnion(1).cell.Dt, ...
     DiffusionCoefficient, physClass.SurfBoundNewmannDate, physClass.BotBoundNewmannDate,...

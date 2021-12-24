@@ -73,7 +73,7 @@ classdef LockExchangeCase < SWEBaroclinic3d
             option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             %             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             %             option('GOTMSetupFile') = obj.GotmFile;
             %             option('equationType') = enumDiscreteEquation.Strong;
