@@ -422,6 +422,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const ptrdiff_t dimension = Np*Nz;
         const ptrdiff_t colB = 1;
         double Alpha = 1.0, Beta = 0.0;
+
         for (int var = 0; var < Nvar; var++){
             dgemm("n", "n", &dimension, &colB, &dimension, &Alpha, StiffMatrix + var*Np*Nz*Np*Nz, &dimension, fphys + var*K3d*Np + i*Nz*Np, &dimension, &Beta, ImplicitRHS + var*K3d*Np + i*Nz*Np, &dimension);
         }

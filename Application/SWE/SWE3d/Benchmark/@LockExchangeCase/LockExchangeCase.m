@@ -3,13 +3,13 @@ classdef LockExchangeCase < SWEBaroclinic3d
     %   此处显示详细说明
     
     properties
-        ChLength = 2
+        ChLength = 64000
         
-        ChWidth = 0.01
+        ChWidth = 500
         
-        finalTime = 15
+        finalTime = 61200
         
-        H0 = 0.3
+        H0 = 20
     end
     
     properties( Constant )
@@ -17,6 +17,7 @@ classdef LockExchangeCase < SWEBaroclinic3d
     end
     
     methods
+        %> For this case, the parameter is set following (Thetis, 2017), and we take M = 128, Mz = 20
         function obj = LockExchangeCase(N, Nz, M, Mz)
             %LOCKEXCHANGECASE 构造此类的实例
             %   此处显示详细说明
@@ -41,10 +42,13 @@ classdef LockExchangeCase < SWEBaroclinic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 Index = all(mesh3d.x<=obj.ChLength/2);
-                fphys{m}(:,Index,15) = 5*obj.H0;
+                fphys{m}(:,Index,15) = 35*obj.H0;
                 Index = all(mesh3d.x>=obj.ChLength/2);
-                fphys{m}(:,Index,15) = 0.2*obj.H0;
-                fphys{m}(:,:,14) = 20*obj.H0;
+                fphys{m}(:,Index,15) = 35*obj.H0;
+                Index = all(mesh3d.x<=obj.ChLength/2);
+                fphys{m}(:,Index,14) = 5*obj.H0;
+                Index = all(mesh3d.x>=obj.ChLength/2);
+                fphys{m}(:,Index,14) = 30*obj.H0;
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
@@ -53,16 +57,7 @@ classdef LockExchangeCase < SWEBaroclinic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-           
-           h3d = zeros(size(obj.fext3d{1}(:,:,1)));
-           h2d = zeros(size(obj.fext2d{1}(:,:,1)));
-           Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h3d(:,Index) = -obj.meshUnion(1).BoundaryEdge.xb(:,Index) *10^(-5)  + 15;
-           obj.fext3d{1}(:,:,3) = h3d;
-           
-           Index = ( obj.mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
-           h2d(:,Index) = -obj.meshUnion(1).mesh2d.BoundaryEdge.xb(:,Index) *10^(-5)  + 15;
-           obj.fext2d{1}(:,:,3) = h2d;
+           %doing nothing
         end        
         
         function [ option ] = setOption( obj, option )
@@ -79,15 +74,15 @@ classdef LockExchangeCase < SWEBaroclinic3d
             %             option('equationType') = enumDiscreteEquation.Strong;
             %             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             %             option('outputType') = enumOutputFile.VTK;
-            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
+            option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
 %             option('GOTMSetupFile') = obj.GotmFile;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('limiterType') = enumLimiter.Vert;
-            option('ConstantVerticalEddyViscosityValue') = 0;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 0;
+            option('ConstantVerticalEddyViscosityValue') = 0.0001;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('ConstantHorizontalEddyViscosityValue') = 1.0;
 %             option('PhysicalSurfaceRoughnessLength') = 0.02;
 %             option('PhysicalBottomRoughnessLength') = 0.0015;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
