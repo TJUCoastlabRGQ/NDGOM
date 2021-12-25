@@ -117,6 +117,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	const mwSize dimOut[3] = { Np, K, Nvar };
 	plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
 	double *OutputRHS = mxGetPr(plhs[0]);
+	/*We copy the input right hand side data to the allocated space and ready for output*/
 	memcpy(OutputRHS, InputRHS, Np*K*Nvar*sizeof(double));
 	int Nfield;
 	mxArray *TempOrder;
@@ -213,11 +214,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int k = 0; k < K; k++){
+			/*set the diffusion coefficient $H\nv$, added on 20211225*/
 			DotProduct(HorDiffnv + k*Np, Tempnv + k*Np, fphys + 3 * Np*K + k*Np, Np);
 			for (int field = 0; field < Nvar; field++){
+				//For 3d shallow water problem, variable about height is organized as the forth variable
 				DotCriticalDivide(HorDiffvariable + field*Np*K + k*Np, \
 					fphys + (int)(varIndex[field] - 1)*Np*K + k*Np, Hcrit, \
-					fphys + 3*Np*K + k*Np, Np);//For 3d shallow water problem, variable about height is organized as the forth variable
+					fphys + 3*Np*K + k*Np, Np);
 			}
 		}
 		huM = HorDiffTempBEfm, hvM = HorDiffTempBEfm + BENe*BENfp, hM = HorDiffTempBEfm + 2 * BENe*BENfp;
@@ -248,7 +251,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, fext + face*BENfp, BENfp, Nfield + 1, BENe, varIndex);
 			/*Water depth needs to be considered, so we plus Nfield by one to consider the water depth field*/
 			EvaluateHydroStaticReconstructValue(*Hcrit, HorDiffTempBEfm + face*BENfp, HorDiffTempBEfp + face*BENfp, HorDiffzM + face*BENfp, HorDiffzP + face*BENfp, BENfp, Nfield + 1, BENe);
-			/*We divide the variable by water depth to get the original variable*/
+			/*We divide the variable by water depth to get the original variable, u, v, T and S etc*/
 			for (int field = 0; field < 2; field++){
 				DotCriticalDivide(HorDiffBEfp + field*BENfp*BENe + face*BENfp, \
 					HorDiffTempBEfp + field*BENfp*BENe + face*BENfp, Hcrit, \
@@ -291,6 +294,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
+			/*Multiply the local derivative by diffusion coefficient $\nu H$, added on 20211225*/
 			DotProduct(HorDiffLocalPrimitiveDiffTermX + field*Np*K + k*Np, HorDiffVx + field*Np*K + k*Np, HorDiffnv + k*Np, Np);
 			DotProduct(HorDiffLocalPrimitiveDiffTermY + field*Np*K + k*Np, HorDiffVy + field*Np*K + k*Np, HorDiffnv + k*Np, Np);
 		}
@@ -310,7 +314,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         for (int field = 0; field < Nfield; field++){
 			FetchInnerEdgeFacialValue(HorDiffIEfm + field*IENe*IENfp + face*IENfp, HorDiffIEfp + field*IENe*IENfp + face*IENfp, HorDiffvariable + field*Np*K, IEFToE + 2 * face, \
 				IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
-			/*Inner edge contribution to RHSX of $\frac{\partial u(v,\theta)}{\partial x}$*/
+			/*Inner edge contribution to RHSX of $\frac{\partial u(v,\theta)}{\partial x}$, the numerical flux and the local flux are calculated in the called function, added on 20211225*/
 			GetIEContributionToAuxialaryVariable(HorDiffERHSX + field*Np*K*Nface, face, IENe, IENfp, field, HorDiffIEfm, HorDiffIEfp, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, HorDiffIEFluxM, HorDiffIEFluxP, HorDiffIEFluxS, IEnx, IEMb, IEJs);
 			/*Inner edge contribution to RHSY of $\frac{\partial u(v,\theta)}{\partial y}$*/
 			GetIEContributionToAuxialaryVariable(HorDiffERHSY + field*Np*K*Nface, face, IENe, IENfp, field, HorDiffIEfm, HorDiffIEfp, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, HorDiffIEFluxM, HorDiffIEFluxP, HorDiffIEFluxS, IEny, IEMb, IEJs);
@@ -387,7 +391,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			DotDivideByConstant(HorDiffAVy + field*Np*K + k*Np, HorDiffAVy + field*Np*K + k*Np, Prantl, Np);
 		}
 	}
-
+	/**********************************************************************************************************************************/
 	/*Calculate the contribution to the right hand side due to the auxialary variable HorDiffAVx and HorDiffAVy with IPDG.*/
 	/*Calculate the penalty parameter $\tau$ first, this parameter is calculated as $\tau=\frac{(N+1)(N+d)}{d}\frac{n_0}{2}\frac{A}{V}\nv$*/
 	/*Inner edge first*/
@@ -435,19 +439,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				Dr, Ds, &np, HorDiffAVy + field*Np*K + k*Np, &np, &zero, &np, ry + k*Np, sy + k*Np);
 			if (type == Two){
 				/*The water depth field is excluded from this part*/
-				Add(OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
-					OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
-					HorDiffVx + field*Np*K + k*Np, Np);
-				Add(OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
-					OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
-					HorDiffVy + field*Np*K + k*Np, Np);
+				Add(OutputRHS + (field + 1)*Np*K + k*Np, \
+					OutputRHS + (field + 1)*Np*K + k*Np, \
+					HorDiffVx + (field + 1 - 1)*Np*K + k*Np, Np);
+				Add(OutputRHS + (field + 1)*Np*K + k*Np, \
+					OutputRHS + (field + 1)*Np*K + k*Np, \
+					HorDiffVy + (field + 1 - 1)*Np*K + k*Np, Np);
 			}
 			else if (type == Three){
-				Add(OutputRHS + ((int)varIndex[field] - 1)*Np*K + k*Np, \
-					OutputRHS + ((int)varIndex[field] - 1)*Np*K + k*Np, \
+				Add(OutputRHS + field*Np*K + k*Np, \
+					OutputRHS + field*Np*K + k*Np, \
 					HorDiffVx + field*Np*K + k*Np, Np);
-				Add(OutputRHS + ((int)varIndex[field] - 1)*Np*K + k*Np, \
-					OutputRHS + ((int)varIndex[field] - 1)*Np*K + k*Np, \
+				Add(OutputRHS + field*Np*K + k*Np, \
+					OutputRHS + field*Np*K + k*Np, \
 					HorDiffVy + field*Np*K + k*Np, Np);
 			}
 		}
@@ -456,29 +460,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		/*If Mellor and Blumberg's method in "Modeling vertical and horizontal diffusivities with the sigma coordinate system" is
 		adopted, the next part should be ignored*/
 /************************************************************************************************************************************/
+/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		int field = 0;
-		/*$\bold{r_x}\cdot (Dr*Q_x)+\bold{s_x}\cdot (Ds*Q_x)$, with $*Q_x=\nv H\frac{\partial u}{\partial x}*$*/
+		//$\bold{r_x}\cdot (Dr*Q_x)+\bold{s_x}\cdot (Ds*Q_x)$, with $Q_x=\nv H\frac{\partial u}{\partial x}$
 		GetVolumnIntegral2d(HorDiffVx + field*Np*K + k*Np, HorDiffTempVx + field*Np*K + k*Np, &np, &oneI, &np, &one, \
 			Dr, Ds, &np, HorDiffAVx + field*Np*K + k*Np, &np, &zero, &np, rx + k*Np, sx + k*Np);
-		/*$\bold{r_y}\cdot (Dr*Q_x)+\bold{s_y}\cdot (Ds*Q_x)$, with $*Q_x=\nv H\frac{\partial v}{\partial x}*$*/
+		//$\bold{r_y}\cdot (Dr*Q_x)+\bold{s_y}\cdot (Ds*Q_x)$, with $Q_x=\nv H\frac{\partial v}{\partial x}$
 		GetVolumnIntegral2d(HorDiffVy + field*Np*K + k*Np, HorDiffTempVy + field*Np*K + k*Np, &np, &oneI, &np, &one, \
 			Dr, Ds, &np, HorDiffAVx + (field + 1)*Np*K + k*Np, &np, &zero, &np, ry + k*Np, sy + k*Np);
 
 		field = 1;
-		/*$\bold{r_x}\cdot (Dr*Q_y)+\bold{s_x}\cdot (Ds*Q_y)$, with $*Q_y=\nv H\frac{\partial u}{\partial y}*$*/
+		//$\bold{r_x}\cdot (Dr*Q_y)+\bold{s_x}\cdot (Ds*Q_y)$, with $Q_y=\nv H\frac{\partial u}{\partial y}$
 		GetVolumnIntegral2d(HorDiffVx + field*Np*K + k*Np, HorDiffTempVx + field*Np*K + k*Np, &np, &oneI, &np, &one, \
 			Dr, Ds, &np, HorDiffAVy + (field - 1)*Np*K + k*Np, &np, &zero, &np, rx + k*Np, sx + k*Np);
-		/*$\bold{r_y}\cdot (Dr*Q_y)+\bold{s_y}\cdot (Ds*Q_y)$, with $*Q_y=\nv H\frac{\partial v}{\partial y}*$*/
+		//$\bold{r_y}\cdot (Dr*Q_y)+\bold{s_y}\cdot (Ds*Q_y)$, with $Q_y=\nv H\frac{\partial v}{\partial y}$
 		GetVolumnIntegral2d(HorDiffVy + field*Np*K + k*Np, HorDiffTempVy + field*Np*K + k*Np, &np, &oneI, &np, &one, \
 			Dr, Ds, &np, HorDiffAVy + field*Np*K + k*Np, &np, &zero, &np, ry + k*Np, sy + k*Np);
 
 		for (int field = 0; field < 2; field++){
 			if (type == Two){
-				/*The water depth field is excluded from this part*/
+				//*The water depth field is excluded from this part
 				Add(OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
 					OutputRHS + ((int)varIndex[field + 1] - 1)*Np*K + k*Np, \
 					HorDiffVx + field*Np*K + k*Np, Np);
@@ -496,6 +501,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 		}
 	}
+	*/
 /***********************************************************************************************************************************************/
 	/*Reset all the data contained in HorDiffERHSX and HorDiffERHSY to zero, becaused these space contains the data left when calculating the auxialary variable*/
 	memset(HorDiffERHSX, 0, Np*K*Nfield*Nface*sizeof(double));
@@ -605,21 +611,35 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 
-
+	/*Facial integral of the second order operator*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
 		for (int field = 0; field < Nfield; field++){
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, HorDiffERHSX + field*Np*K*Nface + k*Np, Np);
-			Minus(OutputRHS + field*Np*K + k*Np, \
-				OutputRHS + field*Np*K + k*Np, HorDiffERHSY + field*Np*K*Nface + k*Np, Np);
+			if (type == Two) {
+				/*The water depth field is excluded from this part*/
+				Minus(OutputRHS + (field + 1)*Np*K + k*Np, \
+					OutputRHS + (field + 1)*Np*K + k*Np, \
+					HorDiffERHSX + field*Np*K*Nface + k*Np, Np);
+				Minus(OutputRHS + (field + 1)*Np*K + k*Np, \
+					OutputRHS + (field + 1)*Np*K + k*Np, \
+					HorDiffERHSY + field*Np*K*Nface + k*Np, Np);
+			}
+			else if (type == Three) {
+				Minus(OutputRHS + field*Np*K + k*Np, \
+					OutputRHS + field*Np*K + k*Np, \
+					HorDiffERHSX + field*Np*K*Nface + k*Np, Np);
+				Minus(OutputRHS + field*Np*K + k*Np, \
+					OutputRHS + field*Np*K + k*Np, \
+					HorDiffERHSX + field*Np*K*Nface + k*Np, Np);
+			}
 		}
 	}
 	/****************************************************************************************************************************/
 	/*If Mellor and Blumberg's method in "Modeling vertical and horizontal diffusivities with the sigma coordinate system" is
 	adopted, the following part about the facial integral should be ignored*/
+	/*
 	memset(HorDiffERHSX, 0, Np * K * 2 * Nface * sizeof(double));
 	memset(HorDiffERHSY, 0, Np * K * 2 * Nface * sizeof(double));
     
@@ -628,13 +648,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif    
 	for (int face = 0; face < IENe; face++){
 		int field = 0;
-		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$*/
+		//*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$
 		GetIEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 			face, HorDiffLocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
 			IEnx, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEnx, HorDiffInnerEdgeTau, 1.0, \
 			HorDiffAVIEfm, HorDiffAVIEfp, HorDiffAVx + field*Np*K, HorDiffIEFluxM, \
 			HorDiffIEFluxP, IEJs, IEMb);
-		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$*/
+		//*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$
 		GetIEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 			face, HorDiffLocalPrimitiveDiffTermX + (field + 1)*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
 			IEny, HorDiffIEfm + (field + 1)*IENe*IENfp, HorDiffIEfp + (field + 1)*IENe*IENfp, IEnx, HorDiffInnerEdgeTau, 1.0, \
@@ -642,13 +662,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			HorDiffIEFluxP, IEJs, IEMb);
 
 		field = 1;
-		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$*/
+		//*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$
 		GetIEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 			face, HorDiffLocalPrimitiveDiffTermY + (field - 1)*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
 			IEnx, HorDiffIEfm + (field - 1)*IENe*IENfp, HorDiffIEfp + (field - 1)*IENe*IENfp, IEny, HorDiffInnerEdgeTau, 1.0, \
 			HorDiffAVIEfm, HorDiffAVIEfp, HorDiffAVy + (field - 1)*Np*K, HorDiffIEFluxM, \
 			HorDiffIEFluxP, IEJs, IEMb);
-		/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$*/
+		//*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$
 		GetIEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 			face, HorDiffLocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
 			IEny, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEny, HorDiffInnerEdgeTau, 1.0, \
@@ -662,29 +682,30 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #endif    
 	for (int face = 0; face < BENe; face++){
 		int field = 0;
-		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$*/
+		//*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\nv H\frac{\partial u}{\partial x}$
 		GetBEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermX + field*Np*K, \
 			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEnx, HorDiffBEfm + field*BENe*BENfp, \
 			HorDiffBEfp + field*BENe*BENfp, BEnx, HorDiffBoundaryEdgeTau, 1.0, HorDiffAVBEfm, HorDiffAVx + field*Np*K, \
 			HorDiffBEFluxM, BEJs, BEMb);
-		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$*/
+		//*Boundary edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial y}$, here $Q_x=\nv H\frac{\partial v}{\partial x}$
 		GetBEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermX + (field + 1)*Np*K, \
 			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEny, HorDiffBEfm + (field + 1)*BENe*BENfp, \
 			HorDiffBEfp + (field + 1)*BENe*BENfp, BEnx, HorDiffBoundaryEdgeTau, 1.0, HorDiffAVBEfm, HorDiffAVx + (field + 1)*Np*K, \
 			HorDiffBEFluxM, BEJs, BEMb);
 
 		field = 1;
-		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$*/
+		//*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial x}$, here $Q_y=\nv H\frac{\partial u}{\partial y}$
 		GetBEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermY + (field - 1)*Np*K, \
 			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEnx, HorDiffBEfm + (field - 1)*BENe*BENfp, \
 			HorDiffBEfp + (field - 1)*BENe*BENfp, BEny, HorDiffBoundaryEdgeTau, 1.0, HorDiffAVBEfm, HorDiffAVy + (field - 1)*Np*K, \
 			HorDiffBEFluxM, BEJs, BEMb);
-		/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$*/
+		//*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\nv H\frac{\partial v}{\partial y}$
 		GetBEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermY + field*Np*K, \
 			BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEny, HorDiffBEfm + field*BENe*BENfp, \
 			HorDiffBEfp + field*BENe*BENfp, BEny, HorDiffBoundaryEdgeTau, 1.0, HorDiffAVBEfm, HorDiffAVy + field*Np*K, \
 			HorDiffBEFluxM, BEJs, BEMb);
 	}
+	
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -711,16 +732,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
 	}
+	*/
 /******************************************************************************************************************************/
+/*Add the mixed diffusion term to the right hand side*/
+	/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
-		for (int field = 0; field < Nfield; field++){
+		for (int field = 0; field < 2; field++){
 			Minus(OutputRHS + field*Np*K + k*Np, \
 				OutputRHS + field*Np*K + k*Np, HorDiffERHSX + field*Np*K*Nface + k*Np, Np);
 			Minus(OutputRHS + field*Np*K + k*Np, \
 				OutputRHS + field*Np*K + k*Np, HorDiffERHSY + field*Np*K*Nface + k*Np, Np);
 		}
 	}
+	*/
 }
