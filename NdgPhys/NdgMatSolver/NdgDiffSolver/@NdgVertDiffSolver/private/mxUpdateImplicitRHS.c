@@ -271,6 +271,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     const mwSize dimOut[3] = {Np,K3d,Nvar};
     plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
     plhs[1] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
+
+	Nvar = 2;
+
     double *fphys = mxGetPr(plhs[0]);
     memcpy(fphys, RHS, Np*K3d*Nvar*sizeof(double));
     double *ImplicitRHS = mxGetPr(plhs[1]);
