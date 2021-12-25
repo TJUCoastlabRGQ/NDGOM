@@ -201,8 +201,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	else if (type == Three){
 		Nfield = Nvar;
-
-		Nfield = 2;
         /*For 3d shallow water problem, the face number is equal to TempNface - 2, since there 
          * is surface edge and bottom edge is not considered for horizontal diffusion term*/
         Nface = tempNface - 2;        
