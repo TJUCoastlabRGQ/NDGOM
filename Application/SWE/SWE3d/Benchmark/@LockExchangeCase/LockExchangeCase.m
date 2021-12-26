@@ -10,6 +10,24 @@ classdef LockExchangeCase < SWEBaroclinic3d
         finalTime = 61200
         
         H0 = 20
+        
+        MAXfid
+        
+        MINfid
+        
+        RPEfid
+        
+        RPE0
+        
+        Front95To96fid
+        
+        Front96To97fid
+        
+        Front97To98fid
+        
+        Front98To99fid
+        
+        Front99To00fid
     end
     
     properties( Constant )
@@ -26,6 +44,26 @@ classdef LockExchangeCase < SWEBaroclinic3d
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             
             obj.Cf{1} = 0*ones(size(obj.mesh2d.x));
+            
+            obj.MAXfid = fopen('Result\LockExchangeCase\3d\MaxData.dat','w');
+            
+            obj.MINfid = fopen('Result\LockExchangeCase\3d\MinData.dat','w');
+            
+            obj.RPEfid = fopen('Result\LockExchangeCase\3d\RPEData.dat','w');
+            
+            obj.Front95To96fid = fopen('Result\LockExchangeCase\3d\FrontData95To96.dat','w');
+            
+            obj.Front96To97fid = fopen('Result\LockExchangeCase\3d\FrontData96To97.dat','w');
+            
+            obj.Front97To98fid = fopen('Result\LockExchangeCase\3d\FrontData97To98.dat','w');
+            
+            obj.Front98To99fid = fopen('Result\LockExchangeCase\3d\FrontData98To99.dat','w');
+            
+            obj.Front99To00fid = fopen('Result\LockExchangeCase\3d\FrontData99To00.dat','w');
+            
+            obj.fphys{1}(:,:,13) = obj.matCalculateDensityField( obj.fphys{1} );
+            
+            obj.RPE0 = obj.matCalculateRPE( obj.fphys );
         end
        
     end
@@ -54,6 +92,70 @@ classdef LockExchangeCase < SWEBaroclinic3d
                 %water depth
                 fphys2d{m}(:,:,1) = obj.H0;
             end
+        end
+        
+        function matUpdateOutputResult( obj, time, ~, fphys )
+            
+            fprintf(obj.MAXfid,'%12.8f  %12.8f\n', time, max(max(fphys{1}(:,:,13))) );
+            
+            fprintf(obj.MINfid,'%12.8f  %12.8f\n', time, min(min(fphys{1}(:,:,13))) );
+            
+            Index = (fphys{1}(:,:,13)>995 & fphys{1}(:,:,13)<=996);
+            
+            fprintf(obj.Front95To96fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
+            
+            Index = (fphys{1}(:,:,13)>996 & fphys{1}(:,:,13)<=997);
+            
+            fprintf(obj.Front96To97fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) ); 
+            
+            Index = (fphys{1}(:,:,13)>997 & fphys{1}(:,:,13)<=998);
+            
+            fprintf(obj.Front97To98fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
+            
+            Index = (fphys{1}(:,:,13)>998 & fphys{1}(:,:,13)<=999);
+            
+            fprintf(obj.Front98To99fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
+            
+            Index = (fphys{1}(:,:,13)>999 & fphys{1}(:,:,13)<=1000);
+            
+            fprintf(obj.Front99To00fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) ); 
+            
+            RPE = obj.matCalculateRPE( fphys );
+            
+            fprintf(obj.RPEfid,'%12.8f  %12.8f\n', time, (RPE - obj.RPE0)/obj.RPE0 ); 
+        end
+        
+        function RPE = matCalculateRPE( obj, fphys )
+            
+            aveRHO = obj.meshUnion(1).GetMeshAverageValue(...
+                    fphys{1}(:,:,13) );
+            [ sortedAveRHO, I ] = sort(aveRHO,'descend');
+            %The mesh is Uniform
+            aveZ = obj.meshUnion(1).GetMeshAverageValue(...
+                    obj.meshUnion(1).z );
+            sortedAveZ = aveZ(I) * obj.H0 + obj.H0 ;
+            sortedLAV = obj.meshUnion(1).LAV(I);
+            
+            RPE = sum( obj.gra * sortedLAV .* sortedAveZ .* sortedAveRHO );
+            
+        end
+        
+        function matUpdateFinalResult( obj, ~, ~, ~ )
+            fclose(obj.MAXfid);
+            
+            fclose(obj.MINfid);
+            
+            fclose(obj.RPEfid);
+            
+            fclose(obj.Front95To96fid);
+                    
+            fclose(obj.Front96To97fid);
+            
+            fclose(obj.Front97To98fid);
+            
+            fclose(obj.Front98To99fid);
+            
+            fclose(obj.Front99To00fid);
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
