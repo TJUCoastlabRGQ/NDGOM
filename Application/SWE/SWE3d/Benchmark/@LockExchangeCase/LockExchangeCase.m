@@ -7,7 +7,7 @@ classdef LockExchangeCase < SWEBaroclinic3d
         
         ChWidth = 500
         
-        finalTime = 61200
+        finalTime = 30
         
         H0 = 20
         
@@ -96,9 +96,9 @@ classdef LockExchangeCase < SWEBaroclinic3d
         
         function matUpdateOutputResult( obj, time, ~, fphys )
             
-            fprintf(obj.MAXfid,'%12.8f  %12.8f\n', time, max(max(fphys{1}(:,:,13))) );
+            fprintf(obj.MAXfid,'%12.8f  %12.8f\n', time, max(max(fphys{1}(:,:,14) ./ fphys{1}(:,:,4))) );
             
-            fprintf(obj.MINfid,'%12.8f  %12.8f\n', time, min(min(fphys{1}(:,:,13))) );
+            fprintf(obj.MINfid,'%12.8f  %12.8f\n', time, min(min(fphys{1}(:,:,14) ./ fphys{1}(:,:,4))) );
             
             Index = (fphys{1}(:,:,13)>995 & fphys{1}(:,:,13)<=996);
             
@@ -133,7 +133,8 @@ classdef LockExchangeCase < SWEBaroclinic3d
             %The mesh is Uniform
             aveZ = obj.meshUnion(1).GetMeshAverageValue(...
                     obj.meshUnion(1).z );
-            sortedAveZ = aveZ(I) * obj.H0 + obj.H0 ;
+            sortedAveZ = sort(aveZ, 'ascend');
+            sortedAveZ = sortedAveZ * obj.H0 + obj.H0 ;
             sortedLAV = obj.meshUnion(1).LAV(I);
             
             RPE = sum( obj.gra * sortedLAV .* sortedAveZ .* sortedAveRHO );
