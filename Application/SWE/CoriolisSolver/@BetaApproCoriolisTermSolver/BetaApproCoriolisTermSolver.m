@@ -19,7 +19,7 @@ classdef BetaApproCoriolisTermSolver < AbstractCoriolisTermSolver
             for m = 1:physClass.Nmesh 
                 
                 mesh = physClass.meshUnion(m);
-                ind = (mesh.EToR == int8(NdgRegionType.Wet));
+                ind = (mesh.EToR == int8(enumSWERegion.Wet));
 
     
                 Np = physClass.meshUnion(m).cell.Np;
