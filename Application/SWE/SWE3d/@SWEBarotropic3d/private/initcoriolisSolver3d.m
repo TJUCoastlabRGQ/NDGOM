@@ -2,7 +2,7 @@ function coriolisSolver3d = initcoriolisSolver3d(obj)
 if obj.option.isKey('CoriolisType') % the option exist
     switch obj.getOption('CoriolisType')
         case enumSWECoriolis.None
-            coriolisSolver3d = NonCoriolisTermSolver();
+            coriolisSolver3d = NonCoriolisTermSolver( obj );
         case enumSWECoriolis.Beta
             if obj.option.isKey('f0 for beta coriolis solver') && obj.option.isKey('beta for beta coriolis solver')
                 f0 = obj.getOption('f0 for beta coriolis solver');
@@ -29,6 +29,6 @@ if obj.option.isKey('CoriolisType') % the option exist
     end
     %doing nothing
 else % the option does not exist
-    coriolisSolver3d = NonCoriolisTermSolver();
+    coriolisSolver3d = NonCoriolisTermSolver( obj );
 end
 end

@@ -68,7 +68,7 @@ classdef EkmanSpiral < SWEBarotropic3d
             option('outputType') = enumOutputFile.VTK;
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.1;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
             option('CoriolisType') = enumSWECoriolis.Beta;
