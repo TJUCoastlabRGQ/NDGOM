@@ -189,6 +189,7 @@ classdef LockExchangeCase < SWEBaroclinic3d
 %             option('PhysicalSurfaceRoughnessLength') = 0.02;
 %             option('PhysicalBottomRoughnessLength') = 0.0015;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
+            option('CoriolisType') = enumSWECoriolis.None;
         end
         
     end    
