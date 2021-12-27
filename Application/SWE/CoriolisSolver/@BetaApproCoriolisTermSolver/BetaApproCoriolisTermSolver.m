@@ -5,7 +5,8 @@ classdef BetaApproCoriolisTermSolver < AbstractCoriolisTermSolver
     end
     
     methods
-        function obj = BetaApproCoriolisTermSolver(m, n)
+        function obj = BetaApproCoriolisTermSolver( phys, m, n)
+            obj = obj@AbstractCoriolisTermSolver( phys.meshUnion );
             obj.f0 = m;
             obj.beta = n;
         end
@@ -27,12 +28,12 @@ classdef BetaApproCoriolisTermSolver < AbstractCoriolisTermSolver
                 q = a*s;%f0
                 
                 % frhs = frhs + (f+by)hv
-                physClass.frhs{m}(:,ind,2) = physClass.frhs{m}(:,ind,2)...
-                    + (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,3));
+                physClass.frhs{m}(:,ind,obj.huIndex) = physClass.frhs{m}(:,ind,obj.huIndex)...
+                    + (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,obj.hvIndex));
                 
                 % frhs = frhs - (f+by)hu
-                physClass.frhs{m}(:,ind,3) = physClass.frhs{m}(:,ind,3)...
-                    - (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,2));
+                physClass.frhs{m}(:,ind,obj.hvIndex) = physClass.frhs{m}(:,ind,obj.hvIndex)...
+                    - (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,obj.huIndex));
                 
             end
         end
