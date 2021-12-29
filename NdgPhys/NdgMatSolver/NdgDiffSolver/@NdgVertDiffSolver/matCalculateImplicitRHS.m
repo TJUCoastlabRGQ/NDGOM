@@ -1,4 +1,4 @@
-function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, EXStage)
+function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage)
 %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
 %> return the physical field with vertical diffusion considered
 %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -21,7 +21,7 @@ Nz = physClass.meshUnion(1).Nz;
 Np = physClass.meshUnion(1).cell.Np;
 
 tic;
-[Tempfphys, physClass.ImplicitRHS(:,:,RKIndex:(EXStage-1):end)] = mxUpdateImplicitRHS(...
+[Tempfphys, physClass.ImplicitRHS(:,:,RKIndex:(IMStage-1):end)] = mxUpdateImplicitRHS(...
     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
     physClass.meshUnion(1).cell.M, physClass.meshUnion(1).tz, physClass.meshUnion(1).cell.Dt, ...
     DiffusionCoefficient, physClass.SurfBoundNewmannDate, physClass.BotBoundNewmannDate,...
@@ -145,7 +145,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
         %     end
         %% This part is used to impose homogeneous Dirichlet boundary condition for hu and hv
         %> Impose bottom boundary condition
-        [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
+%         [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
         %> The upper adjacent cell part
         OP12 = zeros(Np);
         %     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz,i), OP12);
@@ -167,7 +167,7 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
         [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
             ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
  %> For bottom dirichlet boundary, we just need to ignore the following part
-        [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
+%         [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
 
         for var = 1:2
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;

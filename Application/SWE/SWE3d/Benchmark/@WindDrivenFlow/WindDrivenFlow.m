@@ -61,15 +61,15 @@ classdef WindDrivenFlow < SWEBarotropic3d
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
 % %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-%            VCV = obj.meshUnion(1).cell.VCV;
-%            Nz = obj.meshUnion(1).Nz;
-%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+           VCV = obj.meshUnion(1).cell.VCV;
+           Nz = obj.meshUnion(1).Nz;
+           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
         end
         
         function [ option ] = setOption( obj, option )
@@ -81,7 +81,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
-            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -90,7 +90,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
-            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Dirichlet;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         
     end
