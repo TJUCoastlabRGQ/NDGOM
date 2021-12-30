@@ -37,16 +37,11 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
         %> @param[out] fphys The physical field with vertical diffusion
         %> considered
         %         fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
-        
-            [ fphys{1}(:,:,obj.varFieldIndex)] = ...
-        obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-        fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
-        2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
     
-        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, ~, ~, ~, fphys )
+        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, hu, hv, time, fphys )
+            obj.matFetchBottomBoundaryVelocity( physClass, fphys );
             obj.matUpdatePenaltyParameter( physClass, obj.nv ./ Height.^2 );
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height.^2, Height2d, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage );
-            obj.matFetchBottomBoundaryVelocity( physClass, fphys );
         end
     end
     
