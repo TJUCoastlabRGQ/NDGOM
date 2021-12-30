@@ -51,7 +51,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     
     methods( Access = protected )
         
-        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, intRK, Stage);
+        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage);
         
         function matUpdatePenaltyParameter( obj, physClass, DiffusionCoefficient )
             %> @brief Evaluating the penalty parameter used to penalize the jump between adjacet cell used in IPDG for second order operator

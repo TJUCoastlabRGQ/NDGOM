@@ -6,7 +6,7 @@ fphys = obj.fphys;
 %> allocate space for the rhs to be stored
 ExplicitRHS1d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 3);
 DiffusionCoefficient = obj.miu * ones(size(obj.meshUnion(1).x));
-dt = 0.015;
+dt = obj.dt;
 % visual = Visual2d( obj.mesh2d );
 visual = makeVisualizationFromNdgPhys( obj );
 hwait = waitbar(0,'Runing MatSolver....');

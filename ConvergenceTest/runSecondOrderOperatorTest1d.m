@@ -33,7 +33,7 @@ for n = 1:Ndeg
     Solver = SecondOrderOperatorTest1d(Order(n),NOC(m));
     Solver.dt = dt/(NOC(m)/NOC(1))/(Order(n)^2/Order(1)^2);
     tic;
-    Solver.matTimeStepping222;
+    Solver.matTimeStepping343;
     time(m,n) = toc;
     PostProcess = NdgPostProcess(Solver.meshUnion(1),strcat('Result/SecondOrderOperatorTest1d','/','1d/','SecondOrderOperatorTest1d'));
     fext = cell(1);
