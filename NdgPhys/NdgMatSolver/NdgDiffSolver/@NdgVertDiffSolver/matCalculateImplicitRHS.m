@@ -1,4 +1,4 @@
-function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage )
+function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, huv3d, Height2d )
 %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
 %> return the physical field with vertical diffusion considered
 %> @detail this function is used to calculate the right hand side corresponding to the vertical
@@ -26,7 +26,8 @@ tic;
     physClass.meshUnion(1).cell.M, physClass.meshUnion(1).tz, physClass.meshUnion(1).cell.Dt, ...
     DiffusionCoefficient, physClass.SurfBoundNewmannDate, physClass.BotBoundNewmannDate,...
     dt, ImplicitParameter, SystemRHS, obj.Prantl, UpEidM, BottomEidM, max(physClass.meshUnion(1).cell.N, physClass.meshUnion.cell.Nz),...
-    physClass.meshUnion(1).cell.Nface, obj.BoundaryEdgeType);
+    physClass.meshUnion(1).cell.Nface, obj.BoundaryEdgeType, huv3d, Height2d, physClass.hcrit, physClass.meshUnion(1).BottomBoundaryEdge.FToN1,...
+    physClass.meshUnion(1).BottomBoundaryEdge.FToE, physClass.meshUnion(1).cell.VCV );
 Cversion = toc;
 tic;
 fphys = zeros( Np, physClass.meshUnion(1).K, physClass.Nvar );
@@ -136,20 +137,19 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
         for var = 3:physClass.Nvar
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
         end
-        %> If homogenerous boundary is to be added for hu and hv, the Boundary Newmann part is set to be zero, so there would have no effect on the RHS and the stiff matrix
-%         [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
-%             ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
+        %> This part is used to impose the Newmann boundary for tracer transport equation, and the Newmann date is by default set to be zero
+        [ SystemRHS(:,i*Nz,3:physClass.Nvar), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,3:physClass.Nvar),...
+            ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,3:physClass.Nvar));
+         %> Treat the Neumann boundary condition for hu and hv implicitly.
+        [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, physClass.Cf{1}(:,i), dt, ImplicitParameter, obj.Hbot(:,i), ElementalMassMatrix2d, i);
         
-        [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, physClass.Cf{1}(:,i), dt, ImplicitParameter, Height(:,i), ElementalMassMatrix2d, i);
-        
-        
-        %% This part is used to impose Newmann boundary condition for hu and hv
-        %     for var = 1:2
-        %         StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
-        %     end
-        %% This part is used to impose homogeneous Dirichlet boundary condition for hu and hv
-        %> Impose bottom boundary condition
+        %> Impose homogeneous Dirichlet bottom boundary condition for hu and hv 
 %         [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
+        %> Assemble the contribution into the stiff matrix
+         for var = 1:2
+              StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
+         end
+
         %> The upper adjacent cell part
         OP12 = zeros(Np);
         %     OP12 = AdjacentUpBoundaryIntegral(UpEidM, BottomEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(Nz,i), OP12);
@@ -157,30 +157,30 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
 
         for var = 1:2
             StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP12;
-            StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
         end
+        
         for var = 3:physClass.Nvar
             StiffMatrix(AdjacentRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP12./obj.Prantl);
         end
+        
     else %Nz == 1
         %> Impose Newmann boundary for the third to the last physical field
         for var = 3:physClass.Nvar
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\(OP11./obj.Prantl);
         end
- %> This part is used to impose the Newmann boundary for hu, hv and other tracer transport equation, and the Newmann date is by default set to be zero
-        [ SystemRHS(:,i*Nz,:), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,:),...
-            ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,:));
+      %> This part is used to impose the Newmann boundary for tracer transport equation, and the Newmann date is by default set to be zero
+        [ SystemRHS(:,i*Nz,3:physClass.Nvar), BotStiffMatrix ] = ImposeNewmannBoundaryCondition(BottomEidM, physClass.BotBoundNewmannDate(:,i,3:physClass.Nvar),...
+            ElementalMassMatrix2d, ElementalMassMatrix3d, dt, ImplicitParameter, SystemRHS(:,i*Nz,3:physClass.Nvar));
+      %> For this part, we treat the friction implicitly
+        [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, physClass.Cf{1}(:,i), dt, ImplicitParameter, obj.Hbot(:,i), ElementalMassMatrix2d, i);
         
-        [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, physClass.Cf{1}(:,i), dt, ImplicitParameter, Height(:,i), ElementalMassMatrix2d, i);
-        
- %> For bottom dirichlet boundary, we just need to ignore the following part
+      %> This is for bottom Dirichlet condition. For bottom Neumann boundary, we just need to ignore the following part
 %         [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, obj.tau(:,(i-1)*( physClass.meshUnion(1).Nz+1 ) + Nz + 1), OP11);
 
         for var = 1:2
             StiffMatrix(LocalRows(:),LocalColumns(:),var) = ElementalMassMatrix3d\OP11;
         end
-        
-        
+
     end
         %
         for var = 1:physClass.Nvar
@@ -194,11 +194,21 @@ for i =1:physClass.meshUnion(1).mesh2d(1).K
                 StiffMatrix(:,:,var) * fphys( (var-1)* K * Np + (i-1)*Nz * Np + 1  : (var-1)* K * Np + i*Nz * Np)';
 
             physClass.ImplicitRHS(:,(i-1)*Nz + 1,(var-1) * ( IMStage - 1 ) + RKIndex ) = physClass.ImplicitRHS(:,(i-1)*Nz + 1,(var-1)*( IMStage - 1 ) + RKIndex ) + SurfStiffMatrix(:,:,var);
-            physClass.ImplicitRHS(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var);
+            
         end
         
-        [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, physClass, fphys, Height(:, i), physClass.Cf{1}(:,i) );
+        % > The following part is for the tracer equation, HS, HT, HC and so on
+        for var = 3:physClass.Nvar
+            physClass.ImplicitRHS(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var - 2);
+        end
         
+        %> The following part is for hu and hv, we first calculate the stiff term, then add it to the implicit right hand side
+        [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, ElementalMassMatrix2d, ElementalMassMatrix3d, BottomEidM, Np, physClass, fphys(:,:,[1,2]), obj.Hbot(:,i), physClass.Cf{1}(:,i), i );
+        
+        for var = 1 : 2
+            physClass.ImplicitRHS(:,i*Nz,(var-1)* ( IMStage - 1 )  + RKIndex ) = physClass.ImplicitRHS(:,i*Nz,(var-1)*( IMStage - 1 ) + RKIndex ) + BotStiffMatrix(:,:,var);
+        end
+                
 end
 matVersion = toc;
 fprintf('The speed ratio is:%f\n',matVersion/Cversion);
@@ -245,8 +255,20 @@ for i = 1:size(huRHS,3)
 end
 end
 
-% function [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( physClass, eidM, fphys, Height(:, i), physClass.Cf{1}(:,i) )
-function [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, physClass, eidM, fphys, Depth, Cf )
+function [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, massMatrix2d, massMatrix3d, EidM, Np, physClass,  fphys, Depth, Cf, Index )
+
+VCV = physClass.meshUnion.cell.VCV;
+
+NLayer = physClass.meshUnion.Nz;
+
+BotStiffMatrix = zeros(Np, 1, 2);
+
+for i = 1:2
+    tempRHS = zeros(Np,1);
+    %> $C_f\times \sqrt(u^2 + v^2)\times u$
+    tempRHS(EidM) = massMatrix2d * ( Cf .* sqrt( obj.ubot(:,Index) .* obj.ubot(:,Index) + obj.vbot(:,Index) .* obj.vbot(:,Index) ) .* ( ( VCV * fphys(:,Index * NLayer,i) ) ./ Depth ) );
+    BotStiffMatrix(:,:,i) = massMatrix3d\tempRHS;
+end
 
 end
 

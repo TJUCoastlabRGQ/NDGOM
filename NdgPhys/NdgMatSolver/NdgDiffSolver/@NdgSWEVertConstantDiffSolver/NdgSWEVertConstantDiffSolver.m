@@ -8,6 +8,7 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
         
         vbot
         
+        Hbot
     end
     
     methods
@@ -38,19 +39,20 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
         %> considered
         %         fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
     
-        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, hu, hv, time, fphys )
+        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, ~, ~, ~, fphys )
             obj.matFetchBottomBoundaryVelocity( physClass, fphys );
             obj.matUpdatePenaltyParameter( physClass, obj.nv ./ Height.^2 );
-            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height.^2, Height2d, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage );
+            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height.^2, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,[1,2]), Height2d );
         end
     end
     
     methods( Access = protected )
         function matFetchBottomBoundaryVelocity( obj, physClass, fphys )
-            edge = physClass.meshUnion(1).BottomBoundaryEdge;
-            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
-            obj.ubot = fm(:,:,1) ./ fm(:,:,4);
-            obj.vbot = fm(:,:,2) ./ fm(:,:,4);
+            NLayer = physClass.meshUnion.Nz;
+            VCV = physClass.meshUnion.cell.VCV;
+            obj.Hbot = VCV * fphys{1}(:,NLayer:NLayer:end,4);
+            obj.ubot = VCV * fphys{1}(:,NLayer:NLayer:end,1) ./ obj.Hbot;
+            obj.vbot = VCV * fphys{1}(:,NLayer:NLayer:end,2) ./ obj.Hbot;
         end
     end
     

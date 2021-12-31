@@ -40,8 +40,10 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         %> @param[in] dt The time step
         %> @param[out] fphys The physical field with vertical diffusion
         %> considered
-        function  fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, SystemRHS, ImplicitParameter, dt, intRK, Stage )
-            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage);
+        %> Input parameter changed on 20211231 to consider the hu and hv
+        %> field, since we need it when we treat the bottom boundary implicitly. 
+        function  fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d )
+            fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d);
         end
         
         function matUpdateViscosity(obj, ~, ~, ~, ~, ~, ~ )
@@ -50,8 +52,9 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
     end
     
     methods( Access = protected )
-        
-        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage);
+        %> Input parameter changed on 20211231 to consider the hu and hv
+        %> field, since we need it when we treat the bottom boundary implicitly.  
+        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d);
         
         function matUpdatePenaltyParameter( obj, physClass, DiffusionCoefficient )
             %> @brief Evaluating the penalty parameter used to penalize the jump between adjacet cell used in IPDG for second order operator
