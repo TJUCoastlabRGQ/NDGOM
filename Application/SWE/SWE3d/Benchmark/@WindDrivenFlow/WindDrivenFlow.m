@@ -24,7 +24,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} = 0.005*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} = 0.0*100*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
@@ -81,7 +81,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 1;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;

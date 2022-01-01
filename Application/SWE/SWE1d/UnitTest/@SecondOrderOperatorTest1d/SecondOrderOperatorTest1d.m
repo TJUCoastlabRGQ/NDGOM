@@ -111,7 +111,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 50;
+            ftime = 20;
             outputIntervalNum = 5000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

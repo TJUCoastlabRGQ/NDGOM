@@ -25,7 +25,7 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
             obj.nv = value * ones(size(physClass.meshUnion(1).x));
             obj.Prantl = physClass.Prantl;
             obj.ubot = zeros(size(physClass.meshUnion(1).mesh2d.x));
-            obj.vbvot = zeros(size(physClass.meshUnion(1).mesh2d.y));
+            obj.vbot = zeros(size(physClass.meshUnion(1).mesh2d.y));
         end
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
         %> return the physical field with vertical diffusion considered
