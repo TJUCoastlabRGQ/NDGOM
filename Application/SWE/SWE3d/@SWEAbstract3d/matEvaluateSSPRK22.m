@@ -12,7 +12,7 @@ obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -42,7 +42,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-        %         [ fphys ] = obj.matImposeLimiter( fphys );
+                [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
         
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
@@ -63,7 +63,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-        %         [ fphys ] = obj.matImposeLimiter( fphys );
+                [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     

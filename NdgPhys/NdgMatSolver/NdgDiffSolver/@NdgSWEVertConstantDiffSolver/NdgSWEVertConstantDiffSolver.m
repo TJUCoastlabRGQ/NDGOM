@@ -41,7 +41,7 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
     
         function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, ~, ~, ~, fphys )
             obj.matFetchBottomBoundaryVelocity( physClass, fphys );
-            obj.matUpdatePenaltyParameter( physClass, obj.nv ./ Height.^2 );
+%             obj.matUpdatePenaltyParameter( physClass, obj.nv ./ Height.^2 );
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height.^2, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,[1,2]), Height2d );
         end
     end

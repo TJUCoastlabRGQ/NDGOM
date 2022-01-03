@@ -12,7 +12,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         startTime = 0;
         %> final time
 
-        finalTime = 3600;
+        finalTime = 36000;
         hcrit = 0.001;
     end
     
@@ -24,7 +24,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} = 0.0*100*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} =  0.001*100*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
@@ -61,19 +61,19 @@ classdef WindDrivenFlow < SWEBarotropic3d
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
 % %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+%            VCV = obj.meshUnion(1).cell.VCV;
+%            Nz = obj.meshUnion(1).Nz;
+%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 3600;
+            ftime = obj.finalTime;
             outputIntervalNum = 2500;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
