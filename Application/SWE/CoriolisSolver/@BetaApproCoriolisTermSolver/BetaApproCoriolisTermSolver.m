@@ -19,7 +19,7 @@ classdef BetaApproCoriolisTermSolver < AbstractCoriolisTermSolver
             for m = 1:physClass.Nmesh 
                 
                 mesh = physClass.meshUnion(m);
-                ind = (mesh.EToR == int8(enumSWERegion.Wet));
+%                 ind = (mesh.EToR == int8(enumSWERegion.Wet));
 
     
                 Np = physClass.meshUnion(m).cell.Np;
@@ -28,12 +28,12 @@ classdef BetaApproCoriolisTermSolver < AbstractCoriolisTermSolver
                 q = a*s;%f0
                 
                 % frhs = frhs + (f+by)hv
-                physClass.frhs{m}(:,ind,obj.huIndex) = physClass.frhs{m}(:,ind,obj.huIndex)...
-                    + (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,obj.hvIndex));
+                physClass.frhs{m}(:,:,obj.huIndex) = physClass.frhs{m}(:,:,obj.huIndex)...
+                    + (q(:,:)+b*mesh.y(:,:)).*(fphys{m}(:,:,obj.hvIndex));
                 
                 % frhs = frhs - (f+by)hu
-                physClass.frhs{m}(:,ind,obj.hvIndex) = physClass.frhs{m}(:,ind,obj.hvIndex)...
-                    - (q(:,ind)+b*mesh.y(:,ind)).*(fphys{m}(:,ind,obj.huIndex));
+                physClass.frhs{m}(:,:,obj.hvIndex) = physClass.frhs{m}(:,:,obj.hvIndex)...
+                    - (q(:,:)+b*mesh.y(:,:)).*(fphys{m}(:,:,obj.huIndex));
                 
             end
         end
