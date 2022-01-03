@@ -13,7 +13,7 @@ classdef EkmanSpiral < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 86400;
+        finalTime = 86400 * 100;
         
         hcrit = 0.001;
     end
@@ -22,13 +22,13 @@ classdef EkmanSpiral < SWEBarotropic3d
         function obj = EkmanSpiral(N, Nz, M, Mz)
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.outputFieldOrder2d = [ 1 ];
             obj.outputFieldOrder3d = [ 1 2 4];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} = 0*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 0.1/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
+            obj.SurfBoundNewmannDate(:,:,1) = 0.1/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,2)));%0.1
         end
     end
     
@@ -53,20 +53,20 @@ classdef EkmanSpiral < SWEBarotropic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-           VCV = obj.meshUnion(1).cell.VCV;
-           Nz = obj.meshUnion(1).Nz;
-           Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-           Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-           H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-           obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-           obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-               (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+%            VCV = obj.meshUnion(1).cell.VCV;
+%            Nz = obj.meshUnion(1).Nz;
+%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
         end        
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            outputIntervalNum = 2500;
+            outputIntervalNum = 10000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
