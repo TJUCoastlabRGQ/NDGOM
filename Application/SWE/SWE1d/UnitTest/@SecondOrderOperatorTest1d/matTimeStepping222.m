@@ -85,10 +85,10 @@ OP11 = LocalRightBoundaryIntegral(RightEidM, LocalPhysicalDiffMatrix, Dz1d, Elem
 OP12 = zeros(meshUnion.cell.Np);
 OP12 = AdjacentRightBoundaryIntegral(RightEidM, LeftEidM, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, Tau(2), OP12);
 % %> Boundary part, not considered here
-[ SystemRHS(:,1), SurfhuStiffMatrix ] = ImposeSurfaceNewmannBoundaryCondition(obj, LeftEidM, time,...
-    ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, SystemRHS(:,1));
-% [ SystemRHS(:,1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM,...
-%         LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, Tau(1), OP11, SystemRHS(:,1), time);
+% [ SystemRHS(:,1), SurfhuStiffMatrix ] = ImposeSurfaceNewmannBoundaryCondition(obj, LeftEidM, time,...
+%     ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, SystemRHS(:,1));
+[ SystemRHS(:,1), SurfhuStiffMatrix, OP11 ] = ImposeSurfaceDirichletBoundaryCondition(obj, LeftEidM,...
+        LocalPhysicalDiffMatrix, Dz1d, ElementalMassMatrix2d, ElementalMassMatrix, dt, ImplicitParameter, Tau(1), OP11, SystemRHS(:,1), time);
 
 %> Assemble into the StiffMatrix, it's noted that, the diagonal part has been included by eye(Np)
 StiffMatrix(LocalRows(:),LocalColumns(:)) = ElementalMassMatrix\OP11;

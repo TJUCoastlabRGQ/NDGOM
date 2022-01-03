@@ -126,6 +126,6 @@ end
 
 function [ mesh ] = makeUniformMesh( N, M )
 xlim = [-1, 1];
-bcType = [enumBoundaryCondition.SlipWall, enumBoundaryCondition.SlipWall];
+bcType = [enumBoundaryCondition.Clamped, enumBoundaryCondition.SlipWall];
 [ mesh ] = makeUniformMesh1d( N, xlim, M, bcType );
 end

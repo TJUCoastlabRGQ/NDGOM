@@ -26,7 +26,11 @@
 /*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified*/
 void DiagMultiply(double *, const double *, const double *, int );
 
+void DiagLeftMultiplyUnsymmetric(double *, const double *, const double *, int , int );
+
 void DiagRightMultiply(double *, const double *, const double *, int );
+
+void DiagRightMultiplyUnsymmetric(double *, const double *, const double *, int , int );
 
 void Add(double *, double *, double *, int );
 

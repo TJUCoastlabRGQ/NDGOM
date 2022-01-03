@@ -662,19 +662,24 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 
 
 /*This is for vertical diffusion part*/
-double *Tau = NULL;
+double *Tau = NULL, *u2d = NULL, *v2d = NULL;
 char *VertDiffInitialized = "False";
 
 void VertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz){
 	Tau = malloc(sizeof(double)*(Np2d*K2d*(Nz+1)));
     MemoryAllocationCheck(Tau, sizeof(double)*(Np2d*K2d*(Nz+1)));
 	memset(Tau, 0, Np2d*K2d*(Nz + 1)*sizeof(double));
+	u2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(u2d, sizeof(double)*(Np2d*K2d));
+	v2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(v2d, sizeof(double)*(Np2d*K2d));
 	VertDiffInitialized = "True";
 }
 
 void VertDiffMemoryDeAllocation(){
-	free(Tau);
-	Tau = NULL;
+	free(Tau); Tau = NULL;
+	free(u2d); u2d = NULL;
+	free(v2d); v2d = NULL;
 	VertDiffInitialized = "False";
 }
 

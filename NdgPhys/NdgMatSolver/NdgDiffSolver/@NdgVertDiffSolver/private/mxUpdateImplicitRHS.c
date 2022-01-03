@@ -11,7 +11,7 @@
 
 #include <string.h>
 
-extern double *Tau;
+extern double *Tau, *u2d, *v2d;
 
 extern char *VertDiffInitialized;
 
@@ -19,6 +19,14 @@ void FetchBoundaryData(double *dest, double *source, const int Np2d, double *Eid
 {
     for (int i = 0; i < Np2d; i++){
         dest[i] = source[(int)(Eid[i]) - 1];
+    }
+}
+
+void SumInColumn( double *dest, double *source, int row, int column){
+    for(int col = 0;col < column; col++){
+        for(int r = 0; r < row; r++){
+            dest[col] += source[col*row + r]; 
+        }
     }
 }
 
@@ -163,8 +171,8 @@ void LocalBoundaryIntegral(double *eid, double *DiffMatrix, double *mass2d, doub
 void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, double *TempTau, double *OP11, ptrdiff_t Np3d, ptrdiff_t Np2d, int Flag, const double epsilon)
 {
     /*	double *Tau = malloc(Np2d*sizeof(double));
-    for (int i = 0; i < Np2d; i++)
-        Tau[i] = 2 * TempTau[i];
+     * for (int i = 0; i < Np2d; i++)
+     * Tau[i] = 2 * TempTau[i];
      */
     //LocalBoundaryIntegral(eid, DiffMatrix, mass2d, Tau, OP11, Np3d, Np2d, Flag, epsilon);
     double *FDiffMatrix = malloc(Np2d*Np3d*sizeof(double));
@@ -215,6 +223,113 @@ void AssembleBoundaryContribution(double *dest, double *source, int Np, int K3d,
             dest[var*K3d*Np + i] += source[var*Np+i];
     }
 }
+    
+void CalculateVelocityAtBottomCellCenter(double *ucenter, double *vcenter, double *hubot, double *hvbot, \
+        ptrdiff_t *RowVCV, ptrdiff_t *ColVCV, double *hcrit, double *h2d, double *VCV) {
+    char *chn = "N";
+    double alpha = 1.0;
+    double beta = 0.0;
+    ptrdiff_t Col = 1;
+    dgemm(chn, chn, RowVCV, &Col, ColVCV, &alpha, VCV, RowVCV, hubot, ColVCV, &beta, ucenter, RowVCV);
+    dgemm(chn, chn, RowVCV, &Col, ColVCV, &alpha, VCV, RowVCV, hvbot, ColVCV, &beta, vcenter, RowVCV);
+    for (int p = 0; p < (int)(*RowVCV); p++) {
+        if (h2d[p] >= (*hcrit)) {
+            ucenter[p] = ucenter[p] / h2d[p];
+            vcenter[p] = vcenter[p] / h2d[p];
+        }
+        else {
+            ucenter[p] = 0.0;
+            vcenter[p] = 0.0;
+        }
+    }
+}
+
+void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, double dt, double ImplicitParam, double *Depth, \
+        double *EleMass2d, double *u2d, double *v2d, int Np2d, int Np3d, double hcrit, double *VCV, double *FacialElemass3d) {
+    double *Coe = malloc(Np2d * sizeof(double));
+    double *CoeVCV = malloc(Np2d * Np3d *sizeof(double));
+    double *TempOP11 = malloc(Np2d * Np3d *sizeof(double));
+    double *FinalCoe = malloc(Np3d*sizeof(double));
+    memset(FinalCoe, 0, Np3d*sizeof(double));
+    for (int p = 0; p < Np2d; p++) {
+        if (Depth[p] >= hcrit) {
+            Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+        }
+        else {
+            Coe[p] = 0.0;
+        }
+    }
+    
+    DiagLeftMultiplyUnsymmetric(CoeVCV, VCV, Coe, Np2d, Np3d);
+    
+    SumInColumn(FinalCoe, CoeVCV, Np2d, Np3d);
+    
+    DiagRightMultiplyUnsymmetric(TempOP11, FacialElemass3d, FinalCoe, Np2d, Np3d);
+    
+    MultiplyByConstant(TempOP11, TempOP11, -1.0, Np3d*Np2d);
+        
+    //AssembleContributionIntoRowAndColumn(dest, TempOP11, EidM, EidM, Np3d, Np2d, -1);
+    AssembleContributionIntoRow(dest, TempOP11, EidM, Np3d, Np2d);
+    
+    free(Coe);
+    
+    free(CoeVCV);
+    free(TempOP11);
+    free(FinalCoe);
+    
+}
+
+void GetImplicitBoundaryContribution(double *dest, double *Cf, double *u2d, double *v2d, double *Height, \
+        double *hu3d, double *hv3d, double *VCV, ptrdiff_t RowVCV, \
+        ptrdiff_t ColVCV, int Np, int Np2d, double *Mass2d, double *InvMass3d, double *EidM, double hcrit) {
+    
+    double *TempRHS = malloc(Np * 2 * sizeof(double));
+    memset(TempRHS, 0, Np * 2 * sizeof(double));
+    double *Drag2d = malloc(Np2d * 2 * sizeof(double));
+    double *TempRHS2d = malloc(Np2d * 2 * sizeof(double));
+    double *ucenter = malloc(Np2d * sizeof(double));
+    double *vcenter = malloc(Np2d * sizeof(double));
+    
+    CalculateVelocityAtBottomCellCenter(ucenter, vcenter, hu3d, hv3d, \
+            &RowVCV, &ColVCV, &hcrit, Height, VCV);
+    
+    for (int p = 0; p < Np2d; p++) {
+        Drag2d[p] = Cf[p] * sqrt(pow(u2d[p], 2.0) + pow(v2d[p], 2.0))*ucenter[p];
+        Drag2d[Np2d + p] = Cf[p] * sqrt(pow(u2d[p], 2.0) + pow(v2d[p], 2.0))*vcenter[p];
+    }
+    
+    char *chn = "N";
+    double alpha = 1.0;
+    double beta = 0.0;
+    ptrdiff_t Col = 1;
+    ptrdiff_t RowMass2d = (ptrdiff_t)Np2d;
+    ptrdiff_t ColMass2d = (ptrdiff_t)Np2d;
+    
+    ptrdiff_t RowInvMass3d = (ptrdiff_t)Np;
+    ptrdiff_t ColInvMass3d = (ptrdiff_t)Np;
+    
+    dgemm(chn, chn, &RowMass2d, &Col, &RowMass2d, &alpha, Mass2d, \
+            &RowMass2d, Drag2d, &RowMass2d, &beta, TempRHS2d, &RowMass2d);
+    
+    dgemm(chn, chn, &RowMass2d, &Col, &RowMass2d, &alpha, Mass2d, \
+            &RowMass2d, Drag2d + Np2d, &RowMass2d, &beta, TempRHS2d + Np2d, &RowMass2d);
+    
+    AssembleDataIntoPoint(TempRHS, TempRHS2d, EidM, Np2d);
+    
+    AssembleDataIntoPoint(TempRHS + Np, TempRHS2d + Np2d, EidM, Np2d);
+    
+    dgemm(chn, chn, &RowInvMass3d, &Col, &RowInvMass3d, &alpha, InvMass3d, \
+            &RowInvMass3d, TempRHS, &RowInvMass3d, &beta, dest, &RowInvMass3d);
+    
+    dgemm(chn, chn, &RowInvMass3d, &Col, &RowInvMass3d, &alpha, InvMass3d, \
+            &RowInvMass3d, TempRHS + Np, &RowInvMass3d, &beta, dest + Np, &RowInvMass3d);
+    
+    free(TempRHS);
+    free(Drag2d);
+    free(TempRHS2d);
+    free(ucenter);
+    free(vcenter);
+}
 
 void MyExit()
 {
@@ -249,10 +364,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double *BotEidM = mxGetPr(prhs[14]);
     const int P = (int)mxGetScalar(prhs[15]);
     const int Nface = (int)mxGetScalar(prhs[16]);
-
+    
     char* BoundaryType;
     BoundaryType = mxArrayToString(prhs[17]);
-    
+    // Add variables here. Added on 20211231 by RGQ.
+    double *huv3d = mxGetPr(prhs[18]);
+    double *hu3d = huv3d;
+    double *hv3d = huv3d + Np*K3d;
+    double *h2d = mxGetPr(prhs[19]);
+    double hcrit = mxGetScalar(prhs[20]);
+    double *VCV = mxGetPr(prhs[21]);
+    double *Cf = mxGetPr(prhs[22]);
 //    printf("%s\n", BoundaryType);
     
     mwSize DimOfRHS = mxGetNumberOfDimensions(prhs[11]);
@@ -271,7 +393,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     const mwSize dimOut[3] = {Np,K3d,Nvar};
     plhs[0] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
     plhs[1] = mxCreateNumericArray(NdimOut, dimOut, mxDOUBLE_CLASS, mxREAL);
-
+    
+    plhs[2] = mxCreateDoubleMatrix(Np2d,K2d,mxREAL);
+    double *u2dOut = mxGetPr(plhs[2]);
+    plhs[3] = mxCreateDoubleMatrix(Np2d,K2d,mxREAL);
+    double *v2dOut = mxGetPr(plhs[3]);
+    
     double *fphys = mxGetPr(plhs[0]);
     memcpy(fphys, RHS, Np*K3d*Nvar*sizeof(double));
     double *ImplicitRHS = mxGetPr(plhs[1]);
@@ -291,6 +418,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         CalculatePenaltyParameter(Tau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
     }
     
+    ptrdiff_t RowVCV = (ptrdiff_t)Np2d;
+    ptrdiff_t ColVCV = (ptrdiff_t)Np;
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+    for (int i = 0; i < K2d; i++) {
+        CalculateVelocityAtBottomCellCenter(u2d + i*Np2d, v2d + i*Np2d, hu3d + (i + 1)*Nz*Np - Np, hv3d + (i+1)*Nz*Np - Np, \
+                &RowVCV, &ColVCV, &hcrit, h2d + i*Np2d, VCV);
+    }
+    
+    for (int i = 0; i < K2d; i++) {
+        CalculatePenaltyParameter(Tau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
+    }
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -301,12 +441,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         double *EleMass3d = malloc(Np*Np*sizeof(double));
         double *InvEleMass3d = malloc(Np*Np*sizeof(double));
         double *EleMass2d = malloc(Np2d*Np2d*sizeof(double));
+        double *FacialElemass3d = malloc(Np2d*Np*sizeof(double));
         double *LocalPhysicalDiffMatrix = malloc(Np*Np*sizeof(double));
         double *Dz = malloc(Np*Np*sizeof(double));
         double *OP11 = malloc(Np*Np*sizeof(double));
         double *LocalRows = malloc(Np*sizeof(double));
         double *LocalColumns = malloc(Np*sizeof(double));
         DiagMultiply(EleMass3d, M3d, J3d + i*Nz*Np, Np);
+        /*Fetch the mass matrix corresponding to the facial point from the three dimensional mass matrix*/
+        AssembleFacialDiffMatrix(FacialElemass3d, EleMass3d, BotEidM, Np2d, Np);
         memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
         MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
         DiagMultiply(EleMass2d, M2d, J2d + i*Np2d, Np2d);
@@ -316,7 +459,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         /*Calculate the volumn integral for the first cell, and impose the surface Newmann boundary condition*/
         VolumnIntegral(OP11, Dz, EleMass3d, LocalPhysicalDiffMatrix, Np);
         double *SurfBoundStiffTerm = malloc(Np*Nvar*sizeof(double));
+        memset(SurfBoundStiffTerm, 0, Np*Nvar * sizeof(double));
         double *BotBoundStiffTerm = malloc(Np*Nvar*sizeof(double));
+        memset(BotBoundStiffTerm, 0, Np*Nvar * sizeof(double));
         ImposeNewmannBoundary(UpEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, surf + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz, (ptrdiff_t)Np, K3d, SurfBoundStiffTerm, Nvar);
         if (Nz != 1){
             /*When vertical layers greater than one, we calculate the bottom boundary integral part */
@@ -384,14 +529,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             /*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
             ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
             /*The following is used to add homogeneous dirichlet boundary for hu and hv*/
-            if (!strcmp(BoundaryType, "Dirichlet")){
+            if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
             }
+            else {
+                // Impose implicit Neumann boundary condition here, this part is added on 20211231
+                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
+            }
+            
             memset(OP12, 0, Np*Np*sizeof(double));
-            AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1, epsilon);
+            AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, epsilon);
             for (int var = 0; var < 2; var++){
-                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP12, UpAdjacentRows, LocalColumns, 1, Np*Nz, Np);
-                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1, Np*Nz, Np);
+                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP12, UpAdjacentRows, LocalColumns, 1.0, Np*Nz, Np);
+                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1.0, Np*Nz, Np);
             }
             for (int var = 2; var < Nvar; var++){
                 AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP12, UpAdjacentRows, LocalColumns, Prantl, Np*Nz, Np);
@@ -409,12 +559,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             /*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
             ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, (ptrdiff_t)Np2d, K2d, fphys + i*Np*Nz + (Nz - 1)*Np, (ptrdiff_t)Np, K3d, BotBoundStiffTerm, Nvar);
-            /* The following is used to add homogeneous dirichlet boundary for hu and hv*/
-            if (!strcmp(BoundaryType, "Dirichlet")){
+            /*The following is used to add homogeneous dirichlet boundary for hu and hv*/
+            if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
             }
+            else {
+                // Impose implicit Neumann boundary condition here, this part is added on 20211231
+                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
+            }
             for (int var = 0; var < 2; var++){
-                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1, Np*Nz, Np);
+                AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1.0, Np*Nz, Np);
             }
         }
         
@@ -423,14 +577,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         const ptrdiff_t dimension = Np*Nz;
         const ptrdiff_t colB = 1;
         double Alpha = 1.0, Beta = 0.0;
-
+        
         for (int var = 0; var < Nvar; var++){
             dgemm("n", "n", &dimension, &colB, &dimension, &Alpha, StiffMatrix + var*Np*Nz*Np*Nz, &dimension, fphys + var*K3d*Np + i*Nz*Np, &dimension, &Beta, ImplicitRHS + var*K3d*Np + i*Nz*Np, &dimension);
         }
         AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np, SurfBoundStiffTerm, Np, K3d, Nvar);
+        // BotBoundStiffTerm with index 1 and 2 stands for hu and hv respectively, they are zero since they are treated implicitly.
+        // We add them to the ImplicitRHS since they have no effect on the final result.
         AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, Nvar);
+        // We first need to calculate the contribution to the right hand side due to the implicit bottom condition, then add they to the RHS
+        GetImplicitBoundaryContribution(BotBoundStiffTerm, Cf + i*Np2d, u2d + i*Np2d, v2d + i*Np2d, h2d + i*Np2d, \
+                fphys + (i + 1)*Np*Nz - Np, fphys + Np*K3d + (i + 1)*Np*Nz - Np, VCV, RowVCV, ColVCV, Np, Np2d, EleMass2d, InvEleMass3d, \
+                BotEidM, hcrit);
+        
+        //We add the right hand side due to the implicit bottom friction term back, only hu and hv considered. Added on 20211231 by RGQ
+        AssembleBoundaryContribution(ImplicitRHS + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, 2);
+        
         free(EleMass3d);
         free(InvEleMass3d);
+        free(FacialElemass3d);
         free(EleMass2d);
         free(LocalPhysicalDiffMatrix);
         free(Dz);
@@ -440,5 +605,5 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         free(SurfBoundStiffTerm);
         free(BotBoundStiffTerm);
         free(StiffMatrix);
-    }   
+    }
 }

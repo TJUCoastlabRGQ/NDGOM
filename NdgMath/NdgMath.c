@@ -54,11 +54,27 @@ void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
 	}
 }
 
+void DiagLeftMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
+{
+	for (int colI = 0; colI < Col; colI++){
+		for (int RowI = 0; RowI < Row; RowI++)
+			dest[colI*Row + RowI] = coe[RowI] * source[colI*Row + RowI];
+	}
+}
+
 void DiagRightMultiply(double *dest, const double *source, const double *coe, int Np)
 {
 	for (int colI = 0; colI < Np; colI++){
 		for (int RowI = 0; RowI < Np;RowI++)
 			dest[colI*Np + RowI] = coe[colI] * source[colI*Np + RowI];
+	}
+}
+
+void DiagRightMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
+{
+	for (int colI = 0; colI < Col; colI++){
+		for (int RowI = 0; RowI < Row;RowI++)
+			dest[colI*Row + RowI] = coe[colI] * source[colI*Row + RowI];
 	}
 }
 
