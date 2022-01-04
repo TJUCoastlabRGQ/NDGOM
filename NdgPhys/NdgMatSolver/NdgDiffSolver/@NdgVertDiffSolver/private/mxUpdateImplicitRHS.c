@@ -253,7 +253,8 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
     memset(FinalCoe, 0, Np3d*sizeof(double));
     for (int p = 0; p < Np2d; p++) {
         if (Depth[p] >= hcrit) {
-            Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+            //Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+			Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
         }
         else {
             Coe[p] = 0.0;
