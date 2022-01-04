@@ -28,7 +28,7 @@ classdef EkmanSpiral < SWEBarotropic3d
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 0.1/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,2)));%0.1
+            obj.SurfBoundNewmannDate(:,:,2) = 0.1/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
     end
     
