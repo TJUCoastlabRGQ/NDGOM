@@ -87,6 +87,7 @@ while( time < ftime )
     %     postplot(data(:,:,1));
     %     postplot(fphys{1}(:,:,1));
     time = time + dt;
+    disp(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);

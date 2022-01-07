@@ -254,7 +254,8 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
     for (int p = 0; p < Np2d; p++) {
         if (Depth[p] >= hcrit) {
       //      Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-			Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+		//	Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+			Coe[p] = -1.0*0.005 / Depth[p];
         }
         else {
             Coe[p] = 0.0;
@@ -432,10 +433,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     for (int i = 0; i < K2d; i++) {
         CalculatePenaltyParameter(Tau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
     }
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-    
     for (int i = 0; i < K2d; i++){
         double *StiffMatrix = malloc(Np*Nz*Np*Nz*Nvar*sizeof(double));
         memset(StiffMatrix, 0, Np*Nz*Np*Nz*Nvar*sizeof(double));

@@ -19,7 +19,7 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
 % K = physClass.meshUnion(1).K;
 % Nz = physClass.meshUnion(1).Nz;
 % Np = physClass.meshUnion(1).cell.Np;
-% 
+% % 
 % tic;
 [fphys, physClass.ImplicitRHS(:,:,RKIndex:(IMStage-1):end)] = mxUpdateImplicitRHS(...
     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
@@ -214,75 +214,75 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
 % fprintf('The speed ratio is:%f\n',matVersion/Cversion);
 end
 
-function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
-epsilon = -1;
-OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
-OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
-OP11(eidM,eidM) = OP11(eidM,eidM) - diag(Tau)*massMatrix2d; %checked
-end
-
-function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
-epsilon = -1;
-OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
-OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
-OP11(eidM,eidM) = OP11(eidM,eidM) -  diag(Tau)*massMatrix2d;   %checked
-end
-
-function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
-%> Here, Down or up is relative to local cell
-epsilon = -1;
-OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
-OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) +  diag(Tau) * massMatrix2d;    %checked
-end
-
-function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
-epsilon = -1;
-OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
-OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
-OP12(eidP,eidM) = OP12(eidP,eidM) +  diag(Tau) * massMatrix2d;          %checked
-end
-
-
-function [ huRHS, huStiffMatrix ] = ImposeNewmannBoundaryCondition(eidM, BoundNewmannDate, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS)
-%> This part is negative, as this is teated explicitly
-huStiffMatrix = zeros( size( huRHS ) );
-for i = 1:size(huRHS,3)
-    temphuRHS = zeros(size(huRHS(:,:,i)));
-    temphuRHS(eidM) = massMatrix2d * BoundNewmannDate(:,:,i);
-    huStiffMatrix(:,:,i) = massMatrix3d\temphuRHS;
-    huRHS(:,:,i) = huRHS(:,:,i) + dt*ImplicitParameter*huStiffMatrix(:,:,i);
-end
-end
-
-function [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, massMatrix2d, massMatrix3d, EidM, Np, physClass,  fphys, Depth, Cf, Index )
-
-VCV = physClass.meshUnion.cell.VCV;
-
-NLayer = physClass.meshUnion.Nz;
-
-BotStiffMatrix = zeros(Np, 1, 2);
-
-for i = 1:2
-    tempRHS = zeros(Np,1);
-    %> $C_f\times \sqrt(u^2 + v^2)\times u$
-    tempRHS(EidM) = massMatrix2d * ( Cf .* sqrt( obj.ubot(:,Index) .* obj.ubot(:,Index) + obj.vbot(:,Index) .* obj.vbot(:,Index) ) .* ( ( VCV * fphys(:,Index * NLayer,i) ) ./ Depth ) );
-    BotStiffMatrix(:,:,i) = massMatrix3d\tempRHS;
-end
-
-end
-
-function [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, Cf, dt, ImplicitParameter, Depth, M3d, Index , VCV )
-
-TempCoe = -1 * Cf .* sqrt(obj.ubot(:,Index).*obj.ubot(:,Index) + obj.vbot(:,Index).*obj.vbot(:,Index))./Depth;
-
-Coe = sum(diag(TempCoe) * VCV);
-
-OP11(BottomEidM,:) = OP11(BottomEidM,:) - ...
-    dt * ImplicitParameter * M3d(BottomEidM,:) * diag(Coe);
-
-end
-
-function [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, Tau, OP11)
-OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, 2 * Tau, OP11);
-end
+% function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
+% epsilon = -1;
+% OP11(:, eidM)   = OP11(:, eidM)   - epsilon * 1 * 0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+% OP11(eidM, :)   = OP11(eidM, :)   + 0.5*massMatrix2d*physicalDiffMatrix(eidM,:); %checked
+% OP11(eidM,eidM) = OP11(eidM,eidM) - diag(Tau)*massMatrix2d; %checked
+% end
+% 
+% function OP11 = LocalDownBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
+% epsilon = -1;
+% OP11(:, eidM)   = OP11(:, eidM)   - epsilon * (-1) *  0.5*physicalDiffMatrix(eidM,:)'*massMatrix2d; %checked
+% OP11(eidM, :)   = OP11(eidM, :)   -  0.5*massMatrix2d*physicalDiffMatrix(eidM,:);  %checked
+% OP11(eidM,eidM) = OP11(eidM,eidM) -  diag(Tau)*massMatrix2d;   %checked
+% end
+% 
+% function OP12 = AdjacentDownBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
+% %> Here, Down or up is relative to local cell
+% epsilon = -1;
+% OP12(:,eidM)    = OP12(:,eidM) - epsilon * (-1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;
+% OP12(eidP,:)    = OP12(eidP,:) +  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);  %checked
+% OP12(eidP,eidM) = OP12(eidP,eidM) +  diag(Tau) * massMatrix2d;    %checked
+% end
+% 
+% function OP12 = AdjacentUpBoundaryIntegral(eidM, eidP, LocalPhysicalDiffMatrix, AdjacentPhysicalDiffMatrix, massMatrix2d, Tau, OP12)
+% epsilon = -1;
+% OP12(:,eidM)    = OP12(:,eidM) -  epsilon * (1) * 0.5 * AdjacentPhysicalDiffMatrix(eidP,:)'*massMatrix2d;   %checked
+% OP12(eidP,:)    = OP12(eidP,:) -  0.5 * massMatrix2d * LocalPhysicalDiffMatrix(eidM,:);    %checked
+% OP12(eidP,eidM) = OP12(eidP,eidM) +  diag(Tau) * massMatrix2d;          %checked
+% end
+% 
+% 
+% function [ huRHS, huStiffMatrix ] = ImposeNewmannBoundaryCondition(eidM, BoundNewmannDate, massMatrix2d, massMatrix3d, dt, ImplicitParameter, huRHS)
+% %> This part is negative, as this is teated explicitly
+% huStiffMatrix = zeros( size( huRHS ) );
+% for i = 1:size(huRHS,3)
+%     temphuRHS = zeros(size(huRHS(:,:,i)));
+%     temphuRHS(eidM) = massMatrix2d * BoundNewmannDate(:,:,i);
+%     huStiffMatrix(:,:,i) = massMatrix3d\temphuRHS;
+%     huRHS(:,:,i) = huRHS(:,:,i) + dt*ImplicitParameter*huStiffMatrix(:,:,i);
+% end
+% end
+% 
+% function [ BotStiffMatrix ] = ImposeBottomNeumannBoundaryConditionForStiffMatrix( obj, massMatrix2d, massMatrix3d, EidM, Np, physClass,  fphys, Depth, Cf, Index )
+% 
+% VCV = physClass.meshUnion.cell.VCV;
+% 
+% NLayer = physClass.meshUnion.Nz;
+% 
+% BotStiffMatrix = zeros(Np, 1, 2);
+% 
+% for i = 1:2
+%     tempRHS = zeros(Np,1);
+%     %> $C_f\times \sqrt(u^2 + v^2)\times u$
+%     tempRHS(EidM) = massMatrix2d * ( Cf .* sqrt( obj.ubot(:,Index) .* obj.ubot(:,Index) + obj.vbot(:,Index) .* obj.vbot(:,Index) ) .* ( ( VCV * fphys(:,Index * NLayer,i) ) ./ Depth ) );
+%     BotStiffMatrix(:,:,i) = massMatrix3d\tempRHS;
+% end
+% 
+% end
+% 
+% function [ OP11 ] = ImposeBottomNewmannBoundaryCondition( obj, BottomEidM, OP11, Cf, dt, ImplicitParameter, Depth, M3d, Index , VCV )
+% 
+% TempCoe = -1 * Cf .* sqrt(obj.ubot(:,Index).*obj.ubot(:,Index) + obj.vbot(:,Index).*obj.vbot(:,Index))./Depth;
+% 
+% Coe = sum(diag(TempCoe) * VCV);
+% 
+% OP11(BottomEidM,:) = OP11(BottomEidM,:) - ...
+%     dt * ImplicitParameter * M3d(BottomEidM,:) * diag(Coe);
+% 
+% end
+% 
+% function [ OP11 ] = ImposeBottomDirichletBoundaryCondition(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, Tau, OP11)
+% OP11 = LocalDownBoundaryIntegral(BottomEidM, LocalPhysicalDiffMatrix, ElementalMassMatrix2d, 2 * Tau, OP11);
+% end
