@@ -8,7 +8,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
         %         ChLength = 100;
         ChLength = 150;
         %> channel width
-        ChWidth = 1;
+        ChWidth = 1/3;
         %> channel depth
         InitialDepth = 1;
         %> x range
@@ -29,6 +29,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
         U10
         CEU10
         W10
+        W05
         CEW10
         CEP10
         P10
@@ -58,7 +59,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             [ mesh2d, mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz);
             obj.Solitarywave(mesh3d);
             obj.outputFieldOrder2d = [ 1 2 3 ];
-            obj.outputFieldOrder3d = [1 2 4 11 13];
+            obj.outputFieldOrder3d = [1 2 4 11];
             obj.Nfield = 13;
             obj.fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hc','p'};
             obj.Nvar = 3;
@@ -89,7 +90,7 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             time = [10 20 30];
             Nintp = 400;
             xd = linspace(0, obj.ChLength, Nintp)';
-            yd = 0.375*ones(size(xd));
+            yd = 1/6*ones(size(xd));
             %             PostProcess = NdgPostProcess(obj.meshUnion(1),strcat(mfilename,'.',num2str(obj.Nmesh),'-','1','/',mfilename));
             PostProcess = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('Result/',mfilename,'/2d/',mfilename));
             PostProcess3d = NdgPostProcess(obj.meshUnion(1),strcat('Result/',mfilename,'/3d/',mfilename));
@@ -135,8 +136,8 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             for i = 1:numel(time)
                 [~,Index] = sort(abs(outputTime-time(i)));
                 fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
-                Hu = obj.meshUnion.cell.VCV * fresult{1}(:,:,1);
-                H = obj.meshUnion.cell.VCV * fresult{1}(:,:,3);
+                Hu = obj.meshUnion.cell.VCV * fresult{1}(:,1:obj.meshUnion(1).Nz:end,1);
+                H = obj.meshUnion.cell.VCV * fresult{1}(:,1:obj.meshUnion(1).Nz:end,3);
                 u = Hu./H;
                 plot(mesh.x(1:deltapoint:numel(mesh.x)),u(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
                 if i == numel(time)
@@ -185,31 +186,31 @@ classdef NonhydrostaticSolitaryWave3d < SWEBarotropic3d
             set(gca,'LineWidth',1.5);
             % %             set(gca,'YLim',[-0.3*a 0.3*a+0.01],'Fontsize',15);
             %% plot P
-            figure;
-            hold on;
-            set(gcf,'position',[50,50,1050,400]);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            for i = 1:numel(time)
-                [~,Index] = sort(abs(outputTime-time(i)));
-                fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
-                p = obj.meshUnion.cell.VCV * fresult{1}( :,1:obj.meshUnion(1).Nz:end,5 );
-                plot(mesh.x(1:deltapoint:numel(mesh.x)),p(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
-                if i == numel(time)
-                    PMax = max(max(abs(p)));
-                    DiffPRatio = (PMax - APMax)/APMax * 100;
-                    disp(abs(DiffPRatio));
-                end
-            end
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP10(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            % %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
-            set(gca,'Fontsize',14);
-            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
-            ylabel({'$p\;\rm {(Pa)}$'},'Interpreter','latex');
-            set(gca,'LineWidth',1.5);
-            box on;
+%             figure;
+%             hold on;
+%             set(gcf,'position',[50,50,1050,400]);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP0(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP0(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             for i = 1:numel(time)
+%                 [~,Index] = sort(abs(outputTime-time(i)));
+%                 fresult = PostProcess3d.accessOutputResultAtStepNum( Index(1) ); %
+%                 p = obj.meshUnion.cell.VCV * fresult{1}( :,1:obj.meshUnion(1).Nz:end,5 );
+%                 plot(mesh.x(1:deltapoint:numel(mesh.x)),p(1:deltapoint:numel(mesh.x)),'k','Linewidth',1.5);
+%                 if i == numel(time)
+%                     PMax = max(max(abs(p)));
+%                     DiffPRatio = (PMax - APMax)/APMax * 100;
+%                     disp(abs(DiffPRatio));
+%                 end
+%             end
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP10(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP20(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.CEP30(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             % %             plot(mesh.x(1:deltapoint:numel(mesh.x)),obj.P16(1:deltapoint:numel(mesh.x)),'ro','markersize',4.5);
+%             set(gca,'Fontsize',14);
+%             xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex');
+%             ylabel({'$p\;\rm {(Pa)}$'},'Interpreter','latex');
+%             set(gca,'LineWidth',1.5);
+%             box on;
         end
     end
     
@@ -288,6 +289,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 % [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
