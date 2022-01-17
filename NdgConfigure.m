@@ -28,9 +28,8 @@ outPath = 'lib/';
 path = 'thirdParty/Polylib/';
 srcfile = {[path, 'zwglj.c'], ...
     [path, 'zwgl.c'], ...
-    [path, 'JacobiP.c'], ...
-    [path, 'GradJacobiP.c'] };
-libfile = { [path, 'polylib.c'] };
+    [path, 'JacobiP.c']};
+libfile = { path, 'polylib.c' };
 FuncHandle(outPath, srcfile, libfile);
 % NdgMesh
 path = 'NdgMesh/@NdgMesh/private/';
@@ -480,12 +479,15 @@ srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
+% For different platforms, the path to mkl.h should be given explicitly
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
 AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
-    'NdgMath/NdgMemory.c'};
+    'NdgMath/NdgMemory.c',...
+    [path, 'mxImplicitVerticalEddyViscosity.c']};
 srcfile = { ...
-    [path, 'mxUpdateImplicitRHS.c']};
+    [path, 'mxUpdateImplicitRHS.c'],...
+    [path, 'mxSparseVersionUpdateImplicitRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEVertGOTMDiffSolver/private/';
@@ -624,13 +626,14 @@ switch computer('arch')
         LDFLAGS = [LDFLAGS, ' -lmwblas -liomp5 '];
     case 'win64'
         %% if gcc compiler adopted, -fopenmp command is used
-%                 CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
-%                     num2str(parallelThreadNum), ' '];
-%                 LDFLAGS = [LDFLAGS, ' -fopenmp '];
+        %                 CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
+        %                     num2str(parallelThreadNum), ' '];
+        %                 LDFLAGS = [LDFLAGS, ' -fopenmp '];
         %% if intel compiler adopted, /openmp command is used
-        COMPFLAGS = [COMPFLAGS,' /openmp -DDG_THREADS=', ...
+        COMPFLAGS = [COMPFLAGS,'-ID:/Software/Intel/Install/mkl/2022.0.0/include/',' /openmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
-        LDFLAGS = [LDFLAGS, ' /openmp '];
+        LDFLAGS = [LDFLAGS, '-LD:\Software\Intel\Install\mkl\2022.0.0\lib\intel64', ...
+            ' /openmp -lmkl_intel_lp64_dll.lib -lmkl_core_dll.lib -lmkl_intel_thread_dll.lib'];
     case 'glnxa64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
             num2str(parallelThreadNum)];
@@ -643,7 +646,7 @@ global CFLAGS LDFLAGS
 global COMPILER
 CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
 LDFLAGS = 'LDFLAGS=$LDFLAGS';
-COMPILER = [''];
+COMPILER = [' '];
 if ( strcmp(computer('arch'), 'maci64') )
     COMPILER = 'CC=/opt/intel/composer_xe_2015.5.222/bin/intel64/icc';
 end
@@ -655,7 +658,7 @@ switch computer('arch')
     case 'maci64'
         CFLAGS = [CFLAGS, ' -I', path, ' '];
     case 'win64'
-        COMPFLAGS = [COMPFLAGS, ' -I', path,  ' '];
+        COMPFLAGS = [COMPFLAGS, ' -I', path, ' '];
     case 'glnxa64'
         CFLAGS = [CFLAGS, ' -I', path, ' '];
 end
