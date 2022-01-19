@@ -1,6 +1,6 @@
 function NdgConfigure( varargin )
 global COMPILER
-% initialize CFLAGS & LDFLAGS
+% % initialize CFLAGS & LDFLAGS
 configureCompilerSetting();
 
 if (nargin == 0)
@@ -29,7 +29,7 @@ path = 'thirdParty/Polylib/';
 srcfile = {[path, 'zwglj.c'], ...
     [path, 'zwgl.c'], ...
     [path, 'JacobiP.c']};
-libfile = { path, 'polylib.c' };
+libfile = { [path, 'polylib.c'] };
 FuncHandle(outPath, srcfile, libfile);
 % NdgMesh
 path = 'NdgMesh/@NdgMesh/private/';
@@ -479,14 +479,22 @@ srcfile = { ...
     [path, 'mxEvaluateSurfValue.c']};
 FuncHandle(path, srcfile, libfile);
 
-% For different platforms, the path to mkl.h should be given explicitly
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
 AddIncludePath(path);
 libfile = {'NdgMath/NdgMath.c',...
-    'NdgMath/NdgMemory.c',...
+    'NdgMath/NdgMemory.c'};
+srcfile = { ...
+    [path, 'mxUpdateImplicitRHS.c']};
+FuncHandle(path, srcfile, libfile);
+
+% For different platforms, the path to mkl.h should be given explicitly
+path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
+mklpath = 'D:\Software\Intel\Install\mkl\2022.0.0\include\';
+AddIncludePath(mklpath);
+AddIncludePath(path);
+libfile = { 'NdgMath/NdgMemory.c',...
     [path, 'mxImplicitVerticalEddyViscosity.c']};
 srcfile = { ...
-    [path, 'mxUpdateImplicitRHS.c'],...
     [path, 'mxSparseVersionUpdateImplicitRHS.c']};
 FuncHandle(path, srcfile, libfile);
 
@@ -567,6 +575,8 @@ switch computer('arch')
                 file = [srcfile(n), libfile{:}];
                 mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
+%                 mex('-v','-largeArrayDims', COMPFLAGS, LDFLAGS, ...
+%                     file{:}, '-outdir', outPath);
             end
         end
     otherwise
@@ -630,9 +640,9 @@ switch computer('arch')
         %                     num2str(parallelThreadNum), ' '];
         %                 LDFLAGS = [LDFLAGS, ' -fopenmp '];
         %% if intel compiler adopted, /openmp command is used
-        COMPFLAGS = [COMPFLAGS,'-ID:/Software/Intel/Install/mkl/2022.0.0/include/',' /openmp -DDG_THREADS=', ...
+        COMPFLAGS = [COMPFLAGS, ' /openmp -DDG_THREADS=', ...
             num2str(parallelThreadNum), ' '];
-        LDFLAGS = [LDFLAGS, '-LD:\Software\Intel\Install\mkl\2022.0.0\lib\intel64', ...
+        LDFLAGS = [LDFLAGS, ' -LD:\Software\Intel\Install\mkl\2022.0.0\lib\intel64', ...
             ' /openmp -lmkl_intel_lp64_dll.lib -lmkl_core_dll.lib -lmkl_intel_thread_dll.lib'];
     case 'glnxa64'
         CFLAGS = [CFLAGS,' -fopenmp -DDG_THREADS=', ...
@@ -646,7 +656,7 @@ global CFLAGS LDFLAGS
 global COMPILER
 CFLAGS = 'CFLAGS=$CFLAGS -std=c99 -Wall -DPROFILE -largeArrayDims';
 LDFLAGS = 'LDFLAGS=$LDFLAGS';
-COMPILER = [' '];
+COMPILER = [''];
 if ( strcmp(computer('arch'), 'maci64') )
     COMPILER = 'CC=/opt/intel/composer_xe_2015.5.222/bin/intel64/icc';
 end

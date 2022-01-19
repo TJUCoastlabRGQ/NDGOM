@@ -1,6 +1,12 @@
 
 #include  "mxImplicitVerticalEddyViscosity.h"
 
+int *Ir = NULL, *Jc = NULL;
+
+char *ImVertEddyInitialized = "False";
+
+int NNZ;
+
 /*Function checked*/
 void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np) {
 	double *Tempdest = dest;
@@ -12,13 +18,96 @@ void AssembleContributionIntoSparseMatrix(double *dest, double *src, int Nonzero
 	}
 }
 
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the column index, and has been checked*/
+void AssembleContributionIntoColumn(double *dest, double *source, double *column, int Np3d, int Np2d)
+{
+	for (int colI = 0; colI < Np2d; colI++) {
+		for (int RowI = 0; RowI < Np3d; RowI++)
+			dest[((int)column[colI] - 1)*Np3d + RowI] += source[colI*Np3d + RowI];
+	}
+}
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index, and has been checked*/
+void AssembleContributionIntoRow(double *dest, double *source, double *Row, int Np3d, int Np2d)
+{
+	for (int colI = 0; colI < Np3d; colI++) {
+		for (int RowI = 0; RowI < Np2d; RowI++)
+			dest[colI*Np3d + (int)Row[RowI] - 1] += source[colI*Np2d + RowI];
+	}
+}
+/*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index and the column index, and has been checked*/
+void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *Row, double *column, int Np3d, int Np2d, int Flag)
+{
+	for (int colI = 0; colI < Np2d; colI++)
+	{
+		for (int RowI = 0; RowI < Np2d; RowI++)
+			dest[((int)column[colI] - 1)*Np3d + (int)Row[RowI] - 1] += Flag * source[colI*Np2d + RowI];
+	}
+}
+
+void AssembleDataIntoPoint(double *dest, double *source, double *PIndex, int Size) {
+	for (int p = 0; p < Size; p++) {
+		dest[(int)PIndex[p] - 1] += source[p];
+	}
+}
+
+/*Note: this function is used to assemble the element mass matrix and the physical diff matrix, and has been verified.
+Left multiply the matrix source with a diagonal matrix composed of element contained in coe.
+*/
+void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
+{
+	for (int colI = 0; colI < Np; colI++) {
+		for (int RowI = 0; RowI < Np; RowI++)
+			dest[colI*Np + RowI] = coe[RowI] * source[colI*Np + RowI];
+	}
+}
+
+void DiagLeftMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
+{
+	for (int colI = 0; colI < Col; colI++) {
+		for (int RowI = 0; RowI < Row; RowI++)
+			dest[colI*Row + RowI] = coe[RowI] * source[colI*Row + RowI];
+	}
+}
+
+void DiagRightMultiply(double *dest, const double *source, const double *coe, int Np)
+{
+	for (int colI = 0; colI < Np; colI++) {
+		for (int RowI = 0; RowI < Np; RowI++)
+			dest[colI*Np + RowI] = coe[colI] * source[colI*Np + RowI];
+	}
+}
+
+void DiagRightMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
+{
+	for (int colI = 0; colI < Col; colI++) {
+		for (int RowI = 0; RowI < Row; RowI++)
+			dest[colI*Row + RowI] = coe[colI] * source[colI*Row + RowI];
+	}
+}
+
+void ImMatrixInverse(double *dest, lapack_int Np)
+{
+	lapack_int *IPIV = malloc(Np * sizeof(lapack_int));
+
+	LAPACKE_dgetrf(LAPACK_COL_MAJOR, Np, Np, dest, Np, IPIV);
+
+	LAPACKE_dgetri(LAPACK_COL_MAJOR, Np, dest, Np, IPIV);
+
+	free(IPIV);
+}
+
+void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np) {
+	for (int i = 0; i < Np; i++)
+		dest[i] = Source[i] * Coefficient;
+}
+
 void ImEddyVisInVertAllocation(int Np, int Nlayer, int Ele2d) {
 
 	NNZ = Np * Np * 3 * Nlayer - 2 * Np * Np;
 
 	Ir = malloc(NNZ * sizeof(int));
 
-	Jc = malloc(Nlayer * Np + 1);
+	Jc = malloc((Nlayer * Np + 1)*sizeof(int));
 
 	while (Ir == NULL) {
 		Ir = malloc(NNZ * sizeof(int));
@@ -103,7 +192,7 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer, int Ele2d) {
    /*Set the thread for pardiso part to be one, set this part for once*/
 	int thread = 1;
 	mkl_set_num_threads(thread);
-	VertEddyInitialized = "True";
+	ImVertEddyInitialized = "True";
 	free(SingleColumn);
 	free(SingleRow);
 }
@@ -112,12 +201,12 @@ void ImEddyVisInVertDeAllocation()
 {
 	free(Ir), Ir = NULL;
 	free(Jc), Jc = NULL;
-	VertEddyInitialized = "False";
+	ImVertEddyInitialized = "False";
 }
 
 
 // n is the leading dimension of the stiff matrix
-void EquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS) {
+void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS) {
 	MKL_INT iparm[64];
 
 	void *pt[64];
@@ -230,7 +319,7 @@ void PardisoSolve(double *dest, double *StiffMatrix, double *RHS, MKL_INT n, int
 		iparm, msglvl, ddum, ddum, error);
 }
 
-void MatrixMultiply(double *dest, double *OPA, double *B, MKL_INT ROWA, MKL_INT *ia, MKL_INT *ja) {
+void SparseMatrixMultiply(double *dest, double *OPA, double *B, MKL_INT ROWA, MKL_INT *ia, MKL_INT *ja) {
 
 	const double alpha = 1.0;
 

@@ -683,6 +683,31 @@ void VertDiffMemoryDeAllocation(){
 	VertDiffInitialized = "False";
 }
 
+/*This is for sparse vertical diffusion part*/
+double *ImTau = NULL, *Imu2d = NULL, *Imv2d = NULL, *GlobalSystemRHS = NULL;
+char *ImVertDiffInitialized = "False";
+
+void ImVertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz, int Np3d, int Nvar) {
+	ImTau = malloc(sizeof(double)*(Np2d*K2d*(Nz + 1)));
+	MemoryAllocationCheck(ImTau, sizeof(double)*(Np2d*K2d*(Nz + 1)));
+	memset(ImTau, 0, Np2d*K2d*(Nz + 1) * sizeof(double));
+	Imu2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(Imu2d, sizeof(double)*(Np2d*K2d));
+	Imv2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(Imv2d, sizeof(double)*(Np2d*K2d));
+	GlobalSystemRHS = malloc(Np3d*K2d * Nz * sizeof(double));
+	MemoryAllocationCheck(GlobalSystemRHS, Np3d*K2d * Nz * sizeof(double));
+	ImVertDiffInitialized = "True";
+}
+
+void ImVertDiffMemoryDeAllocation() {
+	free(ImTau); ImTau = NULL;
+	free(Imu2d); Imu2d = NULL;
+	free(Imv2d); Imv2d = NULL;
+	free(GlobalSystemRHS); GlobalSystemRHS = NULL;
+	ImVertDiffInitialized = "False";
+}
+
 /*This is for GOTM part*/
 double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *numGOTM = NULL, *layerHeight = NULL, *huCentralDate = NULL, *hvCentralDate = NULL, \
