@@ -488,15 +488,15 @@ srcfile = { ...
 FuncHandle(path, srcfile, libfile);
 
 % For different platforms, the path to mkl.h should be given explicitly
-path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
-mklpath = 'D:\Software\Intel\Install\mkl\2022.0.0\include\';
-AddIncludePath(mklpath);
-AddIncludePath(path);
-libfile = { 'NdgMath/NdgMemory.c',...
-    [path, 'mxImplicitVerticalEddyViscosity.c']};
-srcfile = { ...
-    [path, 'mxSparseVersionUpdateImplicitRHS.c']};
-FuncHandle(path, srcfile, libfile);
+% path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgVertDiffSolver/private/';
+% mklpath = 'D:\Software\Intel\Install\mkl\2022.0.0\include\';
+% AddIncludePath(mklpath);
+% AddIncludePath(path);
+% libfile = { 'NdgMath/NdgMemory.c',...
+%     [path, 'mxImplicitVerticalEddyViscosity.c']};
+% srcfile = { ...
+%     [path, 'mxSparseVersionUpdateImplicitRHS.c']};
+% FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEVertGOTMDiffSolver/private/';
 

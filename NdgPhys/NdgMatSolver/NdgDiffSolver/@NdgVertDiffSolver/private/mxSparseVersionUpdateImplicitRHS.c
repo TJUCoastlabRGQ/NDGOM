@@ -497,8 +497,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     else{
         Nvar = (int)PRHS[2];
     }
-
-	memcpy(GlobalSystemRHS, RHS, Np*K3d*Nvar*sizeof(double));
     
     const size_t NdimOut = 3;
     const mwSize dimOut[3] = {Np,K3d,Nvar};
@@ -517,6 +515,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         ImVertDiffMemoryAllocation(Np2d, K2d, Nz, Np, Nvar);
 		ImEddyVisInVertAllocation(Np, Nz, K2d);
     }
+
+	memcpy(GlobalSystemRHS, RHS, Np*K3d*Nvar * sizeof(double));
     
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
