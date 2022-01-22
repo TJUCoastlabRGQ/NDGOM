@@ -87,13 +87,13 @@ void DiagRightMultiplyUnsymmetric(double *dest, const double *source, const doub
 
 void ImMatrixInverse(double *dest, lapack_int Np)
 {
-	lapack_int *IPIV = malloc(Np * sizeof(lapack_int));
+	lapack_int *IPIV = mkl_malloc(Np * sizeof(lapack_int), 64);
 
 	LAPACKE_dgetrf(LAPACK_COL_MAJOR, Np, Np, dest, Np, IPIV);
 
 	LAPACKE_dgetri(LAPACK_COL_MAJOR, Np, dest, Np, IPIV);
 
-	free(IPIV);
+	mkl_free(IPIV);
 }
 
 void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np) {
@@ -296,11 +296,7 @@ void PardisoSolve(double *dest, double *StiffMatrix, double *RHS, MKL_INT n, int
 	/* -------------------------------------------------------------------- */
 	/* .. Solution phase. */
 	/* -------------------------------------------------------------------- */
-	sparse_matrix_t csrA;
-
 	MKL_INT phase = 33;
-
-	mkl_sparse_d_create_csr(&csrA, SPARSE_INDEX_BASE_ONE, n, n, ia, ia + 1, ja, StiffMatrix);
 
 	MKL_INT NRHS = 1;
 

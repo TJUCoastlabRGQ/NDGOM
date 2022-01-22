@@ -254,8 +254,8 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
     for (int p = 0; p < Np2d; p++) {
         if (Depth[p] >= hcrit) {
       //      Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-		//	Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-			Coe[p] = -1.0*0.005 / Depth[p];
+			Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
+		//	Coe[p] = -1.0*0.005 / Depth[p];
         }
         else {
             Coe[p] = 0.0;
@@ -536,7 +536,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             }
             else {
                 // Impose implicit Neumann boundary condition here, this part is added on 20211231
-                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
+               ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
             }
             
             memset(OP12, 0, Np*Np*sizeof(double));

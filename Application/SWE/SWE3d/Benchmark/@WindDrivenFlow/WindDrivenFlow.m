@@ -24,7 +24,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} =  0.001*100*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} =  0.001*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
@@ -90,7 +90,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
-            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Dirichlet;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         
     end

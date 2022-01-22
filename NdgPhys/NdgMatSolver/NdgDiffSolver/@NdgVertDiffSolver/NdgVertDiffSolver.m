@@ -28,6 +28,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         
         function matClearGlobalMemory( obj )
             clear mxUpdateImplicitRHS;
+            clear mxSparseVersionUpdateImplicitRHS;
         end
         
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and

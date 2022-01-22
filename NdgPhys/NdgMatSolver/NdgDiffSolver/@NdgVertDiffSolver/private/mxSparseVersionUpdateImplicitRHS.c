@@ -1,6 +1,3 @@
-#if !defined(_WIN32)
-#define dgesv dgesv_
-#endif
 
 #include "../../../../../NdgMath/NdgMemory.h"
 
