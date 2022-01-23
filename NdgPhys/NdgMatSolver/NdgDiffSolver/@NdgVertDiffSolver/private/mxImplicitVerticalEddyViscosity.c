@@ -101,7 +101,7 @@ void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np
 		dest[i] = Source[i] * Coefficient;
 }
 
-void ImEddyVisInVertAllocation(int Np, int Nlayer, int Ele2d) {
+void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 
 	NNZ = Np * Np * 3 * Nlayer - 2 * Np * Np;
 
@@ -175,20 +175,15 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer, int Ele2d) {
 		}
 	}
 
-	/*Copy the index of the sparse matrix*/
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
-	for (int i = 0; i < Ele2d; i++) {
-		/*Note data are indexed begin with one in pardiso, so we have to add Ir and Jc*/
-		for (int j = 0; j < SingleNonzero; j++) {
-			Ir[i*SingleNonzero + j] = SingleRow[j] + i*Nlayer*Np + 1;
-		}
-		Jc[0] = 1;
-		for (int j = 0; j < Nlayer*Np; j++) {
-			Jc[1 + i*Nlayer*Np + j] = i * SingleColumn[Nlayer*Np - 1] + SingleColumn[j] + 1;
-		}
+	/*Note data are indexed begin with one in pardiso, so we have to add Ir and Jc*/
+	for (int j = 0; j < SingleNonzero; j++) {
+		Ir[j] = SingleRow[j] + 1;
 	}
+	Jc[0] = 1;
+	for (int j = 0; j < Nlayer*Np; j++) {
+		Jc[1 + j] = SingleColumn[j] + 1;
+	}	
+
    /*Set the thread for pardiso part to be one, set this part for once*/
 	int thread = 1;
 	mkl_set_num_threads(thread);
@@ -206,7 +201,16 @@ void ImEddyVisInVertDeAllocation()
 
 
 // n is the leading dimension of the stiff matrix
-void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS) {
+void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np) {
+
+	int *TempIr = malloc(NNZ * sizeof(int));
+
+	memcpy(TempIr, Ir, NNZ * sizeof(int));
+
+	int *TempJc = malloc((Nlayer * Np + 1) * sizeof(int));
+
+	memcpy(TempJc, Jc, (Nlayer * Np + 1) * sizeof(int));
+
 	MKL_INT iparm[64];
 
 	void *pt[64];
@@ -256,12 +260,15 @@ void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *R
 
 	MKL_INT idum;         /* Integer dummy. */
 
-	PardisoFactorize(iparm, pt, n, StiffMatrix, Jc, Ir, \
+	PardisoFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
 		&maxfct, &mnum, &msglvl, &error, &mtype, &ddum, &idum);
 
 	PardisoSolve(dest, StiffMatrix, RHS, n, iparm, \
-		Jc, Ir, &maxfct, &mnum, &msglvl, \
+		TempJc, TempIr, &maxfct, &mnum, &msglvl, \
 		&error, &mtype, pt, &ddum, &idum);
+
+	free(TempIr);
+	free(TempJc);
 
 }
 

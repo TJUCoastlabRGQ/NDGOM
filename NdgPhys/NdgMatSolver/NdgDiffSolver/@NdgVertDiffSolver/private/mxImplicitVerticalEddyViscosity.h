@@ -16,7 +16,7 @@
 
 #include "D:\Software\Intel\Install\mkl\2022.0.0\include\mkl.h"
 
-void ImEddyVisInVertAllocation( int, int, int);
+void ImEddyVisInVertAllocation( int, int);
 
 void ImEddyVisInVertDeAllocation();
 
@@ -24,7 +24,7 @@ void PardisoFactorize(MKL_INT *, void *, MKL_INT , double *,\
 	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, \
 	MKL_INT *, MKL_INT *, double *, MKL_INT *);
 
-void SparseEquationSolve(double *, MKL_INT , double *, double *);
+void SparseEquationSolve(double *, MKL_INT , double *, double *, int , int );
 
 void PardisoSolve(double *, double *, double *, MKL_INT , int *, \
 	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, \

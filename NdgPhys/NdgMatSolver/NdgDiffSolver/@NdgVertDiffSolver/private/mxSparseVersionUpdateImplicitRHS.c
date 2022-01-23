@@ -513,17 +513,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     if ( (!strcmp("False", ImVertDiffInitialized)) && (!strcmp("False", ImVertEddyInitialized)) )
     {
         ImVertDiffMemoryAllocation(Np2d, K2d, Nz, Np, Nvar);
-		ImEddyVisInVertAllocation(Np, Nz, K2d);
+		ImEddyVisInVertAllocation(Np, Nz);
     }
 
 	memcpy(GlobalSystemRHS, RHS, Np*K3d*Nvar * sizeof(double));
-    
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
-    for (int i = 0; i < K2d; i++){
-        CalculatePenaltyParameter(ImTau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
-    }
     
     int RowVCV = Np2d;
     int ColVCV = Np;
@@ -722,7 +715,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		/*Invoke pardiso from mkl to solve equation Ax = b*/
 		for (int var = 0; var < Nvar; var++) {
-			SparseEquationSolve(fphys + var * Np*K3d + i*Nz*Np, Nz*Np, StiffMatrix + var*NNZ, GlobalSystemRHS + var * Np*K3d + i*Nz*Np);
+			SparseEquationSolve(fphys + var * Np*K3d + i*Nz*Np, Nz*Np, StiffMatrix + var*NNZ, GlobalSystemRHS + var * Np*K3d + i*Nz*Np, Nz, Np);
 		}
 
 		for (int var = 0; var < Nvar; var++) {
@@ -740,7 +733,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         
         //We add the right hand side due to the implicit bottom friction term back, only hu and hv considered. Added on 20211231 by RGQ
         AssembleBoundaryContribution(ImplicitRHS + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, 2);
-        
+
         free(EleMass3d);
         free(InvEleMass3d);
         free(FacialElemass3d);
@@ -753,5 +746,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         free(SurfBoundStiffTerm);
         free(BotBoundStiffTerm);
         free(StiffMatrix);
+		free(FinalStiffMatrix);
     }
 }

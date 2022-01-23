@@ -695,8 +695,8 @@ void ImVertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz, int Np3d,
 	MemoryAllocationCheck(Imu2d, sizeof(double)*(Np2d*K2d));
 	Imv2d = malloc(Np2d*K2d * sizeof(double));
 	MemoryAllocationCheck(Imv2d, sizeof(double)*(Np2d*K2d));
-	GlobalSystemRHS = malloc(Np3d*K2d * Nz * sizeof(double));
-	MemoryAllocationCheck(GlobalSystemRHS, Np3d*K2d * Nz * sizeof(double));
+	GlobalSystemRHS = malloc(Np3d*K2d * Nz * Nvar * sizeof(double));
+	MemoryAllocationCheck(GlobalSystemRHS, Np3d*K2d * Nz * Nvar * sizeof(double));
 	ImVertDiffInitialized = "True";
 }
 
