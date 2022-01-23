@@ -714,9 +714,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         }
 
 		/*Invoke pardiso from mkl to solve equation Ax = b*/
-		for (int var = 0; var < Nvar; var++) {
-			SparseEquationSolve(fphys + var * Np*K3d + i*Nz*Np, Nz*Np, StiffMatrix + var*NNZ, GlobalSystemRHS + var * Np*K3d + i*Nz*Np, Nz, Np);
-		}
+		SparseEquationSolve(fphys, Nz*Np, StiffMatrix, GlobalSystemRHS, Nz, Np, i, Nvar, K3d);
 
 		for (int var = 0; var < Nvar; var++) {
 			SparseMatrixMultiply(ImplicitRHS + var*K3d*Np + i*Nz*Np, FinalStiffMatrix + var*NNZ, fphys + var * Np*K3d + i*Nz*Np, Nz * Np, Jc, Ir);

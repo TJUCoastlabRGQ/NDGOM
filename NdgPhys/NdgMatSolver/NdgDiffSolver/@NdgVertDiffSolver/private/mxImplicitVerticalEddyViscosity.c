@@ -200,8 +200,9 @@ void ImEddyVisInVertDeAllocation()
 }
 
 
+
 // n is the leading dimension of the stiff matrix
-void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np) {
+void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np, int Index, int Nvar, int K3d) {
 
 	int *TempIr = malloc(NNZ * sizeof(int));
 
@@ -251,6 +252,8 @@ void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *R
 	MKL_INT mtype = 11;       /* Real unsymmetric matrix */
 
 	MKL_INT maxfct, mnum, error, msglvl;
+	MKL_INT Tempmaxfct, Tempmnum, Temperror, Tempmsglvl, Tempidum;
+	double Tempddum;
 	maxfct = 1;           /* Maximum number of numerical factorizations. */
 	mnum = 1;             /* Which factorization to use. */
 	msglvl = 0;           /* Print statistical information  */
@@ -260,15 +263,56 @@ void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *R
 
 	MKL_INT idum;         /* Integer dummy. */
 
-	PardisoFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
+	PardisoReOrderAndSymFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
 		&maxfct, &mnum, &msglvl, &error, &mtype, &ddum, &idum);
 
-	PardisoSolve(dest, StiffMatrix, RHS, n, iparm, \
-		TempJc, TempIr, &maxfct, &mnum, &msglvl, \
-		&error, &mtype, pt, &ddum, &idum);
+	for (int var = 0; var < Nvar; var++) {
+
+		Tempmaxfct = maxfct, Tempmnum = mnum, \
+			Temperror = error, Tempmsglvl = msglvl, Tempidum = idum, Tempddum = ddum;
+
+		PardisoFactorize(iparm, pt, n, StiffMatrix + var*NNZ, TempJc, TempIr, \
+			&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, &Tempddum, &Tempidum);
+
+		PardisoSolve(dest + var * Np*K3d + Index*Nlayer*Np, StiffMatrix + var*NNZ, \
+			RHS + var * Np*K3d + Index*Nlayer*Np, n, iparm, TempJc, TempIr, \
+			&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, pt, &Tempddum, &Tempidum);
+	}
+
+	PardisoFree(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
+		&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, &Tempddum, &Tempidum);
 
 	free(TempIr);
 	free(TempJc);
+
+}
+
+void PardisoFree(MKL_INT *iparm, void *pt, MKL_INT n, double *a, MKL_INT *ia, MKL_INT *ja, \
+	MKL_INT *maxfct, MKL_INT *mnum, MKL_INT *msglvl, MKL_INT *error, MKL_INT *mtype, double *ddum, MKL_INT *idum) {
+	/* -------------------------------------------------------------------- */
+	/* .. Termination and release of memory. */
+	/* -------------------------------------------------------------------- */
+	MKL_INT NRHS = 1;
+	MKL_INT phase = -1;           /* Release internal memory. */
+	PARDISO(pt, maxfct, mnum, mtype, &phase,
+		&n, ddum, ia, ja, idum, &NRHS,
+		iparm, msglvl, ddum, ddum, error);
+}
+
+void PardisoReOrderAndSymFactorize(MKL_INT *iparm, void *pt, MKL_INT n, double *a, MKL_INT *ia, MKL_INT *ja, \
+	MKL_INT *maxfct, MKL_INT *mnum, MKL_INT *msglvl, MKL_INT *error, MKL_INT *mtype, double *ddum, MKL_INT *idum) {
+
+	MKL_INT NRHS = 1;
+
+	/* -------------------------------------------------------------------- */
+	/* .. Reordering and Symbolic Factorization. This step also allocates */
+	/* all memory that is necessary for the factorization. */
+	/* -------------------------------------------------------------------- */
+	MKL_INT phase;
+
+	phase = 11;
+	PARDISO(pt, maxfct, mnum, mtype, &phase,
+		&n, a, ia, ja, idum, &NRHS, iparm, msglvl, ddum, ddum, error);
 
 }
 
@@ -283,10 +327,6 @@ void PardisoFactorize(MKL_INT *iparm, void *pt, MKL_INT n, double *a, MKL_INT *i
 	/* all memory that is necessary for the factorization. */
 	/* -------------------------------------------------------------------- */
 	MKL_INT phase;
-
-	phase = 11;
-	PARDISO(pt, maxfct, mnum, mtype, &phase,
-		&n, a, ia, ja, idum, &NRHS, iparm, msglvl, ddum, ddum, error);
 
 	/* -------------------------------------------------------------------- */
 	/* .. Numerical factorization. */
@@ -312,14 +352,6 @@ void PardisoSolve(double *dest, double *StiffMatrix, double *RHS, MKL_INT n, int
 
 	PARDISO(pt, maxfct, mnum, mtype, &phase,
 		&n, StiffMatrix, ia, ja, idum, &NRHS, iparm, msglvl, RHS, dest, error);
-
-	/* -------------------------------------------------------------------- */
-	/* .. Termination and release of memory. */
-	/* -------------------------------------------------------------------- */
-	phase = -1;           /* Release internal memory. */
-	PARDISO(pt, maxfct, mnum, mtype, &phase,
-		&n, ddum, ia, ja, idum, &NRHS,
-		iparm, msglvl, ddum, ddum, error);
 }
 
 void SparseMatrixMultiply(double *dest, double *OPA, double *B, MKL_INT ROWA, MKL_INT *ia, MKL_INT *ja) {

@@ -22,7 +22,7 @@ classdef BaroclinicEddies < SWEBaroclinic3d
     end
     
     methods
-        %> For this case, the parameter is set following (Thetis, 2017), and we take Mx = 125, My = 10 and Mz = 40
+        %> For this case, the parameter is set following (Thetis, 2017), and we take Mx = 125, My = 40 and Mz = 40
         function obj = BaroclinicEddies(N, Nz, M, Mz)
             %LOCKEXCHANGECASE 构造此类的实例
             %   此处显示详细说明
@@ -52,7 +52,7 @@ classdef BaroclinicEddies < SWEBaroclinic3d
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
-                fphys{m}(:,Index,15) = 35*obj.H0;
+                fphys{m}(:,:,15) = 35*obj.H0;
                 
                 TBot = 10;
                 TSurf = 20;
@@ -147,7 +147,9 @@ classdef BaroclinicEddies < SWEBaroclinic3d
 %             option('PhysicalSurfaceRoughnessLength') = 0.02;
 %             option('PhysicalBottomRoughnessLength') = 0.0015;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
-            option('CoriolisType') = enumSWECoriolis.None;
+            option('CoriolisType') = enumSWECoriolis.Beta;
+            option('f0 for beta coriolis solver') = 1.2*10^(-4);
+            option('beta for beta coriolis solver') = 0.0;
         end
         
     end    
@@ -162,7 +164,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], M, 1, bctype);
+    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], 125, 40, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

@@ -24,7 +24,13 @@ void PardisoFactorize(MKL_INT *, void *, MKL_INT , double *,\
 	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, \
 	MKL_INT *, MKL_INT *, double *, MKL_INT *);
 
-void SparseEquationSolve(double *, MKL_INT , double *, double *, int , int );
+void PardisoReOrderAndSymFactorize(MKL_INT *, void *, MKL_INT , double *, MKL_INT *, MKL_INT *, \
+	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, double *, MKL_INT *);
+
+void PardisoFree(MKL_INT *, void *, MKL_INT , double *, MKL_INT *, MKL_INT *, \
+	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, double *, MKL_INT *);
+
+void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np, int Index, int Nvar, int K3d);
 
 void PardisoSolve(double *, double *, double *, MKL_INT , int *, \
 	MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, MKL_INT *, \
