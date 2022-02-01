@@ -42,7 +42,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-                [ fphys ] = obj.matImposeLimiter( fphys );
+%                 [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
         
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
@@ -63,7 +63,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-                [ fphys ] = obj.matImposeLimiter( fphys );
+%                 [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     
