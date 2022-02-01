@@ -253,9 +253,8 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
     memset(FinalCoe, 0, Np3d*sizeof(double));
     for (int p = 0; p < Np2d; p++) {
         if (Depth[p] >= hcrit) {
-      //      Coe[p] = -1.0*dt*ImplicitParam*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-			Coe[p] = -1.0*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-		//	Coe[p] = -1.0*0.005 / Depth[p];
+			// The unit outward normal -1.0 first, then move to the left hand side another -1.0
+			Coe[p] = (-1.0)*(-1.0)*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
         }
         else {
             Coe[p] = 0.0;
@@ -587,14 +586,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         // BotBoundStiffTerm with index 1 and 2 stands for hu and hv respectively, they are zero since they are treated implicitly.
         // We add them to the ImplicitRHS since they have no effect on the final result.
         AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, Nvar);
-        // We first need to calculate the contribution to the right hand side due to the implicit bottom condition, then add they to the RHS
-        GetImplicitBoundaryContribution(BotBoundStiffTerm, Cf + i*Np2d, u2d + i*Np2d, v2d + i*Np2d, h2d + i*Np2d, \
+		// We first need to calculate the contribution to the right hand side due to the implicit bottom condition, then add they to the RHS
+		// The following part is not needed anymore, since the implicit part has been reflected in the stiff matrix and not needed for the right hand side
+		// Added by RGQ ON 20220201
+		/*
+		GetImplicitBoundaryContribution(BotBoundStiffTerm, Cf + i*Np2d, u2d + i*Np2d, v2d + i*Np2d, h2d + i*Np2d, \
                 fphys + (i + 1)*Np*Nz - Np, fphys + Np*K3d + (i + 1)*Np*Nz - Np, VCV, RowVCV, ColVCV, Np, Np2d, EleMass2d, InvEleMass3d, \
                 BotEidM, hcrit);
         
-        //We add the right hand side due to the implicit bottom friction term back, only hu and hv considered. Added on 20211231 by RGQ
         AssembleBoundaryContribution(ImplicitRHS + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, 2);
-        
+        */
         free(EleMass3d);
         free(InvEleMass3d);
         free(FacialElemass3d);
