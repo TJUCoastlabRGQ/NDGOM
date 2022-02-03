@@ -47,12 +47,17 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d);
         end
         
-        function matUpdateViscosity(obj, ~, ~, ~, ~, ~, ~ )
-            %doing nothing
-        end        
+%         function matUpdateViscosity(obj, ~, ~, ~, ~, ~, ~ )
+%             %doing nothing
+%         end        
     end
     
     methods( Access = protected )
+        
+        function matUpdateViscosity(obj, ~, ~, ~, ~, ~, ~ )
+            %doing nothing
+        end  
+        
         %> Input parameter changed on 20211231 to consider the hu and hv
         %> field, since we need it when we treat the bottom boundary implicitly.  
         fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d);
