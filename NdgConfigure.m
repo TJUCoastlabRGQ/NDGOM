@@ -28,7 +28,8 @@ outPath = 'lib/';
 path = 'thirdParty/Polylib/';
 srcfile = {[path, 'zwglj.c'], ...
     [path, 'zwgl.c'], ...
-    [path, 'JacobiP.c']};
+    [path, 'JacobiP.c'],...
+    [path, 'GradJacobiP.c']};
 libfile = { [path, 'polylib.c'] };
 FuncHandle(outPath, srcfile, libfile);
 % NdgMesh
