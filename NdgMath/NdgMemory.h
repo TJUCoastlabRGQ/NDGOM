@@ -74,4 +74,8 @@ void UpdatedVertVelocitySolverMemoryDeAllocation();
 
 void VertVelocitySolverMemoryDeAllocation();
 
+void ImVertDiffMemoryAllocation(const int , int , const int , int , int );
+
+void ImVertDiffMemoryDeAllocation();
+
 #endif

@@ -15,11 +15,12 @@ function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, 
 
 BottomEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
 UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
+% TempImplicitRHS = zeros(size(physClass.ImplicitRHS));
 
 % K = physClass.meshUnion(1).K;
 % Nz = physClass.meshUnion(1).Nz;
 % Np = physClass.meshUnion(1).cell.Np;
-% 
+% % 
 % tic;
 [fphys, physClass.ImplicitRHS(:,:,RKIndex:(IMStage-1):end)] = mxUpdateImplicitRHS(...
     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
@@ -28,6 +29,18 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
     dt, ImplicitParameter, SystemRHS, obj.Prantl, UpEidM, BottomEidM, max(physClass.meshUnion(1).cell.N, physClass.meshUnion.cell.Nz),...
     physClass.meshUnion(1).cell.Nface, obj.BoundaryEdgeType, huv3d, Height2d, physClass.hcrit, ...
     physClass.meshUnion(1).cell.VCV, physClass.Cf{1} );
+% Cversion = toc;
+% tic;
+
+% [fphys, ~] = mxSparseVersionUpdateImplicitRHS(...
+%     physClass.meshUnion(1).mesh2d(1).J, physClass.meshUnion(1).J, physClass.meshUnion(1).mesh2d(1).cell.M,...
+%     physClass.meshUnion(1).cell.M, physClass.meshUnion(1).tz, physClass.meshUnion(1).cell.Dt, ...
+%     DiffusionCoefficient, physClass.SurfBoundNewmannDate, physClass.BotBoundNewmannDate,...
+%     dt, ImplicitParameter, SystemRHS, obj.Prantl, UpEidM, BottomEidM, max(physClass.meshUnion(1).cell.N, physClass.meshUnion.cell.Nz),...
+%     physClass.meshUnion(1).cell.Nface, obj.BoundaryEdgeType, huv3d, Height2d, physClass.hcrit, ...
+%     physClass.meshUnion(1).cell.VCV, physClass.Cf{1} );
+% SparseVersion = toc;
+
 % Cversion = toc;
 % tic;
 % fphys = zeros( Np, physClass.meshUnion(1).K, physClass.Nvar );
@@ -211,7 +224,8 @@ UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask
 %                 
 % end
 % matVersion = toc;
-% fprintf('The speed ratio is:%f\n',matVersion/Cversion);
+% fprintf('The speed ratio is:%f\n',Cversion / SparseVersion);
+% disp(max(max(Tempfphys(:,:,1) - fphys(:,:,1))));
 end
 
 function OP11 = LocalUpBoundaryIntegral(eidM, physicalDiffMatrix, massMatrix2d, Tau, OP11)
@@ -278,8 +292,10 @@ TempCoe = -1 * Cf .* sqrt(obj.ubot(:,Index).*obj.ubot(:,Index) + obj.vbot(:,Inde
 
 Coe = sum(diag(TempCoe) * VCV);
 
+% OP11(BottomEidM,:) = OP11(BottomEidM,:) - ...
+%     dt * ImplicitParameter * M3d(BottomEidM,:) * diag(Coe);
 OP11(BottomEidM,:) = OP11(BottomEidM,:) - ...
-    dt * ImplicitParameter * M3d(BottomEidM,:) * diag(Coe);
+    M3d(BottomEidM,:) * diag(Coe);
 
 end
 
