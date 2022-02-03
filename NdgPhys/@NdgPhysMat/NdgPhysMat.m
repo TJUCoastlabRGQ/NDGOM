@@ -116,6 +116,8 @@ classdef NdgPhysMat < NdgPhys
                     obj.matEvaluateRK33();
                 case enumTemporalDiscrete.SSPRK22
                     obj.matEvaluateSSPRK22();                  
+                case enumTemporalDiscrete.IMEXRK343
+                    obj.matEvaluateIMEXRK343();   
                 otherwise
                     msgID = [ mfilename, ':UnknownTemproalDicsreteType'];
                     msgtext = ['The temporal discrete type ', ...
