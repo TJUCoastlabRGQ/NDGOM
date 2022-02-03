@@ -8,13 +8,13 @@
 
 #include <math.h>
 
-#include "D:\Software\Intel\Install\mkl\2022.0.0\include\mkl_pardiso.h"
+#include "mkl_pardiso.h"
 
-#include "D:\Software\Intel\Install\mkl\2022.0.0\include\mkl_types.h"
+#include "mkl_types.h"
 
-#include "D:\Software\Intel\Install\mkl\2022.0.0\include\mkl_spblas.h"
+#include "mkl_spblas.h"
 
-#include "D:\Software\Intel\Install\mkl\2022.0.0\include\mkl.h"
+#include "mkl.h"
 
 void ImEddyVisInVertAllocation( int, int);
 
