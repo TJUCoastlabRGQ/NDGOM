@@ -111,7 +111,7 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, long long int nlev){
 }
 
 void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
-	double *Taux, double *Tauy, int K2d, long long int nlev) {
+	double *Taux, double *Tauy, int Np2d, int K2d, long long int nlev) {
 	/*for surface friction length, another way is the charnock method*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -119,7 +119,9 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	for (int i = 0; i < K2d; i++) {
 		SurfaceFrictionLength[i] = z0s;
 		SurfaceFrictionVelocity[i] = 0;
-		DragCoefficient[i] = 0;
+		for (int p = 0; p < Np2d; p++) {
+			DragCoefficient[i*Np2d + p] = 0;
+		}		
 		double rr = 0;
 		if (hcenter[i] >= hcrit) {
 			rr = kappa / log((z0b + layerHeight[i*(nlev + 1) + 1] / 2) / z0b);
@@ -128,7 +130,10 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 			/*Formula by SLIM, we note that Taux and Tauy here have already devided by rho0*/
 			SurfaceFrictionVelocity[i] = sqrt(hypot(Taux[i], Tauy[i]));
 			/*Formula by SLIM*/
-			DragCoefficient[i] = pow(rr,2);   //Cd = rr^2;
+			// DragCoefficient[i] = pow(rr,2);   //Cd = rr^2;
+			for (int p = 0; p < Np2d; p++) {
+				DragCoefficient[i*Np2d + p] = pow(rr, 2);
+			}
 			/*Formula by GOTM, see friction.F90(Line 122) and uequation.F90(Line 182)*/
 			//DragCoefficient[p] = pow(rr, 2) / layerHeight[p*(nlev + 1) + 1]
 		}
