@@ -714,7 +714,8 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
-*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, *hcenter = NULL;
+*hcenter = NULL;
+//*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, 
 
 char *GOTMInitialized = "False";
 
@@ -754,10 +755,11 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
     MemoryAllocationCheck(SurfaceFrictionVelocity, sizeof(double)*K2d);
 	eddyViscosityDate = malloc(sizeof(double)*(K2d * Interface));
     MemoryAllocationCheck(eddyViscosityDate, sizeof(double)*(K2d * Interface));
-	rhoCentralDate = malloc(sizeof(double)*(K2d));
-	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K2d));
+	rhoCentralDate = malloc(sizeof(double)*(K3d));
+	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K3d));
 	rhoVerticalLine = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(K2d*Interface));
+	/*
 	eddyDiffusionDate = malloc(sizeof(double)*(K2d * Interface));
 	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(K2d * Interface));
 	eddyTKEDate = malloc(sizeof(double)*(K2d * Interface));
@@ -766,6 +768,7 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
 	MemoryAllocationCheck(eddyLengthDate, sizeof(double)*(K2d * Interface));
 	eddyEPSDate = malloc(sizeof(double)*(K2d * Interface));
 	MemoryAllocationCheck(eddyEPSDate, sizeof(double)*(K2d * Interface));
+	*/
 	hcenter = malloc(K2d * sizeof(double));
 	MemoryAllocationCheck(hcenter, sizeof(double)*K2d);
 	GOTMInitialized = "True";
@@ -791,10 +794,12 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyViscosityDate); eddyViscosityDate = NULL;
 	free(rhoCentralDate); rhoCentralDate = NULL;
 	free(rhoVerticalLine); rhoVerticalLine = NULL;
+	/*
 	free(eddyDiffusionDate); eddyDiffusionDate = NULL;
 	free(eddyTKEDate); eddyTKEDate = NULL;
 	free(eddyLengthDate); eddyLengthDate = NULL;
 	free(eddyEPSDate); eddyEPSDate = NULL;
+	*/
 	free(hcenter); hcenter = NULL;
 	GOTMInitialized = "False";
 }

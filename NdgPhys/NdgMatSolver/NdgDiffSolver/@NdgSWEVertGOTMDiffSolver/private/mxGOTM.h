@@ -24,8 +24,10 @@
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
-*rhoCentralDate, *rhoVerticalLine, *eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,\
+*rhoCentralDate, *rhoVerticalLine, \
 *hcenter;
+
+//*eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,
 
 extern char *GOTMInitialized;
 
@@ -44,7 +46,7 @@ void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, double hcrit, long long i
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
 void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
-	double *Taux, double *Tauy, int K2d, long long int nlev);
+	double *Taux, double *Tauy, int Np2d, int K2d, long long int nlev);
 
 void DGDoTurbulence(double *TimeStep, double hcrit, double *Grass, int K2d, long long int nlev);
 /*This function is used to map the date calculated by GOTM to the output matrix*/

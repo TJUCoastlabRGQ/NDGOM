@@ -127,7 +127,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		CalculateBuoyanceFrequencyDate( Np2d, K2d, hcrit, nlev, gra, rho0);
 
-		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, K2d, nlev);
+		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, nlev);
 
 		DGDoTurbulence(&dt, hcrit, NULL, K2d, nlev);
 
