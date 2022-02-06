@@ -50,7 +50,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d,
 		for (int L = 0; L < nlayer; L++) {
 			double BottomAve = 0.0;
 			double SurfaceAve = 0.0;
-			double Average = 0.0;
+			/*The average data in dest is arranged from bottom to surface*/
 			GetElementCentralData(&BottomAve, fphys + i*nlayer*Np3d + (nlayer - L - 1)*Np3d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 			GetElementCentralData(&SurfaceAve, fphys + i*nlayer*Np3d + (nlayer - L - 1)*Np3d + Np3d - Np2d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV+i);
 			dest[i*nlayer + L] = (BottomAve + SurfaceAve) / 2.0;
@@ -66,6 +66,7 @@ void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLine
 #endif
 	for (int k = 0; k < K2d; k++){
 		for (int L = 0; L < nlev; L++){
+			/*The first data for each vertical line is left undefined*/
 			verticalLineDate[k*(nlev + 1) + L + 1] = \
 				centralDate[k*nlev + L];
 		}
@@ -82,7 +83,8 @@ void CalculateWaterDepth(int K2d, double hcrit, long long int nlev){
 #endif
 	for (int i = 0; i < K2d; i++){
 		if (hcenter[i] >= hcrit){
-			for (int L = 1; L < nlev + 1; L++){
+			for (int L = 1; L < nlev + 1; L++){ 
+				/*The first value of layer height for each vertical line is left undefined*/
 				layerHeight[i * (nlev + 1) + L] = hcenter[i] / nlev;
 			}
 		}
@@ -159,12 +161,10 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	 for (int k = 0; k < K2d; k++){
-		 for (int p = 0; p < Np2d; p++){
-			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p] = SourceDate[k*(nlev + 1)];//the down face of the bottommost cell for each column
-			 DestinationDate[k*nlev*Np3d + Np3d - Np2d + p] = SourceDate[k*(nlev + 1) + nlev];//the upper face of the topmost cell for each column
-			 for (int L = 1; L < nlev; L++){
-				 DestinationDate[k*nlev*Np3d + (nlev - L)*Np3d + Np3d - Np2d + p] = SourceDate[k*(nlev + 1) + L];  //The top layer of the down cell
-				 DestinationDate[k*nlev*Np3d + (nlev - L-1)*Np3d + p] = SourceDate[k*(nlev + 1) + L];//The bottom layer of the up cell
+		 for (int L = 0; L < nlev; L++) {
+			 for (int p = 0; p < Np2d; p++) {
+				 DestinationDate[k*nlev*Np3d + (nlev - L - 1)*Np3d + p] = SourceDate[k*(nlev + 1) + L];//The bottom layer of the up cell
+				 DestinationDate[k*nlev*Np3d + (nlev - L - 1)*Np3d + Np3d - Np2d + p] = SourceDate[k*(nlev + 1) + L + 1];  //The top layer of the down cell
 			 }
 		 }
 	 }
