@@ -37,6 +37,6 @@ end
 
 function CompileF90File(file, Ipath, Outpath)
 for i = 1:numel(file)
-    mex('-g','-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
+    mex('-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
 end
 end

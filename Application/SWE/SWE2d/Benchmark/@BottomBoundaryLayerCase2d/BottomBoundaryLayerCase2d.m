@@ -25,7 +25,7 @@ classdef BottomBoundaryLayerCase2d < SWEConventional2d
             obj.hmin = 1e-3;
             [ mesh ] = obj.makeUniformMesh(N, deltax, cellType);
             obj.initPhysFromOptions( mesh );
-            obj.outputFieldOrder = [1, 2, 3, 6];   
+            obj.outputFieldOrder2d = [1, 2, 3, 6];
         end
         
     end
@@ -38,11 +38,15 @@ classdef BottomBoundaryLayerCase2d < SWEConventional2d
             for m = 1 : obj.Nmesh
                 fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
                 % bottom elevation
-                fphys{m}(:, :, 4) = -obj.H0;                
+                fphys{m}(:, :, 4) = -obj.H0;
                 %water depth
                 fphys{m}(:,:,1) = -obj.meshUnion(1).x *10^(-5) - fphys{m}(:, :, 4);
             end
         end
+        
+        function matUpdateExternalField( obj, time, ~ )
+           obj.fext{1}(:,:,1) = -obj.meshUnion(1).BoundaryEdge.xb *10^(-5)  + 15;
+        end        
         
         function [ option ] = setOption( obj, option )
             ftime = 86400;
@@ -53,7 +57,7 @@ classdef BottomBoundaryLayerCase2d < SWEConventional2d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('temporalDiscreteType') = enumTemporalDiscrete.RK33;
-            option('outputNcfileNum') = 500;            
+            option('outputNcfileNum') = 500;
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -61,23 +65,23 @@ classdef BottomBoundaryLayerCase2d < SWEConventional2d
         end
         
         function [ mesh ] = makeUniformMesh(obj, N, deltax, type)
-            bctype = [...
-                enumBoundaryCondition.SlipWall, ...
-                enumBoundaryCondition.SlipWall, ...
-                enumBoundaryCondition.SlipWall, ...
-                enumBoundaryCondition.SlipWall];
+            bctype = [ ...
+                enumBoundaryCondition.ClampedDepth, ...
+                enumBoundaryCondition.ClampedDepth, ...
+                enumBoundaryCondition.ClampedDepth, ...
+                enumBoundaryCondition.ClampedDepth ];
             
             if (type == enumStdCell.Tri)
-                mesh = makeUniformTriMesh(N, [-obj.ChLength/2, obj.ChLength/2], 0.1*[-obj.ChLength/2, obj.ChLength/2], obj.ChLength/deltax, 0.1*obj.ChLength/deltax, bctype);
+                mesh = makeUniformTriMesh(N, [-obj.ChLength/2, obj.ChLength/2], 0.3*[-obj.ChLength/2, obj.ChLength/2], obj.ChLength/deltax, 0.03*obj.ChLength/deltax, bctype);
             elseif(type == enumStdCell.Quad)
-                mesh = makeUniformQuadMesh(N, [-obj.ChLength/2, obj.ChLength/2], 0.1*[-obj.ChLength/2, obj.ChLength/2], obj.ChLength/deltax, 0.1*obj.ChLength/deltax, bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
+                mesh = makeUniformQuadMesh(N, [-obj.ChLength/2, obj.ChLength/2], 0.3*[-obj.ChLength/2, obj.ChLength/2], obj.ChLength/deltax, 0.03*obj.ChLength/deltax, bctype);% 20/0.1 22/0.05  %4/0.025, 1/0.0125,
             else
                 msgID = [mfile, ':inputCellTypeError'];
                 msgtext = 'The input cell type should be NdgCellType.Tri or NdgCellType.Quad.';
                 ME = MException(msgID, msgtext);
                 throw(ME);
             end
-        end% func  
+        end% func
         
     end
 end
