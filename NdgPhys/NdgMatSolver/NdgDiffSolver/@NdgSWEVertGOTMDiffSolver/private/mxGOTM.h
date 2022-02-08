@@ -24,8 +24,7 @@
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
-*rhoCentralDate, *rhoVerticalLine, \
-*hcenter;
+*rhoCentralDate, *rhoVerticalLine, *hcenter, *pupz, *opupz,*pvpz, *opvpz;
 
 //*eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,
 
