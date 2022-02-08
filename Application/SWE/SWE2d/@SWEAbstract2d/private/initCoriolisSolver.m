@@ -15,7 +15,7 @@ if obj.option.isKey('CoriolisType') % the option exist
             coriolisSolver = LatitudeCoriolisTermSolver(obj, file);
     end
 else % the option does not exist
-    coriolisSolver = NonCoriolisTermSolver();
+    coriolisSolver = NonCoriolisTermSolver( obj );
 end
 
 end

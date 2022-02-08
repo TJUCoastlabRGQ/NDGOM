@@ -191,7 +191,8 @@
   ce3minus=        0.0
   ce3plus=         1.0
   sig_k=           1.0
-  sig_e=           1.3
+  sig_e=           1.08 
+  ! sig_e=           1.3 
   sig_peps=        .false.
  /
 
