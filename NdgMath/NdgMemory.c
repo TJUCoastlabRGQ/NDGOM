@@ -714,7 +714,7 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
-*hcenter = NULL;
+*hcenter = NULL, *pupz = NULL, *opupz = NULL, *pvpz = NULL, *opvpz = NULL;
 //*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, 
 
 char *GOTMInitialized = "False";
@@ -759,6 +759,16 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
 	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K3d));
 	rhoVerticalLine = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(K2d*Interface));
+	pupz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(pupz, sizeof(double)*(K2d*Interface));
+	opupz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(opupz, sizeof(double)*(K2d*Interface));
+	memset(opupz, 0, sizeof(double)*(K2d*Interface));
+	pvpz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(pvpz, sizeof(double)*(K2d*Interface));
+	opvpz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(opvpz, sizeof(double)*(K2d*Interface));
+	memset(opvpz, 0, sizeof(double)*(K2d*Interface));
 	/*
 	eddyDiffusionDate = malloc(sizeof(double)*(K2d * Interface));
 	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(K2d * Interface));
@@ -794,6 +804,10 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyViscosityDate); eddyViscosityDate = NULL;
 	free(rhoCentralDate); rhoCentralDate = NULL;
 	free(rhoVerticalLine); rhoVerticalLine = NULL;
+	free(pupz); pupz = NULL;
+	free(opupz); opupz = NULL;
+	free(pvpz); pvpz = NULL;
+	free(opvpz); opvpz = NULL;
 	/*
 	free(eddyDiffusionDate); eddyDiffusionDate = NULL;
 	free(eddyTKEDate); eddyTKEDate = NULL;
