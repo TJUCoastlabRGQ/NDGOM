@@ -759,13 +759,9 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
 	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K3d));
 	rhoVerticalLine = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(K2d*Interface));
-	pupz = malloc(sizeof(double)*(K2d*Interface));
-	MemoryAllocationCheck(pupz, sizeof(double)*(K2d*Interface));
 	opupz = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(opupz, sizeof(double)*(K2d*Interface));
 	memset(opupz, 0, sizeof(double)*(K2d*Interface));
-	pvpz = malloc(sizeof(double)*(K2d*Interface));
-	MemoryAllocationCheck(pvpz, sizeof(double)*(K2d*Interface));
 	opvpz = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(opvpz, sizeof(double)*(K2d*Interface));
 	memset(opvpz, 0, sizeof(double)*(K2d*Interface));
@@ -804,9 +800,7 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyViscosityDate); eddyViscosityDate = NULL;
 	free(rhoCentralDate); rhoCentralDate = NULL;
 	free(rhoVerticalLine); rhoVerticalLine = NULL;
-	free(pupz); pupz = NULL;
 	free(opupz); opupz = NULL;
-	free(pvpz); pvpz = NULL;
 	free(opvpz); opvpz = NULL;
 	/*
 	free(eddyDiffusionDate); eddyDiffusionDate = NULL;
