@@ -44,10 +44,10 @@
 !
 !-------------------------------------------------------------------------------
  &turbulence
-  turb_method=     2
+  turb_method=     3
   tke_method=      2
   len_scale_method=8
-  stab_method=     4
+  stab_method=     1
  /
 
 !-------------------------------------------------------------------------------
@@ -118,8 +118,9 @@
   galp=            0.53
   const_num=       5.e-4
   const_nuh=       5.e-4
-  k_min=           1.e-8
-!  k_min=           1.e-10
+!  k_min=           7.6e-6
+!  k_min=           1.e-8
+  k_min=           1.e-10
   eps_min=         1.e-14
   kb_min=          1.e-10
   epsb_min=        1.e-14
@@ -191,8 +192,8 @@
   ce3minus=        0.0
   ce3plus=         1.0
   sig_k=           1.0
-  ! sig_e=           1.3
-  sig_e=           1.08
+  sig_e=           1.3
+ ! sig_e=           1.08
   sig_peps=        .false.
  /
 
