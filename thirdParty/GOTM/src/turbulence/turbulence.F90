@@ -2487,6 +2487,12 @@
       nus(i)   =  cmue2(i)*x
    end do
 
+!   do i=0,nlev
+!       num(i)=i*10+0.11111
+!	   nuh(i)=i*10+0.11111
+!	   nus(i)=i*10+0.11111
+!   end do
+
    return
    end subroutine kolpran
 !EOC
