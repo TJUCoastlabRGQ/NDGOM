@@ -100,6 +100,11 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
+fid = fopen('output1.dat','w');
+for i = 1:numel(obj.VerticalEddyViscositySolver.maxhu)
+    fprintf(fid,'%18.16f \n', obj.VerticalEddyViscositySolver.maxhu(i));
+end
+fclose(fid);
 end
 
 function [ rkb, rkt] = GetRKParameter

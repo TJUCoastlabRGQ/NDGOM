@@ -3,11 +3,12 @@
 #include <math.h>
 #include <omp.h>
 #include "../../../../../NdgMath/NdgMemory.h"
+#include "../../../../../NdgMath/NdgMath.h"
 
 /*the Von kamma constant*/
 double kappa = 0.40;
 
-void getGotmDate(int index, long long int nlev){
+void getGotmDate(int index, int nlev){
 	for (int i = 0; i < nlev + 1; i++){
 		tkeGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_TKE[i];
 		epsGOTM[index*(nlev + 1) + i] = TURBULENCE_mp_EPS[i];
@@ -17,7 +18,7 @@ void getGotmDate(int index, long long int nlev){
 	}
 }
 
-void setGotmDate(int index, long long int nlev){
+void setGotmDate(int index, int nlev){
 	for (int i = 0; i < nlev + 1; i++){
 		TURBULENCE_mp_TKE[i] = tkeGOTM[i + index*(nlev + 1)];
 		TURBULENCE_mp_EPS[i] = epsGOTM[i + index*(nlev + 1)];
@@ -36,7 +37,7 @@ void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int 
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);
 
 	for (int i = 0; i < K2d; i++){
-		getGotmDate(i, nlev);
+		getGotmDate(i, (int)nlev);
 	}
 }
 
@@ -59,7 +60,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d,
 }
 
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, \
-	long long int nlev){
+	int nlev){
 	//This has been verified by tests
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -73,7 +74,7 @@ void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLine
 	}
 }
 
-void CalculateWaterDepth(int K2d, double hcrit, long long int nlev){
+void CalculateWaterDepth(int K2d, double hcrit, int nlev){
    /*if the water depth is larger than the threshold value, the layer height is calculated by the ratio of water depth to number of lyers.
    *For the current version, we only consider the equalspace division in vertical. When the water depth is less than the threshold, the water 
    *depth is set to be zero
@@ -94,7 +95,7 @@ void CalculateWaterDepth(int K2d, double hcrit, long long int nlev){
 
 
 
-void CalculateShearFrequencyDate(int K2d, double hcrit, long long int nlev){
+void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -117,12 +118,19 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, long long int nlev){
 			shearFrequencyDate[i*(nlev + 1)] = shearFrequencyDate[i*(nlev + 1) + 1];
 			shearFrequencyDate[i*(nlev + 1) + nlev] = shearFrequencyDate[i*(nlev + 1) + nlev - 1];
 		}
+		else {
+			for (int L = 0; L < nlev + 1; L++) {
+				opupz[i*(nlev + 1) + L] = 0;
+				opvpz[i*(nlev + 1) + L] = 0;
+				shearFrequencyDate[i*(nlev + 1) + L] = 0;
+			}
+		}
 	}
 
 }
 
 void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
-	double *Taux, double *Tauy, int Np2d, int K2d, long long int nlev) {
+	double *Taux, double *Tauy, int Np2d, int K2d, int nlev) {
 	/*for surface friction length, another way is the charnock method*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -155,16 +163,16 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 //For the current version, grass is not considered
 	 for (int i = 0; i < K2d; i++){
 		 if (hcenter[i] >= hcrit){
-			 setGotmDate(i, nlev);
+			 setGotmDate(i, (int)nlev);
 			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, hcenter + i, SurfaceFrictionVelocity + i, BottomFrictionVelocity + i, SurfaceFrictionLength + i, \
 				 BottomFrictionLength + i, layerHeight + i*(nlev + 1), buoyanceFrequencyDate + i*(nlev + 1), shearFrequencyDate + i*(nlev + 1), Grass);
-			 getGotmDate(i, nlev);
+			 getGotmDate(i, (int)nlev);
 		 }
 	 }
 
 }
 
- void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev){
+ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, int nlev){
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -178,7 +186,7 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 }
  }
 
- void CalculateBuoyanceFrequencyDate( int Np2d, int K2d, double hcrit, long long int nlev, \
+ void CalculateBuoyanceFrequencyDate( int Np2d, int K2d, double hcrit, int nlev, \
 	 double gra, double rho0){
 
 #ifdef _OPENMP
@@ -187,8 +195,8 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 for (int i = 0; i < K2d; i++) {
 		 if (hcenter[i] >= hcrit) {
 			 for (int L = 1; L < nlev; L++) {
-				 shearFrequencyDate[i*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[i*(nlev + 1) + L + 1] - rhoVerticalLine[i*(nlev + 1) + L]) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				 shearFrequencyDate[i*(nlev + 1) + L] = max(shearFrequencyDate[i*(nlev + 1) + L], 0.0);
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[i*(nlev + 1) + L + 1] - rhoVerticalLine[i*(nlev + 1) + L]) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = max(buoyanceFrequencyDate[i*(nlev + 1) + L], 0.0);
 			 }
 			 //For each vertical segment, we have NN(0) = NN(1), NN(nlev) = NN(nlev - 1)
 			 buoyanceFrequencyDate[i*(nlev + 1)] = buoyanceFrequencyDate[i*(nlev + 1) + 1];
@@ -196,8 +204,8 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 		 }
 		 else
 		 {
-			 for (int L = 0; L < nlev; L++) {
-				 shearFrequencyDate[i*(nlev + 1) + L] = 0;
+			 for (int L = 0; L < nlev + 1; L++) {
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = 0;
 			 }
 		 }
 	 }

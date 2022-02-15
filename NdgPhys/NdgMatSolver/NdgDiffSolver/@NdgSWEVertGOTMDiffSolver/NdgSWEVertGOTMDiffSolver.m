@@ -14,6 +14,8 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         Eps
         
         rhoIndex
+        
+        maxhu
     end
     
     properties
@@ -53,10 +55,10 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             %zero
             obj.Prantl = physClass.Prantl;
             obj.matClearGlobalMemory;
+            obj.maxhu = [];
         end
         
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
-%             obj.matUpdataNewmannBoundaryCondition( physClass, fphys);
             Outfphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d);
             obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
         end
@@ -64,6 +66,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         
         
         function matClearGlobalMemory(obj)
+            matClearGlobalMemory@NdgVertDiffSolver( obj );
             clear mxUpdateEddyViscosity;
         end
     end
@@ -71,9 +74,6 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
     methods(Access = protected)
         
         function matUpdateViscosity(obj, physClass, H2d, Hu, Hv, dt, rho )
-            %             [ obj.nv, physClass.Cf{1} ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
-            %                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
-            %                 H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0);
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
                 H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
