@@ -232,18 +232,10 @@
       end do
    endif
 
-!   do i=0,nlev
-!       eps(i)=i*10+0.11111
-!   enddo
-
       do i=0,nlev
 !        compute dissipative scale
          L(i) = cde*sqrt(tke(i)*tke(i)*tke(i))/eps(i)
       enddo
-
-!   do i=0,nlev
-!       L(i)=i*10+0.11111
-!   enddo
 
    return
    end subroutine dissipationeq

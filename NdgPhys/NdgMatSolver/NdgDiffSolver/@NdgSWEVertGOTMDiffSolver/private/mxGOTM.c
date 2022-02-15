@@ -107,8 +107,8 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 					+ pow((hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L])), 2);
 				newpupz = (huVerticalLine[i*(nlev + 1) + L + 1] - huVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
 				newpvpz = (hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				shearFrequencyDate[i*(nlev + 1) + L] = pow( (0.5 * newpupz + 0.5*opupz[i*(nlev + 1) + L]) * newpupz + \
-					(0.5 * newpvpz + 0.5*opvpz[i*(nlev + 1) + L]) * newpvpz, 0.5);
+				shearFrequencyDate[i*(nlev + 1) + L] = (0.5 * newpupz + 0.5*opupz[i*(nlev + 1) + L]) * newpupz + \
+					(0.5 * newpvpz + 0.5*opvpz[i*(nlev + 1) + L]) * newpvpz;
 				//Store the data for the use in the next step
 				opupz[i*(nlev + 1) + L] = newpupz;
 				opvpz[i*(nlev + 1) + L] = newpvpz;
@@ -116,6 +116,13 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 			//For each vertical segment, we have SS(0) = SS(1), SS(nlev) = SS(nlev - 1)
 			shearFrequencyDate[i*(nlev + 1)] = shearFrequencyDate[i*(nlev + 1) + 1];
 			shearFrequencyDate[i*(nlev + 1) + nlev] = shearFrequencyDate[i*(nlev + 1) + nlev - 1];
+		}
+		else {
+			for (int L = 0; L < nlev + 1; L++) {
+				opupz[i*(nlev + 1) + L] = 0;
+				opvpz[i*(nlev + 1) + L] = 0;
+				shearFrequencyDate[i*(nlev + 1) + L] = 0;
+			}
 		}
 	}
 
@@ -187,8 +194,8 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 for (int i = 0; i < K2d; i++) {
 		 if (hcenter[i] >= hcrit) {
 			 for (int L = 1; L < nlev; L++) {
-				 shearFrequencyDate[i*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[i*(nlev + 1) + L + 1] - rhoVerticalLine[i*(nlev + 1) + L]) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				 shearFrequencyDate[i*(nlev + 1) + L] = max(shearFrequencyDate[i*(nlev + 1) + L], 0.0);
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[i*(nlev + 1) + L + 1] - rhoVerticalLine[i*(nlev + 1) + L]) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = max(buoyanceFrequencyDate[i*(nlev + 1) + L], 0.0);
 			 }
 			 //For each vertical segment, we have NN(0) = NN(1), NN(nlev) = NN(nlev - 1)
 			 buoyanceFrequencyDate[i*(nlev + 1)] = buoyanceFrequencyDate[i*(nlev + 1) + 1];
@@ -196,8 +203,8 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 		 }
 		 else
 		 {
-			 for (int L = 0; L < nlev; L++) {
-				 shearFrequencyDate[i*(nlev + 1) + L] = 0;
+			 for (int L = 0; L < nlev + 1; L++) {
+				 buoyanceFrequencyDate[i*(nlev + 1) + L] = 0;
 			 }
 		 }
 	 }

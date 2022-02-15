@@ -175,10 +175,6 @@
       tke(i) = max(tke(i),k_min)
    enddo
 
- !  do i=0,nlev
- !     tke(i)=i*10+0.11111
- !  enddo
-
    return
    end subroutine tkeeq
 !EOC
