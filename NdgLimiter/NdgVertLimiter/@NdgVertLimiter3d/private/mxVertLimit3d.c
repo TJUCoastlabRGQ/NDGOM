@@ -42,8 +42,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     size_t Np = mxGetM(prhs[0]);
     size_t K = mxGetN(prhs[0]);
 
-	double *Tempfphys = malloc(Np*K * sizeof(double));
-	memcpy(Tempfphys, fphys, Np*K * sizeof(double));
+//	double *Tempfphys = malloc(Np*K * sizeof(double));
+//	memcpy(Tempfphys, fphys, Np*K * sizeof(double));
     
     size_t Nface = mxGetM(prhs[2]); // number of faces of the computation cell
     
@@ -149,6 +149,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     for(int i=0; i<Np*K; i++)
         limfphys[i] = fphys[i];
     // For elements adjacent to the boundary, we don't alter the value at all, added on 20220203 by RGQ
+	/*
 	for (int k = 0; k < K; k++) {
 		for (int f = 0; f < Nface; f++) {
 			if ((int)EToE[Nface*k + f] == (k + 1)) {
@@ -157,6 +158,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			}
 		}
 	}
+	*/
 
-	free(Tempfphys);
+//	free(Tempfphys);
 }
