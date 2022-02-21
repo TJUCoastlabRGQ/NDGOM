@@ -42,7 +42,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-%         [ fphys ] = obj.matImposeLimiter( fphys );
+        [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
         
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
@@ -63,7 +63,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-%                 [ fphys ] = obj.matImposeLimiter( fphys );
+        [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     
@@ -84,12 +84,7 @@ while( time < ftime )
     
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
-    %     [ data ] = ...
-    %         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-    %         10*ones(size(fphys2d{1}(:,:,1))), 10*ones(size(fphys{1}(:,:,4))), data , dt );
     visual.drawResult( fphys2d{1}(:,:,1) );
-    %     postplot(data(:,:,1));
-    %     postplot(fphys{1}(:,:,1));
     time = time + dt;
     disp(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
@@ -101,31 +96,10 @@ obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
 
-% fid = fopen('output1.dat','w');
-% for i = 1:numel(obj.VerticalEddyViscositySolver.maxhu)
-%     fprintf(fid,'%18.16f \n', obj.VerticalEddyViscositySolver.maxhu(i));
-% end
-% fclose(fid);
 end
 
 function [ rkb, rkt] = GetRKParameter
 rkb = [1 0;
     1/2 1/2];
 rkt = [0 1];
-end
-
-function postplot(data)
-figure;
-index = [5,1];
-Cor = [0,-0.1];
-Np = 8;
-Zcor = zeros(20,1);
-Zcor(1:2)=Cor;
-Dind = zeros(20,1);
-Dind(1:2) = data(index);
-for Layer = 2:10
-    Zcor((Layer-1)*2+(1:2)) = Zcor((Layer-2)*2+(1:2)) - 0.1;
-    Dind((Layer-1)*2+(1:2)) = data(index + (Layer-1)*Np);
-end
-plot(Dind, Zcor);
 end

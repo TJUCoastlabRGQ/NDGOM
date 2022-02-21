@@ -14,8 +14,6 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         Eps
         
         rhoIndex
-        
-        maxhu
     end
     
     properties
@@ -55,7 +53,6 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             %zero
             obj.Prantl = physClass.Prantl;
             obj.matClearGlobalMemory;
-            obj.maxhu = [];
         end
         
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
