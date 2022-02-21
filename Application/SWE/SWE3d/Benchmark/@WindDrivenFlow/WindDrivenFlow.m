@@ -12,7 +12,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         startTime = 0;
         %> final time
 
-        finalTime = 3600;
+        finalTime = 7200;
         hcrit = 0.001;
     end
     
@@ -24,7 +24,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 3 10];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} = 1*0.001*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} = 1000 * 0.001*ones(size(obj.mesh2d(1).x));
             
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
@@ -74,7 +74,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            outputIntervalNum = 2500;
+            outputIntervalNum = 400;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;

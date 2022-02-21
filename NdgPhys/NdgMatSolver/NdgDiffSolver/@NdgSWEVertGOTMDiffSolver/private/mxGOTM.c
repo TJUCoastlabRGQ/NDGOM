@@ -93,8 +93,6 @@ void CalculateWaterDepth(int K2d, double hcrit, int nlev){
 
 }
 
-
-
 void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 #ifdef _OPENMP

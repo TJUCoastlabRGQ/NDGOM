@@ -42,7 +42,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-        [ fphys ] = obj.matImposeLimiter( fphys );
+%         [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
         
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
@@ -63,7 +63,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-                [ fphys ] = obj.matImposeLimiter( fphys );
+%                 [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     
@@ -100,11 +100,12 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
-fid = fopen('output1.dat','w');
-for i = 1:numel(obj.VerticalEddyViscositySolver.maxhu)
-    fprintf(fid,'%18.16f \n', obj.VerticalEddyViscositySolver.maxhu(i));
-end
-fclose(fid);
+
+% fid = fopen('output1.dat','w');
+% for i = 1:numel(obj.VerticalEddyViscositySolver.maxhu)
+%     fprintf(fid,'%18.16f \n', obj.VerticalEddyViscositySolver.maxhu(i));
+% end
+% fclose(fid);
 end
 
 function [ rkb, rkt] = GetRKParameter
