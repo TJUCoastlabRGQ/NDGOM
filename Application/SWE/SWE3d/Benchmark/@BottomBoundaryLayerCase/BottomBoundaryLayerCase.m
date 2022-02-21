@@ -11,7 +11,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 86400;
+        finalTime = 5000;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@BottomBoundaryLayerCase/gotmturb.nml']);
@@ -87,7 +87,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
             option('outputTimeInterval') = obj.finalTime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 20;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             %             option('EddyViscosityType') = enumEddyViscosity.GOTM;
             %             option('GOTMSetupFile') = obj.GotmFile;
             %             option('equationType') = enumDiscreteEquation.Strong;

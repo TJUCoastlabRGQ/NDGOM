@@ -188,7 +188,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < IENe; face++){
-        //printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe
+ //       printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe, can not be used!!
 		/*Fetch variable IEfm and IEfp first*/
 		FetchInnerEdgeFacialValue(hM + face*IENfp, hP + face*IENfp, h, IEFToE + 2 * face, \
 			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);

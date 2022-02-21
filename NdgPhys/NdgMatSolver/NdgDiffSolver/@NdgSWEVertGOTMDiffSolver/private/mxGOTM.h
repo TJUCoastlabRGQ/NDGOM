@@ -24,8 +24,9 @@
 extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
 *hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
 *BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
-*rhoCentralDate, *rhoVerticalLine, *eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,\
-*hcenter;
+*rhoCentralDate, *rhoVerticalLine, *hcenter, *opupz, *opvpz;
+
+//*eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,
 
 extern char *GOTMInitialized;
 
@@ -34,30 +35,30 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d,
 	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV);/*This function is used to map the date located at the central point to the vertical line that the GOTM adapted*/
 
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, \
-	long long int nlev);
+	int nlev);
 /*This function is used to calculate the shear production term*/
-void CalculateShearFrequencyDate(int K2d, double hcrit, long long int nlev);
+void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev);
 
 //void CalculateBuoyanceFrequencyDate(int , int , long long int );
-void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, double hcrit, long long int nlev, \
+void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, double hcrit, int nlev, \
 	double gra, double rho0);
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
 void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
-	double *Taux, double *Tauy, int K2d, long long int nlev);
+	double *Taux, double *Tauy, int Np2d, int K2d, int nlev);
 
 void DGDoTurbulence(double *TimeStep, double hcrit, double *Grass, int K2d, long long int nlev);
 /*This function is used to map the date calculated by GOTM to the output matrix*/
-void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev);
+void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, int nlev);
 /*This function is used to initialize the GOTM module*/
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen, \
 	long long int nlev, int K2d);
 /*This function is used to calculate the water depth for each layer*/
-void CalculateWaterDepth(int K2d, double hcrit, long long int nlev);
+void CalculateWaterDepth(int K2d, double hcrit, int nlev);
 
-void getGotmDate(int, long long int);
+void getGotmDate(int, int);
 
-void setGotmDate(int, long long int);
+void setGotmDate(int, int);
 
 /*The following is the GOTM part*/
 

@@ -8,9 +8,6 @@
 #include <omp.h>
 #endif
 
-#define NRHS 7
-#define NLHS 1
-
 #define max(a, b) ((a > b) ? a : b)
 #define min(a, b) ((a < b) ? a : b)
 
@@ -32,17 +29,6 @@
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     
-    /* check input & output */
-    if (nrhs != NRHS) {
-        mexPrintf("Matlab:%s:InvalidNumberInput,\n", __FILE__);
-        mexPrintf("%d inputs required.\n", NRHS);
-    }
-    
-    if (nlhs != NLHS) {
-        mexPrintf("Matlab:%s:InvalidNumberOutput,\n", __FILE__);
-        mexPrintf("%d inputs required.\n", NLHS);
-    }
-    
     /* get inputs */
     double *fphys = mxGetPr(prhs[0]);
     double *avar = mxGetPr(prhs[1]);
@@ -55,6 +41,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     double *OV1d = mxGetPr(prhs[6]);
     size_t Np = mxGetM(prhs[0]);
     size_t K = mxGetN(prhs[0]);
+
+//	double *Tempfphys = malloc(Np*K * sizeof(double));
+//	memcpy(Tempfphys, fphys, Np*K * sizeof(double));
     
     size_t Nface = mxGetM(prhs[2]); // number of faces of the computation cell
     
@@ -68,10 +57,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     ptrdiff_t Np_ptrdiff = Npz;
     ptrdiff_t Nq_ptrdiff = Npz;
     char *tran = "N";
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-    
     for (int k = 0; k < K; k++) {
         /*This part is used to determine the maxmum and minimum allowable value of the studied cell with index k */
         double amax = -1*pow(10,10), amin = pow(10,10);
@@ -81,13 +70,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 amax = max(amax, avar[(mwIndex)EToE[k*Nface + f]-1]);
                 amin = min(amin, avar[(mwIndex)EToE[k*Nface + f]-1]);
             }
-            else
-                continue;
         }
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         int flag = 0;
         for (int i = 0; i < Np; i++){
-            
             if (fphys[k*Np + i] > amax || fphys[k*Np + i] < amin){
                 flag = 1;
                 break;
@@ -162,4 +148,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /*Copy the limited value to the output*/
     for(int i=0; i<Np*K; i++)
         limfphys[i] = fphys[i];
+    // For elements adjacent to the boundary, we don't alter the value at all, added on 20220203 by RGQ
+	/*
+	for (int k = 0; k < K; k++) {
+		for (int f = 0; f < Nface; f++) {
+			if ((int)EToE[Nface*k + f] == (k + 1)) {
+				memcpy(limfphys + k*Np, Tempfphys + k*Np, Np * sizeof(double));
+				break;
+			}
+		}
+	}
+	*/
+
+//	free(Tempfphys);
 }

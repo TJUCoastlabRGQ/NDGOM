@@ -15,7 +15,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
     end
     
     properties
-        miu = 1
+        miu = 0.1
         
         Cexact
         
@@ -40,7 +40,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             obj.DirichExact = zeros(1,2);
             obj.NewmannExact = zeros(1,2);
             obj.matGetFinalSolution;
-            obj.dt = 0.1;
+            obj.dt = 0.05;
         end        
         
         function drawComparison( obj )
@@ -48,7 +48,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
             t = obj.getOption('finalTime');
             x = obj.meshUnion.x;
             ed = eval(obj.Cexact).*ones(size(obj.meshUnion.x));
-            plot(x(1:20:end),ed(1:20:end),'ro','LineWidth',1.5);
+            plot(x(1:5:end),ed(1:5:end),'ro','LineWidth',1.5);
 %             str =['$\mu=$', num2str(obj.miu)];
             str = '$\frac{1}{\sqrt{(4t+1)}}e^{\frac{-(x-0.5)^2}{4t+1}}$';
             title(str,'Interpreter','Latex','fontsize',15);
@@ -111,7 +111,7 @@ classdef SecondOrderOperatorTest1d < SWEConventional1d
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 50;
+            ftime = 20;
             outputIntervalNum = 5000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;

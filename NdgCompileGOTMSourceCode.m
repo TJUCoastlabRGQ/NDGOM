@@ -6,10 +6,13 @@ else
     
     copyfile([pwd,'/thirdParty/GOTM/src/turbulence/*.F90'],[pwd,'/lib/GOTM']);
     copyfile([pwd,'/thirdParty/GOTM/src/util/*.F90'],[pwd,'/lib/GOTM']);
-    Files = {[pwd,'/lib/GOTM/test_time.F90'],[pwd,'/lib/GOTM/test_eqstate.F90'],...
-        [pwd,'/lib/GOTM/ode_solvers_template.F90'],...
-        [pwd,'/lib/GOTM/field_manager.F90']};
+%     Files = {[pwd,'/lib/GOTM/test_time.F90'],[pwd,'/lib/GOTM/test_eqstate.F90'],...
+%         [pwd,'/lib/GOTM/ode_solvers_template.F90']};
+    Files = {[pwd,'/lib/GOTM/test_time.F90'],[pwd,'/lib/GOTM/ode_solvers_template.F90']};
+%         [pwd,'/lib/GOTM/field_manager.F90']};
     DeleteFiles(Files);
+    
+%     cd /lib/GOTM;
     
     IncludePath = '-I./thirdParty/GOTM/include';
     Outpath = './lib/GOTM';
@@ -37,6 +40,6 @@ end
 
 function CompileF90File(file, Ipath, Outpath)
 for i = 1:numel(file)
-    mex('-g','-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
+    mex('-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
 end
 end

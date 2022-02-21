@@ -43,3 +43,6 @@ NdgMex
 *.vtk
 *.pdb
 *.dat
+*.mod
+*.csv
+*.xlsx

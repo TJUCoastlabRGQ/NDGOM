@@ -1,42 +1,35 @@
-classdef WindDrivenFlow < SWEBarotropic3d
-    %WINDDRIVENFLOW 此处显示有关此类的摘要
+classdef EkmanSpiral < SWEBarotropic3d
+    %EKMANSPIRAL 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties ( Constant )
         %> channel length
-        ChLength = 2000;
-        ChWidth = 200;
+        ChLength = 40000000;
+        
+        ChWidth  = 40000000;
         %> channel depth
-        H0 = 10;
+        H0 = 200;
+        %> x range
         %> start time
         startTime = 0;
         %> final time
-
-        finalTime = 7200;
+        finalTime = 86400 * 100;
+        
         hcrit = 0.001;
     end
     
     methods
-        function obj = WindDrivenFlow( N, Nz, M, Mz )
+        function obj = EkmanSpiral(N, Nz, M, Mz)
             % setup mesh domain
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3 ];
-            obj.outputFieldOrder3d = [ 1 2 3 10];
+            obj.outputFieldOrder2d = [ 1 ];
+            obj.outputFieldOrder3d = [ 1 2 4];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.Cf{1} = 1000 * 0.001*ones(size(obj.mesh2d(1).x));
+            obj.Cf{1} = 0.0025*ones(size(obj.mesh2d(1).x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
+            obj.SurfBoundNewmannDate(:,:,2) = 0.1/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
-        
-        matExplicitRK222(obj);
-        
-        
-        EntropyAndEnergyCalculation(obj);
-        
-        AnalysisResult2d( obj );
-        AnalysisResult3d( obj );
-        
     end
     
     methods ( Access = protected )
@@ -60,7 +53,6 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-% %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
 %            VCV = obj.meshUnion(1).cell.VCV;
 %            Nz = obj.meshUnion(1).Nz;
 %            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
@@ -70,11 +62,11 @@ classdef WindDrivenFlow < SWEBarotropic3d
 %                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
 %            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
 %                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
-        end
+        end        
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            outputIntervalNum = 400;
+            outputIntervalNum = 10000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -87,23 +79,18 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
             option('outputType') = enumOutputFile.VTK;
             option('limiterType') = enumLimiter.Vert;
-            option('ConstantVerticalEddyViscosityValue') = 0.01;
+            option('ConstantVerticalEddyViscosityValue') = 0.1;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 0.1;
+            option('ConstantHorizontalEddyViscosityValue') = 0;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
-        end
-        
+            option('CoriolisType') = enumSWECoriolis.Beta;
+            option('f0 for beta coriolis solver') = 2*sin(pi/4)*7.29*10^(-5);
+            option('beta for beta coriolis solver') = 0.0;
+        end        
     end
-    
 end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
-
-% bctype = [ ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.ZeroGrad, ...
-%     enumBoundaryCondition.ZeroGrad ];
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
@@ -122,7 +109,5 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

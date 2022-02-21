@@ -662,20 +662,50 @@ void SWENH3dImposeBoundaryMemoryDeAllocation(){
 
 
 /*This is for vertical diffusion part*/
-double *Tau = NULL;
+double *Tau = NULL, *u2d = NULL, *v2d = NULL;
 char *VertDiffInitialized = "False";
 
 void VertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz){
 	Tau = malloc(sizeof(double)*(Np2d*K2d*(Nz+1)));
     MemoryAllocationCheck(Tau, sizeof(double)*(Np2d*K2d*(Nz+1)));
 	memset(Tau, 0, Np2d*K2d*(Nz + 1)*sizeof(double));
+	u2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(u2d, sizeof(double)*(Np2d*K2d));
+	v2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(v2d, sizeof(double)*(Np2d*K2d));
 	VertDiffInitialized = "True";
 }
 
 void VertDiffMemoryDeAllocation(){
-	free(Tau);
-	Tau = NULL;
+	free(Tau); Tau = NULL;
+	free(u2d); u2d = NULL;
+	free(v2d); v2d = NULL;
 	VertDiffInitialized = "False";
+}
+
+/*This is for sparse vertical diffusion part*/
+double *ImTau = NULL, *Imu2d = NULL, *Imv2d = NULL, *GlobalSystemRHS = NULL;
+char *ImVertDiffInitialized = "False";
+
+void ImVertDiffMemoryAllocation(const int Np2d, int K2d, const int Nz, int Np3d, int Nvar) {
+	ImTau = malloc(sizeof(double)*(Np2d*K2d*(Nz + 1)));
+	MemoryAllocationCheck(ImTau, sizeof(double)*(Np2d*K2d*(Nz + 1)));
+	memset(ImTau, 0, Np2d*K2d*(Nz + 1) * sizeof(double));
+	Imu2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(Imu2d, sizeof(double)*(Np2d*K2d));
+	Imv2d = malloc(Np2d*K2d * sizeof(double));
+	MemoryAllocationCheck(Imv2d, sizeof(double)*(Np2d*K2d));
+	GlobalSystemRHS = malloc(Np3d*K2d * Nz * Nvar * sizeof(double));
+	MemoryAllocationCheck(GlobalSystemRHS, Np3d*K2d * Nz * Nvar * sizeof(double));
+	ImVertDiffInitialized = "True";
+}
+
+void ImVertDiffMemoryDeAllocation() {
+	free(ImTau); ImTau = NULL;
+	free(Imu2d); Imu2d = NULL;
+	free(Imv2d); Imv2d = NULL;
+	free(GlobalSystemRHS); GlobalSystemRHS = NULL;
+	ImVertDiffInitialized = "False";
 }
 
 /*This is for GOTM part*/
@@ -684,7 +714,8 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
-*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, *hcenter = NULL;
+*hcenter = NULL, *pupz = NULL, *opupz = NULL, *pvpz = NULL, *opvpz = NULL;
+//*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, 
 
 char *GOTMInitialized = "False";
 
@@ -724,10 +755,17 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
     MemoryAllocationCheck(SurfaceFrictionVelocity, sizeof(double)*K2d);
 	eddyViscosityDate = malloc(sizeof(double)*(K2d * Interface));
     MemoryAllocationCheck(eddyViscosityDate, sizeof(double)*(K2d * Interface));
-	rhoCentralDate = malloc(sizeof(double)*(K2d));
-	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K2d));
+	rhoCentralDate = malloc(sizeof(double)*(K3d));
+	MemoryAllocationCheck(rhoCentralDate, sizeof(double)*(K3d));
 	rhoVerticalLine = malloc(sizeof(double)*(K2d*Interface));
 	MemoryAllocationCheck(rhoVerticalLine, sizeof(double)*(K2d*Interface));
+	opupz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(opupz, sizeof(double)*(K2d*Interface));
+	memset(opupz, 0, sizeof(double)*(K2d*Interface));
+	opvpz = malloc(sizeof(double)*(K2d*Interface));
+	MemoryAllocationCheck(opvpz, sizeof(double)*(K2d*Interface));
+	memset(opvpz, 0, sizeof(double)*(K2d*Interface));
+	/*
 	eddyDiffusionDate = malloc(sizeof(double)*(K2d * Interface));
 	MemoryAllocationCheck(eddyDiffusionDate, sizeof(double)*(K2d * Interface));
 	eddyTKEDate = malloc(sizeof(double)*(K2d * Interface));
@@ -736,6 +774,7 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
 	MemoryAllocationCheck(eddyLengthDate, sizeof(double)*(K2d * Interface));
 	eddyEPSDate = malloc(sizeof(double)*(K2d * Interface));
 	MemoryAllocationCheck(eddyEPSDate, sizeof(double)*(K2d * Interface));
+	*/
 	hcenter = malloc(K2d * sizeof(double));
 	MemoryAllocationCheck(hcenter, sizeof(double)*K2d);
 	GOTMInitialized = "True";
@@ -761,10 +800,14 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyViscosityDate); eddyViscosityDate = NULL;
 	free(rhoCentralDate); rhoCentralDate = NULL;
 	free(rhoVerticalLine); rhoVerticalLine = NULL;
+	free(opupz); opupz = NULL;
+	free(opvpz); opvpz = NULL;
+	/*
 	free(eddyDiffusionDate); eddyDiffusionDate = NULL;
 	free(eddyTKEDate); eddyTKEDate = NULL;
 	free(eddyLengthDate); eddyLengthDate = NULL;
 	free(eddyEPSDate); eddyEPSDate = NULL;
+	*/
 	free(hcenter); hcenter = NULL;
 	GOTMInitialized = "False";
 }

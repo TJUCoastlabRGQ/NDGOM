@@ -1,33 +1,20 @@
-classdef LockExchangeCase < SWEBaroclinic3d
+classdef BaroclinicEddies < SWEBaroclinic3d
     %LOCKEXCHANGECASE 此处显示有关此类的摘要
     %   此处显示详细说明
     
     properties
-        ChLength = 64000
+        ChLength = 500000
         
-        ChWidth = 500
+        ChWidth = 160000
         
-        finalTime = 30
+        finalTime = 201 * 86400
         
-        H0 = 20
-        
-        MAXfid
-        
-        MINfid
+        H0 = 1000
         
         RPEfid
         
         RPE0
         
-        Front95To96fid
-        
-        Front96To97fid
-        
-        Front97To98fid
-        
-        Front98To99fid
-        
-        Front99To00fid
     end
     
     properties( Constant )
@@ -35,31 +22,17 @@ classdef LockExchangeCase < SWEBaroclinic3d
     end
     
     methods
-        %> For this case, the parameter is set following (Thetis, 2017), and we take M = 128, Mz = 20
-        function obj = LockExchangeCase(N, Nz, M, Mz)
+        %> For this case, the parameter is set following (Thetis, 2017), and we take Mx = 125, My = 40 and Mz = 40
+        function obj = BaroclinicEddies(N, Nz, M, Mz)
             %LOCKEXCHANGECASE 构造此类的实例
             %   此处显示详细说明
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             
-            obj.Cf{1} = 0*ones(size(obj.mesh2d.x));
-            
-            obj.MAXfid = fopen('Result\LockExchangeCase\3d\MaxData.dat','w');
-            
-            obj.MINfid = fopen('Result\LockExchangeCase\3d\MinData.dat','w');
-            
+            obj.Cf{1} = 0.01*ones(size(obj.mesh2d.x));
+                        
             obj.RPEfid = fopen('Result\LockExchangeCase\3d\RPEData.dat','w');
-            
-            obj.Front95To96fid = fopen('Result\LockExchangeCase\3d\FrontData95To96.dat','w');
-            
-            obj.Front96To97fid = fopen('Result\LockExchangeCase\3d\FrontData96To97.dat','w');
-            
-            obj.Front97To98fid = fopen('Result\LockExchangeCase\3d\FrontData97To98.dat','w');
-            
-            obj.Front98To99fid = fopen('Result\LockExchangeCase\3d\FrontData98To99.dat','w');
-            
-            obj.Front99To00fid = fopen('Result\LockExchangeCase\3d\FrontData99To00.dat','w');
             
             obj.fphys{1}(:,:,13) = obj.matCalculateDensityField( obj.fphys{1} );
             
@@ -79,14 +52,33 @@ classdef LockExchangeCase < SWEBaroclinic3d
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
-                Index = all(mesh3d.x<=obj.ChLength/2);
-                fphys{m}(:,Index,15) = 35*obj.H0;
-                Index = all(mesh3d.x>=obj.ChLength/2);
-                fphys{m}(:,Index,15) = 35*obj.H0;
-                Index = all(mesh3d.x<=obj.ChLength/2);
-                fphys{m}(:,Index,14) = 5*obj.H0;
-                Index = all(mesh3d.x>=obj.ChLength/2);
-                fphys{m}(:,Index,14) = 30*obj.H0;
+                fphys{m}(:,:,15) = 35*obj.H0;
+                
+                TBot = 10;
+                TSurf = 20;
+                TempData = obj.H0*(TBot + (TSurf-TBot)*((-1) - mesh3d.z)./(-1));
+%                 fphys{m}(:,:,14) = obj.H0*(TBot + (TSurf-TBot)*((-1) - mesh3d.z)./(-1));
+                Lx = 160000;
+                y0 = 250000;
+                k = 3;
+                yA = 40000;
+                deltaT = 1.2;
+                deltaY = 40000;
+                
+                Index = mesh3d.y <= y0 - yA*sin(2*pi*k*mesh3d.x./Lx);
+                TempData(Index) = TempData(Index) - deltaT;
+                
+                Index = mesh3d.y > y0 - yA*sin(2*pi*k*mesh3d.x./Lx) & mesh3d.y < y0 - yA*sin(2*pi*k*mesh3d.x./Lx) + deltaY;
+                TempData(Index) = TempData(Index) - deltaT * ( 1 - (mesh3d.y(Index) - (y0 - yA*sin(2*pi*k*mesh3d.x(Index)./Lx) ))/40000);
+                
+                x2 = 110000;
+                x3 = 130000;
+                deltaT = 0.3;
+                yw = y0 - yA/2*sin(pi*(mesh3d.x - x2)./(x3 - x2));
+                Index = ( mesh3d.x >= x2 & mesh3d.x <= x3 & mesh3d.y >= yw - deltaY/2 & mesh3d.y <= yw + deltaY/2 );
+                TempData(Index) = TempData(Index) + obj.H0 * deltaT*(1 - (mesh3d.y(Index) - yw(Index))/deltaY/2);
+                fphys{m}(:,:,14) = TempData;
+                
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
@@ -94,32 +86,10 @@ classdef LockExchangeCase < SWEBaroclinic3d
             end
         end
         
-        function matUpdateOutputResult( obj, time, ~, fphys )
+        function matUpdateOutputResult( obj, time, fphys2d, fphys )
             
-            fprintf(obj.MAXfid,'%12.8f  %12.8f\n', time, max(max(fphys{1}(:,:,14) ./ fphys{1}(:,:,4))) );
-            
-            fprintf(obj.MINfid,'%12.8f  %12.8f\n', time, min(min(fphys{1}(:,:,14) ./ fphys{1}(:,:,4))) );
-            
-            Index = (fphys{1}(:,:,13)>995 & fphys{1}(:,:,13)<=996);
-            
-            fprintf(obj.Front95To96fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
-            
-            Index = (fphys{1}(:,:,13)>996 & fphys{1}(:,:,13)<=997);
-            
-            fprintf(obj.Front96To97fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) ); 
-            
-            Index = (fphys{1}(:,:,13)>997 & fphys{1}(:,:,13)<=998);
-            
-            fprintf(obj.Front97To98fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
-            
-            Index = (fphys{1}(:,:,13)>998 & fphys{1}(:,:,13)<=999);
-            
-            fprintf(obj.Front98To99fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) );
-            
-            Index = (fphys{1}(:,:,13)>999 & fphys{1}(:,:,13)<=1000);
-            
-            fprintf(obj.Front99To00fid,'%12.8f  %12.8f\n', time, max(max(obj.meshUnion.x(Index))) ); 
-            
+            matUpdateOutputResult@SWEAbstract3d( obj, time, fphys2d, fphys );
+                        
             RPE = obj.matCalculateRPE( fphys );
             
             fprintf(obj.RPEfid,'%12.8f  %12.8f\n', time, (RPE - obj.RPE0)/obj.RPE0 ); 
@@ -142,21 +112,9 @@ classdef LockExchangeCase < SWEBaroclinic3d
         end
         
         function matUpdateFinalResult( obj, ~, ~, ~ )
-            fclose(obj.MAXfid);
-            
-            fclose(obj.MINfid);
             
             fclose(obj.RPEfid);
             
-            fclose(obj.Front95To96fid);
-                    
-            fclose(obj.Front96To97fid);
-            
-            fclose(obj.Front97To98fid);
-            
-            fclose(obj.Front98To99fid);
-            
-            fclose(obj.Front99To00fid);
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
@@ -189,7 +147,9 @@ classdef LockExchangeCase < SWEBaroclinic3d
 %             option('PhysicalSurfaceRoughnessLength') = 0.02;
 %             option('PhysicalBottomRoughnessLength') = 0.0015;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
-            option('CoriolisType') = enumSWECoriolis.None;
+            option('CoriolisType') = enumSWECoriolis.Beta;
+            option('f0 for beta coriolis solver') = 1.2*10^(-4);
+            option('beta for beta coriolis solver') = 0.0;
         end
         
     end    
@@ -204,7 +164,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], M, 1, bctype);
+    [ 0, obj.ChLength ], [ 0, obj.ChWidth ], 125, 40, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
@@ -214,4 +174,5 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-end
+end 
+

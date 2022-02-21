@@ -42,7 +42,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-        %         [ fphys ] = obj.matImposeLimiter( fphys );
+%         [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
         
         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
@@ -63,22 +63,26 @@ while( time < ftime )
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-        %         [ fphys ] = obj.matImposeLimiter( fphys );
+%                 [ fphys ] = obj.matImposeLimiter( fphys );
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     
-    [ fphys{1}(:,:,obj.varFieldIndex([1,2]))] = ...
+    [ fphys{1}(:,:,obj.varFieldIndex)] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-        fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex([1,2])), 1, dt, 1,...
+        fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
+    
+    [ fphys{1}(:,:,5)] = obj.VerticalEddyViscositySolver.nv;
+    
+    [ fphys{1}(:,:,14)] = obj.VerticalEddyViscositySolver.Tke;
+    
+    [ fphys{1}(:,:,15)] = obj.VerticalEddyViscositySolver.Eps;
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
-    
-    
     
     %     [ data ] = ...
     %         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
@@ -87,6 +91,7 @@ while( time < ftime )
     %     postplot(data(:,:,1));
     %     postplot(fphys{1}(:,:,1));
     time = time + dt;
+    disp(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);
@@ -95,6 +100,11 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
+% fid = fopen('output1.dat','w');
+% for i = 1:numel(obj.VerticalEddyViscositySolver.maxhu)
+%     fprintf(fid,'%18.16f \n', obj.VerticalEddyViscositySolver.maxhu(i));
+% end
+% fclose(fid);
 end
 
 function [ rkb, rkt] = GetRKParameter

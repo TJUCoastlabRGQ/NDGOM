@@ -71,7 +71,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		//plhs[4] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 		//plhs[5] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
 		//plhs[6] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
-		
+//		plhs[4] = mxCreateDoubleMatrix((int)nlev + 1, K2d, mxREAL);
+//		double *OutShearFrequencyData = mxGetPr(plhs[4]);
+//		plhs[4] = mxCreateDoubleMatrix(K2d, 1, mxREAL);
+//		double *Hcenter = mxGetPr(plhs[4]);
+//		plhs[5] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
+//		double *PtrOutLength = mxGetPr(plhs[5]);
+
 		double *PtrOutEddyViscosity = mxGetPr(plhs[0]);
         double *PtrOutDragCoefficient = mxGetPr(plhs[1]);
 		/*DiffusionParameter for T*/
@@ -103,43 +109,51 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		for (int i = 0; i < K2d; i++) {
 			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d + i);
 		}
-		
-		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
 
-		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+//		memcpy(Hcenter, hcenter, K2d*sizeof(double));
+		
+		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+
+//		memcpy(hucenterOutput, huCentralDate, K3d*sizeof(double));
+
+		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S.
 		Details about the latter manner can be found in Tuomas and Vincent(2012, Ocean modelling)
 		*/
-		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np2d, Np3d, nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
 
 		//Tc to be continued
 		//Sc to be continued
-		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, nlev);
+		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
 
-		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, nlev);
+//		memcpy(huVerticalLineData, huVerticalLine, K2d*((int)nlev + 1) * sizeof(double));
+
+		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, (int)nlev);
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S*/
-		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, nlev);
+		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, (int)nlev);
 		//Tvl to be continued
 		//Svl to be continued
-		CalculateWaterDepth(K2d, hcrit, nlev);
+		CalculateWaterDepth(K2d, hcrit, (int)nlev);
 
-		CalculateShearFrequencyDate(K2d, hcrit, nlev);
+		CalculateShearFrequencyDate(K2d, hcrit, (int)nlev);
+		//Checked
+//		memcpy(OutShearFrequencyData, shearFrequencyDate, K2d*((int)nlev + 1) * sizeof(double));
 
-		CalculateBuoyanceFrequencyDate( Np2d, K2d, hcrit, nlev, gra, rho0);
+		CalculateBuoyanceFrequencyDate( Np2d, K2d, hcrit, (int)nlev, gra, rho0);
 
-		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, K2d, nlev);
+		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, (int)nlev);
 
 		DGDoTurbulence(&dt, hcrit, NULL, K2d, nlev);
 
-		mapVedgeDateToDof(nuhGOTM, PtrOutEddyViscosity, Np2d, K2d, Np3d, nlev);
-//		mapVedgeDateToDof(numGOTM, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(numGOTM, PtrOutEddyViscosity, Np2d, K2d, Np3d, (int)nlev);
+//		mapVedgeDateToDof(nuhGOTM, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, nlev);
 
 //		mapVedgeDateToDof(numGOTM, PtrOutDiffusionCoeForS, Np2d, K2d, Np3d, nlev);
 
-		mapVedgeDateToDof(tkeGOTM, PtrOutTKE, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(tkeGOTM, PtrOutTKE, Np2d, K2d, Np3d, (int)nlev);
 
 //		mapVedgeDateToDof(LGOTM, PtrOutLength, Np2d, K2d, Np3d, nlev);
 
-		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, (int)nlev);
 
 }
