@@ -106,8 +106,8 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 					+ pow((hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L])), 2);
 				newpupz = (huVerticalLine[i*(nlev + 1) + L + 1] - huVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
 				newpvpz = (hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				shearFrequencyDate[i*(nlev + 1) + L] = (0.5 * newpupz + 0.5*opupz[i*(nlev + 1) + L]) * newpupz + \
-					(0.5 * newpvpz + 0.5*opvpz[i*(nlev + 1) + L]) * newpvpz;
+				shearFrequencyDate[i*(nlev + 1) + L] = (1.0 * newpupz + 0.0*opupz[i*(nlev + 1) + L]) * newpupz + \
+					(1.0 * newpvpz + 0.0*opvpz[i*(nlev + 1) + L]) * newpvpz;
 				//Store the data for the use in the next step
 				opupz[i*(nlev + 1) + L] = newpupz;
 				opvpz[i*(nlev + 1) + L] = newpvpz;
