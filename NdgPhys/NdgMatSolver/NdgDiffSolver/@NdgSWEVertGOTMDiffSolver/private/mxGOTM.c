@@ -201,7 +201,6 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 		 if (hcenter[i] >= hcrit) {
 			 for (int L = 1; L < nlev; L++) {
 				 buoyanceFrequencyDate[i*(nlev + 1) + L] = -1 * gra/rho0*(rhoVerticalLine[i*(nlev + 1) + L + 1] - rhoVerticalLine[i*(nlev + 1) + L]) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				 buoyanceFrequencyDate[i*(nlev + 1) + L] = max(buoyanceFrequencyDate[i*(nlev + 1) + L], 0.0);
 			 }
 			 //For each vertical segment, we have NN(0) = NN(1), NN(nlev) = NN(nlev - 1)
 			 buoyanceFrequencyDate[i*(nlev + 1)] = buoyanceFrequencyDate[i*(nlev + 1) + 1];
