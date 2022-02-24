@@ -99,18 +99,27 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < K2d; i++){
-		double newpupz, newpvpz;
+		// L stands for lower, U stands for upper, Old stands for the data at previous step(without vertical eddy considered)
+		// New stands for the data at the updated step(with vertical eddy considered)
+		double uLOld, uUOld, vLOld, vUOld, uLNew, uUNew, vLNew, vUNew;
 		if (hcenter[i] >= hcrit){
 			for (int L = 1; L < nlev; L++){
-//				shearFrequencyDate[i*(nlev + 1) + L] = pow((huVerticalLine[i*(nlev + 1) + L + 1] - huVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L])), 2) \
-					+ pow((hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L])), 2);
-				newpupz = (huVerticalLine[i*(nlev + 1) + L + 1] - huVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				newpvpz = (hvVerticalLine[i*(nlev + 1) + L + 1] - hvVerticalLine[i*(nlev + 1) + L]) / hcenter[i] / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
-				shearFrequencyDate[i*(nlev + 1) + L] = (1.0 * newpupz + 0.0*opupz[i*(nlev + 1) + L]) * newpupz + \
-					(1.0 * newpvpz + 0.0*opvpz[i*(nlev + 1) + L]) * newpvpz;
-				//Store the data for the use in the next step
-				opupz[i*(nlev + 1) + L] = newpupz;
-				opvpz[i*(nlev + 1) + L] = newpvpz;
+				uLOld = huVerticalLine[i*(nlev + 1) + L] / hcenter[i];
+				uUOld = huVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i];
+				uLNew = huVerticalLineNew[i*(nlev + 1) + L] / hcenter[i];
+				uUNew = huVerticalLineNew[i*(nlev + 1) + L + 1] / hcenter[i];
+				vLOld = hvVerticalLine[i*(nlev + 1) + L] / hcenter[i];
+				vUOld = hvVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i];
+				vLNew = hvVerticalLineNew[i*(nlev + 1) + L] / hcenter[i];
+				vUNew = hvVerticalLineNew[i*(nlev + 1) + L + 1] / hcenter[i];
+				/*$SS = \left(\frac{\partial u}{\partial z}\right)^2 + \left(\frac{\partial v}{\partial z}\right)^2 = \\
+				\frac{(\hat u_{j+1} - \hat u_j)\times 0.5\times (\hat u_{j+1} + u_{j+1} - \hat u_j - u_j)}{(z_{j+1}-z_j)^2} + 
+				\frac{(\hat v_{j+1} - \hat v_j)\times 0.5\times (\hat v_{j+1} + v_{j+1} - \hat v_j - v_j)}{(z_{j+1}-z_j)^2}$,
+				here $\hat u_{j+1}$ stands for uUNew, $\hat u_{j}$ uLNew, $u_{j+1}$ uUOld, $u_{j}$ uLOld. Also,  
+				$\hat v_{j+1}$ stands for vUNew, $\hat v_{j}$ vLNew, $v_{j+1}$ vUOld, $v_{j}$ vLOld.
+				*/
+				shearFrequencyDate[i*(nlev + 1) + L] = (uUNew - uLNew)*0.5*(uUNew + uUOld - uLNew - uLOld)/ pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]),2.0) + \
+					(vUNew - vLNew)*0.5*(vUNew + vUOld - vLNew - vLOld) / pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]), 2.0);
 			}
 			//For each vertical segment, we have SS(0) = SS(1), SS(nlev) = SS(nlev - 1)
 			shearFrequencyDate[i*(nlev + 1)] = shearFrequencyDate[i*(nlev + 1) + 1];
@@ -118,8 +127,6 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 		}
 		else {
 			for (int L = 0; L < nlev + 1; L++) {
-				opupz[i*(nlev + 1) + L] = 0;
-				opvpz[i*(nlev + 1) + L] = 0;
 				shearFrequencyDate[i*(nlev + 1) + L] = 0;
 			}
 		}

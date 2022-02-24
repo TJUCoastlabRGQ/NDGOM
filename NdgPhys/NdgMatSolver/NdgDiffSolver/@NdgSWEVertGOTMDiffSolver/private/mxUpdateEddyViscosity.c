@@ -50,6 +50,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double gra = mxGetScalar(prhs[17]);
 	double rho0 = mxGetScalar(prhs[18]);
 	int Interface = (int)nlev + 1;
+	double *J2d = mxGetPr(prhs[19]);
+	double *wq2d = mxGetPr(prhs[20]);
+	double *Vq2d = mxGetPr(prhs[21]);
+	int RVq2d = (int)mxGetM(prhs[21]);
+	int CVq2d = (int)mxGetN(prhs[21]);
+	double *LAV2d = mxGetPr(prhs[22]);
+	double *huNew = mxGetPr(prhs[23]);
+	double *hvNew = mxGetPr(prhs[24]);
 //	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){
@@ -95,13 +103,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempNp3d = (ptrdiff_t)Np3d;
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
-		double *J2d = mxGetPr(prhs[19]);
-		double *wq2d = mxGetPr(prhs[20]);
-		double *Vq2d = mxGetPr(prhs[21]);
-		int RVq2d = (int)mxGetM(prhs[21]);
-		int CVq2d = (int)mxGetN(prhs[21]);
-		double *LAV2d = mxGetPr(prhs[22]);
-
 		/*Calculate the water depth at cell center first*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -113,10 +114,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //		memcpy(Hcenter, hcenter, K2d*sizeof(double));
 		
 		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d);
 
 //		memcpy(hucenterOutput, huCentralDate, K3d*sizeof(double));
 
 		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
+		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d);
+
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S.
 		Details about the latter manner can be found in Tuomas and Vincent(2012, Ocean modelling)
 		*/
@@ -125,10 +129,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		//Tc to be continued
 		//Sc to be continued
 		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
-
+		mapCentralPointDateToVerticalDate(huCentralDateNew, huVerticalLineNew, K2d, (int)nlev);
 //		memcpy(huVerticalLineData, huVerticalLine, K2d*((int)nlev + 1) * sizeof(double));
 
 		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, (int)nlev);
+		mapCentralPointDateToVerticalDate(hvCentralDateNew, hvVerticalLineNew, K2d, (int)nlev);
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S*/
 		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, (int)nlev);
 		//Tvl to be continued

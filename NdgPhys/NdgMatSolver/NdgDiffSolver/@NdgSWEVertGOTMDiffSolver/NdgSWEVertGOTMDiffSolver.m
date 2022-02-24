@@ -54,13 +54,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             obj.Prantl = physClass.Prantl;
             obj.matClearGlobalMemory;
         end
-        
+
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
             Outfphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d);
-            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
-        end
-        
-        
+            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, Outfphys(:,:,1), Outfphys(:,:,2), ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
+        end 
         
         function matClearGlobalMemory(obj)
             matClearGlobalMemory@NdgVertDiffSolver( obj );
@@ -70,11 +68,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
     
     methods(Access = protected)
         
-        function matUpdateViscosity(obj, physClass, H2d, Hu, Hv, dt, rho )
+        function matUpdateViscosity(obj, physClass, H2d, Hu, Hv, HuNew, HvNew, dt, rho )
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
                 H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
-                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV );
+                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew, HvNew );
         end           
         
         function matUpdataNewmannBoundaryCondition( obj, physClass, fphys)

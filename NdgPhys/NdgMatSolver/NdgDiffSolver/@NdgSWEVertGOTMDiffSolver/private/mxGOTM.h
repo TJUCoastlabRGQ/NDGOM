@@ -21,10 +21,11 @@
 #define min(a, b) ((a < b) ? a : b)
 #endif
 
-extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, \
-*hvCentralDate, *huVerticalLine, *hvVerticalLine, *shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, \
-*BottomFrictionVelocity, *SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, \
-*rhoCentralDate, *rhoVerticalLine, *hcenter, *opupz, *opvpz;
+extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huCentralDate, *huCentralDateNew,\
+*hvCentralDate, *hvCentralDateNew, *huVerticalLine, *huVerticalLineNew, *hvVerticalLine, *hvVerticalLineNew, \
+*shearFrequencyDate, *buoyanceFrequencyDate, *BottomFrictionLength, *BottomFrictionVelocity, \
+*SurfaceFrictionLength, *SurfaceFrictionVelocity, *eddyViscosityDate, *rhoCentralDate, \
+*rhoVerticalLine, *hcenter;
 
 //*eddyDiffusionDate, *eddyTKEDate, *eddyLengthDate, *eddyEPSDate,
 
