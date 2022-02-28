@@ -26,6 +26,11 @@ void MyExit()
 	return;
 }
 
+/*
+* The numerical flux for the 2d part is calculated by integration of the 3d part,
+* The final velocity is calculated strongly (i.e. integrated from bottom 
+* to surface, and the bottom boundary is set to zero directly)
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {

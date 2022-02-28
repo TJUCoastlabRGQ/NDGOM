@@ -32,6 +32,13 @@ void FetchBoundaryData(double *dest, double *source, double *destIndex, double *
 		dest[(int)destIndex[i] - 1] = source[(int)sourceIndex[i] - 1];
 }
 
+/*
+* The numerical flux for the 2d part is calculated by integration of the 3d part,
+* The final velocity is calculated weakly (i.e. calculated from bottom
+* using the boundary condition and the information of the bottom element)
+* from bottom
+*/
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
 	mexAtExit(&MyExit);

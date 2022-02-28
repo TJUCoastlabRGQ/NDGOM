@@ -28,6 +28,13 @@ void MyExit()
 
 void FetchBoundaryData(double *, double *, double *, double *, int);
 
+/*
+* The numerical flux for the 2d part is based on the two-dimensional physical variable,
+* i.e. the 2d model and the 3d model are independent. 
+* The final velocity is calculated strongly (i.e. integrated from bottom 
+* to surface, and the bottom boundary is set to zero directly)
+*/
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
 	mexAtExit(&MyExit);

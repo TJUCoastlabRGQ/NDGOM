@@ -27,6 +27,13 @@ void MyExit()
 
 void FetchBoundaryData(double *, double *, double *, double *, int);
 
+/*
+* The numerical flux for the 2d part and 3d part are all set to be zero,
+* The final velocity is calculated weakly (i.e. calculated from bottom 
+* using the boundary condition and the information of the bottom element) 
+* from bottom
+*/
+
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
 	mexAtExit(&MyExit);
@@ -322,6 +329,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
+		/*The numerical flux is set to be zero*/
 		memset(VSERHS2d + k*Np2d, 0, Np2d * sizeof(double));
 		Minus(VSrhs2d + k*Np2d, VSERHS2d + k*Np2d, VSrhs2d + k*Np2d, Np2d);
 	}
@@ -441,6 +449,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K3d; k++){
+		/*The numerical flux is set to be zero*/
 		memset(VSERHS3d + k*Np3d, 0, Np3d*sizeof(double));
 		Minus(VSrhs3d + k*Np3d, VSERHS3d + k*Np3d, VSrhs3d + k*Np3d, Np3d);
 		/*Substract the VSfield2d from VSrhs3d to assemble the final right hand side*/

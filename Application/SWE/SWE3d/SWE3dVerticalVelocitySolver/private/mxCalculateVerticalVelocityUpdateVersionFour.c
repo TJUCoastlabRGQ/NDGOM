@@ -26,6 +26,11 @@ void MyExit()
 	return;
 }
 
+/*
+* The numerical flux for the 2d part and 3d part are all set to be zero,
+* The final velocity is calculated strongly (i.e. integrated from bottom 
+* to surface, and the bottom boundary is set to zero directly)
+*/
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) 
 {
@@ -351,6 +356,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K3d; k++){
+		/*The numerical flux is set to be zero*/
 		memset(UpdatedVSERHS3d + k*Np3d, 0, Np3d * sizeof(double));
 		Minus(UpdatedVSrhs3d + k*Np3d, UpdatedVSERHS3d + k*Np3d, UpdatedVSrhs3d + k*Np3d, Np3d);
 	}
@@ -454,6 +460,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
+		/*The numerical flux is set to be zero*/
 		memset(UpdatedVSERHS2d + k*Np2d, 0, Np2d * sizeof(double));
 		Minus(UpdatedVSrhs2d + k*Np2d, UpdatedVSERHS2d + k*Np2d, UpdatedVSrhs2d + k*Np2d, Np2d);
 	}

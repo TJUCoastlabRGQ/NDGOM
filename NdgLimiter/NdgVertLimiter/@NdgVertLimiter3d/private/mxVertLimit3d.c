@@ -151,14 +151,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     // For elements adjacent to the boundary, we don't alter the value at all, added on 20220203 by RGQ
 	/*
 	for (int k = 0; k < K; k++) {
+        if ((int)EToE[Nface*k + Nface -2 ] == (k + 1)) {
+            memcpy(limfphys + k*Np, Tempfphys + k*Np, Np * sizeof(double));
+        }
+		*/
+        /*
 		for (int f = 0; f < Nface; f++) {
 			if ((int)EToE[Nface*k + f] == (k + 1)) {
 				memcpy(limfphys + k*Np, Tempfphys + k*Np, Np * sizeof(double));
 				break;
 			}
 		}
-	}
-	*/
+         */
+//	}
+	
 
 //	free(Tempfphys);
 }

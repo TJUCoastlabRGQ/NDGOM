@@ -11,7 +11,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 5000;
+        finalTime = 86400;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@BottomBoundaryLayerCase/gotmturb.nml']);
@@ -80,7 +80,7 @@ classdef BottomBoundaryLayerCase < SWEBarotropic3d
         end        
         
         function [ option ] = setOption( obj, option )
-            outputIntervalNum = 7500;
+            outputIntervalNum = 750;
             option('startTime') = 0.0;
             option('finalTime') = obj.finalTime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;

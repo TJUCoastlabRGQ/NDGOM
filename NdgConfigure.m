@@ -127,7 +127,8 @@ srcfile = {[path,'mxVertLimit3d.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgLimiter/NdgVertLimiter/@NdgVertLimiter3d/private/';
-srcfile = {[path,'mxVertLimit3dNew.c']};
+srcfile = {[path,'mxVertLimit3dNew.c'],...
+    [path,'mxVertLimit3dWithLargeStencil.c']};
 libfile = {'NdgMath/NdgMath.c',...
     'NdgMath/NdgSWE.c'};
 FuncHandle(path, srcfile, libfile);
@@ -568,7 +569,7 @@ switch computer('arch')
                     mfilename, srcfile{n}, outPath);
                 fprintf('%s\nCOMPFLAGS=%s\nLDFLAGS=%s\n', COMPILER, COMPFLAGS, LDFLAGS);
                 file = [srcfile(n), libfile{:}];
-                mex('-g','-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
+                mex('-v','-largeArrayDims', COMPILER, COMPFLAGS, '-O', LDFLAGS, ...
                     file{:}, '-outdir', outPath);
 %                 mex('-v','-largeArrayDims', COMPFLAGS, LDFLAGS, ...
 %                     file{:}, '-outdir', outPath);
