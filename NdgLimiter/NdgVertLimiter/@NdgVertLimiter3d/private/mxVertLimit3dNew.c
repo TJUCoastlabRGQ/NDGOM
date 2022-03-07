@@ -244,7 +244,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 	free(Surffm);
-
+*/
 	double *BotBEfm = malloc(BotBENfp*BotBENe*Nvar*sizeof(double));
 	huM = BotBEfm;
 	hvM = BotBEfm + BotBENfp*BotBENe;
@@ -270,7 +270,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 
 	free(BotBEfm);
-	*/
+	
 	
 /******************************************************************Boundary edge part finished************************************************************************************/
 

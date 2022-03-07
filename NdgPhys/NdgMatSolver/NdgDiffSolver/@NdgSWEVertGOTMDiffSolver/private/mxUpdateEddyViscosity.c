@@ -58,6 +58,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *LAV2d = mxGetPr(prhs[22]);
 	double *huNew = mxGetPr(prhs[23]);
 	double *hvNew = mxGetPr(prhs[24]);
+
 //	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){

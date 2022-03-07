@@ -32,9 +32,9 @@ while( time < ftime )
         
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
         
-%         [ fphys ] = obj.matImposeLimiter( fphys );
+        [ fphys ] = obj.matImposeLimiter( fphys );
         
-        [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
+%         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         
@@ -61,8 +61,8 @@ while( time < ftime )
         
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
         
-%         [ fphys ] = obj.matImposeLimiter( fphys );
-        [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
+        [ fphys ] = obj.matImposeLimiter( fphys );
+%         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         

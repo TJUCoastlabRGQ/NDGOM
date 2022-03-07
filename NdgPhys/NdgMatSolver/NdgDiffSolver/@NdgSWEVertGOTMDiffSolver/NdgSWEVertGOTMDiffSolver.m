@@ -20,6 +20,12 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         GotmFile
     end
     
+    properties
+        uo
+        
+        vo
+    end
+    
     methods
         function obj = NdgSWEVertGOTMDiffSolver( physClass )
             obj = obj@NdgVertDiffSolver( physClass );
@@ -53,11 +59,16 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             %zero
             obj.Prantl = physClass.Prantl;
             obj.matClearGlobalMemory;
+            
+            obj.uo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
+            obj.vo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
         end
 
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
             Outfphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d);
-            obj.matUpdateViscosity( physClass, Height2d, Hu, Hv, Outfphys(:,:,1), Outfphys(:,:,2), ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex));
+            obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex), Height);
+            obj.uo = Outfphys(:,:,1)./Height;
+            obj.vo = Outfphys(:,:,2)./Height;
         end 
         
         function matClearGlobalMemory(obj)
@@ -68,11 +79,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
     
     methods(Access = protected)
         
-        function matUpdateViscosity(obj, physClass, H2d, Hu, Hv, HuNew, HvNew, dt, rho )
+        function matUpdateViscosity(obj, physClass, H2d, uo, vo, HuNew, HvNew, dt, rho, h )
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
-                H2d, Hu, Hv, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
-                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew, HvNew );
+                H2d, uo, vo, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
+                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew./h, HvNew./h );
         end           
         
         function matUpdataNewmannBoundaryCondition( obj, physClass, fphys)
