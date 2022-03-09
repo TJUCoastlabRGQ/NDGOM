@@ -1,6 +1,7 @@
 function runConstAdvectionDiffusion3d
 M = [ 5 10 20 40];
 
+
 Order =[ 1 2 ];
 % len = deltax;
 Nmesh = numel(M);
@@ -27,7 +28,8 @@ Err2 = zeros(Nmesh, Ndeg);
 Err1 = zeros(Nmesh, Ndeg);
 for n = 1:Ndeg
     for m = 1:Nmesh
-        Solver = ConstAdvectionDiffusion3d(Order(n), Order(n), M(m), M(m));
+        Solver = ConstAdvectionDiffusion3d(Order(n), Order(n), 1, M(m));
+%         Solver = ConstAdvectionDiffusion3d(Order(n), Order(n), M(m), M(m));
         tic;
         Solver.matSolve;
         time(m,n) = toc;

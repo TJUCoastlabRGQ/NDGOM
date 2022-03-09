@@ -1,6 +1,7 @@
 function runFirstOrderProblemInVerticalTest3d
 % M = [ 1 0.5 0.25 0.125 ];
 % Mz = [10 20 40 80 ];
+%> This script is for test purpose of operator $\frac{\partial p}{\partial \sigma} = f$
 M = [ 2 2 2 2 ];
 Mz = [4 8 16 32 ];
 Order = [1 2 3 4];
