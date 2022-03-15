@@ -41,7 +41,37 @@ void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int 
 	}
 }
 
-void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
+void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np3d, \
+	int nlayer, double *J, double *wq, double *Vq, ptrdiff_t RVq, ptrdiff_t Cvq, \
+	double *LAV) {
+	char *transA = "N";
+	char *transB = "N";
+	double *A = Vq;
+	ptrdiff_t ROPA = RVq;
+	ptrdiff_t COPA = Cvq;
+	ptrdiff_t COPB = 1;
+	double Alpha = 1.0;
+	double Beta = 0.0;
+	ptrdiff_t LDA = RVq;
+	ptrdiff_t LDB = RVq;
+	ptrdiff_t LDC = LDA;
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int i = 0; i < K2d; i++) {
+		for (int L = 0; L < nlayer; L++) {
+//			GetMeshAverageValue(dest + i*nlayer + L, LAV + i*nlayer + L, transA, transB,\
+				&ROPA, &COPB, &COPA, &Alpha, A, &LDA, fphys + i*nlayer*Np3d + L*Np3d,\
+				J + i*nlayer*Np3d + L*Np3d, &LDB, &Beta, &LDC, wq);
+			dest[i*nlayer + L] = 0.0;
+			GetMeshAverageValue(dest + i*nlayer + L, LAV + i*nlayer + nlayer-1-L, transA, transB, \
+				&ROPA, &COPB, &COPA, &Alpha, A, &LDA, fphys + i*nlayer*Np3d + (nlayer-1-L)*Np3d, \
+				J + i*nlayer*Np3d + (nlayer - 1 - L)*Np3d, &LDB, &Beta, &LDC, wq);
+		}
+	}
+}
+
+void InterpolationToCentralPointO(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
 	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d,\
     double *LAV) {
 #ifdef _OPENMP
@@ -51,7 +81,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d,
 		for (int L = 0; L < nlayer; L++) {
 			double BottomAve = 0.0;
 			double SurfaceAve = 0.0;
-			/*The average data in dest is arranged from bottom to surface*/
+			//The average data in dest is arranged from bottom to surface
 			GetElementCentralData(&BottomAve, fphys + i*nlayer*Np3d + (nlayer - L - 1)*Np3d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 			GetElementCentralData(&SurfaceAve, fphys + i*nlayer*Np3d + (nlayer - L - 1)*Np3d + Np3d - Np2d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV+i);
 			dest[i*nlayer + L] = (BottomAve + SurfaceAve) / 2.0;

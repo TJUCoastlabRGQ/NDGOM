@@ -40,6 +40,6 @@ end
 
 function CompileF90File(file, Ipath, Outpath)
 for i = 1:numel(file)
-    mex('-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
+    mex('-g','-c','-v','-largeArrayDims',file{i},Ipath,'-outdir', Outpath);
 end
 end

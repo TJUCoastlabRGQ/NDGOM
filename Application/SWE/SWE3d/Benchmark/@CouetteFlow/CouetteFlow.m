@@ -11,7 +11,7 @@ classdef CouetteFlow < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 86400;
+        finalTime = 86400*1.2;
         hcrit = 0.001;
         % to be corrected
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@CouetteFlow/gotmturb.nml']);
@@ -81,8 +81,8 @@ classdef CouetteFlow < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
-            option('PhysicalSurfaceRoughnessLength') = 0.0030000000260770321;
-            option('PhysicalBottomRoughnessLength') = 0.0030000000260770321;
+            option('PhysicalSurfaceRoughnessLength') = 0.003;
+            option('PhysicalBottomRoughnessLength') = 0.003;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         

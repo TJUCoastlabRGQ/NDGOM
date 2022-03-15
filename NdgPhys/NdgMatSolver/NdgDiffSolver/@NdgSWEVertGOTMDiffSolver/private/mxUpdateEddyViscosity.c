@@ -59,6 +59,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *huNew = mxGetPr(prhs[23]);
 	double *hvNew = mxGetPr(prhs[24]);
 
+	double *J3d = mxGetPr(prhs[25]);
+	double *wq3d = mxGetPr(prhs[26]);
+	double *Vq3d = mxGetPr(prhs[27]);
+	int RVq3d = (int)mxGetM(prhs[27]);
+	int CVq3d = (int)mxGetN(prhs[27]);
+	double *LAV3d = mxGetPr(prhs[28]);
+
 //	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){
@@ -104,29 +111,53 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempNp3d = (ptrdiff_t)Np3d;
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
+		double *huCentralDateO = malloc(K3d * sizeof(double));
+		double *huCentralDateNewO = malloc(K3d * sizeof(double));
+		// Original version
+		plhs[4] = mxCreateDoubleMatrix(1, K3d, mxREAL);
+		double *UcentralOutO = mxGetPr(plhs[4]);
+		// New Version
+		plhs[5] = mxCreateDoubleMatrix(1, K3d, mxREAL);
+		double *UcentralOut = mxGetPr(plhs[5]);
+
 		/*Calculate the water depth at cell center first*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int i = 0; i < K2d; i++) {
-			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d + i);
+			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d + i);
 		}
 
 //		memcpy(Hcenter, hcenter, K2d*sizeof(double));
-		
-		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
-		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d);
+		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+
+//		InterpolationToCentralPointO(hu, huCentralDateO, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, \
+			Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+
+//		InterpolationToCentralPointO(huNew, huCentralDateNewO, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, \
+			Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+/*
+		for (int k = 0; k < K3d; k++) {
+			printf("For element %d\n",k);
+			printf("For huCentralDate, the difference is:%f\n",huCentralDate[k] - huCentralDateO[k]);
+			printf("For huCentralDateNew, the difference is:%f\n", huCentralDateNew[k] - huCentralDateNewO[k]);
+		}
+		*/
+		// Original version
+		memcpy(UcentralOutO, huCentralDateNewO, K3d * sizeof(double));
+		//New version, implemented in matlab
+		memcpy(UcentralOut, huCentralDateNew, K3d * sizeof(double));
 
 //		memcpy(hucenterOutput, huCentralDate, K3d*sizeof(double));
 
-		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
-		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d);
+		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
 
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S.
 		Details about the latter manner can be found in Tuomas and Vincent(2012, Ocean modelling)
 		*/
-		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, RVq2d, CVq2d, LAV2d );
-
+		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
 		//Tc to be continued
 		//Sc to be continued
 		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
@@ -161,5 +192,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //		mapVedgeDateToDof(LGOTM, PtrOutLength, Np2d, K2d, Np3d, nlev);
 
 		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, (int)nlev);
+
+		free(huCentralDateO);
+
+		free(huCentralDateNewO);
 
 }
