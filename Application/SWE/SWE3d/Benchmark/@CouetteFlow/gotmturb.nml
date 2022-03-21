@@ -109,8 +109,8 @@
   cm0_fix=         0.5477
   Prandtl0_fix=    0.74
   cw=              100.
-  compute_kappa=   .false.
-  kappa=           0.4
+  compute_kappa=   .true.
+  kappa=           0.40
   compute_c3=      .true.
   ri_st=           0.25
   length_lim=      .false.

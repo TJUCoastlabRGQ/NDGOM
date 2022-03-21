@@ -4,9 +4,13 @@
 #include <omp.h>
 #include "../../../../../NdgMath/NdgMemory.h"
 #include "../../../../../NdgMath/NdgMath.h"
+#include <stdio.h>
+#include "../../../../../Application/SWE/SWE3d/@SWEBaroclinic3d/private/eqstate.h"
 
 /*the Von kamma constant*/
-double kappa = 0.40;
+double kappa = 0.41587;
+
+int TimeStepNumber = 0;
 
 void getGotmDate(int index, int nlev){
 	for (int i = 0; i < nlev + 1; i++){
@@ -148,8 +152,10 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 				here $\hat u_{j+1}$ stands for uUNew, $\hat u_{j}$ uLNew, $u_{j+1}$ uUOld, $u_{j}$ uLOld. Also,  
 				$\hat v_{j+1}$ stands for vUNew, $\hat v_{j}$ vLNew, $v_{j+1}$ vUOld, $v_{j}$ vLOld.
 				*/
-				shearFrequencyDate[i*(nlev + 1) + L] = max( (uUNew - uLNew)*0.5*(uUNew + uUOld - uLNew - uLOld)/ pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]),2.0) + \
+				//shearFrequencyDate[i*(nlev + 1) + L] = max( (uUNew - uLNew)*0.5*(uUNew + uUOld - uLNew - uLOld)/ pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]),2.0) + \
 					(vUNew - vLNew)*0.5*(vUNew + vUOld - vLNew - vLOld) / pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]), 2.0), 0);
+				shearFrequencyDate[i*(nlev + 1) + L] = max( (uUNew - uLNew)*0.5*(uUNew + uUOld - uLNew - uLOld) / pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]), 2.0) + \
+					(vUNew - vLNew)*0.5*(vUNew + vUOld - vLNew - vLOld) / pow(0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]), 2.0), 0.0 );
 			}
 			//For each vertical segment, we have SS(0) = SS(1), SS(nlev) = SS(nlev - 1)
 			shearFrequencyDate[i*(nlev + 1)] = shearFrequencyDate[i*(nlev + 1) + 1];
@@ -170,44 +176,135 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int i = 0; i < K2d; i++) {
-		SurfaceFrictionLength[i] = z0s;
-		//SurfaceFrictionLength[i] = 0.0030000000260770321;
-		SurfaceFrictionVelocity[i] = 0;
-		for (int p = 0; p < Np2d; p++) {
-			DragCoefficient[i*Np2d + p] = 0;
-		}		
+	for (int i = 0; i < K2d; i++) {	
 		double rr = 0;
 		if (hcenter[i] >= hcrit) {
 			rr = kappa / log((z0b + layerHeight[i*(nlev + 1) + 1] / 2) / z0b);
-			BottomFrictionVelocity[i] = rr * sqrt(pow((huVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2) + pow((hvVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2));
+			BottomFrictionVelocity[i] = rr * sqrt(pow((huVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2.0) + pow((hvVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2.0));
 			BottomFrictionLength[i] = z0b;
-			//BottomFrictionLength[i] = 0.0030000000260770321;
 			/*Formula by SLIM, we note that Taux and Tauy here have already devided by rho0*/
 			SurfaceFrictionVelocity[i] = sqrt(hypot(Taux[i], Tauy[i]));
-			//SurfaceFrictionVelocity[i] = 0.031622776601683791;
+			SurfaceFrictionLength[i] = z0s;
 			/*Formula by SLIM*/
 			// DragCoefficient[i] = pow(rr,2);   //Cd = rr^2;
 			for (int p = 0; p < Np2d; p++) {
-				DragCoefficient[i*Np2d + p] = pow(rr, 2);
+				DragCoefficient[i*Np2d + p] = pow(rr, 2.0);
 			}
 			/*Formula by GOTM, see friction.F90(Line 122) and uequation.F90(Line 182)*/
 			//DragCoefficient[p] = pow(rr, 2) / layerHeight[p*(nlev + 1) + 1]
+		}
+		else {
+			BottomFrictionVelocity[i] = 0;
+			BottomFrictionLength[i] = 0;
+			SurfaceFrictionVelocity[i] = 0;
+			SurfaceFrictionLength[i] = 0;
+			for (int p = 0; p < Np2d; p++) {
+				DragCoefficient[i*Np2d + p] = 0;
+			}
+
 		}
 	}
 }
 
  void DGDoTurbulence(double *TimeStep, double hcrit, double *Grass, int K2d, long long int nlev){
 	 //For the current version, grass is not considered
+/*	 
+	 FILE *F, *G, *H;
+	 double TempData;
+	 F = fopen("D:\\Sharewithpc\\研究工作\\20220316\\DataOutput\\data_my_program.txt","a");
+	 G = fopen("D:\\Sharewithpc\\研究工作\\20220316\\DataOutput\\do_turbulence_my_program.txt", "a");
+	 H = fopen("D:\\Sharewithpc\\研究工作\\20220316\\DataOutput\\num_my_program.txt", "a");
+	 fprintf(F, "This is for time step:%d\n", TimeStepNumber);
+	 fprintf(F, " The shear frequency data is as follows:\n");
+	 fprintf(G, "This is for time step:%d\n", TimeStepNumber);
+	 fprintf(G, " The input parameter for the current step is as follows:\n");
+	 fprintf(H, "This is for time step:%d\n", TimeStepNumber);
+	 fprintf(H, " The eddy coefficient num for the current step is as follows:\n");
+	 */
 	 for (int i = 0; i < K2d; i++){
+		 /*
+		 fprintf(F, "This is for element number:%d\n", i+1);
+		 fprintf(F, "\n");
+		 */
 		 if (hcenter[i] >= hcrit){
 			 setGotmDate(i, (int)nlev);
 			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, hcenter + i, SurfaceFrictionVelocity + i, BottomFrictionVelocity + i, SurfaceFrictionLength + i, \
 				 BottomFrictionLength + i, layerHeight + i*(nlev + 1), buoyanceFrequencyDate + i*(nlev + 1), shearFrequencyDate + i*(nlev + 1), Grass);
 			 getGotmDate(i, (int)nlev);
 		 }
+		 /*
+		 if (i == 0) {
+			 for (int L = 0; L < nlev + 1; L++) {
+				 fprintf(F, "%.10f\n", *(shearFrequencyDate + L));
+			 }
+			 fprintf(G, "nlev is : %d\n", nlev);
+			 fprintf(G, "dt is : %.10f\n", *(TimeStep));
+			 fprintf(G, "depth is : %.10f\n", *(hcenter + i));
+			 fprintf(G, "u_taus is : %.10f\n", *(SurfaceFrictionVelocity + i));
+			 fprintf(G, "u_taub is : %.10f\n", *(BottomFrictionVelocity + i));
+			 fprintf(G, "z0s is : %.10f\n", *(SurfaceFrictionLength + i));
+			 fprintf(G, "z0b is : %.10f\n", *(BottomFrictionLength + i));
+			 fprintf(G, " The layer height for the current step is as follows:\n");
+			 for (int L = 1; L < nlev + 1; L++) {
+				 fprintf(G, "%.10f\n", *(layerHeight + L));
+			 }
+			 fprintf(G, " The buoyance frequency for the current step is as follows:\n");
+			 for (int L = 0; L < nlev + 1; L++) {
+				 fprintf(G, "%.10f\n", *(buoyanceFrequencyDate + L));
+			 }
+			 for (int L = 0; L < nlev + 1; L++) {
+				 fprintf(H, "%.10f\n", TURBULENCE_mp_NUM[L]);
+			 }
+		 }
+		 */
+		 /*
+		 fprintf(F, "SurfaceFrictionVelocity is:%.16f\n", *(SurfaceFrictionVelocity + i));
+		 fprintf(F, "BottomFrictionVelocity is:%.16f\n", *(BottomFrictionVelocity + i));
+		 fprintf(F, "SurfaceFrictionLength is:%.16f\n", *(SurfaceFrictionLength + i));
+		 fprintf(F, "BottomFrictionLength is:%.16f\n", *(BottomFrictionLength + i));
+		 fprintf(F, "The layer height is as follows:\n");
+		 for (int L = 1; L < nlev + 1; L++) {
+			 TempData = *(layerHeight + i*(nlev + 1) + L);
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The shear frequency date is as follows:\n");
+		 for (int L = 1; L < nlev + 1; L++) {
+			 TempData = *(shearFrequencyDate + i*(nlev + 1) + L);
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The tke date is as follows:\n");
+		 for (int L = 0; L < nlev + 1; L++) {
+			 TempData = TURBULENCE_mp_TKE[L];
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The eps date is as follows:\n");
+		 for (int L = 0; L < nlev + 1; L++) {
+			 TempData = TURBULENCE_mp_EPS[L];
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The L date is as follows:\n");
+		 for (int L = 0; L < nlev + 1; L++) {
+			 TempData = TURBULENCE_mp_L[L];
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The nuh date is as follows:\n");
+		 for (int L = 0; L < nlev + 1; L++) {
+			 TempData = TURBULENCE_mp_NUH[L];
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 fprintf(F, "The num date is as follows:\n");
+		 for (int L = 0; L < nlev + 1; L++) {
+			 TempData = TURBULENCE_mp_NUM[L];
+			 fprintf(F, "%.16f\n", TempData);
+		 }
+		 */
 	 }
-
+/*	 
+	 TimeStepNumber++;
+	 fclose(F);
+	 fclose(G);
+	 fclose(H);
+	*/ 
 }
 
  void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, int nlev){
@@ -258,6 +355,7 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 ptrdiff_t LDA = RVq;
 	 ptrdiff_t LDB = RVq;
 	 ptrdiff_t LDC = LDA;
+	 (*dest) = 0.0;
 	 GetMeshAverageValue(dest, LAV, transA, transB, &RVq, &COPB, &CVq, &Alpha, Vq, \
 		 &LDA, source, Jacobian, &LDB, &Beta, &LDC, wq);
  }

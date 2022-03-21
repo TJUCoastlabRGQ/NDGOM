@@ -2,6 +2,7 @@
 #include <math.h>
 #include "../../../../../NdgMath/NdgMemory.h"
 #include "../../../../../NdgMath/NdgMath.h"
+#include "eqstate.h"
 
 #ifdef _OPENMP
 #include <omp.h>
@@ -41,10 +42,21 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int i = 0; i < K; i++) {
+        /*
         DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
         for (int p = 0; p < Np; p++) {
             rho[i*Np + p] = 1000 - 0.2*( BaroclinicT[i*Np + p] - 5.0);
         }
+        */
+
+		DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
+
+		DotCriticalDivide(BaroclinicS + i*Np, hS + i*Np, &hcrit, height + i*Np, Np);
+
+		for (int p = 0; p < Np; p++) {
+			EosByFeistel(rho + i*Np + p, max(*(BaroclinicT + i*Np + p), 0.0), max(*(BaroclinicS + i*Np+p),0.0));
+		}
+        
         /*
          * DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
          * DotCriticalDivide(BaroclinicS + i*Np, hS + i*Np, &hcrit, height + i*Np, Np);

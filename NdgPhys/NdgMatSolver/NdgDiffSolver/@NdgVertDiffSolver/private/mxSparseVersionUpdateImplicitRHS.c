@@ -288,10 +288,12 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
 
 void MyExit()
 {
-    if ( (!strcmp("True", ImVertDiffInitialized)) && (!strcmp("True", ImVertEddyInitialized)) ){
+    if ( !strcmp("True", ImVertDiffInitialized) ){
         ImVertDiffMemoryDeAllocation();
-		ImEddyVisInVertDeAllocation();
     }
+	if ( !strcmp("True", ImVertEddyInitialized) ) {
+		ImEddyVisInVertDeAllocation();
+	}
     return;
 }
 
@@ -331,6 +333,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double hcrit = mxGetScalar(prhs[20]);
     double *VCV = mxGetPr(prhs[21]);
     double *Cf = mxGetPr(prhs[22]);
+	char* BotBoundTreatManner;
+	BotBoundTreatManner = mxArrayToString(prhs[23]);
 //    printf("%s\n", BoundaryType);
     
     mwSize DimOfRHS = mxGetNumberOfDimensions(prhs[11]);
@@ -355,11 +359,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     const double epsilon = 0.0;
     
     /*If not initialized, initialize first*/
-    if ( (!strcmp("False", ImVertDiffInitialized)) && (!strcmp("False", ImVertEddyInitialized)) )
+    if ( !strcmp("False", ImVertDiffInitialized) )
     {
         ImVertDiffMemoryAllocation(Np2d, K2d, Nz, Np, Nvar);
-		ImEddyVisInVertAllocation(Np, Nz);
     }
+	if ( !strcmp("False", ImVertEddyInitialized) )
+	{
+		ImEddyVisInVertAllocation(Np, Nz);
+	}
 
 	memcpy(GlobalSystemRHS, RHS, Np*K3d*Nvar * sizeof(double));
     
@@ -502,10 +509,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
             }
-            else {
-                // Impose implicit Neumann boundary condition here, this part is added on 20211231
-                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
-            }
+			else {
+				if (!strcmp(BotBoundTreatManner, "Implicit")) {
+					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+				}
+			}
             
             memset(OP12, 0, Np*Np*sizeof(double));
 			/*Local element to up element*/
@@ -540,10 +549,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
             }
-            else {
-                // Impose implicit Neumann boundary condition here, this part is added on 20211231.
-                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
-            }
+			else {
+				if (!strcmp(BotBoundTreatManner, "Implicit")) {
+					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+				}
+			}
 			//Local for hu and hv
 			for (int var = 0; var < 2; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \

@@ -244,40 +244,49 @@ void CalculateVelocityAtBottomCellCenter(double *ucenter, double *vcenter, doubl
     }
 }
 
-void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, double dt, double ImplicitParam, double *Depth, \
-        double *EleMass2d, double *u2d, double *v2d, int Np2d, int Np3d, double hcrit, double *VCV, double *FacialElemass3d) {
-    double *Coe = malloc(Np2d * sizeof(double));
-    double *CoeVCV = malloc(Np2d * Np3d *sizeof(double));
-    double *TempOP11 = malloc(Np2d * Np3d *sizeof(double));
-    double *FinalCoe = malloc(Np3d*sizeof(double));
-    memset(FinalCoe, 0, Np3d*sizeof(double));
-    for (int p = 0; p < Np2d; p++) {
-        if (Depth[p] >= hcrit) {
-			// The unit outward normal -1.0 first, then move to the left hand side another -1.0
+void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, double *Depth, \
+        double *EleMass2d, double *u2d, double *v2d, int Np2d, int Np3d, double hcrit, double *VCV) {
+
+	char *chn = "N";
+
+	double *Coe = malloc(Np2d * sizeof(double));
+
+	double *CoeVCV = malloc(Np2d * Np3d * sizeof(double));
+
+	double alpha = 1.0;
+
+	double beta = 0.0;
+
+	ptrdiff_t RowA = (ptrdiff_t)Np2d;
+
+	ptrdiff_t ColA = (ptrdiff_t)Np2d;
+
+	ptrdiff_t ColB = (ptrdiff_t)Np3d;
+
+	double *TempOP11 = malloc(Np2d * Np3d * sizeof(double));
+
+	for (int p = 0; p < Np2d; p++) {
+		if (Depth[p] >= hcrit) {
+			// the unit outward normal -1.0 first, then move to the left hand side another -1.0
 			Coe[p] = (-1.0)*(-1.0)*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
-        }
-        else {
-            Coe[p] = 0.0;
-        }
-    }
-    
-    DiagLeftMultiplyUnsymmetric(CoeVCV, VCV, Coe, Np2d, Np3d);
-    
-    SumInColumn(FinalCoe, CoeVCV, Np2d, Np3d);
-    
-    DiagRightMultiplyUnsymmetric(TempOP11, FacialElemass3d, FinalCoe, Np2d, Np3d);
-    
-    MultiplyByConstant(TempOP11, TempOP11, -1.0, Np3d*Np2d);
-        
-    //AssembleContributionIntoRowAndColumn(dest, TempOP11, EidM, EidM, Np3d, Np2d, -1);
-    AssembleContributionIntoRow(dest, TempOP11, EidM, Np3d, Np2d);
-    
-    free(Coe);
-    
-    free(CoeVCV);
-    free(TempOP11);
-    free(FinalCoe);
-    
+			//Coe[p] = (-1.0)*(-1.0)*0.005 / Depth[p];
+		}
+		else {
+			Coe[p] = 0.0;
+		}
+	}
+
+	DiagLeftMultiplyUnsymmetric(CoeVCV, VCV, Coe, Np2d, Np3d);
+
+	dgemm(chn, chn, &RowA, &ColB, &ColA, &alpha, EleMass2d, &RowA, CoeVCV, &ColA, &beta, TempOP11, &RowA);
+
+	AssembleContributionIntoRow(dest, TempOP11, EidM, Np3d, Np2d);
+
+	free(Coe);
+
+	free(CoeVCV);
+
+	free(TempOP11);
 }
 
 void GetImplicitBoundaryContribution(double *dest, double *Cf, double *u2d, double *v2d, double *Height, \
@@ -376,6 +385,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     double hcrit = mxGetScalar(prhs[20]);
     double *VCV = mxGetPr(prhs[21]);
     double *Cf = mxGetPr(prhs[22]);
+	char* BotBoundTreatManner;
+	BotBoundTreatManner = mxArrayToString(prhs[23]);
 //    printf("%s\n", BoundaryType);
     
     mwSize DimOfRHS = mxGetNumberOfDimensions(prhs[11]);
@@ -533,10 +544,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
             }
-            else {
-                // Impose implicit Neumann boundary condition here, this part is added on 20211231
-               ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
-            }
+			else {
+				if (!strcmp(BotBoundTreatManner, "Implicit")) {
+					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV);
+				}
+			}
             
             memset(OP12, 0, Np*Np*sizeof(double));
             AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, epsilon);
@@ -564,10 +577,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             if (!strcmp(BoundaryType, "Dirichlet")) {
                 ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, Tau + Np2d*(i*(Nz + 1) + Nz), OP11, (ptrdiff_t)Np, (ptrdiff_t)Np2d, -1, epsilon);
             }
-            else {
-                // Impose implicit Neumann boundary condition here, this part is added on 20211231
-                ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, dt, ImplicitParam, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV, FacialElemass3d);
-            }
+			else {
+				if (!strcmp(BotBoundTreatManner, "Implicit")) {
+					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, u2d + i*Np2d, v2d + i*Np2d, Np2d, Np, hcrit, VCV);
+				}
+			}
+
             for (int var = 0; var < 2; var++){
                 AssembleGlobalStiffMatrix(StiffMatrix + var*Np*Nz*Np*Nz, InvEleMass3d, OP11, LocalRows, LocalColumns, 1.0, Np*Nz, Np);
             }

@@ -6,6 +6,11 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         BoundaryEdgeType = 'Dirichlet'
     end
     
+    properties
+        % How to treat the bottom Neumann boundary, Implicit or Explicit
+        BotBoundaryTreatType = 'Explicit'
+    end
+    
     methods
         
         function obj = NdgVertDiffSolver( physClass )

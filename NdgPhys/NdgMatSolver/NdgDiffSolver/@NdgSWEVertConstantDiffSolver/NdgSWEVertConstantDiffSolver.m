@@ -1,16 +1,7 @@
 classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
     %NDGVERTDIFFSOLVER 此处显示有关此类的摘要
     %   此处显示详细说明
-    
-    properties
-        
-        ubot
-        
-        vbot
-        
-        Hbot
-    end
-    
+
     methods
         
         function obj = NdgSWEVertConstantDiffSolver( physClass )
@@ -24,8 +15,13 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
           end
             obj.nv = value * ones(size(physClass.meshUnion(1).x));
             obj.Prantl = physClass.Prantl;
-            obj.ubot = zeros(size(physClass.meshUnion(1).mesh2d.x));
-            obj.vbot = zeros(size(physClass.meshUnion(1).mesh2d.y));
+%             obj.ubot = zeros(size(physClass.meshUnion(1).mesh2d.x));
+%             obj.vbot = zeros(size(physClass.meshUnion(1).mesh2d.y));
+            obj.BotBoundaryTreatType = 'Implicit';
+%             obj.BotBoundaryTreatType = 'Explicit';
+            
+            obj.nv = -1 * physClass.meshUnion.z .* (physClass.meshUnion.z + 1) + 0.005; 
+            
         end
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
         %> return the physical field with vertical diffusion considered
@@ -39,20 +35,28 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
         %> considered
         %         fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time)
     
-        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, ~, ~, ~, fphys )
-%             obj.matFetchBottomBoundaryVelocity( physClass, fphys );
+        function fphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, ~, ~, time, fphys )
+%             obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
 %             obj.matUpdatePenaltyParameter( physClass, obj.nv ./ Height.^2 );
             fphys = obj.matCalculateImplicitRHS( physClass, obj.nv ./ Height.^2, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,[1,2]), Height2d );
+            
+%             obj.nv = -physClass.meshUnion.z.*(physClass.meshUnion.z+1)+0.005 + 0.005*sin(time/200*pi*physClass.meshUnion.z);
+            
+            %             num = num + 0.005 + 0.002 * sin(dt/200*pi*np);
         end
     end
     
     methods( Access = protected )
-        function matFetchBottomBoundaryVelocity( obj, physClass, fphys )
-            NLayer = physClass.meshUnion.Nz;
-            VCV = physClass.meshUnion.cell.VCV;
-            obj.Hbot = VCV * fphys{1}(:,NLayer:NLayer:end,4);
-            obj.ubot = VCV * fphys{1}(:,NLayer:NLayer:end,1) ./ obj.Hbot;
-            obj.vbot = VCV * fphys{1}(:,NLayer:NLayer:end,2) ./ obj.Hbot;
+        function matUpdataNewmannBoundaryCondition( obj, physClass, fphys)
+            VCV = physClass.meshUnion(1).cell.VCV;
+            Nz = physClass.meshUnion(1).Nz;
+            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+            physClass.BotBoundNewmannDate(:,:,1) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
+                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+            physClass.BotBoundNewmannDate(:,:,2) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
+                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
         end
     end
     
