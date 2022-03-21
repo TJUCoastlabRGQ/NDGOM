@@ -45,7 +45,7 @@ void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int 
 	}
 }
 
-void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np3d, \
+void InterpolationToCentralPointO(double *fphys, double *dest, int K2d, int Np3d, \
 	int nlayer, double *J, double *wq, double *Vq, ptrdiff_t RVq, ptrdiff_t Cvq, \
 	double *LAV) {
 	char *transA = "N";
@@ -75,7 +75,7 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np3d,
 	}
 }
 
-void InterpolationToCentralPointO(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
+void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
 	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d,\
     double *LAV) {
 #ifdef _OPENMP

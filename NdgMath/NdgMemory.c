@@ -714,7 +714,9 @@ double *tkeGOTM = NULL, *epsGOTM = NULL, *LGOTM = NULL, *nuhGOTM = NULL, \
 *huVerticalLine = NULL, *hvVerticalLine = NULL, *shearFrequencyDate = NULL, *buoyanceFrequencyDate = NULL, \
 *BottomFrictionLength = NULL, *BottomFrictionVelocity = NULL, *SurfaceFrictionLength = NULL, \
 *SurfaceFrictionVelocity = NULL, *eddyViscosityDate = NULL, *rhoCentralDate = NULL, *rhoVerticalLine = NULL, \
-*hcenter = NULL, *huCentralDateNew = NULL, *hvCentralDateNew = NULL, *huVerticalLineNew = NULL, *hvVerticalLineNew = NULL;
+*hcenter = NULL, *huCentralDateNew = NULL, *hvCentralDateNew = NULL, *huVerticalLineNew = NULL, \
+*hvVerticalLineNew = NULL, *hTCentralData = NULL, *hSCentralData = NULL, \
+*hTVerticalLine = NULL, *hSVerticalLine = NULL;
 //*eddyDiffusionDate = NULL, *eddyTKEDate = NULL, *eddyLengthDate = NULL, *eddyEPSDate = NULL, 
 
 char *GOTMInitialized = "False";
@@ -780,6 +782,10 @@ void GotmSolverMemoryAllocation( int Interface, int Np2d, int K3d, int K2d ){
 	*/
 	hcenter = malloc(K2d * sizeof(double));
 	MemoryAllocationCheck(hcenter, sizeof(double)*K2d);
+	hTCentralData = malloc(K3d * sizeof(double));
+	hSCentralData = malloc(K3d * sizeof(double));
+	hTVerticalLine = malloc(sizeof(double)*(K2d*Interface));
+	hSVerticalLine = malloc(sizeof(double)*(K2d*Interface));
 	GOTMInitialized = "True";
 }
 
@@ -815,6 +821,10 @@ void GotmSolverMemoryDeAllocation(){
 	free(eddyEPSDate); eddyEPSDate = NULL;
 	*/
 	free(hcenter); hcenter = NULL;
+	free(hTCentralData); hTCentralData = NULL;
+	free(hSCentralData); hSCentralData = NULL;
+	free(hTVerticalLine); hTVerticalLine = NULL;
+	free(hSVerticalLine); hSVerticalLine = NULL;
 	GOTMInitialized = "False";
 }
 

@@ -66,6 +66,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int CVq3d = (int)mxGetN(prhs[27]);
 	double *LAV3d = mxGetPr(prhs[28]);
 
+	double *hT = mxGetPr(prhs[29]);
+	double *hS = mxGetPr(prhs[30]);
+
 //	int NMaxItration = 3;
 
 	if (!strcmp("False", GOTMInitialized)){
@@ -120,19 +123,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		
 		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
 
+		InterpolationToCentralPoint(hT, hTCentralData, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+
+		InterpolationToCentralPoint(hS, hSCentralData, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S.
 		Details about the latter manner can be found in Tuomas and Vincent(2012, Ocean modelling)
 		*/
-		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+//		InterpolationToCentralPoint(rho, rhoCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
 		//Tc to be continued
 		//Sc to be continued
 		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
+
 		mapCentralPointDateToVerticalDate(huCentralDateNew, huVerticalLineNew, K2d, (int)nlev);
 
 		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, (int)nlev);
+
 		mapCentralPointDateToVerticalDate(hvCentralDateNew, hvVerticalLineNew, K2d, (int)nlev);
 		/*The gradient about rho in vertical direction is calculated according to rho directly, not T and S*/
-		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, (int)nlev);
+//		mapCentralPointDateToVerticalDate(rhoCentralDate, rhoVerticalLine, K2d, (int)nlev);
+		mapCentralPointDateToVerticalDate(hTCentralData, hTVerticalLine, K2d, (int)nlev);
+
+		mapCentralPointDateToVerticalDate(hSCentralData, hSVerticalLine, K2d, (int)nlev);
+
 		//Tvl to be continued
 		//Svl to be continued
 		CalculateWaterDepth(K2d, hcrit, (int)nlev);
