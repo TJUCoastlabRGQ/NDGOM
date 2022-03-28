@@ -30,6 +30,16 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     double hcrit = mxGetScalar(prhs[4]);
     int Np = (int)mxGetScalar(prhs[5]);
     int K = (int)mxGetScalar(prhs[6]);
+	//This is for linear EOS
+//	double rho0 = mxGetScalar(prhs[7]);
+	//This is for the thermal expansion coefficient
+//	double alphaT = mxGetScalar(prhs[8]);
+	//This is for the salinity expansion coefficient
+//	double betaS = mxGetScalar(prhs[9]);
+	//This is for linear EOS
+//	double T0 = mxGetScalar(prhs[10]);
+	//This is for linear EOS
+//	double S0 = mxGetScalar(prhs[11]);
     
     plhs[0] = mxCreateDoubleMatrix(Np, K, mxREAL);
     double *rho = mxGetPr(plhs[0]);

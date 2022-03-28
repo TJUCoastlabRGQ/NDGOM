@@ -152,7 +152,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		CalculateShearFrequencyDate(K2d, hcrit, (int)nlev);
 
-		CalculateBuoyanceFrequencyDate( Np2d, K2d, hcrit, (int)nlev, gra, rho0);
+		CalculateBuoyanceFrequencyDate(hT, hS, hcrit, K2d,  Np2d, Np3d, (int)nlev, gra, rho0, J2d, wq2d, \
+			Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
 		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, (int)nlev);
 

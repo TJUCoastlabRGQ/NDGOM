@@ -46,8 +46,9 @@ void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLine
 void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev);
 
 //void CalculateBuoyanceFrequencyDate(int , int , long long int );
-void CalculateBuoyanceFrequencyDate(int Np2d, int K2d, double hcrit, int nlev, \
-	double gra, double rho0);
+void CalculateBuoyanceFrequencyDate(double *hT, double *hS, double hcrit, int K2d, \
+	int Np2d, int Np3d, int nlev, double gra, double rho0, double *J2d, double *wq2d, \
+	double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV);
 // CalculateBuoyanceProductionTerm to be added 
 //Here, z0b is the bottom roughness, utaub is the friction velocity, z0s is the surface roughness
 void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \

@@ -10,7 +10,7 @@ void EosByFeistel(double *dest, double th, double s) {
 
 	double anum, aden;
 
-	double th2 = = th*th, sqrts = sqrt(s);
+	double th2 = th*th, sqrts = sqrt(s);
 
 	anum = 9.9984085444849347*pow(10,2.0) + \
 		th*(7.3471625860981584*pow(10,0.0) + \
@@ -33,10 +33,10 @@ void EosByFeistel(double *dest, double th, double s) {
 
 	(*dest) = anum / aden;
 }
+
 /* The following EOS by UNESCO(1983).
 * We note that the pressure effect is not included at present.
 */
-
 void EosByUNESCO(double *dest, double T, double S) {
 	double T2 = T*T;
 	double T3 = T*T2;
@@ -54,3 +54,5 @@ void EosByUNESCO(double *dest, double T, double S) {
 	x = x + 4.8314*pow(10,-4.0)*S2;
 	(*dest) = x;
 }
+
+void
