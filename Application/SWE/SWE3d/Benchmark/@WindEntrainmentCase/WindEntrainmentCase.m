@@ -9,7 +9,7 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
         
         H0 = 50
         
-        finalTime = 30*3600
+        finalTime = 1*3600
         
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@WindEntrainmentCase/gotmturb.nml'])
     end
@@ -46,10 +46,11 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 %> For salinity
-                fphys{m}(:,:,15) = 35*obj.H0;
+                fphys{m}(:,:,15) = obj.H0*obj.S0;
                 %> For temperature
-                Ttop = 20;
-                fphys{m}(:,:,14) = obj.H0 * (Ttop - (0.01)^2*obj.H0/obj.alphaT/obj.gra/obj.rho0*(0-mesh3d.z));
+%                 Ttop = 20;
+%                 fphys{m}(:,:,14) = obj.H0 * (Ttop - (0.01)^2*obj.H0/obj.alphaT/obj.gra/obj.rho0*(0-mesh3d.z));
+                fphys{m}(:,:,14) = obj.H0 * obj.T0;
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
@@ -91,8 +92,8 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.0001;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            %             option('PhysicalSurfaceRoughnessLength') = 0.02;
-            %             option('PhysicalBottomRoughnessLength') = 0.0015;
+            option('PhysicalSurfaceRoughnessLength') = 0.003;
+            option('PhysicalBottomRoughnessLength') = 0.003;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
             option('CoriolisType') = enumSWECoriolis.None;
         end
