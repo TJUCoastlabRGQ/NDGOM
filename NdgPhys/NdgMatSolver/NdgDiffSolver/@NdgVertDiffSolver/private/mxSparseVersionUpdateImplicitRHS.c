@@ -434,7 +434,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             memset(OP12, 0, Np*Np*sizeof(double));
             AdjacentBoundaryIntegral(BotEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + 2 - 1), OP12, Np, Np2d, -1.0, epsilon);
             // Local and Local to bottom
-            for (int var = 0; var < 2; var++){
+            for (int var = 0; var < 2 && var < Nvar; var++){
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0*Np + 1] - Jc[0 * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
@@ -463,7 +463,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				/*Local element to up element*/
                 AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + j), OP12, Np, Np2d, 1.0, epsilon);
 				// Local and Local to up
-                for (int var = 0; var < 2; var++){
+                for (int var = 0; var < 2 && var < Nvar; var++){
 					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
@@ -520,7 +520,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			/*Local element to up element*/
             AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, Np, Np2d, 1.0, epsilon);
 			//Local and Local to up for hu and hv
-			for (int var = 0; var < 2; var++) {
+			for (int var = 0; var < 2 && var < Nvar; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
@@ -552,11 +552,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			else {
 				if (!strcmp(BotBoundTreatManner, "Implicit")) {
 					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+					// If Nvar is less than 2, i.e. this module is used for other passive tracers. We can only use explicit boundary condition
 					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
 				}
 			}
 			//Local for hu and hv
-			for (int var = 0; var < 2; var++) {
+			for (int var = 0; var < 2 && var < Nvar; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 			}

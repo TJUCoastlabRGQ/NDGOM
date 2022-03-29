@@ -31,15 +31,18 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
     int Np = (int)mxGetScalar(prhs[5]);
     int K = (int)mxGetScalar(prhs[6]);
 	//This is for linear EOS
-//	double rho0 = mxGetScalar(prhs[7]);
+	double rho0 = mxGetScalar(prhs[7]);
 	//This is for the thermal expansion coefficient
-//	double alphaT = mxGetScalar(prhs[8]);
+	double alphaT = mxGetScalar(prhs[8]);
 	//This is for the salinity expansion coefficient
-//	double betaS = mxGetScalar(prhs[9]);
+	double betaS = mxGetScalar(prhs[9]);
 	//This is for linear EOS
-//	double T0 = mxGetScalar(prhs[10]);
+	double T0 = mxGetScalar(prhs[10]);
 	//This is for linear EOS
-//	double S0 = mxGetScalar(prhs[11]);
+	double S0 = mxGetScalar(prhs[11]);
+
+	char *EosType;
+	EosType = mxArrayToString(prhs[12]);
     
     plhs[0] = mxCreateDoubleMatrix(Np, K, mxREAL);
     double *rho = mxGetPr(plhs[0]);
@@ -52,32 +55,29 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
     for (int i = 0; i < K; i++) {
-        /*
-        DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
-        for (int p = 0; p < Np; p++) {
-            rho[i*Np + p] = 1000 - 0.2*( BaroclinicT[i*Np + p] - 5.0);
-        }
-        */
 
 		DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
 
 		DotCriticalDivide(BaroclinicS + i*Np, hS + i*Np, &hcrit, height + i*Np, Np);
 
-		for (int p = 0; p < Np; p++) {
-			EosByFeistel(rho + i*Np + p, max(*(BaroclinicT + i*Np + p), 0.0), max(*(BaroclinicS + i*Np+p),0.0));
+		if (!strcmp(EosType, "Jackett05")) {
+			for (int p = 0; p < Np; p++) {
+				EosByFeistel(rho + i*Np + p, max(*(BaroclinicT + i*Np + p), 0.0), max(*(BaroclinicS + i*Np + p), 0.0) );
+			}
 		}
-        
-        /*
-         * DotCriticalDivide(BaroclinicT + i*Np, hT + i*Np, &hcrit, height + i*Np, Np);
-         * DotCriticalDivide(BaroclinicS + i*Np, hS + i*Np, &hcrit, height + i*Np, Np);
-         * DotProduct(BaroclinicDTS + i*Np, height + i*Np, z + i*Np, Np);
-         * MultiplyByConstant(BaroclinicDTS + i*Np, BaroclinicDTS + i*Np, -0.001, Np);
-         * for (int p = 0; p < Np; p++) {
-         * rho[i*Np + p] = 999.83 + 5.053*BaroclinicDTS[i*Np + p] - 0.048*BaroclinicDTS[i*Np + p] * BaroclinicDTS[i*Np + p] + \
-         * (0.808 - 0.0085*BaroclinicDTS[i*Np + p])*BaroclinicS[i*Np + p] - \
-         * 0.0708*(1.0 + 0.351*BaroclinicDTS[i*Np + p] + 0.068*(1 - 0.0683*BaroclinicDTS[i*Np + p])*BaroclinicT[i*Np + p])*BaroclinicT[i*Np + p] - \
-         * 0.003*(1 - 0.059*BaroclinicDTS[i*Np + p] - 0.012*(1 - 0.064*BaroclinicDTS[i*Np + p])*BaroclinicT[i*Np + p])*(35 - BaroclinicS[i*Np + p])*BaroclinicT[i*Np + p];
-         * }
-         */
+		else if (!strcmp(EosType, "UNESCO83")) {
+			for (int p = 0; p < Np; p++) {
+				EosByUNESCO(rho + i*Np + p, max(*(BaroclinicT + i*Np + p), 0.0), max(*(BaroclinicS + i*Np + p), 0.0));
+			}
+		}
+		else if (!strcmp(EosType, "Linear")) {
+			for (int p = 0; p < Np; p++) {
+				EosByLinear(rho + i*Np + p, max(*(BaroclinicT + i*Np + p), 0.0), max(*(BaroclinicS + i*Np + p), 0.0), rho0, T0, S0, alphaT, betaS);
+			}
+		}
+		else {
+			printf("Equation of state(EOS) needs to be pointed for this part!\n");
+			break;
+		}
     }
 }

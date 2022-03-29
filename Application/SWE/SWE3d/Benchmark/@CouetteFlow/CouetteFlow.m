@@ -38,7 +38,7 @@ classdef CouetteFlow < SWEBarotropic3d
             %> time interval
             obj.Cf{1} = (0.4/log((obj.H0/Mz/2 + 0.003)/0.003))^2*ones(size(obj.mesh2d.x));
             
-            obj.SurfBoundNewmannDate(:,:,1) = 1.027/1027 * ones(size(obj.mesh2d.x));%0.1
+            obj.SurfBoundNewmannDate(:,:,1) = 1.027/obj.rho0 * ones(size(obj.mesh2d.x));%0.1
             %             obj.Cf{1} = 0.0025/1000;
             %             obj.Cf{1} = 0.0025;
         end        

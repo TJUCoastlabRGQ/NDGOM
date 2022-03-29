@@ -19,77 +19,65 @@ while( time < ftime )
         dt = ftime - time;
     end
     
-%     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
-%     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
+    Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
+    Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
     
-%     for intRK = 1:1
-%         tloc = time + rkt(intRK) * dt;
-%         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );
-%         
-%         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
-%         
-% %         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + rkb(intRK, 1) * dt * obj.ExplicitRHS2d(:,:,1) + rkb(intRK, 2) * dt * obj.ExplicitRHS2d(:,:,2);
-% %         
-% %         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
-% 
-%         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) +  dt * obj.ExplicitRHS2d(:,:,1);
-%         
-%         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys +  dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end);
-%         
-% %         [ fphys ] = obj.matImposeLimiter( fphys );
-%         
-% %         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
-%         
-%         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
-%         
-%         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
-%         
-%         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
-%         
-%         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
-%         
-%         fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
-%         %         [ fphys ] = obj.matFilterSolution( fphys );
-%         
-%         % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
-%     end
-    
-%     for intRK = 2:2
-%         tloc = time + rkt(intRK) * dt;
-%         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );
-%         
-%         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
-%         
+    for intRK = 1:1
+        tloc = time + rkt(intRK) * dt;
+        %>Actually, boundary condition need to be imposed here
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        
+        obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
+        
 %         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + rkb(intRK, 1) * dt * obj.ExplicitRHS2d(:,:,1) + rkb(intRK, 2) * dt * obj.ExplicitRHS2d(:,:,2);
 %         
 %         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
-%         
-% %         [ fphys ] = obj.matImposeLimiter( fphys );
-% %         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
-%         
-%         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
-%         
-%         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
-%         %         [ fphys ] = obj.matFilterSolution( fphys );
-%     end
 
-%     time = time + dt; 
-%     
-%     obj.matUpdateExternalField( time, fphys2d, fphys );
+        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) +  dt * obj.ExplicitRHS2d(:,:,1);
+        
+        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys +  dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end);
+        
+%         [ fphys ] = obj.matImposeLimiter( fphys );
+        
+%         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
+        
+        fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
+        
+        fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
+        
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        
+        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
+        
+        fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+        %         [ fphys ] = obj.matFilterSolution( fphys );
+        
+        % figure; obj.mesh3d.drawHorizonSlice( fphys3d{1}(:, :, 1) )
+    end
     
-    z = obj.meshUnion.z;
-    
-    t = time;
-    
-    RHS = fphys{1}(:,:,obj.varFieldIndex);
-    
-%     RHS(:,:,1) = RHS(:,:,1) + dt * eval(obj.source);
+    for intRK = 2:2
+        tloc = time + rkt(intRK) * dt;
+        %>Actually, boundary condition need to be imposed here
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        
+        obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
+        
+        fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + rkb(intRK, 1) * dt * obj.ExplicitRHS2d(:,:,1) + rkb(intRK, 2) * dt * obj.ExplicitRHS2d(:,:,2);
+        
+        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
+        
+%         [ fphys ] = obj.matImposeLimiter( fphys );
+%         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);
+        
+        fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
+        
+        fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
+        %         [ fphys ] = obj.matFilterSolution( fphys );
+    end
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
-        fphys2d{1}(:,:,1), fphys{1}(:,:,4), RHS, 1, dt, 1,...
+        fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
     
     [ fphys{1}(:,:,5)] = obj.VerticalEddyViscositySolver.nv;

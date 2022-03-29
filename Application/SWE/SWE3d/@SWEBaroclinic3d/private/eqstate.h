@@ -55,4 +55,9 @@ void EosByUNESCO(double *dest, double T, double S) {
 	(*dest) = x;
 }
 
-void
+// Calculate the density with the linear equation of state, see Tuomas(GMD,2017) for details.
+void EosByLinear(double *dest, double T, double S, double rho0, double T0, \
+	double S0, double alphaT, double betaS) 
+{
+	(*dest) = rho0 - alphaT*(T - T0) + betaS * (S - S0);
+}

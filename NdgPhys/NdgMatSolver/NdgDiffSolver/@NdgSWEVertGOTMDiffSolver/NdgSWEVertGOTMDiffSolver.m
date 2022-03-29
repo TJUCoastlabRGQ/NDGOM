@@ -13,7 +13,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         
         Eps
         
-        rhoIndex
+        nvh
     end
     
     properties
@@ -26,9 +26,22 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
         vo
     end
     
+    properties
+        T0 = 0
+        
+        S0 = 0
+         
+        alphaT = 0
+        
+        betaS = 0
+        
+        EosType
+    end
+    
     methods
         function obj = NdgSWEVertGOTMDiffSolver( physClass )
             obj = obj@NdgVertDiffSolver( physClass );
+            
             if  physClass.option.isKey('PhysicalBottomRoughnessLength')
                 obj.z0b = physClass.getOption('PhysicalBottomRoughnessLength');
                 fprintf('Value of the physical bottom roughness length is set to be: %f\n',obj.z0b);
@@ -36,6 +49,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
                 obj.z0b = 0.0015;
                 fprintf('Value of the physical bottom roughness length is set to be the default value: %f\n',obj.z0b);
             end
+            
             if  physClass.option.isKey('PhysicalSurfaceRoughnessLength')
                 obj.z0s = physClass.getOption('PhysicalSurfaceRoughnessLength');
                 fprintf('Value of the physical surface roughness length is set to be: %f\n',obj.z0s);
@@ -43,17 +57,24 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
                 obj.z0s = 0.02;
                 fprintf('Value of the physical surface roughness length is set to be the default value: %f\n',obj.z0s);
             end
+            
             if  physClass.option.isKey('GOTMSetupFile')
                 obj.GotmFile = physClass.getOption('GOTMSetupFile');
             else
                 msg = 'Gotm setup file must be contained in the case folder, i.e. where the case begin';
                 error(msg);
             end
-            
-            for i = 1:physClass.Nfield
-                if (strcmp(physClass.fieldName3d{i},'rho'))
-                    obj.rhoIndex = i;
+            if physClass.option.isKey('EosType')
+                obj.EosType = physClass.getOption('EosType');
+                if obj.EosType == enumEOSType.Linear
+                    obj.T0 = physClass.T0;
+                    obj.S0 = physClass.S0;
+                    obj.alphaT = physClass.alphaT;
+                    obj.betaS = physClass.betaS;
                 end
+            else
+                msg = 'Type of the equation of state must be set first';
+                error(msg);                
             end
             %Viscosity for GOTM turbulence model is initially set to be
             %zero
@@ -61,13 +82,14 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             obj.matClearGlobalMemory;
             obj.uo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.vo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
-            obj.BotBoundaryTreatType = 'Implicit';
+            obj.nvh = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
+            obj.BotBoundaryTreatType = 'Explicit';
         end
         
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
-%             obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
+            obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
             Outfphys = obj.matCalculateImplicitRHS( physClass, (obj.nv + 1.3e-6) ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d);
-            obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), ImplicitParameter * dt, fphys{1}(:,:,obj.rhoIndex), Height);
+            obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), Outfphys(:,:,3), Outfphys(:,:,4), ImplicitParameter * dt, Height);
             obj.uo = Outfphys(:,:,1)./Height;
             obj.vo = Outfphys(:,:,2)./Height;
         end
@@ -80,33 +102,28 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
     
     methods(Access = protected)
         
-        function matUpdateViscosity(obj, physClass, H2d, uo, vo, HuNew, HvNew, dt, rho, h )
-%             InputData = rand(size(HuNew./h));
-%             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps, CentralDataO, CentralData ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
-%                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
-%                 H2d, uo, vo, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
-%                 physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew./h, HvNew./h,  physClass.meshUnion.J,...
-%                 physClass.meshUnion.cell.wq, physClass.meshUnion.cell.Vq, physClass.meshUnion.LAV);
-            [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
+        function matUpdateViscosity(obj, physClass, H2d, uo, vo, HuNew, HvNew, HT, HS, dt, h )
+            
+            [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps, obj.nvh ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
-                H2d, uo, vo, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), rho, obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J,...
-                physClass.meshUnion.mesh2d.cell.wq, physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew./h, HvNew./h,  physClass.meshUnion.J,...
-                physClass.meshUnion.cell.wq, physClass.meshUnion.cell.Vq, physClass.meshUnion.LAV);
-            
-%             Data = physClass.meshUnion(1).GetMeshAverageValue( InputData );
-            
+                H2d, uo, vo, obj.GotmFile, dt, physClass.SurfBoundNewmannDate(:,:,1), physClass.SurfBoundNewmannDate(:,:,2), ...
+                obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J, physClass.meshUnion.mesh2d.cell.wq,...
+                physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew./h, HvNew./h,  physClass.meshUnion.J, ...
+                physClass.meshUnion.cell.wq, physClass.meshUnion.cell.Vq, physClass.meshUnion.LAV, HT, HS, obj.T0, obj.S0, ...
+                obj.alphaT, obj.betaS, char(obj.EosType));
+                        
         end
         
         function matUpdataNewmannBoundaryCondition( obj, physClass, fphys)
-%             VCV = physClass.meshUnion(1).cell.VCV;
-%             Nz = physClass.meshUnion(1).Nz;
-%             Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-%             Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-%             H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-%             physClass.BotBoundNewmannDate(:,:,1) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                 (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-%             physClass.BotBoundNewmannDate(:,:,2) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                 (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+            VCV = physClass.meshUnion(1).cell.VCV;
+            Nz = physClass.meshUnion(1).Nz;
+            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+            physClass.BotBoundNewmannDate(:,:,1) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
+                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+            physClass.BotBoundNewmannDate(:,:,2) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
+                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
         end
         
     end

@@ -232,7 +232,8 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 
  void CalculateBuoyanceFrequencyDate(double *hT, double *hS, double hcrit, int K2d, \
 	 int Np2d, int Np3d, int nlev, double gra, double rho0, double *J2d, double *wq2d,\
-	 double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV){
+	 double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV, char *type, double T0,\
+	 double S0, double alphaT, double betaS){
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -251,31 +252,63 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 
 			 for (int L = 1; L < nlev; L++) {
 
-				 GetElementCentralData(&TBottomAve, hT + i*nlev*Np3d + (nlev - L )*Np3d + Np3d - Np2d, \
+				 GetElementCentralData(&TBottomAve, hT + i*nlev*Np3d + (nlev - L + 1)*Np3d - Np2d, \
 					 J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 
-				 GetElementCentralData(&TUpAve, hT + i*nlev*Np3d + (nlev - L)*Np3d - Np3d, \
+				 GetElementCentralData(&TUpAve, hT + i*nlev*Np3d + (nlev - L - 1)*Np3d, \
 					 J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 
 				 TSurfaceAve = max((TBottomAve + TUpAve) / 2.0, 0.0);
 
-				 EosByFeistel(&rhoUp, TSurfaceAve/hcenter[i], max(hTVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i],0.0));
+				 if (!strcmp(type, "Jackett05")) {
+					 EosByFeistel(&rhoUp, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0));
 
-				 EosByFeistel(&rhoDown, TSurfaceAve / hcenter[i], max(hTVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0));
+					 EosByFeistel(&rhoDown, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0));
+				 }
+				 else if (!strcmp(type, "UNESCO83")) {
+					 EosByUNESCO(&rhoUp, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0));
+
+					 EosByUNESCO(&rhoDown, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0));
+				 }
+				 else if(!strcmp(type, "Linear")) {
+					 EosByLinear(&rhoUp, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0), rho0, T0, S0, alphaT, betaS);
+
+					 EosByLinear(&rhoDown, TSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0), rho0, T0, S0, alphaT, betaS);
+				 }
+				 else {
+					 printf("Equation of state(EOS) needs to be pointed for this part!\n");
+					 break;
+				 }
 				 
 				 NNT = -1.0*gra / rho0*(rhoUp - rhoDown) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
 
-				 GetElementCentralData(&SBottomAve, hS + i*nlev*Np3d + (nlev - L)*Np3d + Np3d - Np2d, \
+				 GetElementCentralData(&SBottomAve, hS + i*nlev*Np3d + (nlev - L + 1)*Np3d - Np2d, \
 					 J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 
-				 GetElementCentralData(&SUpAve, hS + i*nlev*Np3d + (nlev - L)*Np3d - Np3d, \
+				 GetElementCentralData(&SUpAve, hS + i*nlev*Np3d + (nlev - L - 1)*Np3d, \
 					 J2d + i*Np2d, wq2d, Vq2d, RVq2d, Cvq2d, LAV + i);
 
 				 SSurfaceAve = max((SBottomAve + SUpAve) / 2.0, 0.0);
 
-				 EosByFeistel(&rhoUp, SSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0));
+				 if (!strcmp(type, "Jackett05")) {
+					 EosByFeistel(&rhoUp, max(hTVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0), SSurfaceAve / hcenter[i]);
 
-				 EosByFeistel(&rhoDown, SSurfaceAve / hcenter[i], max(hSVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0));
+					 EosByFeistel(&rhoDown, max(hTVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0), SSurfaceAve / hcenter[i]);
+				 }
+				 else if (!strcmp(type, "UNESCO83")) {
+					 EosByUNESCO(&rhoUp, max(hTVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0), SSurfaceAve / hcenter[i]);
+
+					 EosByUNESCO(&rhoDown, max(hTVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0), SSurfaceAve / hcenter[i]);
+				 }
+				 else if (!strcmp(type, "Linear")) {
+					 EosByLinear(&rhoUp, max(hTVerticalLine[i*(nlev + 1) + L + 1] / hcenter[i], 0.0), SSurfaceAve / hcenter[i], rho0, T0, S0, alphaT, betaS);
+
+					 EosByLinear(&rhoDown, max(hTVerticalLine[i*(nlev + 1) + L] / hcenter[i], 0.0), SSurfaceAve / hcenter[i], rho0, T0, S0, alphaT, betaS);
+				 }
+				 else {
+					 printf("Equation of state(EOS) needs to be pointed for this part!\n");
+					 break;
+				 }
 
 				 NNS = -1.0*gra / rho0*(rhoUp - rhoDown) / (0.5*(layerHeight[i*(nlev + 1) + L + 1] + layerHeight[i*(nlev + 1) + L]));
 

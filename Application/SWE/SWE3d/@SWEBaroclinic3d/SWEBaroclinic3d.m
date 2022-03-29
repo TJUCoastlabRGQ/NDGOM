@@ -7,7 +7,15 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
     end
     
     properties
+        %> The following parameter is used for calculation of density when the linear
+        %> EOS is adopted, the linear EOS is taken as $\rho = \rho_0 - \alpha_T(T-T_0) + \beta_S(S-S_0) $
+        T0 = 25
         
+        S0 = 35
+         
+        alphaT = 0.2
+        
+        betaS = 0.1
     end
     
     methods
@@ -22,15 +30,19 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
             obj.varFieldIndex = [ 1, 2, 14, 15 ];
             %> the 3d field to be put in the output file
             obj.outputFieldOrder3d = [1 2 3 13 14 15];
+            
             clear mxCalculateDensityField;
+            
             clear mxCalculateBaroclinicTerm;
         end
     end
     
     methods( Access = protected )
         function rho = matCalculateDensityField( obj, fphys )
+            
             rho = mxCalculateDensityField( fphys(:,:,4), fphys(:,:,14), fphys(:,:,15), obj.meshUnion.z,  obj.hcrit, ...
-                obj.meshUnion.cell.Np, obj.meshUnion.K);
+                obj.meshUnion.cell.Np, obj.meshUnion.K, obj.rho0, obj.alphaT, obj.betaS, obj.T0, obj.S0, char(obj.getOption('EosType')));
+            
         end
         
         function matEvaluateBaroclinicTerm( obj, fphys )
