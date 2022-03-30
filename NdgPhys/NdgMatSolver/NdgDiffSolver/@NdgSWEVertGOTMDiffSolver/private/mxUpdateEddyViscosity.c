@@ -112,17 +112,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d + i);
 		}
 
-		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 		
-		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 		
-		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hT, hTCentralData, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hT, hTCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hS, hSCentralData, K2d, Np3d, (int)nlev, J3d, wq3d, Vq3d, (ptrdiff_t)RVq3d, (ptrdiff_t)CVq3d, LAV3d);
+		InterpolationToCentralPoint(hS, hSCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
 		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
 

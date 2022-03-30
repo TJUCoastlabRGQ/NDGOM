@@ -3,13 +3,13 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
     %   此处显示详细说明
     
     properties
-        ChLength = 1000
+        ChLength = 2000
         
-        ChWidth = 1000
+        ChWidth = 2000
         
         H0 = 50
         
-        finalTime = 1*3600
+        finalTime = 30*3600
         
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@WindEntrainmentCase/gotmturb.nml'])
     end
@@ -26,12 +26,40 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
         function obj = WindEntrainmentCase(N, Nz, M, Mz)
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             
+            obj.Nfield = 17;
+            
+            obj.fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hc','rho', 'hT', 'hS', 'Tke', 'Eps'};
+            
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             
             obj.SurfBoundNewmannDate(:,:,1) = 0.1027/obj.rho0 * ones(size(obj.mesh2d.x));%0.1
             
-            obj.MLDfid = fopen('Result\WindEntrainmentCase\MixedLayerDepth.dat','w');
+            filename = strcat(['Result\WindEntrainmentCase\MixedLayerDepth-',num2str(Mz),'.txt']);
+            
+            obj.MLDfid = fopen(filename,'w');
         end
+        
+        function PostProcess( obj )
+            close all;
+            figure;
+            hold on;
+            file = dir('Result\WindEntrainmentCase\*.txt');
+            str = cell(1);
+            MarkStyle = {'r','g','b','m'};
+            for i = 1:numel(file)
+                data = importdata(['Result\WindEntrainmentCase\',file(i).name]);
+                str{1,i} = strcat([file(i).name(isstrprop(file(i).name,'digit')),' Layers']);
+                plot(data(:,1)/3600,data(:,2),MarkStyle{i},'Linewidth',1.5);
+            end
+            data = importdata(['Result\WindEntrainmentCase\',file(1).name]);
+            plot(data(:,1)/3600,1.05*0.01*sqrt(data(:,1)/0.01),'k--','Linewidth',1.5);
+            legend({str{1,:},'Theory'},'Location','Northwest');
+            box on;
+            set(gca,'Linewidth',1.2);
+            set(gca,'Fontsize',12);
+            xlabel('$t(h)$','Interpreter','Latex','Fontsize',12);
+            ylabel('$MDL(m)$','Interpreter','Latex','Fontsize',12);
+        end        
     end
     
     methods ( Access = protected )
@@ -48,9 +76,9 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
                 %> For salinity
                 fphys{m}(:,:,15) = obj.H0*obj.S0;
                 %> For temperature
-%                 Ttop = 20;
-%                 fphys{m}(:,:,14) = obj.H0 * (Ttop - (0.01)^2*obj.H0/obj.alphaT/obj.gra/obj.rho0*(0-mesh3d.z));
-                fphys{m}(:,:,14) = obj.H0 * obj.T0;
+                Ttop = 20;
+                fphys{m}(:,:,14) = obj.H0 * (Ttop - (0.01)^2*obj.H0*obj.rho0/obj.alphaT/obj.gra*(0-mesh3d.z));
+%                 fphys{m}(:,:,14) = obj.H0 * obj.T0;
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
@@ -60,7 +88,7 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
         
         function matUpdateOutputResult( obj, time, fphys2d, fphys3d )
             matUpdateOutputResult@SWEAbstract3d( obj, time, fphys2d, fphys3d );
-            Index = fphys3d{1}(:,:,14) > 1e-5;
+            Index = fphys3d{1}(:,:,16) > 1e-5;
             depth = -1 * obj.H0 * min(min(obj.meshUnion.z(Index)));
             fprintf(obj.MLDfid, '%12.8f  %12.8f\n', time, depth );
         end
@@ -75,7 +103,7 @@ classdef WindEntrainmentCase < SWEBaroclinic3d
         end
         
         function [ option ] = setOption( obj, option )
-            outputIntervalNum = 7500;
+            outputIntervalNum = 800;
             option('startTime') = 0.0;
             option('finalTime') = obj.finalTime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;

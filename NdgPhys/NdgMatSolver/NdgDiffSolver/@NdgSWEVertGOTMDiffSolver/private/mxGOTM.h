@@ -33,10 +33,10 @@ extern double *tkeGOTM, *epsGOTM, *LGOTM, *nuhGOTM, *numGOTM, *layerHeight, *huC
 extern char *GOTMInitialized;
 
 /*This function is used to interpolate the physical value from interpolation point to central point in vertical direction*/
-//void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
+void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
 	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV);/*This function is used to map the date located at the central point to the vertical line that the GOTM adapted*/
 
-void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np3d, \
+//void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np3d, \
 	int nlayer, double *J, double *wq, double *Vq, ptrdiff_t RVq, ptrdiff_t Cvq, \
 	double *LAV);
 

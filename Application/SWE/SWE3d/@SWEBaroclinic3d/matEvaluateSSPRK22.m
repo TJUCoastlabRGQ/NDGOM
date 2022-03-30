@@ -13,7 +13,7 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
 %     dt = 0.3 * obj.matUpdateTimeInterval( fphys2d );
-    dt = 10;
+    dt = 30;
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -83,6 +83,12 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
+    
+    [ fphys{1}(:,:,5)] = obj.VerticalEddyViscositySolver.nv;
+    
+    [ fphys{1}(:,:,16)] = obj.VerticalEddyViscositySolver.Tke;
+    
+    [ fphys{1}(:,:,17)] = obj.VerticalEddyViscositySolver.Eps;
     
 %     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
