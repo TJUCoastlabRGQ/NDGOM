@@ -252,7 +252,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
 		}
 		ImposeBoundaryCondition(&gra, type, BEnx + face*BENfp, BEny + face*BENfp, BEfm + face*BENfp, BEfp + face*BENfp, \
-			AdvzM + face*BENfp, AdvzP + face*BENfp, fext + face*BENfp, BENfp, Nvar + 1, BENe, varFieldIndex);
+			AdvzM + face*BENfp, AdvzP + face*BENfp, fext + face*BENfp, BENfp, Nvar + 1, BENe);
 		EvaluateHydroStaticReconstructValue(Hcrit, BEfm + face*BENfp, BEfp + face*BENfp, AdvzM + face*BENfp, AdvzP + face*BENfp, BENfp, Nvar + 1, BENe);
 		EvaluateVerticalFaceSurfFlux(BEFluxM + face*BENfp, BEfm + face*BENfp, BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENfp, Nvar, BENe);
 		EvaluateVerticalFaceNumFlux_HLLC_LAI(BEFluxS + face*BENfp, BEfm + face*BENfp, BEfp + face*BENfp, \
