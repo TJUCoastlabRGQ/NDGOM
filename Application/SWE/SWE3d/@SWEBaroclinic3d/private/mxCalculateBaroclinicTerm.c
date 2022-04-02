@@ -49,6 +49,7 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 	double *h = mxGetPr(prhs[7]);
 	double *rho = mxGetPr(prhs[8]);
 	double gra = mxGetScalar(prhs[9]);
+	double rho0 = mxGetScalar(prhs[10]);
 
 	mxArray *TempK = mxGetField(mesh, 0, "K");
 	int K = (int)mxGetScalar(TempK);
@@ -108,13 +109,13 @@ void mexFunction(int nlhs, mxArray* plhs[], int nrhs, const mxArray* prhs[]) {
 			DotProduct(BaroclinicInXPartTwo + k*Np, z + k*Np, BaroclinicPDPX + k*Np, Np);
 			DotProduct(BaroclinicInXPartTwo + k*Np, BaroclinicInXPartTwo + k*Np, BaroclinicPRHOPS + k*Np, Np);
 			Minus(BaroclinicInXPartOne + k*Np, BaroclinicInXPartOne + k*Np, BaroclinicInXPartTwo + k*Np, Np);
-			MultiplyByConstant(BaroclinicInXPartOne + k*Np, BaroclinicInXPartOne + k*Np, -1*gra/1000.0, Np);
+			MultiplyByConstant(BaroclinicInXPartOne + k*Np, BaroclinicInXPartOne + k*Np, -1*gra/ rho0, Np);
 
 			DotProduct(BaroclinicInYPartOne + k*Np, h + k*Np, BaroclinicPRHOPY + k*Np, Np);
 			DotProduct(BaroclinicInYPartTwo + k*Np, z + k*Np, BaroclinicPDPY + k*Np, Np);
 			DotProduct(BaroclinicInYPartTwo + k*Np, BaroclinicInYPartTwo + k*Np, BaroclinicPRHOPS + k*Np, Np);
 			Minus(BaroclinicInYPartOne + k*Np, BaroclinicInYPartOne + k*Np, BaroclinicInYPartTwo + k*Np, Np);
-			MultiplyByConstant(BaroclinicInYPartOne + k*Np, BaroclinicInYPartOne + k*Np, -1 * gra / 1000.0, Np);
+			MultiplyByConstant(BaroclinicInYPartOne + k*Np, BaroclinicInYPartOne + k*Np, -1 * gra / rho0, Np);
 		}
 	}
 

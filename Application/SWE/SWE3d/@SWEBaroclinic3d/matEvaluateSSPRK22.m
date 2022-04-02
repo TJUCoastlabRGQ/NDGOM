@@ -35,6 +35,8 @@ while( time < ftime )
         
         [ fphys ] = obj.matImposeLimiter( fphys );  
         
+        disp(max(max(fphys{1}(:,:,2))));
+        
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
         
         fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -64,7 +66,9 @@ while( time < ftime )
         
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:2:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:2:end);
         
-        [ fphys ] = obj.matImposeLimiter( fphys );  
+        [ fphys ] = obj.matImposeLimiter( fphys );
+        
+        disp(max(max(fphys{1}(:,:,2))));
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         
@@ -76,6 +80,8 @@ while( time < ftime )
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
         fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
+    
+    disp(max(max(fphys{1}(:,:,2))));
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     

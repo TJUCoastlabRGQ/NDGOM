@@ -74,7 +74,7 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             if ( Momentum >= 0)
                 hs3d(:,Index) = fm(:,Index,4).*30;
             else
-                hs3d(:,Index) = fm(:,Index,14);
+                hs3d(:,Index) = fm(:,Index,15);
             end
             ht3d(:,Index) = fm(:,Index,4).*10;
             %> The riverward boundary be set to ClampedVel
@@ -85,8 +85,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             
             obj.fext3d{1}(:,:,1) = hu3d;
             %> here, index of the variable are arranged accoring to the number of the variable, not the index of the field
-            obj.fext3d{1}(:,:,3) = ht3d;
-            obj.fext3d{1}(:,:,4) = hs3d;
+            obj.fext3d{1}(:,:,4) = ht3d;
+            obj.fext3d{1}(:,:,5) = hs3d;
             %> For the 2d part
             Index = ( (obj.meshUnion(1).mesh2d.BoundaryEdge.ftype)' == enumBoundaryCondition.ClampedVel & all(obj.meshUnion(1).mesh2d.BoundaryEdge.xb == -obj.ChLength/2));
             hu2d(:,Index) = Momentum;
@@ -142,5 +142,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 
