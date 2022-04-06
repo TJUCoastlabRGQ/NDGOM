@@ -281,6 +281,7 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 				}
 
 			}
+			/*
 			else if (HL>Hcrit && HR <= Hcrit){
 				SL = UL - sqrt(*gra*HL);
 				SR = UL + 2 * sqrt(*gra*HL);
@@ -320,6 +321,7 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 			if (SPY == 0){
 				printf("Error occured when calculating the HLLC flux! check please!");
 			}
+			*/
 		}
 	}
 	free(QL), free(QR);
@@ -694,6 +696,11 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 			unchanged*/
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL + n);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER + n);
+			//Set the variable corresponding to T directly to 10.0
+			if (n == 3) {
+				VARIABLEL[3] = 10.0;
+				VARIABLER[3] = 10.0;
+			}
 		}
 		/*Assign water depth, u and v in both sides to HL(R), UL(R), VL(R)*/
 		HL = VARIABLEL[0], HR = VARIABLER[0];
@@ -710,14 +717,26 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 			FL[1] = HL*pow(UL, 2) + 0.5*(*gra)*pow(HL, 2);
 			FL[2] = HL*UL*VL;
 			for (int n = 3; n < Nvar + 1; n++){
-				FL[n] = FL[0] * VARIABLEL[n];
+				// Set the flux corresponding to the left fan directly to 10.0*hu_n
+				if (n == 3) {
+					FL[n] = FL[0] * 10.0;
+				}
+				else {
+					FL[n] = FL[0] * VARIABLEL[n];
+				}
 			}
 
 			FR[0] = HR*UR;
 			FR[1] = HR*pow(UR, 2) + 0.5*(*gra)*pow(HR, 2);
 			FR[2] = HR*UR*VR;
 			for (int n = 3; n < Nvar + 1; n++){
-				FR[n] = FR[0] * VARIABLER[n];
+				// Set the flux corresponding to the right fan directly to 10.0*hu_n
+				if (n == 3) {
+					FR[n] = FR[0] * 10.0;
+				}
+				else {
+					FR[n] = FR[0] * VARIABLER[n];
+				}	
 			}
 
 			if ((HL>Hcrit) & (HR > Hcrit)){
@@ -732,8 +751,15 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 				QSTARR[0] = HR*((SR - UR) / (SR - SM)) * 1;
 				QSTARR[1] = HR*((SR - UR) / (SR - SM)) * SM;
 				for (int i = 2; i<Nvar + 1; i++){
-					QSTARL[i] = HL*((SL - UL) / (SL - SM)) * VARIABLEL[i];
-					QSTARR[i] = HR*((SR - UR) / (SR - SM)) * VARIABLER[i];
+					// Set the left and the right fan value corresponding to hT
+					if (i == 3) {
+						QSTARL[i] = HL*((SL - UL) / (SL - SM)) * 10.0;
+						QSTARR[i] = HR*((SR - UR) / (SR - SM)) * 10.0;
+					}
+					else {
+						QSTARL[i] = HL*((SL - UL) / (SL - SM)) * VARIABLEL[i];
+						QSTARR[i] = HR*((SR - UR) / (SR - SM)) * VARIABLER[i];
+					}
 				}
 				/*Compute FSTARL and FSTARR*/
 				for (int n = 0; n < Nvar + 1; n++){
@@ -776,6 +802,7 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 				}
 
 			}
+			/*
 			else if (HL>Hcrit && HR <= Hcrit){
 				SL = UL - sqrt(*gra*HL);
 				SR = UL + 2 * sqrt(*gra*HL);
@@ -839,6 +866,7 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 					SPY = 1;
 				}
 			}
+			*/
 			//SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
 			if (SPY == 0){
 				printf("Error occured when calculating the HLLC flux! check please!");

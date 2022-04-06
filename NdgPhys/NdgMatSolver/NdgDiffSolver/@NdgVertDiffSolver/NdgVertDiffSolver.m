@@ -65,7 +65,7 @@ classdef NdgVertDiffSolver < AbstractDiffSolver
         
         %> Input parameter changed on 20211231 to consider the hu and hv
         %> field, since we need it when we treat the bottom boundary implicitly.  
-        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d);
+        fphys  = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, Height, SystemRHS, ImplicitParameter, dt, intRK, Stage, huv3d, h2d, h3d);
         
         function matUpdatePenaltyParameter( obj, physClass, DiffusionCoefficient )
             %> @brief Evaluating the penalty parameter used to penalize the jump between adjacet cell used in IPDG for second order operator

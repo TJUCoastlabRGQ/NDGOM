@@ -67,8 +67,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
             %> The seaward boundary be set to ClampedVel
             Index = ( (obj.meshUnion(1).BoundaryEdge.ftype)' == enumBoundaryCondition.ClampedVel & all(obj.meshUnion(1).BoundaryEdge.xb == -obj.ChLength/2));
-            Momentum = -0.08*10 + 0.4*5*sin(2*pi*time/(12*3600));
-%             hu3d(:,Index) = -0.08*5 + 0.4*10*sin(2*pi*time/(12*3600));
+%             Momentum = -0.08*10 + 0.4*5*sin(2*pi*time/(12*3600));
+            Momentum = -0.08*5 + 0.4*10*sin(2*pi*time/(12*3600));
             hu3d(:,Index) = Momentum;
             [fm, ~] = obj.meshUnion(1).BoundaryEdge.matEvaluateSurfValue(fphys);
             if ( Momentum >= 0)
@@ -86,6 +86,7 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             obj.fext3d{1}(:,:,1) = hu3d;
             %> here, index of the variable are arranged accoring to the number of the variable, not the index of the field
             obj.fext3d{1}(:,:,4) = ht3d;
+%             obj.fext3d{1}(:,:,4) = fm(:,:,14);
             obj.fext3d{1}(:,:,5) = hs3d;
             %> For the 2d part
             Index = ( (obj.meshUnion(1).mesh2d.BoundaryEdge.ftype)' == enumBoundaryCondition.ClampedVel & all(obj.meshUnion(1).mesh2d.BoundaryEdge.xb == -obj.ChLength/2));
@@ -97,7 +98,7 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
         end
         
         function [ option ] = setOption( obj, option )
-            outputIntervalNum = 8000;
+            outputIntervalNum = 800;
             option('startTime') = 0.0;
             option('finalTime') = obj.finalTime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;

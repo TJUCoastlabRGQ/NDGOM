@@ -13,9 +13,12 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
         
         S0 = 35
          
-        alphaT = 0.2
+%         alphaT = 0.2
+%         
+%         betaS = 0.1
+        alphaT = 0
         
-        betaS = 0.1
+        betaS = 0
     end
     
     methods

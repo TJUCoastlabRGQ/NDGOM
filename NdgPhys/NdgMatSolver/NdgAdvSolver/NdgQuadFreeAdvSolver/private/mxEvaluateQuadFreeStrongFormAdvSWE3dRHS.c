@@ -2,6 +2,7 @@
 #include "../../../../../NdgMath/NdgSWE.h"
 #include "../../../../../NdgMath/NdgSWE3D.h"
 #include "../../../../../NdgMath/NdgMemory.h"
+#include "stdio.h"
 #include <omp.h>
 
 extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
@@ -11,6 +12,8 @@ extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
 *SurfBEFluxS, *E, *G, *H, *TempVolumeIntegral;
 
 extern char *AdvInitialized;
+
+int timepoint = 0;
 
 void MyExit()
 {
@@ -184,9 +187,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(IEFluxS, 0, IENfp*IENe*Nvar*sizeof(double));
     
     //printf("Number of threads is:%d\n",omp_get_max_threads());
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
+//	FILE *fp2;
+//	fp2 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\IEPureAdv3d.txt", "a");
+//#ifdef _OPENMP
+//#pragma omp parallel for num_threads(DG_THREADS)
+//#endif
 	for (int face = 0; face < IENe; face++){
  //       printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe, can not be used!!
 		/*Fetch variable IEfm and IEfp first*/
@@ -207,7 +212,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateVerticalFaceSurfFlux(IEFluxP + face*IENfp, IEfp + face*IENfp, IEnx + face*IENfp, IEny + face*IENfp, &gra, Hcrit, IENfp, Nvar, IENe);
 		EvaluateVerticalFaceNumFlux_HLLC_LAI(IEFluxS + face*IENfp, IEfm + face*IENfp, IEfp + face*IENfp, \
 			IEnx + face*IENfp, IEny + face*IENfp, &gra, Hcrit, IENfp, Nvar, IENe);
+//		for (int p = 0; p < IENfp; p++) {
+//			fprintf(fp2, "%16.12f \n", (*(IEFluxS + 2 * IENe*IENfp + face*IENfp + p)) / 10.0);
+//		}
 	}
+//	fclose(fp2);
 
 /*Allocate memory for contribution to RHS due to inner edge facial integral, and
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
@@ -233,11 +242,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(BEFluxM, 0, BENfp*BENe*Nvar*sizeof(double));
 	memset(BEFluxS, 0, BENfp*BENe*Nvar*sizeof(double));
 
+//	FILE *fp, *fp1;
+//	fp = fopen("D:\\Sharewithpc\\研究工作\\20220404\\Adv3d.txt","a");
+//	fp1 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\PureAdv3d.txt", "a");
+//	fprintf(fp, "For time points %d:\n", timepoint);
+//	timepoint = timepoint + 1;
 	/*Fetch variable BEfm and BEfp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate local flux term, adjacent flux term and numerical flux term*/
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
+//#ifdef _OPENMP
+//#pragma omp parallel for num_threads(DG_THREADS)
+//#endif
 	for (int face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
 		FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
@@ -257,7 +271,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateVerticalFaceSurfFlux(BEFluxM + face*BENfp, BEfm + face*BENfp, BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENfp, Nvar, BENe);
 		EvaluateVerticalFaceNumFlux_HLLC_LAI(BEFluxS + face*BENfp, BEfm + face*BENfp, BEfp + face*BENfp, \
 			BEnx + face*BENfp, BEny + face*BENfp, &gra, Hcrit, BENfp, Nvar, BENe);
+
+//		if (type == NdgEdgeClampedVel) {
+//			fprintf(fp,"For face %d:\n", face);
+//			fprintf(fp,"For hT, the numerical flux is: \n");
+//			for (int p = 0; p < BENfp; p++) {
+//				fprintf(fp,"%16.12f \n", (*(BEFluxS + 2 * BENe*BENfp + face*BENfp + p))/10.0);
+//				fprintf(fp1, "%16.12f \n", (*(BEFluxS + 2 * BENe*BENfp + face*BENfp + p)) / 10.0);
+//			}
+//		}
 	}
+//	fclose(fp);
+//	fclose(fp1);
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

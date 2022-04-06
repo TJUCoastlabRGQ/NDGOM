@@ -13,6 +13,8 @@ extern double *PCEUpdatedIEfm2d, *PCEUpdatedIEfp2d, *PCEUpdatedIEFluxM2d, *PCEUp
 
 extern char *PCEUpdatedInitialized;
 
+int timepoint = 0;
+
 void MyExit()
 {
 	if (!strcmp("True", PCEUpdatedInitialized)){
@@ -270,6 +272,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		*IEhP3d = PCEUpdatedIEfp3d + 2 * IENfp3d*IENe3d;
 	memset(PCEUpdatedIEFluxS3d, 0, IENfp3d*IENe3d*sizeof(double));
 
+//	FILE *fp2;
+//	fp2 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\IEPurePCE.txt", "a");
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -278,7 +283,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchInnerEdgeFacialValue(IEhuM3d + e*IENfp3d, IEhuP3d + e*IENfp3d, hu3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
 		FetchInnerEdgeFacialValue(IEhvM3d + e*IENfp3d, IEhvP3d + e*IENfp3d, hv3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(PCEUpdatedIEFluxS3d + e*IENfp3d, PCEUpdatedIEfm3d + e*IENfp3d, PCEUpdatedIEfp3d + e*IENfp3d, IEnx3d + e*IENfp3d, IEny3d + e*IENfp3d, &gra, Hcrit, IENfp3d, IENe3d);
+//		for (int p = 0; p < IENfp3d; p++) {
+//			fprintf(fp2, "%16.12f \n", *(PCEUpdatedIEFluxS3d + e*IENfp3d + p));
+//		}
 	}
+//	fclose(fp2);
 
 	memset(PCEUpdatedIEfmod, 0, IENe2d*IENfp3d*sizeof(double));
 
@@ -294,11 +303,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BEhuM3d = PCEUpdatedBEfm3d, *BEhvM3d = PCEUpdatedBEfm3d + BENe3d * BENfp3d, \
 		*BEhM3d = PCEUpdatedBEfm3d + 2 * BENe3d * BENfp3d;
 
+//	FILE *fp, *fp1;
+//	fp = fopen("D:\\Sharewithpc\\研究工作\\20220404\\PCE.txt", "a");
+//	fp1 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\PurePCE.txt", "a");
+//	fprintf(fp, "For time points %d:\n", timepoint);
+//	timepoint = timepoint + 1;
+
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
+//#ifdef _OPENMP
+//#pragma omp parallel for num_threads(DG_THREADS)
+//#endif
 	for (int e = 0; e < BENe3d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype3d[e];  // boundary condition
 		FetchBoundaryEdgeFacialValue(BEhuM3d + e*BENfp3d, hu3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
@@ -310,7 +325,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			PCEUpdatedBEzM3d + e*BENfp3d, PCEUpdatedBEzP3d + e*BENfp3d, fext3d + e*BENfp3d, BENfp3d, Nfield, BENe3d, varFieldIndex);
 		EvaluateHydroStaticReconstructValue(Hcrit, PCEUpdatedBEfm3d + e*BENfp3d, PCEUpdatedBEfp3d + e*BENfp3d, PCEUpdatedBEzM3d + e*BENfp3d, PCEUpdatedBEzP3d + e*BENfp3d, BENfp3d, Nfield, BENe3d);
 		GetPCENumericalFluxTerm_HLLC_LAI(PCEUpdatedBEFluxS3d + e*BENfp3d, PCEUpdatedBEfm3d + e*BENfp3d, PCEUpdatedBEfp3d + e*BENfp3d, BEnx3d + e*BENfp3d, BEny3d + e*BENfp3d, &gra, Hcrit, BENfp3d, BENe3d);
+		
+//		if (type == NdgEdgeClampedVel) {
+//			fprintf(fp, "For face %d:\n", e);
+//			fprintf(fp, "For h, the numerical flux is: \n");
+//			for (int p = 0; p < BENfp3d; p++) {
+//				fprintf(fp, "%16.12f \n", *(PCEUpdatedBEFluxS3d + e*BENfp3d + p));
+//				fprintf(fp1, "%16.12f \n", *(PCEUpdatedBEFluxS3d + e*BENfp3d + p));
+//			}
+//		}
 	}
+//	fclose(fp);
+//	fclose(fp1);
 
 	memset(PCEUpdatedBEfmod, 0, BENe2d*BENfp3d*sizeof(double));
 
