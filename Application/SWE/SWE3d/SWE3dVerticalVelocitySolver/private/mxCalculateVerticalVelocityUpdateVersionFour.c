@@ -357,7 +357,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K3d; k++){
 		/*The numerical flux is set to be zero*/
-		memset(UpdatedVSERHS3d + k*Np3d, 0, Np3d * K3d * sizeof(double));
+		memset(UpdatedVSERHS3d + k*Np3d, 0, Np3d * sizeof(double));
 		Minus(UpdatedVSrhs3d + k*Np3d, UpdatedVSERHS3d + k*Np3d, UpdatedVSrhs3d + k*Np3d, Np3d);
 	}
 
@@ -461,7 +461,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K2d; k++){
 		/*The numerical flux is set to be zero*/
-		memset(UpdatedVSERHS2d + k*Np2d, 0, Np2d * K2d * sizeof(double));
+		memset(UpdatedVSERHS2d + k*Np2d, 0, Np2d * sizeof(double));
 		Minus(UpdatedVSrhs2d + k*Np2d, UpdatedVSERHS2d + k*Np2d, UpdatedVSrhs2d + k*Np2d, Np2d);
 	}
 

@@ -8,7 +8,7 @@ classdef SWE3DVerticalIntegral < SWE3DAbstractTest & ...
         Nvar2d = 1
         varFieldIndex2d = 1
         outputFieldOrder2d = []
-        outputFieldOrder =  1
+        outputFieldOrder3d =  1
         Nfield = 1
         Nvar = 1
         varFieldIndex = 1
@@ -20,7 +20,7 @@ classdef SWE3DVerticalIntegral < SWE3DAbstractTest & ...
     
     methods
         function obj = SWE3DVerticalIntegral(N, Nz)
-            [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz);
+            [obj.mesh2d, obj.mesh3d] = makeChannelMesh( N, Nz);
         end
         
         function VerticalIntegralTest(obj)
@@ -49,7 +49,7 @@ classdef SWE3DVerticalIntegral < SWE3DAbstractTest & ...
     
 end
 
-function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz )
+function [mesh2d, mesh3d] = makeChannelMesh( N, Nz )
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
@@ -62,10 +62,10 @@ mesh2d = makeUniformQuadMesh( N, ...
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
-mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 4 );
-mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1 );
+mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, 6 );
+mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, 6 );
 mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
-mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1 );
+mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, 6 );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
 

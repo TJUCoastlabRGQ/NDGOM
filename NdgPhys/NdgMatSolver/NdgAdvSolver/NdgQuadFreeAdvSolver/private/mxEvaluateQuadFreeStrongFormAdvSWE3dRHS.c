@@ -13,7 +13,7 @@ extern double *TempFacialIntegral, *IEfm, *IEfp, *IEFluxM, *IEFluxP, \
 
 extern char *AdvInitialized;
 
-int timepoint = 0;
+//int timepoint = 0;
 
 void MyExit()
 {
@@ -189,9 +189,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     //printf("Number of threads is:%d\n",omp_get_max_threads());
 //	FILE *fp2;
 //	fp2 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\IEPureAdv3d.txt", "a");
-//#ifdef _OPENMP
-//#pragma omp parallel for num_threads(DG_THREADS)
-//#endif
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
 	for (int face = 0; face < IENe; face++){
  //       printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe, can not be used!!
 		/*Fetch variable IEfm and IEfp first*/
@@ -249,9 +249,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //	timepoint = timepoint + 1;
 	/*Fetch variable BEfm and BEfp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate local flux term, adjacent flux term and numerical flux term*/
-//#ifdef _OPENMP
-//#pragma omp parallel for num_threads(DG_THREADS)
-//#endif
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
 	for (int face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
 		FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
@@ -423,7 +423,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
     for (int face = 0; face < SurfBENe; face++){
         for (int field = 0; field < Nvar; field++){
-			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
+//			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
     
@@ -471,6 +471,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K; k++){
 		for (int n = 0; n < Nvar; n++){
+//			memset(ERHS + n*Np*K*Nface, 0.0, Np*K * sizeof(double));
 			Minus(OutputRHS + n*Np*K + k*Np, \
 				ERHS + n*Np*K*Nface + k*Np, OutputRHS + n*Np*K + k*Np, Np);
 		}

@@ -132,7 +132,7 @@ classdef SWEAbstract3d < NdgPhysMat
     methods( Access = protected )
         
         function matEvaluateTopographySourceTerm( obj, fphys )
-            for m = 1:obj.Nmesh                             
+            for m = 1:obj.Nmesh
                 obj.frhs{m}(:,:,1) = obj.frhs{m}(:,:,1) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,8);
                 obj.frhs{m}(:,:,2) = obj.frhs{m}(:,:,2) - obj.gra * fphys{m}(:,:,7) .* fphys{m}(:,:,9);
             end

@@ -13,7 +13,7 @@ extern double *PCEUpdatedIEfm2d, *PCEUpdatedIEfp2d, *PCEUpdatedIEFluxM2d, *PCEUp
 
 extern char *PCEUpdatedInitialized;
 
-//int timepoint = 0;
+int timepoint = 0;
 
 void MyExit()
 {
@@ -311,9 +311,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
+//#ifdef _OPENMP
+//#pragma omp parallel for num_threads(DG_THREADS)
+//#endif
 	for (int e = 0; e < BENe3d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype3d[e];  // boundary condition
 		FetchBoundaryEdgeFacialValue(BEhuM3d + e*BENfp3d, hu3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
@@ -385,7 +385,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
-//		memset(PCEUpdatedERHS2d, 0.0, K2d*Np2d * sizeof(double));
 		Minus(RHS + k*Np2d, PCEUpdatedERHS2d + k*Np2d, RHS + k*Np2d, Np2d);
 	}
 

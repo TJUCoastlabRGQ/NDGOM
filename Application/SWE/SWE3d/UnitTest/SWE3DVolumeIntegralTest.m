@@ -1,25 +1,14 @@
-classdef SWE3DFluxConsistencyTest < SWE3DAbstractTest & ...
+classdef SWE3DVolumeIntegralTest < SWE3DAbstractTest & ...
         SWEBarotropic3d
     %SWE3DFLUXCONSISTENCYTEST 此处显示有关此类的摘要
     %   此处显示详细说明
-    
-    properties
-%         Nfield2d = 4
-%         Nvar2d = 1
-%         varFieldIndex2d = 1
-%         outputFieldOrder2d = []
-%         outputFieldOrder =  1
-%         Nfield = 9
-%         Nvar = 1
-%         varFieldIndex = 1
-    end
     
     properties(Constant)
         hcrit = 1
     end    
     
     methods
-        function obj = SWE3DFluxConsistencyTest(N, Nz, Mz)
+        function obj = SWE3DVolumeIntegralTest(N, Nz, Mz)
             [obj.mesh2d, obj.mesh3d] = makeChannelMesh(obj, N, Nz, Mz);
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
@@ -27,33 +16,21 @@ classdef SWE3DFluxConsistencyTest < SWE3DAbstractTest & ...
             obj.SurfBoundNewmannDate(:,:,1) = zeros(size(obj.mesh2d(1).x));
         end
         
-        function FluxConsistencyTest(obj)
+        function VolumeIntegralTest(obj)
             % Results indicate these two are not equivalent
             obj.fphys{1}(:,:,1) = 0.5 * rand(size(ones(size(obj.mesh3d.x))));
-%             obj.fphys{1}(:,:,1) = 0.5 * ones(size(obj.mesh3d.x));
-            index = (obj.mesh3d(1).z==-0.5);
-            obj.fphys{1}(index) = 0.75;
-            
             obj.fphys{1}(:,:,2) = 0.5 * rand(size(ones(size(obj.mesh3d.x))));
-%             obj.fphys{1}(:,:,2) = 0.5 * ones(size(obj.mesh3d.x));
-%             obj.fphys{1}(5 + numel(obj.mesh3d.x)) = 0.9;
-            
-            obj.fphys2d{1}(:,:,1) = ( 10 + rand(1) ) * ones(size(obj.mesh2d.x)); 
-%             obj.fphys2d{1}(:,:,1) = 10 * ones(size(obj.mesh2d.x)); 
-            obj.fphys{1}(: , :, 4) = obj.mesh3d.Extend2dField( obj.fphys2d{1}(:, :, 1) );
             
             obj.fphys2d{1}(:,:,2) = obj.mesh3d.VerticalColumnIntegralField( obj.fphys{1}(:, :, 1) );
             obj.fphys2d{1}(:,:,3) = obj.mesh3d.VerticalColumnIntegralField( obj.fphys{1}(:, :, 2) );
             
-            InnerEdge2d = obj.mesh2d.InnerEdge;
-            [ fm2d, fp2d ] = InnerEdge2d.matEvaluateSurfValue( obj.fphys2d );
-            FluxS2d = obj.matEvaluateSurfNumFlux(obj.mesh2d, InnerEdge2d.nx, InnerEdge2d.ny, fm2d, fp2d, InnerEdge2d);
+            Derive3d = obj.mesh3d.VerticalColumnIntegralField( obj.mesh3d.rx .* (obj.mesh3d.cell.Dr * (obj.fphys{1}(:,:,1))) + obj.mesh3d.sx .* (obj.mesh3d.cell.Ds * (obj.fphys{1}(:,:,1))) + ...
+               obj.mesh3d.ry .* (obj.mesh3d.cell.Dr * (obj.fphys{1}(:,:,2))) + obj.mesh3d.sy .* (obj.mesh3d.cell.Ds * (obj.fphys{1}(:,:,2))) );
+           
+           Derive2d = obj.mesh2d.rx .* (obj.mesh2d.cell.Dr * obj.fphys2d{1}(:,:,2)) + obj.mesh2d.sx .* (obj.mesh2d.cell.Ds * obj.fphys2d{1}(:,:,2)) + ...
+               obj.mesh2d.ry .* (obj.mesh2d.cell.Dr * obj.fphys2d{1}(:,:,3)) + obj.mesh2d.sy .* (obj.mesh2d.cell.Ds * obj.fphys2d{1}(:,:,3));
             
-            InnerEdge3d = obj.mesh3d.InnerEdge;
-            [ fm3d, fp3d ] = InnerEdge3d.matEvaluateSurfValue( obj.fphys );
-            FluxS3d = obj.matEvaluateSurfNumFlux(obj.mesh3d, InnerEdge3d.nx, InnerEdge3d.ny, fm3d(:,:,[4,1,2]), fp3d(:,:,[4,1,2]), InnerEdge3d);
-            
-            obj.Assert(InnerEdge3d.VerticalColumnIntegralField(FluxS3d(:,:,1)),FluxS2d(:,:,1));
+            obj.Assert(Derive3d, Derive2d);
             
         end        
     end
@@ -107,7 +84,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, 10 ], [ 0, 10 ], 3, 3, bctype);
+    [ 0, 10 ], [ 0, 10 ], 5, 5, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

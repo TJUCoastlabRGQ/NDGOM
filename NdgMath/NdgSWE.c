@@ -184,23 +184,6 @@ void EvaluateHydroStaticReconstructValue(double hmin, double *fm, double *fp, do
 		zP[i] = zstar;
 	}
 }
-/*
-void EvaluateFlowRateByDeptheThreshold(double hmin, double *h, double *hu, double *hv, double *um, double *vm)
-{
-	if (*h > hmin) {
-		//     const double sqrt2 = 1.414213562373095;
-		//     double h4 = pow(h, 4);
-		//     *u = sqrt2 * h * hu / sqrt( h4 + max( hcrit, h4 ) );
-		//     *v = sqrt2 * h * hv / sqrt( h4 + max( hcrit, h4 ) );
-		*um = *hu / *h;
-		*vm = *hv / *h;
-	}
-	else {
-		*um = 0.0;
-		*vm = 0.0;
-	}
-}
-*/
 
 /*This function is used to calcualte the numerical flux in the primitive continuity equation(PCE) */
 void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Ne){
@@ -217,7 +200,6 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 	double *VARIABLEL = malloc(3 * sizeof(double)), *VARIABLER = malloc(3 * sizeof(double));
 	double FL , FR ;
 	double FSTARL, FSTARR ;
-
 	double QSTARL, QSTARR;
 	for (int i = 0; i < Nfp; i++){
 		/*Rotate variable to normal and tangential direction*/
@@ -225,7 +207,6 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 		QL[0] = *(hm + i), QR[0] = *(hp + i);
 		RotateFluxToNormal2d(hum + i, hvm + i, nx + i, ny + i, QL + 1, QL + 2);
 		RotateFluxToNormal2d(hup + i, hvp + i, nx + i, ny + i, QR + 1, QR + 2);
-
 		int SPY = 0;
 		/*Compute the original variable, u, v and theta, in normal direction*/
 		/*Water depth h comes first*/
@@ -243,25 +224,20 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 		to be very smooth*/
 		if (!(HL < Hcrit && HR < Hcrit))
 		{
-
 			/*Compute FL AND FR*/
 			FL = HL*UL;
-
 			FR = HR*UR;
-
 			if ((HL>Hcrit) & (HR > Hcrit)){
 				USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
-				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2.0);
 				SL = min(UL - sqrt(*gra * HL), USTAR - sqrt(*gra*HSTAR));
 				SR = max(UR + sqrt(*gra * HR), USTAR + sqrt(*gra*HSTAR));
 				SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
 				/*Compute QSTARL AND QSTARR*/
 				QSTARL = HL*((SL - UL) / (SL - SM)) * 1;
 				QSTARR = HR*((SR - UR) / (SR - SM)) * 1;
-
 				FSTARL = FL + SL * (QSTARL - QL[0]);
 				FSTARR = FR + SR * (QSTARR - QR[0]);
-
 				/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
 				if (SL >= 0){
 					dest[i] = FL;
@@ -279,14 +255,11 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 					dest[i] = FR;
 					SPY = 1;
 				}
-
 			}
-			/*
 			else if (HL>Hcrit && HR <= Hcrit){
 				SL = UL - sqrt(*gra*HL);
 				SR = UL + 2 * sqrt(*gra*HL);
-				//是否将SM的计算移到这里来
-				//				SM = SR;
+				//For this case SM = SR;
 				if (SL >= 0){
 					dest[i] = FL;
 					SPY = 1;
@@ -303,7 +276,7 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 			else if (HL <= Hcrit && HR > Hcrit){
 				SL = UR - 2 * sqrt(*gra*HR);
 				SR = UR + sqrt(*gra*HR);
-				//				SM = SL;
+				//For this case SM = SL;
 				if (SL >= 0){
 					dest[i] = FL;
 					SPY = 1;
@@ -317,11 +290,13 @@ void GetPCENumericalFluxTerm_HLLC_LAI(double *dest, double *fm, double *fp, doub
 					SPY = 1;
 				}
 			}
-			//SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
 			if (SPY == 0){
 				printf("Error occured when calculating the HLLC flux! check please!");
 			}
-			*/
+		}
+		else {
+			// The left and right hand sides are dry
+			dest[i] = 0.0;
 		}
 	}
 	free(QL), free(QR);
@@ -347,8 +322,6 @@ void GetPCENumericalFluxTerm_HLL(double *dest, double *fm, double *fp, double *n
 		QL[0] = *(hm + i), QR[0] = *(hp + i);
 		RotateFluxToNormal2d(hum + i, hvm + i, nx + i, ny + i, QL + 1, QL + 2);
 		RotateFluxToNormal2d(hup + i, hvp + i, nx + i, ny + i, QR + 1, QR + 2);
-
-
 		int SPY = 0;
 		/*Compute the original variable, u, v and theta, in normal direction*/
 		/*Water depth h comes first*/
@@ -383,13 +356,9 @@ void GetPCENumericalFluxTerm_HLL(double *dest, double *fm, double *fp, double *n
 				SL = 0.0;
 				SR = 0.0;
 			}
-
-
 			/*Compute FL AND FR*/
 			FL = HL*UL;
-
 			FR = HR*UR;
-
 			/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
 			if (SL >= 0 && SR > 0){
 				dest[i] = FL;
@@ -658,20 +627,19 @@ void RotateFluxToNormal2d(double *hu, ///< flux at x component
 }
 
 /*HLLC numerical flux is adopted in vertical face, */
-void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne){
+void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, double *nx, double *ny, double *gra, double Hcrit, int Nfp, int Nvar, int Ne) {
 	/*The HLLC numerical flux presented in LAI(2012, Modeling one- and two-dimensional shallow water flows with discontinuous Galerkin method) is adopted*/
 	double HR, HL, UR, UL, VR, VL;
 	double SL, SM, SR;
 	double USTAR, HSTAR;
 	double *hum = fm, *hvm = fm + Nfp*Ne, *hm = fm + 2 * Nfp*Ne;
 	double *hup = fp, *hvp = fp + Nfp*Ne, *hp = fp + 2 * Nfp*Ne;
-
-	double *QL = malloc((Nvar + 1)*sizeof(double)), *QR = malloc((Nvar + 1)*sizeof(double));
-	double *FL = malloc((Nvar + 1)*sizeof(double)), *FR = malloc((Nvar + 1)*sizeof(double));
-	double *FSTARL = malloc((Nvar + 1)*sizeof(double)), *FSTARR = malloc((Nvar + 1)*sizeof(double));
-	double *VARIABLEL = malloc((Nvar + 1)*sizeof(double)), *VARIABLER = malloc((Nvar + 1)*sizeof(double));
-	double *QSTARL = malloc((Nvar + 1)*sizeof(double)), *QSTARR = malloc((Nvar + 1)*sizeof(double));
-	for (int i = 0; i < Nfp; i++){
+	double *QL = malloc((Nvar + 1) * sizeof(double)), *QR = malloc((Nvar + 1) * sizeof(double));
+	double *QSTARL = malloc((Nvar + 1) * sizeof(double)), *QSTARR = malloc((Nvar + 1) * sizeof(double));
+	double *VARIABLEL = malloc((Nvar + 1) * sizeof(double)), *VARIABLER = malloc((Nvar + 1) * sizeof(double));
+	double *FL = malloc((Nvar + 1) * sizeof(double)), *FR = malloc((Nvar + 1) * sizeof(double));
+	double *FSTARL = malloc((Nvar + 1) * sizeof(double)), *FSTARR = malloc((Nvar + 1) * sizeof(double));
+	for (int i = 0; i < Nfp; i++) {
 		/*Rotate variable to normal and tangential direction*/
 		/*Here Q stands for H, HUn, HUt, H theta*/
 		QL[0] = *(hm + i), QR[0] = *(hp + i);
@@ -688,7 +656,7 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 		/*Water depth h comes first*/
 		VARIABLEL[0] = QL[0];
 		VARIABLER[0] = QR[0];
-		for (int n = 1; n < Nvar + 1; n++){
+		for (int n = 1; n < Nvar + 1; n++) {
 			/*In this part, we calculate the original variable. If the water depth is smaller than the critical value,
 			we directly set the value of the original variable to be zero, and the original value is further used to calculate
 			the flux term in left and right side. The question here is whether the water depth should be set to zero if it is
@@ -696,11 +664,6 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 			unchanged*/
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLEL, QL + n, VARIABLEL + n);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, VARIABLER, QR + n, VARIABLER + n);
-			//Set the variable corresponding to T directly to 10.0
-			if (n == 3) {
-				VARIABLEL[3] = 10.0;
-				VARIABLER[3] = 10.0;
-			}
 		}
 		/*Assign water depth, u and v in both sides to HL(R), UL(R), VL(R)*/
 		HL = VARIABLEL[0], HR = VARIABLER[0];
@@ -711,37 +674,25 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 		to be very smooth*/
 		if (!(HL < Hcrit && HR < Hcrit))
 		{
-
 			/*Compute FL AND FR*/
 			FL[0] = HL*UL;
-			FL[1] = HL*pow(UL, 2) + 0.5*(*gra)*pow(HL, 2);
+			FL[1] = HL*pow(UL, 2.0) + 0.5*(*gra)*pow(HL, 2.0);
 			FL[2] = HL*UL*VL;
-			for (int n = 3; n < Nvar + 1; n++){
+			for (int n = 3; n < Nvar + 1; n++) {
 				// Set the flux corresponding to the left fan directly to 10.0*hu_n
-				if (n == 3) {
-					FL[n] = FL[0] * 10.0;
-				}
-				else {
-					FL[n] = FL[0] * VARIABLEL[n];
-				}
+				FL[n] = FL[0] * VARIABLEL[n];
 			}
 
 			FR[0] = HR*UR;
 			FR[1] = HR*pow(UR, 2) + 0.5*(*gra)*pow(HR, 2);
 			FR[2] = HR*UR*VR;
-			for (int n = 3; n < Nvar + 1; n++){
-				// Set the flux corresponding to the right fan directly to 10.0*hu_n
-				if (n == 3) {
-					FR[n] = FR[0] * 10.0;
-				}
-				else {
-					FR[n] = FR[0] * VARIABLER[n];
-				}	
+			for (int n = 3; n < Nvar + 1; n++) {
+				FR[n] = FR[0] * VARIABLER[n];
 			}
 
-			if ((HL>Hcrit) & (HR > Hcrit)){
+			if ((HL>Hcrit) & (HR > Hcrit)) {
 				USTAR = 0.5 * (UL + UR) + sqrt(*gra*HL) - sqrt(*gra*HR);
-				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2);
+				HSTAR = 1.0 / (*gra)*pow(0.5*(sqrt(*gra*HL) + sqrt(*gra*HR)) + 0.25*(UL - UR), 2.0);
 				SL = min(UL - sqrt(*gra * HL), USTAR - sqrt(*gra*HSTAR));
 				SR = max(UR + sqrt(*gra * HR), USTAR + sqrt(*gra*HSTAR));
 				SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
@@ -750,126 +701,120 @@ void EvaluateVerticalFaceNumFlux_HLLC_LAI(double *dest, double *fm, double *fp, 
 				QSTARL[1] = HL*((SL - UL) / (SL - SM)) * SM;
 				QSTARR[0] = HR*((SR - UR) / (SR - SM)) * 1;
 				QSTARR[1] = HR*((SR - UR) / (SR - SM)) * SM;
-				for (int i = 2; i<Nvar + 1; i++){
+				for (int i = 2; i<Nvar + 1; i++) {
 					// Set the left and the right fan value corresponding to hT
-					if (i == 3) {
-						QSTARL[i] = HL*((SL - UL) / (SL - SM)) * 10.0;
-						QSTARR[i] = HR*((SR - UR) / (SR - SM)) * 10.0;
-					}
-					else {
-						QSTARL[i] = HL*((SL - UL) / (SL - SM)) * VARIABLEL[i];
-						QSTARR[i] = HR*((SR - UR) / (SR - SM)) * VARIABLER[i];
-					}
+					QSTARL[i] = HL*((SL - UL) / (SL - SM)) * VARIABLEL[i];
+					QSTARR[i] = HR*((SR - UR) / (SR - SM)) * VARIABLER[i];
 				}
 				/*Compute FSTARL and FSTARR*/
-				for (int n = 0; n < Nvar + 1; n++){
+				for (int n = 0; n < Nvar + 1; n++) {
 					FSTARL[n] = FL[n] + SL * (QSTARL[n] - QL[n]);
 					FSTARR[n] = FR[n] + SR * (QSTARR[n] - QR[n]);
 				}
 				/*AND FINALLY THE HLLC FLUX (BEFORE ROTATION)*/
-				if (SL >= 0){
-					//*Fhn = FL[0];
+				if (SL >= 0) {
 					dest[i] = (FL[1] * nx[i] - FL[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FL[1] * ny[i] + FL[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FL[n];
 					}
 					SPY = 1;
 				}
-				else if (SM >= 0 && SL < 0){
+				else if (SL < 0 && 0 <= SM) {
 					dest[i] = (FSTARL[1] * nx[i] - FSTARL[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FSTARL[1] * ny[i] + FSTARL[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FSTARL[n];
 					}
 					SPY = 1;
 				}
-				else if (SM < 0 && SR > 0){
+				else if (SM < 0 && 0 < SR) {
 					dest[i] = (FSTARR[1] * nx[i] - FSTARR[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FSTARR[1] * ny[i] + FSTARR[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FSTARR[n];
 					}
 					SPY = 1;
 				}
-				else if (0 >= SR){
+				else if (SR <= 0) {
 					dest[i] = (FR[1] * nx[i] - FR[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FR[1] * ny[i] + FR[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FR[n];
 					}
 					SPY = 1;
 				}
-
 			}
-			/*
-			else if (HL>Hcrit && HR <= Hcrit){
+			else if (HL>Hcrit && HR <= Hcrit) {
 				SL = UL - sqrt(*gra*HL);
 				SR = UL + 2 * sqrt(*gra*HL);
-				//是否将SM的计算移到这里来
-				//				SM = SR;
-				if (SL >= 0){
+				if (SL >= 0) {
 					dest[i] = (FL[1] * nx[i] - FL[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FL[1] * ny[i] + FL[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FL[n];
 					}
 					SPY = 1;
 				}
-				else if (SL < 0 && 0 < SR){
+				else if (SL < 0 && 0 < SR) {
 					double Fqxn = (SR * FL[1] - SL * FR[1] + SL * SR * (HR*UR - HL*UL)) / (SR - SL);
 					double Fqyn = (SR * FL[2] - SL * FR[2] + SL * SR * (HR*VR - HL*VL)) / (SR - SL);
 					dest[i] = (Fqxn * nx[i] - Fqyn * ny[i]);
 					dest[i + Nfp*Ne] = (Fqxn * ny[i] + Fqyn * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1)*Nfp*Ne] = (SR * FL[n] - SL * FR[n] + SL * SR * (QR[n] - QL[n])) / (SR - SL);
 					}
 					SPY = 1;
 				}
-				else if (SR <= 0){
+				else if (SR <= 0) {
 					dest[i] = (FR[1] * nx[i] - FR[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FR[1] * ny[i] + FR[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FR[n];
 					}
 					SPY = 1;
 				}
 			}
-			else if (HL <= Hcrit && HR > Hcrit){
+			else if (HL <= Hcrit && HR > Hcrit) {
 				SL = UR - 2 * sqrt(*gra*HR);
 				SR = UR + sqrt(*gra*HR);
 				//				SM = SL;
-				if (SL >= 0){
+				if (SL >= 0) {
 					dest[i] = (FL[1] * nx[i] - FL[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FL[1] * ny[i] + FL[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FL[n];
 					}
 					SPY = 1;
 				}
-				else if (SL < 0 && 0 < SR){
+				else if (SL < 0 && 0 < SR) {
 					double Fqxn = (SR * FL[1] - SL * FR[1] + SL * SR * (HR*UR - HL*UL)) / (SR - SL);
 					double Fqyn = (SR * FL[2] - SL * FR[2] + SL * SR * (HR*VR - HL*VL)) / (SR - SL);
 					dest[i] = (Fqxn * nx[i] - Fqyn * ny[i]);
 					dest[i + Nfp*Ne] = (Fqxn * ny[i] + Fqyn * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1)*Nfp*Ne] = (SR * FL[n] - SL * FR[n] + SL * SR * (QR[n] - QL[n])) / (SR - SL);
 					}
 					SPY = 1;
 				}
-				else if (SR <= 0){
+				else if (SR <= 0) {
 					dest[i] = (FR[1] * nx[i] - FR[2] * ny[i]);
 					dest[i + Nfp*Ne] = (FR[1] * ny[i] + FR[2] * nx[i]);
-					for (int n = 3; n < Nvar + 1; n++){
+					for (int n = 3; n < Nvar + 1; n++) {
 						dest[i + (n - 1) * Nfp*Ne] = FR[n];
 					}
 					SPY = 1;
 				}
 			}
-			*/
 			//SM = (SL*HR*(UR - SR) - SR*HL*(UL - SL)) / (HR*(UR - SR) - HL*(UL - SL));
-			if (SPY == 0){
+			if (SPY == 0) {
 				printf("Error occured when calculating the HLLC flux! check please!");
+			}
+		}
+		else {
+			// The left and right hand sides are dry
+			for (int n = 0; n < Nvar; n++) {
+				dest[i + n*Nfp*Ne] = 0.0;
 			}
 		}
 	}

@@ -16,16 +16,16 @@ while( time < ftime )
     if( time + dt > ftime )
         dt = ftime - time;
     end
-    
     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
     %> Calculation of density rho
     fphys{1}(:,:,13) = obj.matCalculateDensityField( fphys{1} );
-    
     for intRK = 1:1
         tloc = time + rkt(intRK) * dt;
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        %> Impose boundary condition first, then calculate the vertical velosity in sigma coordinate
+        fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
         
@@ -33,7 +33,7 @@ while( time < ftime )
         
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:2:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:2:end);
         
-        fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
+%         fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
 %         [ fphys ] = obj.matImposeLimiter( fphys );  
 %         [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
@@ -45,7 +45,7 @@ while( time < ftime )
         
         fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
         
-        fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+%         fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
         
         fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
@@ -62,13 +62,15 @@ while( time < ftime )
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         
+        fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
+                
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
         
         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + rkb(intRK, 1) * dt * obj.ExplicitRHS2d(:,:,1) + rkb(intRK, 2) * dt * obj.ExplicitRHS2d(:,:,2);
         
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:2:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:2:end);
         
-        fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
+%         fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );
 
@@ -87,7 +89,9 @@ while( time < ftime )
         fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
     
-    fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
+    disp(max(max(abs(fphys{1}(:,:,14)./fphys{1}(:,:,4) - 10))));
+    
+%     fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
     
 %     disp(max(max(fphys{1}(:,:,2))));
     
@@ -123,20 +127,4 @@ function [ rkb, rkt] = GetRKParameter
 rkb = [1 0;
     1/2 1/2];
 rkt = [0 1];
-end
-
-function postplot(data)
-figure;
-index = [5,1];
-Cor = [0,-0.1];
-Np = 8;
-Zcor = zeros(20,1);
-Zcor(1:2)=Cor;
-Dind = zeros(20,1);
-Dind(1:2) = data(index);
-for Layer = 2:10
-    Zcor((Layer-1)*2+(1:2)) = Zcor((Layer-2)*2+(1:2)) - 0.1;
-    Dind((Layer-1)*2+(1:2)) = data(index + (Layer-1)*Np);
-end
-plot(Dind, Zcor);
 end

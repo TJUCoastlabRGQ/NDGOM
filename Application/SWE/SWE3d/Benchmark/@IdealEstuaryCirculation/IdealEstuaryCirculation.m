@@ -27,7 +27,7 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             obj.Nfield = 18;
             
             obj.fieldName3d = {'hu','hv','omega', 'h','nv','z','eta','zx','zy','w', 'hw','hc','rho', 'hT', 'hS', 'Tke', 'Eps','nvh'};
-            
+                        
             obj.outputFieldOrder3d = [1 2 3 4 5 6 14 15 16 17 18];
             
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
@@ -45,10 +45,10 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
                 mesh2d = obj.mesh2d(m);
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
-                fphys2d{m}(:,:,1) = -5/obj.ChLength*mesh2d.x + 7.5;
+                fphys2d{m}(:,:,1) = -5/obj.ChLength*mesh2d.x + 7.5 + sin(pi*mesh2d.x/obj.ChLength);
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 %> For water depth
-                fphys{m}(:,:,4) = -5/obj.ChLength*mesh3d.x + 7.5;
+                fphys{m}(:,:,4) = -5/obj.ChLength*mesh3d.x + 7.5 + sin(pi*mesh3d.x/obj.ChLength);
                 %> For temperature
                 fphys{m}(:,:,14) = 10*fphys{m}(:,:,4);
                 %> For salinity
@@ -56,7 +56,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
                 fphys{m}(:,Index,15) = 30 * fphys{m}(:,Index,4);
                 Index = all(mesh3d.x>=-20000 & mesh3d.x<=30000);
                 fphys{m}(:,Index,15) = (-30/50000*mesh3d.x(:,Index) + 90/5) .* fphys{m}(:,Index,4);
-                fphys2d{m}(:, :, 4) = -1 * fphys2d{m}(:,:,1);
+%                 fphys2d{m}(:, :, 4) = -1 * fphys2d{m}(:,:,1);
+                fphys2d{m}(:, :, 4) = 5/obj.ChLength*mesh2d.x - 7.5;
             end
         end
         
@@ -126,11 +127,16 @@ end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.ClampedVel, ...
+%     enumBoundaryCondition.ClampedVel ];
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.ClampedVel, ...
-    enumBoundaryCondition.ClampedVel ];
+    enumBoundaryCondition.SlipWall, ...
+    enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], 1*[ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), 1*ceil(obj.ChWidth/M), bctype);
@@ -143,6 +149,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
 end
 
