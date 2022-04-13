@@ -212,20 +212,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	ptrdiff_t np = Np2d;
 	ptrdiff_t oneI = 1;
 	double one = 1.0, zero = 0.0;
-
+	/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
-		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
+		//$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$
 		GetVolumnIntegral2d(PCEUpdatedVolumeIntegralX + k*Np2d, PCEUpdatedTempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hu2d + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
-		/*$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$*/
+		//$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$
 		GetVolumnIntegral2d(PCEUpdatedVolumeIntegralY + k*Np2d, PCEUpdatedTempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hv2d + k*Np2d, &np, &zero, &np, ry2d + k*Np2d, sy2d + k*Np2d);
 
 		Add(RHS + k*Np2d, PCEUpdatedVolumeIntegralX + k*Np2d, PCEUpdatedVolumeIntegralY + k*Np2d, Np2d);
 	}
+	*/
 	/*Two dimensional inner edge flux part*/
 
 #ifdef _OPENMP

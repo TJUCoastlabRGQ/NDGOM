@@ -381,20 +381,39 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	np = Np2d;
 	oneI = 1;
 	one = 1.0, zero = 0.0;
-
+/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K2d; k++){
-		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
+		//$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$
 		GetVolumnIntegral2d(UpdatedVSVolumeIntegralX + k*Np2d, UpdatedVSTempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hu2d + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
-		/*$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$*/
+		//$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$
 		GetVolumnIntegral2d(UpdatedVSVolumeIntegralY + k*Np2d, UpdatedVSTempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hv2d + k*Np2d, &np, &zero, &np, ry2d + k*Np2d, sy2d + k*Np2d);
 
 		Add(UpdatedVSrhs2d + k*Np2d, UpdatedVSVolumeIntegralX + k*Np2d, UpdatedVSVolumeIntegralY + k*Np2d, Np2d);
 	}
+	*/
+
+	double *Tempfield2d = malloc(Np2d*K2d * sizeof(double));
+	memset(Tempfield2d, 0, Np2d*K2d * sizeof(double));
+	double *Tempfield3d = malloc(Np3d*K3d * sizeof(double));
+	double *fmod = malloc(Np3d*K3d * sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int i = 0; i < K2d; i++) {
+		VerticalColumnIntegralField3d(UpdatedVSrhs2d + i*Np2d, Np2d, V2d, Tempfield2d + i*Np2d, \
+			Tempfield3d + i*Np3d*NLayer, UpdatedVSrhs3d + i*Np3d*NLayer, Jz + i*Np3d*NLayer, \
+			fmod + i*Np3d*NLayer, InvV3d, Np3d, NLayer);
+	}
+	free(Tempfield3d);
+	free(Tempfield2d);
+	free(fmod);
+
 	/*Two dimensional inner edge flux part*/
 
 #ifdef _OPENMP
