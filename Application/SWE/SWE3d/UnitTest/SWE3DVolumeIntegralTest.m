@@ -84,7 +84,7 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
-    [ 0, 10 ], [ 0, 10 ], 5, 5, bctype);
+    [ 0, 10 ], [ 0, 10 ], 10, 10, bctype);
 
 cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zs - 1;

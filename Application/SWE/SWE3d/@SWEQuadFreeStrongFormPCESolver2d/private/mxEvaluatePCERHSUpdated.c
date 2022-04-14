@@ -47,10 +47,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int K3d = (int)mxGetScalar(TempK3d);
 	mxArray *TempNLayer = mxGetField(mesh3d, 0, "Nz");
 	int NLayer = (int)mxGetScalar(TempNLayer);
+	mxArray *TempJz = mxGetField(mesh3d, 0, "Jz");
+	double *Jz = mxGetPr(TempJz);
+	mxArray *Temprx3d = mxGetField(mesh3d, 0, "rx");
+	double *rx3d = mxGetPr(Temprx3d);
+	mxArray *Tempsx3d = mxGetField(mesh3d, 0, "sx");
+	double *sx3d = mxGetPr(Tempsx3d);
+	mxArray *Tempry3d = mxGetField(mesh3d, 0, "ry");
+	double *ry3d = mxGetPr(Tempry3d);
+	mxArray *Tempsy3d = mxGetField(mesh3d, 0, "sy");
+	double *sy3d = mxGetPr(Tempsy3d);
 
 	const mxArray *cell3d = prhs[2];
 	mxArray *TempNp3d = mxGetField(cell3d, 0, "Np");
 	int Np3d = (int)mxGetScalar(TempNp3d);
+	mxArray *TempV3d = mxGetField(cell3d, 0, "V");
+	double *V3d = mxGetPr(TempV3d);
+	double *InvV3d = malloc(Np3d*Np3d * sizeof(double));
+	memcpy(InvV3d, V3d, Np3d*Np3d * sizeof(double));
+	MatrixInverse(InvV3d, (ptrdiff_t)Np3d);
+	mxArray *TempDr3d = mxGetField(cell3d, 0, "Dr");
+	double *Dr3d = mxGetPr(TempDr3d);
+	mxArray *TempDs3d = mxGetField(cell3d, 0, "Ds");
+	double *Ds3d = mxGetPr(TempDs3d);
 
 	/*Properties contained in two dimensional inner edge*/
 	const mxArray *InnerEdge2d = prhs[3];
@@ -106,6 +125,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int Nface = (int)mxGetScalar(TempNface);
 	mxArray *TempinvM2d = mxGetField(cell2d, 0, "invM");
 	double *invM2d = mxGetPr(TempinvM2d);
+	mxArray *TempVC2d = mxGetField(cell2d, 0, "V");
+	double *VC2d = mxGetPr(TempVC2d);
 
 	signed char *ftype2d = (signed char *)mxGetData(prhs[6]);
 
@@ -208,11 +229,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	
 	memset(PCEUpdatedERHS2d, 0, Np2d*K2d*Nface*sizeof(double));
 
-
-	ptrdiff_t np = Np2d;
-	ptrdiff_t oneI = 1;
-	double one = 1.0, zero = 0.0;
-	/*
+	ptrdiff_t np, oneI;
+	np = Np2d;
+	oneI = 1;
+	double one, zero;
+	one = 1.0, zero = 0.0;
+	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -226,7 +248,74 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		Add(RHS + k*Np2d, PCEUpdatedVolumeIntegralX + k*Np2d, PCEUpdatedVolumeIntegralY + k*Np2d, Np2d);
 	}
-	*/
+	
+	np = Np3d;
+	printf("Np3d is %d\n", Np3d);
+	oneI = 1;
+	one = 1.0, zero = 0.0;
+	printf("K3d is %d\n", K3d);
+	double *VSVolumeIntegralX3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(VSVolumeIntegralX3dnew, 0, Np3d*K3d * sizeof(double));
+	double *VSTempVolumeIntegralX3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(VSTempVolumeIntegralX3dnew, 0, Np3d*K3d * sizeof(double));
+	double *VSVolumeIntegralY3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(VSVolumeIntegralY3dnew, 0, Np3d*K3d * sizeof(double));
+	double *VSTempVolumeIntegralY3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(VSTempVolumeIntegralY3dnew, 0, Np3d*K3d * sizeof(double));
+	double *VSrhs3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(VSrhs3dnew, 0, Np3d*K3d * sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K3d; k++) {
+		//$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$
+		GetVolumnIntegral2d(VSVolumeIntegralX3dnew + k*Np3d, VSTempVolumeIntegralX3dnew + k*Np3d, &np, &oneI, &np, &one, \
+			Dr3d, Ds3d, &np, hu3d + k*Np3d, &np, &zero, &np, rx3d + k*Np3d, sx3d + k*Np3d);
+		//$\bold{r_y}\cdot (Dr*hv)+\bold{s_y}\cdot (Ds*hv)$
+		GetVolumnIntegral2d(VSVolumeIntegralY3dnew + k*Np3d, VSTempVolumeIntegralY3dnew + k*Np3d, &np, &oneI, &np, &one, \
+			Dr3d, Ds3d, &np, hv3d + k*Np3d, &np, &zero, &np, ry3d + k*Np3d, sy3d + k*Np3d);
+
+		Add(VSrhs3dnew + k*Np3d, VSVolumeIntegralX3dnew + k*Np3d, VSVolumeIntegralY3dnew + k*Np3d, Np3d);
+	}
+
+	double *Tempfield2dnew = malloc(Np2d*K2d * sizeof(double));
+	memset(Tempfield2dnew, 0, Np2d*K2d * sizeof(double));
+	double *Tempfield3dnew = malloc(Np3d*K3d * sizeof(double));
+	memset(Tempfield3dnew, 0, Np3d*K3d * sizeof(double));
+	double *tempfmodnew = malloc(Np3d*K3d * sizeof(double));
+	memset(tempfmodnew, 0, Np3d*K3d * sizeof(double));
+
+	double *TempRHS2D = malloc(Np2d*K2d * sizeof(double));
+	memset(TempRHS2D, 0, K2d*Np2d * sizeof(double));
+
+//	memset(RHS, 0, K2d*Np2d * sizeof(double));
+
+//#ifdef _OPENMP
+//#pragma omp parallel for num_threads(DG_THREADS)
+//#endif
+	for (int i = 0; i < K2d; i++) {
+		VerticalColumnIntegralField3d(TempRHS2D + i*Np2d, Np2d, VC2d, Tempfield2dnew + i*Np2d, \
+			Tempfield3dnew + i*Np3d*NLayer, VSrhs3dnew + i*Np3d*NLayer, Jz + i*Np3d*NLayer, \
+			tempfmodnew + i*Np3d*NLayer, InvV3d, Np3d, NLayer);
+		for (int j = 0; j < Np2d; j++)
+		{
+			printf("%16.15f \n", RHS[i*Np2d + j] - TempRHS2D[i*Np2d + j]);
+		}
+	}
+
+	free(VSVolumeIntegralX3dnew);
+	free(VSTempVolumeIntegralX3dnew);
+	free(VSVolumeIntegralY3dnew);
+	free(VSTempVolumeIntegralY3dnew);
+	free(VSrhs3dnew);
+
+	free(Tempfield3dnew);
+	free(Tempfield2dnew);
+	free(tempfmodnew);
+
+	free(TempRHS2D);
+	
 	/*Two dimensional inner edge flux part*/
 
 #ifdef _OPENMP
@@ -391,5 +480,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 	free(InvV2d);
+	free(InvV3d);
 
 }
