@@ -120,11 +120,13 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
 %                 end
 %                 E(:,:,1) = fphys{m}(:,:,1) .* fphys{m}(:,:,14)./fphys{m}(:,:,4);
 %                 G(:,:,1) = fphys{m}(:,:,2) .* fphys{m}(:,:,14)./fphys{m}(:,:,4);
+%                 E(:,:,1) = fphys{m}(:,:,1) .* 10;
+%                 G(:,:,1) = fphys{m}(:,:,2) .* 10;
 %                 H(:,:,1) = zeros(size(E(:,:,1)));
 %                 E(:,:,2) = fphys{m}(:,:,1) .* fphys{m}(:,:,15)./fphys{m}(:,:,4);
 %                 G(:,:,2) = fphys{m}(:,:,2) .* fphys{m}(:,:,15)./fphys{m}(:,:,4);
 %                 H(:,:,2) = fphys{m}(:,:,3) .* fphys{m}(:,:,15)./fphys{m}(:,:,4);
-%                 
+% %                 
 %                 for i = 3:4
 %                     Tempfrhs(:,:,i) = ...
 %                         - obj.rx{m}.*( obj.Dr{m} * E(:,:,i-2) ) ...
@@ -133,7 +135,7 @@ classdef NdgQuadFreeStrongFormAdvSWE3dSolver3d < NdgQuadFreeStrongFormAdvSolver3
 %                         - obj.sy{m}.*( obj.Ds{m} * G(:,:,i-2) ) ...
 %                         - obj.tz{m}.*( obj.Dt{m} * H(:,:,i-2) );
 %                 end
-%                 
+% %                 
 %             end
 %             disp("For the three-dimensional part, the maximum difference is:");
 %             disp(max(max(abs(physClass.frhs{1}(:,:,3) - Tempfrhs(:,:,3)))));

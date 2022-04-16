@@ -19,11 +19,6 @@ void EvaluateVerticalFaceSurfFlux(double *dest, double *fm, double *nx, double *
 		for (int field = 3; field < Nvar+1; field++){
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, fm + field*Ne*Nfp + i, &theta);
 			dest[i + (field-1)*Ne*Nfp] = hu[i] * theta * nx[i] + hv[i] * theta * ny[i];
-			/*
-			if (field == 3) {
-				dest[i + (field - 1)*Ne*Nfp] = 0.0;
-			}
-			*/
 		}
 	}
 }
@@ -40,12 +35,7 @@ void EvaluateHorizontalFaceSurfFlux(double *flux, double *fm, double *nz, double
 			/*Here 2*Ne*Nfp stands for the memory occupied by h and omega*/
 			variable = *(fm + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, H + i, &variable, &theta);
-			*(flux + n*Ne*Nfp + i) = theta*omega[i]*nz[i];
-/*			
-			if (n == 2) {
-				*(flux + n*Ne*Nfp + i) = 0.0;
-			}
-*/			
+			*(flux + n*Ne*Nfp + i) = theta*omega[i]*nz[i];		
 		}
 	}
 }
@@ -60,28 +50,22 @@ void EvaluateHorizontalFaceNumFlux(double *FluxS, double *fm, double *fp, double
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hup + i, &up);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, hvp + i, &vp);
 		omegan = omegam[i] * nz[i];
-//		*(FluxS + i) = 0.5*(um*omegam[i] *(1 + Sign(&omegan)) + up*omegap[i] *(1 - Sign(&omegan))) * nz[i];
-//		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] *(1 + Sign(&omegan)) + vp*omegap[i] *(1 - Sign(&omegan))) * nz[i];
+		*(FluxS + i) = 0.5*(um*omegam[i] *(1 + Sign(&omegan)) + up*omegap[i] *(1 - Sign(&omegan))) * nz[i];
+		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] *(1 + Sign(&omegan)) + vp*omegap[i] *(1 - Sign(&omegan))) * nz[i];
 
-		*(FluxS + i) = up*omegap[i] * nz[i];
-		*(FluxS + Ne*Nfp + i) = vp*omegap[i] * nz[i];
-
+//		*(FluxS + i) = up*omegap[i] * nz[i];
+//		*(FluxS + Ne*Nfp + i) = vp*omegap[i] * nz[i];
 //		*(FluxS + i) = 0.5*(um*omegam[i] + up*omegap[i]) * nz[i];
 //		*(FluxS + Ne*Nfp + i) = 0.5*(vm*omegam[i] + vp*omegap[i]) * nz[i];
 		for (int n = 2; n < Nvar; n++){
 			/*Here 2*Ne*Nfp stands for the memory occupied by h and omega*/
 			variablem = *(fm + 2 * Ne*Nfp + n*Ne*Nfp + i);
 			variablep = *(fp + 2 * Ne*Nfp + n*Ne*Nfp + i);
-//			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, &variablem, &thetam);
+			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, &variablem, &thetam);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, &variablep, &thetap);
 //			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] + thetap*omegap[i]) * nz[i];
 //			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] * (1 + Sign(&omegan)) + thetap*omegap[i] * (1 - Sign(&omegan))) * nz[i];
-			*(FluxS + n*Ne*Nfp + i) = thetap*omegap[i] * nz[i];
-/*
-			if (n == 2) {
-				*(FluxS + n*Ne*Nfp + i) = 0.0;
-			}
-*/			
+			*(FluxS + n*Ne*Nfp + i) = thetap*omegap[i] * nz[i];		
 		}
 	}
 
@@ -110,12 +94,7 @@ void EvaluatePrebalanceVolumeTerm(double *Edest, double *Gdest, double *Hdest, d
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, &variable, &theta);
 			Edest[i + n*Np*K] = hu[i] * theta;
 			Gdest[i + n*Np*K] = hv[i] * theta;
-			Hdest[i + n*Np*K] = omega[i] * theta;
-			
-//			if (n == 2) {
-//			Hdest[i + n*Np*K] = 0.0;
-//			}
-			
+			Hdest[i + n*Np*K] = omega[i] * theta;	
 		}
 	}
 }

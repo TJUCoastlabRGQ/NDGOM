@@ -34,7 +34,7 @@ while( time < ftime )
         fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:2:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:2:end);
         
 %         fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
-%         [ fphys ] = obj.matImposeLimiter( fphys );  
+        [ fphys ] = obj.matImposeLimiter( fphys );  
 %         [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         
 %         disp(max(max(fphys{1}(:,:,2))));
@@ -72,7 +72,7 @@ while( time < ftime )
         
 %         fphys{1}(:,:,2) = fphys{1}(:,:,2) * 0;
         
-%         [ fphys ] = obj.matImposeLimiter( fphys );
+        [ fphys ] = obj.matImposeLimiter( fphys );
 
 %         [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
         

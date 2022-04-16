@@ -36,13 +36,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
         function fphys = matImposeLimiter(obj, fphys)
             for i = 1:obj.Nvar
                 fphys = obj.limiter.matLimit( fphys, obj.varFieldIndex(i) );
-            end
-%             for i = 1:2
-%                 fphys = obj.limiter.matLimit( fphys, obj.varFieldIndex(i) );
-%             end
-%             for i = 4:obj.Nvar
-%                 fphys = obj.limiter.matLimit( fphys, obj.varFieldIndex(i) );
-%             end            
+            end        
         end
     end
     

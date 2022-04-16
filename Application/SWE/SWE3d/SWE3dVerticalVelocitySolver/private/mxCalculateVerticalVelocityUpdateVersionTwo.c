@@ -211,12 +211,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int Npz = (int)mxGetScalar(TempNpz);
 	mxArray *TempVint = mxGetField(prhs[10], 0, "Vint");
 	double *Vint = mxGetPr(TempVint);
-	mxArray *TempV3d = mxGetField(prhs[10], 0, "V");
-	double *V3d = mxGetPr(TempV3d);
-
-	double *InvV3d = malloc(Np3d*Np3d*sizeof(double));
-	memcpy(InvV3d, V3d, Np3d*Np3d*sizeof(double));
-	MatrixInverse(InvV3d, (ptrdiff_t)Np3d);
 
 	double gra = mxGetScalar(prhs[11]);
 
@@ -252,11 +246,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(UpdatedVSIEFluxS3d, 0, IENfp3d*IENe3d*sizeof(double));
 	memset(UpdatedVSERHS3d, 0, Np3d*K3d*Nface*sizeof(double));
 
-	ptrdiff_t np = Np3d;
+	ptrdiff_t np = (ptrdiff_t)Np3d;
 	ptrdiff_t oneI = 1;
 	double one = 1.0, zero = 0.0;
 
-	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -269,6 +262,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			Dr3d, Ds3d, &np, hv3d + k*Np3d, &np, &zero, &np, ry3d + k*Np3d, sy3d + k*Np3d);
 
 		Add(UpdatedVSrhs3d + k*Np3d, UpdatedVSVolumeIntegralX3d + k*Np3d, UpdatedVSVolumeIntegralY3d + k*Np3d, Np3d);
+		
 	}
 
 #ifdef _OPENMP
@@ -292,7 +286,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (int e = 0; e < IENe2d; e++){
 		VerticalFaceColumnIntegral(UpdatedVSIEFluxS2d + e*IENfp2d, UpdatedVSIEFluxS3d + e*NLayer*IENfp3d, UpdatedVSIEfmod + e*IENfp3d, InvV2d, (ptrdiff_t)IENfp3d, IEJz3d + e*NLayer*IENfp3d, NLayer, V1d, (ptrdiff_t)IENfp2d, (int)(*(IEFToF3d + e*NLayer * 2)));
 	}
-
 
 	double *BEhuM3d = UpdatedVSBEfm3d, *BEhvM3d = UpdatedVSBEfm3d + BENe3d * BENfp3d, \
 		*BEhM3d = UpdatedVSBEfm3d + 2 * BENe3d * BENfp3d;
@@ -359,28 +352,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		MultiEdgeContributionByLiftOperator(UpdatedVSERHS3d + k*Np3d, UpdatedVSTempFacialIntegral3d + k*Np3d, &np, &oneI, &np, \
 			&one, invM3d, &np, &np, &zero, &np, J3d + k*Np3d, Np3d);
 	}
-	/*
-	double *Tempfield2dnew = malloc(Np2d*K2d * sizeof(double));
-	memset(Tempfield2dnew, 0, Np2d*K2d * sizeof(double));
-	double *Tempfield3dnew = malloc(Np3d*K3d * sizeof(double));
-	memset(Tempfield3dnew, 0, Np3d*K3d * sizeof(double));
-	double *fmodnew = malloc(Np3d*K3d * sizeof(double));
-	memset(fmodnew, 0, Np3d*K3d * sizeof(double));
-
-	memset(UpdatedVSrhs2d, 0, Np2d*K2d * sizeof(double));
-
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
-	for (int i = 0; i < K2d; i++) {
-		VerticalColumnIntegralField3d(UpdatedVSrhs2d + i*Np2d, Np2d, VC2d, Tempfield2dnew + i*Np2d, \
-			Tempfield3dnew + i*Np3d*NLayer, UpdatedVSrhs3d + i*Np3d*NLayer, Jz + i*Np3d*NLayer, \
-			fmodnew + i*Np3d*NLayer, InvV3d, Np3d, NLayer);
-	}
-	free(Tempfield3dnew);
-	free(Tempfield2dnew);
-	free(fmodnew);
-	*/
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -401,8 +372,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(UpdatedVSIEFluxP2d, 0, IENfp2d*IENe2d*sizeof(double));
 	memset(UpdatedVSERHS2d, 0, Np2d*K2d*Nface*sizeof(double));
 
-	
-	np = Np2d;
+	np = (ptrdiff_t)Np2d;
 	oneI = 1;
 	one = 1.0, zero = 0.0;
 
@@ -528,6 +498,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *VSTempVerticalVelocity = malloc(Np3d*K3d * sizeof(double));
 	memset(VSTempVerticalVelocity, 0, Np3d*K3d * sizeof(double));
 
+	np = (ptrdiff_t)Np3d;
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -551,5 +523,4 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	free(VSBotVertVelocity);
 	free(VSTempVerticalVelocity);
 	free(InvV2d);
-	free(InvV3d);
 }

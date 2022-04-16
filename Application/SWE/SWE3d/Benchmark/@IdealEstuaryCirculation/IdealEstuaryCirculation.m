@@ -6,9 +6,10 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
         ChLength = 100000
         
         ChWidth = 2000
-        
-        H0 = 50
-        
+%         ChLength = 1500
+%         
+%         ChWidth = 1000
+                
         finalTime = 16*24*3600
         
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@IdealEstuaryCirculation/gotmturb.nml'])
@@ -45,10 +46,12 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
                 mesh2d = obj.mesh2d(m);
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
-                fphys2d{m}(:,:,1) = -5/obj.ChLength*mesh2d.x + 7.5 + sin(pi*mesh2d.x/obj.ChLength);
+%                 fphys2d{m}(:,:,1) = -5/obj.ChLength*mesh2d.x + 7.5 + sin(pi*mesh2d.x/obj.ChLength);
+                fphys2d{m}(:,:,1) = -5/obj.ChLength*mesh2d.x + 7.5;
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
                 %> For water depth
-                fphys{m}(:,:,4) = -5/obj.ChLength*mesh3d.x + 7.5 + sin(pi*mesh3d.x/obj.ChLength);
+%                 fphys{m}(:,:,4) = -5/obj.ChLength*mesh3d.x + 7.5 + sin(pi*mesh3d.x/obj.ChLength);
+                fphys{m}(:,:,4) = -5/obj.ChLength*mesh3d.x + 7.5;
                 %> For temperature
                 fphys{m}(:,:,14) = 10*fphys{m}(:,:,4);
                 %> For salinity
@@ -56,8 +59,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
                 fphys{m}(:,Index,15) = 30 * fphys{m}(:,Index,4);
                 Index = all(mesh3d.x>=-20000 & mesh3d.x<=30000);
                 fphys{m}(:,Index,15) = (-30/50000*mesh3d.x(:,Index) + 90/5) .* fphys{m}(:,Index,4);
-%                 fphys2d{m}(:, :, 4) = -1 * fphys2d{m}(:,:,1);
-                fphys2d{m}(:, :, 4) = 5/obj.ChLength*mesh2d.x - 7.5;
+                fphys2d{m}(:, :, 4) = -1 * fphys2d{m}(:,:,1);
+%                 fphys2d{m}(:, :, 4) = 5/obj.ChLength*mesh2d.x - 7.5;
             end
         end
         
@@ -127,16 +130,16 @@ end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
 
-% bctype = [ ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.ClampedVel, ...
-%     enumBoundaryCondition.ClampedVel ];
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.ClampedVel ];
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh( N, ...
     [ -obj.ChLength/2, obj.ChLength/2 ], 1*[ -obj.ChWidth/2, obj.ChWidth/2 ], ceil(obj.ChLength/M), 1*ceil(obj.ChWidth/M), bctype);
