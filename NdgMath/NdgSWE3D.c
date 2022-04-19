@@ -14,8 +14,8 @@ void EvaluateVerticalFaceSurfFlux(double *dest, double *fm, double *nx, double *
 	for (int i = 0; i < Nfp; i++){
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hu + i, &u);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hv + i, &v);
-		dest[i] = (hu[i] * u + 0.5 * (*gra)*pow(h[i],2))*nx[i] + hu[i] * v*ny[i];
-		dest[i + Ne*Nfp] = hu[i] * v*nx[i] + (hv[i] * v + 0.5 * (*gra) * pow(h[i], 2))*ny[i];
+		dest[i] = (hu[i] * u + 0.5 * (*gra)*pow(h[i],2.0))*nx[i] + hu[i] * v*ny[i];
+		dest[i + Ne*Nfp] = hu[i] * v*nx[i] + (hv[i] * v + 0.5 * (*gra) * pow(h[i], 2.0))*ny[i];
 		for (int field = 3; field < Nvar+1; field++){
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, fm + field*Ne*Nfp + i, &theta);
 			dest[i + (field-1)*Ne*Nfp] = hu[i] * theta * nx[i] + hv[i] * theta * ny[i];
@@ -64,8 +64,8 @@ void EvaluateHorizontalFaceNumFlux(double *FluxS, double *fm, double *fp, double
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hm + i, &variablem, &thetam);
 			EvaluatePhysicalVariableByDepthThreshold(Hcrit, Hp + i, &variablep, &thetap);
 //			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] + thetap*omegap[i]) * nz[i];
-//			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] * (1 + Sign(&omegan)) + thetap*omegap[i] * (1 - Sign(&omegan))) * nz[i];
-			*(FluxS + n*Ne*Nfp + i) = thetap*omegap[i] * nz[i];		
+			*(FluxS + n*Ne*Nfp + i) = 0.5*(thetam*omegam[i] * (1 + Sign(&omegan)) + thetap*omegap[i] * (1 - Sign(&omegan))) * nz[i];
+//			*(FluxS + n*Ne*Nfp + i) = thetap*omegap[i] * nz[i];		
 		}
 	}
 
@@ -81,11 +81,11 @@ void EvaluatePrebalanceVolumeTerm(double *Edest, double *Gdest, double *Hdest, d
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hu + i, &u);
 		EvaluatePhysicalVariableByDepthThreshold(Hcrit, h + i, hv + i, &v);
 		/*NOTE THAT: THE WET AND DRY NEED TO BE TACKLED HERE*/
-		Edest[i] = hu[i] * u + 0.5 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
+		Edest[i] = hu[i] * u + 0.5 * (*gra)*(pow(h[i], 2.0) - pow(z[i], 2.0));
 		Gdest[i] = hu[i] * v;
 		Hdest[i] = u*omega[i];
 		Edest[i + Np*K] = hu[i] * v;
-		Gdest[i + Np*K] = hv[i] * v + 0.5 * (*gra)*(pow(h[i], 2) - pow(z[i], 2));
+		Gdest[i + Np*K] = hv[i] * v + 0.5 * (*gra)*(pow(h[i], 2.0) - pow(z[i], 2.0));
 		Hdest[i + Np*K] = v*omega[i];
 		/*If temperature, salt, sediment or other passive transport material is included, the following part is used to calculate
 		the volume term corresponding to these terms*/
@@ -193,6 +193,7 @@ void VerticalFaceColumnIntegral(double *dest, double *source, double *fmod, doub
 	}
 	dgemm("N", "N", &LNfp2d, &one, &LNfp2d, &alpha, V1d, &LNfp2d, Tempdest, &LNfp2d, &beta, dest, &LNfp2d);
 	DotDivideByConstant(dest, dest, sqrt(2.0) / 2, LNfp2d);
+    //The order of the facial point for the 2d face is not the same with that of the 3d face
 	if (FToF >= 3) Flip(dest, LNfp2d);
 	
 	free(TempSource);
