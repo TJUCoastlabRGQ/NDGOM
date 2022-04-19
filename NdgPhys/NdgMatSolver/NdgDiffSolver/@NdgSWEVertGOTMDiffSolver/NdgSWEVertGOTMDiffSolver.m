@@ -83,7 +83,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             obj.uo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.vo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.nvh = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
-            obj.BotBoundaryTreatType = 'Explicit';
+            obj.BotBoundaryTreatType = 'Implicit';
         end
         
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)

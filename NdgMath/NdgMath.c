@@ -309,13 +309,13 @@ void ReverseValue(double *dest, double *source, int size){
 		dest[i] = 1.0 / source[i];
 }
 
-int Sign(double *input) {
+double Sign(double *input) {
 	if ((*input) > 0)
-		return 1;
+		return 1.0;
 	else if ((*input) < 0)
-		return -1;
+		return -1.0;
 	else
-		return 0;
+		return 0.0;
 }
 
 void Sort(double *dest, int Num){

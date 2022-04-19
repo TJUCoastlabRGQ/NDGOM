@@ -57,7 +57,7 @@ void MultiplyByConstant(double *, double *, double, int);
 
 void DotCriticalDivide(double *, double *, double *, double *, int);
 
-int Sign(double *);
+double Sign(double *);
 
 void Sort(double *, int);
 

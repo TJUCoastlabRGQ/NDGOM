@@ -483,6 +483,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 	for (int k = 0; k < K2d; k++){
 		VerticalIntegralFromBottom(VerticalVelocity + k*NLayer*Np3d, UpdatedVSrhs3d + k*NLayer*Np3d, Jz + k*NLayer*Np3d, Updatedfmod + k*Np3d, NLayer, (ptrdiff_t)Np3d, InvV3d, Np2d, Npz, Vint);
+		memset(VerticalVelocity + k*NLayer*Np3d + Np3d - Np2d, 0, Np2d*sizeof(double));
 	}
 
 
