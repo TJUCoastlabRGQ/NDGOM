@@ -102,9 +102,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 /*Calculate the slope parameter first*/
                 double Lambda;
                 if (fphys[k*Np + Nph * (Npz - 1) + i] > amax)
-                    Lambda = (amax - avar[k]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avar[k] + pow(10,-10) );
+                    //Lambda = (amax - avar[k]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avar[k] + pow(10,-10) );
+					Lambda = (amax - avar[k]) / (fphys[k*Np + Nph*(Npz - 1) + i] - avar[k]);
                 else if (fphys[k*Np + Nph * (Npz - 1) + i] < amin)
-                    Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10));
+                    //Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10));
+					Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i]);
                 else
                     Lambda = 1;
                 /*Limit the value in vertical direction*/
@@ -132,9 +134,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             double Lambda = 1;
             for (int i=0;i<Np;i++){
                 if ( fphys[k*Np + i] > amax )
-                    Lambda = min( Lambda, ( amax - avar[k] )/( fphys[k*Np + i] - avar[k] + pow(10, -10)) );
+                //    Lambda = min( Lambda, ( amax - avar[k] )/( fphys[k*Np + i] - avar[k] + pow(10, -10)) );
+					Lambda = min(Lambda, (amax - avar[k]) / (fphys[k*Np + i] - avar[k]));
                 else if(fphys[k*Np + i] < amin)
-                    Lambda = min( Lambda, ( avar[k] - amin )/( avar[k] - fphys[k*Np + i] + pow(10, -10)) );
+                //    Lambda = min( Lambda, ( avar[k] - amin )/( avar[k] - fphys[k*Np + i] + pow(10, -10)) );
+					Lambda = min(Lambda, (avar[k] - amin) / (avar[k] - fphys[k*Np + i]));
             }
             Lambda = max( 0, Lambda );
             for(int i=0; i<Np;i++){

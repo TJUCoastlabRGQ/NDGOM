@@ -52,7 +52,8 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
             warning('off');
             [ obj.frhs{1}(:,:,1), obj.frhs{1}(:,:,2) ] = mxCalculateBaroclinicTerm( obj.frhs{1}(:,:,1), obj.frhs{1}(:,:,2), ...
                 struct(obj.meshUnion.InnerEdge), struct(obj.meshUnion.BoundaryEdge), struct(obj.meshUnion.BottomEdge), ...
-                struct(obj.meshUnion.cell), struct(obj.meshUnion), fphys{1}(:,:,4), fphys{1}(:,:,13), obj.gra, obj.rho0 );
+                struct(obj.meshUnion.cell), struct(obj.meshUnion), fphys{1}(:,:,4), fphys{1}(:,:,13), obj.gra, obj.rho0, char(obj.getOption('EosType')),...
+                obj.fext3d{1}, obj.hcrit, int8(obj.meshUnion.BoundaryEdge.ftype), obj.S0, obj.T0, obj.alphaT, obj.betaS);
             warning('on');
         end
         

@@ -36,11 +36,13 @@ double *BaroclinicPDPX = NULL, *BaroclinicPDPY = NULL, *BaroclinicPRHOPX = NULL,
 *BaroclinicBotEfm = NULL, *BaroclinicBotEfp = NULL, *BaroclinicBotEFluxM = NULL, *BaroclinicBotEFluxP = NULL, \
 *BaroclinicBotEFluxS = NULL, *BaroclinicIEfm = NULL, *BaroclinicIEfp = NULL, *BaroclinicIEfluxM = NULL, \
 *BaroclinicIEfluxP = NULL, *BaroclinicIEfluxS = NULL, *BaroclinicERHS = NULL, *BaroclinicTempFacialIntegral = NULL,\
-*BaroclinicTempVolumeIntegral = NULL;
+*BaroclinicTempVolumeIntegral = NULL, *BaroclinicBEfm = NULL, *BaroclinicBEfp = NULL, *BaroclinicBEfluxM = NULL, \
+*BaroclinicBEfluxS = NULL;
 
 char *BaroclinicPartInitialized = "False";
 
-void BaroclinicPartMemoryAllocation(int Np, int K, int K2d, int BotENe, int BotENfp, int IENe, int IENfp, int Nface) {
+void BaroclinicPartMemoryAllocation(int Np, int K, int K2d, int BotENe, int BotENfp, int IENe, \
+	int IENfp, int Nface,int BENe, int BENfp) {
 	BaroclinicPDPX = malloc(Np*K * sizeof(double));
 	MemoryAllocationCheck(BaroclinicPDPX, Np*K * sizeof(double));
 	BaroclinicPDPY = malloc(Np*K * sizeof(double));
@@ -91,6 +93,14 @@ void BaroclinicPartMemoryAllocation(int Np, int K, int K2d, int BotENe, int BotE
 	MemoryAllocationCheck(BaroclinicERHS, 4 * Np*K*(Nface - 2) * sizeof(double));
 	BaroclinicTempVolumeIntegral = malloc(Np*K * sizeof(double));
 	MemoryAllocationCheck(BaroclinicTempVolumeIntegral, Np*K * sizeof(double));
+	BaroclinicBEfm = malloc(BENe*BENfp * 2 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBEfm, BENe*BENfp * 2 * sizeof(double));
+	BaroclinicBEfp = malloc(BENe*BENfp * 3 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBEfp, BENe*BENfp * 3 * sizeof(double));
+	BaroclinicBEfluxM = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBEfluxM, BENe*BENfp * 4 * sizeof(double));
+	BaroclinicBEfluxS = malloc(BENe*BENfp * 4 * sizeof(double));
+	MemoryAllocationCheck(BaroclinicBEfluxS, BENe*BENfp * 4 * sizeof(double));
 	BaroclinicPartInitialized = "True";
 }
 
@@ -121,6 +131,10 @@ void BaroclinicPartMemoryDeAllocation() {
 	free(BaroclinicERHS), BaroclinicERHS = NULL;
 	free(BaroclinicTempFacialIntegral), BaroclinicTempFacialIntegral = NULL;
 	free(BaroclinicTempVolumeIntegral), BaroclinicTempVolumeIntegral = NULL;
+	free(BaroclinicBEfm), BaroclinicBEfm = NULL;
+	free(BaroclinicBEfp), BaroclinicBEfp = NULL;
+	free(BaroclinicBEfluxM), BaroclinicBEfluxM = NULL;
+	free(BaroclinicBEfluxS), BaroclinicBEfluxS = NULL;
 	BaroclinicPartInitialized = "False";
 }
 

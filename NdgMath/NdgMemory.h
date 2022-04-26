@@ -8,7 +8,7 @@ typedef enum {
 	Three = 3
 } NdgMeshType;
 
-void BaroclinicPartMemoryAllocation(int , int , int , int , int , int , int , int );
+void BaroclinicPartMemoryAllocation(int , int , int , int , int , int , int , int, int, int);
 
 void BaroclinicPartMemoryDeAllocation();
 

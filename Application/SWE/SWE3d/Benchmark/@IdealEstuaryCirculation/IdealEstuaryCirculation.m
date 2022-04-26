@@ -92,6 +92,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             obj.fext3d{1}(:,:,4) = ht3d;
 %             obj.fext3d{1}(:,:,4) = fm(:,:,14);
             obj.fext3d{1}(:,:,5) = hs3d;
+            
+            obj.fext3d{1}(:,:,3) = fm(:,:,4);
             %> For the 2d part
             Index = ( (obj.meshUnion(1).mesh2d.BoundaryEdge.ftype)' == enumBoundaryCondition.ClampedVel & all(obj.meshUnion(1).mesh2d.BoundaryEdge.xb == -obj.ChLength/2));
             hu2d(:,Index) = Momentum;
@@ -102,7 +104,7 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
         end
         
         function [ option ] = setOption( obj, option )
-            outputIntervalNum = 800;
+            outputIntervalNum = 8000;
             option('startTime') = 0.0;
             option('finalTime') = obj.finalTime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
