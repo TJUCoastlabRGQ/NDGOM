@@ -27,8 +27,7 @@
  * 		double[Np x K] limfphys the limited physical field.
  */
 
-void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
-    
+void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {  
     /* get inputs */
     double *fphys = mxGetPr(prhs[0]);
     double *avar = mxGetPr(prhs[1]);
@@ -40,13 +39,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     /*This is the one-dimensional VandMande matrix*/
     double *OV1d = mxGetPr(prhs[6]);
     size_t Np = mxGetM(prhs[0]);
-    size_t K = mxGetN(prhs[0]);
-
-//	double *Tempfphys = malloc(Np*K * sizeof(double));
-//	memcpy(Tempfphys, fphys, Np*K * sizeof(double));
-    
-    size_t Nface = mxGetM(prhs[2]); // number of faces of the computation cell
-    
+    size_t K = mxGetN(prhs[0]); 
+	/*number of faces of the computation cell*/
+    size_t Nface = mxGetM(prhs[2]); 
     /* allocate output array */
     plhs[0] = mxCreateDoubleMatrix(Np, K, mxREAL);
     double *limfphys = mxGetPr(plhs[0]);
@@ -57,23 +52,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
     ptrdiff_t Np_ptrdiff = Npz;
     ptrdiff_t Nq_ptrdiff = Npz;
     char *tran = "N";
-
+	int k, f, i, j;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(f,i,j) if(K>)
 #endif
-    for (int k = 0; k < K; k++) {
+    for (k = 0; k < K; k++) {
         /*This part is used to determine the maxmum and minimum allowable value of the studied cell with index k */
         double amax = -1*pow(10,10), amin = pow(10,10);
-        for (int f = 0; f < Nface; f++){
+        for (f = 0; f < Nface; f++){
             /*Only the adjacent cell is considered, and the average value of the studied cell is not included*/
             if ((int)EToE[k*Nface + f]-1 != k){
-                amax = max(amax, avar[(mwIndex)EToE[k*Nface + f]-1]);
-                amin = min(amin, avar[(mwIndex)EToE[k*Nface + f]-1]);
+                amax = max(amax, avar[(int)EToE[k*Nface + f]-1]);
+                amin = min(amin, avar[(int)EToE[k*Nface + f]-1]);
             }
         }
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         int flag = 0;
-        for (int i = 0; i < Np; i++){
+        for ( i = 0; i < Np; i++){
             if (fphys[k*Np + i] > amax || fphys[k*Np + i] < amin){
                 flag = 1;
                 break;
@@ -87,8 +82,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             double *avL = (double*)malloc(sizeof(double) * Nph), \
                     *tempValue = (double*)malloc(sizeof(double) * Npz), \
                     *fmod = (double*)malloc(sizeof(double)*Npz);
-            for (int i = 0; i < Nph; i++){
-                for (int j = 0; j < Npz; j++){
+            for (i = 0; i < Nph; i++){
+                for (j = 0; j < Npz; j++){
                     //Fetch the original value in each line and store them in tempValue, from top to down
                     *(tempValue+j) = fphys[k*Np + Nph*(Npz - 1) + i - j*Nph];
 					//*(tempValue + j) = fphys[k*Np + i - j*Nph];
@@ -100,17 +95,18 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 *( avL + i ) = fmod[0] * OV1d[0];
                 //Next limit the corresponding date
                 /*Calculate the slope parameter first*/
-                double Lambda;
+                double Lambda = 1.0;
                 if (fphys[k*Np + Nph * (Npz - 1) + i] > amax)
-                    //Lambda = (amax - avar[k]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avar[k] + pow(10,-10) );
-					Lambda = (amax - avar[k]) / (fphys[k*Np + Nph*(Npz - 1) + i] - avar[k]);
+                    //Lambda = min(Lambda, (amax - avL[i]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avL[i] + pow(10,-10.0) ));
+					Lambda = (amax - avL[i]) / (fphys[k*Np + Nph*(Npz - 1) + i] - avL[i]);
                 else if (fphys[k*Np + Nph * (Npz - 1) + i] < amin)
-                    //Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10));
-					Lambda = (avar[k] - amin) / (avar[k] - fphys[k*Np + Nph*(Npz - 1) + i]);
+                    //Lambda = min(Lambda, (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10.0)) );
+					Lambda = (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i]);
                 else
-                    Lambda = 1;
+                    Lambda = 1.0;
                 /*Limit the value in vertical direction*/
-                for (int j = 0; j < Npz; j++){
+				Lambda = max(0, Lambda);
+                for (j = 0; j < Npz; j++){
                     fphys[k*Np + Nph*(Npz - 1) + i - j*Nph] = Lambda * fphys[k*Np + Nph*(Npz - 1) + i - j*Nph]\
                             + (1-Lambda) * avL[i];
                 }
@@ -122,7 +118,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         /*Next to limit the whole computation cell follows Cockburn and Shu*/
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         flag = 0;
-        for (int i = 0; i < Np; i++){
+        for (i = 0; i < Np; i++){
             if (fphys[k*Np + i] > amax || fphys[k*Np + i] < amin){
                 flag = 1;
                 break;
@@ -131,8 +127,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         if (flag == 0)
             continue;
         else{
-            double Lambda = 1;
-            for (int i=0;i<Np;i++){
+            double Lambda = 1.0;
+            for (i=0;i<Np;i++){
                 if ( fphys[k*Np + i] > amax )
                 //    Lambda = min( Lambda, ( amax - avar[k] )/( fphys[k*Np + i] - avar[k] + pow(10, -10)) );
 					Lambda = min(Lambda, (amax - avar[k]) / (fphys[k*Np + i] - avar[k]));
@@ -140,35 +136,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 //    Lambda = min( Lambda, ( avar[k] - amin )/( avar[k] - fphys[k*Np + i] + pow(10, -10)) );
 					Lambda = min(Lambda, (avar[k] - amin) / (avar[k] - fphys[k*Np + i]));
             }
-            Lambda = max( 0, Lambda );
-            for(int i=0; i<Np;i++){
+            Lambda = max( 0.0, Lambda );
+            for(i=0; i<Np;i++){
                 fphys[k*Np + i] = Lambda * fphys[k*Np + i] + (1 - Lambda)*avar[k];
             }
         }
     }
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif
-    /*Copy the limited value to the output*/
-    for(int i=0; i<Np*K; i++)
-        limfphys[i] = fphys[i];
-    // For elements adjacent to the boundary, we don't alter the value at all, added on 20220203 by RGQ
-	/*
-	for (int k = 0; k < K; k++) {
-        if ((int)EToE[Nface*k + Nface -2 ] == (k + 1)) {
-            memcpy(limfphys + k*Np, Tempfphys + k*Np, Np * sizeof(double));
-        }
-		*/
-        /*
-		for (int f = 0; f < Nface; f++) {
-			if ((int)EToE[Nface*k + f] == (k + 1)) {
-				memcpy(limfphys + k*Np, Tempfphys + k*Np, Np * sizeof(double));
-				break;
-			}
-		}
-         */
-//	}
-	
 
-//	free(Tempfphys);
+
+    /*Copy the limited value to the output*/
+    for(i=0; i<Np*K; i++)
+        limfphys[i] = fphys[i];
 }

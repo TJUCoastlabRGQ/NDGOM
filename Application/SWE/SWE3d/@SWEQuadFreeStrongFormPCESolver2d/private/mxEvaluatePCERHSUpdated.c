@@ -210,11 +210,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	ptrdiff_t np = Np2d, oneI = 1;
 	double one = 1.0, zero = 0.0;
+
+	int k, e, face;
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>1000)
 #endif
-	for (int k = 0; k < K2d; k++){
+	for (k = 0; k < K2d; k++){
 		//$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$
 		GetVolumnIntegral2d(PCEUpdatedVolumeIntegralX + k*Np2d, PCEUpdatedTempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
 			Dr2d, Ds2d, &np, hu2d + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
@@ -228,9 +230,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Two dimensional inner edge flux part*/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(IENe2d>1000)
 #endif
-	for (int e = 0; e < IENe2d; e++){
+	for (e = 0; e < IENe2d; e++){
 		FetchInnerEdgeFacialValue(IEhM2d + e*IENfp2d, IEhP2d + e*IENfp2d, h2d, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
 		FetchInnerEdgeFacialValue(IEhuM2d + e*IENfp2d, IEhuP2d + e*IENfp2d, hu2d, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
 		FetchInnerEdgeFacialValue(IEhvM2d + e*IENfp2d, IEhvP2d + e*IENfp2d, hv2d, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
@@ -251,9 +253,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*The following void pointer is added on 08/25/2021 to accomadate the usage of function ImposeBoundaryCondition*/
 	double *varFieldIndex = NULL;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(BENe2d>500)
 #endif
-	for (int e = 0; e < BENe2d; e++){
+	for (e = 0; e < BENe2d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype2d[e];  // boundary condition
 		FetchBoundaryEdgeFacialValue(BEhM2d + e*BENfp2d, h2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
 		FetchBoundaryEdgeFacialValue(BEhuM2d + e*BENfp2d, hu2d, BEFToE2d + 2 * e, BEFToN12d + e*BENfp2d, Np2d, BENfp2d);
@@ -275,9 +277,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //	fp2 = fopen("D:\\Sharewithpc\\研究工作\\20220404\\IEPurePCE.txt", "a");
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(IENe3d>500)
 #endif
-	for (int e = 0; e < IENe3d; e++){
+	for (e = 0; e < IENe3d; e++){
 		FetchInnerEdgeFacialValue(IEhM3d + e*IENfp3d, IEhP3d + e*IENfp3d, h3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
 		FetchInnerEdgeFacialValue(IEhuM3d + e*IENfp3d, IEhuP3d + e*IENfp3d, hu3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
 		FetchInnerEdgeFacialValue(IEhvM3d + e*IENfp3d, IEhvP3d + e*IENfp3d, hv3d, IEFToE3d + 2 * e, IEFToN13d + e*IENfp3d, IEFToN23d + e*IENfp3d, Np3d, IENfp3d);
@@ -292,9 +294,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	//void VerticalFaceColumnIntegral(double *dest, double *source, double *fmod, double *InvV2d, int Nfp2d, double *Jz, int Nlayer, double *V1d, int LNfp2d, int FToF)
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(IENe2d>200)
 #endif
-	for (int e = 0; e < IENe2d; e++){
+	for (e = 0; e < IENe2d; e++){
 		VerticalFaceColumnIntegral(PCEUpdatedIEFluxS2d + e*IENfp2d, PCEUpdatedIEFluxS3d + e*NLayer*IENfp3d, PCEUpdatedIEfmod + e*IENfp3d, InvV2d, (ptrdiff_t)IENfp3d, IEJz3d + e*NLayer*IENfp3d, NLayer, V1d, (ptrdiff_t)IENfp2d, (int)(*(IEFToF3d + e*NLayer * 2)));
 	}
 
@@ -311,9 +313,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*fetch boundary edge value h, hu, hv and z, apply hydrostatic construction at the boundary and compute the numerical flux*/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(BENe3d>500)
 #endif
-	for (int e = 0; e < BENe3d; e++){
+	for (e = 0; e < BENe3d; e++){
 		NdgEdgeType type = (NdgEdgeType)ftype3d[e];  // boundary condition
 		FetchBoundaryEdgeFacialValue(BEhuM3d + e*BENfp3d, hu3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
 		FetchBoundaryEdgeFacialValue(BEhvM3d + e*BENfp3d, hv3d, BEFToE3d + 2 * e, BEFToN13d + e*BENfp3d, Np3d, BENfp3d);
@@ -340,40 +342,40 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(PCEUpdatedBEfmod, 0, BENe2d*BENfp3d*sizeof(double));
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(BENe2d>200)
 #endif
-	for (int e = 0; e < BENe2d; e++){
+	for (e = 0; e < BENe2d; e++){
 		VerticalFaceColumnIntegral(PCEUpdatedBEFluxS2d + e*BENfp2d, PCEUpdatedBEFluxS3d + e*NLayer*BENfp3d, PCEUpdatedBEfmod + e*BENfp3d, InvV2d, (ptrdiff_t)BENfp3d, BEJz3d + e*NLayer*BENfp3d, NLayer, V1d, (ptrdiff_t)BENfp2d, (int)(*(BEFToF3d + e*NLayer * 2)));
 	}
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(IENe2d>500)
 #endif
-	for (int e = 0; e < IENe2d; e++){
+	for (e = 0; e < IENe2d; e++){
 		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, PCEUpdatedIEFluxM2d, PCEUpdatedIEFluxP2d, PCEUpdatedIEFluxS2d, IEJs2d, IEMb2d, PCEUpdatedERHS2d);
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(BENe2d>500)
 #endif    
-	for (int e = 0; e < BENe2d; e++){
+	for (e = 0; e < BENe2d; e++){
 		StrongFormBoundaryEdgeRHS(e, BEFToE2d, BEFToF2d, Np2d, K2d, BENfp2d, BEFToN12d, PCEUpdatedBEFluxM2d, PCEUpdatedBEFluxS2d, BEJs2d, BEMb2d, PCEUpdatedERHS2d);
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(face) if(K2d>1000)
 #endif
-    for (int k=0; k < K2d; k++){
-		for (int face = 1; face<Nface; face++){
+    for (k=0; k < K2d; k++){
+		for (face = 1; face<Nface; face++){
 			Add(PCEUpdatedERHS2d + k*Np2d, PCEUpdatedERHS2d + k*Np2d, PCEUpdatedERHS2d + face*Np2d*K2d + k*Np2d, Np2d);
 		}
 	}
 
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>400)
 #endif
-	for (int k = 0; k < K2d; k++) {
+	for (k = 0; k < K2d; k++) {
 		MultiEdgeContributionByLiftOperator(PCEUpdatedERHS2d + k*Np2d, PCEUpdatedPCETempFacialIntegral + k*Np2d, &np, &oneI, &np, \
 			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
 	}
@@ -381,9 +383,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Add face integral and volume integral up to form the right hand side corresponding to the discretization of the depth-averaged part*/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>1000)
 #endif
-	for (int k = 0; k < K2d; k++){
+	for (k = 0; k < K2d; k++){
 //		memset(PCEUpdatedERHS2d, 0.0, K2d*Np2d * sizeof(double));
 		Minus(RHS + k*Np2d, PCEUpdatedERHS2d + k*Np2d, RHS + k*Np2d, Np2d);
 	}

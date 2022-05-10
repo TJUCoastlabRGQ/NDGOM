@@ -186,11 +186,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(IEFluxP, 0, IENfp*IENe*Nvar*sizeof(double));
 	memset(IEFluxS, 0, IENfp*IENe*Nvar*sizeof(double));
     
+	int face, field;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(IENe>1000)
 #endif
-	for (int face = 0; face < IENe; face++){
- //       printf("The order of thread is:%d\n",omp_get_thread_num());  // This is not thread-safe, can not be used!!
+	for ( face = 0; face < IENe; face++){
 		/*Fetch variable IEfm and IEfp first*/
 		FetchInnerEdgeFacialValue(hM + face*IENfp, hP + face*IENfp, h, IEFToE + 2 * face, \
 			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
@@ -200,7 +200,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		here 1 stands for the space occupied by water depth h.*/
-		for (int field = 2; field < Nvar; field++){
+		for ( field = 2; field < Nvar; field++){
 			FetchInnerEdgeFacialValue(IEfm + (field + 1)*IENe*IENfp + face*IENfp, \
 				IEfp + (field + 1)*IENe*IENfp + face*IENfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
 				IEFToE + 2 * face, IEFToN1 + IENfp*face, IEFToN2 + IENfp*face, Np, IENfp);
@@ -213,12 +213,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 /*Allocate memory for contribution to RHS due to inner edge facial integral, and
  calculate contribution to RHS due to inner edge facial integral in strong form manner*/
+
 	memset(ERHS, 0, Np*K*Nvar*Nface*sizeof(double));
+
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(IENe>1000)
 #endif
-    for (int face = 0; face < IENe; face++){
-        for (int field = 0; field < Nvar; field++){
+    for (face = 0; face < IENe; face++){
+        for (field = 0; field < Nvar; field++){
 			StrongFormInnerEdgeRHS(face, IEFToE, IEFToF, Np, K, IENfp, IEFToN1, IEFToN2, IEFluxM + field*IENe*IENfp,\
 				IEFluxP + field*IENe*IENfp, IEFluxS + field*IENe*IENfp, IEJs, IEMb, ERHS + field*Np*K*Nface);
 		}
@@ -238,9 +240,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	/*Fetch variable BEfm and BEfp first, then impose boundary condition and conduct hydrostatic reconstruction.
 	Finally, calculate local flux term, adjacent flux term and numerical flux term*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BENe>1000)
 #endif
-	for (int face = 0; face < BENe; face++){
+	for (face = 0; face < BENe; face++){
 		NdgEdgeType type = (NdgEdgeType)ftype[face];  // boundary condition
 		FetchBoundaryEdgeFacialValue(huM + face*BENfp, hu, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 		FetchBoundaryEdgeFacialValue(hvM + face*BENfp, hv, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
@@ -248,7 +250,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		FetchBoundaryEdgeFacialValue(AdvzM + face*BENfp, z, BEFToE + 2 * face, BEFToN1 + face*BENfp, Np, BENfp);
 		/*The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		here 1 stands for the memory occupied by water depth h*/
-		for (int field = 2; field < Nvar; field++){
+		for (field = 2; field < Nvar; field++){
 			FetchBoundaryEdgeFacialValue(BEfm + (field + 1)*BENe*BENfp + face*BENfp, \
 				 fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
 				BEFToE + 2 * face, BEFToN1 + BENfp*face, Np, BENfp);
@@ -263,10 +265,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BENe>1000)
 #endif
-	for (int face = 0; face < BENe; face++){
-		for (int field = 0; field < Nvar; field++){
+	for (face = 0; face < BENe; face++){
+		for (field = 0; field < Nvar; field++){
 			StrongFormBoundaryEdgeRHS(face, BEFToE, BEFToF, Np, K, BENfp, BEFToN1, BEFluxM + field*BENe*BENfp, BEFluxS + field*BENe*BENfp, BEJs, BEMb, ERHS + field*Np*K*Nface);
 		}
 	}
@@ -284,9 +286,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(BotEFluxP, 0, BotENfp*BotENe*Nvar*sizeof(double));
 	memset(BotEFluxS, 0, BotENfp*BotENe*Nvar*sizeof(double));
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BotENe>1000)
 #endif
-	for (int face = 0; face < BotENe; face++){
+	for (face = 0; face < BotENe; face++){
 		//Fetch variable BotEfm and BotEfp first
 		FetchInnerEdgeFacialValue(hM + face*BotENfp, hP + face*BotENfp, h, BotEFToE + 2 * face, \
 			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
@@ -298,7 +300,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
 		//The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included,
 		//here 2 stands for the memory occupied by water depth h and omega
-		for (int field = 2; field < Nvar; field++){
+		for (field = 2; field < Nvar; field++){
 			FetchInnerEdgeFacialValue(BotEfm + (field + 2)*BotENe*BotENfp + face*BotENfp, \
 				BotEfp + (field + 2)*BotENe*BotENfp + face*BotENfp, fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
 				BotEFToE + 2 * face, BotEFToN1 + BotENfp*face, BotEFToN2 + BotENfp*face, Np, BotENfp);
@@ -310,10 +312,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BotENe>1000)
 #endif
-    for (int face = 0; face < BotENe; face++){
-        for (int field = 0; field < Nvar; field++){
+    for (face = 0; face < BotENe; face++){
+        for (field = 0; field < Nvar; field++){
 			StrongFormInnerEdgeRHS(face, BotEFToE, BotEFToF, Np, K, BotENfp, BotEFToN1, BotEFToN2, BotEFluxM + field*BotENe*BotENfp, \
 				BotEFluxP + field*BotENe*BotENfp, BotEFluxS + field*BotENe*BotENfp, BotEJs, BotEMb, ERHS + field*Np*K*Nface );
 		}
@@ -334,9 +336,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(BotBEFluxS, 0, BotBENfp*BotBENe*Nvar*sizeof(double));
 	
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BotBENe>1000)
 #endif
-	for (int face = 0; face < BotBENe; face++){
+	for (face = 0; face < BotBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*BotBENfp, hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 		FetchBoundaryEdgeFacialValue(hvM + face*BotBENfp, hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
 		FetchBoundaryEdgeFacialValue(omegaM + face*BotBENfp, omega, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
@@ -344,7 +346,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		//The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included
 		//2 stands for the memory occupied by water depth h and omega
-		for (int field = 2; field < Nvar; field++){
+		for (field = 2; field < Nvar; field++){
 			FetchBoundaryEdgeFacialValue(BotBEfm + (field + 2)*BotBENe*BotBENfp + face*BotBENfp, \
 				fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
 				BotBEFToE + 2 * face, BotBEFToN1 + BotBENfp*face, Np, BotBENfp);
@@ -354,10 +356,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(BotBENe>1000)
 #endif
-	for (int face = 0; face < BotBENe; face++){
-		for (int field = 0; field < Nvar; field++){
+	for (face = 0; face < BotBENe; face++){
+		for (field = 0; field < Nvar; field++){
 			StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, BotBEFluxM + field*BotBENe*BotBENfp, BotBEFluxS + field*BotBENe*BotBENfp, BotBEJs, BotBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
@@ -380,9 +382,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	memset(SurfBEFluxS, 0, SurfBENfp*SurfBENe*Nvar*sizeof(double));
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(SurfBENe>1000)
 #endif
-	for (int face = 0; face < SurfBENe; face++){
+	for (face = 0; face < SurfBENe; face++){
 		FetchBoundaryEdgeFacialValue(huM + face*SurfBENfp, hu, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
 		FetchBoundaryEdgeFacialValue(hvM + face*SurfBENfp, hv, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
 		FetchBoundaryEdgeFacialValue(omegaM + face*SurfBENfp, omega, SurfBEFToE + 2 * face, SurfBEFToN1 + face*SurfBENfp, Np, SurfBENfp);
@@ -390,7 +392,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		//The following part is used to fetch the field corresponding to temperature, salinity, and sediment if they are included
 		//2 stands for the memory occupied by water depth h and omega
-		for (int field = 2; field < Nvar; field++){
+		for (field = 2; field < Nvar; field++){
 			FetchBoundaryEdgeFacialValue(SurfBEfm + (field + 2)*SurfBENe*SurfBENfp + face*SurfBENfp, \
 				fphys + ((int)varFieldIndex[field] - 1)*Np*K, \
 				SurfBEFToE + 2 * face, SurfBEFToN1 + SurfBENfp*face, Np, SurfBENfp);
@@ -400,21 +402,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	}
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(SurfBENe>1000)
 #endif
-    for (int face = 0; face < SurfBENe; face++){
-        for (int field = 0; field < Nvar; field++){
+    for (face = 0; face < SurfBENe; face++){
+        for (field = 0; field < Nvar; field++){
 			StrongFormBoundaryEdgeRHS(face, SurfBEFToE, SurfBEFToF, Np, K, SurfBENfp, SurfBEFToN1, SurfBEFluxM + field*SurfBENe*SurfBENfp, SurfBEFluxS + field*SurfBENe*SurfBENfp, SurfBEJs, SurfBEMb, ERHS + field*Np*K*Nface);
 		}
 	}
 	
+	int k;
     
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field,face) if(K>1000)
 #endif
-    for (int k=0; k < K; k++){
-        for(int field=0;field<Nvar;field++){
-            for(int face=1;face<Nface;face++){
+    for (k=0; k < K; k++){
+        for(field=0;field<Nvar;field++){
+            for(face=1;face<Nface;face++){
                 Add( ERHS + field*Np*K*Nface+k*Np, ERHS + field*Np*K*Nface + k*Np, ERHS + field*Np*K*Nface + face*Np*K + k*Np, Np);
             }
         }
@@ -422,10 +425,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(field) if(K>1000)
 #endif
-	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < Nvar; field++){
+	for (k = 0; k < K; k++) {
+		for (field = 0; field < Nvar; field++){
 			MultiEdgeContributionByLiftOperator(ERHS + field*Np*K*Nface + k*Np, TempFacialIntegral + field*Np*K + k*Np, &np, &oneI, &np, \
 				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 		}
@@ -437,9 +440,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	      /************************  Volume Integral Part  ****************************/
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K>1000)
 #endif
-	for (int k = 0; k < K; k++){
+	for (k = 0; k < K; k++){
 
 		EvaluatePrebalanceVolumeTerm(E + k*Np, G + k*Np, H + k*Np, fphys + k*Np, \
 			varFieldIndex, Nvar, &gra, Np, K, Hcrit);
@@ -449,12 +452,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			&np, rx + k*Np, sx + k*Np, ry + k*Np, sy + k*Np, tz + k*Np, Nvar, Np, K);
 	}
 
+	int n;
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(n) if(K>1000)
 #endif
-	for (int k = 0; k < K; k++){
-		for (int n = 0; n < Nvar; n++){
+	for (k = 0; k < K; k++){
+		for (n = 0; n < Nvar; n++){
 			Minus(OutputRHS + n*Np*K + k*Np, \
 				ERHS + n*Np*K*Nface + k*Np, OutputRHS + n*Np*K + k*Np, Np);
 		}

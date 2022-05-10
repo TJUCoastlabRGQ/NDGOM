@@ -372,26 +372,29 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     
     int RowVCV = Np2d;
     int ColVCV = Np;
+	int i;
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>1000)
 #endif
-    for (int i = 0; i < K2d; i++) {
+    for (i = 0; i < K2d; i++) {
         CalculateVelocityAtBottomCellCenter(Imu2d + i*Np2d, Imv2d + i*Np2d, hu3d + (i + 1)*Nz*Np - Np, hv3d + (i+1)*Nz*Np - Np, \
                 RowVCV, ColVCV, &hcrit, h2d + i*Np2d, VCV);
     }
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>500)
 #endif    
-    for (int i = 0; i < K2d; i++) {
+    for (i = 0; i < K2d; i++) {
         CalculatePenaltyParameter(ImTau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
     }
 
+	int var, j;
+
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(var,j) if(K2d>50)
 #endif
-    for (int i = 0; i < K2d; i++){
+    for (i = 0; i < K2d; i++){
         double *StiffMatrix = malloc(NNZ*Nvar*sizeof(double));
         memset(StiffMatrix, 0, NNZ*Nvar*sizeof(double));
 		//FinalStiffMatrix is needed, when we calculate the influence of the diffusion term when IMEXRK time stepping method is used
@@ -434,20 +437,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             memset(OP12, 0, Np*Np*sizeof(double));
             AdjacentBoundaryIntegral(BotEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + 2 - 1), OP12, Np, Np2d, -1.0, epsilon);
             // Local and Local to bottom
-            for (int var = 0; var < 2 && var < Nvar; var++){
+            for (var = 0; var < 2 && var < Nvar; var++){
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0*Np + 1] - Jc[0 * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP12, 1.0, LocalStartPoint + Np, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
             }
 			// Local and Local to bottom
-            for (int var = 2; var < Nvar; var++){
+            for (var = 2; var < Nvar; var++){
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP12, Prantl, LocalStartPoint + Np, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 			}
-            for (int j = 1; j < Nz-1 ; j++){
+            for (j = 1; j < Nz-1 ; j++){
 				/*The local start point, for pardiso, jc starts from one, so we have to delete this*/
 				LocalStartPoint = Jc[j*Np] - 1 + Np;
                 /*Calculate both the volume and surface integral for the second to the last but one cell*/
@@ -463,14 +466,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				/*Local element to up element*/
                 AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + j), OP12, Np, Np2d, 1.0, epsilon);
 				// Local and Local to up
-                for (int var = 0; var < 2 && var < Nvar; var++){
+                for (var = 0; var < 2 && var < Nvar; var++){
 					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP12, 1.0, LocalStartPoint - Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
                 }
 				// Local and Local to up
-                for (int var = 2; var < Nvar; var++){
+                for (var = 2; var < Nvar; var++){
 					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
@@ -480,11 +483,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				/*Local element to bottom element*/
                 AdjacentBoundaryIntegral(BotEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + j + 1), OP12, Np, Np2d, -1.0, epsilon);
 				// Local to bottom
-				for (int var = 0; var < 2 && var < Nvar; var++){
+				for (var = 0; var < 2 && var < Nvar; var++){
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP12, 1.0, LocalStartPoint + Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
                 }
-                for (int var = 2; var < Nvar; var++){
+                for (var = 2; var < Nvar; var++){
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP12, Prantl, LocalStartPoint + Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
                 }
@@ -499,7 +502,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             LocalBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz-1), OP11, Np, Np2d, 1.0, epsilon);
             /*For passive transport substances, we only impose Neumann boundary condition, so this has no effect on the stiff matrix*/
             // Local for passive transport substances
-			for (int var = 2; var < Nvar; var++){
+			for (var = 2; var < Nvar; var++){
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[(Nz-1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
             }
@@ -520,14 +523,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			/*Local element to up element*/
             AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, Np, Np2d, 1.0, epsilon);
 			//Local and Local to up for hu and hv
-			for (int var = 0; var < 2 && var < Nvar; var++) {
+			for (var = 0; var < 2 && var < Nvar; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP12, 1.0, LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 			}
 			// Local to up for passive transport substances
-			for (int var = 2; var < Nvar; var++) {
+			for (var = 2; var < Nvar; var++) {
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP12, Prantl, LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 			}
@@ -539,7 +542,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             
 			 /*For passive transport substances, we only impose Neumann boundary condition*/
 			 // Local for passive transport substances
-			for (int var = 2; var < Nvar; var++) {
+			for (var = 2; var < Nvar; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 			}
@@ -557,7 +560,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				}
 			}
 			//Local for hu and hv
-			for (int var = 0; var < 2 && var < Nvar; var++) {
+			for (var = 0; var < 2 && var < Nvar; var++) {
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 			}
@@ -566,7 +569,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/*Invoke pardiso from mkl to solve equation Ax = b*/
 		SparseEquationSolve(fphys, Nz*Np, StiffMatrix, GlobalSystemRHS, Nz, Np, i, Nvar, K3d);
 
-		for (int var = 0; var < Nvar; var++) {
+		for (var = 0; var < Nvar; var++) {
 			SparseMatrixMultiply(ImplicitRHS + var*K3d*Np + i*Nz*Np, FinalStiffMatrix + var*NNZ, fphys + var * Np*K3d + i*Nz*Np, Nz * Np, Jc, Ir);
 		}
 

@@ -71,8 +71,8 @@ classdef IdealEstuaryCirculation < SWEBaroclinic3d
             hu2d = zeros(size(obj.fext2d{1}(:,:,1)));
             %> The seaward boundary be set to ClampedVel
             Index = ( (obj.meshUnion(1).BoundaryEdge.ftype)' == enumBoundaryCondition.ClampedVel & all(obj.meshUnion(1).BoundaryEdge.xb == -obj.ChLength/2));
-            Momentum = -0.08*10 + 0.4*5*sin(2*pi*time/(12*3600));
-%             Momentum = -0.08*5 + 0.4*10*sin(2*pi*time/(12*3600));
+%             Momentum = -0.08*10 + 0.4*5*sin(2*pi*time/(12*3600));
+            Momentum = -0.08*5 - 0.4*10*sin(2*pi*time/(12*3600));
             hu3d(:,Index) = Momentum;
             [fm, ~] = obj.meshUnion(1).BoundaryEdge.matEvaluateSurfValue(fphys);
             if ( Momentum >= 0)

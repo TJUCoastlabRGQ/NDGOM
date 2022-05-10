@@ -23,10 +23,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]){
 	memcpy(InvV3d, V3d, Np3d*Np3d*sizeof(double));
 	MatrixInverse(InvV3d, (ptrdiff_t)Np3d);
 
+	int i;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) if(K2d>500)
 #endif
-	for (int i = 0; i < K2d; i++){
+	for (i = 0; i < K2d; i++){
 		VerticalColumnIntegralField3d(field2d + i*Np2d, Np2d, V2d, Tempfield2d + i*Np2d, \
 			Tempfield3d + i*Np3d*NLayer, field3d + i*Np3d*NLayer, Jz + i*Np3d*NLayer, \
 			fmod + i*Np3d*NLayer, InvV3d, Np3d, NLayer);

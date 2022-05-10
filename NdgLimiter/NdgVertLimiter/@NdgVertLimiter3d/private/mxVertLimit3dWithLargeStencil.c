@@ -73,12 +73,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Calculate the average value first*/
 	double *Ave = malloc(K*Nvar*sizeof(double));
 	memset(Ave, 0, K*Nvar*sizeof(double));
-	
+	int k, var;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(var) if(K>1000)
 #endif
-	for (int k = 0; k < K; k++){
-		for (int var = 0; var < Nvar; var++){
+	for (k = 0; k < K; k++){
+		for (var = 0; var < Nvar; var++){
 			GetMeshAverageValue(Ave + var*K + k, LAV + k, transA, transB, &ROPA, &COPB, &COPA, &Alpha, A,\
 				&LDA, fphys + ((int)varFieldIndex[var]-1)*Np*K + k*Np, J + k*Np, &LDB, &Beta, &LDC, wq);
 		}
@@ -87,15 +87,16 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	/*Calculate the fvmin and fvmax without considering boundary condition*/
 	double *fmin = malloc(Nv*Nvar*sizeof(double));
 	double *fmax = malloc(Nv*Nvar*sizeof(double));
+	int n;
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(var, k) if(Nv>1000)
 #endif
-	for (int n = 0; n < Nv; n++){
-		for (int var = 0; var < Nvar; var++){
+	for (n = 0; n < Nv; n++){
+		for (var = 0; var < Nvar; var++){
 			int Nk = (int)Nvc[n]; // number of cells connecting to vertex n
 			fmax[var*Nv+n] = -INF;
 			fmin[var*Nv+n] = INF;
-			for (int k = 0; k<Nk; k++) {
+			for (k = 0; k<Nk; k++) {
 				int cellId = (int)VToK[n*maxNk + k] - 1;
 				double temp = Ave[var*K + cellId];
 				fmax[var*Nv + n] = max(fmax[var*Nv + n], temp);
@@ -104,23 +105,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 	}
 	
+	int i, L;
 	/*Limit the physical value according to fmax and fmin*/
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
+#pragma omp parallel for num_threads(DG_THREADS) private(var,i,L) if(K>1000)
 #endif
-	for (int k = 0; k < K; k++) {
-		for (int var = 0; var < Nvar; var++){
+	for (k = 0; k < K; k++) {
+		for (var = 0; var < Nvar; var++){
 			double *Data = fphys + ((int)varFieldIndex[var] - 1)*Np*K;
 			/*Copy the original data into flimit, if the cell is not troubled, just output it as original*/
-			for (int i = 0; i < Np; i++){
+			for (i = 0; i < Np; i++){
 				flimit[var*Np*K + k*Np + i] = Data[k*Np + i];
 			}
 
 			/*Identify whether the studied cell needs to be corrected or not*/
 			int flag = 0;
 			/*study the bottomost face and uppermost face, respectively*/
-			for (int L = 0; L < 2; L++){
-				for (int i = 0; i < Nv2d; i++){
+			for (L = 0; L < 2; L++){
+				for (i = 0; i < Nv2d; i++){
 					/*Global index of the studied vertex of the studied cell. Here, nodeId and vertId must refer to the same point*/
 					int nodeId = k * Np + L*Np2d*Nz + (int)Fmask2d[i * Nfp2d] - 1;
 					int vertId = (int)EToV[k * Nv3d + L*Nv2d + i] - 1;
@@ -134,8 +136,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			if (flag){
 				double *LambdaMax = malloc(Nv3d*sizeof(double));
 				double *LambdaMin = malloc(Nv3d*sizeof(double));
-				for (int L = 0; L < 2; L++){
-					for (int i = 0; i < Nv2d; i++){
+				for (L = 0; L < 2; L++){
+					for (i = 0; i < Nv2d; i++){
 						/*Global index of the studied vertex of the studied cell*/
 						int nodeId = k * Np + L*Np2d*Nz + (int)Fmask2d[i * Nfp2d] - 1;
 						int vertId = (int)EToV[k * Nv3d + L*Nv2d + i] - 1;
@@ -162,8 +164,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 				* then we multiply the mode coefficient by the vandemonde matrix corresponding to the first order to regain the 
 				* intepolation point date value
 				*/
-				for (int L = 0; L < 2; L++){
-					for (int i = 0; i < Nv2d; i++){
+				for (L = 0; L < 2; L++){
+					for (i = 0; i < Nv2d; i++){
 						/*Global index of the studied vertex of the studied cell*/
 						int nodeId = k * Np + L*Np2d*Nz + (int)Fmask2d[i * Nfp2d] - 1;
 						LVertValue[L*Nv2d + i] = Lambda * flimit[var*Np*K + nodeId] + (1 - Lambda)*Ave[var*K + k];
@@ -201,7 +203,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 /*This function is used to get the minimum slope parameter*/
 void GetMinimumSlope(double *dest, double *LamMax, double *LamMin, int Nv){
 	*dest = INF;
-	for (int i = 0; i < Nv; i++){
+	int i;
+	for (i = 0; i < Nv; i++){
 		*dest = min(*dest, LamMax[i]);
 		*dest = min(*dest, LamMin[i]);
 	}

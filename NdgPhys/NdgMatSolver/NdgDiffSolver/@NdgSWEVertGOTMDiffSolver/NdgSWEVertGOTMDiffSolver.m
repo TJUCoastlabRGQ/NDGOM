@@ -83,11 +83,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgVertDiffSolver
             obj.uo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.vo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.nvh = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
-            obj.BotBoundaryTreatType = 'Implicit';
+            obj.BotBoundaryTreatType = 'Explicit';
         end
         
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
-%             obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
+            obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
             Outfphys = obj.matCalculateImplicitRHS( physClass, (obj.nv + 1.3e-6) ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d, Height);
             obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), Outfphys(:,:,3), Outfphys(:,:,4), ImplicitParameter * dt, Height);
             obj.uo = Outfphys(:,:,1)./Height;

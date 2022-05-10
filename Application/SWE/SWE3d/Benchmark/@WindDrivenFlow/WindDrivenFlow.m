@@ -12,7 +12,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
         startTime = 0;
         %> final time
 
-        finalTime = 7200*8;
+        finalTime = 3600;
         hcrit = 0.001;
     end
     
@@ -85,7 +85,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('outputType') = enumOutputFile.VTK;
+            option('outputType') = enumOutputFile.NetCDF;
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;

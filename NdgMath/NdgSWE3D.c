@@ -192,7 +192,7 @@ void VerticalFaceColumnIntegral(double *dest, double *source, double *fmod, doub
 		}
 	}
 	dgemm("N", "N", &LNfp2d, &one, &LNfp2d, &alpha, V1d, &LNfp2d, Tempdest, &LNfp2d, &beta, dest, &LNfp2d);
-	DotDivideByConstant(dest, dest, sqrt(2.0) / 2, LNfp2d);
+	MultiplyByConstant(dest, dest, sqrt(2.0), LNfp2d);
     //The order of the facial point for the 2d face is not the same with that of the 3d face
 	if (FToF >= 3) Flip(dest, LNfp2d);
 	
