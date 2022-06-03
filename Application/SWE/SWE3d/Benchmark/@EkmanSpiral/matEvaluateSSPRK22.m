@@ -83,6 +83,7 @@ while( time < ftime )
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
     
     fphys{1}(:,:,1) = ( Temphuv3d(:,:,1) + f0*dt*Temphuv3d(:,:,2) )/(1+(f0*dt)^2);
+    
     fphys{1}(:,:,2) = ( Temphuv3d(:,:,2) - f0*dt*Temphuv3d(:,:,1) )/(1+(f0*dt)^2);    
 %     [ fphys{1}(:,:,5)] = obj.VerticalEddyViscositySolver.nv;
 %     
