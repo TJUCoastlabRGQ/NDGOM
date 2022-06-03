@@ -83,7 +83,7 @@ classdef EkmanSpiral < SWEBarotropic3d
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
-            option('CoriolisType') = enumSWECoriolis.Beta;
+            option('CoriolisType') = enumSWECoriolis.None;
             option('f0 for beta coriolis solver') = 2*sin(pi/4)*7.29*10^(-5);
             option('beta for beta coriolis solver') = 0.0;
         end        
