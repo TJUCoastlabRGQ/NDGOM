@@ -6,6 +6,7 @@ time = obj.getOption('startTime');
 ftime = obj.getOption('finalTime');
 obj.ExplicitRHS2d = zeros(obj.mesh2d(1).cell.Np, obj.mesh2d(1).K,2);
 obj.ExplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2 * obj.Nvar);
+Temphuv3d = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, 2);
 f0 = obj.getOption('f0 for beta coriolis solver');
 %Actually, the following variable is not used, it is allocated here to
 % accomadate the usage of other time stepping method such as IMEXRK222, note added on 20211223
@@ -76,13 +77,13 @@ while( time < ftime )
         %         [ fphys ] = obj.matFilterSolution( fphys );
     end
     
-    [ fphys{1}(:,:,obj.varFieldIndex)] = ...
+    [ Temphuv3d ] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
         fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
     
-    fphys{1}(:,:,1) = ( fphys{1}(:,:,1) + f0*dt*fphys{1}(:,:,2) )/(1+(f0*dt)^2);
-    fphys{1}(:,:,2) = ( fphys{1}(:,:,2) - f0*dt*fphys{1}(:,:,1) )/(1+(f0*dt)^2);
+    fphys{1}(:,:,1) = ( Temphuv3d(:,:,1) + f0*dt*Temphuv3d(:,:,2) )/(1+(f0*dt)^2);
+    fphys{1}(:,:,2) = ( Temphuv3d(:,:,2) - f0*dt*Temphuv3d(:,:,1) )/(1+(f0*dt)^2);
     
 %     [ fphys{1}(:,:,5)] = obj.VerticalEddyViscositySolver.nv;
 %     
