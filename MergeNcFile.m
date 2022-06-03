@@ -1,4 +1,5 @@
 function MergeNcFile
+
 ncfile = dir('*.nc');
 Str = strsplit(ncfile(1).name,'.');
 InputFile = strcat(Str{1},'.',Str{2},'.1.nc');

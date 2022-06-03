@@ -98,10 +98,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 double Lambda = 1.0;
                 if (fphys[k*Np + Nph * (Npz - 1) + i] > amax)
                     //Lambda = min(Lambda, (amax - avL[i]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avL[i] + pow(10,-10.0) ));
-					Lambda = (amax - avL[i]) / (fphys[k*Np + Nph*(Npz - 1) + i] - avL[i]);
+					Lambda = min(Lambda, (amax - avL[i]) / (fphys[k*Np + Nph*(Npz - 1) + i] - avL[i]));
                 else if (fphys[k*Np + Nph * (Npz - 1) + i] < amin)
                     //Lambda = min(Lambda, (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i] + pow(10, -10.0)) );
-					Lambda = (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i]);
+					Lambda = min(Lambda, (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i]));
                 else
                     Lambda = 1.0;
                 /*Limit the value in vertical direction*/
