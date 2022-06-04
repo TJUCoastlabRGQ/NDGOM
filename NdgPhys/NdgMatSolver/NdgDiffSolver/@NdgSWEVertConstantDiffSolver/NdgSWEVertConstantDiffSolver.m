@@ -20,7 +20,7 @@ classdef NdgSWEVertConstantDiffSolver < NdgVertDiffSolver
             obj.BotBoundaryTreatType = 'Implicit';
 %             obj.BotBoundaryTreatType = 'Explicit';
             
-            obj.nv = -1 * physClass.meshUnion.z .* (physClass.meshUnion.z + 1) + 0.005; 
+%             obj.nv = -1 * physClass.meshUnion.z .* (physClass.meshUnion.z + 1) + 0.005; 
             
         end
         %> @brief Calculating the right hand side corresponding to the vertical diffusion term and
