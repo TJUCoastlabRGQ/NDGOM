@@ -12,8 +12,8 @@ obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-%     dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
-    dt = 10;
+    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
+%     dt = 10;
     %       dt = 0.1;
     if( time + dt > ftime )
         dt = ftime - time;
@@ -94,7 +94,6 @@ while( time < ftime )
     
     visual.drawResult( fphys2d{1}(:,:,1) );
     time = time + dt;
-    disp(time);
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;
     waitbar( timeRatio, hwait, ['Runing MatSolver ', num2str( timeRatio ), '....']);

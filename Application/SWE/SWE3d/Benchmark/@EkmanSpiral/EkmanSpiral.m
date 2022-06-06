@@ -13,7 +13,7 @@ classdef EkmanSpiral < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-        finalTime = 86400 * 100;
+        finalTime = 86400 * 200;
         
         hcrit = 0.001;
     end
@@ -66,7 +66,7 @@ classdef EkmanSpiral < SWEBarotropic3d
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            outputIntervalNum = 10000;
+            outputIntervalNum = 1000;
             option('startTime') = 0.0;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
@@ -83,8 +83,9 @@ classdef EkmanSpiral < SWEBarotropic3d
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
-            option('CoriolisType') = enumSWECoriolis.None;
+            option('CoriolisType') = enumSWECoriolis.Beta;
             option('f0 for beta coriolis solver') = 2*sin(pi/4)*7.29*10^(-5);
+%             option('f0 for beta coriolis solver') = 0;
             option('beta for beta coriolis solver') = 0.0;
         end        
     end

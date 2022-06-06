@@ -106,7 +106,7 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 
 	NNZ = Np * Np * 3 * Nlayer - 2 * Np * Np;
 
-	QuatrNNZ = 2 * NNZ + 2 * Np;
+	QuatrNNZ = 2 * NNZ + 2 * Np*Nlayer;
 
 	Ir = malloc(NNZ * sizeof(int));
 
@@ -124,7 +124,7 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 		QuatrIr = malloc(QuatrNNZ * sizeof(int));
 	}
 	while (Jc == NULL) {
-		Jc = malloc(NNZ * sizeof(int));
+		Jc = malloc((Nlayer*Np+1) * sizeof(int));
 	}
 	while (QuatrJc == NULL) {
 		QuatrJc = malloc((2*Nlayer * Np + 1) * sizeof(int));
@@ -199,63 +199,71 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 		Jc[1 + j] = SingleColumn[j] + 1;
 	}
 
-//	FILE *fp;
-//	fp = fopen("D:\\Sharewithpc\\研究工作\\20220604\\data.txt", "w");
+	FILE *fp;
+	fp = fopen("D:\\Sharewithpc\\研究工作\\20220605\\data.txt", "w");
 
 	for (int p = 0; p < Nlayer*Np; p++) {
-//		fprintf(fp, "For point %d, the row index is:\n",p+1);
+		fprintf(fp, "For point %d, the row index is:\n",p+1);
 		if (p == 0) {
 			for (int p1 = 0; p1 < SingleColumn[0]; p1++) {
 				QuatrIr[p1] = SingleRow[p1] + 1;
-//				fprintf(fp, "%d\n", QuatrIr[p1]);
+				printf("%d\n", p1);
+				fprintf(fp, "%d\n", QuatrIr[p1]);
 			}
 			QuatrIr[SingleColumn[0]] = Nlayer*Np + 1;
-//			fprintf(fp, "%d\n", QuatrIr[SingleColumn[0]]);
+			printf("%d\n", SingleColumn[0]);
+			fprintf(fp, "%d\n", QuatrIr[SingleColumn[0]]);
 		}
 		else {
 			for (int p1 = 0; p1 < SingleColumn[p] - SingleColumn[p - 1]; p1++) {
 				QuatrIr[SingleColumn[p - 1] + p + p1] = SingleRow[SingleColumn[p - 1] + p1]+1;
-//				fprintf(fp, "%d\n", QuatrIr[SingleColumn[p - 1] + p + p1]);
+				printf("%d\n", SingleColumn[p - 1] + p + p1);
+				fprintf(fp, "%d\n", QuatrIr[SingleColumn[p - 1] + p + p1]);
 			}
 			QuatrIr[SingleColumn[p] + p] = Nlayer*Np + p + 1;
-//			fprintf(fp, "%d\n", QuatrIr[SingleColumn[p] + p]);
+			printf("%d\n", SingleColumn[p] + p);
+			fprintf(fp, "%d\n", QuatrIr[SingleColumn[p] + p]);
 		}
 		
 	}
 	for (int p = Nlayer*Np; p < 2 * Nlayer*Np; p++) {
-//		fprintf(fp, "For point %d, the row index is:\n", p + 1);
+		fprintf(fp, "For point %d, the row index is:\n", p + 1);
 		if (p == Nlayer*Np) {
-			QuatrIr[SingleNonzero + Nlayer*Np ] = p - Nlayer*Np + 1;
-//			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np]);
+			QuatrIr[SingleNonzero + Nlayer*Np + p - Nlayer*Np] = p - Nlayer*Np + 1;
+			printf("%d\n", SingleNonzero + Nlayer*Np);
+			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np]);
 			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np]; p1++) {
 				//+1 for the upper diagnoal element
 				QuatrIr[SingleNonzero + Nlayer*Np + p1+1] = SingleRow[p1] + Nlayer*Np + 1;
-//				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + p1 + 1]);
+				printf("%d\n", SingleNonzero + Nlayer*Np + p1 + 1);
+				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + p1 + 1]);
 			}
 		}
 		else {
-			QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p-Nlayer*Np]] = p - Nlayer*Np + 1;
-//			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np]]);
+			QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p-Nlayer*Np-1] + p - Nlayer*Np] = p - Nlayer*Np + 1;
+			printf("%d\n", SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np-1]);
+			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np]]);
 			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np] - SingleColumn[p - Nlayer*Np - 1]; p1++) {
-				QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np] + p1 + 1] = \
+				QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np-1] + p - Nlayer*Np + p1 + 1] = \
 					SingleRow[SingleColumn[p - 1 - Nlayer*Np] + p1]+ Nlayer*Np + 1;
-//				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np] + p1 + 1]);
+				printf("%d\n", SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np - 1] + p - Nlayer*Np + p1 + 1);
+				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np] + p1 + 1]);
 			}
 		}
 	}
-//	fprintf(fp, "The Jc value is:\n");
+	fprintf(fp, "The Jc value is:\n");
 	QuatrJc[0] = 1;
-//	fprintf(fp, "%d\n", QuatrJc[0]);
+	fprintf(fp, "%d\n", QuatrJc[0]);
 	for (int j = 0; j < Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[j] + 1 + j + 1;
-//		fprintf(fp, "%d\n", QuatrJc[1 + j]);
+		fprintf(fp, "%d\n", QuatrJc[1 + j]);
 	}
 	for (int j = Nlayer*Np; j < 2*Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[Nlayer*Np-1] + Nlayer*Np + SingleColumn[j- Nlayer*Np] + 1 + j - Nlayer*Np + 1;
-//		fprintf(fp, "%d\n", QuatrJc[1 + j]);
+		fprintf(fp, "%d\n", QuatrJc[1 + j]);
 	}
 
-//	fclose(fp);
+	fclose(fp);
 
    /*Set the thread for pardiso part to be one, set this part for once*/
 	int thread = 1;
@@ -282,87 +290,82 @@ void ImEddyVisInVertDeAllocation()
 void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np, \
 	int Index, int Nvar, int K3d, int Nonzero, int Column, int *RowIndex, int *ColumnNonzero) {
 
-	int *TempIr = malloc(Nonzero * sizeof(int));
+	if (Nvar >= 1) {
+		int *TempIr = malloc(Nonzero * sizeof(int));
+		memcpy(TempIr, RowIndex, Nonzero * sizeof(int));
 
-	memcpy(TempIr, RowIndex, Nonzero * sizeof(int));
+		int *TempJc = malloc((Column + 1) * sizeof(int));
+		memcpy(TempJc, ColumnNonzero, (Column + 1) * sizeof(int));
 
-	int *TempJc = malloc((Column + 1) * sizeof(int));
+		MKL_INT iparm[64];
+		void *pt[64];
+		MKL_INT i;
 
-	memcpy(TempJc, ColumnNonzero, (Column + 1) * sizeof(int));
+		for (i = 0; i < 64; i++)
+		{
+			iparm[i] = 0;
+		}
+		iparm[0] = 1;         /* No solver default */
+		iparm[1] = 2;         /* Fill-in reordering from METIS */
+		iparm[3] = 0;         /* No iterative-direct algorithm */
+		iparm[4] = 0;         /* No user fill-in reducing permutation */
+		iparm[5] = 0;         /* Write solution into x */
+		iparm[6] = 0;         /* Not in use */
+		iparm[7] = 2;         /* Max numbers of iterative refinement steps */
+		iparm[8] = 0;         /* Not in use */
+		iparm[9] = 13;        /* Perturb the pivot elements with 1E-13 */
+		iparm[10] = 1;        /* Use nonsymmetric permutation and scaling MPS */
+		iparm[11] = 0;        /* Conjugate/transpose solve */
+		iparm[12] = 1;        /* Maximum weighted matching algorithm is switched-on (default for non-symmetric) */
+		iparm[13] = 0;        /* Output: Number of perturbed pivots */
+		iparm[14] = 0;        /* Not in use */
+		iparm[15] = 0;        /* Not in use */
+		iparm[16] = 0;        /* Not in use */
+		iparm[17] = -1;       /* Output: Number of nonzeros in the factor LU */
+		iparm[18] = -1;       /* Output: Mflops for LU factorization */
+		iparm[19] = 0;        /* Output: Numbers of CG Iterations */
 
-	MKL_INT iparm[64];
+		for (i = 0; i < 64; i++)
+		{
+			pt[i] = 0;
+		}
 
-	void *pt[64];
+		MKL_INT mtype = 11;       /* Real unsymmetric matrix */
 
-	MKL_INT i;
+		MKL_INT maxfct, mnum, error, msglvl;
+		MKL_INT Tempmaxfct, Tempmnum, Temperror, Tempmsglvl, Tempidum;
+		double Tempddum;
+		maxfct = 1;           /* Maximum number of numerical factorizations. */
+		mnum = 1;             /* Which factorization to use. */
+		msglvl = 0;           /* Print statistical information  */
+		error = 0;            /* Initialize error flag */
 
-	for (i = 0; i < 64; i++)
-	{
-		iparm[i] = 0;
-	}
-	iparm[0] = 1;         /* No solver default */
-	iparm[1] = 2;         /* Fill-in reordering from METIS */
-	iparm[3] = 0;         /* No iterative-direct algorithm */
-	iparm[4] = 0;         /* No user fill-in reducing permutation */
-	iparm[5] = 0;         /* Write solution into x */
-	iparm[6] = 0;         /* Not in use */
-	iparm[7] = 2;         /* Max numbers of iterative refinement steps */
-	iparm[8] = 0;         /* Not in use */
-	iparm[9] = 13;        /* Perturb the pivot elements with 1E-13 */
-	iparm[10] = 1;        /* Use nonsymmetric permutation and scaling MPS */
-	iparm[11] = 0;        /* Conjugate/transpose solve */
-	iparm[12] = 1;        /* Maximum weighted matching algorithm is switched-on (default for non-symmetric) */
-	iparm[13] = 0;        /* Output: Number of perturbed pivots */
-	iparm[14] = 0;        /* Not in use */
-	iparm[15] = 0;        /* Not in use */
-	iparm[16] = 0;        /* Not in use */
-	iparm[17] = -1;       /* Output: Number of nonzeros in the factor LU */
-	iparm[18] = -1;       /* Output: Mflops for LU factorization */
-	iparm[19] = 0;        /* Output: Numbers of CG Iterations */
+		double ddum;          /* Double dummy */
 
-						  //	void *pt[64];
+		MKL_INT idum;         /* Integer dummy. */
 
-	for (i = 0; i < 64; i++)
-	{
-		pt[i] = 0;
-	}
+		PardisoReOrderAndSymFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
+			&maxfct, &mnum, &msglvl, &error, &mtype, &ddum, &idum);
 
-	MKL_INT mtype = 11;       /* Real unsymmetric matrix */
+		for (int var = 0; var < Nvar; var++) {
 
-	MKL_INT maxfct, mnum, error, msglvl;
-	MKL_INT Tempmaxfct, Tempmnum, Temperror, Tempmsglvl, Tempidum;
-	double Tempddum;
-	maxfct = 1;           /* Maximum number of numerical factorizations. */
-	mnum = 1;             /* Which factorization to use. */
-	msglvl = 0;           /* Print statistical information  */
-	error = 0;            /* Initialize error flag */
+			Tempmaxfct = maxfct, Tempmnum = mnum, \
+				Temperror = error, Tempmsglvl = msglvl, Tempidum = idum, Tempddum = ddum;
 
-	double ddum;          /* Double dummy */
+			PardisoFactorize(iparm, pt, n, StiffMatrix + var*Nonzero, TempJc, TempIr, \
+				&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, &Tempddum, &Tempidum);
 
-	MKL_INT idum;         /* Integer dummy. */
+			PardisoSolve(dest + var * Np*K3d + Index*Nlayer*Np, StiffMatrix + var*Nonzero, \
+				RHS + var * Np*K3d + Index*Nlayer*Np, n, iparm, TempJc, TempIr, \
+				&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, pt, &Tempddum, &Tempidum);
+		}
 
-	PardisoReOrderAndSymFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
-		&maxfct, &mnum, &msglvl, &error, &mtype, &ddum, &idum);
-
-	for (int var = 0; var < Nvar; var++) {
-
-		Tempmaxfct = maxfct, Tempmnum = mnum, \
-			Temperror = error, Tempmsglvl = msglvl, Tempidum = idum, Tempddum = ddum;
-
-		PardisoFactorize(iparm, pt, n, StiffMatrix + var*Nonzero, TempJc, TempIr, \
+		PardisoFree(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
 			&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, &Tempddum, &Tempidum);
 
-		PardisoSolve(dest + var * Np*K3d + Index*Nlayer*Np, StiffMatrix + var*Nonzero, \
-			RHS + var * Np*K3d + Index*Nlayer*Np, n, iparm, TempJc, TempIr, \
-			&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, pt, &Tempddum, &Tempidum);
+		free(TempIr);
+		free(TempJc);
 	}
-
-	PardisoFree(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
-		&Tempmaxfct, &Tempmnum, &Tempmsglvl, &Temperror, &mtype, &Tempddum, &Tempidum);
-
-	free(TempIr);
-	free(TempJc);
-
 }
 
 void PardisoFree(MKL_INT *iparm, void *pt, MKL_INT n, double *a, MKL_INT *ia, MKL_INT *ja, \
