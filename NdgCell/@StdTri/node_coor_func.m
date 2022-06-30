@@ -36,7 +36,20 @@ x = x + 1*warp1 + cos(2*pi/3)*warp2 + cos(4*pi/3)*warp3;
 y = y + 0*warp1 + sin(2*pi/3)*warp2 + sin(4*pi/3)*warp3;
 [r,s] = xytors(x,y);
 
-t = zeros(size(r));
+t = zeros(size(r));       
+
+dx = 0.1;
+[obj.Drawr,obj.Draws]=meshgrid(-1:dx:1);
+obj.Drawt = zeros(size(obj.Drawr));
+obj.DrawV = zeros(numel(obj.Drawr),Np);
+Num = 2/dx;
+for or = 1:Num+1
+    for os = 1:Num + 1
+        L = 2-(os-1)*2/Num;
+        dL = L/Num;
+        obj.Drawr(os,or) = -1 + (or-1)*dL;
+    end
+end
 end
 
 function warp = warpfactor(N, rout)

@@ -88,6 +88,13 @@ classdef StdCell < handle
         wq
     end
     
+    properties
+        DrawV
+        Drawr
+        Draws
+        Drawt
+    end
+    
     methods(Abstract, Access=protected)
         %> get the total number and coordinate of interpolation points
         [ Np,r,s,t ] = node_coor_func(obj, N)
@@ -119,7 +126,7 @@ classdef StdCell < handle
             [ obj.N ] = N;
             [ obj.Np, obj.r, obj.s, obj.t ] = obj.node_coor_func( N );
             [ obj.Nq, obj.rq, obj.sq, obj.tq, obj.wq ] = obj.quad_coor_func( N );
-            [ obj.V ] = obj.assembleVandMatrix( @obj.orthogonal_func );
+            [ obj.V ] = obj.assembleVandMatrix( @obj.orthogonal_func );            
             [ obj.Vq ] = obj.assembleQuadratureMatrix();
             [ obj.M, obj.invM ] = obj.assembleMassMatrix();
             [ obj.Dr, obj.Ds, obj.Dt ] = obj.nodal_derivative_func(obj.r, obj.s, obj.t);
@@ -192,6 +199,7 @@ classdef StdCell < handle
             V = zeros(obj.Np, obj.Np);
             for n = 1:obj.Np
                 V(:, n) = orthogonal_func(obj.N, n, obj.r, obj.s, obj.t);
+                obj.DrawV(:,n) = orthogonal_func(obj.N, n, obj.Drawr(:), obj.Draws(:), obj.Drawt(:));
             end% for
         end% func
         

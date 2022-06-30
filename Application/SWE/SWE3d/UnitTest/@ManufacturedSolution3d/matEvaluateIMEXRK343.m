@@ -34,7 +34,7 @@ while( time < ftime )
         %>Actually, boundary condition need to be imposed here
         obj.matUpdateExternalField( tloc, fphys2d, fphys );
         %> Calculate the intermediate water depth
-        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, SystemRHS, EXa(intRK+1,:), IMa(intRK,:), dt);
+        SystemRHS = obj.matAssembleSystemRHS( Tempfphys, EXa(intRK+1,:), IMa(intRK,:), dt);
         fphys2d{1}(:,:,1) = Tempfphys2d + dt * EXa(intRK+1,1) * obj.ExplicitRHS2d(:,:,1) + dt * EXa(intRK+1,2) * obj.ExplicitRHS2d(:,:,2)+...
         dt * EXa(intRK+1,3) * obj.ExplicitRHS2d(:,:,3) + dt * EXa(intRK+1,4) * obj.ExplicitRHS2d(:,:,4);
     
@@ -44,7 +44,7 @@ while( time < ftime )
         [ fphys{1}(:,:,obj.varFieldIndex)] = ...
             obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
             fphys2d{1}(:,:,1), fphys{1}(:,:,4), SystemRHS, IMa(intRK,intRK), dt, intRK,...
-            Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time );
+            Stage, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );
         
         
         fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );

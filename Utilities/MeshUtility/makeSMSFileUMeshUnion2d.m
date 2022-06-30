@@ -69,7 +69,7 @@ if k
     end
 end
 
-fgetl(fid1); % Maybe a blankspace
+% fgetl(fid1); % Maybe a blankspace
 str = fgetl(fid1);
 k = strfind(str,'Number of land boundaries');
 if k

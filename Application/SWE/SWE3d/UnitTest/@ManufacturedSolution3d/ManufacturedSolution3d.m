@@ -269,7 +269,7 @@ classdef ManufacturedSolution3d < SWEBarotropic3d
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
             option('outputNcfileNum') = 5;
-            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
+            option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK343;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
@@ -299,10 +299,10 @@ bctype = [ ...
     enumBoundaryCondition.Clamped, ...
     enumBoundaryCondition.Clamped ];
 
-mesh2d = makeUniformTriMesh( N, ...
+mesh2d = makeUniformQuadMesh( N, ...
     [ 0, obj.ChLength ], [ 0, obj.ChWidth ], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
 % mesh2d = makeUniformQuadMesh(N,[0, 900], [0, M], 900/M, 1, bctype);
-cell = StdPrismTri( N, Nz );
+cell = StdPrismQuad( N, Nz );
 zs = zeros(mesh2d.Nv, 1); zb = zeros(mesh2d.Nv, 1) - ones(mesh2d.Nv, 1);
 mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
 mesh3d.InnerEdge = NdgSideEdge3d( mesh3d, 1, Mz );

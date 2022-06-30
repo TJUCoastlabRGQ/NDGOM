@@ -26,6 +26,11 @@ classdef StdLine < StdCell
             [ r,~ ] = zwglj(Np);
             s = zeros(Np, 1);
             t = zeros(Np, 1);
+            
+            obj.Drawr = linspace(obj.vr(1), obj.vr(2), 20);
+            obj.Draws = zeros(size(obj.Drawr));
+            obj.Drawt = zeros(size(obj.Drawr));
+            obj.DrawV = zeros(numel(obj.Drawr),Np);
         end
         
         function [dr, ds, dt] = derivative_orthogonal_func(obj, N, ind, r, s, t)

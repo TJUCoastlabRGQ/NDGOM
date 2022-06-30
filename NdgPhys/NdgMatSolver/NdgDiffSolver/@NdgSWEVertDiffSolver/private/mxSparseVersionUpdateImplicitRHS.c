@@ -400,31 +400,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	{
 		ImEddyVisInVertAllocation(Np, Nz);
 	}
-	/*
-	plhs[2] = mxCreateSparse(2*Np*Nz, 2 * Np*Nz, QuatrJc[2*Np*Nz]-1, mxREAL);
-	double *sr = mxGetPr(plhs[2]);
-	mwIndex *irs = mxGetIr(plhs[2]);
-	mwIndex *jcs = mxGetJc(plhs[2]);
-	for (int i = 0; i < QuatrJc[2 * Np*Nz] - 1; i++) {
-		irs[i] = (mwIndex)(QuatrIr[i]) - 1;
-		sr[i] = sr[i] + 2.5;
-	}
-	for (int i = 0; i < 2 * Np*Nz + 1; i++) {
-		jcs[i] = (mwIndex)(QuatrJc[i]) - 1;
-	}
-	
-	plhs[3] = mxCreateSparse(Np*Nz, Np*Nz, Jc[Np*Nz] - 1, mxREAL);
-	double *srNew = mxGetPr(plhs[3]);
-	mwIndex *irsNew = mxGetIr(plhs[3]);
-	mwIndex *jcsNew = mxGetJc(plhs[3]);
-	for (int i = 0; i < Jc[Np*Nz] - 1; i++) {
-		irsNew[i] = (mwIndex)(Ir[i]) - 1;
-		srNew[i] = sr[i] + 2.5;
-	}
-	for (int i = 0; i < Np*Nz + 1; i++) {
-		jcsNew[i] = (mwIndex)(Jc[i]) - 1;
-	}
-	*/
 	
 	memcpy(GlobalSystemRHS, RHS, Np*K3d*Nvar * sizeof(double));
     

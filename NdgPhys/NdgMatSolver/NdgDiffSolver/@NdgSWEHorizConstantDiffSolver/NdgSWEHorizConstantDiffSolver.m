@@ -19,13 +19,15 @@ classdef NdgSWEHorizConstantDiffSolver < NdgSWEHorizDiffSolver
             obj.Prantl = physClass.Prantl;
         end
         
-        function matUpdateViscosity( ~ ,~ , ~, ~, ~ )
-            %doing nothing
-        end        
+%         function matUpdateViscosity( ~ ,~ , ~, ~, ~ )
+%             %doing nothing
+%         end        
         
     end
     
     methods(Access = protected)
-
+        function matUpdateViscosity( ~ ,~ , ~, ~, ~ )
+            %doing nothing
+        end   
     end
 end    

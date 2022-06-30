@@ -1,6 +1,5 @@
 
 #include  "mxImplicitVerticalEddyViscosity.h"
-#include "stdio.h"
 
 int *Ir = NULL, *Jc = NULL, *QuatrIr = NULL, *QuatrJc = NULL;
 
@@ -199,71 +198,44 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 		Jc[1 + j] = SingleColumn[j] + 1;
 	}
 
-	FILE *fp;
-	fp = fopen("D:\\Sharewithpc\\研究工作\\20220605\\data.txt", "w");
-
 	for (int p = 0; p < Nlayer*Np; p++) {
-		fprintf(fp, "For point %d, the row index is:\n",p+1);
 		if (p == 0) {
 			for (int p1 = 0; p1 < SingleColumn[0]; p1++) {
 				QuatrIr[p1] = SingleRow[p1] + 1;
-				printf("%d\n", p1);
-				fprintf(fp, "%d\n", QuatrIr[p1]);
 			}
 			QuatrIr[SingleColumn[0]] = Nlayer*Np + 1;
-			printf("%d\n", SingleColumn[0]);
-			fprintf(fp, "%d\n", QuatrIr[SingleColumn[0]]);
 		}
 		else {
 			for (int p1 = 0; p1 < SingleColumn[p] - SingleColumn[p - 1]; p1++) {
 				QuatrIr[SingleColumn[p - 1] + p + p1] = SingleRow[SingleColumn[p - 1] + p1]+1;
-				printf("%d\n", SingleColumn[p - 1] + p + p1);
-				fprintf(fp, "%d\n", QuatrIr[SingleColumn[p - 1] + p + p1]);
 			}
 			QuatrIr[SingleColumn[p] + p] = Nlayer*Np + p + 1;
-			printf("%d\n", SingleColumn[p] + p);
-			fprintf(fp, "%d\n", QuatrIr[SingleColumn[p] + p]);
 		}
 		
 	}
 	for (int p = Nlayer*Np; p < 2 * Nlayer*Np; p++) {
-		fprintf(fp, "For point %d, the row index is:\n", p + 1);
 		if (p == Nlayer*Np) {
 			QuatrIr[SingleNonzero + Nlayer*Np + p - Nlayer*Np] = p - Nlayer*Np + 1;
-			printf("%d\n", SingleNonzero + Nlayer*Np);
-			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np]);
 			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np]; p1++) {
 				//+1 for the upper diagnoal element
 				QuatrIr[SingleNonzero + Nlayer*Np + p1+1] = SingleRow[p1] + Nlayer*Np + 1;
-				printf("%d\n", SingleNonzero + Nlayer*Np + p1 + 1);
-				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + p1 + 1]);
 			}
 		}
 		else {
 			QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p-Nlayer*Np-1] + p - Nlayer*Np] = p - Nlayer*Np + 1;
-			printf("%d\n", SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np-1]);
-			fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np]]);
 			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np] - SingleColumn[p - Nlayer*Np - 1]; p1++) {
 				QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np-1] + p - Nlayer*Np + p1 + 1] = \
 					SingleRow[SingleColumn[p - 1 - Nlayer*Np] + p1]+ Nlayer*Np + 1;
-				printf("%d\n", SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np - 1] + p - Nlayer*Np + p1 + 1);
-				fprintf(fp, "%d\n", QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np] + p1 + 1]);
 			}
 		}
 	}
-	fprintf(fp, "The Jc value is:\n");
 	QuatrJc[0] = 1;
-	fprintf(fp, "%d\n", QuatrJc[0]);
 	for (int j = 0; j < Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[j] + 1 + j + 1;
-		fprintf(fp, "%d\n", QuatrJc[1 + j]);
 	}
 	for (int j = Nlayer*Np; j < 2*Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[Nlayer*Np-1] + Nlayer*Np + SingleColumn[j- Nlayer*Np] + 1 + j - Nlayer*Np + 1;
-		fprintf(fp, "%d\n", QuatrJc[1 + j]);
 	}
-
-	fclose(fp);
 
    /*Set the thread for pardiso part to be one, set this part for once*/
 	int thread = 1;

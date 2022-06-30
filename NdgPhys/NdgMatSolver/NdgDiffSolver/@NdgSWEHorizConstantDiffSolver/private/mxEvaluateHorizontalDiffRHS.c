@@ -157,7 +157,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		huM = HorDiffTempBEfm, hvM = HorDiffTempBEfm + BENe*BENfp, hM = HorDiffTempBEfm + 2 * BENe*BENfp;
 
 		h = fphys;
-		hu = fphys;
+        /*Corrected from hu = fphys to hu = fphys + Np*K on 20220630*/
+		hu = fphys + Np*K;
 		hv = fphys + 2 * Np*K;
 		z = fphys + 3 * Np*K;
 
