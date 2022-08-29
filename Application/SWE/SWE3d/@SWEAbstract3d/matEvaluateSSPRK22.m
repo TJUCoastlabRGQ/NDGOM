@@ -1,4 +1,5 @@
 function matEvaluateSSPRK22(obj)
+profile on;
 [ rkb, rkt] = GetRKParameter();
 fphys2d = obj.fphys2d;
 fphys = obj.fphys;
@@ -102,7 +103,7 @@ hwait.delete();
 obj.fphys2d = fphys2d;
 obj.fphys = fphys;
 obj.matUpdateFinalResult( time, fphys2d, fphys );
-
+profile viewer;
 end
 
 function [ rkb, rkt] = GetRKParameter

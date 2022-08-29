@@ -5,7 +5,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
     properties ( Constant )
         %> channel length
         ChLength = 2000;
-        ChWidth = 200;
+        ChWidth = 600;
         %> channel depth
         H0 = 10;
         %> start time
@@ -90,7 +90,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
-            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Dirichlet;
         end
         
     end
@@ -122,7 +122,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

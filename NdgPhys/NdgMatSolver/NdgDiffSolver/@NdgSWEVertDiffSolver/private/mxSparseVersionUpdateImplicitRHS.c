@@ -409,6 +409,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS) if(K2d>1000)
+//#pragma omp parallel for num_threads(3) if(K2d>1000)
 #endif
     for (i = 0; i < K2d; i++) {
         CalculateVelocityAtBottomCellCenter(Imu2d + i*Np2d, Imv2d + i*Np2d, hu3d + (i + 1)*Nz*Np - Np, hv3d + (i+1)*Nz*Np - Np, \
@@ -417,6 +418,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS) if(K2d>500)
+//#pragma omp parallel for num_threads(3) if(K2d>500)    
 #endif    
     for (i = 0; i < K2d; i++) {
         CalculatePenaltyParameter(ImTau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
@@ -426,6 +428,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS) private(var,j) if(K2d>50)
+//#pragma omp parallel for num_threads(3) private(var,j) if(K2d>50)
 #endif
     for (i = 0; i < K2d; i++){
 		/*Stiff matrix corresponds to hu, hv and other passive transport substances*/
