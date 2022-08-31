@@ -428,7 +428,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS) private(var,j) if(K2d>50)
-//#pragma omp parallel for num_threads(3) private(var,j) if(K2d>50)
 #endif
     for (i = 0; i < K2d; i++){
 		/*Stiff matrix corresponds to hu, hv and other passive transport substances*/

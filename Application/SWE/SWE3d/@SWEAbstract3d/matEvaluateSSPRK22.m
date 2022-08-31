@@ -13,7 +13,7 @@ obj.ImplicitRHS = zeros(obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nvar);
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.1 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.3 * obj.matUpdateTimeInterval( fphys2d );
 %     dt = 10;
     %       dt = 0.1;
     if( time + dt > ftime )
@@ -93,7 +93,7 @@ while( time < ftime )
     
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
     time = time + dt;
     obj.matUpdateOutputResult( time, fphys2d, fphys );
     timeRatio = time / ftime;

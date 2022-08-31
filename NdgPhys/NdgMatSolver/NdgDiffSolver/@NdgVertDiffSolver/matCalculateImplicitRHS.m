@@ -13,7 +13,7 @@ function fphys = matCalculateImplicitRHS( obj, physClass, DiffusionCoefficient, 
 %> @param[out] fphys The physical field with vertical diffusion
 %> considered
 
-% fphys = zeros(physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K, 4);
+fphys = zeros(physClass.meshUnion(1).cell.Np, physClass.meshUnion(1).K, 4);
 
 BottomEidM   = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end-1)~=0,end-1);
 UpEidM     = physClass.meshUnion(1).cell.Fmask(physClass.meshUnion(1).cell.Fmask(:,end)~=0,end);
