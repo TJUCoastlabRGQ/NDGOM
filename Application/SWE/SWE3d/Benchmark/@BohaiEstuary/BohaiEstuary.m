@@ -46,33 +46,14 @@ classdef BohaiEstuary < SWEBarotropic3d
             obj.betaS = 0;
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.ReadTideElevation;
+%             obj.Tide{1}(:,:,1436) = 0;
         end
+        
     end
     
     methods( Access = protected)
         
         ReadTideElevation( obj );
-        
-        function boundaryInfo = initBoundaryInformation( obj )
-            boundaryInfo = struct('time', {}, 'extElevation', {});
-            
-            [ path, ~, ~ ] = fileparts( mfilename('fullpath') );
-            obcfile = [ path, '/mesh/Benchmark_2_input.txt'];
-            fp = fopen(obcfile);
-            fgetl(fp); % pass the rest of first line
-            data = fscanf(fp, '%f %f', [2, inf]);
-            fclose(fp);
-            
-            boundaryInfo(1).time = data(1, :);
-            boundaryInfo(1).extElevation = data(2, :);
-            
-            for m = 1:obj.Nmesh
-                mesh = obj.meshUnion(m);
-                edge = obj.meshUnion(m).BoundaryEdge;
-                nodeid = bsxfun( @plus, edge.FToN1, (edge.FToE(1, :) - 1) .* mesh.cell.Np);
-                obj.fext{m}( :, :, 4 ) = obj.fphys{m}( nodeid + mesh.K * mesh.cell.Np * 3 );
-            end
-        end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
             delta = obj.tideinterval;
@@ -99,6 +80,14 @@ classdef BohaiEstuary < SWEBarotropic3d
             fphys2d{1} = zeros( obj.mesh2d(1).cell.Np, obj.mesh2d(1).K, obj.Nfield2d );
             fphys2d = obj.matInterpolateTopography(fphys2d);
             fphys2d{1}(:,:,1) = -1*fphys2d{1}(:,:,4);
+            
+%             Index = find(obj.meshUnion.mesh2d.x >500005 & obj.meshUnion.mesh2d.y < 4306120);
+%             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -28.0;
+
+            
+%             Index = find(abs(obj.meshUnion.mesh2d.x - 498357)<1 & abs(obj.meshUnion.mesh2d.y - 4311231)<1);
+%             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -18.0;
+            
             fphys{1} = zeros( obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nfield );
         end
         

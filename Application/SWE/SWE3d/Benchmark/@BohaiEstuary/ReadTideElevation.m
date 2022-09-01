@@ -9,7 +9,7 @@ for i = 2:size(Tempdata,2)-2
     data(:,1+(i-2)*2+1) = Tempdata(:,i);
     data(:,1+(i-2)*2+2) = Tempdata(:,i);
 end
-
+data(:,end) = Tempdata(:,end);
 
 TotalNb = 0;
 Nb = cell( obj.Nmesh, 1 );
@@ -43,7 +43,10 @@ for t = 1:Ntime
         Nbedge = numel( obj.OBEdgeIndex{m} );
         obj.Tide{m}(:, :, t) = reshape( ...
             data(t,:) - bot(Index(:))', edge.Nfp, Nbedge );
-        
+%         obj.Tide{m}(:, :, 1436) = reshape( ...
+%             - bot(Index(:))', edge.Nfp, Nbedge );        
+%         obj.Tide{m}(:, :, t) = reshape( ...
+%             - bot(Index(:))', edge.Nfp, Nbedge );  
 %         counter = counter + Nb{m};
     end
 end
