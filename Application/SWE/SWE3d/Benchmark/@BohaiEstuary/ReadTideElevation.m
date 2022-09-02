@@ -5,7 +5,7 @@ Tempdata = xlsread( obj.tidalFile );
 data = zeros(size(Tempdata,1),2 + (size(Tempdata,2) - 2)*2);
 
 data(:,1) = Tempdata(:,1);
-for i = 2:size(Tempdata,2)-2
+for i = 2:size(Tempdata,2)-1
     data(:,1+(i-2)*2+1) = Tempdata(:,i);
     data(:,1+(i-2)*2+2) = Tempdata(:,i);
 end
