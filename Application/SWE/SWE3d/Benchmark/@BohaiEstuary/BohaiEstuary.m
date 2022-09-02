@@ -112,13 +112,14 @@ classdef BohaiEstuary < SWEBarotropic3d
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            outputIntervalNum = 440;
-            option('startTime') = 1435*600;
+            startTime = 1435*600;
+            outputIntervalNum = 230;
+            option('startTime') = startTime;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
-            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputTimeInterval') = (ftime - startTime)/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 400;
+            option('outputNcfileNum') = 230;
             option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.GOTM;
             option('GOTMSetupFile') = obj.GotmFile;
