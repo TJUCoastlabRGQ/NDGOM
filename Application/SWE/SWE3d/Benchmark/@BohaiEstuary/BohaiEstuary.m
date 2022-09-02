@@ -38,7 +38,7 @@ classdef BohaiEstuary < SWEBarotropic3d
             %BOHAIESTUARY 构造此类的实例
             %   此处显示详细说明
             [ mesh2d, mesh3d ] = obj.makeChannelMesh( N, Nz, Mz );
-            obj.outputFieldOrder2d = [ 1 2 3 ];
+            obj.outputFieldOrder2d = [ 1 2 3 4];
             obj.outputFieldOrder3d = [ 1 2 4 6 ];
             obj.T0 = 0;
             obj.S0 = 0;

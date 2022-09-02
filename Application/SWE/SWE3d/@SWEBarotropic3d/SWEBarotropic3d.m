@@ -18,7 +18,7 @@ classdef SWEBarotropic3d < SWEAbstract3d
         %> index of variable in physical field
         varFieldIndex2d = 1
         
-        fieldName2d = {'h','hU','hV'};
+        fieldName2d = {'h','hU','hV','z'};
     end
     
     properties
