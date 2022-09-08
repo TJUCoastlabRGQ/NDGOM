@@ -14,7 +14,7 @@ classdef BohaiEstuary < SWEBarotropic3d
     end
     
     properties
-        finalTime = 1435*600 + 38*3600;
+        finalTime = 1435*600 + 42*3600;
         
         tideinterval = 600;
         
@@ -31,7 +31,7 @@ classdef BohaiEstuary < SWEBarotropic3d
         alphaT
         
         betaS
-    end    
+    end
     
     methods
         function obj = BohaiEstuary(N, Nz, Mz)
@@ -46,7 +46,58 @@ classdef BohaiEstuary < SWEBarotropic3d
             obj.betaS = 0;
             obj.initPhysFromOptions( mesh2d, mesh3d );
             obj.ReadTideElevation;
-%             obj.Tide{1}(:,:,1436) = 0;
+            %             obj.Tide{1}(:,:,1436) = 0;
+        end
+        
+        function BohaiEstuaryPostProcess( obj )
+            Time = ncread('D:\Sharewithpc\研究工作\20220906\BohaiEstuary\2d\BohaiEstuary.1-1.1.nc','time');
+            [ path, ~, ~ ] = fileparts( mfilename('fullpath') );
+%             EtaIndex = [1 2 3 4 5];
+%             for i = 1:numel(EtaIndex)
+%                 file = dir([path,'/Data/Point',num2str(i),'/*.csv']);
+%                 Eta = zeros(numel(file),1);
+%                 for j = 1:numel(file)
+%                     Data = xlsread([path,'/Data/Point',num2str(i),'/Point',num2str(i),'.',num2str(j-1),'.csv']);
+%                     Eta(j) = Data(1);
+%                     %                     Data = xlsread(['Point1'])
+%                 end
+%                 figure;
+%                 hold on;
+%                 plot(Time, Eta,'k','linewidth',1.5);
+%                 
+%                 MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
+%                 plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
+%                 legend({'Simulation','Measurement'},'Fontsize',12);
+%                 legend('boxoff');
+%                 box on;
+%                 xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
+%                 ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
+%                 set(gca,'Fontsize',14,'Linewidth',1.4);
+%             end
+            UIndex = [3 4 5];
+            for i = 1:numel(UIndex)
+                file = dir([path,'/Data/UPoint',num2str(UIndex(i)),'/*.csv']);
+                Vel = zeros(numel(file),1);
+                for j = 1:numel(file)
+                    Data = xlsread([path,'/Data/UPoint',num2str(UIndex(i)),'/UPoint',num2str(UIndex(i)),'.',num2str(j-1),'.csv']);
+                    Vel(j) = Data(1);
+                end
+                figure;
+                hold on;
+                plot(Time, Vel,'k','linewidth',1.5);
+                
+                MData = xlsread([path,'/Data/Measured-Data/','流速',num2str(UIndex(i)),'.xlsx']);
+                plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
+                legend({'Simulation','Measurement'},'Fontsize',12);
+                legend('boxoff');
+                box on;
+                xlim([9.1*10^5,10.2*10^5]);
+                xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
+                ylabel('$Velocity\;(m/s)$','interpreter','Latex','Fontsize',14);
+                set(gca,'Fontsize',14,'Linewidth',1.4);
+                
+            end            
+            
         end
         
     end
@@ -81,12 +132,12 @@ classdef BohaiEstuary < SWEBarotropic3d
             fphys2d = obj.matInterpolateTopography(fphys2d);
             fphys2d{1}(:,:,1) = -1*fphys2d{1}(:,:,4);
             
-%             Index = find(obj.meshUnion.mesh2d.x >500005 & obj.meshUnion.mesh2d.y < 4306120);
-%             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -28.0;
-
+            %             Index = find(obj.meshUnion.mesh2d.x >500005 & obj.meshUnion.mesh2d.y < 4306120);
+            %             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -28.0;
             
-%             Index = find(abs(obj.meshUnion.mesh2d.x - 498357)<1 & abs(obj.meshUnion.mesh2d.y - 4311231)<1);
-%             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -18.0;
+            
+            %             Index = find(abs(obj.meshUnion.mesh2d.x - 498357)<1 & abs(obj.meshUnion.mesh2d.y - 4311231)<1);
+            %             fphys2d{1}(3*obj.meshUnion.mesh2d.K*obj.meshUnion.mesh2d.cell.Np + Index) = -18.0;
             
             fphys{1} = zeros( obj.meshUnion(1).cell.Np, obj.meshUnion(1).K, obj.Nfield );
         end
@@ -136,8 +187,8 @@ classdef BohaiEstuary < SWEBarotropic3d
             option('f0 for beta coriolis solver') = 2*sin((38 + 54/60)/180*pi)*7.29*10^(-5);
             %             option('f0 for beta coriolis solver') = 0;
             option('beta for beta coriolis solver') = 0.0;
-            option('PhysicalSurfaceRoughnessLength') = 0.003;
-            option('PhysicalBottomRoughnessLength') = 0.003;
+            option('PhysicalSurfaceRoughnessLength') = 0.0001;
+            option('PhysicalBottomRoughnessLength') = 0.0001;
         end
         
         

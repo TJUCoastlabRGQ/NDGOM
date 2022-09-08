@@ -14,7 +14,7 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 % try
 while( time < ftime )
-    dt = 0.4 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.2 * obj.matUpdateTimeInterval( fphys2d );
 
     if( time + dt > ftime )
         dt = ftime - time;
@@ -85,7 +85,7 @@ while( time < ftime )
 %     [ fphys ] = obj.limiter.matLimitNew( obj, fphys );
 %     [ fphys ] = obj.matImposeLimiter( fphys ); 
  
-   obj.VerticalEddyViscositySolver.matUpdateViscosity( obj, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2), dt, fphys{1}(:,:,13));
+%    obj.VerticalEddyViscositySolver.matUpdateViscosity( obj, fphys2d{1}(:,:,1), fphys{1}(:,:,1), fphys{1}(:,:,2), dt, fphys{1}(:,:,13));
     
 %    fphys{1}(:,:,5) = obj.VerticalEddyViscositySolver.nv;
         
@@ -96,8 +96,8 @@ while( time < ftime )
    fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
    fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-%     visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
-    visual.drawResult( fphys2d{1}(:,:,1) );
+    visual.drawResult( fphys2d{1}(:,:,1) + fphys2d{1}(:,:,4) );
+%     visual.drawResult( fphys2d{1}(:,:,1) );
 %     disp(max(max(fphys2d{1}(:,:,1))));
     % obj.drawVerticalSlice( 20, 1, fphys3d{1}(:, :, 3) * 1e7 );
     %> reallocate the space for the rhs
