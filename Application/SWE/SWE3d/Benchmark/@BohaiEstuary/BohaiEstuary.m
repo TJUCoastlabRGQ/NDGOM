@@ -164,7 +164,7 @@ classdef BohaiEstuary < SWEBarotropic3d
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
             startTime = 1435*600;
-            outputIntervalNum = 230;
+            outputIntervalNum = 252;
             option('startTime') = startTime;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
