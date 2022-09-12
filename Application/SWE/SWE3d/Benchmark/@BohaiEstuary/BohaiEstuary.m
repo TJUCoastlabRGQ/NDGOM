@@ -14,7 +14,7 @@ classdef BohaiEstuary < SWEBarotropic3d
     end
     
     properties
-        finalTime = 1435*600 + 42*3600;
+        finalTime = 1363*600 + 54*3600;
         
         tideinterval = 600;
         
@@ -50,36 +50,36 @@ classdef BohaiEstuary < SWEBarotropic3d
         end
         
         function BohaiEstuaryPostProcess( obj )
-            Time = ncread('D:\Sharewithpc\研究工作\20220906\BohaiEstuary\2d\BohaiEstuary.1-1.1.nc','time');
+            Time = ncread('D:\Sharewithpc\研究工作\20220912\Result\2d\BohaiEstuary.1-1.1.nc','time');
             [ path, ~, ~ ] = fileparts( mfilename('fullpath') );
-%             EtaIndex = [1 2 3 4 5];
-%             for i = 1:numel(EtaIndex)
-%                 file = dir([path,'/Data/Point',num2str(i),'/*.csv']);
-%                 Eta = zeros(numel(file),1);
-%                 for j = 1:numel(file)
-%                     Data = xlsread([path,'/Data/Point',num2str(i),'/Point',num2str(i),'.',num2str(j-1),'.csv']);
-%                     Eta(j) = Data(1);
-%                     %                     Data = xlsread(['Point1'])
-%                 end
-%                 figure;
-%                 hold on;
-%                 plot(Time, Eta,'k','linewidth',1.5);
-%                 
-%                 MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
-%                 plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
-%                 legend({'Simulation','Measurement'},'Fontsize',12);
-%                 legend('boxoff');
-%                 box on;
-%                 xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
-%                 ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
-%                 set(gca,'Fontsize',14,'Linewidth',1.4);
-%             end
+            EtaIndex = [1 2 3 4 5];
+            for i = 1:numel(EtaIndex)
+                file = dir([path,'/Data/P',num2str(i),'/*.csv']);
+                Eta = zeros(numel(file),1);
+                for j = 1:numel(file)
+                    Data = xlsread([path,'/Data/P',num2str(i),'/P',num2str(i),'.',num2str(j-1),'.csv']);
+                    Eta(j) = Data(6);
+                end
+                figure;
+                hold on;
+                plot(Time, Eta,'k','linewidth',1.5);
+                
+                MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
+                plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
+                legend({'Simulation','Measurement'},'Fontsize',12);
+                legend('boxoff');
+                box on;
+                xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
+                ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
+                xlim([9.1*10^5,10.2*10^5]);
+                set(gca,'Fontsize',14,'Linewidth',1.4);
+            end
             UIndex = [3 4 5];
             for i = 1:numel(UIndex)
-                file = dir([path,'/Data/UPoint',num2str(UIndex(i)),'/*.csv']);
+                file = dir([path,'/Data/P',num2str(UIndex(i)),'/*.csv']);
                 Vel = zeros(numel(file),1);
                 for j = 1:numel(file)
-                    Data = xlsread([path,'/Data/UPoint',num2str(UIndex(i)),'/UPoint',num2str(UIndex(i)),'.',num2str(j-1),'.csv']);
+                    Data = xlsread([path,'/Data/P',num2str(UIndex(i)),'/P',num2str(UIndex(i)),'.',num2str(j-1),'.csv']);
                     Vel(j) = Data(1);
                 end
                 figure;
@@ -94,6 +94,7 @@ classdef BohaiEstuary < SWEBarotropic3d
                 xlim([9.1*10^5,10.2*10^5]);
                 xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
                 ylabel('$Velocity\;(m/s)$','interpreter','Latex','Fontsize',14);
+                xlim([9.1*10^5,10.2*10^5]);
                 set(gca,'Fontsize',14,'Linewidth',1.4);
                 
             end            
@@ -163,8 +164,8 @@ classdef BohaiEstuary < SWEBarotropic3d
         
         function [ option ] = setOption( obj, option )
             ftime = obj.finalTime;
-            startTime = 1435*600;
-            outputIntervalNum = 252;
+            startTime = 1363*600;
+            outputIntervalNum = 324;
             option('startTime') = startTime;
             option('finalTime') = ftime;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
