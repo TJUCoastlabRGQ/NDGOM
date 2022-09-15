@@ -52,28 +52,28 @@ classdef BohaiEstuary < SWEBarotropic3d
         function BohaiEstuaryPostProcess( obj )
             Time = ncread('D:\Sharewithpc\研究工作\20220912\Result\2d\BohaiEstuary.1-1.1.nc','time');
             [ path, ~, ~ ] = fileparts( mfilename('fullpath') );
-            EtaIndex = [1 2 3 4 5];
-            for i = 1:numel(EtaIndex)
-                file = dir([path,'/Data/P',num2str(i),'/*.csv']);
-                Eta = zeros(numel(file),1);
-                for j = 1:numel(file)
-                    Data = xlsread([path,'/Data/P',num2str(i),'/P',num2str(i),'.',num2str(j-1),'.csv']);
-                    Eta(j) = Data(6);
-                end
-                figure;
-                hold on;
-                plot(Time, Eta,'k','linewidth',1.5);
-                
-                MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
-                plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
-                legend({'Simulation','Measurement'},'Fontsize',12);
-                legend('boxoff');
-                box on;
-                xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
-                ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
-                xlim([9.1*10^5,10.2*10^5]);
-                set(gca,'Fontsize',14,'Linewidth',1.4);
-            end
+%             EtaIndex = [1 2 3 4 5];
+%             for i = 1:numel(EtaIndex)
+%                 file = dir([path,'/Data/P',num2str(i),'/*.csv']);
+%                 Eta = zeros(numel(file),1);
+%                 for j = 1:numel(file)
+%                     Data = xlsread([path,'/Data/P',num2str(i),'/P',num2str(i),'.',num2str(j-1),'.csv']);
+%                     Eta(j) = Data(6);
+%                 end
+%                 figure;
+%                 hold on;
+%                 plot(Time, Eta,'k','linewidth',1.5);
+%                 
+%                 MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
+%                 plot(1435*600+12*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
+%                 legend({'Simulation','Measurement'},'Fontsize',12);
+%                 legend('boxoff');
+%                 box on;
+%                 xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
+%                 ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
+% %                 xlim([9.1*10^5,10.2*10^5]);
+%                 set(gca,'Fontsize',14,'Linewidth',1.4);
+%             end
             UIndex = [3 4 5];
             for i = 1:numel(UIndex)
                 file = dir([path,'/Data/P',num2str(UIndex(i)),'/*.csv']);
@@ -91,10 +91,10 @@ classdef BohaiEstuary < SWEBarotropic3d
                 legend({'Simulation','Measurement'},'Fontsize',12);
                 legend('boxoff');
                 box on;
-                xlim([9.1*10^5,10.2*10^5]);
+%                 xlim([9.1*10^5,10.2*10^5]);
                 xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
                 ylabel('$Velocity\;(m/s)$','interpreter','Latex','Fontsize',14);
-                xlim([9.1*10^5,10.2*10^5]);
+%                 xlim([9.1*10^5,10.2*10^5]);
                 set(gca,'Fontsize',14,'Linewidth',1.4);
                 
             end            
