@@ -50,7 +50,14 @@ classdef BohaiEstuary < SWEBarotropic3d
         end
         
         function BohaiEstuaryPostProcess( obj )
-            Time = ncread('D:\Sharewithpc\研究工作\20220917\Result\2d\BohaiEstuary.1-1.1.nc','time');
+            Time = ncread('D:\Sharewithpc\研究工作\20220912\Result\2d\BohaiEstuary.1-1.1.nc','time');
+%             N0=datenum([0 12 7 20 10 0]);
+            N0=datenum([0 12 8 8 10 0]);
+            Newtime = zeros(numel(Time),1);
+            Newtime(1) = N0;
+            for i = 2:numel(Time)
+                Newtime(i) = Newtime(i-1) + datenum([0 0 0 0 0 Time(i) - Time(i-1)]);
+            end     
             [ path, ~, ~ ] = fileparts( mfilename('fullpath') );
             EtaIndex = [1 2 3 4 5];
             for i = 1:numel(EtaIndex)
@@ -62,42 +69,84 @@ classdef BohaiEstuary < SWEBarotropic3d
                 end
                 figure;
                 hold on;
-                plot(Time, Eta,'k','linewidth',1.5);
-                
+                Index = Newtime >= datenum([0 12 8 18 0 0]);
+                plot(Newtime(Index), Eta(Index),'k','linewidth',1.5);
                 MData = xlsread([path,'/Data/Measured-Data/','潮位',num2str(i),'.xlsx']);
-                plot(1363*600+24*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
-                legend({'Simulation','Measurement'},'Fontsize',12);
-                legend('boxoff');
-                box on;
-                xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
-                ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);
-%                 xlim([9.1*10^5,10.2*10^5]);
-                set(gca,'Fontsize',14,'Linewidth',1.4);
-            end
-            UIndex = [3 4 5];
-            for i = 1:numel(UIndex)
-                file = dir([path,'/Data/P',num2str(UIndex(i)),'/*.csv']);
-                Vel = zeros(numel(file),1);
-                for j = 1:numel(file)
-                    Data = xlsread([path,'/Data/P',num2str(UIndex(i)),'/P',num2str(UIndex(i)),'.',num2str(j-1),'.csv']);
-                    Vel(j) = Data(1);
+                N1 = datenum([0 12 8 21 0 0]);
+                MeasureTime = zeros(numel(MData(:,1)),1);
+                MeasureTime(1) = N1 + datenum([0 0 0 MData(1,1)*6 0 0]);
+                for j = 2:numel(MeasureTime)
+                    MeasureTime(j) = MeasureTime(j-1) + datenum([0 0 0 0 0 (MData(j,1) - MData(j-1,1))*6*3600]);
                 end
-                figure;
-                hold on;
-                plot(Time, Vel,'k','linewidth',1.5);
-                
-                MData = xlsread([path,'/Data/Measured-Data/','流速',num2str(UIndex(i)),'.xlsx']);
-                plot(1363*600+24*6*600+5*600 + MData(:,1)*6*3600, MData(:,2),'ro','markersize',7.5);
+                plot(MeasureTime, MData(:,2),'ro','markersize',7.5,'Linewidth',1.5);
                 legend({'Simulation','Measurement'},'Fontsize',12);
                 legend('boxoff');
                 box on;
-%                 xlim([9.1*10^5,10.2*10^5]);
-                xlabel('$time\;(s)$','interpreter','Latex','Fontsize',14);
-                ylabel('$Velocity\;(m/s)$','interpreter','Latex','Fontsize',14);
-%                 xlim([9.1*10^5,10.2*10^5]);
-                set(gca,'Fontsize',14,'Linewidth',1.4);
-                
-            end            
+                ylabel('$\eta\;(m)$','interpreter','Latex','Fontsize',14);                
+                set(gca,'XTickLabelRotation',30);
+                datetick('x','mm/dd HH:MM');
+                set(gca,'Fontsize',12,'Linewidth',1.4);
+                set(gcf,'position',[50,50,700,350]);
+            end
+            
+%             UIndex = [3 4 5];
+%             for i = 1:numel(UIndex)
+%                 file = dir([path,'/Data/P',num2str(UIndex(i)),'/*.csv']);
+%                 Vel = zeros(numel(file),1);
+%                 Dir = zeros(numel(file),1);
+%                 for j = 1:numel(file)
+%                     Data = xlsread([path,'/Data/P',num2str(UIndex(i)),'/P',num2str(UIndex(i)),'.',num2str(j-1),'.csv']);
+%                     Vel(j) = Data(1);
+%                     if ( Data(7)<0 && Data(8)>=0)
+%                         Dir(j) = ...
+%                             450 - atan2d(Data(8), Data(7));
+%                     else
+%                         Dir(j) = ...
+%                             90 - atan2d(Data(8), Data(7));
+%                     end
+%                 end
+%                 figure;
+%                 hold on;
+%                 Index = Newtime >= datenum([0 12 8 18 0 0]);
+%                 plot(Newtime(Index), Vel(Index),'k','linewidth',1.5);                            
+%                 MData = xlsread([path,'/Data/Measured-Data/','流速',num2str(UIndex(i)),'.xlsx']);
+%                 N1 = datenum([0 12 8 21 0 0]);
+%                 MeasureTime = zeros(numel(MData(:,1)),1);
+%                 MeasureTime(1) = N1 + datenum([0 0 0 MData(1,1)*6 0 0]);
+%                 for j = 2:numel(MeasureTime)
+%                     MeasureTime(j) = MeasureTime(j-1) + datenum([0 0 0 0 0 (MData(j,1) - MData(j-1,1))*6*3600]);
+%                 end
+%                 plot(MeasureTime, MData(:,2),'ro','markersize',7.5,'Linewidth',1.5);
+%                 legend({'Simulation','Measurement'},'Fontsize',12);
+%                 legend('boxoff');
+%                 box on;
+%                 ylim([0,1.0]);
+%                 ylabel('$Velocity\;(m/s)$','interpreter','Latex','Fontsize',14);
+%                 set(gca,'XTickLabelRotation',30);
+%                 datetick('x','mm/dd HH:MM');
+%                 set(gca,'Fontsize',12,'Linewidth',1.4);
+%                 set(gcf,'position',[50,50,700,350]);
+%                 
+%                 figure;
+%                 hold on;
+%                 plot(Newtime(Index), Dir(Index),'k','linewidth',1.5); 
+%                 MData = xlsread([path,'/Data/Measured-Data/','流向',num2str(UIndex(i)),'.xlsx']);
+%                 N1 = datenum([0 12 8 21 0 0]);
+%                 MeasureTime = zeros(numel(MData(:,1)),1);
+%                 MeasureTime(1) = N1 + datenum([0 0 0 MData(1,1)*6 0 0]);
+%                 for j = 2:numel(MeasureTime)
+%                     MeasureTime(j) = MeasureTime(j-1) + datenum([0 0 0 0 0 (MData(j,1) - MData(j-1,1))*6*3600]);
+%                 end  
+%                 plot(MeasureTime, MData(:,2),'ro','markersize',7.5,'Linewidth',1.5);
+%                 legend({'Simulation','Measurement'},'Fontsize',12);
+%                 legend('boxoff');
+%                 box on;
+%                 ylabel('$Deg$','interpreter','Latex','Fontsize',14);
+%                 set(gca,'XTickLabelRotation',30);
+%                 datetick('x','mm/dd HH:MM');
+%                 set(gca,'Fontsize',12,'Linewidth',1.4);
+%                 set(gcf,'position',[50,50,700,350]);
+%             end
             
         end
         

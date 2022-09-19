@@ -1,0 +1,7 @@
+data=rand(7,1); %假设你原来的数据是一个数列
+num=length(data); %数据的点数是数列的长度
+N0=datenum([0 12 8 10 15 0]); %起始时间 10：15
+dN=datenum([0 0 0 1 0 0]); %时间增量，1分钟
+N=N0+(0:num-1)*dN; %根据数据点数，产生1分钟间隔时间点
+plot(N,data); %数据画图
+datetick(gca,'x','mm/dd HH:MM');
