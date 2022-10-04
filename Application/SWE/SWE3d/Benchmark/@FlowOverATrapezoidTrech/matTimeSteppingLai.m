@@ -6,7 +6,7 @@ fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.3 * obj.matUpdateTimeInterval( fphys );
+    dt = 0.3 * obj.matUpdateTimeInterval( fphys2d );
 %     dt = 0.005;
     %       dt = 0.1;
     if( time + dt > ftime )
@@ -24,7 +24,7 @@ while( time < ftime )
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
-    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys );
+    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys{1} );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
@@ -61,7 +61,7 @@ while( time < ftime )
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
-    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys );
+    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys{1} );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     

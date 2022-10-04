@@ -19,7 +19,7 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
         end
         
         function matEvaluateDiffRHS(obj, physClass, fphys)
-            obj.matUpdateViscosity(physClass, fphys{1}(:,:,1), fphys{1}(:,:,2), fphys{1}(:,:,4));
+            obj.matUpdateViscosity(physClass, fphys(:,:,1), fphys(:,:,2), fphys(:,:,4));
             matEvaluateDiffRHS@NdgSWEHorizDiffSolver( obj, physClass, fphys);
         end
     end

@@ -105,7 +105,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             option('outputType') = enumOutputFile.NetCDF;
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
