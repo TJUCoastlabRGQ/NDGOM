@@ -34,11 +34,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double dt = mxGetScalar(prhs[8]);
 	double rho = mxGetScalar(prhs[9]);
 	double Hcrit = mxGetScalar(prhs[10]);
+	double *J = mxGetPr(prhs[11]);
+	double *M3d = mxGetPr(prhs[12]);
 
 	plhs[0] = mxCreateDoubleMatrix(Np*K, 1, mxREAL);
 	double *RHS = mxGetPr(plhs[0]);
 
 	double *InvSHeight = malloc(Np*K*sizeof(double));
+	double *TempRHS = malloc(Np*K*sizeof(double));
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -47,18 +50,25 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		GetInverseHeight(InvSHeight + k*Np, Height+k*Np, Hcrit, Np);
 	}
 
+	ptrdiff_t One = 1;
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
+		double *EleMass3d = malloc(Np*Np*sizeof(double));
+		DiagMultiply(EleMass3d, M3d, J+k*Np, Np);
 		for (int p = 0; p < Np; p++){
-			RHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
+			TempRHS[k*Np + p] = rho / dt*(PUPX[k*Np + p] + PUPS[k*Np + p] * PSPX[k*Np + p] + \
 				PVPY[k*Np + p] + PVPS[k*Np + p] * PSPY[k*Np + p] + \
 				InvSHeight[k*Np + p] * PWPS[k*Np + p]);
 		}
+		MatrixMultiply("N", "N", (ptrdiff_t)Np, One, (ptrdiff_t)Np, 1.0, EleMass3d,
+			(ptrdiff_t)Np, TempRHS + k*Np, (ptrdiff_t)Np, 0.0, RHS + k*Np, (ptrdiff_t)Np);
+		free(EleMass3d);
 	}
 	free(InvSHeight);
-
+	free(TempRHS);
 }
 
 void GetInverseHeight(double *dest, double *source, double hcrit, int Np){

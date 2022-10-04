@@ -68,6 +68,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
         }
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         int flag = 0;
+		/*
         for ( i = 0; i < Np; i++){
             if (fphys[k*Np + i] > amax || fphys[k*Np + i] < amin){
                 flag = 1;
@@ -94,7 +95,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
                 // the final average data for each vertical line
                 *( avL + i ) = fmod[0] * OV1d[0];
                 //Next limit the corresponding date
-                /*Calculate the slope parameter first*/
+                //*Calculate the slope parameter first
                 double Lambda = 1.0;
                 if (fphys[k*Np + Nph * (Npz - 1) + i] > amax)
                     //Lambda = min(Lambda, (amax - avL[i]) / ( fphys[k*Np + Nph*(Npz - 1) + i] - avL[i] + pow(10,-10.0) ));
@@ -104,7 +105,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 					Lambda = min(Lambda, (avL[i] - amin) / (avL[i] - fphys[k*Np + Nph*(Npz - 1) + i]));
                 else
                     Lambda = 1.0;
-                /*Limit the value in vertical direction*/
+                /*Limit the value in vertical direction
 				Lambda = max(0, Lambda);
                 for (j = 0; j < Npz; j++){
                     fphys[k*Np + Nph*(Npz - 1) + i - j*Nph] = Lambda * fphys[k*Np + Nph*(Npz - 1) + i - j*Nph]\
@@ -115,6 +116,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
             free(tempValue);
             free(fmod);
         }
+		*/
         /*Next to limit the whole computation cell follows Cockburn and Shu*/
         /*This part is used to decide whether the studied cell is problematic following Cockburn and Shu*/
         flag = 0;

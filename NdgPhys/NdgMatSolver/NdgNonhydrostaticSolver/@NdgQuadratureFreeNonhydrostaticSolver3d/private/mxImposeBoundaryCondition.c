@@ -1,21 +1,49 @@
 
 #include "SWENonhydrostatic3d.h"
 
-void GetInverseSquareHeight(double *, double *, double , int );
+extern double *ImposeBCsK33, *ImposeBCsInvSquaHeight, *BETau, *ImposeBCsNewmannData, *ImposeBCsTempNewmannData, *ImposeBCsWx, *ImposeBCsWy, \
+*ImposeBCsWxRHS2d, *ImposeBCsWyRHS2d, *ImposeBCsWIEFluxMx2d, *ImposeBCsWIEFluxMy2d, *ImposeBCsWIEFluxPx2d, *ImposeBCsWIEFluxPy2d, \
+*ImposeBCsWIEFluxSx2d, *ImposeBCsWIEFluxSy2d, *ImposeBCsVolumeIntegralX, *ImposeBCsTempVolumeIntegralX, *ImposeBCsVolumeIntegralY, \
+*ImposeBCsTempVolumeIntegralY, *ImposeBCsIEfm, *ImposeBCsIEfp, *ImposeBCsERHSx, *ImposeBCsERHSy, *ImposeBCsTempFacialIntegral, \
+*ImposeBCsBotBEU, *ImposeBCsBotBEV, *ImposeBCsBotBEH, *ImposeBCsBotBECoe, *ImposeBCsBotBEPWPS, \
+*ImposeBCsWs, *ImposeBCsPUPX, *ImposeBCsPUPY, *ImposeBCsPUPS, *ImposeBCsPVPX, *ImposeBCsPVPY, *ImposeBCsPVPS, \
+*ImposeBCsPWPH, *ImposeBCsPHPX, *ImposeBCsPHPY, *ImposeBCsPzPx, *ImposeBCsPzPy, *ImposeBCsTempDataInX,\
+*ImposeBCsTempDataInY, *ImposeBCsTempDataInZ, *ImposeBCsInverseH, *ImposeBCsPNPS, *ImposeBCsPNPX, *ImposeBCsPNPY,\
+*ImposeBCsGPEtaPX, *ImposeBCsDPNPSX, *ImposeBCsGPEtaPY, *ImposeBCsDPNPSY, *ImposeBCsInvHeight;
+
+extern char *ImposeBoundaryInitialized;
+
+void MyExit()
+{
+	if (!strcmp("True", ImposeBoundaryInitialized)){
+		SWENH3dImposeBoundaryMemoryDeAllocation();
+		ImposeBoundaryInitialized = "False";
+	}
+	return;
+}
+
+void SumInColumn(double *, double *, int);
+
+void SumInRow(double *, double *, int, int);
+
+void GetInverseSquareHeight(double *, double *, double *, double , int );
 
 void GetPenaltyParameter(double *, double , double , int , int , int );
 
-void ImposeNewmannBoundaryCondition(double *, mwIndex *, mwIndex *, int , \
-	double *, double *, double *, double *, double *, double *, int , int , \
-	double *, double *, double *, double *, double *, int , double *);
 
-void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, int, \
-	int, int, double *, double *, double *, double *, double *, double *, double *, double *, \
-	double *, double *, double *, double *, double *, double *, double *, double *, double *, \
-	int, double *, double *, double *, double *);
+void ImposeNewmannBoundaryCondition(double *, int , \
+	int , int , double *, double *, double *, double *, double *);
+
+void ImposeDirichletBoundaryCondition(double *, mwIndex *, mwIndex *, double *, double *, int , \
+	int , int , double *, double *, double *, double *, double *, double *, double *, double *, \
+	double *, double *, double *, double *, double *, double *, \
+	int , double *, double *, double *, double *, double );
+
+void GetScalarCentralFluxTerm2d(double *, double *, double *, double *, int );
 
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
+	mexAtExit(&MyExit);
 	double *StiffMatrix = mxGetPr(prhs[0]);
 	mwIndex *Tempjcs = mxGetJc(prhs[0]);
 	mwIndex *Tempirs = mxGetIr(prhs[0]);
@@ -42,6 +70,36 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	const mxArray *BottomBoundaryEdge = prhs[7];
 	const mxArray *BoundaryEdge = prhs[8];
 	signed char *ftype = (signed char *)mxGetData(prhs[9]);
+	const mxArray *mesh2d = prhs[10];
+	const mxArray *cell2d = prhs[11];
+	const mxArray *InnerEdge2d = prhs[12];
+	const mxArray *BoundaryEdge2d = prhs[13];
+	double *Wold = mxGetPr(prhs[14]);
+	double *Wnew = mxGetPr(prhs[15]);
+	double deltatime = mxGetScalar(prhs[16]);
+	double rho = mxGetScalar(prhs[17]);
+	double *Hu = mxGetPr(prhs[18]);
+	double *Hv = mxGetPr(prhs[19]);
+	double *RHS = mxGetPr(prhs[20]);
+	double *PWPS = mxGetPr(prhs[21]);
+	double *BoundaryNonhydro = mxGetPr(prhs[22]);
+
+	double *Unew = mxGetPr(prhs[23]);
+	double *Uold = mxGetPr(prhs[24]);
+	double *Vnew = mxGetPr(prhs[25]);
+	double *Vold = mxGetPr(prhs[26]);
+	double *PUPX = mxGetPr(prhs[27]);
+	double *PUPY = mxGetPr(prhs[28]);
+	double *PUPS = mxGetPr(prhs[29]);
+	double *PVPX = mxGetPr(prhs[30]);
+	double *PVPY = mxGetPr(prhs[31]);
+	double *PVPS = mxGetPr(prhs[32]);
+	double *PHPX = mxGetPr(prhs[33]);
+	double *PHPY = mxGetPr(prhs[34]);
+	double gra = mxGetScalar(prhs[35]);
+	double *PzPx = mxGetPr(prhs[36]);
+	double *PzPy = mxGetPr(prhs[37]);
+	double *BEBCsNewmannData = mxGetPr(prhs[38]);
 
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
@@ -58,8 +116,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double  *Ds = mxGetPr(TempDs);
 	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double  *Dt = mxGetPr(TempDt);
-	mxArray *TempP = mxGetField(cell, 0, "N");
-	int P = (int)mxGetScalar(TempP);
+	mxArray *TempN = mxGetField(cell, 0, "N");
+	int N = (int)mxGetScalar(TempN);
+	mxArray *TempNz = mxGetField(cell, 0, "Nz");
+	int Nz = (int)mxGetScalar(TempNz);
 
 	mxArray *TempNlayer = mxGetField(mesh, 0, "Nz");
 	int Nlayer = (int)mxGetScalar(TempNlayer);
@@ -79,10 +139,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *ry = mxGetPr(Tempry);
 	mxArray *Tempsy = mxGetField(mesh, 0, "sy");
 	double *sy = mxGetPr(Tempsy);
-	mxArray *Temprz = mxGetField(mesh, 0, "rz");
-	double *rz = mxGetPr(Temprz);
+//	mxArray *Temprz = mxGetField(mesh, 0, "rz");
+//	double *rz = mxGetPr(Temprz);
 	mxArray *Temptz = mxGetField(mesh, 0, "tz");
 	double *tz = mxGetPr(Temptz);
+
+	plhs[1] = mxCreateDoubleMatrix(Np*K, 1, mxREAL);
+	double *OutRHS = mxGetPr(plhs[1]);
+	memcpy(OutRHS, RHS, Np*K*sizeof(double));
 
 	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
 	double *BEJs = mxGetPr(TempBEJs);
@@ -95,6 +159,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BEFToE = mxGetPr(TempBEFToE);
 	mxArray *TempBEFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
+	mxArray *TempBEFToN2 = mxGetField(BoundaryEdge, 0, "FToN2");
+	double *BEFToN2 = mxGetPr(TempBEFToN2);
 	mxArray *TempBEnx = mxGetField(BoundaryEdge, 0, "nx");
 	double *BEnx = mxGetPr(TempBEnx);
 	mxArray *TempBEny = mxGetField(BoundaryEdge, 0, "ny");
@@ -103,8 +169,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *BEnz = mxGetPr(TempBEnz);
 	mxArray *TempBELMass2d = mxGetField(BoundaryEdge, 0, "M");
 	double  *BELMass2d = mxGetPr(TempBELMass2d);
-	mxArray *TempBEFLAV = mxGetField(BoundaryEdge, 0, "LAV");
-	double *BEFLAV = mxGetPr(TempBEFLAV);
+	mxArray *TempBELAV = mxGetField(BoundaryEdge, 0, "LAV");
+	double *BELAV = mxGetPr(TempBELAV);
 
 	mxArray *TempBotBEJs = mxGetField(BottomBoundaryEdge, 0, "Js");
 	double *BotBEJs = mxGetPr(TempBotBEJs);
@@ -128,17 +194,63 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempBotBEFLAV = mxGetField(BottomBoundaryEdge, 0, "LAV");
 	double *BotBEFLAV = mxGetPr(TempBotBEFLAV);
 
-	double *InvSquaHeight = malloc(Np*K*sizeof(double));
-	double *K33 = malloc(Np*K*sizeof(double));
+	mxArray *TempNp2d = mxGetField(cell2d, 0, "Np");
+	int Np2d = (int)mxGetScalar(TempNp2d);
+	mxArray *TempDr2d = mxGetField(cell2d, 0, "Dr");
+	double *Dr2d = mxGetPr(TempDr2d);
+	mxArray *TempDs2d = mxGetField(cell2d, 0, "Ds");
+	double *Ds2d = mxGetPr(TempDs2d);
+	mxArray *TempNface2d = mxGetField(cell2d, 0, "Nface");
+	int Nface2d = (int)mxGetScalar(TempNface2d);
+	mxArray *TempinvM2d = mxGetField(cell2d, 0, "invM");
+	double *invM2d = mxGetPr(TempinvM2d);
 
+	mxArray *TempK2d = mxGetField(mesh2d, 0, "K");
+	int K2d = (int)mxGetScalar(TempK2d);
+	mxArray *Temprx2d = mxGetField(mesh2d, 0, "rx");
+	double *rx2d = mxGetPr(Temprx2d);
+	mxArray *Tempsx2d = mxGetField(mesh2d, 0, "sx");
+	double *sx2d = mxGetPr(Tempsx2d);
+	mxArray *Tempry2d = mxGetField(mesh2d, 0, "ry");
+	double *ry2d = mxGetPr(Tempry2d);
+	mxArray *Tempsy2d = mxGetField(mesh2d, 0, "sy");
+	double *sy2d = mxGetPr(Tempsy2d);
+	mxArray *TempJ2d = mxGetField(mesh2d, 0, "J");
+	double *J2d = mxGetPr(TempJ2d);
+
+	mxArray *TempIENe2d = mxGetField(InnerEdge2d, 0, "Ne");
+	int IENe2d = (int)mxGetScalar(TempIENe2d);
+	mxArray *TempIENfp2d = mxGetField(InnerEdge2d, 0, "Nfp");
+	int IENfp2d = (int)mxGetScalar(TempIENfp2d);
+	mxArray *TempIEnx2d = mxGetField(InnerEdge2d, 0, "nx");
+	double *IEnx2d = mxGetPr(TempIEnx2d);
+	mxArray *TempIEny2d = mxGetField(InnerEdge2d, 0, "ny");
+	double *IEny2d = mxGetPr(TempIEny2d);
+	mxArray *TempIEFToN12d = mxGetField(InnerEdge2d, 0, "FToN1");
+	double* IEFToN12d = mxGetPr(TempIEFToN12d);
+	mxArray *TempIEFToN22d = mxGetField(InnerEdge2d, 0, "FToN2");
+	double* IEFToN22d = mxGetPr(TempIEFToN22d);
+	mxArray *TempIEMb2d = mxGetField(InnerEdge2d, 0, "M");
+	double* IEMb2d = mxGetPr(TempIEMb2d);
+	mxArray *TempIEJs2d = mxGetField(InnerEdge2d, 0, "Js");
+	double *IEJs2d = mxGetPr(TempIEJs2d);
+	mxArray *TempIEFToE2d = mxGetField(InnerEdge2d, 0, "FToE");
+	double *IEFToE2d = mxGetPr(TempIEFToE2d);
+	mxArray *TempIEFToF2d = mxGetField(InnerEdge2d, 0, "FToF");
+	double *IEFToF2d = mxGetPr(TempIEFToF2d);
+
+	if (!strcmp("False", ImposeBoundaryInitialized)){
+		SWENH3dImposeBoundaryMemoryAllocation(Np, K, BENe, Np2d, K2d, Nface2d, IENfp2d, IENe2d, BotBENe, BotBENfp);
+	}
+	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
-		GetInverseSquareHeight(InvSquaHeight + Np*k, Height + Np*k, Hcrit, Np);
+		GetInverseSquareHeight(ImposeBCsInvSquaHeight + Np*k, ImposeBCsInvHeight + Np*k, Height + Np*k, Hcrit, Np);
 		for (int p = 0; p < Np; p++)
-			K33[k*Np + p] = pow(K13[k*Np + p], 2) + pow(K23[k*Np + p], 2) + \
-			InvSquaHeight[k*Np + p];
+			ImposeBCsK33[k*Np + p] = pow(K13[k*Np + p], 2) + pow(K23[k*Np + p], 2) + \
+			ImposeBCsInvSquaHeight[k*Np + p];
 	}
 
 #ifdef _OPENMP
@@ -148,33 +260,350 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		if ((NdgEdgeType)ftype[edge] == NdgEdgeSlipWall){
 			//Newmann boundary Doing Nothing
 		}
+		else if ((NdgEdgeType)ftype[edge] == NdgEdgeClampedVel) {
+			int LocalEle;
+			LocalEle = (int)BEFToE[2 * edge];
+
+			double *TempEToE = NULL, *TempJs = NULL;
+			TempEToE = EToE + (LocalEle - 1)*Nface;
+			TempJs = BEJs + edge * BENfp;
+
+			double *FpIndex = malloc(BENfp * sizeof(double));
+
+			for (int p = 0; p < BENfp; p++) {
+				FpIndex[p] = BEFToN1[BENfp*edge + p];
+			}
+
+			ImposeNewmannBoundaryCondition(OutRHS, LocalEle, Np, BENfp, \
+				TempJs, BELMass2d, TempEToE, FpIndex, BEBCsNewmannData + edge * BENfp);
+
+			free(FpIndex);
+		}
 		else{
+			/*
 			double *FpIndex = malloc(BENfp*sizeof(double));
 
 			for (int p = 0; p < BENfp; p++){
 				FpIndex[p] = BEFToN1[BENfp*edge + p];
 			}
 
+			CalculatePenaltyParameter(BETau, BEFToE, BEFToN1, BEFToN2, Np, BENfp, \
+				edge, K13, K23, ImposeBCsK33, BELAV, LAV, max(N, Nz), Nface);
+
 			int LocalEle;
 			LocalEle = (int)BEFToE[2 * edge];
-			double *Tau = malloc(BENfp*sizeof(double));
-			GetPenaltyParameter(Tau, LAV[LocalEle - 1], BEFLAV[edge], P, Nface, BENfp);
 
-			double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
+			double *TempEToE , *TempJ = NULL, *TempJs = NULL;
 			TempEToE = EToE + (LocalEle - 1)*Nface;
 			TempJ = J + (LocalEle - 1)*Np;
 			TempJs = BEJs + edge * BENfp;
 
-			ImposeDirichletBoundaryCondition(sr, irs, jcs, LocalEle, \
+			ImposeDirichletBoundaryCondition(sr, irs, jcs, OutRHS + (LocalEle - 1)*Np, BoundaryNonhydro + edge * BENfp, LocalEle, \
 				Np, BENfp, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, \
 				sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
-				Dr, Ds, Dt, Tau, BEnx + edge * BENfp, BEny + edge * BENfp, BEnz + edge*BENfp, \
-				Mass3d, TempJ, TempJs, BELMass2d, TempEToE, Nface, FpIndex, \
-				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np);
+				Dr, Ds, Dt, BEnx + edge * BENfp, BEny + edge * BENfp, BEnz + edge*BENfp, \
+				TempJs, BELMass2d, TempEToE, Nface, FpIndex, \
+				K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, ImposeBCsK33 + (LocalEle - 1)*Np, *(BETau + edge));
+
 
 			free(FpIndex);
-			free(Tau);
+			*/
 		}
+	}
+	/*The following part is used to calculate the Neumann boundary condition according to 
+	$\frac{\partial w}{\partial t^*} + u\frac{\partial w}{\partial x^*}+v\frac{\partial w}{\partial y^*} + w\frac{\partial w}{\partial z^*}=-\frac{1}{\rho D} \frac{\partial p}{\partial \sigma}$,
+	this relation is further transformed into the $\sigma$ coordinate as:
+	$\frac{\partial w}{\partial t} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial t^*} + u(\frac{\partial w}{\partial x} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial x^*})+
+	v(\frac{\partial w}{\partial y} + \frac{\partial w}{\partial \sigma}\frac{\partial \sigma}{\partial y^*}) + \frac{w}{D}\frac{\partial w}{\partial \sigma}=-\frac{1}{\rho D} \frac{\partial p}{\partial \sigma}$.
+	At bottom, since $\sigma=-1$ always stands, so $\frac{\partial \sigma}{\partial t^*}=0$. 
+	*/
+	ptrdiff_t np = Np2d;
+	ptrdiff_t oneI = 1;
+	double one = 1.0, zero = 0.0;
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		/*$\bold{r_x}\cdot (Dr*hu2d)+\bold{s_x}\cdot (Ds*hu2d)$*/
+		GetVolumnIntegral2d(ImposeBCsVolumeIntegralX + k*Np2d, ImposeBCsTempVolumeIntegralX + k*Np2d, &np, &oneI, &np, &one, \
+			Dr2d, Ds2d, &np, Wnew + k*Np2d, &np, &zero, &np, rx2d + k*Np2d, sx2d + k*Np2d);
+		/*$\bold{r_y}\cdot (Dr*hv2d)+\bold{s_y}\cdot (Ds*hv2d)$*/
+		GetVolumnIntegral2d(ImposeBCsVolumeIntegralY + k*Np2d, ImposeBCsTempVolumeIntegralY + k*Np2d, &np, &oneI, &np, &one, \
+			Dr2d, Ds2d, &np, Wnew + k*Np2d, &np, &zero, &np, ry2d + k*Np2d, sy2d + k*Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe2d; e++){
+		FetchInnerEdgeFacialValue(ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, Wnew, IEFToE2d + 2 * e, IEFToN12d + e*IENfp2d, IEFToN22d + e*IENfp2d, Np2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxMx2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxPx2d + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxMy2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+		GetScalarFluxTerm2d(ImposeBCsWIEFluxPy2d + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+		GetScalarCentralFluxTerm2d(ImposeBCsWIEFluxSx2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEnx2d + e*IENfp2d, IENfp2d);
+		GetScalarCentralFluxTerm2d(ImposeBCsWIEFluxSy2d + e*IENfp2d, ImposeBCsIEfm + e*IENfp2d, ImposeBCsIEfp + e*IENfp2d, IEny2d + e*IENfp2d, IENfp2d);
+	}
+
+	memset(ImposeBCsERHSx, 0, Np2d*K2d*Nface2d*sizeof(double));
+	memset(ImposeBCsERHSy, 0, Np2d*K2d*Nface2d*sizeof(double));
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int e = 0; e < IENe2d; e++){
+		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, ImposeBCsWIEFluxMx2d, ImposeBCsWIEFluxPx2d, ImposeBCsWIEFluxSx2d, IEJs2d, IEMb2d, ImposeBCsERHSx);
+		StrongFormInnerEdgeRHS(e, IEFToE2d, IEFToF2d, Np2d, K2d, IENfp2d, IEFToN12d, IEFToN22d, ImposeBCsWIEFluxMy2d, ImposeBCsWIEFluxPy2d, ImposeBCsWIEFluxSy2d, IEJs2d, IEMb2d, ImposeBCsERHSy);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		for (int face = 1; face<Nface2d; face++){
+			Add(ImposeBCsERHSx + k*Np2d, ImposeBCsERHSx + k*Np2d, ImposeBCsERHSx + face*Np2d*K2d + k*Np2d, Np2d);
+			Add(ImposeBCsERHSy + k*Np2d, ImposeBCsERHSy + k*Np2d, ImposeBCsERHSy + face*Np2d*K2d + k*Np2d, Np2d);
+		}
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++) {
+		MultiEdgeContributionByLiftOperator(ImposeBCsERHSx + k*Np2d, ImposeBCsTempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
+		MultiEdgeContributionByLiftOperator(ImposeBCsERHSy + k*Np2d, ImposeBCsTempFacialIntegral + k*Np2d, &np, &oneI, &np, \
+			&one, invM2d, &np, &np, &zero, &np, J2d + k*Np2d, Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int k = 0; k < K2d; k++){
+		Minus(ImposeBCsWx + k*Np2d, ImposeBCsVolumeIntegralX + k*Np2d, ImposeBCsERHSx + k*Np2d, Np2d);
+		Minus(ImposeBCsWy + k*Np2d, ImposeBCsVolumeIntegralY + k*Np2d, ImposeBCsERHSy + k*Np2d, Np2d);
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < BotBENe; face++){
+		/*Hu*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEU + face*BotBENfp, Hu, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*Hv*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEV + face*BotBENfp, Hv, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*H*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEH + face*BotBENfp, Height, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$u=\frac{Hu}{H}$*/
+		DotCriticalDivide(ImposeBCsBotBEU + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$v=\frac{Hv}{H}$*/
+		DotCriticalDivide(ImposeBCsBotBEV + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$\frac{w}{H}$*/
+		DotCriticalDivide(ImposeBCsPWPH + face*BotBENfp, Wnew + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$\frac{\partial H}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPHPX + face*BotBENfp, PHPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial H}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPHPY + face*BotBENfp, PHPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial z}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPzPx + face*BotBENfp, PzPx, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial z}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPzPy + face*BotBENfp, PzPy, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{1}{D}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsInverseH + face*BotBENfp, ImposeBCsInvHeight, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/**********************************************************For the third part**********************************************************************/
+		
+		/*$\frac{\partial w}{\partial \sigma}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBEPWPS + face*BotBENfp, PWPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial w}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		MultiplyByConstant(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		Add(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsWx + face*BotBENfp, BotBENfp);
+		/*$u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+
+		/*$\frac{1}{D}\frac{\partial w}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsPzPy + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		MultiplyByConstant(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		Add(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsWy + face*BotBENfp, BotBENfp);
+		/*$v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+
+		/*$\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )$*/
+		DotProduct(ImposeBCsTempDataInZ + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, ImposeBCsBotBEPWPS + face*BotBENfp, BotBENfp);
+
+		/*$w_{new} - w_{old}$*/
+		Minus(ImposeBCsPNPS + face*BotBENfp, Wnew + face*BotBENfp, Wold + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t}$*/
+		DotDivideByConstant(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, deltatime, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		Add(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		Add(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )$*/
+		Add(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, ImposeBCsTempDataInZ + face*BotBENfp, BotBENfp);
+		/*$\rho\left (\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )\right )$*/
+		MultiplyByConstant(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, rho, BotBENfp);
+		/*$\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )\right )$*/
+		DotProduct(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$-\rho D\left (\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )\right )$*/
+		MultiplyByConstant(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, -1.0, BotBENfp);
+
+	//	memset(ImposeBCsPNPS + face*BotBENfp, 0, BotBENfp * sizeof(double));
+
+		/**********************************************************For the first part**********************************************************************/
+		/*$\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
+		DotProduct(ImposeBCsDPNPSX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{rho}\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
+		DotDivideByConstant(ImposeBCsDPNPSX + face*BotBENfp, ImposeBCsDPNPSX + face*BotBENfp, rho, BotBENfp);
+		/*$\frac{1}{rho D}\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
+		DotCriticalDivide(ImposeBCsDPNPSX + face*BotBENfp, ImposeBCsDPNPSX + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{rho D}\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
+		MultiplyByConstant(ImposeBCsDPNPSX + face*BotBENfp, ImposeBCsDPNPSX + face*BotBENfp, -1.0, BotBENfp);
+
+		/*$\frac{\partial D}{\partial x} + \frac{\partial z_b}{\partial x}$*/
+		Add(ImposeBCsGPEtaPX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, ImposeBCsPHPX + face*BotBENfp, BotBENfp);
+		/*$g\left (\frac{\partial D}{\partial x} + \frac{\partial z_b}{\partial x}\right )$*/
+		MultiplyByConstant(ImposeBCsGPEtaPX + face*BotBENfp, ImposeBCsGPEtaPX + face*BotBENfp, gra, BotBENfp);
+
+		/*$\frac{\partial u}{\partial \sigma}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPS + face*BotBENfp, PUPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial u}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPX + face*BotBENfp, PUPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial u}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPUPY + face*BotBENfp, PUPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		/*$\frac{1}{D}\frac{\partial u}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsPUPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		MultiplyByConstant(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial u}{\partial x}-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		Add(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsPUPX + face*BotBENfp, BotBENfp);
+		/*$u\left(\frac{\partial u}{\partial x}-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+
+		/*$\frac{1}{D}\frac{\partial u}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsPUPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsPzPy + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		MultiplyByConstant(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial u}{\partial y}-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		Add(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsPUPY + face*BotBENfp, BotBENfp);
+		/*$v\left(\frac{\partial u}{\partial y}-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+
+		/*$\frac{w}{D}\left (\frac{\partial u}{\partial \sigma}\right )$*/
+		DotProduct(ImposeBCsTempDataInZ + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, ImposeBCsPUPS + face*BotBENfp, BotBENfp);
+
+		/*$u_{new} - u_{old}$*/
+		Minus(ImposeBCsPNPX + face*BotBENfp, Unew + face*BotBENfp, Uold + face*BotBENfp, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t}$*/
+		DotDivideByConstant(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, deltatime, BotBENfp);
+		/*$\frac{u_{new} - u_{old}}{\Delta t} + u\left(\frac{\partial u}{\partial x}-1.0*\frac{1}{D}\frac{\partial u}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		Add(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		Add(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, BotBENfp);
+		/*$\frac{w_{new} - w_{old}}{\Delta t} + u\left(\frac{\partial w}{\partial x}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial w}{\partial y}-1.0*\frac{1}{D}\frac{\partial w}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial w}{\partial \sigma}\right )$*/
+		Add(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsTempDataInZ + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsGPEtaPX + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsDPNPSX + face*BotBENfp, BotBENfp);
+
+		MultiplyByConstant(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, -1.0*rho, BotBENfp);
+
+		/**********************************************************For the second part**********************************************************************/
+		/*$\frac{\partial z_b}{\partial y}\frac{\partial p}{\partial \sigma}$*/
+		DotProduct(ImposeBCsDPNPSY + face*BotBENfp, ImposeBCsPzPy + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{rho}\frac{\partial z_b}{\partial y}\frac{\partial p}{\partial \sigma}$*/
+		DotDivideByConstant(ImposeBCsDPNPSY + face*BotBENfp, ImposeBCsDPNPSY + face*BotBENfp, rho, BotBENfp);
+		/*$\frac{1}{rho D}\frac{\partial z_b}{\partial y}\frac{\partial p}{\partial \sigma}$*/
+		DotCriticalDivide(ImposeBCsDPNPSY + face*BotBENfp, ImposeBCsDPNPSY + face*BotBENfp, &Hcrit, ImposeBCsBotBEH + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{rho D}\frac{\partial z_b}{\partial x}\frac{\partial p}{\partial \sigma}$*/
+		MultiplyByConstant(ImposeBCsDPNPSY + face*BotBENfp, ImposeBCsDPNPSY + face*BotBENfp, -1.0, BotBENfp);
+
+		/*$\frac{\partial D}{\partial y} + \frac{\partial z_b}{\partial y}$*/
+		Add(ImposeBCsGPEtaPY + face*BotBENfp, ImposeBCsPzPy + face*BotBENfp, ImposeBCsPHPY + face*BotBENfp, BotBENfp);
+		/*$g\left (\frac{\partial D}{\partial y} + \frac{\partial z_b}{\partial y}\right )$*/
+		MultiplyByConstant(ImposeBCsGPEtaPY + face*BotBENfp, ImposeBCsGPEtaPY + face*BotBENfp, gra, BotBENfp);
+
+		/*$\frac{\partial v}{\partial \sigma}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPS + face*BotBENfp, PVPS, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial v}{\partial x}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPX + face*BotBENfp, PVPX, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		/*$\frac{\partial v}{\partial y}$*/
+		FetchBoundaryEdgeFacialValue(ImposeBCsPVPY + face*BotBENfp, PVPY, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		/*$\frac{1}{D}\frac{\partial v}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsPVPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsPzPx + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		MultiplyByConstant(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial v}{\partial x}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}$*/
+		Add(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsPVPX + face*BotBENfp, BotBENfp);
+		/*$u\left(\frac{\partial v}{\partial x}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		DotProduct(ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, ImposeBCsBotBEU + face*BotBENfp, BotBENfp);
+
+		/*$\frac{1}{D}\frac{\partial v}{\partial \sigma}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsInverseH + face*BotBENfp, ImposeBCsPVPS + face*BotBENfp, BotBENfp);
+		/*$\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsPzPy + face*BotBENfp, BotBENfp);
+		/*$-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		MultiplyByConstant(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, -1.0, BotBENfp);
+		/*$\frac{\partial v}{\partial y}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}$*/
+		Add(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsPVPY + face*BotBENfp, BotBENfp);
+		/*$v\left(\frac{\partial v}{\partial y}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		DotProduct(ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, ImposeBCsBotBEV + face*BotBENfp, BotBENfp);
+
+		/*$\frac{w}{D}\left (\frac{\partial v}{\partial \sigma}\right )$*/
+		DotProduct(ImposeBCsTempDataInZ + face*BotBENfp, ImposeBCsPWPH + face*BotBENfp, ImposeBCsPVPS + face*BotBENfp, BotBENfp);
+
+		/*$v_{new} - v_{old}$*/
+		Minus(ImposeBCsPNPY + face*BotBENfp, Vnew + face*BotBENfp, Vold + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t}$*/
+		DotDivideByConstant(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, deltatime, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left(\frac{\partial v}{\partial x}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}\right )$*/
+		Add(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsTempDataInX + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left(\frac{\partial v}{\partial x}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial v}{\partial y}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )$*/
+		Add(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsTempDataInY + face*BotBENfp, BotBENfp);
+		/*$\frac{v_{new} - v_{old}}{\Delta t} + u\left(\frac{\partial v}{\partial x}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial x}\right ) + v\left(\frac{\partial v}{\partial y}-1.0*\frac{1}{D}\frac{\partial v}{\partial \sigma}\frac{\partial z_b}{\partial y}\right )+\frac{w}{D}\left (\frac{\partial v}{\partial \sigma}\right )$*/
+		Add(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsTempDataInZ + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsGPEtaPY + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsDPNPSY + face*BotBENfp, BotBENfp);
+
+		MultiplyByConstant(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, -1.0*rho, BotBENfp);
+        //=========================================Calculation of each part finished================================================
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, ImposeBCsK33, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+		
+		DotProduct(ImposeBCsPNPS + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
+
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, K13, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		DotProduct(ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
+
+		FetchBoundaryEdgeFacialValue(ImposeBCsBotBECoe + face*BotBENfp, K23, BotBEFToE + 2 * face, BotBEFToN1 + face*BotBENfp, Np, BotBENfp);
+
+		DotProduct(ImposeBCsPNPY + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, ImposeBCsBotBECoe + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsPNPX + face*BotBENfp, ImposeBCsPNPY + face*BotBENfp, BotBENfp);
+
+		Add(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, ImposeBCsPNPS + face*BotBENfp, BotBENfp);
+		/*Multiply by $n_{\sigma}$*/
+		MultiplyByConstant(ImposeBCsNewmannData + face*BotBENfp, ImposeBCsNewmannData + face*BotBENfp, -1.0, BotBENfp);
 	}
 
 
@@ -200,9 +629,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		DiagMultiply(Dy, Ds, sy + (LocalEle - 1)*Np, Np);
 		Add(Dy, Dy, DyBuff, Np*Np);
 
-		double *TempEToE = NULL, *TempJ = NULL, *TempJs = NULL;
+		double *TempEToE = NULL, *TempJs = NULL;
 		TempEToE = EToE + (LocalEle - 1)*Nface;
-		TempJ = J + (LocalEle - 1)*Np;
 		TempJs = BotBEJs + edge * BotBENfp;
 
 		double *FpIndex = malloc(BotBENfp*sizeof(double));
@@ -211,10 +639,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			FpIndex[p] = BotBEFToN1[BotBENfp*edge + p];
 		}
 
-		ImposeNewmannBoundaryCondition(sr, irs, jcs, LocalEle, \
-			K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np,\
-			Dx, Dy, Dz, Np, BotBENfp, \
-			Mass3d, TempJ, TempJs, BotBELMass2d, TempEToE, Nface, FpIndex);
+		ImposeNewmannBoundaryCondition( OutRHS, LocalEle, Np, BotBENfp, \
+			TempJs, BotBELMass2d, TempEToE, FpIndex, ImposeBCsNewmannData + edge * BotBENfp);
 
 		free(DxBuff);
 		free(Dx);
@@ -223,123 +649,49 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		free(Dy);
 		free(FpIndex);
 	}
-
-	free(InvSquaHeight);
-	free(K33);
 }
 
-void GetInverseSquareHeight(double *dest, double *source, double Hcrit, int Np){
+void GetInverseSquareHeight(double *Squadest, double *Invdest, double *source, double Hcrit, int Np){
 	for (int i = 0; i < Np; i++){
 		if (source[i] >= Hcrit){
-			dest[i] = 1.0 / source[i] / source[i];
+			Squadest[i] = 1.0 / source[i] / source[i];
+			Invdest[i] = 1.0 / source[i];
 		}
 		else{
-			dest[i] = 0;
+			Squadest[i] = 0;
+			Invdest[i] = 0;
 		}
 	}
 }
 
-void GetPenaltyParameter(double *dest, double LAV, double FLAV, int P, int Nface, int Nfp){
-	for (int i = 0; i < Nfp; i++){
-		dest[i] = 100 * (P + 1)*(P + 3) / 3.0 * Nface / 2.0 * FLAV / LAV;
-		//	dest[i] = 2 * 1.0 / sqrt(FLAV); //This parameter is doubled at the boundary
-	}
-}
+void ImposeNewmannBoundaryCondition(double *RHSdest, int LocalEle, \
+	int Np, int Nfp, double *Js, double *M2d, double *EToE, double *FpIndex, double *NewmannData){
 
-void ImposeNewmannBoundaryCondition(double *dest, mwIndex *Irs, mwIndex *Jcs, int LocalEle, \
-	double *K31, double *K32, double *K33, double *Dx, double *Dy, double *Dz, int Np, int Nfp,\
-	double *M3d, double *J, double *Js, double *M2d, double *EToE, int Nface, double *FpIndex){
-
-	double *TempK31 = malloc(Np*Np*sizeof(double));
-	double *TempK32 = malloc(Np*Np*sizeof(double));
-	double *TempK33 = malloc(Np*Np*sizeof(double));
-	double *TempCoe = malloc(Np*Np*sizeof(double));
-
-	DiagMultiply(TempK31, Dx, K31, Np);
-
-	DiagMultiply(TempK32, Dy, K32, Np);
-
-	DiagMultiply(TempK33, Dz, K33, Np);
-
-	Add(TempCoe, TempK31, TempK32, Np*Np);
-
-//	Add(TempCoe, TempCoe, TempK33, Np*Np);
-
-	/*Withdraw the data in $\frac{\partial p}{\partial \sigma}$, and store them in TempPNPS*/
-	double *TempFacialData = malloc(Nfp*sizeof(double));
+	double *TempRHSBuff = malloc(Np * 1 * sizeof(double));
+	memset(TempRHSBuff, 0, Np * 1 * sizeof(double));
+	double *TempRHSFacialData = malloc(Nfp * 1 * sizeof(double));
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, M2d, Js, Nfp);
-	double *TempContribution = malloc(Np*Np*sizeof(double));
-	memset(TempContribution, 0, Np*Np*sizeof(double));
-	double *Contribution = malloc(Np*Np*sizeof(double));
-	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-	DiagMultiply(InvEleMass3d, M3d, J, Np);
-	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
-
-	int UniNum = 0, StartPoint;
-
-	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
-	double *TempEToE = malloc((Nface + 1)*sizeof(double));
-
-	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
-
-	int NonzeroPerColumn = Jcs[(LocalEle - 1)*Np + 1] - Jcs[(LocalEle - 1)*Np];
-
-	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == LocalEle)
-			StartPoint = (int)Jcs[(LocalEle - 1)*Np] + j*Np;
-	}
-	double *ContributionPerPoint = malloc(Nfp*sizeof(double));
-
 	ptrdiff_t One = 1;
-	/*
-	for (int j = 0; j < Nfp; j++){
+	
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
+		(ptrdiff_t)Nfp, NewmannData, (ptrdiff_t)Nfp, 0.0, TempRHSFacialData, (ptrdiff_t)Nfp);
 
-		FetchFacialData(TempFacialData, TempCoe + ((int)FpIndex[j] - 1)*Np, FpIndex, Nfp);
+	AssembleDataIntoPoint(TempRHSBuff, TempRHSFacialData, FpIndex, Nfp);
 
-		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
-			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
+	MultiplyByConstant(TempRHSBuff, TempRHSBuff, -1.0, Np);
 
-		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
+	Add(RHSdest + (LocalEle - 1)*Np, RHSdest + (LocalEle - 1)*Np, TempRHSBuff, Np);
 
-		AssembleDataIntoPoint(TempContribution + ((int)FpIndex[j] - 1)*Np, ContributionPerPoint, FpIndex, Nfp);
-	}
-	*/
-
-	for (int j = 0; j < Np; j++){
-
-		FetchFacialData(TempFacialData, TempCoe + j*Np, FpIndex, Nfp);
-
-		MatrixMultiply("N", "N", (ptrdiff_t)Nfp, One, (ptrdiff_t)Nfp, 1.0, EleMass2d,
-			(ptrdiff_t)Nfp, TempFacialData, (ptrdiff_t)Nfp, 0.0, ContributionPerPoint, (ptrdiff_t)Nfp);
-
-		MultiplyByConstant(ContributionPerPoint, ContributionPerPoint, -1.0, Nfp);
-
-		AssembleDataIntoPoint(TempContribution + j*Np, ContributionPerPoint, FpIndex, Nfp);
-	}
-
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d,
-		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
-
-	free(TempK31);
-	free(TempK32);
-	free(TempK33);
-	free(TempCoe);
-	free(TempFacialData);
 	free(EleMass2d);
-	free(TempContribution);
-	free(Contribution);
-	free(InvEleMass3d);
-	free(TempEToE);
-	free(ContributionPerPoint);
+	free(TempRHSBuff);
+	free(TempRHSFacialData);
 }
 
-void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, \
+void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, double *RHSdest, double *BoundNonhydro, int LocalEle, \
 	int Np, int Nfp, double *rx, double *sx, double *ry, double *sy, double *tz, double *Dr, double *Ds, double *Dt, \
-	double *Tau, double *nx, double *ny, double *nz, double *Mass3d, double *J, double *Js, double *Mass2d, double *EToE, \
-	int Nface, double *FpIndex, double *K13, double *K23, double *K33){
+	double *nx, double *ny, double *nz, double *Js, double *Mass2d, double *EToE, \
+	int Nface, double *FpIndex, double *K13, double *K23, double *K33, double Tau){
 	double *DxBuff = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DxBuff, Dr, rx, Np);
 	double *Dx = malloc(Np*Np*sizeof(double));
@@ -357,20 +709,23 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	double *TempDiffMatrix = malloc(Np*Np*sizeof(double));
 
-	double *EleMass3d = malloc(Np*Np*sizeof(double));
-	DiagMultiply(EleMass3d, Mass3d, J, Np);
 	double *EleMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(EleMass2d, Mass2d, Js, Nfp);
-	double *InvEleMass3d = malloc(Np*Np*sizeof(double));
-	memcpy(InvEleMass3d, EleMass3d, Np*Np*sizeof(double));
-	MatrixInverse(InvEleMass3d, (ptrdiff_t)Np);
 
-	double *TempContribution = malloc(Np*Np*sizeof(double));
-	memset(TempContribution, 0, Np*Np*sizeof(double));
-	double *Contribution = malloc(Np*Np*sizeof(double));
+	double *TempContribution = malloc(Np*Np * sizeof(double));
+	memset(TempContribution, 0, Np*Np * sizeof(double));
 
-	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-	double *EdgeContribution = malloc(Np*Nfp*sizeof(double));
+	double *FacialDiffMatrix = malloc(Np*Nfp * sizeof(double));
+	double *EdgeContribution = malloc(Np*Nfp * sizeof(double));
+
+	double *WeightedEleMass2d = malloc(Nfp*Nfp * sizeof(double));
+	DiagMultiply(WeightedEleMass2d, EleMass2d, BoundNonhydro, Nfp);
+	
+	double *TempRHSBuff = malloc(Np*sizeof(double));
+	memset(TempRHSBuff, 0, Np*sizeof(double));
+	double *DirichEdge2d = malloc(Nfp*sizeof(double));
+	memset(DirichEdge2d, 0, Nfp*sizeof(double));
+	double *DirichEdgeBuff = malloc(Nfp*Np * sizeof(double));
 
 	/*For fifth term part*/
 	/* For term $\int_{\partial \Omega^D}u_h\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
@@ -389,6 +744,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	/*For $k_{13}\frac{\partial v}{\partial \sigma}n_xp$*/
 
 	DiagMultiply(TempDiffMatrix, Dz, K13, Np);
@@ -406,6 +767,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
+
 	/*For $k_{22}\frac{\partial v}{\partial y}n_yp$*/
 	AssembleFacialDiffMatrix(FacialDiffMatrix, Dy, FpIndex, Nfp, Np);
 	/*The vector is a constant for a given face*/
@@ -420,6 +787,12 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	/*For $k_{23}\frac{\partial v}{\partial \sigma}n_yp$*/
 	DiagMultiply(TempDiffMatrix, Dz, K23, Np);
@@ -437,89 +810,69 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *irs, mwIndex *jcs, 
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
 
-	/*For $k_{31}\frac{\partial v}{\partial x}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dx, K13, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
+	/*For term $\int_{\partial \Omega^D}u_D\nabla_h s\cdot\boldsymbol{n}d\boldsymbol{x}$, x direction first*/
+	MatrixMultiply("T", "T", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix, \
+		(ptrdiff_t)Nfp, WeightedEleMass2d, (ptrdiff_t)Nfp, 0.0, DirichEdgeBuff, (ptrdiff_t)Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{31}\frac{\partial p}{\partial x}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/*For $k_{32}\frac{\partial v}{\partial y}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dy, K23, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
-
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{32}\frac{\partial p}{\partial y}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/*For $k_{33}\frac{\partial v}{\partial \sigma}n_{\sigma}p$*/
-	DiagMultiply(TempDiffMatrix, Dz, K33, Np);
-	AssembleFacialDiffMatrix(FacialDiffMatrix, TempDiffMatrix, FpIndex, Nfp, Np);
-	/*The vector is a constant for a given face*/
-	MultiplyByConstant(FacialDiffMatrix, FacialDiffMatrix, nz[0], Np*Nfp);
-
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
-		(ptrdiff_t)Nfp, EleMass2d, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Np);
-	AssembleContributionIntoColumn(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
-
-	/* For term $k_{33}\frac{\partial p}{\partial \sigma}n_{\sigma}v$*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, EleMass2d, \
-		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, EdgeContribution, (ptrdiff_t)Nfp);
-
-	AssembleContributionIntoRow(TempContribution, EdgeContribution, FpIndex, Np, Nfp);
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Nfp);
 
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
-	DiagMultiply(TempMass2d, EleMass2d, Tau, Nfp);
+	MultiplyByConstant(TempMass2d, EleMass2d, Tau, Nfp*Nfp);
 	/*For term $-\int_{\partial \Omega^d}\tau^k s u_hd\boldsymbol{x}$*/
 	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, FpIndex, FpIndex, Np, Nfp, -1.0);
 
-	/*Multiply the contribution by inverse matrix*/
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvEleMass3d, \
-		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+	/*For term $-\int_{\partial \Omega^D}\tau^ksu_Dd\boldsymbol{x}$*/
+	MultiplyByConstant(WeightedEleMass2d, WeightedEleMass2d, Tau, Nfp * Nfp);
 
-	int UniNum = 0, StartPoint;
-	/*Find the exact place where to fill in the data, and the place is stored in StartPoint*/
-	double *TempEToE = malloc((Nface + 1)*sizeof(double));
-	FindUniqueElementAndSortOrder(TempEToE, EToE, &UniNum, Nface, LocalEle);
-	int NonzeroPerColumn = jcs[(LocalEle - 1)*Np + 1] - jcs[(LocalEle - 1)*Np];
-	for (int j = 0; j < UniNum; j++){
-		if ((int)TempEToE[j] == LocalEle){
-			StartPoint = jcs[(LocalEle - 1)*Np] + j*Np;
-			AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
-			break;
-		}
-	}
+	SumInColumn(DirichEdge2d, WeightedEleMass2d, Nfp);
+
+	MultiplyByConstant(DirichEdge2d, DirichEdge2d, -1.0, Nfp);
+
+	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, FpIndex, Nfp);
+
+	Add(RHSdest, RHSdest, TempRHSBuff, Np);
+
+	double *SortedFpIndex = malloc(Nfp*sizeof(double));
+	memcpy(SortedFpIndex, FpIndex, Nfp*sizeof(double));
+	Sort(SortedFpIndex, Nfp);
+
+	AssembleFacialContributionIntoSparseMatrix(dest, irs, jcs, SortedFpIndex, SortedFpIndex, Np, Nfp, TempContribution, LocalEle, LocalEle);
 
 	free(DxBuff);
 	free(Dx);
 	free(DyBuff);
 	free(Dy);
 	free(Dz);
-	free(EleMass3d);
 	free(EleMass2d);
-	free(InvEleMass3d);
 	free(TempContribution);
-	free(Contribution);
 	free(FacialDiffMatrix);
 	free(EdgeContribution);
-	free(TempEToE);
+	free(WeightedEleMass2d);
+	free(TempRHSBuff);
+	free(DirichEdge2d);
+	free(DirichEdgeBuff);
 	free(TempMass2d);
 	free(TempDiffMatrix);
+	free(SortedFpIndex);
+}
+
+void SumInColumn(double *dest, double *Source, int Np){
+	for (int col = 0; col < Np; col++){
+		for (int Row = 0; Row < Np; Row++){
+			dest[col] += Source[col*Np + Row];
+		}
+	}
+}
+
+void SumInRow(double *dest, double *Source, int Np, int ColNum){
+	for (int row = 0; row < Np; row++){
+		for (int col = 0; col < ColNum; col++){
+			dest[row] += Source[col*Np + row];
+		}
+	}
+}
+
+void GetScalarCentralFluxTerm2d(double *dest, double *fm, double *fp, double *Vector, int Nfp){
+	for (int i = 0; i < Nfp; i++)
+		dest[i] = 0.5*Vector[i] * (fm[i] + fp[i]);
 }

@@ -30,34 +30,16 @@ Layer: The index of the layer of the studied cell. This parameter is used here,
 	   layer = 0, we start from dest + Startpoint, otherwise we start from 
 	   dest + Startpoint + Np.
 */
-void GetLocalVolumuIntegralTermForFirstOrderTerm(double *dest, int Startpoint, \
-	int Np, int NonzeroPerColumn, double *mass3d, \
-	double *Dt, double *tz, double *J, int Layer){
 
-	double *Mass3d = malloc(Np*Np*sizeof(double));
-	DiagMultiply(Mass3d, mass3d, J, Np);
-	double *InvMass3d = malloc(Np*Np*sizeof(double));
-	memcpy(InvMass3d, Mass3d, Np*Np*sizeof(double));
-	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+void GetLocalVolumuIntegralTermForFirstOrderTerm(double *dest, mwIndex *Ir, mwIndex *Jc,\
+	int Np, double *Dt, double *tz, int LocalEle) {
+
 	double *DiffSigma = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DiffSigma, Dt, tz, Np);
-	double *TempContribution = malloc(Np*Np*sizeof(double));
-	double *Contribution = malloc(Np*Np*sizeof(double));
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, Mass3d,
-		(ptrdiff_t)Np, DiffSigma, (ptrdiff_t)Np, 0.0, TempContribution, (ptrdiff_t)Np);
-	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
-		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	if (Layer == 0){
-		AssembleContributionIntoSparseMatrix(dest + Startpoint, Contribution, NonzeroPerColumn, Np);
-	}
-	else{
-		AssembleContributionIntoSparseMatrix(dest + Startpoint + Np, Contribution, NonzeroPerColumn, Np);
-	}
-	free(Mass3d);
-	free(InvMass3d);
+
+	AssembleVolumnContributionIntoSparseMatrix(dest, Ir, Jc, Np, DiffSigma, LocalEle);
+
 	free(DiffSigma);
-	free(TempContribution);
-	free(Contribution);
 }
 
 
@@ -71,8 +53,8 @@ mass2d: A pointer to the start of the mass matrix for the 2 dimensional master c
 J2d: A pointer to the start of the Jacobian of the 2 dimensional studied element
 Eid: A pointer to the start of the interpolation point index on the top of the master cell
 */
-void ImposeFirstOrderNonhydroDirichletBoundaryCondition(double *dest, int StartPoint, int Np, \
-	int Np2d, int NonzeroPerColumn, double *mass3d, double *mass2d, double *J, \
+void ImposeFirstOrderNonhydroDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, \
+	int Np2d, int Ele, double *mass3d, double *mass2d, double *J, \
 	double *J2d, double *Eid){
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, mass3d, J, Np);
@@ -84,10 +66,12 @@ void ImposeFirstOrderNonhydroDirichletBoundaryCondition(double *dest, int StartP
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
-	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, Eid, Np, Np2d, Contribution, Ele, Ele);
+
 	free(Mass3d);
 	free(InvMass3d);
 	free(Mass2d);
@@ -103,8 +87,9 @@ The rest are as follows:
 LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
 UpEid: A pointer to the start of the interpolation point index on the adjacent face of the master cell
 */
-void GetLocalToUpElementContributionForFirstOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
-	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *UpEid){
+
+void GetLocalToUpElementContributionForFirstOrderTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *UpEid, int LocalEle, int UpEle){
 	double *UpMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(UpMass3d, mass3d, J, Np);
 	double *InvUpMass3d = malloc(Np*Np*sizeof(double));
@@ -115,18 +100,18 @@ void GetLocalToUpElementContributionForFirstOrderTerm(double *dest, int StartPoi
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
-	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
-	MultiplyByConstant(TempMass2d, Mass2d, -0.5, Np2d*Np2d);
-	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, UpEid, LocalEid, Np, Np2d, 1);
+	MultiplyByConstant(Mass2d, Mass2d, -0.5, Np2d*Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, UpEid, LocalEid, Np, Np2d, 1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvUpMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEid, Np, Np2d, Contribution, LocalEle, UpEle);
+
 	free(UpMass3d);
 	free(InvUpMass3d);
 	free(Mass2d);
 	free(TempContribution);
 	free(Contribution);
-	free(TempMass2d);
 }
 
 /*The following funciton is used to assemble terms corresponding to
@@ -138,8 +123,8 @@ The rest are as follows:
 LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
 */
 
-void GetLocalUpElementContributionForFirstOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
-	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid){
+void GetLocalUpElementContributionForFirstOrderTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, int LocalEle) {
 	double *LocalMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(LocalMass3d, mass3d, J, Np);
 	double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
@@ -151,10 +136,12 @@ void GetLocalUpElementContributionForFirstOrderTerm(double *dest, int StartPoint
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 	MultiplyByConstant(Mass2d, Mass2d, -0.5, Np2d*Np2d);
-	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, 1);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, 1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEid, Np, Np2d, Contribution, LocalEle, LocalEle);
+
 	free(LocalMass3d);
 	free(InvLocalMass3d);
 	free(Mass2d);
@@ -170,8 +157,8 @@ The rest are as follows:
 LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
 DownEid: A pointer to the start of the interpolation point index on the adjacent face of the master cell
 */
-void GetLocalToDownElementContributionForFirstOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
-	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *DownEid){
+void GetLocalToDownElementContributionForFirstOrderTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, double *DownEid, int LocalEle, int DownEle){
 	double *DownMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(DownMass3d, mass3d, J, Np);
 	double *InvDownMass3d = malloc(Np*Np*sizeof(double));
@@ -182,18 +169,18 @@ void GetLocalToDownElementContributionForFirstOrderTerm(double *dest, int StartP
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
-	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
-	MultiplyByConstant(TempMass2d, Mass2d, 0.5, Np2d*Np2d);
-	AssembleContributionIntoRowAndColumn(TempContribution, TempMass2d, DownEid, LocalEid, Np, Np2d, 1);
+	MultiplyByConstant(Mass2d, Mass2d, 0.5, Np2d*Np2d);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, DownEid, LocalEid, Np, Np2d, 1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvDownMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEid, Np, Np2d, Contribution, LocalEle, DownEle);
+
 	free(DownMass3d);
 	free(InvDownMass3d);
 	free(Mass2d);
 	free(TempContribution);
 	free(Contribution);
-	free(TempMass2d);
 }
 
 /*The following funciton is used to assemble terms corresponding to
@@ -205,8 +192,8 @@ The rest are as follows:
 LocalEid: A pointer to the start of the interpolation point index on the local face of the master cell
 */
 
-void GetLocalDownElementContributionForFirstOrderTerm(double *dest, int StartPoint, int Np, int Np2d, int NonzeroPerColumn, \
-	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid){
+void GetLocalDownElementContributionForFirstOrderTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
+	double *mass3d, double *mass2d, double *J, double *J2d, double *LocalEid, int LocalEle){
 	double *LocalMass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(LocalMass3d, mass3d, J, Np);
 	double *InvLocalMass3d = malloc(Np*Np*sizeof(double));
@@ -218,10 +205,12 @@ void GetLocalDownElementContributionForFirstOrderTerm(double *dest, int StartPoi
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 	MultiplyByConstant(Mass2d, Mass2d, 0.5, Np2d*Np2d);
-	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, 1);
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, LocalEid, LocalEid, Np, Np2d, 1.0);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvLocalMass3d,
 		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
-	AssembleContributionIntoSparseMatrix(dest + StartPoint, Contribution, NonzeroPerColumn, Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, LocalEid, Np, Np2d, Contribution, LocalEle, LocalEle);
+
 	free(LocalMass3d);
 	free(InvLocalMass3d);
 	free(Mass2d);
@@ -252,15 +241,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	int Ele3d = (int)mxGetScalar(prhs[1]);
 	int Nlayer = (int)mxGetScalar(prhs[2]);
 	int Ele2d = (int)mxGetScalar(prhs[3]);
+	int BotENe = (Nlayer - 1)*Ele2d;
 	int Nface = (int)mxGetScalar(prhs[4]);
 	double *EToE = mxGetPr(prhs[5]);
-	int TotalNonzero = Ele3d * 3 * Np*Np - Ele2d * 2 * Np*Np;
-	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
-	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
-	TempJc[0] = 0;
 	double *tz = mxGetPr(prhs[6]);
 	double *Dt = mxGetPr(prhs[7]);
-	//double *Mass3d = malloc(Np*Np*sizeof(double));
 	double *J = mxGetPr(prhs[8]);
 	double *J2d = mxGetPr(prhs[9]);
 	double *M2d = mxGetPr(prhs[10]);
@@ -275,8 +260,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		UpEidM[i] = Fmask[(Nface - 1)*maxNfp + i];
 		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
 	}
+	double *BotEFToE = mxGetPr(prhs[14]);
+	double *BotEFToN1 = mxGetPr(prhs[15]);
+	double *BotEFToN2 = mxGetPr(prhs[16]);
 
-	GetSparsePatternInVerticalDirection(TempIr, TempJc, Np, Nlayer, Ele2d);
+
+	int TotalNonzero = Ele3d * Np*Np + BotENe * 2 * Np2d*Np;
+	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
+	mwIndex *TempJc = malloc((Np*Ele3d + 1)*sizeof(mwIndex));
+	TempJc[0] = 0;
+
+	GetSparsePatternForVerticalFirstOrderTerm(TempIr, TempJc, EToE, BotEFToE, BotEFToN1, BotEFToN2, \
+		Nface, Np2d, maxNfp, Np, Ele3d, BotENe, Fmask);
+
 	plhs[0] = mxCreateSparse(Np*Ele3d, Np*Ele3d, TotalNonzero, mxREAL);
 	double *sr = mxGetPr(plhs[0]);
 	mwIndex *irs = mxGetIr(plhs[0]);
@@ -288,7 +284,6 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int e = 0; e < Ele2d; e++){
-		int StartPoint;
 
 		for (int L = 0; L < Nlayer; L++){
 			//Index of the studied element
@@ -298,69 +293,55 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			//Index of the element that located downside of the studied element
 			int DownEle = (int)EToE[e*Nlayer*Nface + L*Nface + Nface - 2];
 
-			GetLocalVolumuIntegralTermForFirstOrderTerm(sr, jcs[e*Nlayer*Np + L*Np], \
-				Np, jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], M3d, \
-				Dt, tz + e*Nlayer*Np + L*Np, J + e*Nlayer*Np + L*Np, L);
+			GetLocalVolumuIntegralTermForFirstOrderTerm(sr, irs, jcs, \
+				Np, Dt, tz + e*Nlayer*Np + L*Np, LocalEle);
 
 			if (UpEle == DownEle){ // we have only one layer in vertical direction, L=0
-				StartPoint = (int)jcs[e * Nlayer * Np + L*Np];
-				ImposeFirstOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, \
-					Np2d, jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], M3d, M2d, \
-					J + e * Nlayer * Np + L*Np, J2d + e*Np2d, UpEidM);
+
+				ImposeFirstOrderNonhydroDirichletBoundaryCondition(sr, irs, jcs, Np, \
+					Np2d, LocalEle, M3d, M2d, J + e * Nlayer * Np + L*Np, \
+					J2d + e*Np2d, UpEidM);
 			}
 			else{//two or more layers included in vertical direction
 				if (LocalEle == UpEle){//This is the top most cell, and L=0
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + 0;
 
-					ImposeFirstOrderNonhydroDirichletBoundaryCondition(sr, StartPoint, Np, \
-						Np2d, jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], M3d, M2d, \
-						J + e * Nlayer * Np + L * Np, J2d + e*Np2d, UpEidM);
+					ImposeFirstOrderNonhydroDirichletBoundaryCondition(sr, irs, jcs, Np, \
+						Np2d, LocalEle, M3d, M2d, J + e * Nlayer * Np + L*Np, \
+						J2d + e*Np2d, UpEidM);
 
-					GetLocalToDownElementContributionForFirstOrderTerm(sr, StartPoint + Np, Np, Np2d, \
-						jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np + Np, J2d + e*Np2d, BotEidM, UpEidM);
+					GetLocalToDownElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np + Np, J2d + e*Np2d, BotEidM, UpEidM, LocalEle, DownEle);
 
-					GetLocalDownElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
-						jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, BotEidM);
+					GetLocalDownElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, BotEidM, LocalEle);
 				}
 				else if (LocalEle == DownEle){// This is the bottom most cell.
 					/*For this situation, this is the bottom most cell, since Newmann boundary
 					condition is added, for the first order derivative about non-hydrostatic
 					pressure, we do nothing here*/
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np + 1] - 2 * Np;
 
-					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
-						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np - Np, J2d + e*Np2d, UpEidM, BotEidM);
+					GetLocalToUpElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np - Np, J2d + e*Np2d, UpEidM, BotEidM, LocalEle, UpEle);
 
-					GetLocalUpElementContributionForFirstOrderTerm(sr, StartPoint + Np, Np, Np2d, \
-						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, UpEidM);
+					GetLocalUpElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, UpEidM, LocalEle);
 				}
 				else{
 					/*
 					Element locates in the middle of the studied column, and there are elements located both upside and downside
 					*/
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np];
 
-					GetLocalToUpElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
-						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np - Np, J2d + e*Np2d, UpEidM, BotEidM);
+					GetLocalToUpElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np - Np, J2d + e*Np2d, UpEidM, BotEidM, LocalEle, UpEle);
 
-					GetLocalUpElementContributionForFirstOrderTerm(sr, StartPoint + Np, Np, Np2d, \
-						jcs[e*Nlayer*Np + L*Np + 1] - jcs[e*Nlayer*Np + L*Np], \
-						M3d, M2d, J + e * Nlayer* Np + L * Np, J2d + e*Np2d, UpEidM);
+					GetLocalUpElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, UpEidM, LocalEle);
 
-					StartPoint = (int)jcs[e*Nlayer*Np + L*Np] + 2 * Np;
+					GetLocalToDownElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np + Np, J2d + e*Np2d, BotEidM, UpEidM, LocalEle, DownEle);
 
-					GetLocalToDownElementContributionForFirstOrderTerm(sr, StartPoint, Np, Np2d, \
-						jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
-						M3d, M2d, J + e * Nlayer * Np + L * Np + Np, J2d + e*Np2d, BotEidM, UpEidM);
-
-					GetLocalDownElementContributionForFirstOrderTerm(sr, StartPoint - Np, Np, Np2d, \
-						jcs[e * Nlayer * Np + L*Np + 1] - jcs[e * Nlayer * Np + L*Np], \
-						M3d, M2d, J + e * Nlayer* Np + L * Np, J2d + e*Np2d, BotEidM);
+					GetLocalDownElementContributionForFirstOrderTerm(sr, irs, jcs, Np, Np2d, \
+						M3d, M2d, J + e * Nlayer * Np + L * Np, J2d + e*Np2d, BotEidM, LocalEle);
 				}
 			}
 		}
