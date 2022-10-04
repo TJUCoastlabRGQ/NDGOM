@@ -24,6 +24,8 @@ while( time < ftime )
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
     
+    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys );
+    
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     
     obj.matEvaluateSourceTerm( fphys );
@@ -58,6 +60,8 @@ while( time < ftime )
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );
     
     obj.advectionSolver.evaluateAdvectionRHS( obj, fphys );
+    
+    obj.HorizontalEddyViscositySolver.matEvaluateDiffRHS( obj, fphys );
     
     obj.PCESolver2d.evaluateAdvectionRHS(obj, fphys2d, fphys );
     

@@ -24,8 +24,9 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             obj.outputFieldOrder3d = [ 1 2 4 6];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-            obj.varFieldIndex = [1 2 11];
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
+%             obj.varFieldIndex = [1 2 11];
+            obj.varFieldIndex = [1 2];
+%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
         end
         
         matTimeSteppingLai( obj );
@@ -104,8 +105,8 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             option('outputType') = enumOutputFile.NetCDF;
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0;
-            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
-            option('ConstantHorizontalEddyViscosityValue') = 0;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Constant;
+            option('ConstantHorizontalEddyViscosityValue') = 0.1;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
         end
         

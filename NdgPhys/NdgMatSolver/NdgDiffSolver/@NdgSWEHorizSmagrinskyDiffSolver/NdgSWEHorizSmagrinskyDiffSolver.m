@@ -17,6 +17,11 @@ classdef NdgSWEHorizSmagrinskyDiffSolver < NdgSWEHorizDiffSolver
             obj.nv = zeros(size(physClass.meshUnion(1).x));
             obj.Prantl = physClass.Prantl;
         end
+        
+        function matEvaluateDiffRHS(obj, physClass, fphys)
+            obj.matUpdateViscosity(physClass, fphys{1}(:,:,1), fphys{1}(:,:,2), fphys{1}(:,:,4));
+            matEvaluateDiffRHS@NdgSWEHorizDiffSolver( obj, physClass, fphys);
+        end
     end
     
     methods( Access = protected )
