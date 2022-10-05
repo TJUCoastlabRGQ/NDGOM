@@ -22,10 +22,11 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 4 6];
+            obj.Prantl = [1.0, 1.3];
+            obj.Nvar = 4;
+            obj.varFieldIndex = [1 2 14 15];
             % allocate boundary field with mesh obj
-            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
-%             obj.varFieldIndex = [1 2 11];
-            obj.varFieldIndex = [1 2];
+            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );          
 %             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
         end
         
@@ -66,20 +67,23 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             % h.
             ks = 0.002;
             hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            [fm, ~] = obj.meshUnion.BoundaryEdge.matEvaluateSurfValue(fphys);
-            Temph3d = fm(:,:,4);
-%             Bz = Temph3d .* ( 1 + obj.meshUnion.BoundaryEdge.zb );
+            hEps = zeros(size(obj.fext3d{1}(:,:,1)));
             Bz = 0.2 .* ( 1 + obj.meshUnion.BoundaryEdge.zb );
+            hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-Bz/0.2);
             Index = (Bz ~= 0 );
-%             hu3d(Index) = Temph3d(Index) .* 0.033/0.4.*log(30*Bz(Index)/ks);
-            hu3d(Index) = 0.2 .* 0.033/0.4.*log(30*Bz(Index)/ks);
+            hu3d(Index) = 0.2 * 0.033/0.4 * log(30*Bz(Index)/ks);
+            Index = (Bz ~= 0 );
+            hEps(Index) = 0.2 * 0.033^3./(0.4*Bz(Index)).*(1-Bz(Index)/0.2);
+%             hEps(Index) = 0.2 * 0.033^3/(0.4*Bz(Index))*(1-Bz(Index)/0.2);
             Index = any(Bz == 0);
             Tempz = Bz(:,Index)./2;
-%             hu3d(1:2,Index) = 2*Temph3d(3:4,Index) .* 0.033/0.4.*log(30*Tempz(3:4,:)/ks) - ...
-%                 hu3d(3:4,Index);
             hu3d(1:2,Index) = 2*0.2 .* 0.033/0.4.*log(30*Tempz(3:4,:)/ks) - ...
                 hu3d(3:4,Index);
+            hEps(1:2,Index) = 2*0.2 .* 0.033^3./(0.4*Tempz(3:4,:)).*(1-Tempz(3:4,:)/0.2) - ...
+                hEps(3:4,Index);
             obj.fext3d{1}(:,:,1) = hu3d;
+            obj.fext3d{1}(:,:,4) = hK;
+            obj.fext3d{1}(:,:,5) = hEps;
             obj.fext2d{1}(:,:,1) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(hu3d);
             obj.fext3d{1}(:,:,3) = 0.2;
             obj.fext2d{1}(:,:,3) = 0.2;

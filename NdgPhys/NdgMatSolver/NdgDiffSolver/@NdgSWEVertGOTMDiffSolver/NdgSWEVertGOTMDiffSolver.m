@@ -90,7 +90,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
         function Outfphys = matUpdateImplicitVerticalDiffusion( obj, physClass, Height2d, Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, Hu, Hv, time, fphys)
 %             obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
             Outfphys = obj.matCalculateImplicitRHS( physClass, (obj.nv + 1.3e-6) ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d, Height);
-            obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), zeros(size(Outfphys(:,:,2))), zeros(size(Outfphys(:,:,2))), ImplicitParameter * dt, Height);
+            obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), zeros(size(Outfphys(:,:,2))), zeros(size(Outfphys(:,:,2))), ImplicitParameter * dt, Height, fphys{1}(:,:,14), fphys{1}(:,:,15) );
+            Outfphys(:,:,3) = obj.Tke .* Height;
+            Outfphys(:,:,4) = obj.Eps .* Height;
+%             Outfphys(:,:,3) = 0 * Height;
+%             Outfphys(:,:,4) = 0 * Height;
             obj.uo = Outfphys(:,:,1)./Height;
             obj.vo = Outfphys(:,:,2)./Height;
         end
@@ -103,7 +107,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
     
     methods(Access = protected)
         
-        function matUpdateViscosity(obj, physClass, H2d, uo, vo, HuNew, HvNew, HT, HS, dt, h )
+        function matUpdateViscosity(obj, physClass, H2d, uo, vo, HuNew, HvNew, HT, HS, dt, h, Hk, Heps )
             
             [ obj.nv, physClass.Cf{1}, obj.Tke, obj.Eps, obj.nvh ]  = mxUpdateEddyViscosity(physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, physClass.meshUnion(1).cell.Np,...
                 physClass.meshUnion(1).K, physClass.meshUnion(1).Nz, physClass.hcrit, physClass.meshUnion(1).cell.VCV,...
@@ -111,7 +115,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
                 obj.z0s, obj.z0b, physClass.gra, physClass.rho0, physClass.meshUnion.mesh2d.J, physClass.meshUnion.mesh2d.cell.wq,...
                 physClass.meshUnion.mesh2d.cell.Vq, physClass.meshUnion.mesh2d.LAV, HuNew./h, HvNew./h,  physClass.meshUnion.J, ...
                 physClass.meshUnion.cell.wq, physClass.meshUnion.cell.Vq, physClass.meshUnion.LAV, HT, HS, obj.T0, obj.S0, ...
-                obj.alphaT, obj.betaS, char(obj.EosType));
+                obj.alphaT, obj.betaS, char(obj.EosType), Hk./h, Heps./h);
                         
         end
         

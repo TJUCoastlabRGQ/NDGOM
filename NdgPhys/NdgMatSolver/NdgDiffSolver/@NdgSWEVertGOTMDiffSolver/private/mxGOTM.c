@@ -32,13 +32,13 @@ void setGotmDate(int index, int nlev){
 
 
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen,\
-	long long int nlev, int K2d){
+	long long int nlev, int K2d, int Np2d){
 
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
 
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);
 
-	for (int i = 0; i < K2d; i++){
+	for (int i = 0; i < Np2d*K2d; i++){
 		getGotmDate(i, (int)nlev);
 	}
 }
@@ -73,12 +73,19 @@ void InterpolationToCentralPointO(double *fphys, double *dest, int K2d, int Np3d
 	}
 }
 
-void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d, int Np3d, \
-	int nlayer, double *J2d, double *wq2d, double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d,\
-    double *LAV2d) {
+void InterpolationToCentralPoint(double *fphys, double *dest, ptrdiff_t *Np2d, ptrdiff_t *K3d, ptrdiff_t *Np3d, double *VCV) {
+
+	char *chn = "N";
+	double alpha = 1;
+	double beta = 0;
+	ptrdiff_t Col = 1;
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
+	for (int i = 0; i < (int)(*K3d); i++) {
+		dgemm(chn, chn, Np2d, &Col, Np3d, &alpha, VCV, Np2d, fphys + i*(int)(*Np3d), Np3d, &beta, dest + i*(int)(*Np2d), Np2d);
+	}
+	/*
 	for (int i = 0; i < K2d; i++) {
 		for (int L = 0; L < nlayer; L++) {
 			double BottomAve = 0.0;
@@ -89,25 +96,36 @@ void InterpolationToCentralPoint(double *fphys, double *dest, int K2d, int Np2d,
 			dest[i*nlayer + L] = (BottomAve + SurfaceAve) / 2.0;
 		}
 	}
+	*/
 }
 
 
 void mapCentralPointDateToVerticalDate(double *centralDate, double *verticalLineDate, int K2d, \
-	int nlev){
+	int nlev, int Np2d){
 	//This has been verified by tests
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
+	for (int k = 0; k < K2d; k++) {
+		for (int L = 1; L < nlev + 1; L++) {
+			for (int p = 0; p < Np2d; p++) {
+				verticalLineDate[k*(nlev + 1)*Np2d + p*(nlev + 1) + L] = \
+					centralDate[k*nlev*Np2d + (nlev - L)*Np2d + p];
+			}
+		}
+	}
+	/*
 	for (int k = 0; k < K2d; k++){
 		for (int L = 0; L < nlev; L++){
-			/*The first data for each vertical line is left undefined*/
+			//The first data for each vertical line is left undefined
 			verticalLineDate[k*(nlev + 1) + L + 1] = \
 				centralDate[k*nlev + L];
 		}
 	}
+	*/
 }
 
-void CalculateWaterDepth(int K2d, double hcrit, int nlev){
+void CalculateWaterDepth(double *H2d, int Np2d, int K2d, double hcrit, long long int nlev) {
    /*if the water depth is larger than the threshold value, the layer height is calculated by the ratio of water depth to number of lyers.
    *For the current version, we only consider the equalspace division in vertical. When the water depth is less than the threshold, the water 
    *depth is set to be zero
@@ -115,27 +133,25 @@ void CalculateWaterDepth(int K2d, double hcrit, int nlev){
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int i = 0; i < K2d; i++){
-		if (hcenter[i] >= hcrit){
-			for (int L = 1; L < nlev + 1; L++){ 
-				/*The first value of layer height for each vertical line is left undefined*/
-				layerHeight[i * (nlev + 1) + L] = hcenter[i] / nlev;
+	for (int p = 0; p < Np2d * K2d; p++) {
+		if (H2d[p] >= hcrit) {
+			for (int L = 1; L < nlev + 1; L++) {
+				layerHeight[p * (nlev + 1) + L] = H2d[p] / nlev;
 			}
 		}
 	}
-
 }
 
-void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
+void CalculateShearFrequencyDate(double *H2d, int Np2d, int K2d, double hcrit, int nlev){
 	//SS = $(\frac{\partial u}{\partial x})^2+(\frac{\partial v}{\partial y})^2$
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int i = 0; i < K2d; i++){
+	for (int i = 0; i < K2d*Np2d; i++){
 		// L stands for lower, U stands for upper, Old stands for the data at previous step(without vertical eddy considered)
 		// New stands for the data at the updated step(with vertical eddy considered)
 		double uLOld, uUOld, vLOld, vUOld, uLNew, uUNew, vLNew, vUNew;
-		if (hcenter[i] >= hcrit){
+		if (H2d[i] >= hcrit){
 			for (int L = 1; L < nlev; L++){
 				uLOld = huVerticalLine[i*(nlev + 1) + L];
 				uUOld = huVerticalLine[i*(nlev + 1) + L + 1];
@@ -169,24 +185,27 @@ void CalculateShearFrequencyDate(int K2d, double hcrit, int nlev){
 
 }
 
-void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, double *DragCoefficient, \
+void CalculateLengthScaleAndShearVelocity(double *h2d, double z0b, double z0s, double hcrit, double *DragCoefficient, \
 	double *Taux, double *Tauy, int Np2d, int K2d, int nlev) {
 	/*for surface friction length, another way is the charnock method*/
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int i = 0; i < K2d; i++) {	
+	for (int i = 0; i < K2d*Np2d; i++) {	
 		double rr = 0;
-		if (hcenter[i] >= hcrit) {
+		if (h2d[i] >= hcrit) {
 			rr = kappa / log((z0b + layerHeight[i*(nlev + 1) + 1] / 2) / z0b);
-			BottomFrictionVelocity[i] = rr * sqrt(pow((huVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2.0) + pow((hvVerticalLine[i*(nlev + 1) + 1] / hcenter[i]), 2.0));
+			BottomFrictionVelocity[i] = rr * sqrt(pow((huVerticalLine[i*(nlev + 1) + 1] / h2d[i]), 2.0) + pow((hvVerticalLine[i*(nlev + 1) + 1] / h2d[i]), 2.0));
 			BottomFrictionLength[i] = z0b;
 			/*We note that Taux and Tauy here have already devided by rho0*/
 			SurfaceFrictionVelocity[i] = sqrt(hypot(Taux[i], Tauy[i]));
 			SurfaceFrictionLength[i] = z0s;
+			DragCoefficient[i] = pow(rr, 2.0);
+			/*
 			for (int p = 0; p < Np2d; p++) {
 				DragCoefficient[i*Np2d + p] = pow(rr, 2.0);
 			}
+			*/
 		}
 		else {
 			BottomFrictionVelocity[i] = 0;
@@ -201,28 +220,48 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	}
 }
 
- void DGDoTurbulence(double *TimeStep, double hcrit, double *Grass, int K2d, long long int nlev){
+ void DGDoTurbulence(double *h2d, double *TimeStep, double hcrit, double *Grass, int Np2d, int K2d, long long int nlev){
 	 //For the current version, grass is not considered
-	 for (int i = 0; i < K2d; i++){
-		 if (hcenter[i] >= hcrit){
+	 for (int i = 0; i < K2d*Np2d; i++){
+		 if (h2d[i] >= hcrit){
 			 setGotmDate(i, (int)nlev);
-			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, hcenter + i, SurfaceFrictionVelocity + i, BottomFrictionVelocity + i, SurfaceFrictionLength + i, \
+			 TURBULENCE_mp_DO_TURBULENCE(&nlev, TimeStep, h2d + i, SurfaceFrictionVelocity + i, BottomFrictionVelocity + i, SurfaceFrictionLength + i, \
 				 BottomFrictionLength + i, layerHeight + i*(nlev + 1), buoyanceFrequencyDate + i*(nlev + 1), shearFrequencyDate + i*(nlev + 1), Grass);
 			 getGotmDate(i, (int)nlev);
 		 }
 	 }
 }
 
- void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, int nlev){
+ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, int K2d, int Np3d, long long int nlev) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	 for (int k = 0; k < K2d; k++){
-		 for (int L = 0; L < nlev; L++) {
-			 for (int p = 0; p < Np2d; p++) {
-				 DestinationDate[k*nlev*Np3d + (nlev - L - 1)*Np3d + p] = SourceDate[k*(nlev + 1) + L];//The bottom layer of the up cell
-				 DestinationDate[k*nlev*Np3d + (nlev - L - 1)*Np3d + Np3d - Np2d + p] = SourceDate[k*(nlev + 1) + L + 1];  //The top layer of the down cell
+	 for (int k = 0; k < K2d; k++) {
+		 for (int p = 0; p < Np2d; p++) {
+			 DestinationDate[k*nlev*Np3d + (nlev - 1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev + 1)];//the down face of the bottommost cell for each column
+			 DestinationDate[k*nlev*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev + 1) + nlev];//the upper face of the topmost cell for each column
+			 for (int L = 1; L < nlev; L++) {
+				 DestinationDate[k*nlev*Np3d + (nlev - L)*Np3d + p + Np2d] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev + 1) + L];  //The top layer of the down cell
+				 DestinationDate[k*nlev*Np3d + (nlev - L - 1)*Np3d + p] = SourceDate[k*Np2d*(nlev + 1) + p*(nlev + 1) + L];//The bottom layer of the up cell
 			 }
+		 }
+	 }
+ }
+
+ void mapDofDateToVedge(double *SourceDate, double *DestinationDate, int K2d, int Np2d, int nlev) {
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	 for (int ele = 0; ele < K2d; ele++) {
+		 for (int p = 0; p < Np2d; p++) {
+			 //The first point on the bottom
+			 DestinationDate[ele*Np2d*(nlev+1) + p*(nlev + 1)] = SourceDate[ele*Np2d*2*nlev + (nlev-1)*2*Np2d+p];
+			 for (int L = 1; L < nlev; L++) {
+				 DestinationDate[ele*Np2d*(nlev + 1) + p*(nlev + 1) + L] = 0.5 * SourceDate[ele*Np2d * 2 * nlev + (nlev - L) * 2 * Np2d + Np2d + p] + \
+					 0.5*SourceDate[ele*Np2d * 2 * nlev + (nlev - L - 1) * 2 * Np2d + p];
+			 }
+			 //The point on the surface
+			 DestinationDate[ele*Np2d*(nlev + 1) + p*(nlev + 1)+nlev] = SourceDate[ele*Np2d * 2 * nlev + Np2d + p];
 		 }
 	 }
  }
@@ -232,18 +271,19 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 	 int Np2d, int Np3d, int nlev, double gra, double rho0, double *J2d, double *wq2d,\
 	 double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV, char *type, double T0,\
 	 double S0, double alphaT, double betaS){
-
+	 memset(buoyanceFrequencyDate, 0.0, K2d*Np2d*(nlev + 1) * sizeof(double));
+/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	 for (int i = 0; i < K2d; i++) {
-		 /*Values at the bottom surface and the upper surface at the same location*/
+		 //Values at the bottom surface and the upper surface at the same location
 		 double TBottomAve, TUpAve, SBottomAve, SUpAve;
-		 /*The average T and S at the interface*/
+		 //The average T and S at the interface
 		 double TSurfaceAve, SSurfaceAve;
-		 /*Density calculated according to the upper elemental information and lower elemental information*/
+		 //Density calculated according to the upper elemental information and lower elemental information
 		 double rhoUp, rhoDown;
-		 /*Contribution to buoyance due to T and S*/
+		 //Contribution to buoyance due to T and S
 		 double NNT, NNS;
 
 		 if (hcenter[i] >= hcrit) {
@@ -324,6 +364,7 @@ void CalculateLengthScaleAndShearVelocity(double z0b, double z0s, double hcrit, 
 			 }
 		 }
 	 }
+	 */
  }
 
  void GetElementCentralData(double *dest, double *source, double *Jacobian, \

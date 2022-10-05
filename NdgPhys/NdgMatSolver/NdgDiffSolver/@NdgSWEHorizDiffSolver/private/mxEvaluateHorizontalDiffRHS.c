@@ -30,7 +30,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *Hcrit = mxGetPr(prhs[0]);
 	signed char *Dimension = (signed char *)mxGetData(prhs[1]);
 	NdgMeshType type = (NdgMeshType)Dimension[0];
-	double Prantl = mxGetScalar(prhs[2]);
+	double *Prantl = mxGetPr(prhs[2]);
 	mxArray *TempIENe = mxGetField(prhs[3], 0, "Ne");
 	int IENe = (int)mxGetScalar(TempIENe);
 	mxArray *TempIENfp = mxGetField(prhs[3], 0, "Nfp");
@@ -303,8 +303,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		}
 		/*for substance transport, prantl number is considered*/
 		for (field = 2; field < Nfield; field++){
-			DotDivideByConstant(HorDiffLocalPrimitiveDiffTermX + field*Np*K + k*Np, HorDiffLocalPrimitiveDiffTermX + field*Np*K + k*Np, Prantl, Np);
-			DotDivideByConstant(HorDiffLocalPrimitiveDiffTermY + field*Np*K + k*Np, HorDiffLocalPrimitiveDiffTermY + field*Np*K + k*Np, Prantl, Np);
+			DotDivideByConstant(HorDiffLocalPrimitiveDiffTermX + field*Np*K + k*Np, HorDiffLocalPrimitiveDiffTermX + field*Np*K + k*Np, Prantl[field-2], Np);
+			DotDivideByConstant(HorDiffLocalPrimitiveDiffTermY + field*Np*K + k*Np, HorDiffLocalPrimitiveDiffTermY + field*Np*K + k*Np, Prantl[field-2], Np);
 		}
 	}
 
@@ -390,8 +390,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			DotProduct(HorDiffAVy + field*Np*K + k*Np, HorDiffAVy + field*Np*K + k*Np, HorDiffnv + k*Np, Np);
 		}
 		for (field = 2; field < Nfield; field++){
-			DotDivideByConstant(HorDiffAVx + field*Np*K + k*Np, HorDiffAVx + field*Np*K + k*Np, Prantl, Np);
-			DotDivideByConstant(HorDiffAVy + field*Np*K + k*Np, HorDiffAVy + field*Np*K + k*Np, Prantl, Np);
+			DotDivideByConstant(HorDiffAVx + field*Np*K + k*Np, HorDiffAVx + field*Np*K + k*Np, Prantl[field-2], Np);
+			DotDivideByConstant(HorDiffAVy + field*Np*K + k*Np, HorDiffAVy + field*Np*K + k*Np, Prantl[field-2], Np);
 		}
 	}
 	/**********************************************************************************************************************************/
@@ -538,13 +538,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_x}{\partial x}$, here $Q_x=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial x}$*/
 			GetIEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 				face, HorDiffLocalPrimitiveDiffTermX + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
-				IEnx, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEnx, HorDiffInnerEdgeTau, Prantl, \
+				IEnx, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEnx, HorDiffInnerEdgeTau, Prantl[field-2], \
 				HorDiffAVIEfm, HorDiffAVIEfp, HorDiffAVx + field*Np*K, HorDiffIEFluxM, \
 				HorDiffIEFluxP, IEJs, IEMb);
 			/*Inner edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial y}$*/
 			GetIEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTIEfm, HorDiffLPDTIEfp, \
 				face, HorDiffLocalPrimitiveDiffTermY + field*Np*K, IEFToE, IEFToF, IEFToN1, IEFToN2, Np, K, IENe, IENfp, field, HorDiffIEFluxS, \
-				IEny, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEny, HorDiffInnerEdgeTau, Prantl, \
+				IEny, HorDiffIEfm + field*IENe*IENfp, HorDiffIEfp + field*IENe*IENfp, IEny, HorDiffInnerEdgeTau, Prantl[field-2], \
 				HorDiffAVIEfm, HorDiffAVIEfp, HorDiffAVy + field*Np*K, HorDiffIEFluxM, \
 				HorDiffIEFluxP, IEJs, IEMb);
 
@@ -577,13 +577,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 			we note that the numerical flux at the boundary is set directly to the outer value*/
 			GetBEContributionToRHS(HorDiffERHSX + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermX + field*Np*K, \
 				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEnx, HorDiffBEfm + field*BENe*BENfp, \
-				HorDiffBEfp + field*BENe*BENfp, BEnx, HorDiffBoundaryEdgeTau, Prantl, HorDiffAVBEfm, HorDiffAVx + field*Np*K, \
+				HorDiffBEfp + field*BENe*BENfp, BEnx, HorDiffBoundaryEdgeTau, Prantl[field-2], HorDiffAVBEfm, HorDiffAVx + field*Np*K, \
 				HorDiffBEFluxM, BEJs, BEMb);
 			/*Boundary edge contribution to right hand side due to term $\frac{\partial Q_y}{\partial y}$, here $Q_y=\frac{\nv}{\sigma} H\frac{\partial \theta}{\partial y}$,
 			we note that the numerical flux at the boundary is set directly to the outer value*/
 			GetBEContributionToRHS(HorDiffERHSY + field*Np*K*Nface, HorDiffLPDTBEfm, face, HorDiffLocalPrimitiveDiffTermY + field*Np*K, \
 				BEFToE, BEFToF, BEFToN1, Np, K, BENe, BENfp, field, HorDiffBEFluxS, BEny, HorDiffBEfm + field*BENe*BENfp, \
-				HorDiffBEfp + field*BENe*BENfp, BEny, HorDiffBoundaryEdgeTau, Prantl, HorDiffAVBEfm, HorDiffAVy + field*Np*K, \
+				HorDiffBEfp + field*BENe*BENfp, BEny, HorDiffBoundaryEdgeTau, Prantl[field-2], HorDiffAVBEfm, HorDiffAVy + field*Np*K, \
 				HorDiffBEFluxM, BEJs, BEMb);
 		}
 	}
