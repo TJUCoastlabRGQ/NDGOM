@@ -116,6 +116,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d + i);
 		}
 		*/
+        
+        double *TkeCenterData = malloc(Np2d*K3d*sizeof(double));
+        
+        double *EpsCenterData = malloc(Np2d*K3d*sizeof(double));
+        
+        InterpolationToCentralPoint(tke, TkeCenterData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
+        
+        InterpolationToCentralPoint(eps, EpsCenterData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
 
 		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
 //		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
@@ -160,9 +168,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 		CalculateLengthScaleAndShearVelocity(h, z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, (int)nlev);
 
-		mapDofDateToVedge(tke, tkeGOTM, K2d, Np2d, (int)nlev);
+		mapDofDateToVedge(TkeCenterData, tkeGOTM, K2d, Np2d, (int)nlev);
 
-		mapDofDateToVedge(eps, epsGOTM, K2d, Np2d, (int)nlev);
+		mapDofDateToVedge(EpsCenterData, epsGOTM, K2d, Np2d, (int)nlev);
 
 		DGDoTurbulence(h, &dt, hcrit, NULL, Np2d, K2d, nlev);
 
@@ -175,5 +183,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //		mapVedgeDateToDof(LGOTM, PtrOutLength, Np2d, K2d, Np3d, nlev);
 
 		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, nlev);
+        
+        free(TkeCenterData);
+        
+        free(EpsCenterData);
 
 }

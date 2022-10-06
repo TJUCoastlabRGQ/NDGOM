@@ -247,7 +247,7 @@ void CalculateLengthScaleAndShearVelocity(double *h2d, double z0b, double z0s, d
 		 }
 	 }
  }
-
+/*
  void mapDofDateToVedge(double *SourceDate, double *DestinationDate, int K2d, int Np2d, int nlev) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
@@ -265,7 +265,25 @@ void CalculateLengthScaleAndShearVelocity(double *h2d, double z0b, double z0s, d
 		 }
 	 }
  }
-
+*/
+ 
+  void mapDofDateToVedge(double *SourceDate, double *DestinationDate, int K2d, int Np2d, int nlev) {
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	 for (int ele = 0; ele < K2d; ele++) {
+		 for (int p = 0; p < Np2d; p++) {
+			 //The first point on the bottom
+			 DestinationDate[ele*Np2d*(nlev+1) + p*(nlev + 1)] = SourceDate[ele*Np2d*nlev + (nlev-1)*Np2d+p];
+			 for (int L = 1; L < nlev; L++) {
+				 DestinationDate[ele*Np2d*(nlev + 1) + p*(nlev + 1) + L] = 0.5 * SourceDate[ele*Np2d * nlev + (nlev - L) * Np2d + p] + \
+					 0.5*SourceDate[ele*Np2d * nlev + (nlev - L - 1) * Np2d + p];
+			 }
+			 //The point on the surface
+			 DestinationDate[ele*Np2d*(nlev + 1) + p*(nlev + 1)+nlev] = SourceDate[ele * Np2d * nlev + p];
+		 }
+	 }
+ }
 
  void CalculateBuoyanceFrequencyDate(double *hT, double *hS, double hcrit, int K2d, \
 	 int Np2d, int Np3d, int nlev, double gra, double rho0, double *J2d, double *wq2d,\
