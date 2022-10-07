@@ -84,7 +84,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/* Copy the string data into buf. */
 		mxGetString(prhs[10], buf, (mwSize)buflen);
 		long long int _nNamelist = 2;
-		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, K2d, Np2d);
+		InitTurbulenceModelGOTM(&_nNamelist, buf, buflen, nlev, K2d);
 		free(buf);
 	}
 		plhs[0] = mxCreateDoubleMatrix(Np3d, K3d, mxREAL);
@@ -108,81 +108,84 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		ptrdiff_t TempK3d = (ptrdiff_t)K3d;
 
 		/*Calculate the water depth at cell center first*/
-		/*
+		
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 		for (int i = 0; i < K2d; i++) {
 			GetElementCentralData(hcenter + i, h + i*Np2d, J2d + i*Np2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d + i);
 		}
-		*/
-        
-        double *TkeCenterData = malloc(Np2d*K3d*sizeof(double));
-        
-        double *EpsCenterData = malloc(Np2d*K3d*sizeof(double));
-        
-        InterpolationToCentralPoint(tke, TkeCenterData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-        
-        InterpolationToCentralPoint(eps, EpsCenterData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-
-		InterpolationToCentralPoint(hu, huCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 		
-		InterpolationToCentralPoint(huNew, huCentralDateNew, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+        
+        double *TkeCenterData = malloc(K3d*sizeof(double));
+        
+        double *EpsCenterData = malloc(K3d*sizeof(double));
+        
+		InterpolationToCentralPoint(tke, TkeCenterData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hv, hvCentralDate, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+		InterpolationToCentralPoint(eps, EpsCenterData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hvNew, hvCentralDateNew, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+		for (int i = 0; i < K3d; i++) {
+			if (TkeCenterData[i] <= 0) {
+				TkeCenterData[i] = pow(1.0, -10.0);
+			}
+			if (EpsCenterData[i] <= 0) {
+				EpsCenterData[i] = pow(1.0, -14.0);
+			}
+		}
 
-		InterpolationToCentralPoint(hT, hTCentralData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(hT, hTCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+		InterpolationToCentralPoint(hu, huCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+		
+		InterpolationToCentralPoint(huNew, huCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		InterpolationToCentralPoint(hS, hSCentralData, &TempNp2d, &TempK3d, &TempNp3d, VCV);
-//		InterpolationToCentralPoint(hS, hSCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
+		InterpolationToCentralPoint(hv, hvCentralDate, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev, Np2d);
+		InterpolationToCentralPoint(hvNew, hvCentralDateNew, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		mapCentralPointDateToVerticalDate(huCentralDateNew, huVerticalLineNew, K2d, (int)nlev, Np2d);
+		InterpolationToCentralPoint(hT, hTCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, (int)nlev, Np2d);
+		InterpolationToCentralPoint(hS, hSCentralData, K2d, Np2d, Np3d, (int)nlev, J2d, wq2d, Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d);
 
-		mapCentralPointDateToVerticalDate(hvCentralDateNew, hvVerticalLineNew, K2d, (int)nlev, Np2d);
+		mapCentralPointDateToVerticalDate(huCentralDate, huVerticalLine, K2d, (int)nlev);
+
+		mapCentralPointDateToVerticalDate(huCentralDateNew, huVerticalLineNew, K2d, (int)nlev);
+
+		mapCentralPointDateToVerticalDate(hvCentralDate, hvVerticalLine, K2d, (int)nlev);
+
+		mapCentralPointDateToVerticalDate(hvCentralDateNew, hvVerticalLineNew, K2d, (int)nlev);
 
 		/*The gradient about rho in vertical direction is calculated according to T and S*/
-		mapCentralPointDateToVerticalDate(hTCentralData, hTVerticalLine, K2d, (int)nlev, Np2d);
+		mapCentralPointDateToVerticalDate(hTCentralData, hTVerticalLine, K2d, (int)nlev);
 
-		mapCentralPointDateToVerticalDate(hSCentralData, hSVerticalLine, K2d, (int)nlev, Np2d);
+		mapCentralPointDateToVerticalDate(hSCentralData, hSVerticalLine, K2d, (int)nlev);
 
-		CalculateWaterDepth(h, Np2d, K2d, hcrit, nlev);
+		CalculateWaterDepth(K2d, hcrit, (int)nlev);
 
-//		CalculateWaterDepth(K2d, hcrit, (int)nlev);
-
-		CalculateShearFrequencyDate(h, Np2d, K2d, hcrit, (int)nlev);
-//		CalculateShearFrequencyDate(K2d, hcrit, (int)nlev);
+		CalculateShearFrequencyDate(K2d, hcrit, (int)nlev);
 
 		CalculateBuoyanceFrequencyDate(hT, hS, hcrit, K2d,  Np2d, Np3d, (int)nlev, gra, rho0, J2d, wq2d, \
 			Vq2d, (ptrdiff_t)RVq2d, (ptrdiff_t)CVq2d, LAV2d, EosType, T0, S0, alphaT, betaS);
 
-		CalculateLengthScaleAndShearVelocity(h, z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, (int)nlev);
+		CalculateLengthScaleAndShearVelocity(z0b, z0s, hcrit, PtrOutDragCoefficient, WindTaux, WindTauy, Np2d, K2d, (int)nlev);
 
 		mapDofDateToVedge(TkeCenterData, tkeGOTM, K2d, Np2d, (int)nlev);
 
 		mapDofDateToVedge(EpsCenterData, epsGOTM, K2d, Np2d, (int)nlev);
 
-		DGDoTurbulence(h, &dt, hcrit, NULL, Np2d, K2d, nlev);
+		DGDoTurbulence( &dt, hcrit, NULL, K2d, nlev);
 
-		mapVedgeDateToDof(numGOTM, PtrOutEddyViscosity, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(numGOTM, PtrOutEddyViscosity, Np2d, K2d, Np3d, (int)nlev);
 
-		mapVedgeDateToDof(nuhGOTM, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(nuhGOTM, PtrOutDiffusionCoeForT, Np2d, K2d, Np3d, (int)nlev);
 
-		mapVedgeDateToDof(tkeGOTM, PtrOutTKE, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(tkeGOTM, PtrOutTKE, Np2d, K2d, Np3d, (int)nlev);
 
 //		mapVedgeDateToDof(LGOTM, PtrOutLength, Np2d, K2d, Np3d, nlev);
 
-		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, nlev);
+		mapVedgeDateToDof(epsGOTM, PtrOutEPS, Np2d, K2d, Np3d, (int)nlev);
         
         free(TkeCenterData);
         
