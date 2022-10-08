@@ -250,8 +250,6 @@ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, in
 	 int Np2d, int Np3d, int nlev, double gra, double rho0, double *J2d, double *wq2d,\
 	 double *Vq2d, ptrdiff_t RVq2d, ptrdiff_t Cvq2d, double *LAV, char *type, double T0,\
 	 double S0, double alphaT, double betaS){
-	 memset(buoyanceFrequencyDate, 0.0, K2d*(nlev + 1) * sizeof(double));
-/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -343,7 +341,6 @@ void mapVedgeDateToDof(double *SourceDate, double *DestinationDate, int Np2d, in
 			 }
 		 }
 	 }
-	 */
  }
 
  void GetElementCentralData(double *dest, double *source, double *Jacobian, \

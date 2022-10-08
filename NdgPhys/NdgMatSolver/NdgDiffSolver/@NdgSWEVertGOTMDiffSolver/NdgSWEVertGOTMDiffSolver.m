@@ -93,8 +93,7 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
             obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), zeros(size(Outfphys(:,:,2))), zeros(size(Outfphys(:,:,2))), ImplicitParameter * dt, Height, fphys{1}(:,:,14), fphys{1}(:,:,15) );
             Outfphys(:,:,3) = obj.Tke .* Height;
             Outfphys(:,:,4) = obj.Eps .* Height;
-%             Outfphys(:,:,3) = 0 * Height;
-%             Outfphys(:,:,4) = 0 * Height;
+            Outfphys = obj.matFilterData( physClass, Outfphys );
             obj.uo = Outfphys(:,:,1)./Height;
             obj.vo = Outfphys(:,:,2)./Height;
         end
@@ -129,6 +128,11 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
                 (Hv./H).^2 ) .* ( Hu./H ) * (-1);
             physClass.BotBoundNewmannDate(:,:,2) = physClass.Cf{1} .* sqrt( (Hu./H).^2 + ...
                 (Hv./H).^2 ) .* ( Hv./H ) * (-1);
+        end
+        
+        function fphys = matFilterData( obj, physClass, fphys )
+            fphys = mxFilterData( physClass.mesh2d(1).cell.Np, physClass.mesh2d(1).K, ...
+                physClass.meshUnion(1).Nz, physClass.meshUnion.cell.Nz, fphys );
         end
         
     end

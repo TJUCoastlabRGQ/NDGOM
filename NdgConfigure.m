@@ -517,7 +517,8 @@ end
 libfile{numel(file)+1} = [path,'mxGOTM.c'];
 libfile{numel(file)+2} = 'NdgMath/NdgMemory.c';
 libfile{numel(file)+3} = 'NdgMath/NdgMath.c';
-srcfile = {[path,'mxUpdateEddyViscosity.c']};
+srcfile = {[path,'mxUpdateEddyViscosity.c'],...
+    [path,'mxFilterData.c']};
 FuncHandle(path, srcfile, libfile);
 
 path = 'NdgPhys/NdgMatSolver/NdgDiffSolver/@NdgSWEHorizDiffSolver/private/';

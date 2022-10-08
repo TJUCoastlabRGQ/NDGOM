@@ -74,7 +74,6 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             hu3d(Index) = 0.2 * 0.033/0.4 * log(30*Bz(Index)/ks);
             Index = (Bz ~= 0 );
             hEps(Index) = 0.2 * 0.033^3./(0.4*Bz(Index)).*(1-Bz(Index)/0.2);
-%             hEps(Index) = 0.2 * 0.033^3/(0.4*Bz(Index))*(1-Bz(Index)/0.2);
             Index = any(Bz == 0);
             Tempz = Bz(:,Index)./2;
             hu3d(1:2,Index) = 2*0.2 .* 0.033/0.4.*log(30*Tempz(3:4,:)/ks) - ...
