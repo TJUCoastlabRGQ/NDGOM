@@ -21,7 +21,7 @@ function updateFigure( obj, field )
 end
 
 function drawNewFigure(obj, field)
-    obj.drawHandle = trisurf( obj.tri, obj.mesh.x(:), obj.mesh.y(:), field(:),'FaceColor', [0.5 0.5 0.5] );
+    obj.drawHandle = trisurf( obj.tri, obj.mesh.x(:), obj.mesh.y(:), field(:),'FaceColor', [0.5 0.5 0.5]);
 %     hold on;
 %     obj.drawHandle = trisurf( obj.tri, obj.mesh.x(:), obj.mesh.y(:), field(:) );
     obj.drawHandle.FaceColor = 'interp';

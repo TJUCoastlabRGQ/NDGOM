@@ -49,6 +49,8 @@ classdef BohaiEstuary < SWEBarotropic3d
             %             obj.Tide{1}(:,:,1436) = 0;
         end
         
+        drawTopographyAndGaugePoints( obj );
+        
         function BohaiEstuaryPostProcess( obj )
             Time = ncread('D:\Sharewithpc\研究工作\20220912\Result\2d\BohaiEstuary.1-1.1.nc','time');
 %             N0=datenum([0 12 7 20 10 0]);
