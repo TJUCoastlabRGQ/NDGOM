@@ -6,7 +6,7 @@ fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.3 * obj.matUpdateTimeInterval( fphys2d );
+    dt = 0.3 * obj.matUpdateTimeInterval( fphys );
 %     dt = 0.005;
     %       dt = 0.1;
     if( time + dt > ftime )
@@ -16,7 +16,7 @@ while( time < ftime )
     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
     
-%    obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
+   obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
 
     
     tloc = time + dt;
@@ -49,7 +49,7 @@ while( time < ftime )
     
 %     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
     
-%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
+    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
@@ -84,7 +84,7 @@ while( time < ftime )
     
 %     obj.NonhydrostaticSolver.matCalculateNonhydroRHS(obj, fphys, fphys2d );
     
-%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
+    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
     
 %     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d );
       

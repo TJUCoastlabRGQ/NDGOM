@@ -22,12 +22,12 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             [ obj.mesh2d, obj.mesh3d ] = makeChannelMesh( obj, N, Nz, M, Mz );
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 4 6];
-            obj.Prantl = [1.0, 1.3];
-            obj.Nvar = 4;
-            obj.varFieldIndex = [1 2 14 15];
+            obj.Prantl = [1.0, 1.0, 1.3];
+            obj.Nvar = 5;
+            obj.varFieldIndex = [1 2 11 14 15];
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );          
-%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
         end
         
         matTimeSteppingLai( obj );
@@ -65,6 +65,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
         function matUpdateExternalField( obj, time, fphys2d, fphys )
             % For 3d external field, the variable is organized as hu hv and
             % h.
+            [fm, ~] = obj.meshUnion.BoundaryEdge.matEvaluateSurfValue(fphys);
             ks = 0.002;
             hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
             hEps = zeros(size(obj.fext3d{1}(:,:,1)));
@@ -81,10 +82,11 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             hEps(1:2,Index) = 2*0.2 .* 0.033^3./(0.4*Tempz(3:4,:)).*(1-Tempz(3:4,:)/0.2) - ...
                 hEps(3:4,Index);
             obj.fext3d{1}(:,:,1) = hu3d;
-            obj.fext3d{1}(:,:,4) = hK;
-            obj.fext3d{1}(:,:,5) = hEps;
-            obj.fext2d{1}(:,:,1) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(hu3d);
             obj.fext3d{1}(:,:,3) = 0.2;
+            obj.fext3d{1}(:,:,4) = fm(:,:,11);
+            obj.fext3d{1}(:,:,5) = hK;
+            obj.fext3d{1}(:,:,6) = hEps;
+            obj.fext2d{1}(:,:,1) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(hu3d);
             obj.fext2d{1}(:,:,3) = 0.2;
         end
         
