@@ -42,13 +42,13 @@ void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, dou
         FetchBoundaryData(nvP, nv + Layer*Np3d, Np2d, UpEidM);
         for (int p = 0; p < Np2d; p++)
         {
-            dest[Layer*Np2d + p] = 20*((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*Nz*max(nvM[p], nvP[p]);
+            dest[Layer*Np2d + p] = 10*((P + 1.0)*(P + 3.0) / 3.0)*(Nface / 2.0)*Nz*max(nvM[p], nvP[p]);
         }
     }
     FetchBoundaryData(nvM, nv + (Nz - 1)*Np3d, Np2d, BotEidM);
     for (int p = 0; p < Np2d; p++)
     {
-        dest[Nz*Np2d + p] = ((P + 1)*(P + 3) / 3.0)*(Nface / 2.0)*Nz*nvM[p];
+        dest[Nz*Np2d + p] = 10*((P + 1.0)*(P + 3.0) / 3.0)*(Nface / 2.0)*Nz*nvM[p];
     }
 }
 

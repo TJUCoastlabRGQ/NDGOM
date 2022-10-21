@@ -85,30 +85,32 @@ void AssembleVolumnContributionIntoSparseMatrix(double *dest, mwIndex *Ir, mwInd
 		}
 	}
 }
+/*
+    This function is used to calculate the penalty parameter at the edge boundary.
+	The penalty parameter is defined as $\tau = \frac{2k_1*k_2}{k_1+k_2}$, with k_1
+	the normal diffusion coefficient at the local boundary defined as 
+	$\boldsymbol{n}^T\bold K\boldsymbol{n}$, and k_2 the coefficient at the adjacent
+	boundary. We have used the fact that k12 = k21 = 0. Also, $n_{x(y)}\times n_{\sigma} = 0$
+	for the computational mesh we used in this study. Km and Kp here are only K33 defined
+	over the edge. Details can be found in "Mathematical Aspects of Discontinuous Galerkin
+	Methods (Springer, Section 4.5.6)"
+*/
 
-void CalculatePenaltyParameter(double *Tau, double *FToE, double *FToN1, double *FToN2, int Np, int Nfp,\
-	int Index, double *K13, double *K23, double *K33, double *ELAV, double *MLAV, int P, int Nface){
-	
-	int LocalEle = (int)FToE[2*Index];
-	int AdjEle = (int)FToE[2 * Index + 1];
-	double *LocalK13 = K13 + (LocalEle - 1)*Np;
-	double *LocalK23 = K23 + (LocalEle - 1)*Np;
-	double *LocalK33 = K33 + (LocalEle - 1)*Np;
-	double *AdjK13 = K13 + (AdjEle - 1)*Np;
-	double *AdjK23 = K23 + (AdjEle - 1)*Np;
-	double *AdjK33 = K33 + (AdjEle - 1)*Np;
-	double MaximumK = 1.0;
-	for (int i = 0; i < Nfp; i++){
-		MaximumK = max(MaximumK, abs(LocalK13[(int)FToN1[Index*Nfp + i]-1]));
-		MaximumK = max(MaximumK, abs(LocalK23[(int)FToN1[Index*Nfp + i]-1]));
-		MaximumK = max(MaximumK, LocalK33[(int)FToN1[Index*Nfp + i]-1]);
-		MaximumK = max(MaximumK, abs(AdjK13[(int)FToN2[Index*Nfp + i]-1]));
-		MaximumK = max(MaximumK, abs(AdjK23[(int)FToN2[Index*Nfp + i]-1]));
-		MaximumK = max(MaximumK, AdjK33[(int)FToN2[Index*Nfp + i]-1]);
+void CalculatePenaltyParameterAndWeight(double *Tau, double *Weight1, double *Weight2, double *Km, double *Kp,\
+	double *nx, double *ny, double *nz, int Nfp, double FLAV,double LocalVolume, double AdjVolume, int P, \
+	int Nface){
+	double k1[Nfp], k2[Nfp];
+	double TempMiu[Nfp];
+	double Miu = 0.0;
+	for (int i = 0; i < Nfp; i++) {
+		k1[i] = pow(nx[i], 2.0) + pow(ny[i], 2.0) + pow(nz[i], 2.0) * Km[i];
+		k2[i] = pow(nx[i], 2.0) + pow(ny[i], 2.0) + pow(nz[i], 2.0) * Kp[i];
+		TempMiu[i] = 2 * k1[i] * k2[i] / (k1[i] + k2[i]);
+		Miu = max(Miu, TempMiu[i]);
+		Weight1[i] = k2[i] / (k1[i] + k2[i]);
+		Weight2[i] = k1[i] / (k1[i] + k2[i]);
 	}
-	//*(Tau + Index) = 10000*MaximumK*(P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*max(ELAV[Index] / MLAV[LocalEle - 1], ELAV[Index] / MLAV[AdjEle - 1]);
-
-	*(Tau + Index) = (P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*max(ELAV[Index] / MLAV[LocalEle - 1], ELAV[Index] / MLAV[AdjEle - 1]);
+	*Tau = 10 * (P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*FLAV / ((LocalVolume + AdjVolume) / 2.0)*Miu;
 }
 
 void EvaluateNonhydroVerticalFaceSurfFlux(double *dest, double *fm, double *n, int Nfp){
@@ -144,7 +146,7 @@ void FetchFacialData(double *dest, double *src, double *FpIndex, int Nfp){
 	}
 
 }
-
+// Find the unique element that the studied element LocalElement adjacent to and sort them in ascend order
 void FindUniqueElementAndSortOrder(double *dest, double *Src, double *OutNum, double InNum, int LocalElement){
 	//First, take the unique value in Src and store them in dest.
 	(*OutNum)= 1;
@@ -170,6 +172,7 @@ void FindUniqueElementAndSortOrder(double *dest, double *Src, double *OutNum, do
 	Sort(dest, (int)(*OutNum));
 }
 
+// This function is used to find the global face index and the direction vector of each horizontal face 
 void FindFaceAndDirectionVector(double *FacialVector, double *GlobalFace, \
 	double *AdjEle, double *InternalFace, double *Flag, int Nfp, int LocalEle, double *FToE, \
 	double *FToF, double *Vector, int IENe, int Nface2d){
@@ -241,8 +244,10 @@ void FindGlobalBottomEdgeFace(int *GlobalFace, double *FToE, int LocalEle, int A
 /* The following function is called at file mxSecondOrderDerivAboutNohydroPressInHorizon.c to determine the sparse pattern of the corresponding sparse matrix.
  * In this function call, we assume that the whole computational domain is wet.  
 */
-void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
+void GetSparsePattern(int *TempIr, int *TempJc, double *EToE, double *IEFToE, double *IEFToN1, double *IEFToN2, double *BotEFToE, \
 	double *BotEFToN1, double *BotEFToN2, int Nface, int IENfp, int BotENfp, int Np, int Ele3d, int IENe, int BotENe){
+    
+    TempJc[0] = 0;
 
 	double *TempEToE = malloc((Nface+1)*Ele3d*sizeof(double));
 	double *UniNum = malloc(Ele3d*sizeof(double));
@@ -261,7 +266,7 @@ void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IE
 	* column is influenced by that of the columns come before the studied one.
 	*/
 	/*The row index, with (Nface+1)*Np the possible maximum influence scope and Np the number of point for each cell*/
-	mwIndex *Ir = malloc((Nface + 1)*Np*Np*sizeof(mwIndex));
+	int *Ir = malloc((Nface + 1)*Np*Np*sizeof(int));
 	/*Number of point influenced by each point*/
 	int *NumRowPerPoint = malloc(Np*sizeof(int));
 	/*The position the row index of each point has been inserted*/
@@ -270,7 +275,7 @@ void GetSparsePattern(mwIndex *TempIr, mwIndex *TempJc, double *EToE, double *IE
 	double *LocalEidM = NULL, *AdjacentEidM = NULL;
 
 	for (int i = 0; i < Ele3d; i++){
-		memset(Ir, 0, (Nface + 1)*Np*Np*sizeof(mwIndex));
+		memset(Ir, 0, (Nface + 1)*Np*Np*sizeof(int));
 		memset(NumRowPerPoint, 0, Np*sizeof(int));
 		memset(CurrentPosition, 0, Np*sizeof(int));
 		for (int e = 0; e < (int)(*(UniNum + i)); e++){

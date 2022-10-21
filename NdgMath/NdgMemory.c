@@ -1,6 +1,6 @@
 # include "NdgMemory.h"
 
-void MemoryAllocationCheck(double *dest, int size){
+void MemoryAllocationCheck(void *dest, int size){
     while(dest == NULL){
         dest = malloc(size); 
     }
@@ -463,11 +463,23 @@ void SWENonhydroVertVelocityMemoryDeAllocation(){
 
 
 /*The following global space is used in file mxAssembleGlobalStiffMatrixNew.c*/
+/*(BotE)IEKM(P)11, (BotE)IEKM(P)22 is not needed since they equal to 1.0
+ *(BotE)IEKM(P)12, (BotE)IEKM(P)21 is not needed since they equal to 0.0
+ */
+double *K33 = NULL, *InvSquaHeight = NULL, *InnerEdgeTau = NULL,\
+        *BottomEdgeTau = NULL, *SurfaceEdgeTau = NULL;
+double *IEK33M = NULL, *IEK33P = NULL;
+double *BotEK33M = NULL, *BotEK33P = NULL;
+double *SurfEK33M = NULL;
+double *IEWeight1 = NULL, *IEWeight2 = NULL;
+double *BotEWeight1 = NULL, *BotEWeight2 = NULL;
+double *SurfEWeight1 = NULL, *SurfEWeight2 = NULL;
+int *NonIr = NULL, *NonJc = NULL;
 
-double *K33 = NULL, *InvSquaHeight = NULL, *InnerEdgeTau = NULL, *BottomEdgeTau = NULL, *SurfaceEdgeTau = NULL;
 char *GlobalStiffMatrixInitialized = "False";
 
-void GlobalStiffMatrixMemoryAllocation(int Np3d, int K3d, int IENe, int BotENe, int SurfBENe){
+void GlobalStiffMatrixMemoryAllocation(int Np3d, int K3d, int IENe, int BotENe, int SurfBENe, \
+	int IENfp, int BotENfp, int Nonzero){
 	K33 = malloc(sizeof(double)*Np3d*K3d);
 	MemoryAllocationCheck(K33, sizeof(double)*Np3d*K3d);
 	InvSquaHeight = malloc(sizeof(double)*Np3d*K3d);
@@ -478,6 +490,40 @@ void GlobalStiffMatrixMemoryAllocation(int Np3d, int K3d, int IENe, int BotENe, 
 	MemoryAllocationCheck(BottomEdgeTau, BotENe*sizeof(double));
 	SurfaceEdgeTau = malloc(SurfBENe*sizeof(double));
 	MemoryAllocationCheck(SurfaceEdgeTau, SurfBENe*sizeof(double));
+       
+    IEK33M = malloc(IENe*IENfp*sizeof(double));
+    MemoryAllocationCheck(IEK33M,IENe*IENfp*sizeof(double));       
+    IEK33P = malloc(IENe*IENfp*sizeof(double));
+    MemoryAllocationCheck(IEK33P,IENe*IENfp*sizeof(double)); 
+
+	IEWeight1 = malloc(IENe*IENfp * sizeof(double));
+	MemoryAllocationCheck(IEWeight1, IENe*IENfp * sizeof(double));
+	IEWeight2 = malloc(IENe*IENfp * sizeof(double));
+	MemoryAllocationCheck(IEWeight2, IENe*IENfp * sizeof(double));
+   
+    BotEK33M = malloc(BotENe*BotENfp*sizeof(double));
+    MemoryAllocationCheck(BotEK33M,BotENe*BotENfp*sizeof(double));       
+    BotEK33P = malloc(BotENe*BotENfp*sizeof(double));
+    MemoryAllocationCheck(BotEK33P,BotENe*BotENfp*sizeof(double));  
+
+	BotEWeight1 = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BotEWeight1, BotENe*BotENfp * sizeof(double));
+	BotEWeight2 = malloc(BotENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(BotEWeight2, BotENe*BotENfp * sizeof(double));
+
+	SurfEK33M = malloc(SurfBENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(SurfEK33M, SurfBENe*BotENfp * sizeof(double));
+
+	SurfEWeight1 = malloc(SurfBENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(SurfEWeight1, SurfBENe*BotENfp * sizeof(double));
+	SurfEWeight2 = malloc(SurfBENe*BotENfp * sizeof(double));
+	MemoryAllocationCheck(SurfEWeight2, SurfBENe*BotENfp * sizeof(double));
+
+	NonIr = malloc(Nonzero * sizeof(int));
+	MemoryAllocationCheck(NonIr, Nonzero * sizeof(int));
+	NonJc = malloc((Np3d*K3d + 1) * sizeof(int));
+	MemoryAllocationCheck(NonJc, (Np3d*K3d + 1) * sizeof(int));
+
 	GlobalStiffMatrixInitialized = "True";
 }
 
@@ -487,6 +533,26 @@ void GlobalStiffMatrixMemoryDeAllocation(){
 	free(InnerEdgeTau); InnerEdgeTau = NULL;
 	free(BottomEdgeTau); BottomEdgeTau = NULL;
 	free(SurfaceEdgeTau); SurfaceEdgeTau = NULL;
+    
+    free(IEK33M); IEK33M = NULL;
+    free(IEK33P); IEK33P = NULL; 
+	free(IEWeight1); IEWeight1 = NULL;
+	free(IEWeight2); IEWeight2 = NULL;
+
+    free(BotEK33M); BotEK33M = NULL;
+    free(BotEK33P); BotEK33P = NULL;
+
+	free(BotEWeight1); BotEWeight1 = NULL;
+	free(BotEWeight2); BotEWeight2 = NULL;
+
+	free(SurfEK33M); SurfEK33M = NULL;
+
+	free(SurfEWeight1); SurfEWeight1 = NULL;
+	free(SurfEWeight2); SurfEWeight2 = NULL;
+
+	free(NonIr); NonIr = NULL;
+	free(NonJc); NonJc = NULL;
+    
 	GlobalStiffMatrixInitialized = "False";
 }
 

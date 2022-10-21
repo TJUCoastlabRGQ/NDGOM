@@ -1369,7 +1369,8 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection( double *PHPX, double *
 
 	/*Allocate memory for fm and fp defined over boundary edges. Here, variables correspond to hu, hv, hw, h */
 	uM = NonhydroBEfm, vM = NonhydroBEfm + BENfp*BENe, hM = NonhydroBEfm + 2 * BENfp*BENe;
-	uP = NonhydroBEfp, vP = NonhydroBEfp + BENfp*BENe, hP = NonhydroBEfp + 2 * BENfp*BENe;
+    uP = NonhydroBEfm, vP = NonhydroBEfm + BENfp*BENe, hP = NonhydroBEfm + 2 * BENfp*BENe;
+//	uP = NonhydroBEfp, vP = NonhydroBEfp + BENfp*BENe, hP = NonhydroBEfp + 2 * BENfp*BENe;
 
 //	double *Hext = fext + 2 * BENfp*BENe;
 

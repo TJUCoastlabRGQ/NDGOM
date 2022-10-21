@@ -1,6 +1,18 @@
 #include "SWENonhydrostatic3d.h"
 
 extern double *K33, *InvSquaHeight, *InnerEdgeTau, *BottomEdgeTau, *SurfaceEdgeTau;
+extern double *IEK33M, *IEK33P;
+extern double *BotEK33M, *BotEK33P;
+extern double *SurfEK33M;
+extern double *IEWeight1, *IEWeight2;
+extern double *BotEWeight1, *BotEWeight2;
+/*
+ * Actually, SurfWeight1 and SurfWeight2 are not needed, 
+ * we used it here just to accommodate
+ * the usage of function CalculatePenaltyParameterAndWeight
+ */ 
+extern double *SurfEWeight1, *SurfEWeight2;
+extern int *NonIr, *NonJc;
 extern char *GlobalStiffMatrixInitialized;
 
 void MyExit()
@@ -15,29 +27,32 @@ void MyExit()
 void GetInverseSquareHeight(double *, double *, double, int); 
 
 void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *M3d, \
-	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
-	double *K23, double *K33, int LocalEle);
+	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, \
+	double *J, double *K13, double *K23, double *K33, int Localele);
 
-void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int DownEle, int Np, int Np2d, \
-	double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
-	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
-	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33, double Tau);
+void GetLocalToDownFacialContribution(double *dest, mwIndex *Irs, mwIndex *jcs, int LocalEle, int DownEle, int Np, \
+	int Np2d, double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
+	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, \
+	double *Adjry, double *Adjsy, double *Adjtz, double *Dr, double *Ds, double *Dt, \
+	double *LocalK13, double *LocalK23, double *LocalK33, \
+	double *AdjK13, double *AdjK23, double *AdjK33, \
+	double Tau, int face);
 
 void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int UpEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33, double Tau);
-
+	double *AdjK23, double *AdjK33, double Tau, int face);
 
 void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
-	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau);
+	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, \
+	double *K33, double Tau, int face);
 
 void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
-	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau);
+	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, \
+	double Tau, int face);
 
 void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, \
@@ -45,13 +60,17 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, in
 	double *K23, double *K33, double Tau, int LocalEle);
 
 void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
-	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
-	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
-	double *AdjK13, double *AdjK23, double Tau, int LocalEle, int AdjEle);
+	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dr, double *Ds, double *Dt, \
+	double *LocalRx, double *LocalSx, double *LocalRy, double *LocalSy, double *LocalTz, \
+	double *AdjRx, double *AdjSx, double *AdjRy, double *AdjSy, double *AdjTz, double *nx, double *ny, \
+	double *LocalK13, double *LocalK23, double *AdjK13, double *AdjK23, double Tau, int LocalEle, \
+	int AdjEle, int Face);
 
 void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
-	double *M2d, double *J2d, double *LocalEid, double *Dt, double *tz, double *nx, \
-	double *ny, double *K13, double *K23, double Tau, int LocalEle);
+	double *M2d, double *J2d, double *LocalEid, double *Dr, double *Ds, double *Dt, double *rx, double *sx, \
+	double *ry, double *sy, double *tz, double *nx, double *ny, double *K13, double *K23, double Tau, \
+	int LocalEle, int Face);
+
 /*This function is used to assemble the global stiff matrix used in the 
 three-dimensional non-hydrostatic solver, the input parameters are organized as follows:
 PNPS: $\frac{\partial q}{\partial \sigma}$, indexed as 0;
@@ -78,26 +97,19 @@ ftype2d: The two-dimensional boundary edge type, indexed as 18;
 void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 {
 	mexAtExit(&MyExit);
-	double *SPNPX = mxGetPr(prhs[0]);
-	mwIndex *jcSPNPX = mxGetJc(prhs[0]);
-	mwIndex *irSPNPX = mxGetIr(prhs[0]);
-
-	double *SPNPY = mxGetPr(prhs[1]);
-	mwIndex *jcSPNPY = mxGetJc(prhs[1]);
-	mwIndex *irSPNPY = mxGetIr(prhs[1]);
 
 	/*$\frac{\partial \sigma}{\partial x^*}$*/
-	double *K13 = mxGetPr(prhs[2]);
+	double *K13 = mxGetPr(prhs[0]);
 	/*$\frac{\partial \sigma}{\partial y^*}$*/
-	double *K23 = mxGetPr(prhs[3]);
+	double *K23 = mxGetPr(prhs[1]);
 
-	double *SQPSPX = mxGetPr(prhs[4]);
-	double *SQPSPY = mxGetPr(prhs[5]);
+	double *SQPSPX = mxGetPr(prhs[2]);
+	double *SQPSPY = mxGetPr(prhs[3]);
 
-	double Hcrit = mxGetScalar(prhs[6]);
-	double *Height = mxGetPr(prhs[7]);
+	double Hcrit = mxGetScalar(prhs[4]);
+	double *Height = mxGetPr(prhs[5]);
 
-	const mxArray *mesh = prhs[8];
+	const mxArray *mesh = prhs[6];
 
 	mxArray *Temprx = mxGetField(mesh, 0, "rx");
 	double *rx = mxGetPr(Temprx);
@@ -121,7 +133,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	int K = (int)mxGetScalar(TempK);
 
 
-	const mxArray *cell = prhs[9];
+	const mxArray *cell = prhs[7];
 	mxArray *TempFmask = mxGetField(cell, 0, "Fmask");
 	double *Fmask = mxGetPr(TempFmask);
 	int maxNfp = (int)mxGetM(TempFmask);
@@ -152,7 +164,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		BotEidM[i] = Fmask[(Nface - 2)*maxNfp + i];
 	}
 
-	const mxArray *InnerEdge = prhs[10];
+	const mxArray *InnerEdge = prhs[8];
 	mxArray *TempIENe = mxGetField(InnerEdge, 0, "Ne");
 	int IENe = (int)mxGetScalar(TempIENe);
 	mxArray *TempIENfp = mxGetField(InnerEdge, 0, "Nfp");
@@ -165,6 +177,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *IEnx = mxGetPr(TempIEnx);
 	mxArray *TempIEny = mxGetField(InnerEdge, 0, "ny");
 	double *IEny = mxGetPr(TempIEny);
+	mxArray *TempIEnz = mxGetField(InnerEdge, 0, "nz");
+	double *IEnz = mxGetPr(TempIEnz);
 	mxArray *TempIELAV = mxGetField(InnerEdge, 0, "LAV");
 	double *IELAV = mxGetPr(TempIELAV);
 	mxArray *TempIEFToE = mxGetField(InnerEdge, 0, "FToE");
@@ -176,11 +190,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempIEFToN2 = mxGetField(InnerEdge, 0, "FToN2");
 	double *IEFToN2 = mxGetPr(TempIEFToN2);
 
-	const mxArray *BottomEdge = prhs[11];
+	const mxArray *BottomEdge = prhs[9];
 	mxArray *TempBotENe = mxGetField(BottomEdge, 0, "Ne");
 	int BotENe = (int)mxGetScalar(TempBotENe);
 	mxArray *TempBotENfp = mxGetField(BottomEdge, 0, "Nfp");
 	int BotENfp = (int)mxGetScalar(TempBotENfp);
+	mxArray *TempBotEnx = mxGetField(BottomEdge, 0, "nx");
+	double *BotEnx = mxGetPr(TempBotEnx);
+	mxArray *TempBotEny = mxGetField(BottomEdge, 0, "ny");
+	double *BotEny = mxGetPr(TempBotEny);
+	mxArray *TempBotEnz = mxGetField(BottomEdge, 0, "nz");
+	double *BotEnz = mxGetPr(TempBotEnz);
 	mxArray *TempBotEFToE = mxGetField(BottomEdge, 0, "FToE");
 	double *BotEFToE = mxGetPr(TempBotEFToE);
 	mxArray *TempBotEFToN1 = mxGetField(BottomEdge, 0, "FToN1");
@@ -190,11 +210,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	mxArray *TempBotELAV = mxGetField(BottomEdge, 0, "LAV");
 	double *BotELAV = mxGetPr(TempBotELAV);
 
-	const mxArray *SurfaceBoundaryEdge = prhs[12];
+	const mxArray *SurfaceBoundaryEdge = prhs[10];
 	mxArray *TempSurfBENe = mxGetField(SurfaceBoundaryEdge, 0, "Ne");
 	int SurfBENe = (int)mxGetScalar(TempSurfBENe);
 	mxArray *TempSurfBENfp = mxGetField(SurfaceBoundaryEdge, 0, "Nfp");
 	int SurfBENfp = (int)mxGetScalar(TempSurfBENfp);
+	mxArray *TempSurfBEnx = mxGetField(SurfaceBoundaryEdge, 0, "nx");
+	double *SurfBEnx = mxGetPr(TempSurfBEnx);
+	mxArray *TempSurfBEny = mxGetField(SurfaceBoundaryEdge, 0, "ny");
+	double *SurfBEny = mxGetPr(TempSurfBEny);
+	mxArray *TempSurfBEnz = mxGetField(SurfaceBoundaryEdge, 0, "nz");
+	double *SurfBEnz = mxGetPr(TempSurfBEnz);
 	mxArray *TempSurfBEFToE = mxGetField(SurfaceBoundaryEdge, 0, "FToE");
 	double *SurfBEFToE = mxGetPr(TempSurfBEFToE);
 	mxArray *TempSurfBEFToN1 = mxGetField(SurfaceBoundaryEdge, 0, "FToN1");
@@ -205,92 +231,96 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *SurfBELAV = mxGetPr(TempSurfBELAV);
 
 
-	double *M2d = mxGetPr(prhs[13]);
-	double *J2d = mxGetPr(prhs[14]);
-	int K2d = (int)mxGetScalar(prhs[15]);
+	double *M2d = mxGetPr(prhs[11]);
+	double *J2d = mxGetPr(prhs[12]);
+	int K2d = (int)mxGetScalar(prhs[13]);
 
 	char* BoundaryType;
-	BoundaryType = mxArrayToString(prhs[16]);
+	BoundaryType = mxArrayToString(prhs[14]);
 
-	double *SortedIEnx = mxGetPr(prhs[17]);
-	double *SortedIEny = mxGetPr(prhs[18]);
-	double *SortedIEGlobalFace = mxGetPr(prhs[19]);
-	double *SortedIEAdjEle = mxGetPr(prhs[20]);
-	double *SortedIEReverseFlag = mxGetPr(prhs[21]);
-	double *SortedIEInternalFace = mxGetPr(prhs[22]);
+	double *SortedIEnx = mxGetPr(prhs[15]);
+	double *SortedIEny = mxGetPr(prhs[16]);
+	double *SortedIEGlobalFace = mxGetPr(prhs[17]);
+	double *SortedIEAdjEle = mxGetPr(prhs[18]);
+	double *SortedIEReverseFlag = mxGetPr(prhs[19]);
+	double *SortedIEInternalFace = mxGetPr(prhs[20]);
+
+	int Nonzero = K * Np*Np + 2 * IENe * (2 * Np*IENfp - IENfp*IENfp) + \
+		2 * BotENe * (2 * Np*BotENfp - BotENfp*BotENfp);
 
 	if (!strcmp("False", GlobalStiffMatrixInitialized)){
-		GlobalStiffMatrixMemoryAllocation(Np, K, IENe, BotENe, SurfBENe);
+		GlobalStiffMatrixMemoryAllocation(Np, K, IENe, BotENe, SurfBENe, IENfp, BotENfp, Nonzero);
+		GetSparsePattern(NonIr, NonJc, EToE, IEFToE, IEFToN1, IEFToN2, BotEFToE, \
+			BotEFToN1, BotEFToN2, Nface, IENfp, BotENfp, Np, K, IENe, BotENe);
 	}
+
+	int i, k, p, ele, L;
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int k = 0; k < K; k++){
+	for (k = 0; k < K; k++){
 		GetInverseSquareHeight(InvSquaHeight + Np*k, Height + Np*k, Hcrit, Np);
-		for (int p = 0; p < Np; p++)
+		for (p = 0; p < Np; p++)
 			K33[k*Np + p] = SQPSPX[k*Np + p] + SQPSPY[k*Np + p] + \
 			InvSquaHeight[k*Np + p];
 	}
 
-	int row, col;
+//	int row, col;
 	double *sr;
 	mwIndex *irs, *jcs;
 
-	row = (int)mxGetM(prhs[0]);
-	col = (int)mxGetN(prhs[0]);
-
-	plhs[0] = mxCreateSparse(row, col, jcSPNPX[col], mxREAL);
+	plhs[0] = mxCreateSparse(Np*K, Np*K, Nonzero, mxREAL);
 	sr = mxGetPr(plhs[0]);
 	irs = mxGetIr(plhs[0]);
 	jcs = mxGetJc(plhs[0]);
-
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif  
-	for (int i = 0; i < col + 1; i++){
-		jcs[i] = jcSPNPX[i];
+ 
+	for (i = 0; i < K*Np + 1; i++){
+		jcs[i] = (mwIndex)(NonJc[i]);
+	}
+  
+	for (i = 0; i < Nonzero; i++){
+		irs[i] = (mwIndex)(NonIr[i]);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif  
-	for (int i = 0; i < (int)jcSPNPX[col]; i++){
-		irs[i] = irSPNPX[i];
-		sr[i] = SPNPX[i] + SPNPY[i];
+	for (i = 0; i < IENe; i++){
+		FetchInnerEdgeFacialValue(IEK33M + i*IENfp, IEK33P + i*IENfp, K33, \
+			IEFToE + i * 2, IEFToN1 + i*IENfp, IEFToN2 + i*IENfp, Np, IENfp);
+		CalculatePenaltyParameterAndWeight(InnerEdgeTau + i, IEWeight1 + i*IENfp, IEWeight2 + i*IENfp,\
+			IEK33M + i*IENfp, IEK33P + i*IENfp, IEnx + i*IENfp, IEny + i*IENfp, IEnz + i*IENfp, IENfp, \
+			IELAV[i], LAV[(int)IEFToE[2*i]-1], LAV[(int)IEFToE[2 * i + 1]-1], max(N, Nz), Nface);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif  
-	for (int i = 0; i < IENe; i++){
-		CalculatePenaltyParameter(InnerEdgeTau, IEFToE, IEFToN1, IEFToN2, Np, IENfp, \
-			i, K13, K23, K33, IELAV, LAV, max(N, Nz), Nface);
+	for (i = 0; i < BotENe; i++){
+		FetchInnerEdgeFacialValue(BotEK33M + i*BotENfp, BotEK33P + i*BotENfp, K33, \
+			BotEFToE + i * 2, BotEFToN1 + i*BotENfp, BotEFToN2 + i*BotENfp, Np, BotENfp);
+		CalculatePenaltyParameterAndWeight(BottomEdgeTau + i, BotEWeight1 + i*BotENfp, BotEWeight2 + i*BotENfp, \
+			BotEK33M + i*BotENfp, BotEK33P + i*BotENfp, BotEnx + i*BotENfp, BotEny + i*BotENfp, BotEnz + i*BotENfp,\
+			BotENfp, BotELAV[i], LAV[(int)BotEFToE[2 * i]-1], LAV[(int)BotEFToE[2 * i + 1]-1], max(N, Nz), Nface);
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif  
-	for (int i = 0; i < BotENe; i++){
-		CalculatePenaltyParameter(BottomEdgeTau, BotEFToE, BotEFToN1, BotEFToN2, Np, BotENfp, \
-			i, K13, K23, K33, BotELAV, LAV, max(N, Nz), Nface);
-	}
-
-#ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS)
-#endif  
-	for (int i = 0; i < SurfBENe; i++){
-		CalculatePenaltyParameter(SurfaceEdgeTau, SurfBEFToE, SurfBEFToN1, SurfBEFToN2, Np, SurfBENfp, \
-			i, K13, K23, K33, SurfBELAV, LAV, max(N, Nz), Nface);
+	for (i = 0; i < SurfBENe; i++){
+		FetchBoundaryEdgeFacialValue(SurfEK33M + i*SurfBENfp, K33, \
+			SurfBEFToE + i * 2, SurfBEFToN1 + i*SurfBENfp, Np, SurfBENfp);
+		CalculatePenaltyParameterAndWeight(SurfaceEdgeTau + i, SurfEWeight1 + i*SurfBENfp, \
+			SurfEWeight2 + i*SurfBENfp, SurfEK33M + i*SurfBENfp, SurfEK33M + i*SurfBENfp, \
+			SurfBEnx + i*SurfBENfp, SurfBEny + i*SurfBENfp, SurfBEnz + i*SurfBENfp, SurfBENfp,\
+			SurfBELAV[i], LAV[(int)SurfBEFToE[2 * i]-1], LAV[(int)SurfBEFToE[2 * i + 1]-1], max(N, Nz), Nface);
 	}
 	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int ele = 0; ele < K; ele++){
-		//int EleNumber = (int)UniEleNumber[ele];
-		//double *TempEToE = UniEle + ele * (Nface + 1);
-		//FindUniqueElementAndSortOrder(TempEToE, EToE + ele*Nface, &EleNumber, Nface, ele + 1);
+	for (ele = 0; ele < K; ele++){
 
 		GetLocalVolumnIntegralTerm(sr, irs, jcs, \
 			Np, M3d, Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, ry + ele*Np, \
@@ -298,29 +328,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			K23 + ele*Np, K33 + ele*Np, ele + 1);
 
 		double *Facialnx = SortedIEnx + ele * Nface2d * IENfp;
-		//malloc(Nface2d*IENfp * sizeof(double));
 		double *Facialny = SortedIEny + ele * Nface2d * IENfp; 
-		//malloc(Nface2d*IENfp*sizeof(double));
 		double *GlobalFace = SortedIEGlobalFace + ele * Nface2d;
-		//malloc(Nface2d*sizeof(int));
 		double *AdjEle = SortedIEAdjEle + ele * Nface2d;
-		//malloc(Nface2d*sizeof(int));
 		double *ReverseFlag = SortedIEReverseFlag + ele * Nface2d;
-		//malloc(Nface2d*sizeof(int));
 		int InternalFace = (int)SortedIEInternalFace[ele];
-		//0;
-
-//		FindFaceAndDirectionVector(Facialnx, GlobalFace, AdjEle, \
-			&InternalFace, ReverseFlag, IENfp, ele + 1, IEFToE, IEFToF, IEnx, IENe, Nface2d);
-
-//		FindFaceAndDirectionVector(Facialny, GlobalFace, AdjEle, \
-			&InternalFace, ReverseFlag, IENfp, ele + 1, IEFToE, IEFToF, IEny, IENe, Nface2d);
-
 		double *LocalEidM = malloc(IENfp*sizeof(double));
-
 		double *AdjEidM = malloc(IENfp*sizeof(double));
 
-		for (int i = 0; i < InternalFace; i++){
+		for (i = 0; i < InternalFace; i++){
 			if ((int)ReverseFlag[i] == 0){
 				for (int p = 0; p < IENfp; p++){
 					LocalEidM[p] = IEFToN1[(int)GlobalFace[i] * IENfp + p];
@@ -328,29 +344,27 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				}
 			}
 			else{
-				for (int p = 0; p < IENfp; p++){
+				for (p = 0; p < IENfp; p++){
 					LocalEidM[p] = IEFToN2[(int)GlobalFace[i] * IENfp + p];
 					AdjEidM[p] = IEFToN1[(int)GlobalFace[i] * IENfp + p];
 				}
 			}
 
 			GetLocalFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
-				IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, Dt, tz + ele*Np, Facialnx + i * IENfp, \
-				Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, *(InnerEdgeTau + (int)GlobalFace[i]), ele + 1);
+				IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, \
+				ry + ele*Np, sy + ele*Np, tz + ele*Np, Facialnx + i * IENfp, Facialny + i*IENfp, K13 + ele*Np, \
+				K23 + ele*Np, *(InnerEdgeTau + (int)GlobalFace[i]), ele + 1, (int)GlobalFace[i]);
 
 			if (AdjEle[i] != ele + 1) {
 				GetLocalToAdjacentFacialContributionInHorizontalDirection(sr, irs, jcs, Np, IENfp, \
-					IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dt, tz + ele*Np, \
-					tz + (int)(AdjEle[i] - 1)*Np, Facialnx + i*IENfp, Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, \
-					K13 + (int)(AdjEle[i] - 1)*Np, K23 + (int)(AdjEle[i] - 1)*Np, *(InnerEdgeTau + (int)GlobalFace[i]), ele + 1, AdjEle[i]);
+					IEMb, IEJs + (int)GlobalFace[i] * IENfp, LocalEidM, AdjEidM, Dr, Ds, Dt, rx + ele*Np, sx + ele*Np, \
+					ry + ele*Np, sy + ele*Np, tz + ele*Np, rx + (int)(AdjEle[i] - 1)*Np, sx + (int)(AdjEle[i] - 1)*Np, \
+					ry + (int)(AdjEle[i] - 1)*Np, sy + (int)(AdjEle[i] - 1)*Np, tz + (int)(AdjEle[i] - 1)*Np, Facialnx + i*IENfp,\
+					Facialny + i*IENfp, K13 + ele*Np, K23 + ele*Np, K13 + (int)(AdjEle[i] - 1)*Np, K23 + (int)(AdjEle[i] - 1)*Np, \
+					*(InnerEdgeTau + (int)GlobalFace[i]), ele + 1, AdjEle[i], (int)GlobalFace[i]);
 			}
+
 		}
-//		free(TempEToE);
-//		free(Facialnx);
-//		free(Facialny);
-//		free(GlobalFace);
-//		free(AdjEle);
-//		free(ReverseFlag);
 		free(LocalEidM);
 		free(AdjEidM);
 	}
@@ -358,8 +372,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int ele = 0; ele < K2d; ele++){
-		for (int L = 0; L < Nlayer; L++){
+	for (ele = 0; ele < K2d; ele++){
+		for (L = 0; L < Nlayer; L++){
 			//Index of the studied element
 			int LocalEle = ele*Nlayer + L + 1;
 			//Index of the element that located upside of the studied element 
@@ -389,21 +403,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele), L*K2d + ele);
 					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
 						ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, tz + (LocalEle - 1)*Np, \
 						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
 						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, \
+						*(BottomEdgeTau + L*K2d + ele), L*K2d + ele);
 				}
 				else if (LocalEle == DownEle) {// This is the bottom most cell.
 					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele), (L - 1)*K2d + ele);
 
 					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
@@ -411,14 +426,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
 						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, \
+						*(BottomEdgeTau + (L - 1)*K2d + ele), (L - 1)*K2d + ele);
 				}
 				else {
 					GetLocalUpFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele), (L - 1)*K2d + ele);
 
 					GetLocalToUpFacialContribution(sr, irs, jcs, LocalEle, UpEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, UpEidM, BotEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
@@ -426,13 +442,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						rx + (UpEle - 1)*Np, sx + (UpEle - 1)*Np, \
 						ry + (UpEle - 1)*Np, sy + (UpEle - 1)*Np, tz + (UpEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np, *(BottomEdgeTau + (L - 1)*K2d + ele));
+						K13 + (UpEle - 1)*Np, K23 + (UpEle - 1)*Np, K33 + (UpEle - 1)*Np,\
+						*(BottomEdgeTau + (L - 1)*K2d + ele), (L - 1)*K2d + ele);
 
 					GetLocalDownFacialContribution(sr, irs, jcs, LocalEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, rx + (LocalEle - 1)*Np, \
 						sx + (LocalEle - 1)*Np, ry + (LocalEle - 1)*Np, sy + (LocalEle - 1)*Np, \
 						tz + (LocalEle - 1)*Np, Dr, Ds, Dt, K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, \
-						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+						K33 + (LocalEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele), L*K2d + ele);
 
 					GetLocalToDownFacialContribution(sr, irs, jcs, LocalEle, DownEle, Np, Np2d, M2d, \
 						J2d + ele*Np2d, BotEidM, UpEidM, rx + (LocalEle - 1)*Np, sx + (LocalEle - 1)*Np, \
@@ -440,31 +457,43 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						rx + (DownEle - 1)*Np, sx + (DownEle - 1)*Np, \
 						ry + (DownEle - 1)*Np, sy + (DownEle - 1)*Np, tz + (DownEle - 1)*Np, Dr, Ds, Dt, \
 						K13 + (LocalEle - 1)*Np, K23 + (LocalEle - 1)*Np, K33 + (LocalEle - 1)*Np, \
-						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np, *(BottomEdgeTau + L*K2d + ele));
+						K13 + (DownEle - 1)*Np, K23 + (DownEle - 1)*Np, K33 + (DownEle - 1)*Np,\
+						*(BottomEdgeTau + L*K2d + ele), L*K2d + ele);
 				}
 			}					
 		}
 	}
 	free(UpEidM);
 	free(BotEidM);
+	
 }
 
+
 void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, double *M3d, \
-	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz, double *J, double *K13, \
-	double *K23, double *K33, int LocalEle){
+	double *Dr, double *Ds, double *Dt, double *rx, double *sx, double *ry, double *sy, double *tz,\
+	double *J, double *K13, double *K23, double *K33, int LocalEle){
 	double *DiffMatrix = malloc(Np*Np*sizeof(double));
 	double *TempDiffMatrix = malloc(Np*Np*sizeof(double));
 	double *VertDiffMatrix = malloc(Np*Np*sizeof(double));
 	double *Mass3d = malloc(Np*Np*sizeof(double));
 	DiagMultiply(Mass3d, M3d, J, Np);
-	double *LumpedMass3d = malloc(Np*Np*sizeof(double));
-	MassLumping(LumpedMass3d, Mass3d, Np);
 	double *TempContributionBuff = malloc(Np*Np*sizeof(double));
 	double *ContributionBuff = malloc(Np*Np*sizeof(double));
 	double *Contribution = malloc(Np*Np*sizeof(double));
 	memset(Contribution, 0, Np*Np*sizeof(double));
 
-	/*For term $$k_{13}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial x}$$*/
+	/*For term $$k_{11}\frac{\partial v}{\partial x}\frac{\partial p_h}{\partial x}$$*/
+	DiagMultiply(DiffMatrix, Dr, rx, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sx, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{13}\frac{\partial q_h}{\partial \sigma}\frac{\partial v}{\partial x}$$.*/
 	DiagMultiply(DiffMatrix, Dr, rx, Np);
 	DiagMultiply(TempDiffMatrix, Ds, sx, Np);
 	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
@@ -472,15 +501,26 @@ void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, 
 	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
 	DiagMultiply(VertDiffMatrix, VertDiffMatrix, K13, Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
-		(ptrdiff_t)Np, LumpedMass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
-		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
 	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
 
-	/*For term $$k_{23}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial y}$$*/
+	/*For term $$k_{22}\frac{\partial v}{\partial y}\frac{\partial p_h}{\partial y}$$*/
+	DiagMultiply(DiffMatrix, Dr, ry, Np);
+	DiagMultiply(TempDiffMatrix, Ds, sy, Np);
+	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
+	Add(Contribution, Contribution, ContributionBuff, Np*Np);
+
+	/*For term $$k_{23}\frac{\partial p_h}{\partial \sigma}\frac{\partial v}{\partial y}$$*/
 	DiagMultiply(DiffMatrix, Dr, ry, Np);
 	DiagMultiply(TempDiffMatrix, Ds, sy, Np);
 	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
@@ -488,15 +528,15 @@ void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, 
 	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
 	DiagMultiply(VertDiffMatrix, VertDiffMatrix, K23, Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
-		(ptrdiff_t)Np, LumpedMass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
-		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
 	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
 
-	/*For term $$k_{31}\frac{\partial v}{\partial x}\frac{\partial p_h}{\partial \sigma}$$.Here  $k_{31}=k_{13}$*/
+	/*For term $$k_{31}\frac{\partial p_h}{\partial x}\frac{\partial v}{\partial \sigma}$$*/
 	DiagMultiply(DiffMatrix, Dr, rx, Np);
 	DiagMultiply(TempDiffMatrix, Ds, sx, Np);
 	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
@@ -504,15 +544,15 @@ void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, 
 
 	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
-		(ptrdiff_t)Np, LumpedMass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
-		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
 	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
 
-	/*For term $$k_{32}\frac{\partial v}{\partial y}\frac{\partial p_h}{\partial \sigma}$$. Here, $k_{32}=k_{23}$*/
+	/*For term $$k_{32}\frac{\partial q_h}{\partial y}\frac{\partial v}{\partial \sigma}$$. Here, $k_{32}=k_{23}$*/
 	DiagMultiply(DiffMatrix, Dr, ry, Np);
 	DiagMultiply(TempDiffMatrix, Ds, sy, Np);
 	Add(DiffMatrix, DiffMatrix, TempDiffMatrix, Np*Np);
@@ -520,24 +560,24 @@ void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, 
 
 	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
-		(ptrdiff_t)Np, LumpedMass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
-		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
 	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
 
-	/*For term $$k_{33}\frac{\partial v}{\partial \sigma}\frac{\partial p_h}{\partial \sigma}$$*/
+	/*For term $$k_{33}\frac{\partial p_h}{\partial \sigma}\frac{\partial v}{\partial \sigma}$$*/
 	DiagMultiply(DiffMatrix, Dt, tz, Np);
 	DiagMultiply(DiffMatrix, DiffMatrix, K33, Np);
 
 	DiagMultiply(VertDiffMatrix, Dt, tz, Np);
 
-	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, DiffMatrix,
-		(ptrdiff_t)Np, LumpedMass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, VertDiffMatrix,
+		(ptrdiff_t)Np, Mass3d, (ptrdiff_t)Np, 0.0, TempContributionBuff, (ptrdiff_t)Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, TempContributionBuff,
-		(ptrdiff_t)Np, VertDiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
+		(ptrdiff_t)Np, DiffMatrix, (ptrdiff_t)Np, 0.0, ContributionBuff, (ptrdiff_t)Np);
 	MultiplyByConstant(ContributionBuff, ContributionBuff, -1.0, Np*Np);
 
 	Add(Contribution, Contribution, ContributionBuff, Np*Np);
@@ -548,17 +588,19 @@ void GetLocalVolumnIntegralTerm(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, 
 	free(TempDiffMatrix);
 	free(VertDiffMatrix);
 	free(Mass3d);
-	free(LumpedMass3d);
 	free(TempContributionBuff);
 	free(ContributionBuff);
 	free(Contribution);
 }
 
-void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int DownEle, int Np, int Np2d, \
-	double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
-	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
-	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33, double Tau){
+
+void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int DownEle, int Np,\
+	int Np2d, double *M2d, double *J2d, double *LocalEid, double *DownEid, double *Localrx, \
+	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, \
+	double *Adjry, double *Adjsy, double *Adjtz, double *Dr, double *Ds, double *Dt,\
+	double *LocalK13, double *LocalK23, double *LocalK33, \
+	double *AdjK13, double *AdjK23, double *AdjK33,\
+	double Tau, int face){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Np2d);
@@ -579,11 +621,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{31}\frac{\partial v}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, DownEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -594,11 +637,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{31}\frac{\partial p}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial v}{\partial y}\right\}[p_h]_{\sigma} $$*/
@@ -608,11 +652,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{32}\frac{\partial v}{\partial y}$. Here, $k_{32} = k_{23}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, DownEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -623,11 +668,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{32}\frac{\partial p}{\partial y}$. Here, $k_{32} = k_{23}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial v}{\partial \sigma}\right\}[p_h]_{\sigma} $$*/
@@ -635,11 +681,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{33}\frac{\partial v}{\partial \sigma}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, DownEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -648,11 +695,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	/*For term $k_{33}\frac{\partial p}{\partial \sigma}$$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, DownEid, Np, Np2d);
 
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
@@ -679,11 +727,12 @@ void GetLocalToDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, 
 	free(SortedLocalEid);
 }
 
+
 void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int UpEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *UpEid, double *Localrx, \
 	double *Localsx, double *Localry, double *Localsy, double *Localtz, double *Adjrx, double *Adjsx, double *Adjry, double *Adjsy, \
 	double *Adjtz, double *Dr, double *Ds, double *Dt, double *LocalK13, double *LocalK23, double *LocalK33, double *AdjK13, \
-	double *AdjK23, double *AdjK33, double Tau){
+	double *AdjK23, double *AdjK33, double Tau, int face){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Np2d);
@@ -704,11 +753,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{31}\frac{\partial v}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, UpEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -719,11 +769,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{31}\frac{\partial p}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{32}\frac{\partial v}{\partial y}\right\}[p_h]_{\sigma} $$*/
@@ -733,11 +784,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{32}\frac{\partial v}{\partial y}$. Here, $k_{32} = k_{23}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, UpEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -748,11 +800,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{32}\frac{\partial p}{\partial y}$. Here, $k_{32} = k_{23}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1 * 0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
 
 	/*For term $$ \left \{k_{33}\frac{\partial v}{\partial \sigma}\right\}[p_h]_{\sigma} $$*/
@@ -760,11 +813,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{33}\frac{\partial v}{\partial \sigma}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, AdjK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, UpEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight2 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -773,11 +827,12 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{33}\frac{\partial p}{\partial \sigma}$$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, LocalK33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1 * 0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, UpEid, Np, Np2d);
 
 	double *TempMass2d = malloc(Np2d*Np2d*sizeof(double));
@@ -807,7 +862,8 @@ void GetLocalToUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 
 void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
-	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau){
+	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23,\
+	double *K33, double Tau, int face){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Np2d);
@@ -828,11 +884,13 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{31}\frac{\partial v}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, K13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
+
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -840,7 +898,7 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -852,10 +910,12 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	DiagMultiply(DiffMatrix, DiffMatrix, K23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
+
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -863,7 +923,7 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -872,11 +932,12 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	/*For term $k_{33}\frac{\partial v}{\partial \sigma}$.$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, K33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -884,7 +945,7 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, -1*0.5, Np*Np2d);
+	MultiplyByConstant(EdgeContribution, EdgeContribution, -1.0, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -910,7 +971,8 @@ void GetLocalDownFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, in
 
 void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int LocalEle, int Np, int Np2d, \
 	double *M2d, double *J2d, double *LocalEid, double *rx, double *sx, double *ry, \
-	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, double Tau){
+	double *sy, double *tz, double *Dr, double *Ds, double *Dt, double *K13, double *K23, double *K33, \
+	double Tau, int face){
 
 	double *FacialMass2d = malloc(Np2d*Np2d*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Np2d);
@@ -931,11 +993,12 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	/*For term $k_{31}\frac{\partial v}{\partial x}$. Here, $k_{31} = k_{13}$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, K13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -943,7 +1006,7 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -955,10 +1018,12 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	DiagMultiply(DiffMatrix, DiffMatrix, K23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
 
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
+
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -966,7 +1031,7 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -975,11 +1040,11 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	/*For term $k_{33}\frac{\partial v}{\partial \sigma}$.$*/
 	DiagMultiply(DiffMatrix, DiffMatrix, K33, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, LocalEid, Np2d, Np);
-
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, BotEWeight1 + face * Np2d, Np2d, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Np2d, (ptrdiff_t)Np2d, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Np2d, FacialMass2d, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoColumn(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -987,7 +1052,7 @@ void GetLocalUpFacialContribution(double *dest, mwIndex *irs, mwIndex *jcs, int 
 	MatrixMultiply("N", "N", (ptrdiff_t)Np2d, (ptrdiff_t)Np, (ptrdiff_t)Np2d, 1.0, FacialMass2d,
 		(ptrdiff_t)Np2d, FacialDiffMatrix, (ptrdiff_t)Np2d, 0.0, EdgeContribution, (ptrdiff_t)Np2d);
 
-	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
+//	MultiplyByConstant(EdgeContribution, EdgeContribution, 0.5, Np*Np2d);
 
 	AssembleContributionIntoRow(TempContribution, EdgeContribution, LocalEid, Np, Np2d);
 
@@ -1099,49 +1164,102 @@ void ImposeDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, in
 }
 
 void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
-	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dt, double *LocalTz, \
-	double *AdjTz, double *nx, double *ny, double *LocalK13, double *LocalK23, \
-	double *AdjK13, double *AdjK23, double Tau, int LocalEle, int AdjEle){
+	double *M2d, double *J2d, double *LocalEid, double *AdjEid, double *Dr, double *Ds, double *Dt, \
+	double *LocalRx, double *LocalSx, double *LocalRy, double *LocalSy, double *LocalTz, \
+	double *AdjRx, double *AdjSx, double *AdjRy, double *AdjSy, double *AdjTz, double *nx, double *ny,\
+	double *LocalK13, double *LocalK23, double *AdjK13, double *AdjK23, double Tau, int LocalEle,\
+	int AdjEle, int Face){
 	// \D5\E2\C0\EF\B5\C4nx \BA\CDny \D3ɱ\BE\B5ص\A5Ԫָ\B3\F6
 	double *FacialMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Nfp);
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
 
+	double *TempAdjDiff = malloc(Np*Np * sizeof(double));
 	double *AdjDiff = malloc(Np*Np*sizeof(double));
-
 	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-
 	double *InnerEdgeContribution = malloc(Np*Nfp*sizeof(double));
+
+	/*For term $$ \left \{k_{11}\frac{\partial v}{\partial x}\right\}[p_h]_x $$*/
+	DiagMultiply(TempAdjDiff, Dr, AdjRx, Np);
+	DiagMultiply(AdjDiff, Ds, AdjSx, Np);
+	Add(AdjDiff, AdjDiff, TempAdjDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, AdjDiff, AdjEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight2 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
 	/*For term $$ \left \{k_{13}\frac{\partial v}{\partial \sigma}\right\}[p_h]_x $$*/
 	DiagMultiply(AdjDiff, Dt, AdjTz, Np);
 	/*For term $k_{13}\frac{\partial v}{\partial \sigma}$*/
 	DiagMultiply(AdjDiff, AdjDiff, AdjK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, AdjDiff, AdjEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight2 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*nx[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{22}\frac{\partial v}{\partial y}\right\}[p_h]_y $$*/
+	DiagMultiply(TempAdjDiff, Dr, AdjRy, Np);
+	DiagMultiply(AdjDiff, Ds, AdjSy, Np);
+	Add(AdjDiff, AdjDiff, TempAdjDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, AdjDiff, AdjEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight2 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
 
 	/*For term $$ \left \{k_{23}\frac{\partial v}{\partial \sigma}\right\}[p_h]_y $$*/
 	DiagMultiply(AdjDiff, Dt, AdjTz, Np);
 	/*For term $k_{23}\frac{\partial v}{\partial \sigma}$*/
 	DiagMultiply(AdjDiff, AdjDiff, AdjK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, AdjDiff, AdjEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight2 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*ny[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
 
+	double *TempLocalDiff = malloc(Np*Np * sizeof(double));
+	double *LocalDiff = malloc(Np*Np * sizeof(double));
+
+	/*For term $$ \left \{k_{11}\frac{\partial p_h}{\partial x}\right\}[v]_x $$*/
+	DiagMultiply(TempLocalDiff, Dr, LocalRx, Np);
+	DiagMultiply(LocalDiff, Ds, LocalSx, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -1.0*nx[0], Np*Nfp);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, AdjEid, Np, Nfp);
+
+
 	/*For term $$k_{13}\frac{\partial p_h}{\partial \sigma} [v]_x$$*/
-	double *LocalDiff = malloc(Np*Np*sizeof(double));
 	DiagMultiply(LocalDiff, Dt, LocalTz, Np);
 	/*For term $k_{13}\frac{\partial p_h}{\partial \sigma}$*/
 	DiagMultiply(LocalDiff, LocalDiff, LocalK13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5*nx[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -1.0*nx[0], Np*Nfp);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, AdjEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{22}\frac{\partial p_h}{\partial y}\right\}[v]_y $$*/
+	DiagMultiply(TempLocalDiff, Dr, LocalRy, Np);
+	DiagMultiply(LocalDiff, Ds, LocalSy, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -1.0*ny[0], Np*Nfp);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, AdjEid, Np, Nfp);
 
 	/*For term $$k_{23}\frac{\partial p_h}{\partial \sigma} [v]_y$$*/
@@ -1149,9 +1267,10 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwI
 	/*For term $k_{23}\frac{\partial p_h}{\partial \sigma}$*/
 	DiagMultiply(LocalDiff, LocalDiff, LocalK23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -0.5*ny[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, -1.0*ny[0], Np*Nfp);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, AdjEid, Np, Nfp);
 
 	double *TempMass2d = malloc(Nfp*Nfp*sizeof(double));
@@ -1169,9 +1288,11 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwI
 
 	free(FacialMass2d);
 	free(TempContribution);
+	free(TempAdjDiff);
 	free(AdjDiff);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);
+	free(TempLocalDiff);
 	free(LocalDiff);
 	free(TempMass2d);
 	free(SortedLocalEid);
@@ -1179,27 +1300,51 @@ void GetLocalToAdjacentFacialContributionInHorizontalDirection(double *dest, mwI
 }
 
 void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, int Nfp, \
-	double *M2d, double *J2d, double *LocalEid, double *Dt, double *tz, double *nx, \
-	double *ny, double *K13, double *K23, double Tau, int LocalEle){
+	double *M2d, double *J2d, double *LocalEid, double *Dr, double *Ds, double *Dt, double *rx, double *sx,\
+	double *ry, double *sy, double *tz, double *nx, double *ny, double *K13, double *K23, double Tau,\
+	int LocalEle, int Face){
 
 	double *FacialMass2d = malloc(Nfp*Nfp*sizeof(double));
 	DiagMultiply(FacialMass2d, M2d, J2d, Nfp);
 	double *TempContribution = malloc(Np*Np*sizeof(double));
 	memset(TempContribution, 0, Np*Np*sizeof(double));
-
+	double *TempLocalDiff = malloc(Np*Np * sizeof(double));
 	double *LocalDiff = malloc(Np*Np*sizeof(double));
-
-	double *FacialDiffMatrix = malloc(Np*Nfp*sizeof(double));
-
+	double *FacialDiffMatrix = malloc(Np*Nfp * sizeof(double));
 	double *InnerEdgeContribution = malloc(Np*Nfp*sizeof(double));
-	/*For term $$ \left \{k_{13}\frac{\partial v}{\partial \sigma}\right\}[p_h]_x $$*/
-	DiagMultiply(LocalDiff, Dt, tz, Np);
-	/*For term $k_{13}\frac{\partial v}{\partial \sigma}$*/
-	DiagMultiply(LocalDiff, LocalDiff, K13, Np);
+	/*For term $$ \left \{k_{11}\frac{\partial v}{\partial x}\right\}[p_h]_x $$*/
+	/*For term $k_{11}\frac{\partial v}{\partial x}$, here $k_{11}=1$*/
+	DiagMultiply(TempLocalDiff, Dr, rx, Np);
+	DiagMultiply(LocalDiff, Ds, sx, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*nx[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{13}\frac{\partial v}{\partial \sigma}\right\}[p_h]_x $$*/
+	/*For term $k_{13}\frac{\partial v}{\partial \sigma}$*/
+	DiagMultiply(LocalDiff, Dt, tz, Np);
+	DiagMultiply(LocalDiff, LocalDiff, K13, Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
+	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{22}\frac{\partial v}{\partial y}\right\}[p_h]_y $$*/
+	/*For term $k_{22}\frac{\partial v}{\partial y}$, here $k_{22}=1$*/
+	DiagMultiply(TempLocalDiff, Dr, ry, Np);
+	DiagMultiply(LocalDiff, Ds, sy, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
+		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
 
 	/*For term $$ \left \{k_{23}\frac{\partial v}{\partial \sigma}\right\}[p_h]_y $$*/
@@ -1207,19 +1352,45 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 	/*For term $k_{23}\frac{\partial v}{\partial \sigma}$*/
 	DiagMultiply(LocalDiff, LocalDiff, K23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("T", "N", (ptrdiff_t)Np, (ptrdiff_t)Nfp, (ptrdiff_t)Nfp, 1.0, FacialDiffMatrix,
 		(ptrdiff_t)Nfp, FacialMass2d, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Np);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*ny[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
 	AssembleContributionIntoColumn(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{11}\frac{\partial q_h}{\partial x}\right\}[v]_x $$*/
+	/*For term $k_{11}\frac{\partial q_h}{\partial x}$, here $k_{11}=1$*/
+	DiagMultiply(TempLocalDiff, Dr, rx, Np);
+	DiagMultiply(LocalDiff, Ds, sx, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
 
 	/*For term $$ \left \{k_{13}\frac{\partial p_h}{\partial \sigma}\right\}[v]_x $$*/
 	DiagMultiply(LocalDiff, Dt, tz, Np);
 	/*For term $k_{13}\frac{\partial p_h}{\partial \sigma}$*/
 	DiagMultiply(LocalDiff, LocalDiff, K13, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*nx[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, nx[0], Np*Nfp);
+	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
+
+	/*For term $$ \left \{k_{22}\frac{\partial q_h}{\partial y}\right\}[v]_y $$*/
+	/*For term $k_{22}\frac{\partial q_h}{\partial y}$, here $k_{11}=1$*/
+	DiagMultiply(TempLocalDiff, Dr, ry, Np);
+	DiagMultiply(LocalDiff, Ds, sy, Np);
+	Add(LocalDiff, LocalDiff, TempLocalDiff, Np*Np);
+	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
+	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
+		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
 
 	/*For term $$ \left \{k_{23}\frac{\partial p_h}{\partial \sigma}\right\}[v]_y $$*/
@@ -1227,9 +1398,10 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 	/*For term $k_{23}\frac{\partial p_h}{\partial \sigma}$*/
 	DiagMultiply(LocalDiff, LocalDiff, K23, Np);
 	AssembleFacialDiffMatrix(FacialDiffMatrix, LocalDiff, LocalEid, Nfp, Np);
+	DiagLeftMultiplyUnsymmetric(FacialDiffMatrix, FacialDiffMatrix, IEWeight1 + Face * Nfp, Nfp, Np);
 	MatrixMultiply("N", "N", (ptrdiff_t)Nfp, (ptrdiff_t)Np, (ptrdiff_t)Nfp, 1.0, FacialMass2d, \
 		(ptrdiff_t)Nfp, FacialDiffMatrix, (ptrdiff_t)Nfp, 0.0, InnerEdgeContribution, (ptrdiff_t)Nfp);
-	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, 0.5*ny[0], Np*Nfp);
+	MultiplyByConstant(InnerEdgeContribution, InnerEdgeContribution, ny[0], Np*Nfp);
 	AssembleContributionIntoRow(TempContribution, InnerEdgeContribution, LocalEid, Np, Nfp);
 
 	/*The follow part is for term $ - \int_{ \epsilon_i }\tau^k[p_h][s]d\boldsymbol{ x }$*/
@@ -1240,10 +1412,11 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 	double *SortedLocalEidM = malloc(Nfp*sizeof(double));
 	memcpy(SortedLocalEidM, LocalEid, Nfp*sizeof(double));
 	Sort(SortedLocalEidM, Nfp);
-
+	// Why
 	AssembleFacialContributionIntoSparseMatrix(dest, Ir, Jc, SortedLocalEidM, SortedLocalEidM, Np, Nfp, TempContribution, LocalEle, LocalEle);
 	free(FacialMass2d);
 	free(TempContribution);
+	free(TempLocalDiff);
 	free(LocalDiff);
 	free(FacialDiffMatrix);
 	free(InnerEdgeContribution);

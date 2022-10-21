@@ -33,7 +33,7 @@ void EvaluateNonhydroVerticalFaceSurfFlux(double *, double *, double *, int );
 
 void EvaluateNonhydroVerticalFaceNumFlux_Central(double *, double *, double *, double *, int );
 
-void GetSparsePattern(mwIndex *, mwIndex *, double *, double *, double *, double *, double *, \
+void GetSparsePattern(int *, int *, double *, double *, double *, double *, double *, \
 	double *, double *, int, int, int, int, int, int , int );
 
 void GetSparsePatternForHorizontalFirstOrderTerm(mwIndex *, mwIndex *, double *, double *, double *, double *, \
@@ -56,7 +56,8 @@ void FindFaceAndDirectionVectorAtBoundary(double *, int *, int *, int, int, doub
 
 void FindFaceAndFacialPoint(double *, double *, int, double *, double *, double *, int, int, int);
 
-void CalculatePenaltyParameter(double *, double *, double *, double *, int , int , \
-	int , double *, double *, double *, double *, double *, int , int );
+void CalculatePenaltyParameterAndWeight(double *, double *, double *, \
+	double *, double *, double *, double *, double *, int , \
+	double , double , double , int , int );
 
 #endif

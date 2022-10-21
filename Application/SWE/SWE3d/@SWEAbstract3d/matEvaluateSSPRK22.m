@@ -26,7 +26,7 @@ while( time < ftime )
     for intRK = 1:1
         tloc = time + rkt(intRK) * dt;
         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
         
@@ -59,7 +59,7 @@ while( time < ftime )
     for intRK = 2:2
         tloc = time + rkt(intRK) * dt;
         %>Actually, boundary condition need to be imposed here
-%         obj.matUpdateExternalField( tloc, fphys2d, fphys );
+        obj.matUpdateExternalField( tloc, fphys2d, fphys );
         
         obj.matCalculateExplicitRHSTerm( fphys2d, fphys, 2, intRK);
         

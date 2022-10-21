@@ -1,14 +1,53 @@
-classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest3dNew
+classdef EllipticProblemConvergenceTest3dNew < SWEBarotropic3d
     %ELLIPTICPROBLEMCONVERGENCETEST3DNEW 此处显示有关此类的摘要
     %   此处显示详细说明
+    % Note: This case is exclusive for the test of convergence property
     
     properties
-        ConstantCoe = 'False'
+        ChLength = 2
+        ChWidth = 2
+        K11
+        K22
+        K13
+        K23
+        K33
+        StiffMatrix
+        SurfaceBoundaryEdgeType = 'Dirichlet'
+    end
+    
+    properties (Constant)
+        hcrit = 0.01
+    end
+    
+    properties
+        D
+        zb
+        Depth = 0.2
+        Cexact
+        symK11
+        symK22
+        symK13
+        symK23
+        symK33
+        SecondDiffCexact
+        ExactSolution
+        SimulatedSolution
+        RHS
     end
     
     methods
         function obj = EllipticProblemConvergenceTest3dNew(N, Nz, M, Mz)
-            obj = obj@EllipticProblemMatrixAssembleTest3dNew(N, Nz, M, Mz);
+            [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz);
+            obj.initPhysFromOptions( mesh2d, mesh3d );
+            obj.varFieldIndex = [1 2 11];
+            obj.K11 = ones(mesh3d.cell.Np, mesh3d.K);
+            obj.K22 = obj.K11;
+            obj.K13 = zeros(mesh3d.cell.Np, mesh3d.K);
+            obj.K23 = zeros(mesh3d.cell.Np, mesh3d.K);
+            obj.K33 = obj.K13.^2 + obj.K23.^2 + 1/obj.Depth/obj.Depth;
+            obj.matGetFunction;
+            obj.RHS = obj.matAssembleRightHandSide;
+            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
         end
         
         function EllipticProblemSolve(obj)
@@ -17,32 +56,26 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
             y = mesh3d.y;
             z = mesh3d.z;
             obj.matGetFunction;
-            obj.K11 = eval(obj.symK11);
-            if numel(obj.K11) == 1
-                obj.K11 = obj.K11 * ones(size(x));
-            end
+            obj.K11 = eval(obj.symK11) * ones(size(x));
             obj.K22 = obj.K11;
-            obj.K13 = eval(obj.symK13);
-            if numel(obj.K13) == 1
-                obj.ConstantCoe = 'True';
-                obj.K13 = obj.K13 * ones(size(x));
-            end
-            obj.K23 = eval(obj.symK23);
-            if numel(obj.K23) == 1
-                obj.K23 = obj.K23 * ones(size(x));
-            end            
-            obj.K33 = eval(obj.symK33);
-            if numel(obj.K33) == 1
-                obj.K33 = obj.K33 * ones(size(x));
-            end            
+            obj.K13 = eval(obj.symK13) * ones(size(x));
+            obj.K23 = eval(obj.symK23) * ones(size(x));
+            obj.K33 = eval(obj.symK33) * ones(size(x));
             obj.RHS = obj.matAssembleRightHandSide;
-%             obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys, obj.fphys2d );
-            obj.NonhydrostaticSolver.AssembleStiffMatrix( obj, obj.fphys, obj.fphys2d );
-            obj.matAssembleGlobalStiffMatrixWithBCsImposed;
-            obj.matAssembleGlobalStiffMatrixWithSurfaceBCsImposed;
-            obj.matAssembleGlobalStiffMatrixWithBottomBCsImposed;
+            obj.AssembleGlobalStiffMatrix;
             
-            obj.SimulatedSolution = obj.NonhydrostaticSolver.GlobalStiffMatrix\obj.RHS(:);
+            NonhydroStiffMatrix = obj.NonhydrostaticSolver.TestAssembleGlobalStiffMatrix( obj, obj.fphys, obj.fphys2d );
+            
+            Matrix = full(obj.StiffMatrix - NonhydroStiffMatrix);
+            
+            disp("============For Matrix================")
+            disp("The maximum difference is:")
+            disp(max(max(Matrix)))
+            disp("The minimum difference is:")
+            disp(min(min(Matrix)))
+            disp("============End Matrix================")
+            
+            obj.SimulatedSolution = NonhydroStiffMatrix\(obj.RHS(:));
             
             disp("============For solution================")
             disp("The maximum value is:")
@@ -56,75 +89,60 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
             disp("============End solution================")
         end
         
+        AssembleGlobalStiffMatrix(obj);
+        
     end
     methods(Access = protected)
         
-                %> set initial function
+        %> set initial function
         function [fphys2d, fphys] = setInitialField( obj )
             syms x y;
             %variable water depth
-            obj.D = 1*0.1*cos(pi*x)*cos(pi*y)+obj.Depth;
+            obj.zb = 0*x + 0*y + 0.2;
+            obj.D = 0*x + 0*y + obj.Depth;
             fphys2d = cell( obj.Nmesh, 1 );
             fphys = cell( obj.Nmesh, 1 );
             for m = 1 : obj.Nmesh
-                fphys2d{m} = zeros( obj.mesh2d(m).cell.Np, obj.mesh2d(m).K, obj.Nfield2d );
-                fphys{m} = zeros( obj.meshUnion(m).cell.Np, obj.meshUnion(m).K, obj.Nfield );
-                x = obj.mesh2d(m).x;
-                y = obj.mesh2d(m).y;
+                mesh2d = obj.meshUnion(m).mesh2d;
+                mesh3d = obj.meshUnion(m);
+                x = mesh2d.x;
+                y = mesh2d.y;
+                fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
+                fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
+                fphys2d{m}(:, :, 4) = eval(obj.zb);
+                %water depth
                 fphys2d{m}(:,:,1) = eval(obj.D);
+                %                  fphys2d{m}(:,:,1) = 2.89677;
+            end
+        end
+        
+        function rhs = matAssembleRightHandSide( obj )
+            x = obj.meshUnion.x;
+            y = obj.meshUnion.y;
+            z = obj.meshUnion.z;
+            Temprhs = eval(obj.SecondDiffCexact);
+            for i = 1:size(Temprhs,2)
+                rhs(:,i) = diag(obj.meshUnion.J(:,1))*obj.meshUnion.cell.M * Temprhs(:,i);
             end
         end
         
         function matGetFunction(obj)
             syms x y z nx ny nz;
-            obj.Cexact = sin(-pi/2*z)*sin(1/2*x)*sin(1/2*y);             
+            obj.Cexact = sin(-pi/2*x) * sin(-pi/2*y) * sin(-pi/2*z);
             obj.symK11 = 0*x + 0*y + 1;
             obj.symK22 = 0*x + 0*y + 1;
-            obj.symK13 =1*( -1/obj.D*(diff(obj.D,x)) - z/obj.D*diff(obj.D,x)) + 0*0.04;
-            obj.symK23 =1*(-1/obj.D*(diff(obj.D,y)) - z/obj.D*diff(obj.D,y)) + 0*0.04;
+            obj.symK13 =1*( -1/obj.D*(diff(obj.D,x)) - z/obj.D*diff(obj.D,x));
+            obj.symK23 =1*(-1/obj.D*(diff(obj.D,y)) - z/obj.D*diff(obj.D,y));
             obj.symK33 = obj.symK13^2 + obj.symK23^2 + 1./obj.D./obj.D;
             
             obj.SecondDiffCexact = diff(diff(obj.Cexact,x) + obj.symK13*diff(obj.Cexact, z),x) + ...
                 diff(diff(obj.Cexact,y) + obj.symK23*diff(obj.Cexact, z),y) + ...
-                diff(obj.symK13*diff(obj.Cexact,x) + obj.symK23*diff(obj.Cexact,y) + obj.symK33*diff(obj.Cexact, z),z) - ...
-                diff(obj.Cexact,x)*diff(obj.symK13,z) - diff(obj.Cexact,z)*obj.symK13*diff(obj.symK13,z) - ...
-                diff(obj.Cexact,y)*diff(obj.symK23,z) - diff(obj.Cexact,z)*obj.symK23*diff(obj.symK23,z);
-            
-            obj.NewmannCexact = (diff(obj.Cexact,x) + obj.symK13*diff(obj.Cexact, z))*nx + ...
-                (diff(obj.Cexact,y) + obj.symK23*diff(obj.Cexact, z))*ny + ...
-                (obj.symK13*diff(obj.Cexact,x) + obj.symK23*diff(obj.Cexact,y) + obj.symK33*diff(obj.Cexact, z))*nz;
+                diff(obj.symK13*diff(obj.Cexact,x) + obj.symK23*diff(obj.Cexact,y) + obj.symK33*diff(obj.Cexact, z),z);
             
             x = obj.meshUnion.x;
             y = obj.meshUnion.y;
             z = obj.meshUnion.z;
             obj.ExactSolution = eval(obj.Cexact);
-            
-            x = obj.meshUnion.BoundaryEdge.xb;
-            y = obj.meshUnion.BoundaryEdge.yb;
-            z = obj.meshUnion.BoundaryEdge.zb;
-            nx = obj.meshUnion.BoundaryEdge.nx;
-            ny = obj.meshUnion.BoundaryEdge.ny;
-            nz = obj.meshUnion.BoundaryEdge.nz;
-            obj.DirichletData = eval(obj.Cexact);
-            obj.NewmannData = eval(obj.NewmannCexact);
-            
-            x = obj.meshUnion.mesh2d.x;
-            y = obj.meshUnion.mesh2d.y;
-            z = max(max(obj.meshUnion.z))*ones(size(x));
-            nx = obj.meshUnion.SurfaceBoundaryEdge.nx;
-            ny = obj.meshUnion.SurfaceBoundaryEdge.ny;
-            nz = obj.meshUnion.SurfaceBoundaryEdge.nz;
-            obj.SurfaceDirichletData = eval(obj.Cexact);
-            obj.SurfaceNewmannData = eval(obj.NewmannCexact);
-            
-            x = obj.meshUnion.mesh2d.x;
-            y = obj.meshUnion.mesh2d.y;
-            z = min(min(obj.meshUnion.z))*ones(size(x));
-            nx = obj.meshUnion.BottomBoundaryEdge.nx;
-            ny = obj.meshUnion.BottomBoundaryEdge.ny;
-            nz = obj.meshUnion.BottomBoundaryEdge.nz;
-            obj.BottomDirichletData = eval(obj.Cexact);
-            obj.BottomNewmannData = eval(obj.NewmannCexact);
         end
         
         function [mesh2d, mesh3d] = makeChannelMesh(obj, N, Nz, M, Mz)
@@ -134,7 +152,7 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
                 enumBoundaryCondition.SlipWall, ...
                 enumBoundaryCondition.SlipWall ];
             mesh2d = makeUniformQuadMesh( N, ...
-                    [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], M, M, bctype);
+                [ -obj.ChLength/2, obj.ChLength/2 ], [ -obj.ChWidth/2, obj.ChWidth/2 ], M, M, bctype);
             cell = StdPrismQuad( N, Nz );
             zs = zeros(mesh2d.Nv, 1); zb = zs - 1;
             mesh3d = NdgExtendMesh3d( cell, mesh2d, zs, zb, Mz );
@@ -146,21 +164,24 @@ classdef EllipticProblemConvergenceTest3dNew < EllipticProblemMatrixAssembleTest
         end
         
         function [ option ] = setOption( obj, option )
-            ftime = 1.75;
-            outputIntervalNum = 500;
+            outputIntervalNum = 7500;
             option('startTime') = 0.0;
-            option('finalTime') = ftime;
+            option('finalTime') = 1.0;
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
-            option('outputTimeInterval') = ftime/outputIntervalNum;
+            option('outputTimeInterval') = 1.0/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 5;
-            option('AdvDiffVerticalDiffusionType') = enumVerticalDiffusion.None;
+            option('outputNcfileNum') = 20;
+            option('temporalDiscreteType') = enumTemporalDiscrete.SSPRK22;
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.None;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('outputType') = enumOutputFile.NetCDF;
-            option('AdvDiffHorizontalDiffusionType') = enumHorizontalDiffusion.Constant;
-            option('AdvDiffConstantHorizontalDiffusionValue') = 1;
+            option('outputType') = enumOutputFile.VTK;
+            option('limiterType') = enumLimiter.Vert;
+            option('ConstantVerticalEddyViscosityValue') = 0.0001;
+            option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
+            option('ConstantHorizontalEddyViscosityValue') = 1.0;
+            option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
+            option('CoriolisType') = enumSWECoriolis.None;
         end
     end
 end

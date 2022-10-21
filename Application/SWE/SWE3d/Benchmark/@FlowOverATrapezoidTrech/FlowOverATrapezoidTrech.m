@@ -55,6 +55,8 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
                 TempBottomElevation(:,Index) = (obj.meshUnion(1).mesh2d.x(:,Index) - 1.9) * 0.5;
                 Index = all(obj.meshUnion(1).mesh2d.x>=2.3);
                 TempBottomElevation(:,Index) = 0.2;
+%                 TempBottomElevation = 0.2 * ones(mesh2d.cell.Np, mesh2d.K);
+
                 fphys2d{m}(:, :, 4) = TempBottomElevation;
                 %water depth
                 fphys2d{m}(:,:,1) = 0.4 - fphys2d{m}(:, :, 4);
@@ -124,7 +126,13 @@ bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.ClampedVel, ...
-    enumBoundaryCondition.ClampedDepth ];
+    enumBoundaryCondition.SlipWall ];
+
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh(N, [0, obj.ChLength],...
     [-obj.ChWidth/2, obj.ChWidth/2], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);
@@ -137,5 +145,6 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
