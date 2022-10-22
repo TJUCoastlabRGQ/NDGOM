@@ -163,6 +163,54 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
                 int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), physClass.frhs2d{1}(:,:,1));
             
+            disp("Fot PSPX\n")
+            DataCheck(obj.PSPX, obj.mesh.K/2);
+            
+            disp("Fot PSPY\n")
+            DataCheck(obj.PSPY, obj.mesh.K/2);   
+            
+            disp("Fot SQPSPX\n")
+            DataCheck(obj.SQPSPX, obj.mesh.K/2);
+            
+            disp("Fot SQPSPY\n")
+            DataCheck(obj.SQPSPY, obj.mesh.K/2); 
+            
+            disp("Fot PUPX\n")
+            DataCheck(obj.PUPX, obj.mesh.K/2);               
+
+            disp("Fot PUPY\n")
+            DataCheck(obj.PUPY, obj.mesh.K/2);  
+            
+            disp("Fot PVPX\n")
+            DataCheck(obj.PVPX, obj.mesh.K/2);               
+
+            disp("Fot PVPY\n")
+            DataCheck(obj.PVPY, obj.mesh.K/2);  
+
+            disp("Fot PUPS\n")
+            DataCheck(obj.PUPS, obj.mesh.K/2);   
+            
+            disp("Fot PVPS\n")
+            DataCheck(obj.PVPS, obj.mesh.K/2);              
+
+            disp("Fot PWPS\n")
+            DataCheck(obj.PWPS, obj.mesh.K/2); 
+            
+            disp("Fot PHPX\n")
+            DataCheck(obj.PHPX, obj.mesh.K/2);
+            
+            disp("Fot PHPY\n")
+            DataCheck(obj.PHPY, obj.mesh.K/2);        
+            
+            disp("Fot Wnew\n")
+            DataCheck(obj.Wnew, obj.mesh2d.K/2);   
+            
+            disp("Fot Unew\n")
+            DataCheck(obj.Unew, obj.mesh2d.K/2);   
+            
+            disp("Fot Vnew\n")
+            DataCheck(obj.Vnew, obj.mesh2d.K/2);             
+            
             edge = physClass.meshUnion.BottomBoundaryEdge;
             [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
             obj.Wnew = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
@@ -176,14 +224,17 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %checked
             obj.NonhydroRHS = mxAssembleNonhydroRHS(obj.PUPX, obj.PUPS, obj.PVPY, obj.PVPS, obj.PWPS, obj.PSPX, ...
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.mesh.J, obj.cell.M);
+            disp("Fot Nonhydrostatic RHS\n")
+            DataCheck(reshape(obj.NonhydroRHS, obj.mesh.cell.Np, obj.mesh.K), obj.mesh.K/2);
+            
             %checked
-%             [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
-%                 physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
-%                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
-%                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
-%                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure, obj.Unew, obj.Uold, obj.Vnew, obj.Vold,...
-%                 obj.PUPX, obj.PUPY, obj.PUPS, obj.PVPX, obj.PVPY, obj.PVPS, obj.PHPX, obj.PHPY, physClass.gra, fphys{1}(:,:,obj.varIndex(5)), ...
-%                 fphys{1}(:,:,obj.varIndex(6)), obj.BoundNonhydroGrad);
+            %             [  obj.GlobalStiffMatrix, obj.NonhydroRHS ] = mxImposeBoundaryCondition( obj.GlobalStiffMatrix, obj.PSPX, obj.PSPY, ...
+            %                 physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.BottomBoundaryEdge,...
+            %                 obj.BoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh2d, obj.cell2d, obj.InnerEdge2d,...
+            %                 obj.BoundaryEdge2d, obj.Wold, obj.Wnew, deltatime, obj.rho, fphys{1}(:,:,obj.varIndex(1)), ...
+            %                 fphys{1}(:,:,obj.varIndex(2)), obj.NonhydroRHS, obj.PWPS,  obj.BoundNonhydroPressure, obj.Unew, obj.Uold, obj.Vnew, obj.Vold,...
+            %                 obj.PUPX, obj.PUPY, obj.PUPS, obj.PVPX, obj.PVPY, obj.PVPS, obj.PHPX, obj.PHPY, physClass.gra, fphys{1}(:,:,obj.varIndex(5)), ...
+            %                 fphys{1}(:,:,obj.varIndex(6)), obj.BoundNonhydroGrad);
             % checked
             obj.GlobalStiffMatrix = mxAssembleFinalGlobalStiffMatrix(obj.cell.Np, obj.mesh.K, physClass.hcrit, obj.mesh.EToE, obj.cell.Nface,...
                 obj.cell.M, obj.mesh.J, obj.GlobalStiffMatrix, obj.PNPX, obj.PNPY, obj.PNPS, fphys{1}(:,:,obj.varIndex(4)), ...
@@ -216,6 +267,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
             % Compute the solutions X using the symbolic factorization.
             [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
+            disp("Fot NonhydroPressure\n")
+            DataCheck(reshape(NonhydroPressure, obj.mesh.cell.Np, obj.mesh.K), obj.mesh.K/2);
             
             Index = abs(NonhydroPressure)<1e-10;
             NonhydroPressure(Index) = 0;
@@ -240,15 +293,21 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             %                  PETSC_KSPGMRES, 1.e-10, int32(10000000), PETSC_PCJACOBI, 'right');
             %             toc;
             
-%             NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
+            %             NonhydroPressure = obj.GlobalStiffMatrix\obj.NonhydroRHS;
             
             %checked
             fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
-                obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype));
+                obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh.EToE);
+            disp("Fot the corrected hu\n")
+            DataCheck(fphys{1}(:,:,obj.varIndex(1)), obj.mesh.K/2);
+            disp("Fot the corrected hv\n")
+            DataCheck(fphys{1}(:,:,obj.varIndex(2)), obj.mesh.K/2);
+            disp("Fot the corrected hw\n")
+            DataCheck(fphys{1}(:,:,obj.varIndex(3)), obj.mesh.K/2);
             
             %             obj.Wold = mxCalculateBottomVerticalVelocity( obj.cell, obj.BottomBoundaryEdge, fphys{1}, obj.varIndex, obj.mesh, physClass.hcrit );
-            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys ); 
+            [ fm, ~ ] = edge.matEvaluateSurfValue( fphys );
             obj.Uold = fm(:,:,obj.varIndex(1))./fm(:,:,obj.varIndex(4));
             obj.Vold = fm(:,:,obj.varIndex(2))./fm(:,:,obj.varIndex(4));
             obj.Wold = fm(:,:,obj.varIndex(3))./fm(:,:,obj.varIndex(4));
@@ -366,7 +425,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         end
         
         function Matrix = TestAssembleGlobalStiffMatrix( obj, physClass, fphys, fphys2d )
-                        %checked
+            %checked
             [ obj.PSPX, obj.PSPY, obj.SQPSPX, obj.SQPSPY, obj.PUPX, obj.PUPY, ...
                 obj.PVPX, obj.PVPY, obj.PUPS, obj.PVPS, obj.PWPS, obj.Wnew, obj.Unew, obj.Vnew, obj.PHPX, obj.PHPY ] = ...
                 mxCalculatePartialDerivativeUpdated( physClass.hcrit, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, ...

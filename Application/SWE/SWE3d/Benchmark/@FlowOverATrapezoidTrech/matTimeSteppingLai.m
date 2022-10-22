@@ -33,12 +33,23 @@ while( time < ftime )
     % $H^*u^*$, $H^*v^*$, $H^*w^*$
     [ fphys{1}(:,:,obj.varFieldIndex)] = Tempfphys + dt * obj.frhs{1}; 
     
+    disp("Fot the right hand side of hu\n")
+    DataCheck(obj.frhs{1}(:,:,1), obj.meshUnion.K/2);
+    
+    disp("Fot the right hand side of hv\n")
+    DataCheck(obj.frhs{1}(:,:,2), obj.meshUnion.K/2);
+    
     % $H^*$
     fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + dt * obj.frhs2d{1}(:,:,1);
     
+    disp("Fot the right hand side of h\n")
+    DataCheck(obj.frhs2d{1}(:,:,1), obj.meshUnion.mesh2d.K/2);
+    
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) ); 
     
-    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);      
+    fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
+    
+    DataCheck(fphys{1}(: , :, 7), obj.meshUnion.K/2);
     
     [ fphys ] = obj.matImposeLimiter( fphys );
     
@@ -69,11 +80,20 @@ while( time < ftime )
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = fphys{1}(:,:,obj.varFieldIndex) + dt * obj.frhs{1}; 
     
+    disp("Fot the right hand side of hu\n")
+    DataCheck(obj.frhs{1}(:,:,1), obj.meshUnion.K/2);
+    disp("Fot the right hand side of hv\n")
+    DataCheck(obj.frhs{1}(:,:,2), obj.meshUnion.K/2);
+    
     fphys2d{1}(:,:,1) = fphys2d{1}(:,:,1) + dt * obj.frhs2d{1}(:,:,1);
+    disp("Fot the right hand side of h\n")
+    DataCheck(obj.frhs2d{1}(:,:,1), obj.meshUnion.mesh2d.K/2);
     
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
+    
+    DataCheck(fphys{1}(: , :, 7), obj.meshUnion.K/2);
     
     [ fphys ] = obj.matImposeLimiter( fphys );
     

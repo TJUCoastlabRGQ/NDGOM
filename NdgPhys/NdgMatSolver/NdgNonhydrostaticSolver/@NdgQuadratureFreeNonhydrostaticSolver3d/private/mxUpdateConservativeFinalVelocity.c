@@ -52,72 +52,76 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *Updatedhv = OutVariable + Np*K;
 	double *Updatedhw = OutVariable + 2*Np*K;
 
-	mxArray *Temprx = mxGetField(prhs[7], 0, "rx");
+	const mxArray *mesh = prhs[7];
+	mxArray *Temprx = mxGetField(mesh, 0, "rx");
 	double *rx = mxGetPr(Temprx);
-	mxArray *Tempsx = mxGetField(prhs[7], 0, "sx");
+	mxArray *Tempsx = mxGetField(mesh, 0, "sx");
 	double *sx = mxGetPr(Tempsx);
-	mxArray *Tempry = mxGetField(prhs[7], 0, "ry");
+	mxArray *Tempry = mxGetField(mesh, 0, "ry");
 	double *ry = mxGetPr(Tempry);
-	mxArray *Tempsy = mxGetField(prhs[7], 0, "sy");
+	mxArray *Tempsy = mxGetField(mesh, 0, "sy");
 	double *sy = mxGetPr(Tempsy);
-	mxArray *Temptz = mxGetField(prhs[7], 0, "tz");
+	mxArray *Temptz = mxGetField(mesh, 0, "tz");
 	double *tz = mxGetPr(Temptz);
-	mxArray *TempJ = mxGetField(prhs[7], 0, "J");
+	mxArray *TempJ = mxGetField(mesh, 0, "J");
 	double *J = mxGetPr(TempJ);
 
-	mxArray *TempDr = mxGetField(prhs[8], 0, "Dr");
+	const mxArray *cell = prhs[8];
+	mxArray *TempDr = mxGetField(cell, 0, "Dr");
 	double *Dr = mxGetPr(TempDr);
-	mxArray *TempDs = mxGetField(prhs[8], 0, "Ds");
+	mxArray *TempDs = mxGetField(cell, 0, "Ds");
 	double *Ds = mxGetPr(TempDs);
-	mxArray *TempDt = mxGetField(prhs[8], 0, "Dt");
+	mxArray *TempDt = mxGetField(cell, 0, "Dt");
 	double *Dt = mxGetPr(TempDt);
-	mxArray *TempNface = mxGetField(prhs[8], 0, "Nface");
+	mxArray *TempNface = mxGetField(cell, 0, "Nface");
 	int Nface = (int)mxGetScalar(TempNface);// Substract the bottom face and surface face from the total face
-	mxArray *TempInvM = mxGetField(prhs[8], 0, "invM");
+	mxArray *TempInvM = mxGetField(cell, 0, "invM");
 	double *invM = mxGetPr(TempInvM);
 
-	mxArray *TempIENe = mxGetField(prhs[9], 0, "Ne");
+	const mxArray *InnerEdge = prhs[9];
+	mxArray *TempIENe = mxGetField(InnerEdge, 0, "Ne");
 	int IENe = (int)mxGetScalar(TempIENe);
-	mxArray *TempIENfp = mxGetField(prhs[9], 0, "Nfp");
+	mxArray *TempIENfp = mxGetField(InnerEdge, 0, "Nfp");
 	int IENfp = (int)mxGetScalar(TempIENfp);
-	mxArray *TempIEMb = mxGetField(prhs[9], 0, "M");
+	mxArray *TempIEMb = mxGetField(InnerEdge, 0, "M");
 	double *IEMb = mxGetPr(TempIEMb);
-	mxArray *TempIEJs = mxGetField(prhs[9], 0, "Js");
+	mxArray *TempIEJs = mxGetField(InnerEdge, 0, "Js");
 	double *IEJs = mxGetPr(TempIEJs);
-	mxArray *TempIEnx = mxGetField(prhs[9], 0, "nx");
+	mxArray *TempIEnx = mxGetField(InnerEdge, 0, "nx");
 	double *IEnx = mxGetPr(TempIEnx);
-	mxArray *TempIEny = mxGetField(prhs[9], 0, "ny");
+	mxArray *TempIEny = mxGetField(InnerEdge, 0, "ny");
 	double *IEny = mxGetPr(TempIEny);
-	mxArray *TempIELAV = mxGetField(prhs[9], 0, "LAV");
+	mxArray *TempIELAV = mxGetField(InnerEdge, 0, "LAV");
 	double *IELAV = mxGetPr(TempIELAV);
-	mxArray *TempIEFToE = mxGetField(prhs[9], 0, "FToE");
+	mxArray *TempIEFToE = mxGetField(InnerEdge, 0, "FToE");
 	double *IEFToE = mxGetPr(TempIEFToE);
-	mxArray *TempIEFToF = mxGetField(prhs[9], 0, "FToF");
+	mxArray *TempIEFToF = mxGetField(InnerEdge, 0, "FToF");
 	double *IEFToF = mxGetPr(TempIEFToF);
-	mxArray *TempIEFToN1 = mxGetField(prhs[9], 0, "FToN1");
+	mxArray *TempIEFToN1 = mxGetField(InnerEdge, 0, "FToN1");
 	double *IEFToN1 = mxGetPr(TempIEFToN1);
-	mxArray *TempIEFToN2 = mxGetField(prhs[9], 0, "FToN2");
+	mxArray *TempIEFToN2 = mxGetField(InnerEdge, 0, "FToN2");
 	double *IEFToN2 = mxGetPr(TempIEFToN2);
 
-	mxArray *TempBENe = mxGetField(prhs[10], 0, "Ne");
+	const mxArray *BoundaryEdge = prhs[10];
+	mxArray *TempBENe = mxGetField(BoundaryEdge, 0, "Ne");
 	int BENe = (int)mxGetScalar(TempBENe);
-	mxArray *TempBENfp = mxGetField(prhs[10], 0, "Nfp");
+	mxArray *TempBENfp = mxGetField(BoundaryEdge, 0, "Nfp");
 	int BENfp = mxGetScalar(TempBENfp);
-	mxArray *TempBEMb = mxGetField(prhs[10], 0, "M");
+	mxArray *TempBEMb = mxGetField(BoundaryEdge, 0, "M");
 	double *BEMb = mxGetPr(TempBEMb);
-	mxArray *TempBEJs = mxGetField(prhs[10], 0, "Js");
+	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
 	double *BEJs = mxGetPr(TempBEJs);
-	mxArray *TempBEnx = mxGetField(prhs[10], 0, "nx");
+	mxArray *TempBEnx = mxGetField(BoundaryEdge, 0, "nx");
 	double *BEnx = mxGetPr(TempBEnx);
-	mxArray *TempBEny = mxGetField(prhs[10], 0, "ny");
+	mxArray *TempBEny = mxGetField(BoundaryEdge, 0, "ny");
 	double *BEny = mxGetPr(TempBEny);
-	mxArray *TempBELAV = mxGetField(prhs[10], 0, "LAV");
+	mxArray *TempBELAV = mxGetField(BoundaryEdge, 0, "LAV");
 	double *BELAV = mxGetPr(TempBELAV);
-	mxArray *TempBEFToE = mxGetField(prhs[10], 0, "FToE");
+	mxArray *TempBEFToE = mxGetField(BoundaryEdge, 0, "FToE");
 	double *BEFToE = mxGetPr(TempBEFToE);
-	mxArray *TempBEFToF = mxGetField(prhs[10], 0, "FToF");
+	mxArray *TempBEFToF = mxGetField(BoundaryEdge, 0, "FToF");
 	double *BEFToF = mxGetPr(TempBEFToF);
-	mxArray *TempBEFToN1 = mxGetField(prhs[10], 0, "FToN1");
+	mxArray *TempBEFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
 	double *BEFToN1 = mxGetPr(TempBEFToN1);
 
 	/*
@@ -127,58 +131,61 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	signed char *ftype = (signed char *)mxGetData(prhs[14]);
 
 	/*For bottom edge object*/
-	mxArray *TempBotENe = mxGetField(prhs[11], 0, "Ne");
+	const mxArray *BottomEdge = prhs[11];
+	mxArray *TempBotENe = mxGetField(BottomEdge, 0, "Ne");
 	int BotENe = (int)mxGetScalar(TempBotENe);
-	mxArray *TempBotENfp = mxGetField(prhs[11], 0, "Nfp");
+	mxArray *TempBotENfp = mxGetField(BottomEdge, 0, "Nfp");
 	int BotENfp = (int)mxGetScalar(TempBotENfp);
-	mxArray *TempBotEMb = mxGetField(prhs[11], 0, "M");
+	mxArray *TempBotEMb = mxGetField(BottomEdge, 0, "M");
 	double *BotEMb = mxGetPr(TempBotEMb);
-	mxArray *TempBotEJs = mxGetField(prhs[11], 0, "Js");
+	mxArray *TempBotEJs = mxGetField(BottomEdge, 0, "Js");
 	double *BotEJs = mxGetPr(TempBotEJs);
-	mxArray *TempBotEnz = mxGetField(prhs[11], 0, "nz");
+	mxArray *TempBotEnz = mxGetField(BottomEdge, 0, "nz");
 	double *BotEnz = mxGetPr(TempBotEnz);
-	mxArray *TempBotEFToE = mxGetField(prhs[11], 0, "FToE");
+	mxArray *TempBotEFToE = mxGetField(BottomEdge, 0, "FToE");
 	double *BotEFToE = mxGetPr(TempBotEFToE);
-	mxArray *TempBotEFToF = mxGetField(prhs[11], 0, "FToF");
+	mxArray *TempBotEFToF = mxGetField(BottomEdge, 0, "FToF");
 	double *BotEFToF = mxGetPr(TempBotEFToF);
-	mxArray *TempBotEFToN1 = mxGetField(prhs[11], 0, "FToN1");
+	mxArray *TempBotEFToN1 = mxGetField(BottomEdge, 0, "FToN1");
 	double *BotEFToN1 = mxGetPr(TempBotEFToN1);
-	mxArray *TempBotEFToN2 = mxGetField(prhs[11], 0, "FToN2");
+	mxArray *TempBotEFToN2 = mxGetField(BottomEdge, 0, "FToN2");
 	double *BotEFToN2 = mxGetPr(TempBotEFToN2);
 
-	mxArray *TempBotBENe = mxGetField(prhs[12], 0, "Ne");
+	const mxArray *BottomBoundaryEdge = prhs[12];
+	mxArray *TempBotBENe = mxGetField(BottomBoundaryEdge, 0, "Ne");
 	int BotBENe = (int)mxGetScalar(TempBotBENe);
-	mxArray *TempBotBENfp = mxGetField(prhs[12], 0, "Nfp");
+	mxArray *TempBotBENfp = mxGetField(BottomBoundaryEdge, 0, "Nfp");
 	int BotBENfp = (int)mxGetScalar(TempBotBENfp);
-	mxArray *TempBotBEMb = mxGetField(prhs[12], 0, "M");
+	mxArray *TempBotBEMb = mxGetField(BottomBoundaryEdge, 0, "M");
 	double *BotBEMb = mxGetPr(TempBotBEMb);
-	mxArray *TempBotBEJs = mxGetField(prhs[12], 0, "Js");
+	mxArray *TempBotBEJs = mxGetField(BottomBoundaryEdge, 0, "Js");
 	double *BotBEJs = mxGetPr(TempBotBEJs);
-	mxArray *TempBotBEnz = mxGetField(prhs[12], 0, "nz");
+	mxArray *TempBotBEnz = mxGetField(BottomBoundaryEdge, 0, "nz");
 	double *BotBEnz = mxGetPr(TempBotBEnz);
-	mxArray *TempBotBEFToE = mxGetField(prhs[12], 0, "FToE");
+	mxArray *TempBotBEFToE = mxGetField(BottomBoundaryEdge, 0, "FToE");
 	double *BotBEFToE = mxGetPr(TempBotBEFToE);
-	mxArray *TempBotBEFToF = mxGetField(prhs[12], 0, "FToF");
+	mxArray *TempBotBEFToF = mxGetField(BottomBoundaryEdge, 0, "FToF");
 	double *BotBEFToF = mxGetPr(TempBotBEFToF);
-	mxArray *TempBotBEFToN1 = mxGetField(prhs[12], 0, "FToN1");
+	mxArray *TempBotBEFToN1 = mxGetField(BottomBoundaryEdge, 0, "FToN1");
 	double *BotBEFToN1 = mxGetPr(TempBotBEFToN1);
 
 	/*For surface boundary edge object*/
-	mxArray *TempSurfBENe = mxGetField(prhs[13], 0, "Ne");
+	const mxArray *SurfaceBoundaryEdge = prhs[13];
+	mxArray *TempSurfBENe = mxGetField(SurfaceBoundaryEdge, 0, "Ne");
 	int SurfBENe = (int)mxGetScalar(TempSurfBENe);
-	mxArray *TempSurfBENfp = mxGetField(prhs[13], 0, "Nfp");
+	mxArray *TempSurfBENfp = mxGetField(SurfaceBoundaryEdge, 0, "Nfp");
 	int SurfBENfp = (int)mxGetScalar(TempSurfBENfp);
-	mxArray *TempSurfBEMb = mxGetField(prhs[13], 0, "M");
+	mxArray *TempSurfBEMb = mxGetField(SurfaceBoundaryEdge, 0, "M");
 	double *SurfBEMb = mxGetPr(TempSurfBEMb);
-	mxArray *TempSurfBEJs = mxGetField(prhs[13], 0, "Js");
+	mxArray *TempSurfBEJs = mxGetField(SurfaceBoundaryEdge, 0, "Js");
 	double *SurfBEJs = mxGetPr(TempSurfBEJs);
-	mxArray *TempSurfBEnz = mxGetField(prhs[13], 0, "nz");
+	mxArray *TempSurfBEnz = mxGetField(SurfaceBoundaryEdge, 0, "nz");
 	double *SurfBEnz = mxGetPr(TempSurfBEnz);
-	mxArray *TempSurfBEFToE = mxGetField(prhs[13], 0, "FToE");
+	mxArray *TempSurfBEFToE = mxGetField(SurfaceBoundaryEdge, 0, "FToE");
 	double *SurfBEFToE = mxGetPr(TempSurfBEFToE);
-	mxArray *TempSurfBEFToF = mxGetField(prhs[13], 0, "FToF");
+	mxArray *TempSurfBEFToF = mxGetField(SurfaceBoundaryEdge, 0, "FToF");
 	double *SurfBEFToF = mxGetPr(TempSurfBEFToF);
-	mxArray *TempSurfBEFToN1 = mxGetField(prhs[13], 0, "FToN1");
+	mxArray *TempSurfBEFToN1 = mxGetField(SurfaceBoundaryEdge, 0, "FToN1");
 	double *SurfBEFToN1 = mxGetPr(TempSurfBEFToN1);
 
 	double *PNPX = malloc(Np*K*sizeof(double));
@@ -348,7 +355,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	double *qBotBEM = malloc(BotBENe*BotBENfp*sizeof(double));
 	double *QBotBEfluxM = malloc(BotBENe*BotBENfp*sizeof(double));
 	double *QBotBEfluxS = malloc(BotBENe*BotBENfp*sizeof(double));
-
+/*
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
@@ -357,13 +364,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateNonhydroVerticalFaceSurfFlux(QBotBEfluxM + face*BotBENfp, qBotBEM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 		DotProduct(QBotBEfluxS + face*BotBENfp, qBotBEM + face*BotBENfp, BotBEnz + face*BotBENfp, BotBENfp);
 	}
-
+	
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int face = 0; face < BotBENe; face++){
-//		StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, QBotBEfluxM, QBotBEfluxS, BotBEJs, BotBEMb, NonhydroERHS);
+		StrongFormBoundaryEdgeRHS(face, BotBEFToE, BotBEFToF, Np, K, BotBENfp, BotBEFToN1, QBotBEfluxM, QBotBEfluxS, BotBEJs, BotBEMb, NonhydroERHS);
 	}
+*/
 
 	double *qSurfBEM = malloc(SurfBENe*SurfBENfp*sizeof(double));
 	double *QSurfBEfluxM = malloc(SurfBENe*SurfBENfp*sizeof(double));
@@ -377,7 +385,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		EvaluateNonhydroVerticalFaceSurfFlux(QSurfBEfluxM + face*SurfBENfp, qSurfBEM + face*SurfBENfp, SurfBEnz + face*SurfBENfp, SurfBENfp);
 		/*At dirichelet boundary, the numerical flux is given as the Dirichlet boundary*/
 		for (int p = 0; p < SurfBENfp; p++){
-			QSurfBEfluxS[face*SurfBENfp + p] = 0;
+			QSurfBEfluxS[face*SurfBENfp + p] = 0.0;
 		}
 	}
 
@@ -392,22 +400,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++){
-		for (int field = 0; field<1; field++){
-			for (int face = 1; face<Nface; face++){
-				Add(NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroERHS + field*Np*K*Nface + face*Np*K + k*Np, Np);
-			}
-		}
+		for (int face = 1; face<Nface; face++) {
+			Add(NonhydroERHS + k*Np, NonhydroERHS + k*Np, NonhydroERHS + face*Np*K + k*Np, Np);
+		}		
 	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int k = 0; k < K; k++) {
-		for (int field = 0; field < 1; field++){
-
-			MultiEdgeContributionByLiftOperator(NonhydroERHS + field*Np*K*Nface + k*Np, NonhydroTempFacialIntegral + k*Np, &np, &oneI, &np, \
-				&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
-		}
+		MultiEdgeContributionByLiftOperator(NonhydroERHS + k*Np, NonhydroTempFacialIntegral + k*Np, &np, &oneI, &np, \
+			&one, invM, &np, &np, &zero, &np, J + k*Np, Np);
 	}
 
 #ifdef _OPENMP
@@ -435,6 +438,24 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			Updatedhu[k*Np + p] = hu[k*Np + p] - h[k*Np + p] * dt / rho*(PNPX[k*Np + p] + PSPX[k*Np + p] * PNPS[k*Np + p]);
 			Updatedhv[k*Np + p] = hv[k*Np + p] - h[k*Np + p] * dt / rho*(PNPY[k*Np + p] + PSPY[k*Np + p] * PNPS[k*Np + p]);
 			Updatedhw[k*Np + p] = hw[k*Np + p] - dt / rho*PNPS[k*Np + p];
+		}
+	}
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (int face = 0; face < BENe; face++) {
+		NdgEdgeType type = (NdgEdgeType)ftype[face];
+		if (type == NdgEdgeSlipWall) {
+			//Doing Nothing
+		}
+		else {//impose zero boundary condition at other boundary
+			int ele = (int)BEFToE[2*face];
+			for (int p = 0; p < Np; p++) {
+				Updatedhu[(ele - 1)*Np + p] = hu[(ele - 1)*Np + p];
+				Updatedhv[(ele - 1)*Np + p] = hv[(ele - 1)*Np + p];
+				Updatedhw[(ele - 1)*Np + p] = hw[(ele - 1)*Np + p];
+			}
 		}
 	}
 
