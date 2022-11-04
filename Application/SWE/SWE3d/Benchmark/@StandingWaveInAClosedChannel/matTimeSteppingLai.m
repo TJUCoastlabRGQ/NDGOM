@@ -18,7 +18,7 @@ while( time < ftime )
     Tempfphys2d = fphys2d{1}(:,:,obj.varFieldIndex2d);
     Tempfphys = fphys{1}(:,:,obj.varFieldIndex);
     
-   obj.NonhydrostaticSolver.matCalculateBottomVerticalVelocity( obj, fphys );
+    obj.NonhydrostaticSolver.matGetBottomOldMomentum( obj, fphys );
 
     
     tloc = time + dt;
@@ -47,7 +47,7 @@ while( time < ftime )
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d ); 
+    obj.NonhydrostaticSolver.matGetBottomOldMomentum( obj, fphys );
     
     %> update the vertical velocity
     fphys{1}(:,:,3) = obj.VerticalVelocitySolver.matCalculateVerticalVelocity( obj, fphys2d, fphys );

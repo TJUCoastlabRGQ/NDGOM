@@ -288,7 +288,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 
 	}
 
-	int i, k, p, ele, L;
+	int i, k, p, ele, L, face;
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)

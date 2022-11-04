@@ -33,7 +33,7 @@ void SWENonhydroVertVelocityMemoryAllocation(int, int);
 
 void SWENonhydroVertVelocityMemoryDeAllocation();
 
-void GlobalStiffMatrixMemoryAllocation(int, int, int, int, int, int, int, int);
+void GlobalStiffMatrixMemoryAllocation(int, int, int, int, int, int, int, int, int, int);
 
 void GlobalStiffMatrixMemoryDeAllocation();
 

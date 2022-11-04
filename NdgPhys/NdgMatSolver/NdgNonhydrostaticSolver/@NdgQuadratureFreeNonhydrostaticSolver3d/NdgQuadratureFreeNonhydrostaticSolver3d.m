@@ -61,6 +61,30 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         
         Vnew
         
+        BotBEUold
+        
+        BotBEUnew
+        
+        BotBEVold
+        
+        BotBEVnew
+        
+        BotBEWold
+        
+        BotBEWnew
+        
+        BEUold
+        
+        BEUnew
+        
+        BEVold
+        
+        BEVnew
+        
+        BEWold
+        
+        BEWnew
+        
     end
     
     properties
@@ -103,7 +127,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
     
     methods
         function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )
-            obj.matSetInitializeCharacteristicMatrix( mesh );
+            
             warning('off');
             obj.InnerEdge = struct(mesh.InnerEdge);
             obj.BoundaryEdge = struct(mesh.BoundaryEdge);
@@ -117,6 +141,9 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.BoundaryEdge2d = struct(mesh.mesh2d.BoundaryEdge);
             obj.cell2d = struct(mesh.mesh2d.cell);
             warning('on');
+            
+            obj.matSetInitializeCharacteristicMatrix( mesh );
+            
             obj.varIndex = zeros(6,1);
             obj.rho = 1000;
             obj.BoundNonhydroPressure = zeros(obj.BoundaryEdge.Nfp, obj.BoundaryEdge.Ne);
@@ -161,7 +188,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.BottomEdge, obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, fphys{1}, obj.varIndex, ...
                 int8(physClass.meshUnion.BoundaryEdge.ftype), physClass.gra, physClass.fext3d{ 1 }, fphys2d{1}(:,:,1),...
                 fphys2d{1}(:,:,4), physClass.fext2d{ 1 }, obj.mesh2d, obj.InnerEdge2d, obj.BoundaryEdge2d, obj.cell2d, ...
-                int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), physClass.frhs2d{1}(:,:,1));        
+                int8(physClass.meshUnion.mesh2d.BoundaryEdge.ftype), physClass.frhs2d{1}(:,:,1));
             
             obj.matGetBottomNewMomentum( physClass, fphys );
             
@@ -176,15 +203,15 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
                 obj.PSPY, fphys{1}(:,:,obj.varIndex(4)), deltatime, obj.rho, physClass.hcrit, obj.mesh.J, obj.cell.M);
             
             
-            obj.NonhydroRHS = mxImposeBottomBoundaryCondition( obj.PSPX, obj.PSPY, physClass.hcrit, obj.mesh, obj.cell,...
-                obj.BottomBoundaryEdge, obj.BotBEUold, obj.BotBEUnew, obj.BotBEVold, obj.BotBEVnew, obj.BotBEWold, obj.BotBEWnew,...
-                deltatime, obj.rho, obj.varIndex, obj.NonhydroRHS, physClass.frhs{1},...
-                fphys{1});
+            %             obj.NonhydroRHS = mxImposeBottomBoundaryCondition( obj.PSPX, obj.PSPY, physClass.hcrit, obj.mesh, obj.cell,...
+            %                 obj.BottomBoundaryEdge, obj.BotBEUold, obj.BotBEUnew, obj.BotBEVold, obj.BotBEVnew, obj.BotBEWold, obj.BotBEWnew,...
+            %                 deltatime, obj.rho, obj.varIndex, obj.NonhydroRHS, physClass.frhs{1},...
+            %                 fphys{1});
             
             %             obj.NonhydroRHS = mxImposeSideBoundaryCondition( obj.PSPX, obj.PSPY, physClass.hcrit, obj.mesh, obj.cell,...
             %                 obj.BoundaryEdge, obj.BEUold, obj.BEUnew, obj.BEVold, obj.BEVnew, obj.BEWold, obj.BEWnew,...
             %                 deltatime, obj.rho, obj.varIndex, obj.NonhydroRHS, physClass.frhs{1},...
-            %                 fphys{1}, int8(obj.BoundaryEdge.ftype));            
+            %                 fphys{1}, int8(obj.BoundaryEdge.ftype));
             
             
             % checked
@@ -214,7 +241,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             fphys{1}(:,:,obj.varIndex(1:3)) = mxUpdateConservativeFinalVelocity( NonhydroPressure, fphys{1}, obj.varIndex, ...
                 obj.rho, deltatime, obj.PSPX, obj.PSPY, obj.mesh, obj.cell, obj.InnerEdge, obj.BoundaryEdge, obj.BottomEdge,...
                 obj.BottomBoundaryEdge, obj.SurfaceBoundaryEdge, int8(physClass.meshUnion.BoundaryEdge.ftype), obj.mesh.EToE);
-                        
+            
         end
         
         function [ time, fphys2d, fphys3d ] = matHotStart( obj, mesh3d, file2d, file3d, fphys2d, fphys3d)
@@ -266,7 +293,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.BEUnew = fm(:,:,obj.varIndex(1));
             obj.BEVnew = fm(:,:,obj.varIndex(2));
             obj.BEWnew = fm(:,:,obj.varIndex(3));
-        end        
+        end
         
         function matCalculateNonhydroRHS(obj, physClass, fphys, fphys2d )
             

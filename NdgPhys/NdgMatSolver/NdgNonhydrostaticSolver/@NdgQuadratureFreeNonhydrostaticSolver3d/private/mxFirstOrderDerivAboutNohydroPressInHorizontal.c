@@ -319,11 +319,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	mwIndex *jcs = mxGetJc(plhs[0]);
 	memcpy(jcs, TempJc, (Np*Ele3d + 1)*sizeof(mwIndex));
 
+	int ele, L, face, i;
+
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int ele = 0; ele < Ele2d; ele++){
-		for (int L = 0; L < Nlayer; L++){
+	for (ele = 0; ele < Ele2d; ele++){
+		for ( L = 0; L < Nlayer; L++){
 			//Index of the studied element
 			int LocalEle = ele*Nlayer + L + 1;
 
@@ -333,7 +335,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 
 			FindUniqueElementAndSortOrder(TempEToE, EToE + (LocalEle - 1)*Nface, &EleNumber, Nface2d, LocalEle);
 
-			for (int i = 0; i < EleNumber; i++){
+			for (i = 0; i < EleNumber; i++){
 				if (LocalEle == TempEToE[i]){
 
 					GetLocalVolumuIntegralTermForFirstOrderHorizontalTerm(sr, irs, jcs, \
@@ -384,7 +386,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
-	for (int i = 0; i < TotalNonzero; i++) {
+	for (i = 0; i < TotalNonzero; i++) {
 		sr[i] += pow(10, -16.0);
 	}
 }
