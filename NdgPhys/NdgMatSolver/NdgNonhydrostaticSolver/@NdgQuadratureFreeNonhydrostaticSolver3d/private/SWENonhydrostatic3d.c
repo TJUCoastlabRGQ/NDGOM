@@ -110,7 +110,7 @@ void CalculatePenaltyParameterAndWeight(double *Tau, double *Weight1, double *We
 		Weight1[i] = k2[i] / (k1[i] + k2[i]);
 		Weight2[i] = k1[i] / (k1[i] + k2[i]);
 	}
-	*Tau = 10 * (P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*FLAV / ((LocalVolume + AdjVolume) / 2.0)*Miu;
+	*Tau = 100.0 * (P + 1.0)*(P + 3.0) / 3.0*Nface / 2.0*FLAV / ((LocalVolume + AdjVolume) / 2.0)*Miu;
 }
 
 void EvaluateNonhydroVerticalFaceSurfFlux(double *dest, double *fm, double *n, int Nfp){

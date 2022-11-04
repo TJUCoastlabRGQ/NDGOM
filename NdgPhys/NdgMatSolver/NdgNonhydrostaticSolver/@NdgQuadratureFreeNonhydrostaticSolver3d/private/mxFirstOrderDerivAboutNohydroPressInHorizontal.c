@@ -188,6 +188,42 @@ void GetLocalFacialContributionInHorizontalDirection(double *dest, mwIndex *Ir, 
 	free(LocalEidM);
 }
 
+void ImposeHorizonFirstOrderNonhydroDirichletBoundaryCondition(double *dest, mwIndex *Ir, mwIndex *Jc, int Np, \
+	int Np2d, int Ele, double *mass3d, double *mass2d, double *J, \
+	double *J2d, double *Eid, double *Vector) {
+
+	double *Mass3d = malloc(Np*Np * sizeof(double));
+	DiagMultiply(Mass3d, mass3d, J, Np);
+	double *InvMass3d = malloc(Np*Np * sizeof(double));
+	memcpy(InvMass3d, Mass3d, Np*Np * sizeof(double));
+	MatrixInverse(InvMass3d, (ptrdiff_t)Np);
+	double *Mass2d = malloc(Np2d*Np2d * sizeof(double));
+	DiagMultiply(Mass2d, mass2d, J2d, Np2d);
+	double *TempContribution = malloc(Np*Np * sizeof(double));
+	memset(TempContribution, 0, Np*Np * sizeof(double));
+	double *Contribution = malloc(Np*Np * sizeof(double));
+
+	MultiplyByConstant(Mass2d, Mass2d, Vector[0], Np2d*Np2d);
+
+	AssembleContributionIntoRowAndColumn(TempContribution, Mass2d, Eid, Eid, Np, Np2d, -1.0);
+
+	MatrixMultiply("N", "N", (ptrdiff_t)Np, (ptrdiff_t)Np, (ptrdiff_t)Np, 1.0, InvMass3d,
+		(ptrdiff_t)Np, TempContribution, (ptrdiff_t)Np, 0.0, Contribution, (ptrdiff_t)Np);
+
+	AssembleFacialContributionForFirstOrderTermIntoSparseMatrix(dest, Ir, Jc, Eid, Np, Np2d, Contribution, Ele, Ele);
+
+	free(Mass3d);
+
+	free(InvMass3d);
+
+	free(Mass2d);
+
+	free(TempContribution);
+
+	free(Contribution);
+}
+
+
 /*The input parameters are organized as follows:
 Np: Number of interpolation points, indexed as 0.
 Ele3d: Number of elements in three-dimensional mesh object, indexed as 1.
@@ -250,6 +286,23 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	double *Ds = mxGetPr(prhs[20]);
 	double *Fmask = mxGetPr(prhs[21]);
 	int MaxNfp = (int)mxGetM(prhs[21]);
+
+	const mxArray *BoundaryEdge = prhs[22];
+	mxArray *TempBEMb = mxGetField(BoundaryEdge, 0, "M");
+	double *BEMb = mxGetPr(TempBEMb);
+	mxArray *TempBEJs = mxGetField(BoundaryEdge, 0, "Js");
+	double *BEJs = mxGetPr(TempBEJs);
+	mxArray *TempBEFToE = mxGetField(BoundaryEdge, 0, "FToE");
+	double *BEFToE = mxGetPr(TempBEFToE);
+	mxArray *TempBEFToN1 = mxGetField(BoundaryEdge, 0, "FToN1");
+	double *BEFToN1 = mxGetPr(TempBEFToN1);
+	mxArray *TempBENfp = mxGetField(BoundaryEdge, 0, "Nfp");
+	int BENfp = (int)mxGetScalar(TempBENfp);
+	mxArray *TempBENe = mxGetField(BoundaryEdge, 0, "Ne");
+	int BENe = (int)mxGetScalar(TempBENe);
+
+	signed char *ftype = (signed char *)mxGetData(prhs[23]);
+	double *BEVector = mxGetPr(prhs[24]);
 
 	int TotalNonzero = Ele3d * Np * Np + 2 * IENe * HorNfp * Np;
 	mwIndex *TempIr = malloc(TotalNonzero*sizeof(mwIndex));
@@ -314,6 +367,19 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	}
 	free(TempIr);
 	free(TempJc);
+
+#ifdef _OPENMP
+#pragma omp parallel for num_threads(DG_THREADS)
+#endif
+	for (face = 0; face < BENe; face++) {
+		NdgEdgeType type = (NdgEdgeType)ftype[face];
+		//if ((type == NdgEdgeClampedDepth) || (type == NdgEdgeClampedVel) || (type == NdgEdgeZeroGrad)) {
+		if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth)) {
+			ImposeHorizonFirstOrderNonhydroDirichletBoundaryCondition(sr, irs, jcs, Np, \
+				BENfp, (int)BEFToE[2 * face], M3d, BEMb, J + ((int)BEFToE[2 * face] - 1)*Np, \
+				BEJs + face*BENfp, BEFToN1 + face*BENfp, BEVector + face*BENfp);
+		}
+	}
 
 #ifdef _OPENMP
 #pragma omp parallel for num_threads(DG_THREADS)
