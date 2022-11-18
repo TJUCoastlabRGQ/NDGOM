@@ -33,7 +33,7 @@ void setGotmDate(int index, int nlev){
 
 void InitTurbulenceModelGOTM(long long int *NameList, char * buf, long long int buflen,\
 	long long int nlev, int K2d){
-
+	
 	TURBULENCE_mp_INIT_TURBULENCE(NameList, buf, &nlev, buflen);
 
 	MTRIDIAGONAL_mp_INIT_TRIDIAGONAL(&nlev);

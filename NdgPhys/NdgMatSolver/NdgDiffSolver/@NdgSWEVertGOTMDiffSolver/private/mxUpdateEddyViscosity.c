@@ -130,10 +130,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 #endif
 		for (int i = 0; i < K3d; i++) {
 			if (TkeCenterData[i] <= 0) {
-				TkeCenterData[i] = pow(1.0, -10.0);
+				TkeCenterData[i] = 1.0e-10;
 			}
 			if (EpsCenterData[i] <= 0) {
-				EpsCenterData[i] = pow(1.0, -14.0);
+				EpsCenterData[i] = 1.0e-14;
 			}
 		}
 

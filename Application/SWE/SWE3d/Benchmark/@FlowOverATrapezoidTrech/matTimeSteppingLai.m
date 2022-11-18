@@ -39,9 +39,7 @@ while( time < ftime )
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) ); 
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
-    
-    DataCheck(fphys{1}(: , :, 7), obj.meshUnion.K/2);
-    
+        
     [ fphys ] = obj.matImposeLimiter( fphys );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
@@ -49,7 +47,7 @@ while( time < ftime )
         fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );    
         
-    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
+%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
     
     fphys2d{1}(:, :, 2) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 1) );
     
@@ -77,9 +75,7 @@ while( time < ftime )
     fphys{1}(: , :, 4) = obj.meshUnion(1).Extend2dField( fphys2d{1}(:, :, 1) );
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
-    
-    DataCheck(fphys{1}(: , :, 7), obj.meshUnion.K/2);
-    
+        
     [ fphys ] = obj.matImposeLimiter( fphys );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
@@ -87,7 +83,7 @@ while( time < ftime )
         fphys2d{1}(:,:,1), fphys{1}(:,:,4), fphys{1}(:,:,obj.varFieldIndex), 1, dt, 1,...
         2, fphys{1}(:,:,1), fphys{1}(:,:,2), time, fphys );       
         
-    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
+%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
           
     %> The final velocity
     [ fphys{1}(:,:,obj.varFieldIndex)] = 1/2 * Tempfphys + 1/2 * fphys{1}(:,:,obj.varFieldIndex);
