@@ -351,7 +351,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 #pragma omp parallel for num_threads(DG_THREADS)
 #endif
 	for (int i = 0; i < TotalNonzero; i++){
-		sr[i] = sr[i] + pow(10, -16.0);
+		sr[i] += 1.0e-16;
 	}
 
 	free(UpEidM);

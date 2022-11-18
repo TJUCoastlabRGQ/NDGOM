@@ -315,6 +315,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
   
 	for (i = 0; i < Nonzero; i++){
 		irs[i] = (mwIndex)(NonIr[i]);
+        sr[i] += 1.0e-16;
 	}
 
 #ifdef _OPENMP
