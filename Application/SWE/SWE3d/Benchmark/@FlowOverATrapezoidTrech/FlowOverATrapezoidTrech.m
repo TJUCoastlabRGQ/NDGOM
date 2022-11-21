@@ -13,7 +13,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
     
     properties
         SurfaceBoundaryEdgeType = 'Dirichlet'
-    end    
+    end
     
     methods
         function obj = FlowOverATrapezoidTrech(N, Nz, M, Mz)
@@ -26,7 +26,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             obj.Nvar = 5;
             obj.varFieldIndex = [1 2 11 14 15];
             % allocate boundary field with mesh obj
-            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );          
+            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
         end
         
@@ -55,8 +55,8 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
                 TempBottomElevation(:,Index) = (obj.meshUnion(1).mesh2d.x(:,Index) - 1.9) * 0.5;
                 Index = all(obj.meshUnion(1).mesh2d.x>=2.3);
                 TempBottomElevation(:,Index) = 0.2;
-%                 TempBottomElevation = 0.2 * ones(mesh2d.cell.Np, mesh2d.K);
-
+                %                 TempBottomElevation = 0.2 * ones(mesh2d.cell.Np, mesh2d.K);
+                
                 fphys2d{m}(:, :, 4) = TempBottomElevation;
                 %water depth
                 fphys2d{m}(:,:,1) = 0.4 - fphys2d{m}(:, :, 4);
@@ -70,24 +70,29 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             [fm, ~] = obj.meshUnion.BoundaryEdge.matEvaluateSurfValue(fphys);
             ks = 0.002;
             hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            hEps = zeros(size(obj.fext3d{1}(:,:,1)));
+            %             hEps = zeros(size(obj.fext3d{1}(:,:,1)));
             Bz = 0.2 .* ( 1 + obj.meshUnion.BoundaryEdge.zb );
-            hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-Bz/0.2);
+            %             hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-Bz/0.2);
+            hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)/0.2);
             Index = (Bz ~= 0 );
             hu3d(Index) = 0.2 * 0.033/0.4 * log(30*Bz(Index)/ks);
-            Index = (Bz ~= 0 );
-            hEps(Index) = 0.2 * 0.033^3./(0.4*Bz(Index)).*(1-Bz(Index)/0.2);
+            %             Index = (Bz ~= 0 );
+            %             hEps(Index) = 0.2 * 0.033^3./(0.4*Bz(Index)).*(1-Bz(Index)/0.2);
+            hEps = 0.2 * 0.033^3./(0.4*repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)).*(1-repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)/0.2);
             Index = any(Bz == 0);
             Tempz = Bz(:,Index)./2;
             hu3d(1:2,Index) = 2*0.2 .* 0.033/0.4.*log(30*Tempz(3:4,:)/ks) - ...
                 hu3d(3:4,Index);
-            hEps(1:2,Index) = 2*0.2 .* 0.033^3./(0.4*Tempz(3:4,:)).*(1-Tempz(3:4,:)/0.2) - ...
-                hEps(3:4,Index);
+            %             hEps(1:2,Index) = 2*0.2 .* 0.033^3./(0.4*Tempz(3:4,:)).*(1-Tempz(3:4,:)/0.2) - ...
+            %                 hEps(3:4,Index);
             obj.fext3d{1}(:,:,1) = hu3d;
+            %             obj.fext3d{1}(:,:,1) = hu3d * 0.5 * (1 + tanh((time-3*2)/2));
             obj.fext3d{1}(:,:,3) = 0.2;
             obj.fext3d{1}(:,:,4) = fm(:,:,11);
             obj.fext3d{1}(:,:,5) = hK;
             obj.fext3d{1}(:,:,6) = hEps;
+            %             obj.fext3d{1}(:,:,5) = hK* 0.5 * (1 + tanh((time-3*5)/5));
+            %             obj.fext3d{1}(:,:,6) = hEps* 0.5 * (1 + tanh((time-3*5)/5));
             obj.fext2d{1}(:,:,1) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField(hu3d);
             obj.fext2d{1}(:,:,3) = 0.2;
         end
@@ -121,18 +126,18 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
 end
 
 function [mesh2d, mesh3d] = makeChannelMesh( obj, N, Nz, M, Mz )
-% 
-% bctype = [ ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.SlipWall, ...
-%     enumBoundaryCondition.ClampedVel, ...
-%     enumBoundaryCondition.ClampedDepth ];
 
 bctype = [ ...
     enumBoundaryCondition.SlipWall, ...
     enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall, ...
-    enumBoundaryCondition.SlipWall ];
+    enumBoundaryCondition.ClampedVel, ...
+    enumBoundaryCondition.ClampedDepth ];
+
+% bctype = [ ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall, ...
+%     enumBoundaryCondition.SlipWall ];
 
 mesh2d = makeUniformQuadMesh(N, [0, obj.ChLength],...
     [-obj.ChWidth/2, obj.ChWidth/2], ceil(obj.ChLength/M), ceil(obj.ChWidth/M), bctype);

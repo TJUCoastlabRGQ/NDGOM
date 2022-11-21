@@ -624,7 +624,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 		/*Note: The index parameter, i, is set to 0 for hu and hv, as we don't need to change the position of the pointer*/
 		SparseEquationSolve(Temphuv, 2 * Nz*Np, StiffMatrixForhuv, TempGlobalRHS, Nz, Np, 0, 1, K3d, QuatrNNZ, 2 * Nz*Np, QuatrIr, QuatrJc);
 		
-		SparseEquationSolve(fphys + 2*K3d*Np, Nz*Np, StiffMatrix + 2*NNZ, GlobalSystemRHS + 2*Nz*Np, Nz, Np, i, Nvar-2, K3d, NNZ, Nz*Np, Ir, Jc);
+		SparseEquationSolve(fphys + 2*K3d*Np, Nz*Np, StiffMatrix + 2*NNZ, GlobalSystemRHS + 2* K3d*Np, Nz, Np, i, Nvar-2, K3d, NNZ, Nz*Np, Ir, Jc);
 		/*Copy the calculated hu and hv back into the fphys field*/
 		memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
 		memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
