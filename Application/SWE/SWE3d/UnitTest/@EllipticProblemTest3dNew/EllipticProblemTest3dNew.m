@@ -108,7 +108,8 @@ classdef EllipticProblemTest3dNew < SWEBarotropic3d
             obj.BottomDirichletData = eval(obj.Cexact);
             obj.BottomNewmannData = eval(obj.NewmannCexact);
             
-            [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );                      
+            [ ~ ]= obj.NonhydrostaticSolver.TestNewFormGlobalStiffMatrix( obj, obj.fphys );       
+            
             warning('off');
             [ obj.RHS, obj.NonhydrostaticSolver.GlobalStiffMatrix ] = mxAssembleGlobalStiffMatrixWithBCsImposed(...
                 obj.NonhydrostaticSolver.GlobalStiffMatrix, obj.RHS, obj.DirichletData,...

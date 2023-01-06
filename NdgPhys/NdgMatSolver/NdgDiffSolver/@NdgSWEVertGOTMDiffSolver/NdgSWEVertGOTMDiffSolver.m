@@ -78,7 +78,6 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
             end
             %Viscosity for GOTM turbulence model is initially set to be
             %zero
-            obj.Prantl = physClass.Prantl;
             obj.matClearGlobalMemory;
             obj.uo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );
             obj.vo = zeros( physClass.meshUnion.cell.Np, physClass.meshUnion.K );

@@ -12,14 +12,13 @@ classdef NdgSWEVertDiffSolver < handle
     
     properties
         nv
-        
-        %> the Prantal number for heat and sault diffusion
-        Prantl
     end
     
     properties
         % How to treat the bottom Neumann boundary, Implicit or Explicit
         BotBoundaryTreatType = 'Implicit'
+        
+        NonhydroType = 'Hydrostatic'
     end
     
     properties
@@ -66,6 +65,10 @@ classdef NdgSWEVertDiffSolver < handle
                 obj.BoundaryEdgeType = char(physClass.getOption('BottomBoundaryEdgeType'));
             end
             fprintf('The bottom boundary condition for momentum is: %s\n',obj.BoundaryEdgeType);
+            
+            if isa(physClass.NonhydrostaticSolver, 'NdgQuadratureFreeNonhydrostaticSolver3d')
+                obj.NonhydroType = 'Nonhydrostatic';
+            end
             
             obj.matClearGlobalMemory;
         end

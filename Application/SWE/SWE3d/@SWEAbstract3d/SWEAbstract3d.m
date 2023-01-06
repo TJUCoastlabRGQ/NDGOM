@@ -100,7 +100,10 @@ classdef SWEAbstract3d < NdgPhysMat
 %         ImplicitRHS3d = []
         % This parameter is used to calculate the horizontal viscosity when smagorinsky model is adopted 
         SmagorinskyConstant = []
-        Prantl = []
+    end
+    
+    properties
+        Prantl = [1.0, 1.0];
     end
     
     methods

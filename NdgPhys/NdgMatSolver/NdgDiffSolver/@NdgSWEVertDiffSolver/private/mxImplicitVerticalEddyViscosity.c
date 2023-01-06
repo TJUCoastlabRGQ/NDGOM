@@ -7,12 +7,19 @@ char *ImVertEddyInitialized = "False";
 
 int NNZ, QuatrNNZ;
 
+void Add(double *dest, double *sourcea, double *sourceb, int size) {
+	int i;
+	for (i = 0; i < size; i++)
+		dest[i] = sourcea[i] + sourceb[i];
+}
+
 /*Function checked*/
 void AssembleContributionIntoSparseMatrix(double *dest, double *src, int NonzeroNum, int Np) {
 	double *Tempdest = dest;
-	for (int col = 0; col < Np; col++) {
+	int col, row;
+	for (col = 0; col < Np; col++) {
 		Tempdest = dest + col * NonzeroNum;
-		for (int row = 0; row < Np; row++) {
+		for (row = 0; row < Np; row++) {
 			Tempdest[row] += src[col*Np + row];
 		}
 	}
@@ -21,31 +28,35 @@ void AssembleContributionIntoSparseMatrix(double *dest, double *src, int Nonzero
 /*Note: This function is used to assemble the facial integral term into the local stiff operator according to the column index, and has been checked*/
 void AssembleContributionIntoColumn(double *dest, double *source, double *column, int Np3d, int Np2d)
 {
-	for (int colI = 0; colI < Np2d; colI++) {
-		for (int RowI = 0; RowI < Np3d; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Np2d; colI++) {
+		for (RowI = 0; RowI < Np3d; RowI++)
 			dest[((int)column[colI] - 1)*Np3d + RowI] += source[colI*Np3d + RowI];
 	}
 }
 /*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index, and has been checked*/
 void AssembleContributionIntoRow(double *dest, double *source, double *Row, int Np3d, int Np2d)
 {
-	for (int colI = 0; colI < Np3d; colI++) {
-		for (int RowI = 0; RowI < Np2d; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Np3d; colI++) {
+		for (RowI = 0; RowI < Np2d; RowI++)
 			dest[colI*Np3d + (int)Row[RowI] - 1] += source[colI*Np2d + RowI];
 	}
 }
 /*Note: This function is used to assemble the facial integral term into the local stiff operator according to the row index and the column index, and has been checked*/
 void AssembleContributionIntoRowAndColumn(double *dest, double *source, double *Row, double *column, int Np3d, int Np2d, int Flag)
 {
-	for (int colI = 0; colI < Np2d; colI++)
+	int colI, RowI;
+	for (colI = 0; colI < Np2d; colI++)
 	{
-		for (int RowI = 0; RowI < Np2d; RowI++)
+		for (RowI = 0; RowI < Np2d; RowI++)
 			dest[((int)column[colI] - 1)*Np3d + (int)Row[RowI] - 1] += Flag * source[colI*Np2d + RowI];
 	}
 }
 
 void AssembleDataIntoPoint(double *dest, double *source, double *PIndex, int Size) {
-	for (int p = 0; p < Size; p++) {
+	int p;
+	for (p = 0; p < Size; p++) {
 		dest[(int)PIndex[p] - 1] += source[p];
 	}
 }
@@ -55,32 +66,36 @@ Left multiply the matrix source with a diagonal matrix composed of element conta
 */
 void DiagMultiply(double *dest, const double *source, const double *coe, int Np)
 {
-	for (int colI = 0; colI < Np; colI++) {
-		for (int RowI = 0; RowI < Np; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Np; colI++) {
+		for (RowI = 0; RowI < Np; RowI++)
 			dest[colI*Np + RowI] = coe[RowI] * source[colI*Np + RowI];
 	}
 }
 
 void DiagLeftMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
 {
-	for (int colI = 0; colI < Col; colI++) {
-		for (int RowI = 0; RowI < Row; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Col; colI++) {
+		for (RowI = 0; RowI < Row; RowI++)
 			dest[colI*Row + RowI] = coe[RowI] * source[colI*Row + RowI];
 	}
 }
 
 void DiagRightMultiply(double *dest, const double *source, const double *coe, int Np)
 {
-	for (int colI = 0; colI < Np; colI++) {
-		for (int RowI = 0; RowI < Np; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Np; colI++) {
+		for (RowI = 0; RowI < Np; RowI++)
 			dest[colI*Np + RowI] = coe[colI] * source[colI*Np + RowI];
 	}
 }
 
 void DiagRightMultiplyUnsymmetric(double *dest, const double *source, const double *coe, int Row, int Col)
 {
-	for (int colI = 0; colI < Col; colI++) {
-		for (int RowI = 0; RowI < Row; RowI++)
+	int colI, RowI;
+	for (colI = 0; colI < Col; colI++) {
+		for (RowI = 0; RowI < Row; RowI++)
 			dest[colI*Row + RowI] = coe[colI] * source[colI*Row + RowI];
 	}
 }
@@ -97,7 +112,8 @@ void ImMatrixInverse(double *dest, lapack_int Np)
 }
 
 void MultiplyByConstant(double *dest, double *Source, double Coefficient, int Np) {
-	for (int i = 0; i < Np; i++)
+	int i;
+	for (i = 0; i < Np; i++)
 		dest[i] = Source[i] * Coefficient;
 }
 
@@ -135,14 +151,16 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 
 	int SingleNonzero;
 
+	int ic, jr, Layer;
+
 	if (Nlayer == 1) {
 		SingleNonzero = Np*Np;
 		// The row index of the non-zero elements
 		SingleRow = malloc(SingleNonzero * sizeof(int));
-		for (int ic = 0; ic < Np; ic++) {
+		for (ic = 0; ic < Np; ic++) {
 			// Number of total non-zero elements
 			SingleColumn[ic] = (ic + 1)*Np;
-			for (int jr = 0; jr < Np; jr++) {
+			for (jr = 0; jr < Np; jr++) {
 				SingleRow[ic*Np + jr] = jr;
 			}
 		}
@@ -150,9 +168,9 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 	else if (Nlayer == 2) {
 		SingleNonzero = Np*Np * 2 * 2;
 		SingleRow = malloc(SingleNonzero * sizeof(int));
-		for (int ic = 0; ic < 2 * Np; ic++) {
+		for (ic = 0; ic < 2 * Np; ic++) {
 			SingleColumn[ic] = (ic + 1)*Np * 2;
-			for (int jr = 0; jr < 2 * Np; jr++) {
+			for (jr = 0; jr < 2 * Np; jr++) {
 				SingleRow[ic*Np * 2 + jr] = jr;
 			}
 		}
@@ -161,79 +179,80 @@ void ImEddyVisInVertAllocation(int Np, int Nlayer) {
 		SingleNonzero = Np*Np * 2 * 2 + (Nlayer - 2)*Np*Np * 3;
 		SingleRow = malloc(SingleNonzero * sizeof(int));
 		int NSumR = 0;
-		for (int Layer = 0; Layer < 1; Layer++) {
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
+		for (Layer = 0; Layer < 1; Layer++) {
+			for (ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
 				SingleColumn[ic] = (ic + 1) * 2 * Np;
-				for (int jr = 0; jr < 2 * Np; jr++) {
+				for (jr = 0; jr < 2 * Np; jr++) {
 					SingleRow[NSumR + ic*Np * 2 + jr] = jr;
 				}
 			}
 		}
 		NSumR = Np * Np * 2;
-		for (int Layer = 1; Layer < Nlayer - 1; Layer++) {
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
+		for (Layer = 1; Layer < Nlayer - 1; Layer++) {
+			for (ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
 				SingleColumn[ic] = SingleColumn[ic - 1] + 3 * Np;
-				for (int jr = 0; jr < 3 * Np; jr++) {
+				for (jr = 0; jr < 3 * Np; jr++) {
 					SingleRow[NSumR + (ic - Np) * 3 * Np + jr] = (Layer - 1)*Np + jr;
 				}
 			}
 		}
 		NSumR = Np*Np * 2 + (Nlayer - 2)*Np * 3 * Np;
-		for (int Layer = Nlayer - 1; Layer < Nlayer; Layer++) {
-			for (int ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
+		for (Layer = Nlayer - 1; Layer < Nlayer; Layer++) {
+			for (ic = Layer*Np; ic < (Layer + 1)*Np; ic++) {
 				SingleColumn[ic] = SingleColumn[ic - 1] + 2 * Np;
-				for (int jr = 0; jr < 2 * Np; jr++) {
+				for (jr = 0; jr < 2 * Np; jr++) {
 					SingleRow[NSumR + (ic - (Nlayer - 1)*Np) * 2 * Np + jr] = (Layer - 1)*Np + jr;   //²âÊÔ
 				}
 			}
 		}
 	}
 
+	int j, p, p1;
 	/*Note data are indexed begin with one in pardiso, so we have to add Ir and Jc*/
-	for (int j = 0; j < SingleNonzero; j++) {
+	for (j = 0; j < SingleNonzero; j++) {
 		Ir[j] = SingleRow[j] + 1;
 	}
 	Jc[0] = 1;
-	for (int j = 0; j < Nlayer*Np; j++) {
+	for (j = 0; j < Nlayer*Np; j++) {
 		Jc[1 + j] = SingleColumn[j] + 1;
 	}
 
-	for (int p = 0; p < Nlayer*Np; p++) {
+	for (p = 0; p < Nlayer*Np; p++) {
 		if (p == 0) {
-			for (int p1 = 0; p1 < SingleColumn[0]; p1++) {
+			for (p1 = 0; p1 < SingleColumn[0]; p1++) {
 				QuatrIr[p1] = SingleRow[p1] + 1;
 			}
 			QuatrIr[SingleColumn[0]] = Nlayer*Np + 1;
 		}
 		else {
-			for (int p1 = 0; p1 < SingleColumn[p] - SingleColumn[p - 1]; p1++) {
+			for (p1 = 0; p1 < SingleColumn[p] - SingleColumn[p - 1]; p1++) {
 				QuatrIr[SingleColumn[p - 1] + p + p1] = SingleRow[SingleColumn[p - 1] + p1]+1;
 			}
 			QuatrIr[SingleColumn[p] + p] = Nlayer*Np + p + 1;
 		}
 		
 	}
-	for (int p = Nlayer*Np; p < 2 * Nlayer*Np; p++) {
+	for (p = Nlayer*Np; p < 2 * Nlayer*Np; p++) {
 		if (p == Nlayer*Np) {
 			QuatrIr[SingleNonzero + Nlayer*Np + p - Nlayer*Np] = p - Nlayer*Np + 1;
-			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np]; p1++) {
+			for (p1 = 0; p1 < SingleColumn[p- Nlayer*Np]; p1++) {
 				//+1 for the upper diagnoal element
 				QuatrIr[SingleNonzero + Nlayer*Np + p1+1] = SingleRow[p1] + Nlayer*Np + 1;
 			}
 		}
 		else {
 			QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p-Nlayer*Np-1] + p - Nlayer*Np] = p - Nlayer*Np + 1;
-			for (int p1 = 0; p1 < SingleColumn[p- Nlayer*Np] - SingleColumn[p - Nlayer*Np - 1]; p1++) {
+			for (p1 = 0; p1 < SingleColumn[p- Nlayer*Np] - SingleColumn[p - Nlayer*Np - 1]; p1++) {
 				QuatrIr[SingleNonzero + Nlayer*Np + SingleColumn[p - Nlayer*Np-1] + p - Nlayer*Np + p1 + 1] = \
 					SingleRow[SingleColumn[p - 1 - Nlayer*Np] + p1]+ Nlayer*Np + 1;
 			}
 		}
 	}
 	QuatrJc[0] = 1;
-	for (int j = 0; j < Nlayer*Np; j++) {
+	for (j = 0; j < Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[j] + 1 + j + 1;
 	}
-	for (int j = Nlayer*Np; j < 2*Nlayer*Np; j++) {
+	for (j = Nlayer*Np; j < 2*Nlayer*Np; j++) {
 		QuatrJc[1 + j] = SingleColumn[Nlayer*Np-1] + Nlayer*Np + SingleColumn[j- Nlayer*Np] + 1 + j - Nlayer*Np + 1;
 	}
 
@@ -256,7 +275,23 @@ void ImEddyVisInVertDeAllocation()
 	ImVertEddyInitialized = "False";
 }
 
+void SumInColumn(double *dest, double *Source, int Np) {
+	int col, Row;
+	for (col = 0; col < Np; col++) {
+		for (Row = 0; Row < Np; Row++) {
+			dest[col] += Source[col*Np + Row];
+		}
+	}
+}
 
+void SumInRow(double *dest, double *Source, int Np, int ColNum) {
+	int row, col;
+	for (row = 0; row < Np; row++) {
+		for (col = 0; col < ColNum; col++) {
+			dest[row] += Source[col*Np + row];
+		}
+	}
+}
 
 // n is the leading dimension of the stiff matrix
 void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *RHS, int Nlayer, int Np, \
@@ -319,7 +354,9 @@ void SparseEquationSolve(double *dest, MKL_INT n, double *StiffMatrix, double *R
 		PardisoReOrderAndSymFactorize(iparm, pt, n, StiffMatrix, TempJc, TempIr, \
 			&maxfct, &mnum, &msglvl, &error, &mtype, &ddum, &idum);
 
-		for (int var = 0; var < Nvar; var++) {
+		int var;
+
+		for (var = 0; var < Nvar; var++) {
 
 			Tempmaxfct = maxfct, Tempmnum = mnum, \
 				Temperror = error, Tempmsglvl = msglvl, Tempidum = idum, Tempddum = ddum;

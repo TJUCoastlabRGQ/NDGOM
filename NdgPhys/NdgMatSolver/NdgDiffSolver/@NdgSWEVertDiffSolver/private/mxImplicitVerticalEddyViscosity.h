@@ -16,6 +16,12 @@
 
 #include "mkl.h"
 
+void Add(double *, double *, double *, int );
+
+void SumInColumn(double *, double *, int );
+
+void SumInRow(double *, double *, int , int );
+
 void ImEddyVisInVertAllocation( int, int);
 
 void ImEddyVisInVertDeAllocation();

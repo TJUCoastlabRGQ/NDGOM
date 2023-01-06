@@ -34,6 +34,8 @@ classdef SWEBaroclinic3d < SWEBarotropic3d
             %> the 3d field to be put in the output file
             obj.outputFieldOrder3d = [1 2 3 13 14 15];
             
+            obj.Prantl = [1.0, 1.0, 1.1, 1.1];
+            
             clear mxCalculateDensityField;
             
             clear mxCalculateBaroclinicTerm;

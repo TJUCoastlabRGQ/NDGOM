@@ -23,10 +23,13 @@ extern int NNZ, QuatrNNZ;
 extern double *ImTau, *Imu2d, *Imv2d , *GlobalSystemRHS;
 
 extern char *ImVertDiffInitialized, *ImVertEddyInitialized;
+//This flag is used to indicate wheather non-hydrostatic model is activated.
+int NonhydroFlag = 0;
 
 void FetchBoundaryData(double *dest, double *source, const int Np2d, double *Eid)
 {
-    for (int i = 0; i < Np2d; i++){
+	int i;
+    for (i = 0; i < Np2d; i++){
         dest[i] = source[(int)(Eid[i]) - 1];
     }
 }
@@ -35,18 +38,19 @@ void CalculatePenaltyParameter(double *dest, const int Np2d, const int Np3d, dou
         int Nz, int P, int Nface)
 {
     double nvM[Np2d], nvP[Np2d];
+	int Layer, p;
     //Note: the penalty parameter for the topmost face of each column is not needed, so we leave them undefined
-    for (int Layer = 1; Layer < Nz; Layer++)
+    for (Layer = 1; Layer < Nz; Layer++)
     {
         FetchBoundaryData(nvM, nv + (Layer-1)*Np3d, Np2d, BotEidM);
         FetchBoundaryData(nvP, nv + Layer*Np3d, Np2d, UpEidM);
-        for (int p = 0; p < Np2d; p++)
+        for (p = 0; p < Np2d; p++)
         {
             dest[Layer*Np2d + p] = 10*((P + 1.0)*(P + 3.0) / 3.0)*(Nface / 2.0)*Nz*max(nvM[p], nvP[p]);
         }
     }
     FetchBoundaryData(nvM, nv + (Nz - 1)*Np3d, Np2d, BotEidM);
-    for (int p = 0; p < Np2d; p++)
+    for (p = 0; p < Np2d; p++)
     {
         dest[Nz*Np2d + p] = 10*((P + 1.0)*(P + 3.0) / 3.0)*(Nface / 2.0)*Nz*nvM[p];
     }
@@ -77,7 +81,8 @@ void ImposeNewmannBoundary(double *Eid, double *mass2d, double* InvMassMatrix3d,
 {
     double *tempRHS = malloc(Np3d*sizeof(double));
     double *RHS2d = malloc(Np2d*sizeof(double));
-    for (int i = 0; i < Nvar; i++){
+	int i, j;
+    for (i = 0; i < Nvar; i++){
         memset(tempRHS, 0, Np3d*sizeof(double));
         memset(RHS2d, 0, Np2d*sizeof(double));
 		int colB = 1;
@@ -86,12 +91,12 @@ void ImposeNewmannBoundary(double *Eid, double *mass2d, double* InvMassMatrix3d,
 		cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans,\
 			Np2d, colB, Np2d, Alpha, mass2d, Np2d, BoundNewmannData + i*Np2d*K2d, Np3d, Beta, RHS2d, Np2d);
 
-        for (int j = 0; j < Np2d; j++)
+        for (j = 0; j < Np2d; j++)
             tempRHS[(int)Eid[j] - 1] = RHS2d[j];
 		/*RHS is needed to assemble the final rhs corresponding to implicit part*/
 		cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, \
 			Np3d, colB, Np3d, Alpha, InvMassMatrix3d, Np3d, tempRHS, Np3d, Beta, StiffMatrix + i*Np3d, Np3d);
-        for (int j = 0; j < Np3d; j++)
+        for (j = 0; j < Np3d; j++)
             SystemRHS[i*K3d*Np3d + j] += dt*Imparam*(*(StiffMatrix + i*Np3d + j));
     }
     free(tempRHS);
@@ -102,8 +107,9 @@ void ImposeNewmannBoundary(double *Eid, double *mass2d, double* InvMassMatrix3d,
 void AssembleFacialDiffMatrix(double *dest, double *source, double *Eid, int Np2d, int Np3d)
 {
     int Index = 0;
-    for (int colI = 0; colI < Np3d; colI++){
-        for (int RowI = 0; RowI < Np2d; RowI++)
+	int colI, RowI;
+    for (colI = 0; colI < Np3d; colI++){
+        for (RowI = 0; RowI < Np2d; RowI++)
         {
             dest[Index] = source[colI*Np3d + (int)Eid[RowI] - 1];
             Index++;
@@ -122,9 +128,10 @@ void AssembleLocalToGlobalContribution(double *dest, double *Finaldest, double *
 	/* Form the final stiff matrix first*/
 	AssembleContributionIntoSparseMatrix(Finaldest + StartPoint, TempDest, NonzeroNum, Np);
 	/*Multiply the stiff matrix by parameter dt*Coe*ImplicitParam */
-	MultiplyByConstant(TempDest, TempDest, dt*Coe*ImplicitParam, Np*Np);
+	MultiplyByConstant(TempDest, TempDest, dt*1.0/Coe*ImplicitParam, Np*Np);
+	int row;
 	/* Add the diagonal data by 1 */
-	for (int row = 0; row < Np; row++) {
+	for (row = 0; row < Np; row++) {
 		TempDest[row*Np + row] += 1;
 	}
 	/* Form the stiff matrix used to calculate the final result */
@@ -143,7 +150,7 @@ void AssembleLocalAdjacentToGlobalContribution(double *dest, double *Finaldest, 
 	/* Form the final stiff matrix first*/
 	AssembleContributionIntoSparseMatrix(Finaldest + StartPoint, TempDest, NonzeroNum, Np);
 	/* Multiply the stiff matrix by parameter dt*ImplicitParam */
-	MultiplyByConstant(TempDest, TempDest, dt* Coe *ImplicitParam, Np*Np);
+	MultiplyByConstant(TempDest, TempDest, dt* 1.0/Coe *ImplicitParam, Np*Np);
 	/* Form the stiff matrix used to calculate the final result */
 	AssembleContributionIntoSparseMatrix(dest + StartPoint, TempDest, NonzeroNum, Np);
 	free(TempDest);
@@ -197,6 +204,56 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, do
     free(EdgeContribution);
     free(DoubleJump);
 }
+
+/*This function is used to add the non-homogeneous Dirichlet boundary condition, here we only consider the influce on the right hand side.
+* The following part is added
+     $$\epsilon\int_{\partial \Omega_D}g_D\nu_v\frac{\partial \phi}{\partial \sigma}\n_{\sigma}d\boldsymbol{x} + \int_{\partial \Omega_D}\tau\phi n_{\sigma}^2g_Dd\boldsymbol{x}$$
+* see for instance "Discontinuous Galerkin methods for solving elliptic and parabolic equations theory and implementation", page 53/212.
+*/
+void ImposeNonhomogeneousDirichletBoundary(double *dest, double *eid, double *DiffMatrix, double *mass2d, double *InvElemass3d,\
+	double *Tau, const double epsilon, int Np2d, int Np, double *DirichletValue)
+{
+	double Alpha = 1.0, Beta = 0.0;
+	double *FacialDiffMatrix = malloc(Np*Np2d * sizeof(double));
+	double *WeightedEleMass2d = malloc(Np2d*Np2d * sizeof(double));
+	DiagMultiply(WeightedEleMass2d, mass2d, DirichletValue, Np2d);
+	double *TempRHS = malloc(Np * sizeof(double));
+	memset(TempRHS, 0, Np * sizeof(double));
+	double *TempRHSBuff = malloc(Np * sizeof(double));
+	memset(TempRHSBuff, 0, Np * sizeof(double));
+	double *DirichEdge2d = malloc(Np2d * sizeof(double));
+	memset(DirichEdge2d, 0, Np2d * sizeof(double));
+	double *DirichEdgeBuff = malloc(Np2d*Np * sizeof(double));
+
+	AssembleFacialDiffMatrix(FacialDiffMatrix, DiffMatrix, eid, Np2d, Np);
+
+	cblas_dgemm(CblasColMajor, CblasTrans, CblasTrans, \
+		Np, Np2d, Np2d, Alpha, FacialDiffMatrix, Np2d, WeightedEleMass2d, Np2d, Beta, DirichEdgeBuff, Np);
+
+	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Np2d);
+
+	/* Multiply the stiff matrix by parameter epsilon */
+	MultiplyByConstant(TempRHSBuff, TempRHSBuff, epsilon, Np);
+
+	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Np2d);
+
+	SumInColumn(DirichEdge2d, WeightedEleMass2d, Np2d);
+
+	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, eid, Np2d);
+
+	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, \
+		Np, 1, Np, Alpha, InvElemass3d, Np, TempRHSBuff, Np, Beta, TempRHS, Np);
+
+	Add(dest, dest, TempRHS, Np);
+
+	free(FacialDiffMatrix);
+	free(WeightedEleMass2d);
+	free(TempRHS);
+	free(TempRHSBuff);
+	free(DirichEdge2d);
+	free(DirichEdgeBuff);
+}
+
 /*Note: This function is used to calculate the adjacent boundary contribution to the adjacent stiff operator OP12, here adjacent means the test function is defined over the adjacent cell and not the local one
 * Also note here nz is the outward normal from the local element
 */
@@ -228,8 +285,9 @@ void AdjacentBoundaryIntegral(double *eidM, double *eidP, double *LocalDiff, dou
 /*Note: This function is used to add the Newmman boundary part back to the implicit right hand side*/
 void AssembleBoundaryContribution(double *dest, double *source, int Np, int K3d, int Nvar)
 {
-    for (int var = 0; var < Nvar; var++){
-        for (int i = 0; i < Np; i++)
+	int var, i;
+    for (var = 0; var < Nvar; var++){
+        for (i = 0; i < Np; i++)
             dest[var*K3d*Np + i] += source[var*Np+i];
     }
 }
@@ -244,7 +302,9 @@ void CalculateVelocityAtBottomCellCenter(double *ucenter, double *vcenter, doubl
 
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, \
 		RowVCV, Col, ColVCV, alpha, VCV, RowVCV, hvbot, ColVCV, beta, vcenter, RowVCV);
-    for (int p = 0; p < RowVCV; p++) {
+
+	int p;
+    for (p = 0; p < RowVCV; p++) {
         if (h2d[p] >= (*hcrit)) {
             ucenter[p] = ucenter[p] / h2d[p];
             vcenter[p] = vcenter[p] / h2d[p];
@@ -264,7 +324,8 @@ void ImposeImplicitNeumannBoundary(double *dest, double *EidM, double *Cf, doubl
 	double beta = 0.0;
 	double *TempOP11 = malloc(Np2d * Np3d * sizeof(double));
 
-	for (int p = 0; p < Np2d; p++) {
+	int p;
+	for (p = 0; p < Np2d; p++) {
 		if (Depth[p] >= hcrit) {
 			// the unit outward normal -1.0 first, then move to the left hand side another -1.0
 			Coe[p] = (-1.0)*(-1.0)*Cf[p] * sqrt(u2d[p] * u2d[p] + v2d[p] * v2d[p]) / Depth[p];
@@ -291,29 +352,64 @@ void AssembleGlobalStiffMatrixForhuv(double *dest, double *Finaldest, double *so
 	int Num;
 	int Dstart;
 	int Sstart;
-	for (int p = 0; p < Nz*Np; p++) {
+	int p, i;
+	for (p = 0; p < Nz*Np; p++) {
 		Num = Jc[p + 1] - Jc[p];
 		Dstart = QuatrJc[p] - 1;
 		Sstart = Jc[p] - 1;
-		for (int i = 0; i < Num; i++) {
+		for (i = 0; i < Num; i++) {
 			dest[Dstart + i] = source[Sstart + i];
 			Finaldest[Dstart + i] = Finalsource[Sstart + i];
 		}
 		dest[Dstart + Num] = Coriolis[p]*ImplicitParam*dt;
 		Finaldest[Dstart + Num] = Coriolis[p];
 	}
-	for (int p = Nz*Np; p < 2 * Nz*Np; p++) {
+	for (p = Nz*Np; p < 2 * Nz*Np; p++) {
 		Num = Jc[p + 1-Nz*Np] - Jc[p-Nz*Np];
 		//The first data to store the coriolis related term
 		Dstart = QuatrJc[p] - 1 + 1;
 		Sstart = Jc[p - Nz*Np] - 1;
 		dest[Dstart - 1] = -Coriolis[p-Nz*Np] *dt*ImplicitParam;
 		Finaldest[Dstart - 1] = -Coriolis[p-Nz*Np];
-		for (int i = 0; i < Num; i++) {
+		for (i = 0; i < Num; i++) {
 			dest[Dstart + i] = source[Sstart + i];
 			Finaldest[Dstart + i] = Finalsource[Sstart + i];
 		}
 	}
+}
+
+void HorizontalMomemtumSolve(double *Temphuv, double *StiffMatrixForhuv, double *FinalStiffMatrixForhuv, double *StiffMatrix, \
+	double *FinalStiffMatrix, double *f0, double dt, double ImplicitParam, double *TempGlobalRHS, double *GlobalSystemRHS, \
+	int i, int K3d, int Nz, int Np)
+{
+	/*Assemble both the global stiff matrix and the final stiff matrix for hu and hv, as coriolis term treated implicitly*/
+	AssembleGlobalStiffMatrixForhuv(StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, \
+		FinalStiffMatrix, f0 + i*Nz*Np, dt, ImplicitParam, Nz, Np);
+	/*Copy the right hand side corresponds to hu and hv into a continuous space named TempGlobalRHS*/
+	memcpy(TempGlobalRHS, GlobalSystemRHS + i*Nz*Np, Nz*Np * sizeof(double));
+	memcpy(TempGlobalRHS + Nz*Np, GlobalSystemRHS + i*Nz*Np + K3d*Np, Nz*Np * sizeof(double));
+	/*Invoke pardiso from mkl to solve equation Ax = b for hu and hv first, followed by other passive substances*/
+	/*Note: The index parameter, i, is set to 0 for hu and hv, as we don't need to change the position of the pointer*/
+	SparseEquationSolve(Temphuv, 2 * Nz*Np, StiffMatrixForhuv, TempGlobalRHS, Nz, Np, 0, 1, K3d, QuatrNNZ, 2 * Nz*Np, QuatrIr, QuatrJc);
+}
+
+void AssembleImplicitRHS(double *TempImplicitRHS, double *ImplicitRHS, double *FinalStiffMatrixForhuv, double *FinalStiffMatrix, double *fphys, \
+	double *Temphuv, int i, int Nz, int Np, int K3d, int Nvar, double *SurfBoundStiffTerm, double *BotBoundStiffTerm)
+{
+	/*Multiply the Temphuv by FinalStiffMatrixForhuv to form the Implicit rihgt hand side in a continuous space*/
+	SparseMatrixMultiply(TempImplicitRHS, FinalStiffMatrixForhuv, Temphuv, 2 * Nz * Np, QuatrJc, QuatrIr);
+	int var;
+	for (var = 2; var < Nvar; var++) {
+		SparseMatrixMultiply(ImplicitRHS + var*K3d*Np + i*Nz*Np, FinalStiffMatrix + var*NNZ, fphys + var * Np*K3d + i*Nz*Np, Nz * Np, Jc, Ir);
+	}
+	/*Copy the Implicit rihgt hand side for hu and hv back into the ImplicitRHS field*/
+	memcpy(ImplicitRHS + i*Nz*Np, TempImplicitRHS, Nz*Np * sizeof(double));
+	memcpy(ImplicitRHS + i*Nz*Np + K3d*Np, TempImplicitRHS + Nz*Np, Nz*Np * sizeof(double));
+	/*Assemble the boundary contribution part into the implicit RHS part*/
+	AssembleBoundaryContribution(ImplicitRHS + i*Nz*Np, SurfBoundStiffTerm, Np, K3d, Nvar);
+	// BotBoundStiffTerm with index 1 and 2 stands for hu and hv respectively, they are zero since they are treated implicitly.
+	// We add them to the ImplicitRHS since they have no effect on the final result.
+	AssembleBoundaryContribution(ImplicitRHS + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, Nvar);
 }
 
 
@@ -343,7 +439,7 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
     const double dt = mxGetScalar(prhs[9]);
     const double ImplicitParam = mxGetScalar(prhs[10]);
     const double *RHS = mxGetPr(prhs[11]);
-    const double Prantl = mxGetScalar(prhs[12]);
+    double *Prantl = mxGetPr(prhs[12]);
     const int K2d = (int)mxGetN(prhs[0]);
     const int K3d = (int)mxGetN(prhs[1]);
     const int Nz = K3d / K2d;
@@ -368,6 +464,13 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	BotBoundTreatManner = mxArrayToString(prhs[23]);
 	//The coriolis parameter
 	double *f0 = mxGetPr(prhs[24]);
+
+	char* NonhydroType;
+	NonhydroType = mxArrayToString(prhs[25]);
+
+	double *bx = mxGetPr(prhs[26]);
+
+	double *by = mxGetPr(prhs[27]);
 //    printf("%s\n", BoundaryType);
     
     mwSize DimOfRHS = mxGetNumberOfDimensions(prhs[11]);
@@ -389,12 +492,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 //    memcpy(fphys, RHS, Np*K3d*Nvar*sizeof(double));
     double *ImplicitRHS = mxGetPr(plhs[1]);
     /*Here, epsilon is set to be -1, and this correspoinding to the SIPG. This value can be set to 1(IIPG or NIPG) or 0(IIPG or NIPG)*/
-    const double epsilon = 0.0;
+    const double epsilon = -1.0;
     
     /*If not initialized, initialize first*/
     if ( !strcmp("False", ImVertDiffInitialized) )
     {
         ImVertDiffMemoryAllocation(Np2d, K2d, Nz, Np, Nvar);
+
+		if (!strcmp(NonhydroType, "Nonhydrostatic"))
+		{
+			NonhydroFlag = 1;
+		}
     }
 	if ( !strcmp("False", ImVertEddyInitialized) )
 	{
@@ -424,10 +532,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
         CalculatePenaltyParameter(ImTau + i*Np2d*(Nz + 1), Np2d, Np, UpEidM, BotEidM, Diff + i*Np*Nz, Nz, P, Nface);
     }
 
-	int var, j;
+	int var, j, Point;
 
 #ifdef _OPENMP
-#pragma omp parallel for num_threads(DG_THREADS) private(var,j) if(K2d>50)
+#pragma omp parallel for num_threads(DG_THREADS) private(var,j, Point) if(K2d>50)
 #endif
     for (i = 0; i < K2d; i++){
 		/*Stiff matrix corresponds to hu, hv and other passive transport substances*/
@@ -485,19 +593,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             memset(OP12, 0, Np*Np*sizeof(double));
             AdjacentBoundaryIntegral(BotEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + 2 - 1), OP12, Np, Np2d, -1.0, epsilon);
             // Local and Local to bottom
-            for (var = 0; var < 2 && var < Nvar; var++){
+            for (var = 0; var < Nvar; var++){
 				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0*Np + 1] - Jc[0 * Np + 0], Np);
+					dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[0*Np + 1] - Jc[0 * Np + 0], Np);
 				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP12, 1.0, LocalStartPoint + Np, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
+					dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint + Np, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
             }
-			// Local and Local to bottom
-            for (var = 2; var < Nvar; var++){
-				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
-				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP12, Prantl, LocalStartPoint + Np, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
-			}
             for (j = 1; j < Nz-1 ; j++){
 				/*The local start point, for pardiso, jc starts from one, so we have to delete this*/
 				LocalStartPoint = Jc[j*Np] - 1 + Np;
@@ -514,30 +615,20 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				/*Local element to up element*/
                 AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + j), OP12, Np, Np2d, 1.0, epsilon);
 				// Local and Local to up
-                for (var = 0; var < 2 && var < Nvar; var++){
+                for (var = 0; var < Nvar; var++){
 					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP12, 1.0, LocalStartPoint - Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
                 }
-				// Local and Local to up
-                for (var = 2; var < Nvar; var++){
-					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
-					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP12, Prantl, LocalStartPoint - Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
-                }
+
                 memset(OP12, 0, Np*Np*sizeof(double));
 				/*Local element to bottom element*/
                 AdjacentBoundaryIntegral(BotEidM, UpEidM, LocalPhysicalDiffMatrix, BottomPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + j + 1), OP12, Np, Np2d, -1.0, epsilon);
 				// Local to bottom
-				for (var = 0; var < 2 && var < Nvar; var++){
+				for (var = 0; var < Nvar; var++){
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP12, 1.0, LocalStartPoint + Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
-                }
-                for (var = 2; var < Nvar; var++){
-					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-						dt, ImplicitParam, OP12, Prantl, LocalStartPoint + Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint + Np, Jc[j * Np + 1] - Jc[j * Np + 0], Np);
                 }
             }
 			/*The local start point, for pardiso, jc starts from one, so we have to delete this*/
@@ -548,102 +639,220 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
             VolumnIntegral(OP11, Dz, EleMass3d, LocalPhysicalDiffMatrix, Np);
 			/*The upper surface*/
             LocalBoundaryIntegral(UpEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz-1), OP11, Np, Np2d, 1.0, epsilon);
-            /*For passive transport substances, we only impose Neumann boundary condition, so this has no effect on the stiff matrix*/
-            // Local for passive transport substances
-			for (var = 2; var < Nvar; var++){
-				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[(Nz-1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
-            }
-            /*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
-            ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
-            /*The following is used to add homogeneous dirichlet boundary for hu and hv*/
-            if (!strcmp(BoundaryType, "Dirichlet")) {
-                ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
-            }
-			else {
-				if (!strcmp(BotBoundTreatManner, "Implicit")) {
-					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
-					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+			if (NonhydroFlag)
+			{
+				/*Nonhydrostatic model is activated*/
+				/*For passive transport substances, we only impose Neumann boundary condition, so this has no effect on the stiff matrix*/
+				/*Local for passive transport substances, Dw is excluded since Dirichlet boundary condition is to be added, Index start from 3*/ 
+				memset(OP12, 0, Np*Np * sizeof(double));
+				/*Local element to up element*/
+				AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, Np, Np2d, 1.0, epsilon);
+				/*Local and Local to up for passive transport substances*/
+				for (var = 3; var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 				}
-			}
-            
-            memset(OP12, 0, Np*Np*sizeof(double));
-			/*Local element to up element*/
-            AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, Np, Np2d, 1.0, epsilon);
-			//Local and Local to up for hu and hv
-			for (var = 0; var < 2 && var < Nvar; var++) {
-				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
-				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP12, 1.0, LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
-			}
-			// Local to up for passive transport substances
-			for (var = 2; var < Nvar; var++) {
-				AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP12, Prantl, LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
-			}
-            free(BottomPhysicalDiffMatrix);
-            free(UpPhysicalDiffMatrix);
-            free(OP12);
-        }
-        else{/*If only one layer included in vertical direction, we need to consider the bottom face, and the Upper face has been considered in the first part, from 291-312*/
-            
-			 /*For passive transport substances, we only impose Neumann boundary condition*/
-			 // Local for passive transport substances
-			for (var = 2; var < Nvar; var++) {
-				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, Prantl, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
-			}
-            /*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
-            ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
-            /*The following is used to add homogeneous dirichlet boundary for hu and hv*/
-            if (!strcmp(BoundaryType, "Dirichlet")) {
-                ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
-            }
-			else {
-				if (!strcmp(BotBoundTreatManner, "Implicit")) {
-					// Impose implicit Neumann boundary condition here, this part is added on 20211231.
-					// If Nvar is less than 2, i.e. this module is used for other passive tracers. We can only use explicit boundary condition
-					ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+				/*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for Du, Dv and Dw will not affect the Dirichlet boundary condition for Du, Dv and Dw*/
+				ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
+				
+				double DWOP11[Np*Np];
+				memcpy(DWOP11, OP11, Np*Np * sizeof(double));
+				/*Impose homogeneous Dirichlet boundary condition for Dw*/
+				ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), DWOP11, Np, Np2d, -1.0, epsilon);
+				/*The following is used to add homogeneous dirichlet boundary for Du and Dv*/
+				if (!strcmp(BoundaryType, "Dirichlet")) {
+					ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
 				}
+				else {
+					if (!strcmp(BotBoundTreatManner, "Implicit")) {
+						/* Impose implicit Neumann boundary condition for Du and Dv here, this part is added on 20211231.*/
+						ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+					}
+				}
+				//Local and Local to up for hu and hv
+				for (var = 0; var < 2 && var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				free(BottomPhysicalDiffMatrix);
+				free(UpPhysicalDiffMatrix);
+				free(OP12);
+
+				/*Momentum Du and Dv are to be solved first, next to impose the bottom boundary condition for Dw*/
+				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
+
+				double Dw[Np2d];
+				for (Point = 0; Point < Np2d; Point++) 
+				{
+					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[Nz*Np + (Nz - 1)*Np + Point];
+				}
+				ImposeNonhomogeneousDirichletBoundary(GlobalSystemRHS + 2 * K3d * Np + i*Nz*Np + (Nz - 1)*Np, BotEidM, LocalPhysicalDiffMatrix, \
+					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw);
+				/*Solve for Dw*/
+				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, 1, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Solve for other passive transport substances*/
+				SparseEquationSolve(fphys + 3 * K3d*Np, Nz*Np, StiffMatrix + 3 * NNZ, GlobalSystemRHS + 3 * K3d*Np, Nz, Np, i, Nvar - 3, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Copy the calculated hu and hv back into the fphys field*/
+				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
+				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+				/*In case of IMEXRK Time stepping method is adopted*/
+				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
+					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
+
 			}
-			//Local for hu and hv
-			for (var = 0; var < 2 && var < Nvar; var++) {
-				AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
-					dt, ImplicitParam, OP11, 1.0, LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
+			else {
+				/*For passive transport substances, we only impose Neumann boundary condition, so this has no effect on the stiff matrix*/
+				memset(OP12, 0, Np*Np * sizeof(double));
+				/*Local element to up element*/
+				AdjacentBoundaryIntegral(UpEidM, BotEidM, LocalPhysicalDiffMatrix, UpPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz - 1), OP12, Np, Np2d, 1.0, epsilon);
+				// Local and Local to up for passive transport substances
+				for (var = 2; var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				/*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
+				ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
+				/*The following is used to add homogeneous dirichlet boundary for hu and hv*/
+				if (!strcmp(BoundaryType, "Dirichlet")) {
+					ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
+				}
+				else {
+					if (!strcmp(BotBoundTreatManner, "Implicit")) {
+						// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+						ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+					}
+				}
+				//Local and Local to up for hu and hv
+				for (var = 0; var < 2 && var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				free(BottomPhysicalDiffMatrix);
+				free(UpPhysicalDiffMatrix);
+				free(OP12);
+
+				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
+
+				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, Nvar - 2, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Copy the calculated hu and hv back into the fphys field*/
+				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
+
+				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+
+				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
+					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
 			}
         }
-		/*Assemble both the global stiff matrix and the final stiff matrix for hu and hv, as coriolis term treated implicitly*/
-		AssembleGlobalStiffMatrixForhuv(StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix,\
-			FinalStiffMatrix, f0 + i*Nz*Np, dt, ImplicitParam, Nz, Np);
-		/*Copy the right hand side corresponds to hu and hv into a continuous space named TempGlobalRHS*/
-		memcpy(TempGlobalRHS, GlobalSystemRHS + i*Nz*Np, Nz*Np * sizeof(double));
-		memcpy(TempGlobalRHS + Nz*Np, GlobalSystemRHS + i*Nz*Np + K3d*Np, Nz*Np * sizeof(double));
+		else {/*If only one layer included in vertical direction, we need to consider the bottom face, and the Upper face has been considered in the first part, from 291-312*/
+			if (NonhydroFlag)
+			{
+				/*For passive transport substances, we only impose Neumann boundary condition, so this has no effect on the stiff matrix*/
+				// Local for passive transport substances, Dw is excluded since Dirichlet boundary condition is to be added, Index start from 3
+				for (var = 3; var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				/*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
+				ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
 
-		/*Invoke pardiso from mkl to solve equation Ax = b for hu and hv first, followed by other passive substances*/
-		/*Note: The index parameter, i, is set to 0 for hu and hv, as we don't need to change the position of the pointer*/
-		SparseEquationSolve(Temphuv, 2 * Nz*Np, StiffMatrixForhuv, TempGlobalRHS, Nz, Np, 0, 1, K3d, QuatrNNZ, 2 * Nz*Np, QuatrIr, QuatrJc);
-		
-		SparseEquationSolve(fphys + 2*K3d*Np, Nz*Np, StiffMatrix + 2*NNZ, GlobalSystemRHS + 2* K3d*Np, Nz, Np, i, Nvar-2, K3d, NNZ, Nz*Np, Ir, Jc);
-		/*Copy the calculated hu and hv back into the fphys field*/
-		memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
-		memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+				double DWOP11[Np*Np];
 
-		/*Multiply the Temphuv by FinalStiffMatrixForhuv to form the Implicit rihgt hand side in a continuous space*/
-		SparseMatrixMultiply(TempImplicitRHS, FinalStiffMatrixForhuv, Temphuv, 2*Nz * Np, QuatrJc, QuatrIr);
+				memcpy(DWOP11, OP11, Np*Np * sizeof(double));
+				/*Impose Dirichlet boundary condition for Dw*/
+				ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), DWOP11, Np, Np2d, -1.0, epsilon);
+				/*The following is used to add homogeneous dirichlet boundary for hu and hv*/
+				if (!strcmp(BoundaryType, "Dirichlet")) {
+					ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
+				}
+				else {
+					if (!strcmp(BotBoundTreatManner, "Implicit")) {
+						// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+						ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+					}
+				}
 
-		for (var = 2; var < Nvar; var++) {
-			SparseMatrixMultiply(ImplicitRHS + var*K3d*Np + i*Nz*Np, FinalStiffMatrix + var*NNZ, fphys + var * Np*K3d + i*Nz*Np, Nz * Np, Jc, Ir);
-		}
-		/*Copy the Implicit rihgt hand side for hu and hv back into the ImplicitRHS field*/
-		memcpy(ImplicitRHS + i*Nz*Np, TempImplicitRHS, Nz*Np * sizeof(double));
-		memcpy(ImplicitRHS + i*Nz*Np + K3d*Np, TempImplicitRHS + Nz*Np, Nz*Np * sizeof(double));
-		/*Assemble the boundary contribution part into the implicit RHS part*/
-        AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np, SurfBoundStiffTerm, Np, K3d, Nvar);
-        // BotBoundStiffTerm with index 1 and 2 stands for hu and hv respectively, they are zero since they are treated implicitly.
-        // We add them to the ImplicitRHS since they have no effect on the final result.
-        AssembleBoundaryContribution(ImplicitRHS  + i*Nz*Np + (Nz - 1)*Np, BotBoundStiffTerm, Np, K3d, Nvar);
+				//Local for hu and hv
+				for (var = 0; var < 2 && var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				// Local for Dw
+				for (var = 2; var < 3 && var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, DWOP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
 
+				/*Momentum Du and Dv are to be solved first, next to impose the bottom boundary condition for Dw*/
+				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
+
+				double Dw[Np2d];
+				for (Point = 0; Point < Np2d; Point++)
+				{
+					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[Nz*Np + (Nz - 1)*Np + Point];
+				}
+				ImposeNonhomogeneousDirichletBoundary(GlobalSystemRHS + 2 * K3d * Np + i*Nz*Np + (Nz - 1)*Np, BotEidM, LocalPhysicalDiffMatrix, \
+					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw);
+				/*Solve for Dw*/
+				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, 1, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Solve for other passive transport substances*/
+				SparseEquationSolve(fphys + 3 * K3d*Np, Nz*Np, StiffMatrix + 3 * NNZ, GlobalSystemRHS + 3 * K3d*Np, Nz, Np, i, Nvar - 3, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Copy the calculated hu and hv back into the fphys field*/
+				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
+				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+
+				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
+					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
+			}
+			else
+			{
+				/*For passive transport substances, we only impose Neumann boundary condition*/
+				// Local for passive transport substances
+				for (var = 2; var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
+				}
+				/*We note that, the Neumann data is zero by default, so the impositon of Neumann BC for hu and hv will not affect the Dirichlet boundary condition for hu and hv*/
+				ImposeNewmannBoundary(BotEidM, EleMass2d, InvEleMass3d, dt, ImplicitParam, bot + i*Np2d, Np2d, K2d, GlobalSystemRHS + i*Np*Nz + (Nz - 1)*Np, Np, K3d, BotBoundStiffTerm, Nvar);
+				/*The following is used to add homogeneous dirichlet boundary for hu and hv*/
+				if (!strcmp(BoundaryType, "Dirichlet")) {
+					ImposeDirichletBoundary(BotEidM, LocalPhysicalDiffMatrix, EleMass2d, ImTau + Np2d*(i*(Nz + 1) + Nz), OP11, Np, Np2d, -1.0, epsilon);
+				}
+				else {
+					if (!strcmp(BotBoundTreatManner, "Implicit")) {
+						// Impose implicit Neumann boundary condition here, this part is added on 20211231.
+						// If Nvar is less than 2, i.e. this module is used for other passive tracers. We can only use explicit boundary condition
+						ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
+					}
+				}
+				//Local for hu and hv
+				for (var = 0; var < 2 && var < Nvar; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
+				}
+
+				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
+
+				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, Nvar - 2, K3d, NNZ, Nz*Np, Ir, Jc);
+				/*Copy the calculated hu and hv back into the fphys field*/
+				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
+				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+
+				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
+					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
+			}
+        }
 		free(StiffMatrix);
 		free(StiffMatrixForhuv);
 		free(FinalStiffMatrix);
