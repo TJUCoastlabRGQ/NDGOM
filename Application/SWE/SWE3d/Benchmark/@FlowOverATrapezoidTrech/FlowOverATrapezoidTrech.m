@@ -70,14 +70,14 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             [fm, ~] = obj.meshUnion.BoundaryEdge.matEvaluateSurfValue(fphys);
             ks = 0.002;
             hu3d = zeros(size(obj.fext3d{1}(:,:,1)));
-            %             hEps = zeros(size(obj.fext3d{1}(:,:,1)));
+            hEps = zeros(size(obj.fext3d{1}(:,:,1)));
             Bz = 0.2 .* ( 1 + obj.meshUnion.BoundaryEdge.zb );
             hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-Bz/0.2);
 %             hK = 0.2 * 0.033^2/sqrt(0.5265)*(1-repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)/0.2);
-            Index = all(Bz ~= 0 );
+            Index = (Bz ~= 0) ;
             hu3d(Index) = 0.2 * 0.033/0.4 * log(30*Bz(Index)/ks);
             Index = (Bz ~= 0 );
-            hEps(:,Index) = 0.2 * 0.033^3./(0.4*Bz(:,Index)).*(1-Bz(:,Index)/0.2);
+            hEps(Index) = 0.2 * 0.033^3./(0.4*Bz(Index)).*(1-Bz(Index)/0.2);
 %             hEps = 0.2 * 0.033^3./(0.4*repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)).*(1-repmat(mean(obj.meshUnion.BoundaryEdge.zb),size(obj.meshUnion.BoundaryEdge.zb,1), 1)/0.2);
             Index = any(Bz == 0);
             Tempz = Bz(:,Index)./2;

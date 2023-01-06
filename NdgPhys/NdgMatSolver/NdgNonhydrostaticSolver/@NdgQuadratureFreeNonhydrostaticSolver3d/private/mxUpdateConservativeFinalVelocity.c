@@ -254,12 +254,12 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
 		}
 		else{//impose zero boundary condition at other boundary
-			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
-			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
-/*			for (int i = 0; i < BENfp; i++){
+			//DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
+			//DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
+			for (int i = 0; i < BENfp; i++){
 				QBEfluxSx[face*BENfp + i] = 0;
 				QBEfluxSy[face*BENfp + i] = 0;
-			}*/
+			}
 		}
 	}
 
