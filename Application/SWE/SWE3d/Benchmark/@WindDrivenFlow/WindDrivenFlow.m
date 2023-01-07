@@ -11,9 +11,13 @@ classdef WindDrivenFlow < SWEBarotropic3d
         %> start time
         startTime = 0;
         %> final time
-
+        
         finalTime = 3600;
         hcrit = 0.001;
+    end
+    
+    properties
+        SurfaceBoundaryEdgeType = 'Dirichlet'
     end
     
     methods
@@ -25,7 +29,6 @@ classdef WindDrivenFlow < SWEBarotropic3d
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
             obj.Cf{1} = 1000 * 0.001*ones(size(obj.mesh2d(1).x));
-            
             obj.SurfBoundNewmannDate(:,:,1) = 1.5/1000 * ones(size(obj.SurfBoundNewmannDate(:,:,1)));%0.1
         end
         
@@ -50,8 +53,8 @@ classdef WindDrivenFlow < SWEBarotropic3d
                 mesh3d = obj.mesh3d(m);
                 fphys2d{m} = zeros( mesh2d.cell.Np, mesh2d.K, obj.Nfield2d );
                 fphys{m} = zeros( mesh3d.cell.Np, mesh3d.K, obj.Nfield );
-%                 Index = ( mesh3d.z == 0 );
-%                 fphys{m}(Index) = 1.5;
+                %                 Index = ( mesh3d.z == 0 );
+                %                 fphys{m}(Index) = 1.5;
                 % bottom elevation
                 fphys2d{m}(:, :, 4) = -obj.H0;
                 %water depth
@@ -60,16 +63,16 @@ classdef WindDrivenFlow < SWEBarotropic3d
         end
         
         function matUpdateExternalField( obj, time, fphys2d, fphys )
-% %             obj.BotBoundNewmannDate(:,:,1)  = obj. 
-%            VCV = obj.meshUnion(1).cell.VCV;
-%            Nz = obj.meshUnion(1).Nz;
-%            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
-%            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
-%            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
-%            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
-%            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
-%                (Hv./H).^2 ) .* ( Hv./H ) * (-1);           
+            % %             obj.BotBoundNewmannDate(:,:,1)  = obj.
+            %            VCV = obj.meshUnion(1).cell.VCV;
+            %            Nz = obj.meshUnion(1).Nz;
+            %            Hu = VCV * fphys{1}(:,Nz:Nz:end,1);
+            %            Hv = VCV * fphys{1}(:,Nz:Nz:end,2);
+            %            H  = VCV * fphys{1}(:,Nz:Nz:end,4);
+            %            obj.BotBoundNewmannDate(:,:,1) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+            %                (Hv./H).^2 ) .* ( Hu./H ) * (-1);
+            %            obj.BotBoundNewmannDate(:,:,2) = obj.Cf{1} .* sqrt( (Hu./H).^2 + ...
+            %                (Hv./H).^2 ) .* ( Hv./H ) * (-1);
         end
         
         function [ option ] = setOption( obj, option )
@@ -85,7 +88,7 @@ classdef WindDrivenFlow < SWEBarotropic3d
             option('VerticalEddyViscosityType') = enumSWEVerticalEddyViscosity.Constant;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('outputType') = enumOutputFile.NetCDF;
+            option('outputType') = enumOutputFile.VTK;
             option('limiterType') = enumLimiter.Vert;
             option('ConstantVerticalEddyViscosityValue') = 0.01;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
@@ -122,7 +125,7 @@ mesh3d.BottomEdge = NdgBottomInnerEdge3d( mesh3d, 1 );
 mesh3d.BoundaryEdge = NdgHaloEdge3d( mesh3d, 1, Mz );
 mesh3d.BottomBoundaryEdge = NdgBottomHaloEdge3d( mesh3d, 1 );
 mesh3d.SurfaceBoundaryEdge = NdgSurfaceHaloEdge3d( mesh3d, 1 );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
-[ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'West-East' );
+% [ mesh2d, mesh3d ] = ImposePeriodicBoundaryCondition3d(  mesh2d, mesh3d, 'South-North' );
 end
 

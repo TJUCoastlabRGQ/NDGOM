@@ -14,6 +14,7 @@ visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
     dt = 0.3 * obj.matUpdateTimeInterval( fphys2d );
+%     dt = 1.5;
 %     dt = 10;
     %       dt = 0.1;
     if( time + dt > ftime )
@@ -36,7 +37,7 @@ while( time < ftime )
 
         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) +  dt * obj.ExplicitRHS2d(:,:,1);
         
-        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys +  dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end);
+        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys +  dt * obj.ExplicitRHS(:,:,1:2:end);
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );
         
@@ -65,7 +66,7 @@ while( time < ftime )
         
         fphys2d{1}(:,:,1) = Tempfphys2d(:,:,1) + rkb(intRK, 1) * dt * obj.ExplicitRHS2d(:,:,1) + rkb(intRK, 2) * dt * obj.ExplicitRHS2d(:,:,2);
         
-        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:obj.Nvar:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:obj.Nvar:end);
+        fphys{1}(:,:,obj.varFieldIndex) = Tempfphys + rkb(intRK, 1) * dt * obj.ExplicitRHS(:,:,1:2:end) + rkb(intRK, 2) * dt * obj.ExplicitRHS(:,:,2:2:end);
         
 %         [ fphys ] = obj.matImposeLimiter( fphys );
 %         [ fphys ] = obj.limiter.matLimitNew(obj, fphys);

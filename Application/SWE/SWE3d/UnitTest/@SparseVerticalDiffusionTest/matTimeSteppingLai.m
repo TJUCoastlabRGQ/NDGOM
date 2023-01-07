@@ -6,8 +6,8 @@ fphys = obj.fphys;
 visual = Visual2d( obj.mesh2d );
 hwait = waitbar(0,'Runing MatSolver....');
 while( time < ftime )
-    dt = 0.3 * obj.matUpdateTimeInterval( fphys );
-%     dt = 0.005;
+%     dt = 0.3 * obj.matUpdateTimeInterval( fphys );
+    dt = 0.005;
     if( time + dt > ftime )
         dt = ftime - time;
     end
@@ -40,9 +40,9 @@ while( time < ftime )
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);  
         
-    [ fphys ] = obj.matImposeLimiter( fphys );
+%     [ fphys ] = obj.matImposeLimiter( fphys );
     
-    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
+%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );    
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...
@@ -53,7 +53,7 @@ while( time < ftime )
     
     fphys2d{1}(:, :, 3) = obj.meshUnion(1).VerticalColumnIntegralField( fphys{1}(:, :, 2) );
     
-    obj.NonhydrostaticSolver.matGetBottomOldMomentum( obj, fphys );
+%     obj.NonhydrostaticSolver.matGetBottomOldMomentum( obj, fphys );
     
 %     fphys = obj.NonhydrostaticSolver.matUpdataVerticalVelocity( obj, fphys, fphys2d ); 
     
@@ -76,9 +76,9 @@ while( time < ftime )
     
     fphys{1}(: , :, 7) = fphys{1}(: , :, 4) + fphys{1}(: , :, 6);
         
-    [ fphys ] = obj.matImposeLimiter( fphys );
+%     [ fphys ] = obj.matImposeLimiter( fphys );
     
-    fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
+%     fphys = obj.NonhydrostaticSolver.NdgConservativeNonhydrostaticUpdata( obj, fphys, fphys2d, dt );
     
     [ fphys{1}(:,:,obj.varFieldIndex)] = ...
         obj.VerticalEddyViscositySolver.matUpdateImplicitVerticalDiffusion( obj,...

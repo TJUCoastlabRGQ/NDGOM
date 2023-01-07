@@ -198,7 +198,7 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, do
     AssembleContributionIntoRow(OP11, EdgeContribution, eid, Np3d, Np2d);
 	/*For term $\int_{\partial \Omega^D}\tau q_h vd\boldsymbol x$*/
     double *DoubleJump = malloc(Np2d*Np2d*sizeof(double));
-    DiagRightMultiply(DoubleJump, mass2d, TempTau, Np2d);
+    DiagMultiply(DoubleJump, mass2d, TempTau, Np2d);
     AssembleContributionIntoRowAndColumn(OP11, DoubleJump, eid, eid, Np3d, Np2d, 1);
     free(FDiffMatrix);
     free(EdgeContribution);
@@ -211,7 +211,7 @@ void ImposeDirichletBoundary(double *eid, double *DiffMatrix, double *mass2d, do
 * see for instance "Discontinuous Galerkin methods for solving elliptic and parabolic equations theory and implementation", page 53/212.
 */
 void ImposeNonhomogeneousDirichletBoundary(double *dest, double *eid, double *DiffMatrix, double *mass2d, double *InvElemass3d,\
-	double *Tau, const double epsilon, int Np2d, int Np, double *DirichletValue)
+	double *Tau, const double epsilon, int Np2d, int Np, double *DirichletValue, double dt, double Imparam)
 {
 	double Alpha = 1.0, Beta = 0.0;
 	double *FacialDiffMatrix = malloc(Np*Np2d * sizeof(double));
@@ -232,17 +232,17 @@ void ImposeNonhomogeneousDirichletBoundary(double *dest, double *eid, double *Di
 
 	SumInRow(TempRHSBuff, DirichEdgeBuff, Np, Np2d);
 
-	/* Multiply the stiff matrix by parameter epsilon */
-	MultiplyByConstant(TempRHSBuff, TempRHSBuff, epsilon, Np);
+	/* Multiply the stiff matrix by parameter epsilon, and the direction vector -1.0 at the bottom boundary */
+	MultiplyByConstant(TempRHSBuff, TempRHSBuff, -1.0 * epsilon, Np);
 
 	DiagMultiply(WeightedEleMass2d, WeightedEleMass2d, Tau, Np2d);
 
 	SumInColumn(DirichEdge2d, WeightedEleMass2d, Np2d);
 
 	AssembleDataIntoPoint(TempRHSBuff, DirichEdge2d, eid, Np2d);
-
+	/*The coefficient dt*Imparam is considered here*/
 	cblas_dgemm(CblasColMajor, CblasNoTrans, CblasNoTrans, \
-		Np, 1, Np, Alpha, InvElemass3d, Np, TempRHSBuff, Np, Beta, TempRHS, Np);
+		Np, 1, Np, Alpha * dt * Imparam, InvElemass3d, Np, TempRHSBuff, Np, Beta, TempRHS, Np);
 
 	Add(dest, dest, TempRHS, Np);
 
@@ -378,7 +378,7 @@ void AssembleGlobalStiffMatrixForhuv(double *dest, double *Finaldest, double *so
 	}
 }
 
-void HorizontalMomemtumSolve(double *Temphuv, double *StiffMatrixForhuv, double *FinalStiffMatrixForhuv, double *StiffMatrix, \
+void HorizontalMomemtumSolve(double *Temphuv, double *fphys, double *StiffMatrixForhuv, double *FinalStiffMatrixForhuv, double *StiffMatrix, \
 	double *FinalStiffMatrix, double *f0, double dt, double ImplicitParam, double *TempGlobalRHS, double *GlobalSystemRHS, \
 	int i, int K3d, int Nz, int Np)
 {
@@ -391,6 +391,11 @@ void HorizontalMomemtumSolve(double *Temphuv, double *StiffMatrixForhuv, double 
 	/*Invoke pardiso from mkl to solve equation Ax = b for hu and hv first, followed by other passive substances*/
 	/*Note: The index parameter, i, is set to 0 for hu and hv, as we don't need to change the position of the pointer*/
 	SparseEquationSolve(Temphuv, 2 * Nz*Np, StiffMatrixForhuv, TempGlobalRHS, Nz, Np, 0, 1, K3d, QuatrNNZ, 2 * Nz*Np, QuatrIr, QuatrJc);
+
+	/*Copy the calculated hu and hv back into the fphys field*/
+	memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
+
+	memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
 }
 
 void AssembleImplicitRHS(double *TempImplicitRHS, double *ImplicitRHS, double *FinalStiffMatrixForhuv, double *FinalStiffMatrix, double *fphys, \
@@ -671,10 +676,17 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						ImposeImplicitNeumannBoundary(OP11, BotEidM, Cf + i*Np2d, h2d + i*Np2d, EleMass2d, Imu2d + i*Np2d, Imv2d + i*Np2d, Np2d, Np, hcrit, VCV);
 					}
 				}
-				//Local and Local to up for hu and hv
+				//Local and Local to up for Du and Dv
 				for (var = 0; var < 2 && var < Nvar; var++) {
 					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
+				}
+				//Local and Local to up for Dw
+				for (var = 2; var < 3; var++) {
+					AssembleLocalToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
+						dt, ImplicitParam, DWOP11, Prantl[var], LocalStartPoint, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 					AssembleLocalAdjacentToGlobalContribution(StiffMatrix + var*NNZ, FinalStiffMatrix + var*NNZ, InvEleMass3d, \
 						dt, ImplicitParam, OP12, Prantl[var], LocalStartPoint - Np, Jc[(Nz - 1) * Np + 1] - Jc[(Nz - 1) * Np + 0], Np);
 				}
@@ -683,23 +695,22 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				free(OP12);
 
 				/*Momentum Du and Dv are to be solved first, next to impose the bottom boundary condition for Dw*/
-				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+				HorizontalMomemtumSolve(Temphuv, fphys, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
 					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
 
 				double Dw[Np2d];
 				for (Point = 0; Point < Np2d; Point++) 
 				{
-					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[Nz*Np + (Nz - 1)*Np + Point];
+					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[(2*Nz - 1)*Np + Point];
 				}
+
 				ImposeNonhomogeneousDirichletBoundary(GlobalSystemRHS + 2 * K3d * Np + i*Nz*Np + (Nz - 1)*Np, BotEidM, LocalPhysicalDiffMatrix, \
-					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw);
+					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw, dt, ImplicitParam);
 				/*Solve for Dw*/
 				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, 1, K3d, NNZ, Nz*Np, Ir, Jc);
 				/*Solve for other passive transport substances*/
 				SparseEquationSolve(fphys + 3 * K3d*Np, Nz*Np, StiffMatrix + 3 * NNZ, GlobalSystemRHS + 3 * K3d*Np, Nz, Np, i, Nvar - 3, K3d, NNZ, Nz*Np, Ir, Jc);
-				/*Copy the calculated hu and hv back into the fphys field*/
-				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
-				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
+
 				/*In case of IMEXRK Time stepping method is adopted*/
 				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
 					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
@@ -740,14 +751,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				free(UpPhysicalDiffMatrix);
 				free(OP12);
 
-				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+				HorizontalMomemtumSolve(Temphuv, fphys, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
 					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
 
 				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, Nvar - 2, K3d, NNZ, Nz*Np, Ir, Jc);
-				/*Copy the calculated hu and hv back into the fphys field*/
-				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
-
-				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
 
 				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
 					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
@@ -793,23 +800,21 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 				}
 
 				/*Momentum Du and Dv are to be solved first, next to impose the bottom boundary condition for Dw*/
-				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+				HorizontalMomemtumSolve(Temphuv, fphys, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
 					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
 
 				double Dw[Np2d];
 				for (Point = 0; Point < Np2d; Point++)
 				{
-					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[Nz*Np + (Nz - 1)*Np + Point];
+					Dw[Point] = bx[i*Np2d + Point] * Temphuv[(Nz - 1)*Np + Point] + by[i*Np2d + Point] * Temphuv[(2*Nz - 1)*Np + Point];
 				}
+
 				ImposeNonhomogeneousDirichletBoundary(GlobalSystemRHS + 2 * K3d * Np + i*Nz*Np + (Nz - 1)*Np, BotEidM, LocalPhysicalDiffMatrix, \
-					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw);
+					EleMass2d, InvEleMass3d, ImTau + Np2d*(i*(Nz + 1) + Nz), epsilon, Np2d, Np, Dw, dt, ImplicitParam);
 				/*Solve for Dw*/
 				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, 1, K3d, NNZ, Nz*Np, Ir, Jc);
 				/*Solve for other passive transport substances*/
 				SparseEquationSolve(fphys + 3 * K3d*Np, Nz*Np, StiffMatrix + 3 * NNZ, GlobalSystemRHS + 3 * K3d*Np, Nz, Np, i, Nvar - 3, K3d, NNZ, Nz*Np, Ir, Jc);
-				/*Copy the calculated hu and hv back into the fphys field*/
-				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
-				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
 
 				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
 					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);
@@ -841,13 +846,10 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 						dt, ImplicitParam, OP11, Prantl[var], LocalStartPoint, Jc[0 * Np + 1] - Jc[0 * Np + 0], Np);
 				}
 
-				HorizontalMomemtumSolve(Temphuv, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
+				HorizontalMomemtumSolve(Temphuv, fphys, StiffMatrixForhuv, FinalStiffMatrixForhuv, StiffMatrix, FinalStiffMatrix, f0, dt, ImplicitParam, \
 					TempGlobalRHS, GlobalSystemRHS, i, K3d, Nz, Np);
 
 				SparseEquationSolve(fphys + 2 * K3d*Np, Nz*Np, StiffMatrix + 2 * NNZ, GlobalSystemRHS + 2 * K3d*Np, Nz, Np, i, Nvar - 2, K3d, NNZ, Nz*Np, Ir, Jc);
-				/*Copy the calculated hu and hv back into the fphys field*/
-				memcpy(fphys + i*Nz*Np, Temphuv, Nz*Np * sizeof(double));
-				memcpy(fphys + i*Nz*Np + K3d*Np, Temphuv + Nz*Np, Nz*Np * sizeof(double));
 
 				AssembleImplicitRHS(TempImplicitRHS, ImplicitRHS, FinalStiffMatrixForhuv, FinalStiffMatrix, fphys, Temphuv, i, Nz, \
 					Np, K3d, Nvar, SurfBoundStiffTerm, BotBoundStiffTerm);

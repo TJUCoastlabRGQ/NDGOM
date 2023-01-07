@@ -14,12 +14,10 @@ classdef NdgSWEVertConstantDiffSolver < NdgSWEVertDiffSolver
               fprintf('Value of the constant horizontal eddy viscosity is set to be the default value: %f\n',value);
           end
             obj.nv = value * ones(size(physClass.meshUnion(1).x));
-%             obj.Prantl = physClass.Prantl;
-            obj.Prantl = 1.0;
 %             obj.ubot = zeros(size(physClass.meshUnion(1).mesh2d.x));
 %             obj.vbot = zeros(size(physClass.meshUnion(1).mesh2d.y));
-            obj.BotBoundaryTreatType = 'Implicit';
-%             obj.BotBoundaryTreatType = 'Explicit';
+%             obj.BotBoundaryTreatType = 'Implicit';
+            obj.BotBoundaryTreatType = 'Explicit';
             
 %             obj.nv = -1 * physClass.meshUnion.z .* (physClass.meshUnion.z + 1) + 0.005; 
             

@@ -5,7 +5,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
     properties(Constant)
         hcrit = 0.01;
         ChLength = 2.8
-        ChWidth = 0.15
+        ChWidth = 0.05
         startTime = 0
         finalTime = 100
         GotmFile = fullfile([pwd,'/Application/SWE/SWE3d/Benchmark/@FlowOverATrapezoidTrech/gotmturb.nml'])
@@ -26,8 +26,10 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             obj.Nvar = 5;
             obj.varFieldIndex = [1 2 11 14 15];
             % allocate boundary field with mesh obj
-            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
+            
             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
+            
+            obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
         end
         
         matTimeSteppingLai( obj );
