@@ -90,8 +90,9 @@ classdef NdgSWEVertGOTMDiffSolver < NdgSWEVertDiffSolver
 %             obj.matUpdataNewmannBoundaryCondition( physClass, fphys );
             Outfphys = obj.matCalculateImplicitRHS( physClass, (obj.nv + 1.3e-6) ./ Height./Height, SystemRHS, ImplicitParameter, dt, RKIndex, IMStage, fphys{1}(:,:,1:2), Height2d, Height);
             obj.matUpdateViscosity( physClass, Height2d, obj.uo, obj.vo, Outfphys(:,:,1), Outfphys(:,:,2), zeros(size(Outfphys(:,:,2))), zeros(size(Outfphys(:,:,2))), ImplicitParameter * dt, Height, fphys{1}(:,:,14), fphys{1}(:,:,15) );
-            Outfphys(:,:,4) = obj.Tke .* Height;
-            Outfphys(:,:,5) = obj.Eps .* Height;
+            Outfphys(:,:,3) = physClass.meshUnion.GetVertexWeightData( obj.Tke .* Height );
+%             obj.Tke .* Height;
+            Outfphys(:,:,4) = physClass.meshUnion.GetVertexWeightData( obj.Eps .* Height );
 %             Outfphys = obj.matFilterData( physClass, Outfphys );
             obj.uo = Outfphys(:,:,1)./Height;
             obj.vo = Outfphys(:,:,2)./Height;

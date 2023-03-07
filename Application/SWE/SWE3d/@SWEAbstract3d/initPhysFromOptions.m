@@ -79,6 +79,8 @@ end
 obj.SurfBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 obj.BotBoundNewmannDate = zeros(mesh2d(1).cell.Np, mesh2d(1).K, obj.Nvar);
 
+obj.NonhydrostaticSolver = initNonhydrostaticSolver( obj );
+
 obj.matInitEddyViscositySolver( );
 % Setup the output NetCDF file object
 % initOutput( obj, mesh2d, mesh3d );
@@ -88,7 +90,6 @@ obj.outputFile2d = obj.matInitOutput(mesh2d, obj.fieldName2d);
 [ obj.limiter ] = initSlopeLimiter( obj );
 
 obj.VerticalVelocitySolver = SWE3dVerticalVelocitySolver( mesh2d, mesh3d );
-
 
 end
 
@@ -110,5 +111,18 @@ if ( type == enumLimiter.None )
     limiter = NdgNonLimiter( mesh );
 else
     limiter = NdgVertLimiter3d( mesh );
+end
+end
+
+function [NonhydrostaticSolver] = initNonhydrostaticSolver(obj)
+if obj.option.isKey('nonhydrostaticType')
+    switch obj.getOption('nonhydrostaticType')
+        case enumNonhydrostaticType.Hydrostatic
+            NonhydrostaticSolver = NdghydrostaticSolver3d(obj);
+        case enumNonhydrostaticType.Nonhydrostatic
+            NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.meshUnion );
+    end% switch
+else
+    NonhydrostaticSolver = NdghydrostaticSolver3d( obj );
 end
 end

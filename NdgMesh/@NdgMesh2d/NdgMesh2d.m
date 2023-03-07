@@ -8,7 +8,17 @@ classdef NdgMesh2d < NdgMesh
         type = enumMeshDim.Two
     end
     
+    properties
+        %> Vertex point to node point relation, data is organized as Node
+        %> points number first, followed by global point index
+        VertToNode
+        %> Weight of each node, and the sum is equal to 1.0 
+        NodeWeight
+    end
+    
     methods( Hidden, Access = protected )
+        
+        matVertNodeProjection( obj );
         
         function obj = assembleJacobiFactor(obj)
             Np = obj.cell.Np;
@@ -38,7 +48,13 @@ classdef NdgMesh2d < NdgMesh
             [ EToV ] = makeCounterclockwiseVertexOrder( EToV, vx, vy );
             vz = zeros( Nv, 1 ); % vz is all zeros
             obj = obj@NdgMesh(cell, Nv, vx, vy, vz, K, EToV, EToR);
+            obj.matVertNodeProjection(); 
         end% func
+        
+        function NodeWeightData = GetVertexWeightData( obj, Data)
+            NodeWeightData = mxGetVertexWeightedData( obj.VertToNode, obj.NodeWeight, Data );
+        end
+        
     end% methods
     
 end

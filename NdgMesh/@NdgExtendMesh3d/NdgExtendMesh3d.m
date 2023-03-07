@@ -34,7 +34,15 @@ classdef NdgExtendMesh3d < handle
     
     properties
         %> index of adjacent elements and faces
-        EToE, EToF        
+        EToE, EToF
+    end
+    
+    properties
+        %> Vertex point to node point relation, data is organized as Node
+        %> points number first, followed by global point index
+        VertToNode
+        %> Weight of each node, and the sum is equal to 1.0
+        NodeWeight
     end
     
     % elemental volume infomation
@@ -106,8 +114,8 @@ classdef NdgExtendMesh3d < handle
             
             [ obj.xc ] =  obj.GetMeshAverageValue( obj.x );
             [ obj.yc ] =  obj.GetMeshAverageValue( obj.y );
-            [ obj.zc ] =  obj.GetMeshAverageValue( obj.z );            
-            
+            [ obj.zc ] =  obj.GetMeshAverageValue( obj.z );
+            obj.matVertNodeProjection();
         end% func
         
         function integralValue = GetMeshIntegralValue(obj, nodeVal)
@@ -117,6 +125,10 @@ classdef NdgExtendMesh3d < handle
         function avergeValue = GetMeshAverageValue(obj, nodeVal)
             integralValue = mxGetMeshIntegralValue(nodeVal, obj.cell.wq, obj.J, obj.cell.Vq);
             avergeValue = integralValue ./ obj.LAV;
+        end
+        
+        function NodeWeightData = GetVertexWeightData( obj, Data)
+            NodeWeightData = mxGetVertexWeightedData( obj.VertToNode, obj.NodeWeight, Data );
         end
         
         function nodeQ = proj_vert2node(obj, vertQ)

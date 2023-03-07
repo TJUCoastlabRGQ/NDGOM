@@ -23,11 +23,13 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             obj.outputFieldOrder2d = [ 1 2 3 ];
             obj.outputFieldOrder3d = [ 1 2 4 6];
             obj.Prantl = [1.0, 1.0, 1.0];
-            obj.Nvar = 5;
-            obj.varFieldIndex = [1 2 11 14 15];
+            obj.Nvar = 4;
+            obj.varFieldIndex = [1 2 14 15];
+%             obj.varFieldIndex = [1 2 11 14 15];
+
             % allocate boundary field with mesh obj
             
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
+%             obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, obj.mesh3d );
             
             obj.initPhysFromOptions( obj.mesh2d, obj.mesh3d );
         end
@@ -122,6 +124,7 @@ classdef FlowOverATrapezoidTrech < SWEBarotropic3d
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.Smagorinsky;
             option('ConstantHorizontalEddyViscosityValue') = 0.1;
             option('BottomBoundaryEdgeType') = enumBottomBoundaryEdgeType.Neumann;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
         
     end
