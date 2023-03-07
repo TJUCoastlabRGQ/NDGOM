@@ -20,11 +20,11 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 		double TempNodeData = 0.0;
 		//Get the weighted data
 		for (j = 0; j < (int)VertNode[i*maxPoint]; j++) {
-			TempNodeData += Data[(int)VertNode[i*maxPoint + j+1]] * NodeWeight[i*(maxPoint-1) + j];
+			TempNodeData += Data[(int)VertNode[i*maxPoint + j+1]-1] * NodeWeight[i*(maxPoint-1) + j];
 		}
 		//Replace the Data
 		for (j = 0; j < (int)VertNode[i*maxPoint]; j++) {
-			dest[(int)VertNode[i*maxPoint + j + 1]] = TempNodeData;
+			dest[(int)VertNode[i*maxPoint + j + 1]-1] = TempNodeData;
 		}
 	}
 }
