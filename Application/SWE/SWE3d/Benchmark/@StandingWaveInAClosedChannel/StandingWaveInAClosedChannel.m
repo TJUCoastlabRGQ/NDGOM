@@ -10,7 +10,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
         %> channel width
         ChWidth = 2;
         %> channel depth
-        H0 = 10;
+        H0 = 100;
         %> x range
         %> start time
         startTime = 0;
@@ -44,11 +44,8 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             obj.Nfield = 11;
             obj.Nvar = 3;
             obj.varFieldIndex = [1 2 11];
-            obj.NonhydrostaticSolver = NdgQuadratureFreeNonhydrostaticSolver3d( obj, mesh3d );
             % allocate boundary field with mesh obj
             obj.initPhysFromOptions( mesh2d, mesh3d );
-            %> time interval
-            obj.dt = 0.005;
             %             obj.Cf{1} = 0.0025/1000;
             obj.Cf{1} = 0*ones(size(mesh2d.x));
         end
@@ -66,7 +63,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 18;
+            x0 = 17.5;
             h = obj.H0;
             a = obj.A;
             c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
@@ -93,8 +90,10 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             %             close(h);
             %             plot(XData1, YData1,'k--','LineWidth',1.5);
             plot(outputTime(1:4:end),exactEta(1:4:end),'ro','markersize',6,'LineWidth', 1);
+            disp(sqrt(sum((exactEta-Eta).^2)/numel(Eta)));
             h = legend('SWE','Theory');
             set(h,'fontsize',15);
+            set(gca,'Linewidth',1.5);
             legend('boxoff');
         end
         
@@ -139,7 +138,7 @@ classdef StandingWaveInAClosedChannel < SWEBarotropic3d
             option('ConstantVerticalEddyViscosityValue') = 0.03;
             option('HorizontalEddyViscosityType') = enumSWEHorizontalEddyViscosity.None;
             option('ConstantHorizontalEddyViscosityValue') = 1;
-            
+            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;    
         end
         
     end

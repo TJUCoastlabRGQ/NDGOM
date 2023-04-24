@@ -59,8 +59,8 @@ void ImposeBoundaryCondition(double *gra, NdgEdgeType type, double *nx, double *
 			huP[i] = huE[i];
 			hvP[i] = hvE[i];
 			for (int n = 3; n < Nvar; n++){
-				fp[n*Nfp*Ne + i] = fext[n*Nfp*Ne + i];
-			//	fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
+			//	fp[n*Nfp*Ne + i] = fext[n*Nfp*Ne + i];
+				fp[n*Nfp*Ne + i] = fm[n*Nfp*Ne + i];
 			}
 		}
 	}

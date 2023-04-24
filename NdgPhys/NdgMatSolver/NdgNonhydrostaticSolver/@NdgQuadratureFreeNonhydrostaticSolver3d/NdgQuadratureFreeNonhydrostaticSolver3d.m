@@ -233,8 +233,11 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             % Compute the solutions X using the symbolic factorization.
             [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
             
-            Index = abs(NonhydroPressure)<1e-10;
+            Index = physClass.meshUnion.z == 0;
             NonhydroPressure(Index) = 0;
+            
+%             Index = abs(NonhydroPressure)<1e-10;
+%             NonhydroPressure(Index) = 0;
             
             
             %checked

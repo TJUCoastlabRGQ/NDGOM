@@ -5,7 +5,7 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
     properties(Constant)
         rho = 1000
         %         amplitude = 0.0232
-        amplitude = 0.0232
+        amplitude = 0.0118/2 %0.0232
         d = 0.45
         T = 1
         hcrit = 0.005
@@ -60,9 +60,9 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             ind = obj.meshUnion.yc > bp(1); % right part is sponge region
             obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
             
-%             bp(2) = obj.spgLength + obj.Ylim(1);
-%             ind = obj.meshUnion.yc < bp(2); % left part is sponge region
-%             obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
+            %             bp(2) = obj.spgLength + obj.Ylim(1);
+            %             ind = obj.meshUnion.yc < bp(2); % left part is sponge region
+            %             obj.meshUnion.EToR(ind) = enumSWERegion.Sponge;
             
             
             
@@ -186,21 +186,21 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (Eta + obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
             %             hv3d(:,Index) = omega*obj.amplitude*0.5*(1+tanh((time-3*obj.T)/obj.T))*sin(omega*time) * (obj.d).*(cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d));
             %% The depth-averaged version, value is averaged from bottom to Surface
-            hv3d(:,Index) =  omega*obj.amplitude/obj.k*sinh(obj.k*(obj.d+Eta))/sinh(obj.k*obj.d)*sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-            hw3d(:,Index) =  omega*obj.amplitude/obj.k*(cosh(obj.k*(obj.d + Eta))-1)/sinh(obj.k*obj.d)*cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-%             %             obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 * obj.NonhydrostaticSolver.rho*obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
-%             obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 *obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
+            % hv3d(:,Index) =  omega*obj.amplitude/obj.k*sinh(obj.k*(obj.d+Eta))/sinh(obj.k*obj.d)*sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            % hw3d(:,Index) =  omega*obj.amplitude/obj.k*(cosh(obj.k*(obj.d + Eta))-1)/sinh(obj.k*obj.d)*cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %             %             obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 * obj.NonhydrostaticSolver.rho*obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
+            %             obj.NonhydrostaticSolver.BoundNonhydroGrad(:,Index) = -1 *obj.gra*obj.amplitude/obj.d*cos(omega*time)*tanh(obj.k*obj.d).*obj.meshUnion(1).BoundaryEdge.ny(:,Index);
             
-            %% The depth-dependent version 1 28.99
-%             hv3d(:,Index) = obj.d * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-%             hw3d(:,Index) = obj.d * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-            %% The depth-dependent version 2 23.39
-            %             hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
-            %             hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %% The depth-dependent version 1 28.99  43.8
+             hv3d(:,Index) = obj.d * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+             hw3d(:,Index) = obj.d * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+            %% The depth-dependent version 2 23.39 33.75
+%             hv3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (cosh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * sin(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
+%             hw3d(:,Index) = (obj.d + Eta) * omega*obj.amplitude .* (sinh(obj.k*(zb+obj.d))./sinh(obj.k*obj.d)) * cos(omega*time)*0.5*(1 + tanh((time-3*obj.T)/obj.T));
             obj.fext3d{1}(:,:,2) = hv3d;
             %             obj.fext3d{1}(:,:,3) = obj.d + Eta;
             %             obj.fext3d{1}(:,:,3) = obj.d;
-            obj.fext3d{1}(:,:,11) = hw3d;
+            obj.fext3d{1}(:,:,4) = hw3d;
             
             obj.fext2d{1}(:,:,2) = obj.meshUnion.BoundaryEdge.VerticalColumnIntegralField( hv3d );
             
@@ -214,6 +214,15 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             %             hv2d(:,Index) = omega*obj.amplitude/obj.k*0.5*(1 + tanh((time-3*obj.T)/obj.T))*sinh(obj.k*(obj.d + Eta))/sinh(obj.k*obj.d)*sin(omega*time);
             
             %             obj.fext2d{1}(:,:,2) = hv2d;
+            
+                        h3d = zeros(size(obj.fext3d{1}(:,:,1)));
+                        Index = ( obj.meshUnion(1).BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+                        h3d(:,Index) = obj.d + Eta * 0.5*(1 + tanh((time-10*obj.T)/obj.T)) * 0 ;
+                        obj.fext3d{1}(:,:,3) = h3d ;
+                        h2d = zeros(size(obj.fext2d{1}(:,:,1)));
+                        Index = ( obj.meshUnion(1).mesh2d.BoundaryEdge.ftype == enumBoundaryCondition.ClampedDepth );
+                        h2d(:,Index) = obj.d + Eta* 0.5*(1 + tanh((time-10*obj.T)/obj.T)) * 0;
+                        obj.fext2d{1}(:,:,3) = h2d ;
         end
         
         function matEvaluateTopographySourceTerm( obj, fphys )
@@ -230,74 +239,74 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             end
             
             ys = 5.125;
- %% The following is the momentum source part           
-%             soruce = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             
-%             D = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             
-%             deltas = 2;
-%             
-%             Index = find(all(obj.meshUnion.y>=ys-deltas * obj.length/2/2 & obj.meshUnion.y <= ys + deltas * obj.length/2/2));
-%             
-%             deltay = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
-%             
-%             deltay(:,Index) = obj.meshUnion.y(:,Index) - ys;
-%             
-%             beltas = 80/deltas/deltas/obj.length;
-%             
-%             I1 = sqrt(pi/beltas)*exp(0);
-%             
-%             omega = 2*pi/obj.T;
-%             
-%             alpha0 = -0.53*(0.5*(-0.53) + 1);
-%             
-%             alpha1 = alpha0 + 1/3;
-%             
-%             h = fphys{1}(:,:,4);
-%             
-%             D(:,Index) = 2*obj.amplitude*(omega^2 - alpha1 * obj.gra * (obj.k)^4*h(:,Index).^3)./(omega*obj.k*I1*(1-alpha0*(obj.k*h(:,Index)).^2)); 
-%             
-%             soruce(:,Index) = -obj.gra * 2 * beltas .* deltay(:,Index).*exp(-beltas*deltay(:,Index).^2).*D(:,Index)./omega*sin(-1*omega*time); 
-%             if time <= 3*obj.T
-%                 soruce(:,Index) = soruce(:,Index) * (1 - exp(-2*time/obj.T));
-%             end
-%             
-%             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + soruce;
-%% The following is the water depth source part
-%             soruce = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
-%             
-%             D = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
-%             
-%             deltas = 2;
-%             
-%             Index = find(all(obj.meshUnion.mesh2d.y>=ys-deltas * obj.length/2/2 & obj.meshUnion.mesh2d.y <= ys + deltas * obj.length/2/2));
-%             
-%             deltay = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
-%             
-%             deltay(:,Index) = obj.meshUnion.mesh2d.y(:,Index) - ys;
-%             
-%             beltas = 80/deltas/deltas/obj.length;
-%             
-%             I1 = sqrt(pi/beltas)*exp(0);
-%             
-%             omega = 2*pi/obj.T;
-%             
-%             alpha0 = -0.53*(0.5*(-0.53) + 1);
-%             
-%             alpha1 = alpha0 + 1/3;
-%             
-%             h = fphys2d{1}(:,:,1);    
-%             
-%             D(:,Index) = 2*obj.amplitude*(omega^2 - alpha1 * obj.gra * (obj.k)^4*h(:,Index).^3)./(omega*obj.k*I1*(1-alpha0*(obj.k*h(:,Index)).^2)); 
-%             
-%             obj.NonhydroIndex = Index;
-%             
-%             soruce(:,Index) = D(:,Index) .* sin(-1*omega*time) .*exp(-beltas*deltay(:,Index).^2);
-%             if time <= 3*obj.T
-%                 soruce(:,Index) = soruce(:,Index) * (1 - exp(-2*time/obj.T));
-%             end
-%             
-%             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + soruce;
+            %% The following is the momentum source part
+            %             soruce = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            %
+            %             D = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            %
+            %             deltas = 2;
+            %
+            %             Index = find(all(obj.meshUnion.y>=ys-deltas * obj.length/2/2 & obj.meshUnion.y <= ys + deltas * obj.length/2/2));
+            %
+            %             deltay = zeros(obj.meshUnion.cell.Np, obj.meshUnion.K);
+            %
+            %             deltay(:,Index) = obj.meshUnion.y(:,Index) - ys;
+            %
+            %             beltas = 80/deltas/deltas/obj.length;
+            %
+            %             I1 = sqrt(pi/beltas)*exp(0);
+            %
+            %             omega = 2*pi/obj.T;
+            %
+            %             alpha0 = -0.53*(0.5*(-0.53) + 1);
+            %
+            %             alpha1 = alpha0 + 1/3;
+            %
+            %             h = fphys{1}(:,:,4);
+            %
+            %             D(:,Index) = 2*obj.amplitude*(omega^2 - alpha1 * obj.gra * (obj.k)^4*h(:,Index).^3)./(omega*obj.k*I1*(1-alpha0*(obj.k*h(:,Index)).^2));
+            %
+            %             soruce(:,Index) = -obj.gra * 2 * beltas .* deltay(:,Index).*exp(-beltas*deltay(:,Index).^2).*D(:,Index)./omega*sin(-1*omega*time);
+            %             if time <= 3*obj.T
+            %                 soruce(:,Index) = soruce(:,Index) * (1 - exp(-2*time/obj.T));
+            %             end
+            %
+            %             obj.frhs{1}(:,:,2) = obj.frhs{1}(:,:,2) + soruce;
+            %% The following is the water depth source part
+            %             soruce = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
+            %
+            %             D = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
+            %
+            %             deltas = 2;
+            %
+            %             Index = find(all(obj.meshUnion.mesh2d.y>=ys-deltas * obj.length/2/2 & obj.meshUnion.mesh2d.y <= ys + deltas * obj.length/2/2));
+            %
+            %             deltay = zeros(obj.meshUnion.mesh2d.cell.Np, obj.meshUnion.mesh2d.K);
+            %
+            %             deltay(:,Index) = obj.meshUnion.mesh2d.y(:,Index) - ys;
+            %
+            %             beltas = 80/deltas/deltas/obj.length;
+            %
+            %             I1 = sqrt(pi/beltas)*exp(0);
+            %
+            %             omega = 2*pi/obj.T;
+            %
+            %             alpha0 = -0.53*(0.5*(-0.53) + 1);
+            %
+            %             alpha1 = alpha0 + 1/3;
+            %
+            %             h = fphys2d{1}(:,:,1);
+            %
+            %             D(:,Index) = 2*obj.amplitude*(omega^2 - alpha1 * obj.gra * (obj.k)^4*h(:,Index).^3)./(omega*obj.k*I1*(1-alpha0*(obj.k*h(:,Index)).^2));
+            %
+            %             obj.NonhydroIndex = Index;
+            %
+            %             soruce(:,Index) = D(:,Index) .* sin(-1*omega*time) .*exp(-beltas*deltay(:,Index).^2);
+            %             if time <= 3*obj.T
+            %                 soruce(:,Index) = soruce(:,Index) * (1 - exp(-2*time/obj.T));
+            %             end
+            %
+            %             obj.frhs2d{1}(:,:,1) = obj.frhs2d{1}(:,:,1) + soruce;
             
         end
         
@@ -327,11 +336,11 @@ classdef WaveTransformOverAnEllipticalShoal3dTest < SWEBarotropic3d
             Index = (ratio>1/2 & ratio <= 1);
             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(3-4*ratio(Index))/2)./( 1-(3-4*ratio(Index)).^2) )+1 );
             
-%             ratio = ( yb(2) - obj.meshUnion(1).y )/obj.spgLength;
-%             Index = (ratio>0 & ratio <= 1/2);
-%             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(4*ratio(Index)-1)/2)./( 1-(4*ratio(Index)-1).^2) ) +1 );
-%             Index = (ratio>1/2 & ratio <= 1);
-%             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(3-4*ratio(Index))/2)./( 1-(3-4*ratio(Index)).^2) )+1 );
+            %             ratio = ( yb(2) - obj.meshUnion(1).y )/obj.spgLength;
+            %             Index = (ratio>0 & ratio <= 1/2);
+            %             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(4*ratio(Index)-1)/2)./( 1-(4*ratio(Index)-1).^2) ) +1 );
+            %             Index = (ratio>1/2 & ratio <= 1);
+            %             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(3-4*ratio(Index))/2)./( 1-(3-4*ratio(Index)).^2) )+1 );
             
         end
         

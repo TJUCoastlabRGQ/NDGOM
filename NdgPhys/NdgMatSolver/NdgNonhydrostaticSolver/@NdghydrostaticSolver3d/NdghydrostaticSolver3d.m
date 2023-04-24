@@ -15,6 +15,10 @@ classdef NdghydrostaticSolver3d
             %Doing Nothing
         end
         
+        function matGetBottomOldMomentum( obj, physClass, fphys )
+            %Doing Nothing
+        end
+        
         function matClearGlobalMemory( obj )
             %Doing Nothing
         end

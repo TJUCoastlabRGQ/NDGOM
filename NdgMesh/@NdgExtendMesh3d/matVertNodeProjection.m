@@ -9,10 +9,10 @@ if obj.Nz == 1
         end
     end
     %> bottom
-    for i = obj.mesh2d.Nv + 1 : 2 * mesh2d.Nv
+    for i = obj.mesh2d.Nv + 1 : 2 * obj.mesh2d.Nv
         obj.VertToNode(1,i) = obj.mesh2d.VertToNode(1,i-obj.mesh2d.Nv);
         for j = 2:obj.mesh2d.VertToNode(1,i-obj.mesh2d.Nv)
-            obj.VertToNode(j,i) = (ceil(obj.mesh2d.VertToNode(j,i)/obj.mesh2d.cell.Np) - 1)*obj.cell.Np + obj.mesh2d.VertToNode(j,i-obj.mesh2d.Nv);
+            obj.VertToNode(j,i) = (ceil(obj.mesh2d.VertToNode(j,i-obj.mesh2d.Nv)/obj.mesh2d.cell.Np) - 1)*obj.cell.Np + obj.mesh2d.VertToNode(j,i-obj.mesh2d.Nv);
         end
     end
     obj.NodeWeight = horzcat(obj.mesh2d.NodeWeight, obj.mesh2d.NodeWeight);

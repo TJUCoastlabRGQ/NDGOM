@@ -376,9 +376,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[]) {
 	for (face = 0; face < BENe; face++) {
 		NdgEdgeType type = (NdgEdgeType)ftype[face];
 		//if ((type == NdgEdgeClampedDepth) || (type == NdgEdgeClampedVel) || (type == NdgEdgeZeroGrad)) {
-		//if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth)) {
-		if ((type == NdgEdgeClampedVel)) {
-			ImposeHorizonFirstOrderNonhydroDirichletBoundaryCondition(sr, irs, jcs, Np, \
+		if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth)) {
+		//if ((type == NdgEdgeClampedVel)) {
+	//		ImposeHorizonFirstOrderNonhydroDirichletBoundaryCondition(sr, irs, jcs, Np, \
 				BENfp, (int)BEFToE[2 * face], M3d, BEMb, J + ((int)BEFToE[2 * face] - 1)*Np, \
 				BEJs + face*BENfp, BEFToN1 + face*BENfp, BEVector + face*BENfp);
 		}

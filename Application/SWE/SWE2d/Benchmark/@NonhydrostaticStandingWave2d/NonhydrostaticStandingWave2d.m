@@ -31,7 +31,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Eta = zeros( Ntime,1 );
             exactEta = zeros( Ntime,1 );
-            x0 = 17.5;
+            x0 = 18.0;
             h = obj.d;
             a = obj.A;
 %             c = sqrt( obj.gra*obj.Lambda/2/pi*tanh(2*pi*h/obj.Lambda) );
@@ -57,7 +57,7 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
 %             YData1=get(D1,'YData'); %get the y data
 %             close(h);
 %             plot(XData1, YData1,'k--','LineWidth',1.5);
-            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5);
+            plot(outputTime(1:10:end),exactEta(1:10:end),'ro','markersize',4.5,'Linewidth',1.5);
             h = legend('SWE','Theory');
             set(h,'fontsize',15);
             legend('boxoff');
@@ -116,9 +116,9 @@ classdef NonhydrostaticStandingWave2d < SWEPreBlanaced2d
             option('limiterType') = enumLimiter.Vert;
             option('equationType') = enumDiscreteEquation.Strong;
             option('integralType') = enumDiscreteIntegral.QuadratureFree;
-            option('nonhydrostaticType') = enumNonhydrostaticType.Nonhydrostatic;
+            option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
             option('outputNcfileNum') = 1;
-            option('outputType') = enumOutputFile.VTK;
+            option('outputType') = enumOutputFile.NetCDF;
 %             option('nonhydrostaticType') = enumNonhydrostaticType.Hydrostatic;
         end
     end
@@ -138,9 +138,9 @@ bctype = [...
 %     enumBoundaryCondition.Clamped];
 
 if (type == enumStdCell.Tri)
-    mesh = makeUniformTriMesh(N, [0, 20], [0, 10*deltax], 20/deltax, 10, bctype);
+    mesh = makeUniformTriMesh(N, [0, 20], [0, 1], 20/deltax, 10, bctype);
 elseif(type == enumStdCell.Quad)
-    mesh = makeUniformQuadMesh(N,[0, 20], [0, 4*deltax], 20/deltax, 4, bctype);
+    mesh = makeUniformQuadMesh(N,[0, 20], [0, 2*deltax], 20/deltax, 2, bctype);
 %     mesh = makeUniformQuadMesh(N,[ -1, 1 ], [ -1, 1 ], deltax, deltax, bctype);
 else
     msgID = [mfile, ':inputCellTypeError'];

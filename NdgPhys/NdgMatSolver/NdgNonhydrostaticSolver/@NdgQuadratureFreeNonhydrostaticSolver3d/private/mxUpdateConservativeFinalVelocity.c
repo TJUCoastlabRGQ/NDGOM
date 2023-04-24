@@ -253,13 +253,15 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
 			DotProduct(QBEfluxSy + face*BENfp, qbM + face*BENfp, BEny + face*BENfp, BENfp);
 		}
-		else if ((type == NdgEdgeClampedVel))
+		/*
+		else if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth))
 		{
 			for (int i = 0; i < BENfp; i++) {
-				QBEfluxSx[face*BENfp + i] = 0;
-				QBEfluxSy[face*BENfp + i] = 0;
+				QBEfluxSx[face*BENfp + i] = 0.0;
+				QBEfluxSy[face*BENfp + i] = 0.0;
 			}
 		}
+		*/
 		else
 		{
 			DotProduct(QBEfluxSx + face*BENfp, qbM + face*BENfp, BEnx + face*BENfp, BENfp);
@@ -454,12 +456,14 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 			//Doing Nothing
 		}
 		else {//impose zero boundary condition at other boundary
+			/*
 			int ele = (int)BEFToE[2*face];
 			for (int p = 0; p < Np; p++) {
 				Updatedhu[(ele - 1)*Np + p] = hu[(ele - 1)*Np + p];
 				Updatedhv[(ele - 1)*Np + p] = hv[(ele - 1)*Np + p];
 				Updatedhw[(ele - 1)*Np + p] = hw[(ele - 1)*Np + p];
 			}
+			*/
 		}
 	}
 

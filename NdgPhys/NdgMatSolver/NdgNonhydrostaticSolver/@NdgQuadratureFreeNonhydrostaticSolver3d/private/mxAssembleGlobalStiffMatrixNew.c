@@ -421,9 +421,9 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	for (face = 0; face < BENe; face++) {
 		NdgEdgeType type = (NdgEdgeType)ftype[face];
 		//if ((type == NdgEdgeClampedDepth) || (type == NdgEdgeClampedVel) || (type == NdgEdgeZeroGrad)) {
-		//if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth)) {
-		if ((type == NdgEdgeClampedVel)) {
-			ImposeHorizontalDirichletBoundaryCondition(sr, irs, jcs, Np, BENfp, \
+		if ((type == NdgEdgeClampedVel) || (type == NdgEdgeClampedDepth)) {
+		//if ((type == NdgEdgeClampedVel)) {
+		//	ImposeHorizontalDirichletBoundaryCondition(sr, irs, jcs, Np, BENfp, \
 				BEMb, BEJs + face*BENfp, BEFToN1 + face*BENfp, rx + (int)(BEFToE[2 * face] - 1)*Np, \
 				sx + (int)(BEFToE[2 * face] - 1)*Np, ry + (int)(BEFToE[2 * face] - 1)*Np, \
 				sy + (int)(BEFToE[2 * face] - 1)*Np, tz + (int)(BEFToE[2 * face] - 1)*Np, \

@@ -1400,8 +1400,7 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection( double *PHPX, double *
 
 		EvaluateHydroStaticReconstructValue(Hcrit, NonhydroBEfm + face*BENfp, NonhydroBEfp + face*BENfp, NonhydrozM + face*BENfp, NonhydrozP + face*BENfp, BENfp, 2, BENe);
 
-
-/*		
+		
 		if (type == NdgEdgeSlipWall) {
 			for (int i = 0; i < BENfp; i++) {
 				hP[i + face*BENfp] = hM[i + face*BENfp];
@@ -1409,16 +1408,15 @@ void GetFirstOrderPartialDerivativeInHorizontalDirection( double *PHPX, double *
 				vP[i + face*BENfp] = vM[i + face*BENfp];
 			}
 		}
-*/
-/*	
-        if (type == NdgEdgeClampedVel) {
+	
+        if (type == NdgEdgeClampedVel || type == NdgEdgeClampedDepth) {
 			for (int i = 0; i < BENfp; i++){
 				hP[i + face*BENfp] = hM[i + face*BENfp];
 				uP[i + face*BENfp] = uM[i + face*BENfp];
 				vP[i + face*BENfp] = vM[i + face*BENfp];
 			}
 		}
-*/		
+		
 		DotCriticalDivide(uM + face*BENfp, uM + face*BENfp, &Hcrit, hM + face*BENfp, BENfp);
 		DotCriticalDivide(uP + face*BENfp, uP + face*BENfp, &Hcrit, hP + face*BENfp, BENfp);
 //      MultiplyByConstant(uP + face*BENfp, uP + face*BENfp, 0.95, BENfp);
