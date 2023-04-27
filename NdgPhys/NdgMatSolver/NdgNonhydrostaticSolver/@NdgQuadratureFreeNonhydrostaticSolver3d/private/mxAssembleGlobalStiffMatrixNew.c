@@ -308,6 +308,8 @@ void mexFunction(int nlhs, mxArray *plhs[], int nrhs, const mxArray *prhs[])
 	sr = mxGetPr(plhs[0]);
 	irs = mxGetIr(plhs[0]);
 	jcs = mxGetJc(plhs[0]);
+    
+    plhs[1] = mxCreateDoubleScalar(Nonzero);
  
 	for (i = 0; i < K*Np + 1; i++){
 		jcs[i] = (mwIndex)(NonJc[i]);

@@ -1,5 +1,5 @@
 function CheckProfileResult(obj)
-y = [1, 3, 5, 7, 9]; x = [-2 0 2];
+y = [8.98]; x = [11.2 9.7 8.0 6.2 5.0 3.8];
 % fontsize = 15;
 % markersize = 6;
 
@@ -10,22 +10,22 @@ end
 
 function  YprofileProcess(obj, y)
 % Nout = obj.outputFile.outputStep;
-WaveTransformPos = NdgPostProcess(obj.meshUnion(1),strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
+WaveTransformPos = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('WaveTransformOverAnFlatBottomMountedEllipticalShoal3d','/2d/','WaveTransformOverAnFlatBottomMountedEllipticalShoal3d'));
 [ time ] = ncread( WaveTransformPos.outputFile{1}, 'time' );
 Nout = numel(time);
 
 for i = 1:numel(y)
     str = strcat('$Section',32,num2str(i),'$');
-    csv = strcat('profile',num2str(i),'.csv');
+    csv = strcat('profile',num2str(i-1),'.csv');
     filename = [ fileparts( mfilename('fullpath') ), ...
     '/data/',csv];
     data = xlsread(filename);
   
-    xpf = -5:0.1:5;
+    xpf = 0:0.2:18;
     ypf = y(i).*ones(size(xpf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(30* Nout/35)+1:ceil(35* Nout/35);
+    index = ceil(30* Nout/40)+1:ceil(40* Nout/40);
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
@@ -56,7 +56,7 @@ for i = 1:numel(y)
     legend({'$Simulated$','$Measured$'},'Interpreter','Latex');
     legend('boxoff')
     text(-4,2,str,'Fontsize',14,'Interpreter','latex');
-    xlim([-5,5]);
+    xlim([0,18]);
     ylim([0,2.5]);
     set(gca,'Fontsize',12);
 end
@@ -66,22 +66,22 @@ function  XprofileProcess(obj, x)
 % Nout = obj.outputFile.outputStep;
 % Nout = 1652;
 % Nout = 1616;
-WaveTransformPos = NdgPostProcess(obj.meshUnion(1),strcat('WaveTransformOverAnEllipticalShoal','/','WaveTransformOverAnEllipticalShoal'));
+WaveTransformPos = NdgPostProcess(obj.meshUnion(1).mesh2d,strcat('WaveTransformOverAnFlatBottomMountedEllipticalShoal3d','/2d/','WaveTransformOverAnFlatBottomMountedEllipticalShoal3d'));
 [ time ] = ncread( WaveTransformPos.outputFile{1}, 'time' );
 Nout = numel(time);
 
 for i = 1:numel(x)
-    str = strcat('$Section',32,num2str(i+5),'$');
-    csv = strcat('profile',num2str(i+5),'.csv');
+    str = strcat('$Section',32,num2str(i),'$');
+    csv = strcat('profile',num2str(i),'.csv');
     filename = [ fileparts( mfilename('fullpath') ), ...
     '/data/',csv];
     data = xlsread(filename);
   
-    ypf = 0:0.1:12;
+    ypf = 0:0.2:18;
     xpf = x(i).*ones(size(ypf));
     
     [ result ] = WaveTransformPos.interpolateOutputResultToGaugePoint( xpf, ypf, xpf );
-    index = ceil(30* Nout/35)+1:ceil(35* Nout/35);  
+    index = ceil(30* Nout/40)+1:ceil(40* Nout/40);  
     
 %     analys = Analysis2d( obj, xpf,  ypf);
     
@@ -112,7 +112,7 @@ for i = 1:numel(x)
     legend({'$Simulated$','$Measured$'},'Interpreter','Latex');
     legend('boxoff');
     text(1.2,2,str,'Fontsize',14,'Interpreter','latex');
-    xlim([0,12]);
+    xlim([0,18.2]);
     ylim([0,2.5]);
     set(gca,'Fontsize',12);    
 end

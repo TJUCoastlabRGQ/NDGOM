@@ -120,11 +120,6 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
         UniEle
     end
     
-    properties
-        PARDISO_INITIALIZED = 0
-        PARDISO_INFO = []
-    end
-    
     methods
         function obj = NdgQuadratureFreeNonhydrostaticSolver3d( PhysClass, mesh )
             
@@ -193,7 +188,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.matGetBottomNewMomentum( physClass, fphys );
             
             % checked
-            obj.GlobalStiffMatrix = mxAssembleGlobalStiffMatrixNew(obj.PSPX, obj.PSPY, obj.SQPSPX, ...
+           [ obj.GlobalStiffMatrix, NNZ ] = mxAssembleGlobalStiffMatrixNew(obj.PSPX, obj.PSPY, obj.SQPSPX, ...
                 obj.SQPSPY, physClass.hcrit, fphys{1}(:,:,obj.varIndex(4)), obj.mesh, obj.cell, obj.InnerEdge, obj.BottomEdge,...
                 obj.SurfaceBoundaryEdge, obj.cell2d.M, obj.mesh2d.J, obj.mesh2d.K, physClass.SurfaceBoundaryEdgeType,...
                 obj.SortedIEnx, obj.SortedIEny, obj.SortedIEGlobalFace, obj.SortedIEAdjEle, obj.SortedIEReverseFlag,...
@@ -218,20 +213,8 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             obj.GlobalStiffMatrix = mxAssembleFinalGlobalStiffMatrix(obj.cell.Np, obj.mesh.K, physClass.hcrit, obj.mesh.EToE, obj.cell.Nface,...
                 obj.cell.M, obj.mesh.J, obj.GlobalStiffMatrix, obj.PNPX, obj.PNPY, obj.PNPS, fphys{1}(:,:,obj.varIndex(4)), ...
                 obj.PHPX, obj.PHPY, fphys{1}(:,:,obj.varIndex(5)), fphys{1}(:,:,obj.varIndex(6)), obj.mesh.z, obj.UniEleNumber, obj.UniEle);
-            
-            verbose = false;
-            if ~obj.PARDISO_INITIALIZED
-                
-                obj.PARDISO_INFO = pardisoinit(11,0);
-                % Analyze the matrix and compute a symbolic factorization.
-                obj.PARDISO_INFO = pardisoreorder(obj.GlobalStiffMatrix, obj.PARDISO_INFO,verbose);
-                
-                obj.PARDISO_INITIALIZED = 1;
-            end
-            % Compute the numeric factorization.
-            obj.PARDISO_INFO = pardisofactor(obj.GlobalStiffMatrix, obj.PARDISO_INFO, false);
-            % Compute the solutions X using the symbolic factorization.
-            [NonhydroPressure, ~] = pardisosolve(obj.GlobalStiffMatrix, obj.NonhydroRHS, obj.PARDISO_INFO, false);
+ 
+            NonhydroPressure = mxNonhydroSystemSolve( obj.GlobalStiffMatrix, NNZ, obj.cell.Np, obj.mesh.K, obj.NonhydroRHS );
             
             Index = physClass.meshUnion.z == 0;
             NonhydroPressure(Index) = 0;
@@ -342,11 +325,7 @@ classdef NdgQuadratureFreeNonhydrostaticSolver3d < handle
             clear mxAssembleGlobalStiffMatrixNew;
             clear mxImposeBoundaryCondition;
             clear mxCalculateBottomVerticalVelocity;
-            if obj.PARDISO_INITIALIZED
-                obj.PARDISO_INITIALIZED = 0;
-                pardisofree(obj.PARDISO_INFO);
-                clear obj.PARDISO_INFO
-            end
+            clear mxNonhydroSystemSolve;
         end
         
         % checked

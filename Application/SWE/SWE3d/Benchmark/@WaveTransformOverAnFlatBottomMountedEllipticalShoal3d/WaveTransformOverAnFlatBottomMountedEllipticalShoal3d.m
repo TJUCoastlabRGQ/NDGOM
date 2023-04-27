@@ -81,31 +81,32 @@ classdef WaveTransformOverAnFlatBottomMountedEllipticalShoal3d < SWEBarotropic3d
         end
         
         function VideoPostprocess(obj)
-            PostProcess = NdgPostProcess(obj.mesh2d(1),strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
+            PostProcess = NdgPostProcess(obj.mesh2d(1),strcat('Result/WaveTransformOverAnFlatBottomMountedEllipticalShoal3d/2d','/','WaveTransformOverAnFlatBottomMountedEllipticalShoal3d'));
             %             Ntime = PostProcess.Nt;
             %             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             Visual = makeVisualizationFromNdgPhys(obj);
-            PostProcess.drawAnimation(Visual, 1, 6, 'WaveTransformOverAnEllipticalShoal3d', obj.fphys2d{1}(:,:,4) );
+            PostProcess.drawAnimation(Visual, 1, 6, 'WaveTransformOverAnFlatBottomMountedEllipticalShoal3d', obj.fphys2d{1}(:,:,4) );
         end
         
         function VisualPostprocess(obj)
-            time = 35;
-            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/WaveTransformOverAnEllipticalShoal3d/2d','/','WaveTransformOverAnEllipticalShoal3d'));
+            time = 40;
+            PostProcess = NdgPostProcess(obj.meshUnion(1),strcat('Result/WaveTransformOverAnFlatBottomMountedEllipticalShoal3d/2d','/','WaveTransformOverAnFlatBottomMountedEllipticalShoal3d'));
             outputTime = ncread( PostProcess.outputFile{1}, 'time' );
             [~,Index] = sort(abs(outputTime-time));
             [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
             Visual = makeVisualizationFromNdgPhys( obj );
-            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
+            Visual.drawResult( 100*(fphys{1}(:,:,1)+ obj.fphys2d{1}(:, :, 4)) );
+            colormap('jet')
             shading interp;
             %            axis off;
             %            hold on;
-            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
-            ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
-            zlabel({'$\eta\;\rm{(m)}$'},'Interpreter','latex','Fontsize',12);
-            set(gca,'Ylim',[-10,12]);
+            xlabel({'$x\;\rm{(m)}$'},'Interpreter','latex','Fontsize',14);
+            ylabel({'$y\;\rm{(m)}$'},'Interpreter','latex','Fontsize',14);
+            zlabel({'$\eta\;\rm{(cm)}$'},'Interpreter','latex','Fontsize',14);
+            set(gca,'Xlim',[0,18]);
             set(gca,'FontSize',12);
             set(gcf,'Position',[309 198 1252 614]);
-            view(122, 66);
+            view(47, 75);
             h = colorbar;
             h.Location = 'south';
             h.Position = [0.1 0.04 0.8 0.025];
@@ -199,9 +200,9 @@ classdef WaveTransformOverAnFlatBottomMountedEllipticalShoal3d < SWEBarotropic3d
             end
         end% func
         
-        function evaluateSpongeCoefficient(obj, yb)
+        function evaluateSpongeCoefficient(obj, xb)
             obj.SpongeCoefficient = zeros(size(obj.meshUnion(1).x));
-            ratio = ( obj.meshUnion(1).y - yb(1) )/obj.spgLength;
+            ratio = ( obj.meshUnion(1).x - xb(1) )/obj.spgLength;
             Index = (ratio>0 & ratio <= 1/2);
             obj.SpongeCoefficient(Index) = 1/4*( tanh( sin(pi*(4*ratio(Index)-1)/2)./( 1-(4*ratio(Index)-1).^2) ) +1 );
             Index = (ratio>1/2 & ratio <= 1);
@@ -233,7 +234,7 @@ classdef WaveTransformOverAnFlatBottomMountedEllipticalShoal3d < SWEBarotropic3d
             option('outputIntervalType') = enumOutputInterval.DeltaTime;
             option('outputTimeInterval') = ftime/outputIntervalNum;
             option('outputCaseName') = mfilename;
-            option('outputNcfileNum') = 1;
+            option('outputNcfileNum') = 40;
             option('temporalDiscreteType') = enumTemporalDiscrete.IMEXRK222;
             %             option('EddyViscosityType') = enumEddyViscosity.Constant;
             %             option('GOTMSetupFile') = obj.GotmFile;

@@ -78,6 +78,7 @@ classdef WaveTransformOverAnEllipticalShoal < SWEPreBlanaced2d
            [ fphys ] = PostProcess.accessOutputResultAtStepNum(  Index(1) );
            Visual = makeVisualizationFromNdgPhys( obj );
            Visual.drawResult( fphys{1}(:,:,1)+ obj.fphys{1}(:, :, 4) );
+           colormap('rainbow');
            shading interp; 
 %            axis off;
 %            hold on;
